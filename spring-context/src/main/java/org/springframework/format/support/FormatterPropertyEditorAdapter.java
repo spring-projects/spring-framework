@@ -18,7 +18,6 @@ package org.springframework.format.support;
 
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
-import java.text.ParseException;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.Formatter;
@@ -65,7 +64,10 @@ public class FormatterPropertyEditorAdapter extends PropertyEditorSupport {
 			try {
 				setValue(this.formatter.parse(text, LocaleContextHolder.getLocale()));
 			}
-			catch (ParseException ex) {
+			catch (IllegalArgumentException ex) {
+				throw ex;
+			}
+			catch (Throwable ex) {
 				throw new IllegalArgumentException("Parse attempt failed for value [" + text + "]", ex);
 			}
 		}

@@ -32,6 +32,7 @@ import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.lang.Nullable;
 
 import static org.junit.Assert.*;
 
@@ -174,7 +175,7 @@ public class TrickyAspectJPointcutExpressionTests {
 		private int countThrows = 0;
 
 		@Override
-		public void before(Method method, Object[] objects, Object o) throws Throwable {
+		public void before(Method method, Object[] objects, @Nullable Object o) throws Throwable {
 			countBefore++;
 		}
 

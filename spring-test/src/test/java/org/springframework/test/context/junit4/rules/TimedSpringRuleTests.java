@@ -55,7 +55,7 @@ public class TimedSpringRuleTests extends TimedSpringRunnerTests {
 	public static final class TimedSpringRuleTestCase extends TimedSpringRunnerTestCase {
 
 		@ClassRule
-		public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+		public static final SpringClassRule springClassRule = new SpringClassRule();
 
 		@Rule
 		public final SpringMethodRule springMethodRule = new SpringMethodRule();

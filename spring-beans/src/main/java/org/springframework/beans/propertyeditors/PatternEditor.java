@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 import java.util.regex.Pattern;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Editor for {@code java.util.regex.Pattern}, to directly populate a Pattern property.
@@ -56,7 +58,7 @@ public class PatternEditor extends PropertyEditorSupport {
 
 
 	@Override
-	public void setAsText(String text) {
+	public void setAsText(@Nullable String text) {
 		setValue(text != null ? Pattern.compile(text, this.flags) : null);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 /**
- * {@link ClientHttpRequest} implementation that uses OkHttp 3.x to execute requests.
+ * {@link ClientHttpRequest} implementation based on OkHttp 3.x.
  *
  * <p>Created via the {@link OkHttp3ClientHttpRequestFactory}.
  *
@@ -54,6 +54,11 @@ class OkHttp3ClientHttpRequest extends AbstractBufferingClientHttpRequest {
 	@Override
 	public HttpMethod getMethod() {
 		return this.method;
+	}
+
+	@Override
+	public String getMethodValue() {
+		return this.method.name();
 	}
 
 	@Override

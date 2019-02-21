@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.task.SyncTaskExecutor;
@@ -34,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -67,13 +67,7 @@ public class RestTemplateXhrTransportTests {
 
 	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
-	private WebSocketHandler webSocketHandler;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.webSocketHandler = mock(WebSocketHandler.class);
-	}
+	private final WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
 
 
 	@Test
@@ -191,7 +185,7 @@ public class RestTemplateXhrTransportTests {
 	private ClientHttpResponse response(HttpStatus status, String body) throws IOException {
 		ClientHttpResponse response = mock(ClientHttpResponse.class);
 		InputStream inputStream = getInputStream(body);
-		given(response.getStatusCode()).willReturn(status);
+		given(response.getRawStatusCode()).willReturn(status.value());
 		given(response.getBody()).willReturn(inputStream);
 		return response;
 	}
@@ -213,7 +207,9 @@ public class RestTemplateXhrTransportTests {
 		}
 
 		@Override
-		public <T> T execute(URI url, HttpMethod method, RequestCallback callback, ResponseExtractor<T> extractor) throws RestClientException {
+		public <T> T execute(URI url, HttpMethod method, @Nullable RequestCallback callback,
+				@Nullable ResponseExtractor<T> extractor) throws RestClientException {
+
 			try {
 				extractor.extractData(this.responses.remove());
 			}

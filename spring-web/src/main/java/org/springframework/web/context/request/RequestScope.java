@@ -16,6 +16,8 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Request-backed {@link org.springframework.beans.factory.config.Scope}
  * implementation.
@@ -47,6 +49,7 @@ public class RequestScope extends AbstractRequestAttributesScope {
 	 * returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public String getConversationId() {
 		return null;
 	}

@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionException;
 
 /**
@@ -40,6 +41,7 @@ public interface TransactionOperations {
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
+	@Nullable
 	<T> T execute(TransactionCallback<T> action) throws TransactionException;
 
 }

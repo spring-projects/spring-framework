@@ -30,6 +30,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
@@ -57,6 +58,7 @@ public abstract class RmiClientInterceptorUtils {
 	 * @return the invocation result, if any
 	 * @throws InvocationTargetException if thrown by reflection
 	 */
+	@Nullable
 	public static Object invokeRemoteMethod(MethodInvocation invocation, Object stub)
 			throws InvocationTargetException {
 

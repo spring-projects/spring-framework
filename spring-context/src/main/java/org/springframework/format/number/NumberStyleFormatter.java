@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A general-purpose number formatter using NumberFormat's number style.
  *
@@ -36,6 +38,7 @@ import java.util.Locale;
  */
 public class NumberStyleFormatter extends AbstractNumberFormatter {
 
+	@Nullable
 	private String pattern;
 
 
@@ -56,7 +59,7 @@ public class NumberStyleFormatter extends AbstractNumberFormatter {
 
 
 	/**
-	 * Sets the pattern to use to format number values.
+	 * Specify the pattern to use to format number values.
 	 * If not specified, the default DecimalFormat pattern is used.
 	 * @see java.text.DecimalFormat#applyPattern(String)
 	 */

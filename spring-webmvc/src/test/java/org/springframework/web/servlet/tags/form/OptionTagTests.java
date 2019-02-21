@@ -79,7 +79,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	@Test
 	public void canBeDisabledEvenWhenSelected() throws Exception {
 		String selectName = "testBean.name";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
 		this.tag.setDisabled(true);
@@ -100,7 +101,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	@Test
 	public void renderNotSelected() throws Exception {
 		String selectName = "testBean.name";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
 		int result = this.tag.doStartTag();
@@ -122,7 +124,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		String dynamicAttribute2 = "attr2";
 
 		String selectName = "testBean.name";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
@@ -146,7 +149,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	@Test
 	public void renderSelected() throws Exception {
 		String selectName = "testBean.name";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 		this.tag.setId("myOption");
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
@@ -168,7 +172,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	@Test
 	public void withNoLabel() throws Exception {
 		String selectName = "testBean.name";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 		this.tag.setValue("bar");
 		this.tag.setCssClass("myClass");
 		this.tag.setOnclick("CLICK");
@@ -261,7 +266,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	@Test
 	public void withCustomObjectSelected() throws Exception {
 		String selectName = "testBean.someNumber";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 		this.tag.setValue(new Float(12.34));
 		this.tag.setLabel("GBP 12.34");
 		int result = this.tag.doStartTag();
@@ -281,7 +287,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	@Test
 	public void withCustomObjectNotSelected() throws Exception {
 		String selectName = "testBean.someNumber";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 		this.tag.setValue(new Float(12.35));
 		this.tag.setLabel("GBP 12.35");
 		int result = this.tag.doStartTag();

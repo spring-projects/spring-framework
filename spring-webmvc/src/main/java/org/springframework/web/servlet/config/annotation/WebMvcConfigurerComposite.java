@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -36,7 +37,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  */
 class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
-	private final List<WebMvcConfigurer> delegates = new ArrayList<WebMvcConfigurer>();
+	private final List<WebMvcConfigurer> delegates = new ArrayList<>();
 
 
 	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {
@@ -175,6 +176,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	@Nullable
 	public MessageCodesResolver getMessageCodesResolver() {
 		MessageCodesResolver selected = null;
 		for (WebMvcConfigurer configurer : this.delegates) {

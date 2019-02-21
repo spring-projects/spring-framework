@@ -20,12 +20,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.lang.Nullable;
 
 /**
  * A basic, no operation {@link CacheManager} implementation suitable
@@ -51,10 +51,11 @@ public class NoOpCacheManager implements CacheManager {
 	 * Additionally, the request cache will be remembered by the manager for consistency.
 	 */
 	@Override
+	@Nullable
 	public Cache getCache(String name) {
 		Cache cache = this.caches.get(name);
 		if (cache == null) {
-			this.caches.putIfAbsent(name, new NoOpCache(name));
+			this.caches.computeIfAbsent(name, key -> new NoOpCache(name));
 			synchronized (this.cacheNames) {
 				this.cacheNames.add(name);
 			}
@@ -70,63 +71,6 @@ public class NoOpCacheManager implements CacheManager {
 	public Collection<String> getCacheNames() {
 		synchronized (this.cacheNames) {
 			return Collections.unmodifiableSet(this.cacheNames);
-		}
-	}
-
-
-	private static class NoOpCache implements Cache {
-
-		private final String name;
-
-		public NoOpCache(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public void clear() {
-		}
-
-		@Override
-		public void evict(Object key) {
-		}
-
-		@Override
-		public ValueWrapper get(Object key) {
-			return null;
-		}
-
-		@Override
-		public <T> T get(Object key, Class<T> type) {
-			return null;
-		}
-
-		@Override
-		public <T> T get(Object key, Callable<T> valueLoader) {
-			try {
-				return valueLoader.call();
-			}
-			catch (Exception ex) {
-				throw new ValueRetrievalException(key, valueLoader, ex);
-			}
-		}
-
-		@Override
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public Object getNativeCache() {
-			return null;
-		}
-
-		@Override
-		public void put(Object key, Object value) {
-		}
-
-		@Override
-		public ValueWrapper putIfAbsent(Object key, Object value) {
-			return null;
 		}
 	}
 

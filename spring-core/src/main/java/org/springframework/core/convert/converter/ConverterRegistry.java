@@ -49,12 +49,12 @@ public interface ConverterRegistry {
 	/**
 	 * Add a ranged converter factory to this registry.
 	 * The convertible source/target type pair is derived from the ConverterFactory's parameterized types.
-	 * @throws IllegalArgumentException if the parameterized types could not be resolved.
+	 * @throws IllegalArgumentException if the parameterized types could not be resolved
 	 */
-	void addConverterFactory(ConverterFactory<?, ?> converterFactory);
+	void addConverterFactory(ConverterFactory<?, ?> factory);
 
 	/**
-	 * Remove any converters from sourceType to targetType.
+	 * Remove any converters from {@code sourceType} to {@code targetType}.
 	 * @param sourceType the source type
 	 * @param targetType the target type
 	 */

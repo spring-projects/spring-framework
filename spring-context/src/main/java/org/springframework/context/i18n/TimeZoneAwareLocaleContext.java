@@ -18,6 +18,8 @@ package org.springframework.context.i18n;
 
 import java.util.TimeZone;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Extension of {@link LocaleContext}, adding awareness of the current time zone.
  *
@@ -37,6 +39,7 @@ public interface TimeZoneAwareLocaleContext extends LocaleContext {
 	 * depending on the implementation strategy.
 	 * @return the current TimeZone, or {@code null} if no specific TimeZone associated
 	 */
+	@Nullable
 	TimeZone getTimeZone();
 
 }

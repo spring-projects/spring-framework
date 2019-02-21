@@ -19,6 +19,7 @@ package org.springframework.expression;
 import java.util.List;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.lang.Nullable;
 
 /**
  * A constructor resolver attempts locate a constructor and returns a ConstructorExecutor
@@ -40,6 +41,7 @@ public interface ConstructorResolver {
 	 * @param argumentTypes the arguments that the constructor must be able to handle
 	 * @return a ConstructorExecutor that can invoke the constructor, or null if non found
 	 */
+	@Nullable
 	ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
 			throws AccessException;
 

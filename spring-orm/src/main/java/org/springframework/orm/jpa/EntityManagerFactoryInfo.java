@@ -22,6 +22,8 @@ import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Metadata interface for a Spring-managed JPA {@link EntityManagerFactory}.
  *
@@ -47,6 +49,7 @@ public interface EntityManagerFactoryInfo {
 	 * or {@code null} if the standard JPA provider autodetection process
 	 * was used to configure the EntityManagerFactory
 	 */
+	@Nullable
 	PersistenceProvider getPersistenceProvider();
 
 	/**
@@ -56,6 +59,7 @@ public interface EntityManagerFactoryInfo {
 	 * or {@code null} if the in-container contract was not used to
 	 * configure the EntityManagerFactory
 	 */
+	@Nullable
 	PersistenceUnitInfo getPersistenceUnitInfo();
 
 	/**
@@ -67,6 +71,7 @@ public interface EntityManagerFactoryInfo {
 	 * @see #getPersistenceUnitInfo()
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceUnitName()
 	 */
+	@Nullable
 	String getPersistenceUnitName();
 
 	/**
@@ -74,6 +79,7 @@ public interface EntityManagerFactoryInfo {
 	 * obtains its JDBC Connections from.
 	 * @return the JDBC DataSource, or {@code null} if not known
 	 */
+	@Nullable
 	DataSource getDataSource();
 
 	/**
@@ -83,12 +89,14 @@ public interface EntityManagerFactoryInfo {
 	 * to happen: either based on a target {@code EntityManager} instance
 	 * or simply defaulting to {@code javax.persistence.EntityManager}.
 	 */
+	@Nullable
 	Class<? extends EntityManager> getEntityManagerInterface();
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this
 	 * EntityManagerFactory, or {@code null} if not known.
 	 */
+	@Nullable
 	JpaDialect getJpaDialect();
 
 	/**

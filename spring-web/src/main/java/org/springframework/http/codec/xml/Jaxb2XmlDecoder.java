@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.http.codec.xml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchema;
@@ -37,7 +39,12 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.log.LogFormatUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -68,36 +75,90 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	private final JaxbContextContainer jaxbContexts = new JaxbContextContainer();
 
+	private Function<Unmarshaller, Unmarshaller> unmarshallerProcessor = Function.identity();
+
 
 	public Jaxb2XmlDecoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
 
 
+	/**
+	 * Configure a processor function to customize Unmarshaller instances.
+	 * @param processor the function to use
+	 * @since 5.1.3
+	 */
+	public void setUnmarshallerProcessor(Function<Unmarshaller, Unmarshaller> processor) {
+		this.unmarshallerProcessor = this.unmarshallerProcessor.andThen(processor);
+	}
+
+	/**
+	 * Return the configured processor for customizing Unmarshaller instances.
+	 * @since 5.1.3
+	 */
+	public Function<Unmarshaller, Unmarshaller> getUnmarshallerProcessor() {
+		return this.unmarshallerProcessor;
+	}
+
+
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
-		if (super.canDecode(elementType, mimeType, hints)) {
-			Class<?> outputClass = elementType.getRawClass();
-			return outputClass.isAnnotationPresent(XmlRootElement.class) ||
-					outputClass.isAnnotationPresent(XmlType.class);
-		}
-		else {
-			return false;
-		}
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		Class<?> outputClass = elementType.toClass();
+		return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
+				outputClass.isAnnotationPresent(XmlType.class)) && super.canDecode(elementType, mimeType);
 	}
 
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Class<?> outputClass = elementType.getRawClass();
-		Flux<XMLEvent> xmlEventFlux =
-				this.xmlEventDecoder.decode(inputStream, null, mimeType);
+		Flux<XMLEvent> xmlEventFlux = this.xmlEventDecoder.decode(
+				inputStream, ResolvableType.forClass(XMLEvent.class), mimeType, hints);
 
+		Class<?> outputClass = elementType.toClass();
 		QName typeName = toQName(outputClass);
 		Flux<List<XMLEvent>> splitEvents = split(xmlEventFlux, typeName);
 
-		return splitEvents.map(events -> unmarshal(events, outputClass));
+		return splitEvents.map(events -> {
+			Object value = unmarshal(events, outputClass);
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+			});
+			return value;
+		});
+	}
+
+	@Override
+	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		return decode(inputStream, elementType, mimeType, hints).singleOrEmpty();
+	}
+
+	private Object unmarshal(List<XMLEvent> events, Class<?> outputClass) {
+		try {
+			Unmarshaller unmarshaller = initUnmarshaller(outputClass);
+			XMLEventReader eventReader = StaxUtils.createXMLEventReader(events);
+			if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
+				return unmarshaller.unmarshal(eventReader);
+			}
+			else {
+				JAXBElement<?> jaxbElement = unmarshaller.unmarshal(eventReader, outputClass);
+				return jaxbElement.getValue();
+			}
+		}
+		catch (UnmarshalException ex) {
+			throw new DecodingException("Could not unmarshal XML to " + outputClass, ex);
+		}
+		catch (JAXBException ex) {
+			throw new CodecException("Invalid JAXB configuration", ex);
+		}
+	}
+
+	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws JAXBException {
+		Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
+		return this.unmarshallerProcessor.apply(unmarshaller);
 	}
 
 	/**
@@ -119,8 +180,8 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 			namespaceUri = annotation.namespace();
 		}
 		else {
-			throw new IllegalArgumentException("Outputclass [" + outputClass + "] is " +
-					"neither annotated with @XmlRootElement nor @XmlType");
+			throw new IllegalArgumentException("Output class [" + outputClass.getName() +
+					"] is neither annotated with @XmlRootElement nor @XmlType");
 		}
 
 		if (JAXB_DEFAULT_ANNOTATION_VALUE.equals(localPart)) {
@@ -128,8 +189,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		}
 		if (JAXB_DEFAULT_ANNOTATION_VALUE.equals(namespaceUri)) {
 			Package outputClassPackage = outputClass.getPackage();
-			if (outputClassPackage != null &&
-					outputClassPackage.isAnnotationPresent(XmlSchema.class)) {
+			if (outputClassPackage != null && outputClassPackage.isAnnotationPresent(XmlSchema.class)) {
 				XmlSchema annotation = outputClassPackage.getAnnotation(XmlSchema.class);
 				namespaceUri = annotation.namespace();
 			}
@@ -141,21 +201,20 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	/**
-	 * Split a flux of {@link XMLEvent}s into a flux of XMLEvent lists, one list for each
-	 * branch of the tree that starts with the given qualified name.
-	 * That is, given the XMLEvents shown
-	 * {@linkplain XmlEventDecoder here},
-	 * and the {@code desiredName} "{@code child}", this method
-	 * returns a flux of two lists, each of which containing the events of a particular
-	 * branch of the tree that starts with "{@code child}".
+	 * Split a flux of {@link XMLEvent XMLEvents} into a flux of XMLEvent lists, one list
+	 * for each branch of the tree that starts with the given qualified name.
+	 * That is, given the XMLEvents shown {@linkplain XmlEventDecoder here},
+	 * and the {@code desiredName} "{@code child}", this method returns a flux
+	 * of two lists, each of which containing the events of a particular branch
+	 * of the tree that starts with "{@code child}".
 	 * <ol>
-	 * <li>The first list, dealing with the first branch of the tree
+	 * <li>The first list, dealing with the first branch of the tree:
 	 * <ol>
 	 * <li>{@link javax.xml.stream.events.StartElement} {@code child}</li>
 	 * <li>{@link javax.xml.stream.events.Characters} {@code foo}</li>
 	 * <li>{@link javax.xml.stream.events.EndElement} {@code child}</li>
 	 * </ol>
-	 * <li>The second list, dealing with the second branch of the tree
+	 * <li>The second list, dealing with the second branch of the tree:
 	 * <ol>
 	 * <li>{@link javax.xml.stream.events.StartElement} {@code child}</li>
 	 * <li>{@link javax.xml.stream.events.Characters} {@code bar}</li>
@@ -165,57 +224,50 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 * </ol>
 	 */
 	Flux<List<XMLEvent>> split(Flux<XMLEvent> xmlEventFlux, QName desiredName) {
-		return xmlEventFlux
-				.flatMap(new Function<XMLEvent, Publisher<? extends List<XMLEvent>>>() {
-
-					private List<XMLEvent> events = null;
-
-					private int elementDepth = 0;
-
-					private int barrier = Integer.MAX_VALUE;
-
-					@Override
-					public Publisher<? extends List<XMLEvent>> apply(XMLEvent event) {
-						if (event.isStartElement()) {
-							if (this.barrier == Integer.MAX_VALUE) {
-								QName startElementName = event.asStartElement().getName();
-								if (desiredName.equals(startElementName)) {
-									this.events = new ArrayList<XMLEvent>();
-									this.barrier = this.elementDepth;
-								}
-							}
-							this.elementDepth++;
-						}
-						if (this.elementDepth > this.barrier) {
-							this.events.add(event);
-						}
-						if (event.isEndElement()) {
-							this.elementDepth--;
-							if (this.elementDepth == this.barrier) {
-								this.barrier = Integer.MAX_VALUE;
-								return Mono.just(this.events);
-							}
-						}
-						return Mono.empty();
-					}
-				});
+		return xmlEventFlux.flatMap(new SplitFunction(desiredName));
 	}
 
-	private Object unmarshal(List<XMLEvent> events, Class<?> outputClass) {
-		try {
-			Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
-			XMLEventReader eventReader = StaxUtils.createXMLEventReader(events);
-			if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
-				return unmarshaller.unmarshal(eventReader);
-			}
-			else {
-				JAXBElement<?> jaxbElement =
-						unmarshaller.unmarshal(eventReader, outputClass);
-				return jaxbElement.getValue();
-			}
+
+	private static class SplitFunction implements Function<XMLEvent, Publisher<? extends List<XMLEvent>>> {
+
+		private final QName desiredName;
+
+		@Nullable
+		private List<XMLEvent> events;
+
+		private int elementDepth = 0;
+
+		private int barrier = Integer.MAX_VALUE;
+
+		public SplitFunction(QName desiredName) {
+			this.desiredName = desiredName;
 		}
-		catch (JAXBException ex) {
-			throw new CodecException(ex.getMessage(), ex);
+
+		@Override
+		public Publisher<? extends List<XMLEvent>> apply(XMLEvent event) {
+			if (event.isStartElement()) {
+				if (this.barrier == Integer.MAX_VALUE) {
+					QName startElementName = event.asStartElement().getName();
+					if (this.desiredName.equals(startElementName)) {
+						this.events = new ArrayList<>();
+						this.barrier = this.elementDepth;
+					}
+				}
+				this.elementDepth++;
+			}
+			if (this.elementDepth > this.barrier) {
+				Assert.state(this.events != null, "No XMLEvent List");
+				this.events.add(event);
+			}
+			if (event.isEndElement()) {
+				this.elementDepth--;
+				if (this.elementDepth == this.barrier) {
+					this.barrier = Integer.MAX_VALUE;
+					Assert.state(this.events != null, "No XMLEvent List");
+					return Mono.just(this.events);
+				}
+			}
+			return Mono.empty();
 		}
 	}
 

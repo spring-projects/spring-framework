@@ -53,7 +53,7 @@ final class NumberToNumberConverterFactory implements ConverterFactory<Number, N
 	}
 
 
-	private final static class NumberToNumber<T extends Number> implements Converter<Number, T> {
+	private static final class NumberToNumber<T extends Number> implements Converter<Number, T> {
 
 		private final Class<T> targetType;
 

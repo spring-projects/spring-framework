@@ -101,6 +101,7 @@ public class GroovyMarkupConfigurerTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void parentLoader() throws Exception {
 
 		this.configurer.setApplicationContext(this.applicationContext);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,47 +38,35 @@ public class MockMvcWebConnectionTests {
 
 	private final WebClient webClient = new WebClient();
 
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc =
+			MockMvcBuilders.standaloneSetup(new HelloController(), new ForwardController()).build();
 
-
-	@Before
-	public void setup() {
-		this.mockMvc = MockMvcBuilders.standaloneSetup(new HelloController(), new ForwardController()).build();
-	}
 
 	@Test
 	public void contextPathNull() throws IOException {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient));
-
 		Page page = this.webClient.getPage("http://localhost/context/a");
-
 		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
 	}
 
 	@Test
 	public void contextPathExplicit() throws IOException {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, "/context"));
-
 		Page page = this.webClient.getPage("http://localhost/context/a");
-
 		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
 	}
 
 	@Test
 	public void contextPathEmpty() throws IOException {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
-
 		Page page = this.webClient.getPage("http://localhost/context/a");
-
 		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
 	}
 
 	@Test
 	public void forward() throws IOException {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
-
 		Page page = this.webClient.getPage("http://localhost/forward");
-
 		assertThat(page.getWebResponse().getContentAsString(), equalTo("hello"));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.context.support;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Servlet-specific subclass of RequestHandledEvent,
  * adding servlet-specific context information.
@@ -28,19 +30,19 @@ package org.springframework.web.context.support;
 @SuppressWarnings("serial")
 public class ServletRequestHandledEvent extends RequestHandledEvent {
 
-	/** URL that triggered the request */
+	/** URL that triggered the request. */
 	private final String requestUrl;
 
-	/** IP address that the request came from */
+	/** IP address that the request came from. */
 	private final String clientAddress;
 
-	/** Usually GET or POST */
+	/** Usually GET or POST. */
 	private final String method;
 
-	/** Name of the servlet that handled the request */
+	/** Name of the servlet that handled the request. */
 	private final String servletName;
 
-	/** HTTP status code of the response */
+	/** HTTP status code of the response. */
 	private final int statusCode;
 
 
@@ -58,7 +60,7 @@ public class ServletRequestHandledEvent extends RequestHandledEvent {
 	 */
 	public ServletRequestHandledEvent(Object source, String requestUrl,
 			String clientAddress, String method, String servletName,
-			String sessionId, String userName, long processingTimeMillis) {
+			@Nullable String sessionId, @Nullable String userName, long processingTimeMillis) {
 
 		super(source, sessionId, userName, processingTimeMillis);
 		this.requestUrl = requestUrl;
@@ -82,8 +84,8 @@ public class ServletRequestHandledEvent extends RequestHandledEvent {
 	 * @param failureCause the cause of failure, if any
 	 */
 	public ServletRequestHandledEvent(Object source, String requestUrl,
-			String clientAddress, String method, String servletName, String sessionId,
-			String userName, long processingTimeMillis, Throwable failureCause) {
+			String clientAddress, String method, String servletName, @Nullable String sessionId,
+			@Nullable String userName, long processingTimeMillis, @Nullable Throwable failureCause) {
 
 		super(source, sessionId, userName, processingTimeMillis, failureCause);
 		this.requestUrl = requestUrl;
@@ -108,8 +110,8 @@ public class ServletRequestHandledEvent extends RequestHandledEvent {
 	 * @param statusCode the HTTP status code of the response
 	 */
 	public ServletRequestHandledEvent(Object source, String requestUrl,
-			String clientAddress, String method, String servletName, String sessionId,
-			String userName, long processingTimeMillis, Throwable failureCause, int statusCode) {
+			String clientAddress, String method, String servletName, @Nullable String sessionId,
+			@Nullable String userName, long processingTimeMillis, @Nullable Throwable failureCause, int statusCode) {
 
 		super(source, sessionId, userName, processingTimeMillis, failureCause);
 		this.requestUrl = requestUrl;

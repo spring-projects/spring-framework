@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ public final class PongMessage extends AbstractWebSocketMessage<ByteBuffer> {
 
 	@Override
 	public int getPayloadLength() {
-		return (getPayload() != null ? getPayload().remaining() : 0);
+		return getPayload().remaining();
 	}
 
 	@Override
 	protected String toStringPayload() {
-		return (getPayload() != null ? getPayload().toString() : null);
+		return getPayload().toString();
 	}
 
 }

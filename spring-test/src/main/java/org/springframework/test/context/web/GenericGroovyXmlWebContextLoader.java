@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ public class GenericGroovyXmlWebContextLoader extends GenericXmlWebContextLoader
 	 * Load bean definitions into the supplied {@link GenericWebApplicationContext context}
 	 * from the locations in the supplied {@code WebMergedContextConfiguration} using a
 	 * {@link GroovyBeanDefinitionReader}.
-	 *
 	 * @param context the context into which the bean definitions should be loaded
 	 * @param webMergedConfig the merged context configuration
 	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions
@@ -63,12 +62,12 @@ public class GenericGroovyXmlWebContextLoader extends GenericXmlWebContextLoader
 	 * resource types for detection of defaults. Consequently, this method
 	 * is not supported.
 	 * @see #getResourceSuffixes()
-	 * @throws UnsupportedOperationException
+	 * @throws UnsupportedOperationException in this implementation
 	 */
 	@Override
 	protected String getResourceSuffix() {
 		throw new UnsupportedOperationException(
-			"GenericGroovyXmlWebContextLoader does not support the getResourceSuffix() method");
+				"GenericGroovyXmlWebContextLoader does not support the getResourceSuffix() method");
 	}
 
 }

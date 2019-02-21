@@ -56,7 +56,7 @@ public class PrioritizedParameterNameDiscovererTests {
 	private final Method anyMethod;
 
 	public PrioritizedParameterNameDiscovererTests() throws SecurityException, NoSuchMethodException {
-		anyMethod = TestObject.class.getMethod("getAge", (Class[]) null);
+		anyMethod = TestObject.class.getMethod("getAge");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,12 @@ import org.springframework.util.Assert;
  * @since 4.1
  * @see TransactionalTestExecutionListener
  */
-public class TestTransaction {
+public final class TestTransaction {
+
+
+	private TestTransaction() {
+	}
+
 
 	/**
 	 * Determine whether a test-managed transaction is currently <em>active</em>.
@@ -50,10 +55,8 @@ public class TestTransaction {
 		TransactionContext transactionContext = TransactionContextHolder.getCurrentTransactionContext();
 		if (transactionContext != null) {
 			TransactionStatus transactionStatus = transactionContext.getTransactionStatus();
-			return (transactionStatus != null) && (!transactionStatus.isCompleted());
+			return (transactionStatus != null && !transactionStatus.isCompleted());
 		}
-
-		// else
 		return false;
 	}
 
@@ -80,8 +83,7 @@ public class TestTransaction {
 	 * Rather, the value of this flag will be used to determine whether or not
 	 * the current test-managed transaction should be rolled back or committed
 	 * once it is {@linkplain #end ended}.
-	 * @throws IllegalStateException if a transaction is not active for the
-	 * current test
+	 * @throws IllegalStateException if no transaction is active for the current test
 	 * @see #isActive()
 	 * @see #isFlaggedForRollback()
 	 * @see #start()
@@ -97,8 +99,7 @@ public class TestTransaction {
 	 * Rather, the value of this flag will be used to determine whether or not
 	 * the current test-managed transaction should be rolled back or committed
 	 * once it is {@linkplain #end ended}.
-	 * @throws IllegalStateException if a transaction is not active for the
-	 * current test
+	 * @throws IllegalStateException if no transaction is active for the current test
 	 * @see #isActive()
 	 * @see #isFlaggedForRollback()
 	 * @see #start()
@@ -122,9 +123,9 @@ public class TestTransaction {
 	}
 
 	/**
-	 * Immediately force a <em>commit</em> or <em>rollback</em> of the current
-	 * test-managed transaction, according to the {@linkplain #isFlaggedForRollback
-	 * rollback flag}.
+	 * Immediately force a <em>commit</em> or <em>rollback</em> of the
+	 * current test-managed transaction, according to the
+	 * {@linkplain #isFlaggedForRollback rollback flag}.
 	 * @throws IllegalStateException if the transaction context could not be
 	 * retrieved or if a transaction is not active for the current test
 	 * @see #isActive()
@@ -133,6 +134,7 @@ public class TestTransaction {
 	public static void end() {
 		requireCurrentTransactionContext().endTransaction();
 	}
+
 
 	private static TransactionContext requireCurrentTransactionContext() {
 		TransactionContext txContext = TransactionContextHolder.getCurrentTransactionContext();

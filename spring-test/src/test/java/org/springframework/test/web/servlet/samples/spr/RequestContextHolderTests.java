@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test.web.servlet.samples.spr;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -37,18 +36,20 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.annotation.RequestScope;
+import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -68,7 +69,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * @author Sam Brannen
  * @see CustomRequestAttributesRequestContextHolderTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
 @DirtiesContext
@@ -145,7 +146,7 @@ public class RequestContextHolderTests {
 
 	@Configuration
 	@EnableWebMvc
-	static class WebConfig extends WebMvcConfigurerAdapter {
+	static class WebConfig implements WebMvcConfigurer {
 
 		@Bean
 		public SingletonController singletonController() {
@@ -159,7 +160,7 @@ public class RequestContextHolderTests {
 		}
 
 		@Bean
-		@Scope(scopeName = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@RequestScope
 		public RequestScopedService requestScopedService() {
 			return new RequestScopedService();
 		}
@@ -170,7 +171,7 @@ public class RequestContextHolderTests {
 		}
 
 		@Bean
-		@Scope(scopeName = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@SessionScope
 		public SessionScopedService sessionScopedService() {
 			return new SessionScopedService();
 		}
@@ -187,7 +188,7 @@ public class RequestContextHolderTests {
 	}
 
 	@RestController
-	private static class SingletonController {
+	static class SingletonController {
 
 		@RequestMapping("/singletonController")
 		public void handle() {
@@ -196,7 +197,7 @@ public class RequestContextHolderTests {
 	}
 
 	@RestController
-	private static class RequestScopedController {
+	static class RequestScopedController {
 
 		@Autowired
 		private ServletRequest request;
@@ -209,7 +210,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class RequestScopedService {
+	static class RequestScopedService {
 
 		@Autowired
 		private ServletRequest request;
@@ -220,7 +221,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class SessionScopedService {
+	static class SessionScopedService {
 
 		@Autowired
 		private ServletRequest request;
@@ -232,7 +233,7 @@ public class RequestContextHolderTests {
 	}
 
 	@RestController
-	private static class ControllerWithRequestScopedService {
+	static class ControllerWithRequestScopedService {
 
 		@Autowired
 		private RequestScopedService service;
@@ -246,7 +247,7 @@ public class RequestContextHolderTests {
 	}
 
 	@RestController
-	private static class ControllerWithSessionScopedService {
+	static class ControllerWithSessionScopedService {
 
 		@Autowired
 		private SessionScopedService service;
@@ -259,7 +260,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class FilterWithSessionScopedService extends GenericFilterBean {
+	static class FilterWithSessionScopedService extends GenericFilterBean {
 
 		@Autowired
 		private SessionScopedService service;
@@ -274,7 +275,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class RequestFilter extends GenericFilterBean {
+	static class RequestFilter extends GenericFilterBean {
 
 		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -283,7 +284,7 @@ public class RequestContextHolderTests {
 		}
 	}
 
-	private static class RequestAttributesFilter extends GenericFilterBean {
+	static class RequestAttributesFilter extends GenericFilterBean {
 
 		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

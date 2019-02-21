@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interceptor that checks the authorization of the current user via the
  * user's roles, as evaluated by HttpServletRequest's isUserInRole method.
@@ -31,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter {
 
+	@Nullable
 	private String[] authorizedRoles;
 
 

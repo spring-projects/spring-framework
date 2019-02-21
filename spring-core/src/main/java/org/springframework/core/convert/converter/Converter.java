@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.converter;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A converter converts a source object of type {@code S} to a target of type {@code T}.
  *
@@ -37,6 +39,7 @@ public interface Converter<S, T> {
 	 * @return the converted object, which must be an instance of {@code T} (potentially {@code null})
 	 * @throws IllegalArgumentException if the source cannot be converted to the desired target type
 	 */
+	@Nullable
 	T convert(S source);
 
 }

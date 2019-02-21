@@ -20,6 +20,7 @@ import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * TargetSourceCreator that enforces a LazyInitTargetSource for each bean
@@ -59,6 +60,7 @@ public class LazyInitTargetSourceCreator extends AbstractBeanFactoryBasedTargetS
 	}
 
 	@Override
+	@Nullable
 	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName) {
 

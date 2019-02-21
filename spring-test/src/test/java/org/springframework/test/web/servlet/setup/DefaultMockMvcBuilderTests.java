@@ -20,11 +20,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -36,6 +39,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * @author Rob Winch
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Stephane Nicoll
  */
 public class DefaultMockMvcBuilderTests {
 
@@ -122,6 +126,34 @@ public class DefaultMockMvcBuilderTests {
 		assertSame(root, wac.getParent());
 		assertSame(ear, wac.getParent().getParent());
 		assertSame(root, WebApplicationContextUtils.getRequiredWebApplicationContext(this.servletContext));
+	}
+
+	/**
+	 * See /SPR-14277
+	 */
+	@Test
+	public void dispatcherServletCustomizer() {
+		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
+		DefaultMockMvcBuilder builder = webAppContextSetup(root);
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("test-id"));
+		builder.dispatchOptions(true);
+		MockMvc mvc = builder.build();
+		DispatcherServlet ds = (DispatcherServlet) new DirectFieldAccessor(mvc)
+				.getPropertyValue("servlet");
+		assertEquals("test-id", ds.getContextId());
+	}
+
+	@Test
+	public void dispatcherServletCustomizerProcessedInOrder() {
+		StubWebApplicationContext root = new StubWebApplicationContext(this.servletContext);
+		DefaultMockMvcBuilder builder = webAppContextSetup(root);
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("test-id"));
+		builder.addDispatcherServletCustomizer(ds -> ds.setContextId("override-id"));
+		builder.dispatchOptions(true);
+		MockMvc mvc = builder.build();
+		DispatcherServlet ds = (DispatcherServlet) new DirectFieldAccessor(mvc)
+				.getPropertyValue("servlet");
+		assertEquals("override-id", ds.getContextId());
 	}
 
 }

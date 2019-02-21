@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,10 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import static org.junit.Assert.*;
 
 /**
+ * Tests for {@link HiddenHttpMethodFilter}.
+ *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
 public class HiddenHttpMethodFilterTests {
 
@@ -39,25 +42,29 @@ public class HiddenHttpMethodFilterTests {
 
 	@Test
 	public void filterWithParameter() throws IOException, ServletException {
-		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
-		request.addParameter("_method", "delete");
-		MockHttpServletResponse response = new MockHttpServletResponse();
+		filterWithParameterForMethod("delete", "DELETE");
+		filterWithParameterForMethod("put", "PUT");
+		filterWithParameterForMethod("patch", "PATCH");
+	}
 
-		FilterChain filterChain = new FilterChain() {
-
-			@Override
-			public void doFilter(ServletRequest filterRequest,
-					ServletResponse filterResponse) throws IOException, ServletException {
-				assertEquals("Invalid method", "DELETE",
-						((HttpServletRequest) filterRequest).getMethod());
-			}
-		};
-		filter.doFilter(request, response, filterChain);
+	@Test
+	public void filterWithParameterDisallowedMethods() throws IOException, ServletException {
+		filterWithParameterForMethod("trace", "POST");
+		filterWithParameterForMethod("head", "POST");
+		filterWithParameterForMethod("options", "POST");
 	}
 
 	@Test
 	public void filterWithNoParameter() throws IOException, ServletException {
+		filterWithParameterForMethod(null, "POST");
+	}
+
+	private void filterWithParameterForMethod(String methodParam, String expectedMethod)
+			throws IOException, ServletException {
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		if(methodParam != null) {
+			request.addParameter("_method", methodParam);
+		}
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		FilterChain filterChain = new FilterChain() {
@@ -65,11 +72,11 @@ public class HiddenHttpMethodFilterTests {
 			@Override
 			public void doFilter(ServletRequest filterRequest,
 					ServletResponse filterResponse) throws IOException, ServletException {
-				assertEquals("Invalid method", "POST",
+				assertEquals("Invalid method", expectedMethod,
 						((HttpServletRequest) filterRequest).getMethod());
 			}
 		};
-		filter.doFilter(request, response, filterChain);
+		this.filter.doFilter(request, response, filterChain);
 	}
 
 }

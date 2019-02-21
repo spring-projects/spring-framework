@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ public class BindTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		assertEquals("Error messages String should be 'message1'",
-				status.getErrorMessagesAsString(","), "message1");
+				"message1", status.getErrorMessagesAsString(","));
 
 		// two errors
 		pc = createPageContext();
@@ -209,7 +209,7 @@ public class BindTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		assertEquals("Error messages String should be 'message1,message2'",
-				status.getErrorMessagesAsString(","), "message1,message2");
+				"message1,message2", status.getErrorMessagesAsString(","));
 
 		// no errors
 		pc = createPageContext();
@@ -220,7 +220,7 @@ public class BindTagTests extends AbstractTagTests {
 		tag.setPath("tb");
 		tag.doStartTag();
 		status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
-		assertEquals("Error messages String should be ''", status.getErrorMessagesAsString(","), "");
+		assertEquals("Error messages String should be ''", "", status.getErrorMessagesAsString(","));
 	}
 
 	@Test
@@ -561,7 +561,7 @@ public class BindTagTests extends AbstractTagTests {
 		BindStatus status = (BindStatus) pc.getAttribute(BindTag.STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		assertEquals("doctor", status.getExpression());
 		assertTrue(status.getValue() instanceof NestedTestBean);
-		assertTrue(status.getDisplayValue().indexOf("juergen&amp;eva") != -1);
+		assertTrue(status.getDisplayValue().contains("juergen&amp;eva"));
 	}
 
 	@Test
@@ -656,7 +656,8 @@ public class BindTagTests extends AbstractTagTests {
 		tag.setPageContext(pc);
 		tag.setName("tb");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertTrue("Has errors variable", pc.getAttribute(BindErrorsTag.ERRORS_VARIABLE_NAME, PageContext.REQUEST_SCOPE) == errors);
+		assertTrue("Has errors variable",
+				pc.getAttribute(BindErrorsTag.ERRORS_VARIABLE_NAME, PageContext.REQUEST_SCOPE) == errors);
 	}
 
 	@Test
@@ -918,7 +919,7 @@ public class BindTagTests extends AbstractTagTests {
 		transform.setParent(message);
 		try {
 			transform.doStartTag();
-			fail("Tag can be executed outside BindTag and inside messagtag");
+			fail("Tag can be executed outside BindTag and inside messagetag");
 		}
 		catch (JspException e) {
 			// this is ok!

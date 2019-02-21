@@ -113,8 +113,9 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 
 		for (MockFilterRegistration filterRegistration : filterRegistrations.values()) {
 			assertTrue(filterRegistration.isAsyncSupported());
-			assertEquals(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC),
-					filterRegistration.getMappings().get(SERVLET_NAME));
+			EnumSet<DispatcherType> enumSet = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD,
+					DispatcherType.INCLUDE, DispatcherType.ASYNC);
+			assertEquals(enumSet, filterRegistration.getMappings().get(SERVLET_NAME));
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ import java.util.Set;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -42,11 +45,7 @@ import org.springframework.util.ObjectUtils;
 abstract class AnnotationReadingVisitorUtils {
 
 	public static AnnotationAttributes convertClassValues(Object annotatedElement,
-			ClassLoader classLoader, AnnotationAttributes original, boolean classValuesAsString) {
-
-		if (original == null) {
-			return null;
-		}
+			@Nullable ClassLoader classLoader, AnnotationAttributes original, boolean classValuesAsString) {
 
 		AnnotationAttributes result = new AnnotationAttributes(original);
 		AnnotationUtils.postProcessAnnotationAttributes(annotatedElement, result, classValuesAsString);
@@ -67,7 +66,7 @@ abstract class AnnotationReadingVisitorUtils {
 				}
 				else if (value instanceof Type) {
 					value = (classValuesAsString ? ((Type) value).getClassName() :
-							classLoader.loadClass(((Type) value).getClassName()));
+							ClassUtils.forName(((Type) value).getClassName(), classLoader));
 				}
 				else if (value instanceof Type[]) {
 					Type[] array = (Type[]) value;
@@ -75,15 +74,15 @@ abstract class AnnotationReadingVisitorUtils {
 							(classValuesAsString ? new String[array.length] : new Class<?>[array.length]);
 					for (int i = 0; i < array.length; i++) {
 						convArray[i] = (classValuesAsString ? array[i].getClassName() :
-								classLoader.loadClass(array[i].getClassName()));
+								ClassUtils.forName(array[i].getClassName(), classLoader));
 					}
 					value = convArray;
 				}
 				else if (classValuesAsString) {
-					if (value instanceof Class<?>) {
+					if (value instanceof Class) {
 						value = ((Class<?>) value).getName();
 					}
-					else if (value instanceof Class<?>[]) {
+					else if (value instanceof Class[]) {
 						Class<?>[] clazzArray = (Class<?>[]) value;
 						String[] newValue = new String[clazzArray.length];
 						for (int i = 0; i < clazzArray.length; i++) {
@@ -94,7 +93,7 @@ abstract class AnnotationReadingVisitorUtils {
 				}
 				entry.setValue(value);
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				// Class not found - can't resolve class reference in annotation attribute.
 				result.put(entry.getKey(), ex);
 			}
@@ -119,13 +118,14 @@ abstract class AnnotationReadingVisitorUtils {
 	 * matching annotation is present in the {@code attributesMap}
 	 * @since 4.0.3
 	 */
+	@Nullable
 	public static AnnotationAttributes getMergedAnnotationAttributes(
 			LinkedMultiValueMap<String, AnnotationAttributes> attributesMap,
 			Map<String, Set<String>> metaAnnotationMap, String annotationName) {
 
 		// Get the unmerged list of attributes for the target annotation.
 		List<AnnotationAttributes> attributesList = attributesMap.get(annotationName);
-		if (attributesList == null || attributesList.isEmpty()) {
+		if (CollectionUtils.isEmpty(attributesList)) {
 			return null;
 		}
 

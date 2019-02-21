@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -62,27 +61,6 @@ public class SerializableTypeWrapperTests {
 		Constructor<?> constructor = Constructors.class.getDeclaredConstructor(List.class);
 		Type type = SerializableTypeWrapper.forMethodParameter(MethodParameter.forExecutable(constructor, 0));
 		assertThat(type.toString(), equalTo("java.util.List<java.lang.String>"));
-		assertSerializable(type);
-	}
-
-	@Test
-	public void forGenericSuperClass() throws Exception {
-		Type type = SerializableTypeWrapper.forGenericSuperclass(ArrayList.class);
-		assertThat(type.toString(), equalTo("java.util.AbstractList<E>"));
-		assertSerializable(type);
-	}
-
-	@Test
-	public void forGenericInterfaces() throws Exception {
-		Type type = SerializableTypeWrapper.forGenericInterfaces(List.class)[0];
-		assertThat(type.toString(), equalTo("java.util.Collection<E>"));
-		assertSerializable(type);
-	}
-
-	@Test
-	public void forTypeParameters() throws Exception {
-		Type type = SerializableTypeWrapper.forTypeParameters(List.class)[0];
-		assertThat(type.toString(), equalTo("E"));
 		assertSerializable(type);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class DefaultMessageListenerContainerTests {
 	public void recoverResetBackOff() {
 		BackOff backOff = mock(BackOff.class);
 		BackOffExecution execution = mock(BackOffExecution.class);
-		given(execution.nextBackOff()).willReturn(50L, 50L, 50L); // 3 attempts max
+		given(execution.nextBackOff()).willReturn(50L, 50L, 50L);  // 3 attempts max
 		given(backOff.start()).willReturn(execution);
 
 		DefaultMessageListenerContainer container = createContainer(createRecoverableContainerFactory(1));
@@ -88,7 +88,7 @@ public class DefaultMessageListenerContainerTests {
 
 		assertEquals(true, container.isRunning());
 		verify(backOff).start();
-		verify(execution, times(1)).nextBackOff(); // only on attempt as the second one lead to a recovery
+		verify(execution, times(1)).nextBackOff();  // only on attempt as the second one lead to a recovery
 	}
 
 	@Test
@@ -123,11 +123,8 @@ public class DefaultMessageListenerContainerTests {
 	private ConnectionFactory createFailingContainerFactory() {
 		try {
 			ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
-			given(connectionFactory.createConnection()).will(new Answer<Object>() {
-				@Override
-				public Object answer(InvocationOnMock invocation) throws Throwable {
-					throw new JMSException("Test exception");
-				}
+			given(connectionFactory.createConnection()).will(invocation -> {
+				throw new JMSException("Test exception");
 			});
 			return connectionFactory;
 		}

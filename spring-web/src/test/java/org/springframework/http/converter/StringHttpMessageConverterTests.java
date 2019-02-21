@@ -17,7 +17,6 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
@@ -73,14 +72,13 @@ public class StringHttpMessageConverterTests {
 
 	@Test
 	public void writeDefaultCharset() throws IOException {
-		Charset iso88591 = Charset.forName("ISO-8859-1");
 		String body = "H\u00e9llo W\u00f6rld";
 		this.converter.write(body, null, this.outputMessage);
 
 		HttpHeaders headers = this.outputMessage.getHeaders();
-		assertEquals(body, this.outputMessage.getBodyAsString(iso88591));
-		assertEquals(new MediaType("text", "plain", iso88591), headers.getContentType());
-		assertEquals(body.getBytes(iso88591).length, headers.getContentLength());
+		assertEquals(body, this.outputMessage.getBodyAsString(StandardCharsets.ISO_8859_1));
+		assertEquals(new MediaType("text", "plain", StandardCharsets.ISO_8859_1), headers.getContentType());
+		assertEquals(body.getBytes(StandardCharsets.ISO_8859_1).length, headers.getContentLength());
 		assertFalse(headers.getAcceptCharset().isEmpty());
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
 
@@ -70,6 +71,9 @@ import org.springframework.util.IdGenerator;
  */
 public class MessageHeaders implements Map<String, Object>, Serializable {
 
+	/**
+	 * UUID for none.
+	 */
 	public static final UUID ID_VALUE_NONE = new UUID(0,0);
 
 	/**
@@ -80,12 +84,24 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 */
 	public static final String ID = "id";
 
+	/**
+	 * The key for the message timestamp.
+	 */
 	public static final String TIMESTAMP = "timestamp";
 
+	/**
+	 * The key for the message content type.
+	 */
 	public static final String CONTENT_TYPE = "contentType";
 
+	/**
+	 * The key for the message reply channel.
+	 */
 	public static final String REPLY_CHANNEL = "replyChannel";
 
+	/**
+	 * The key for the message error channel.
+	 */
 	public static final String ERROR_CHANNEL = "errorChannel";
 
 
@@ -95,7 +111,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private static final IdGenerator defaultIdGenerator = new AlternativeJdkIdGenerator();
 
-	private static volatile IdGenerator idGenerator = null;
+	@Nullable
+	private static volatile IdGenerator idGenerator;
 
 
 	private final Map<String, Object> headers;
@@ -106,7 +123,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * {@link #TIMESTAMP} headers will also be added, overriding any existing values.
 	 * @param headers a map with headers to add
 	 */
-	public MessageHeaders(Map<String, Object> headers) {
+	public MessageHeaders(@Nullable Map<String, Object> headers) {
 		this(headers, null, null);
 	}
 
@@ -116,8 +133,8 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param id the {@link #ID} header value
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
-	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
-		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<String, Object>());
+	protected MessageHeaders(@Nullable Map<String, Object> headers, @Nullable UUID id, @Nullable Long timestamp) {
+		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<>());
 
 		if (id == null) {
 			this.headers.put(ID, getIdGenerator().generateId());
@@ -147,12 +164,12 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param keysToIgnore the keys of the entries to ignore
 	 */
 	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
-		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
-		for (Map.Entry<String, Object> entry : original.headers.entrySet()) {
-			if (!keysToIgnore.contains(entry.getKey())) {
-				this.headers.put(entry.getKey(), entry.getValue());
+		this.headers = new HashMap<>(original.headers.size());
+		original.headers.forEach((key, value) -> {
+			if (!keysToIgnore.contains(key)) {
+				this.headers.put(key, value);
 			}
-		}
+		});
 	}
 
 
@@ -161,27 +178,33 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	protected static IdGenerator getIdGenerator() {
-		return (idGenerator != null ? idGenerator : defaultIdGenerator);
+		IdGenerator generator = idGenerator;
+		return (generator != null ? generator : defaultIdGenerator);
 	}
 
+	@Nullable
 	public UUID getId() {
 		return get(ID, UUID.class);
 	}
 
+	@Nullable
 	public Long getTimestamp() {
 		return get(TIMESTAMP, Long.class);
 	}
 
+	@Nullable
 	public Object getReplyChannel() {
 		return get(REPLY_CHANNEL);
 	}
 
+	@Nullable
 	public Object getErrorChannel() {
 		return get(ERROR_CHANNEL);
 	}
 
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	public <T> T get(Object key, Class<T> type) {
 		Object value = this.headers.get(key);
 		if (value == null) {
@@ -209,6 +232,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return Collections.unmodifiableMap(this.headers).entrySet();
 	}
 
+	@Nullable
 	public Object get(Object key) {
 		return this.headers.get(key);
 	}
@@ -269,11 +293,11 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		Set<String> keysToIgnore = new HashSet<>();
-		for (Map.Entry<String, Object> entry : this.headers.entrySet()) {
-			if (!(entry.getValue() instanceof Serializable)) {
-				keysToIgnore.add(entry.getKey());
+		this.headers.forEach((key, value) -> {
+			if (!(value instanceof Serializable)) {
+				keysToIgnore.add(key);
 			}
-		}
+		});
 
 		if (keysToIgnore.isEmpty()) {
 			// All entries are serializable -> serialize the regular MessageHeaders instance

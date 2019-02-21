@@ -18,6 +18,7 @@ package org.springframework.web.socket.client;
 
 import java.net.URI;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
@@ -38,6 +39,6 @@ public interface WebSocketClient {
 			String uriTemplate, Object... uriVariables);
 
 	ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			WebSocketHttpHeaders headers, URI uri);
+			@Nullable WebSocketHttpHeaders headers, URI uri);
 
 }

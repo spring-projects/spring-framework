@@ -4,4 +4,9 @@
  * (and <a href="http://code.google.com/p/beanshell2/">BeanShell2</a>)
  * into Spring's scripting infrastructure.
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.scripting.bsh;
+
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,12 @@ import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.eclipse.persistence.config.TargetDatabase;
 import org.eclipse.persistence.jpa.JpaEntityManager;
 
+import org.springframework.lang.Nullable;
+
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Eclipse
- * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.4.
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.7;
+ * backwards-compatible with EclipseLink 2.5 and 2.6 at runtime.
  *
  * <p>Exposes EclipseLink's persistence provider and EntityManager extension interface,
  * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
@@ -62,7 +65,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		if (getDatabasePlatform() != null) {
 			jpaProperties.put(PersistenceUnitProperties.TARGET_DATABASE, getDatabasePlatform());
 		}
-		else if (getDatabase() != null) {
+		else {
 			String targetDatabase = determineTargetDatabaseName(getDatabase());
 			if (targetDatabase != null) {
 				jpaProperties.put(PersistenceUnitProperties.TARGET_DATABASE, targetDatabase);
@@ -78,6 +81,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		if (isShowSql()) {
 			jpaProperties.put(PersistenceUnitProperties.CATEGORY_LOGGING_LEVEL_ +
 					org.eclipse.persistence.logging.SessionLog.SQL, Level.FINE.toString());
+			jpaProperties.put(PersistenceUnitProperties.LOGGING_PARAMETERS, Boolean.TRUE.toString());
 		}
 
 		return jpaProperties;
@@ -88,13 +92,15 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the specified database
 	 * @return the EclipseLink target database name, or {@code null} if none found
 	 */
+	@Nullable
 	protected String determineTargetDatabaseName(Database database) {
 		switch (database) {
 			case DB2: return TargetDatabase.DB2;
 			case DERBY: return TargetDatabase.Derby;
+			case HANA: return TargetDatabase.HANA;
 			case HSQL: return TargetDatabase.HSQL;
 			case INFORMIX: return TargetDatabase.Informix;
-			case MYSQL: return TargetDatabase.MySQL4;
+			case MYSQL: return TargetDatabase.MySQL;
 			case ORACLE: return TargetDatabase.Oracle;
 			case POSTGRESQL: return TargetDatabase.PostgreSQL;
 			case SQL_SERVER: return TargetDatabase.SQLServer;

@@ -127,7 +127,7 @@ import java.lang.annotation.Target;
  * public class BaseTests {}
  *
  * &#064;ContextHierarchy(
- *     &#064;ContextConfiguration(name = "child",  locations = "/test-user-config.xml", inheritLocations=false)
+ *     &#064;ContextConfiguration(name = "child",  locations = "/test-user-config.xml", inheritLocations = false)
  * )
  * public class ExtendedTests extends BaseTests {}</pre>
  *

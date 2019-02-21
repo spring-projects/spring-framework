@@ -19,13 +19,16 @@ package org.springframework.jdbc.support.incrementer;
 import javax.sql.DataSource;
 
 /**
- * {@link DataFieldMaxValueIncrementer} that retrieves the next value of a given sequence
- * on DB2/390 or DB2/400. Thanks to Jens Eickmeyer for the suggestion!
+ * {@link DataFieldMaxValueIncrementer} that retrieves the next value
+ * of a given sequence on DB2 for the mainframe (z/OS, DB2/390, DB2/400).
+ *
+ * <p>Thanks to Jens Eickmeyer for the suggestion!
  *
  * @author Juergen Hoeller
  * @since 2.5.3
- * @see DB2SequenceMaxValueIncrementer
+ * @deprecated in favor of the differently named {@link Db2MainframeMaxValueIncrementer}
  */
+@Deprecated
 public class DB2MainframeSequenceMaxValueIncrementer extends AbstractSequenceMaxValueIncrementer {
 
 	/**

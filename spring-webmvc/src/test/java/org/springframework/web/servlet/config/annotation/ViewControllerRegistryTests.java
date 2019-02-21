@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,16 +47,16 @@ public class ViewControllerRegistryTests {
 
 
 	@Before
-	public void setUp() {
-		this.registry = new ViewControllerRegistry();
-		this.registry.setApplicationContext(new StaticApplicationContext());
+	public void setup() {
+		this.registry = new ViewControllerRegistry(new StaticApplicationContext());
 		this.request = new MockHttpServletRequest("GET", "/");
 		this.response = new MockHttpServletResponse();
 	}
 
+
 	@Test
-	public void noViewControllers() throws Exception {
-		assertNull(this.registry.getHandlerMapping());
+	public void noViewControllers() {
+		assertNull(this.registry.buildHandlerMapping());
 	}
 
 	@Test
@@ -125,17 +125,17 @@ public class ViewControllerRegistryTests {
 	@Test
 	public void order() {
 		this.registry.addViewController("/path");
-		SimpleUrlHandlerMapping handlerMapping = getHandlerMapping();
+		SimpleUrlHandlerMapping handlerMapping = this.registry.buildHandlerMapping();
 		assertEquals(1, handlerMapping.getOrder());
 
 		this.registry.setOrder(2);
-		handlerMapping = getHandlerMapping();
+		handlerMapping = this.registry.buildHandlerMapping();
 		assertEquals(2, handlerMapping.getOrder());
 	}
 
 
 	private ParameterizableViewController getController(String path) {
-		Map<String, ?> urlMap = getHandlerMapping().getUrlMap();
+		Map<String, ?> urlMap = this.registry.buildHandlerMapping().getUrlMap();
 		ParameterizableViewController controller = (ParameterizableViewController) urlMap.get(path);
 		assertNotNull(controller);
 		return controller;
@@ -147,10 +147,6 @@ public class ViewControllerRegistryTests {
 		assertNotNull(controller.getView());
 		assertEquals(RedirectView.class, controller.getView().getClass());
 		return (RedirectView) controller.getView();
-	}
-
-	private SimpleUrlHandlerMapping getHandlerMapping() {
-		return (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();
 	}
 
 }

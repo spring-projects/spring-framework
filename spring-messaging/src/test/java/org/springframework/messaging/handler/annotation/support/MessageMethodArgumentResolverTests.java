@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.ErrorMessage;
@@ -56,7 +57,7 @@ public class MessageMethodArgumentResolverTests {
 	@Before
 	public void setup() throws Exception {
 		this.method = MessageMethodArgumentResolverTests.class.getDeclaredMethod("handle",
-				Message.class, Message.class, Message.class, Message.class, ErrorMessage.class);
+				Message.class, Message.class, Message.class, Message.class, ErrorMessage.class, Message.class);
 
 		this.converter = mock(MessageConverter.class);
 		this.resolver = new MessageMethodArgumentResolver(this.converter);
@@ -124,7 +125,7 @@ public class MessageMethodArgumentResolverTests {
 
 		assertTrue(this.resolver.supportsParameter(parameter));
 		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("the payload is empty");
+		thrown.expectMessage("payload is empty");
 		thrown.expectMessage(Integer.class.getName());
 		thrown.expectMessage(String.class.getName());
 		this.resolver.resolveArgument(parameter, message);
@@ -216,10 +217,24 @@ public class MessageMethodArgumentResolverTests {
 
 		assertTrue(this.resolver.supportsParameter(parameter));
 		thrown.expect(MessageConversionException.class);
-		thrown.expectMessage("the payload is empty");
+		thrown.expectMessage("payload is empty");
 		thrown.expectMessage(Integer.class.getName());
 		thrown.expectMessage(String.class.getName());
 		this.resolver.resolveArgument(parameter, message);
+	}
+
+	@Test // SPR-16486
+	public void resolveWithJacksonConverter() throws Exception {
+		Message<String> inMessage = MessageBuilder.withPayload("{\"foo\":\"bar\"}").build();
+		MethodParameter parameter = new MethodParameter(this.method, 5);
+
+		this.resolver = new MessageMethodArgumentResolver(new MappingJackson2MessageConverter());
+		Object actual = this.resolver.resolveArgument(parameter, inMessage);
+
+		assertTrue(actual instanceof Message);
+		Message<?> outMessage = (Message<?>) actual;
+		assertTrue(outMessage.getPayload() instanceof Foo);
+		assertEquals("bar", ((Foo) outMessage.getPayload()).getFoo());
 	}
 
 
@@ -229,7 +244,23 @@ public class MessageMethodArgumentResolverTests {
 			Message<Integer> integerPayload,
 			Message<Number> numberPayload,
 			Message<? extends Number> anyNumberPayload,
-			ErrorMessage subClass) {
+			ErrorMessage subClass,
+			Message<Foo> fooPayload) {
+	}
+
+
+	static class Foo {
+
+		private String foo;
+
+		public String getFoo() {
+			return foo;
+		}
+
+		public void setFoo(String foo) {
+			this.foo = foo;
+		}
+
 	}
 
 }

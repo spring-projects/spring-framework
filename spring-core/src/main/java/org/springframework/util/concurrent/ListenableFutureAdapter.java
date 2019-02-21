@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.util.concurrent;
 
 import java.util.concurrent.ExecutionException;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract class that adapts a {@link ListenableFuture} parameterized over S into a
@@ -51,19 +53,21 @@ public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S> 
 		ListenableFuture<S> listenableAdaptee = (ListenableFuture<S>) getAdaptee();
 		listenableAdaptee.addCallback(new ListenableFutureCallback<S>() {
 			@Override
-			public void onSuccess(S result) {
-				T adapted;
-				try {
-					adapted = adaptInternal(result);
-				}
-				catch (ExecutionException ex) {
-					Throwable cause = ex.getCause();
-					onFailure(cause != null ? cause : ex);
-					return;
-				}
-				catch (Throwable ex) {
-					onFailure(ex);
-					return;
+			public void onSuccess(@Nullable S result) {
+				T adapted = null;
+				if (result != null) {
+					try {
+						adapted = adaptInternal(result);
+					}
+					catch (ExecutionException ex) {
+						Throwable cause = ex.getCause();
+						onFailure(cause != null ? cause : ex);
+						return;
+					}
+					catch (Throwable ex) {
+						onFailure(ex);
+						return;
+					}
 				}
 				successCallback.onSuccess(adapted);
 			}

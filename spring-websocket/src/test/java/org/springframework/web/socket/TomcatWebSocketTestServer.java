@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@ package org.springframework.web.socket;
 
 import java.io.File;
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
 import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleEvent;
-import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.logging.Log;
@@ -35,7 +32,6 @@ import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.websocket.server.WsContextListener;
 
 import org.springframework.util.Assert;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -51,24 +47,22 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
 	private Tomcat tomcatServer;
 
-	private int port = -1;
+	private int port;
 
 	private Context context;
 
 
 	@Override
 	public void setup() {
-		this.port = SocketUtils.findAvailableTcpPort();
-
 		Connector connector = new Connector(Http11NioProtocol.class.getName());
-		connector.setPort(this.port);
+		connector.setPort(0);
 
 		File baseDir = createTempDir("tomcat");
 		String baseDirPath = baseDir.getAbsolutePath();
 
 		this.tomcatServer = new Tomcat();
 		this.tomcatServer.setBaseDir(baseDirPath);
-		this.tomcatServer.setPort(this.port);
+		this.tomcatServer.setPort(0);
 		this.tomcatServer.getService().addConnector(connector);
 		this.tomcatServer.setConnector(connector);
 	}
@@ -82,22 +76,17 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 			return tempFolder;
 		}
 		catch (IOException ex) {
-			throw new RuntimeException("Unable to create temp directory", ex);
+			throw new IllegalStateException("Unable to create temp directory", ex);
 		}
-	}
-
-	@Override
-	public int getPort() {
-		return this.port;
 	}
 
 	@Override
 	public void deployConfig(WebApplicationContext wac, Filter... filters) {
 		Assert.state(this.port != -1, "setup() was never called.");
 		this.context = this.tomcatServer.addContext("", System.getProperty("java.io.tmpdir"));
-        this.context.addApplicationListener(WsContextListener.class.getName());
+		this.context.addApplicationListener(WsContextListener.class.getName());
 		Tomcat.addServlet(this.context, "dispatcherServlet", new DispatcherServlet(wac)).setAsyncSupported(true);
-		this.context.addServletMapping("/", "dispatcherServlet");
+		this.context.addServletMappingDecoded("/", "dispatcherServlet");
 		for (Filter filter : filters) {
 			FilterDef filterDef = new FilterDef();
 			filterDef.setFilterName(filter.getClass().getName());
@@ -113,11 +102,6 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	}
 
 	@Override
-	public ServletContext getServletContext() {
-		return this.context.getServletContext();
-	}
-
-	@Override
 	public void undeployConfig() {
 		if (this.context != null) {
 			this.context.removeServletMapping("/");
@@ -128,12 +112,10 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.tomcatServer.start();
-		this.context.addLifecycleListener(new LifecycleListener() {
-			@Override
-			public void lifecycleEvent(LifecycleEvent event) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Event: " + event.getType());
-				}
+		this.port = this.tomcatServer.getConnector().getLocalPort();
+		this.context.addLifecycleListener(event -> {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Event: " + event.getType());
 			}
 		});
 	}
@@ -141,6 +123,17 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void stop() throws Exception {
 		this.tomcatServer.stop();
+		this.port = 0;
+	}
+
+	@Override
+	public int getPort() {
+		return this.port;
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return this.context.getServletContext();
 	}
 
 }

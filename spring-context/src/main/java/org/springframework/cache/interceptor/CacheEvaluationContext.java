@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.lang.Nullable;
 
 /**
  * Cache specific evaluation context that adds a method parameters as SpEL
@@ -69,6 +70,7 @@ class CacheEvaluationContext extends MethodBasedEvaluationContext {
 	 * Load the param information only when needed.
 	 */
 	@Override
+	@Nullable
 	public Object lookupVariable(String name) {
 		if (this.unavailableVariables.contains(name)) {
 			throw new VariableNotAvailableException(name);

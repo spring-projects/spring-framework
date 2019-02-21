@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 1.0.2
+ * @param <T> the result element type
  * @see RowMapper
  * @see JdbcTemplate
  * @see org.springframework.jdbc.object.MappingSqlQuery
@@ -87,7 +88,7 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 
 	@Override
 	public List<T> extractData(ResultSet rs) throws SQLException {
-		List<T> results = (this.rowsExpected > 0 ? new ArrayList<>(this.rowsExpected) : new ArrayList<T>());
+		List<T> results = (this.rowsExpected > 0 ? new ArrayList<>(this.rowsExpected) : new ArrayList<>());
 		int rowNum = 0;
 		while (rs.next()) {
 			results.add(this.rowMapper.mapRow(rs, rowNum++));

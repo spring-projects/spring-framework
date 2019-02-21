@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.Driver;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
  * {@link EmbeddedDatabaseConfigurer} for an H2 embedded database instance.
+ *
  * <p>Call {@link #getInstance()} to get the singleton instance of this class.
  *
  * @author Oliver Gierke
@@ -31,6 +33,7 @@ import org.springframework.util.ClassUtils;
  */
 final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
+	@Nullable
 	private static H2EmbeddedDatabaseConfigurer instance;
 
 	private final Class<? extends Driver> driverClass;
@@ -38,7 +41,7 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 
 	/**
 	 * Get the singleton {@code H2EmbeddedDatabaseConfigurer} instance.
-	 * @return the configurer
+	 * @return the configurer instance
 	 * @throws ClassNotFoundException if H2 is not on the classpath
 	 */
 	@SuppressWarnings("unchecked")

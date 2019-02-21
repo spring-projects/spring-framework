@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.http.HttpMethod;
  * all outgoing and incoming streams in memory.
  *
  * <p>Using this wrapper allows for multiple reads of the
- * @linkplain ClientHttpResponse#getBody() response body}.
+ * {@linkplain ClientHttpResponse#getBody() response body}.
  *
  * @author Arjen Poutsma
  * @since 3.1

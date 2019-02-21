@@ -18,6 +18,8 @@ package org.springframework.test.context;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Factory for creating {@link ContextCustomizer ContextCustomizers}.
  *
@@ -48,6 +50,7 @@ public interface ContextCustomizerFactory {
 	 * @return a {@link ContextCustomizer} or {@code null} if no customizer should
 	 * be used
 	 */
+	@Nullable
 	ContextCustomizer createContextCustomizer(Class<?> testClass, List<ContextConfigurationAttributes> configAttributes);
 
 }

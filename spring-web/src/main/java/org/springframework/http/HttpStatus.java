@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.http;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Enumeration of HTTP status codes.
@@ -128,7 +130,7 @@ public enum HttpStatus {
 	/**
 	 * {@code 302 Moved Temporarily}.
 	 * @see <a href="http://tools.ietf.org/html/rfc1945#section-9.3">HTTP/1.0, section 9.3</a>
-	 * @deprecated In favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
+	 * @deprecated in favor of {@link #FOUND} which will be returned from {@code HttpStatus.valueOf(302)}
 	 */
 	@Deprecated
 	MOVED_TEMPORARILY(302, "Moved Temporarily"),
@@ -214,48 +216,55 @@ public enum HttpStatus {
 	CONFLICT(409, "Conflict"),
 	/**
 	 * {@code 410 Gone}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.9">HTTP/1.1: Semantics and Content, section 6.5.9</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.9">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.9</a>
 	 */
 	GONE(410, "Gone"),
 	/**
 	 * {@code 411 Length Required}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.10">HTTP/1.1: Semantics and Content, section 6.5.10</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.10">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.10</a>
 	 */
 	LENGTH_REQUIRED(411, "Length Required"),
 	/**
 	 * {@code 412 Precondition failed}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-4.2">HTTP/1.1: Conditional Requests, section 4.2</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-4.2">
+	 *     HTTP/1.1: Conditional Requests, section 4.2</a>
 	 */
 	PRECONDITION_FAILED(412, "Precondition Failed"),
 	/**
 	 * {@code 413 Payload Too Large}.
 	 * @since 4.1
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.11">HTTP/1.1: Semantics and Content, section 6.5.11</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.11">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.11</a>
 	 */
 	PAYLOAD_TOO_LARGE(413, "Payload Too Large"),
 	/**
 	 * {@code 413 Request Entity Too Large}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.14">HTTP/1.1, section 10.4.14</a>
-	 * @deprecated In favor of {@link #PAYLOAD_TOO_LARGE} which will be returned from {@code HttpStatus.valueOf(413)}
+	 * @deprecated in favor of {@link #PAYLOAD_TOO_LARGE} which will be
+	 * returned from {@code HttpStatus.valueOf(413)}
 	 */
 	@Deprecated
 	REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large"),
 	/**
 	 * {@code 414 URI Too Long}.
 	 * @since 4.1
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.12">HTTP/1.1: Semantics and Content, section 6.5.12</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.12">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.12</a>
 	 */
 	URI_TOO_LONG(414, "URI Too Long"),
 	/**
 	 * {@code 414 Request-URI Too Long}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.15">HTTP/1.1, section 10.4.15</a>
-	 * @deprecated In favor of {@link #URI_TOO_LONG} which will be returned from {@code HttpStatus.valueOf(414)}
+	 * @deprecated in favor of {@link #URI_TOO_LONG} which will be returned from {@code HttpStatus.valueOf(414)}
 	 */
 	@Deprecated
 	REQUEST_URI_TOO_LONG(414, "Request-URI Too Long"),
 	/**
 	 * {@code 415 Unsupported Media Type}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.13">HTTP/1.1: Semantics and Content, section 6.5.13</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.13">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.13</a>
 	 */
 	UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type"),
 	/**
@@ -265,7 +274,8 @@ public enum HttpStatus {
 	REQUESTED_RANGE_NOT_SATISFIABLE(416, "Requested range not satisfiable"),
 	/**
 	 * {@code 417 Expectation Failed}.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.14">HTTP/1.1: Semantics and Content, section 6.5.14</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-6.5.14">
+	 *     HTTP/1.1: Semantics and Content, section 6.5.14</a>
 	 */
 	EXPECTATION_FAILED(417, "Expectation Failed"),
 	/**
@@ -274,17 +284,23 @@ public enum HttpStatus {
 	 */
 	I_AM_A_TEAPOT(418, "I'm a teapot"),
 	/**
-	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
+	 * @deprecated See
+	 * <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	INSUFFICIENT_SPACE_ON_RESOURCE(419, "Insufficient Space On Resource"),
 	/**
-	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
+	 * @deprecated See
+	 * <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	METHOD_FAILURE(420, "Method Failure"),
 	/**
-	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
+	 * @deprecated
+	 * See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	DESTINATION_LOCKED(421, "Destination Locked"),
@@ -420,53 +436,7 @@ public enum HttpStatus {
 	}
 
 	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#INFORMATIONAL}.
-	 * This is a shortcut for checking the value of {@link #series()}.
-	 */
-	public boolean is1xxInformational() {
-		return Series.INFORMATIONAL.equals(series());
-	}
-
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#SUCCESSFUL}.
-	 * This is a shortcut for checking the value of {@link #series()}.
-	 */
-	public boolean is2xxSuccessful() {
-		return Series.SUCCESSFUL.equals(series());
-	}
-
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#REDIRECTION}.
-	 * This is a shortcut for checking the value of {@link #series()}.
-	 */
-	public boolean is3xxRedirection() {
-		return Series.REDIRECTION.equals(series());
-	}
-
-
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}.
-	 * This is a shortcut for checking the value of {@link #series()}.
-	 */
-	public boolean is4xxClientError() {
-		return Series.CLIENT_ERROR.equals(series());
-	}
-
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
-	 * This is a shortcut for checking the value of {@link #series()}.
-	 */
-	public boolean is5xxServerError() {
-		return Series.SERVER_ERROR.equals(series());
-	}
-
-	/**
-	 * Returns the HTTP status series of this status code.
+	 * Return the HTTP status series of this status code.
 	 * @see HttpStatus.Series
 	 */
 	public Series series() {
@@ -474,11 +444,74 @@ public enum HttpStatus {
 	}
 
 	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#INFORMATIONAL}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
+	 */
+	public boolean is1xxInformational() {
+		return (series() == Series.INFORMATIONAL);
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#SUCCESSFUL}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
+	 */
+	public boolean is2xxSuccessful() {
+		return (series() == Series.SUCCESSFUL);
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#REDIRECTION}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
+	 */
+	public boolean is3xxRedirection() {
+		return (series() == Series.REDIRECTION);
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
+	 */
+	public boolean is4xxClientError() {
+		return (series() == Series.CLIENT_ERROR);
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @see #series()
+	 */
+	public boolean is5xxServerError() {
+		return (series() == Series.SERVER_ERROR);
+	}
+
+	/**
+	 * Whether this status code is in the HTTP series
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
+	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @since 5.0
+	 * @see #is4xxClientError()
+	 * @see #is5xxServerError()
+	 */
+	public boolean isError() {
+		return (is4xxClientError() || is5xxServerError());
+	}
+
+	/**
 	 * Return a string representation of this status code.
 	 */
 	@Override
 	public String toString() {
-		return Integer.toString(this.value);
+		return this.value + " " + name();
 	}
 
 
@@ -489,12 +522,27 @@ public enum HttpStatus {
 	 * @throws IllegalArgumentException if this enum has no constant for the specified numeric value
 	 */
 	public static HttpStatus valueOf(int statusCode) {
+		HttpStatus status = resolve(statusCode);
+		if (status == null) {
+			throw new IllegalArgumentException("No matching constant for [" + statusCode + "]");
+		}
+		return status;
+	}
+
+	/**
+	 * Resolve the given status code to an {@code HttpStatus}, if possible.
+	 * @param statusCode the HTTP status code (potentially non-standard)
+	 * @return the corresponding {@code HttpStatus}, or {@code null} if not found
+	 * @since 5.0
+	 */
+	@Nullable
+	public static HttpStatus resolve(int statusCode) {
 		for (HttpStatus status : values()) {
 			if (status.value == statusCode) {
 				return status;
 			}
 		}
-		throw new IllegalArgumentException("No matching constant for [" + statusCode + "]");
+		return null;
 	}
 
 
@@ -523,18 +571,45 @@ public enum HttpStatus {
 			return this.value;
 		}
 
-		public static Series valueOf(int status) {
-			int seriesCode = status / 100;
+		/**
+		 * Return the enum constant of this type with the corresponding series.
+		 * @param status a standard HTTP status enum value
+		 * @return the enum constant of this type with the corresponding series
+		 * @throws IllegalArgumentException if this enum has no corresponding constant
+		 */
+		public static Series valueOf(HttpStatus status) {
+			return valueOf(status.value);
+		}
+
+		/**
+		 * Return the enum constant of this type with the corresponding series.
+		 * @param statusCode the HTTP status code (potentially non-standard)
+		 * @return the enum constant of this type with the corresponding series
+		 * @throws IllegalArgumentException if this enum has no corresponding constant
+		 */
+		public static Series valueOf(int statusCode) {
+			Series series = resolve(statusCode);
+			if (series == null) {
+				throw new IllegalArgumentException("No matching constant for [" + statusCode + "]");
+			}
+			return series;
+		}
+
+		/**
+		 * Resolve the given status code to an {@code HttpStatus.Series}, if possible.
+		 * @param statusCode the HTTP status code (potentially non-standard)
+		 * @return the corresponding {@code Series}, or {@code null} if not found
+		 * @since 5.1.3
+		 */
+		@Nullable
+		public static Series resolve(int statusCode) {
+			int seriesCode = statusCode / 100;
 			for (Series series : values()) {
 				if (series.value == seriesCode) {
 					return series;
 				}
 			}
-			throw new IllegalArgumentException("No matching constant for [" + status + "]");
-		}
-
-		public static Series valueOf(HttpStatus status) {
-			return valueOf(status.value);
+			return null;
 		}
 	}
 

@@ -21,6 +21,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.lang.Nullable;
 
 /**
  * Central interface to provide configuration for an application.
@@ -61,6 +62,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 	 * Return the unique id of this application context.
 	 * @return the unique id of the context, or {@code null} if none
 	 */
+	@Nullable
 	String getId();
 
 	/**
@@ -86,6 +88,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 	 * and this is the root of the context hierarchy.
 	 * @return the parent context, or {@code null} if there is no parent
 	 */
+	@Nullable
 	ApplicationContext getParent();
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,14 +55,14 @@ public class AnnotationTransactionAttributeSourceTests {
 		TransactionInterceptor ti = new TransactionInterceptor(ptm, tas);
 
 		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.setInterfaces(ITestBean.class);
+		proxyFactory.setInterfaces(ITestBean1.class);
 		proxyFactory.addAdvice(ti);
 		proxyFactory.setTarget(tb);
-		ITestBean proxy = (ITestBean) proxyFactory.getProxy();
+		ITestBean1 proxy = (ITestBean1) proxyFactory.getProxy();
 		proxy.getAge();
 		assertEquals(1, ptm.commits);
 
-		ITestBean serializedProxy = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
+		ITestBean1 serializedProxy = (ITestBean1) SerializationTestUtils.serializeAndDeserialize(proxy);
 		serializedProxy.getAge();
 		Advised advised = (Advised) serializedProxy;
 		TransactionInterceptor serializedTi = (TransactionInterceptor) advised.getAdvisors()[0].getAdvice();
@@ -88,7 +88,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	 */
 	@Test
 	public void transactionAttributeDeclaredOnClassMethod() throws Exception {
-		Method classMethod = ITestBean.class.getMethod("getAge");
+		Method classMethod = ITestBean1.class.getMethod("getAge");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute actual = atas.getTransactionAttribute(classMethod, TestBean1.class);
@@ -104,7 +104,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	 */
 	@Test
 	public void transactionAttributeDeclaredOnCglibClassMethod() throws Exception {
-		Method classMethod = ITestBean.class.getMethod("getAge");
+		Method classMethod = ITestBean1.class.getMethod("getAge");
 		TestBean1 tb = new TestBean1();
 		ProxyFactory pf = new ProxyFactory(tb);
 		pf.setProxyTargetClass(true);
@@ -129,7 +129,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		TransactionAttribute actual = atas.getTransactionAttribute(interfaceMethod, TestBean2.class);
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
-			assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
 	}
 
 	/**
@@ -300,8 +300,8 @@ public class AnnotationTransactionAttributeSourceTests {
 
 	@Test
 	public void transactionAttributeDeclaredOnClassMethodWithEjb3() throws Exception {
-		Method getAgeMethod = ITestBean.class.getMethod("getAge");
-		Method getNameMethod = ITestBean.class.getMethod("getName");
+		Method getAgeMethod = ITestBean1.class.getMethod("getAge");
+		Method getNameMethod = ITestBean1.class.getMethod("getName");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, Ejb3AnnotatedBean1.class);
@@ -312,8 +312,8 @@ public class AnnotationTransactionAttributeSourceTests {
 
 	@Test
 	public void transactionAttributeDeclaredOnClassWithEjb3() throws Exception {
-		Method getAgeMethod = ITestBean.class.getMethod("getAge");
-		Method getNameMethod = ITestBean.class.getMethod("getName");
+		Method getAgeMethod = ITestBean1.class.getMethod("getAge");
+		Method getNameMethod = ITestBean1.class.getMethod("getName");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, Ejb3AnnotatedBean2.class);
@@ -336,8 +336,8 @@ public class AnnotationTransactionAttributeSourceTests {
 
 	@Test
 	public void transactionAttributeDeclaredOnClassMethodWithJta() throws Exception {
-		Method getAgeMethod = ITestBean.class.getMethod("getAge");
-		Method getNameMethod = ITestBean.class.getMethod("getName");
+		Method getAgeMethod = ITestBean1.class.getMethod("getAge");
+		Method getNameMethod = ITestBean1.class.getMethod("getName");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, JtaAnnotatedBean1.class);
@@ -348,8 +348,8 @@ public class AnnotationTransactionAttributeSourceTests {
 
 	@Test
 	public void transactionAttributeDeclaredOnClassWithJta() throws Exception {
-		Method getAgeMethod = ITestBean.class.getMethod("getAge");
-		Method getNameMethod = ITestBean.class.getMethod("getName");
+		Method getAgeMethod = ITestBean1.class.getMethod("getAge");
+		Method getNameMethod = ITestBean1.class.getMethod("getName");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, JtaAnnotatedBean2.class);
@@ -372,8 +372,8 @@ public class AnnotationTransactionAttributeSourceTests {
 
 	@Test
 	public void transactionAttributeDeclaredOnGroovyClass() throws Exception {
-		Method getAgeMethod = ITestBean.class.getMethod("getAge");
-		Method getNameMethod = ITestBean.class.getMethod("getName");
+		Method getAgeMethod = ITestBean1.class.getMethod("getAge");
+		Method getNameMethod = ITestBean1.class.getMethod("getName");
 		Method getMetaClassMethod = GroovyObject.class.getMethod("getMetaClass");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
@@ -385,7 +385,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	interface ITestBean {
+	interface ITestBean1 {
 
 		int getAge();
 
@@ -403,6 +403,10 @@ public class AnnotationTransactionAttributeSourceTests {
 		int getAge();
 
 		void setAge(int age);
+	}
+
+
+	interface ITestBean2X extends ITestBean2 {
 
 		String getName();
 
@@ -423,7 +427,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	static class Empty implements ITestBean {
+	static class Empty implements ITestBean1 {
 
 		private String name;
 
@@ -460,7 +464,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 
 	@SuppressWarnings("serial")
-	static class TestBean1 implements ITestBean, Serializable {
+	static class TestBean1 implements ITestBean1, Serializable {
 
 		private String name;
 
@@ -497,7 +501,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	static class TestBean2 implements ITestBean2 {
+	static class TestBean2 implements ITestBean2X {
 
 		private String name;
 
@@ -635,6 +639,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Transactional(rollbackFor = Exception.class, noRollbackFor = IOException.class)
 	@interface TxWithAttribute {
+
 		boolean readOnly();
 	}
 
@@ -689,23 +694,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	interface Foo<T> {
-
-		void doSomething(T theArgument);
-	}
-
-
-	static class MyFoo implements Foo<String> {
-
-		@Override
-		@Transactional
-		public void doSomething(String theArgument) {
-			System.out.println(theArgument);
-		}
-	}
-
-
-	static class Ejb3AnnotatedBean1 implements ITestBean {
+	static class Ejb3AnnotatedBean1 implements ITestBean1 {
 
 		private String name;
 
@@ -736,7 +725,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 
 	@javax.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	static class Ejb3AnnotatedBean2 implements ITestBean {
+	static class Ejb3AnnotatedBean2 implements ITestBean1 {
 
 		private String name;
 
@@ -807,7 +796,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	static class JtaAnnotatedBean1 implements ITestBean {
+	static class JtaAnnotatedBean1 implements ITestBean1 {
 
 		private String name;
 
@@ -838,7 +827,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 
 	@javax.transaction.Transactional(javax.transaction.Transactional.TxType.SUPPORTS)
-	static class JtaAnnotatedBean2 implements ITestBean {
+	static class JtaAnnotatedBean2 implements ITestBean1 {
 
 		private String name;
 
@@ -910,7 +899,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 
 	@Transactional
-	static class GroovyTestBean implements ITestBean, GroovyObject {
+	static class GroovyTestBean implements ITestBean1, GroovyObject {
 
 		private String name;
 

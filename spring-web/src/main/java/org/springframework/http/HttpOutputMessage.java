@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public interface HttpOutputMessage extends HttpMessage {
 	/**
 	 * Return the body of the message as an output stream.
 	 * @return the output stream body (never {@code null})
-	 * @throws IOException in case of I/O Errors
+	 * @throws IOException in case of I/O errors
 	 */
 	OutputStream getBody() throws IOException;
 

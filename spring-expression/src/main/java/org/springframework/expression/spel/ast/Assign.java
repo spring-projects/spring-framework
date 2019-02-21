@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 
 /**
- * Represents assignment. An alternative to calling setValue() for an expression is to use
- * an assign.
+ * Represents assignment. An alternative to calling {@code setValue}
+ * for an expression which indicates an assign statement.
  *
  * <p>Example: 'someNumberProperty=42'
  *
@@ -31,8 +31,8 @@ import org.springframework.expression.spel.ExpressionState;
  */
 public class Assign extends SpelNodeImpl {
 
-	public Assign(int pos,SpelNodeImpl... operands) {
-		super(pos,operands);
+	public Assign(int startPos, int endPos, SpelNodeImpl... operands) {
+		super(startPos, endPos, operands);
 	}
 
 

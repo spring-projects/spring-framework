@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,34 @@ public class BeanWrapperEnumTests {
 		bw.setPropertyValue("standardEnumMap[VALUE_1]", 1);
 		assertEquals(1, gb.getStandardEnumMap().size());
 		assertEquals(new Integer(1), gb.getStandardEnumMap().get(CustomEnum.VALUE_1));
+	}
+
+	@Test
+	public void testNonPublicEnum() {
+		NonPublicEnumHolder holder = new NonPublicEnumHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("nonPublicEnum", "VALUE_1");
+		assertEquals(NonPublicEnum.VALUE_1, holder.getNonPublicEnum());
+	}
+
+
+	enum NonPublicEnum {
+
+		VALUE_1, VALUE_2;
+	}
+
+
+	static class NonPublicEnumHolder {
+
+		private NonPublicEnum nonPublicEnum;
+
+		public NonPublicEnum getNonPublicEnum() {
+			return nonPublicEnum;
+		}
+
+		public void setNonPublicEnum(NonPublicEnum nonPublicEnum) {
+			this.nonPublicEnum = nonPublicEnum;
+		}
 	}
 
 }

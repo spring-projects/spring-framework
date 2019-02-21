@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,7 @@ public class BeanNamePointcutMatchingTests {
 		assertMisMatch("someName", "!bean(someName) || bean(someOtherName)");
 	}
 
+
 	private void assertMatch(String beanName, String pcExpression) {
 		assertTrue("Unexpected mismatch for bean \"" + beanName + "\" for pcExpression \"" + pcExpression + "\"",
 				matches(beanName, pcExpression));
@@ -98,4 +99,5 @@ public class BeanNamePointcutMatchingTests {
 		pointcut.setExpression(pcExpression);
 		return pointcut.matches(TestBean.class);
 	}
+
 }

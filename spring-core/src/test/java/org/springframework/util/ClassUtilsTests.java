@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.io.Externalizable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,20 +45,21 @@ import static org.junit.Assert.*;
  * @author Rob Harrop
  * @author Rick Evans
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ClassUtilsTests {
 
 	private ClassLoader classLoader = getClass().getClassLoader();
 
+
 	@Before
-	public void setUp() {
+	public void clearStatics() {
 		InnerClass.noArgCalled = false;
 		InnerClass.argCalled = false;
 		InnerClass.overloadedCalled = false;
 	}
 
+
 	@Test
-	public void testIsPresent() throws Exception {
+	public void testIsPresent() {
 		assertTrue(ClassUtils.isPresent("java.lang.String", classLoader));
 		assertFalse(ClassUtils.isPresent("java.lang.MySpecialString", classLoader));
 	}
@@ -112,6 +114,36 @@ public class ClassUtilsTests {
 		assertEquals(long[].class, ClassUtils.forName(long[].class.getName(), classLoader));
 		assertEquals(float[].class, ClassUtils.forName(float[].class.getName(), classLoader));
 		assertEquals(double[].class, ClassUtils.forName(double[].class.getName(), classLoader));
+	}
+
+	@Test
+	public void testIsCacheSafe() {
+		ClassLoader childLoader1 = new ClassLoader(classLoader) {};
+		ClassLoader childLoader2 = new ClassLoader(classLoader) {};
+		ClassLoader childLoader3 = new ClassLoader(classLoader) {
+			@Override
+			public Class<?> loadClass(String name) throws ClassNotFoundException {
+				return childLoader1.loadClass(name);
+			}
+		};
+		Class<?> composite = ClassUtils.createCompositeInterface(
+				new Class<?>[] {Serializable.class, Externalizable.class}, childLoader1);
+
+		assertTrue(ClassUtils.isCacheSafe(String.class, null));
+		assertTrue(ClassUtils.isCacheSafe(String.class, classLoader));
+		assertTrue(ClassUtils.isCacheSafe(String.class, childLoader1));
+		assertTrue(ClassUtils.isCacheSafe(String.class, childLoader2));
+		assertTrue(ClassUtils.isCacheSafe(String.class, childLoader3));
+		assertFalse(ClassUtils.isCacheSafe(InnerClass.class, null));
+		assertTrue(ClassUtils.isCacheSafe(InnerClass.class, classLoader));
+		assertTrue(ClassUtils.isCacheSafe(InnerClass.class, childLoader1));
+		assertTrue(ClassUtils.isCacheSafe(InnerClass.class, childLoader2));
+		assertTrue(ClassUtils.isCacheSafe(InnerClass.class, childLoader3));
+		assertFalse(ClassUtils.isCacheSafe(composite, null));
+		assertFalse(ClassUtils.isCacheSafe(composite, classLoader));
+		assertTrue(ClassUtils.isCacheSafe(composite, childLoader1));
+		assertFalse(ClassUtils.isCacheSafe(composite, childLoader2));
+		assertTrue(ClassUtils.isCacheSafe(composite, childLoader3));
 	}
 
 	@Test
@@ -199,7 +231,7 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testHasMethod() throws Exception {
+	public void testHasMethod() {
 		assertTrue(ClassUtils.hasMethod(Collection.class, "size"));
 		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", Object.class));
 		assertFalse(ClassUtils.hasMethod(Collection.class, "remove"));
@@ -207,12 +239,12 @@ public class ClassUtilsTests {
 	}
 
 	@Test
-	public void testGetMethodIfAvailable() throws Exception {
+	public void testGetMethodIfAvailable() {
 		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size");
 		assertNotNull(method);
 		assertEquals("size", method.getName());
 
-		method = ClassUtils.getMethodIfAvailable(Collection.class, "remove", new Class[] {Object.class});
+		method = ClassUtils.getMethodIfAvailable(Collection.class, "remove", Object.class);
 		assertNotNull(method);
 		assertEquals("remove", method.getName());
 
@@ -239,7 +271,7 @@ public class ClassUtilsTests {
 
 	@Test
 	public void testNoArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", (Class[]) null);
+		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod");
 		method.invoke(null, (Object[]) null);
 		assertTrue("no argument method was not invoked.",
 				InnerClass.noArgCalled);
@@ -247,19 +279,16 @@ public class ClassUtilsTests {
 
 	@Test
 	public void testArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "argStaticMethod",
-				new Class[] {String.class});
-		method.invoke(null, new Object[] {"test"});
+		Method method = ClassUtils.getStaticMethod(InnerClass.class, "argStaticMethod", String.class);
+		method.invoke(null, "test");
 		assertTrue("argument method was not invoked.", InnerClass.argCalled);
 	}
 
 	@Test
 	public void testOverloadedStaticMethod() throws IllegalAccessException, InvocationTargetException {
-		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod",
-				new Class[] {String.class});
-		method.invoke(null, new Object[] {"test"});
-		assertTrue("argument method was not invoked.",
-				InnerClass.overloadedCalled);
+		Method method = ClassUtils.getStaticMethod(InnerClass.class, "staticMethod", String.class);
+		method.invoke(null, "test");
+		assertTrue("argument method was not invoked.", InnerClass.overloadedCalled);
 	}
 
 	@Test
@@ -281,7 +310,7 @@ public class ClassUtilsTests {
 	@Test
 	public void testClassPackageAsResourcePath() {
 		String result = ClassUtils.classPackageAsResourcePath(Proxy.class);
-		assertTrue(result.equals("java/lang/reflect"));
+		assertEquals("java/lang/reflect", result);
 	}
 
 	@Test
@@ -297,7 +326,7 @@ public class ClassUtilsTests {
 	@Test
 	public void testGetAllInterfaces() {
 		DerivedTestObject testBean = new DerivedTestObject();
-		List ifcs = Arrays.asList(ClassUtils.getAllInterfaces(testBean));
+		List<Class<?>> ifcs = Arrays.asList(ClassUtils.getAllInterfaces(testBean));
 		assertEquals("Correct number of interfaces", 4, ifcs.size());
 		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
 		assertTrue("Contains ITestBean", ifcs.contains(ITestObject.class));
@@ -306,13 +335,13 @@ public class ClassUtilsTests {
 
 	@Test
 	public void testClassNamesToString() {
-		List ifcs = new LinkedList();
+		List<Class<?>> ifcs = new LinkedList<>();
 		ifcs.add(Serializable.class);
 		ifcs.add(Runnable.class);
 		assertEquals("[interface java.io.Serializable, interface java.lang.Runnable]", ifcs.toString());
 		assertEquals("[java.io.Serializable, java.lang.Runnable]", ClassUtils.classNamesToString(ifcs));
 
-		List classes = new LinkedList();
+		List<Class<?>> classes = new LinkedList<>();
 		classes.add(LinkedList.class);
 		classes.add(Integer.class);
 		assertEquals("[class java.util.LinkedList, class java.lang.Integer]", classes.toString());
@@ -322,7 +351,7 @@ public class ClassUtilsTests {
 		assertEquals("[java.util.List]", ClassUtils.classNamesToString(List.class));
 
 		assertEquals("[]", Collections.EMPTY_LIST.toString());
-		assertEquals("[]", ClassUtils.classNamesToString(Collections.EMPTY_LIST));
+		assertEquals("[]", ClassUtils.classNamesToString(Collections.emptyList()));
 	}
 
 	@Test

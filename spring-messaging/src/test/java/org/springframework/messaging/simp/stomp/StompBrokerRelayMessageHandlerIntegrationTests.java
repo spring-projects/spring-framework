@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
 		this.port = SocketUtils.findAvailableTcpPort(61613);
 		this.responseChannel = new ExecutorSubscribableChannel();
@@ -100,19 +100,21 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	private void createAndStartRelay() throws InterruptedException {
-		this.relay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
-				this.responseChannel, new StubMessageChannel(), Arrays.asList("/queue/", "/topic/"));
+		StubMessageChannel channel = new StubMessageChannel();
+		List<String> prefixes = Arrays.asList("/queue/", "/topic/");
+		this.relay = new StompBrokerRelayMessageHandler(channel, this.responseChannel, channel, prefixes);
 		this.relay.setRelayPort(this.port);
 		this.relay.setApplicationEventPublisher(this.eventPublisher);
 		this.relay.setSystemHeartbeatReceiveInterval(0);
 		this.relay.setSystemHeartbeatSendInterval(0);
+		this.relay.setPreservePublishOrder(true);
 
 		this.relay.start();
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void stop() throws Exception {
 		try {
 			logger.debug("STOMP broker relay stats: " + this.relay.getStatsInfo());
 			this.relay.stop();
@@ -166,7 +168,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 	@Test(expected = MessageDeliveryException.class)
 	public void messageDeliveryExceptionIfSystemSessionForwardFails() throws Exception {
-
 		logger.debug("Starting test messageDeliveryExceptionIfSystemSessionForwardFails()");
 
 		stopActiveMqBrokerAndAwait();
@@ -177,8 +178,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	}
 
 	@Test
-	public void brokerBecomingUnvailableTriggersErrorFrame() throws Exception {
-		logger.debug("Starting test brokerBecomingUnvailableTriggersErrorFrame()");
+	public void brokerBecomingUnavailableTriggersErrorFrame() throws Exception {
+		logger.debug("Starting test brokerBecomingUnavailableTriggersErrorFrame()");
 
 		String sess1 = "sess1";
 		MessageExchange connect = MessageExchangeBuilder.connect(sess1).build();
@@ -399,7 +400,6 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public static MessageExchangeBuilder disconnectWithReceipt(String sessionId, String receiptId) {
-
 			StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 			headers.setSessionId(sessionId);
 			headers.setReceipt(receiptId);
@@ -411,7 +411,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public MessageExchangeBuilder andExpectMessage(String sessionId, String subscriptionId) {
-			Assert.isTrue(SimpMessageType.MESSAGE.equals(headers.getMessageType()));
+			Assert.state(SimpMessageType.MESSAGE.equals(this.headers.getMessageType()), "MESSAGE type expected");
 			String destination = this.headers.getDestination();
 			Object payload = this.message.getPayload();
 			this.expected.add(new StompMessageFrameMessageMatcher(sessionId, subscriptionId, destination, payload));
@@ -420,7 +420,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		public MessageExchangeBuilder andExpectError() {
 			String sessionId = this.headers.getSessionId();
-			Assert.notNull(sessionId, "No sessionId to match the ERROR frame to");
+			Assert.state(sessionId != null, "No sessionId to match the ERROR frame to");
 			return andExpectError(sessionId);
 		}
 
@@ -510,7 +510,9 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		@Override
 		protected boolean matchInternal(StompHeaderAccessor headers, Object payload) {
-			if (!this.subscriptionId.equals(headers.getSubscriptionId()) ||  !this.destination.equals(headers.getDestination())) {
+			if (!this.subscriptionId.equals(headers.getSubscriptionId()) ||
+					!this.destination.equals(headers.getDestination())) {
+
 				return false;
 			}
 			if (payload instanceof byte[] && this.payload instanceof byte[]) {

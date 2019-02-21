@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +24,12 @@ import java.util.List;
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * {@link AnnotationVisitor} to recursively visit annotation arrays.
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1.1
@@ -38,7 +42,7 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 
 
 	public RecursiveAnnotationArrayVisitor(
-			String attributeName, AnnotationAttributes attributes, ClassLoader classLoader) {
+			String attributeName, AnnotationAttributes attributes, @Nullable ClassLoader classLoader) {
 
 		super(classLoader, attributes);
 		this.attributeName = attributeName;
@@ -77,8 +81,25 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 	@Override
 	public void visitEnd() {
 		if (!this.allNestedAttributes.isEmpty()) {
-			this.attributes.put(this.attributeName,
-					this.allNestedAttributes.toArray(new AnnotationAttributes[this.allNestedAttributes.size()]));
+			this.attributes.put(this.attributeName, this.allNestedAttributes.toArray(new AnnotationAttributes[0]));
+		}
+		else if (!this.attributes.containsKey(this.attributeName)) {
+			Class<? extends Annotation> annotationType = this.attributes.annotationType();
+			if (annotationType != null) {
+				try {
+					Class<?> attributeType = annotationType.getMethod(this.attributeName).getReturnType();
+					if (attributeType.isArray()) {
+						Class<?> elementType = attributeType.getComponentType();
+						if (elementType.isAnnotation()) {
+							elementType = AnnotationAttributes.class;
+						}
+						this.attributes.put(this.attributeName, Array.newInstance(elementType, 0));
+					}
+				}
+				catch (NoSuchMethodException ex) {
+					// Corresponding attribute method not found: cannot expose empty array.
+				}
+			}
 		}
 	}
 

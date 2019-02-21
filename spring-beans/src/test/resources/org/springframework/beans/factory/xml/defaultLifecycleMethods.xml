@@ -11,4 +11,10 @@
 	<bean id="overrideLifecycleMethods" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
 			init-method="customInit" destroy-method="customDestroy"/>
 
+	<bean id="childWithDefaultLifecycleMethods" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
+			parent="overrideLifecycleMethods"/>
+
+	<bean id="childWithLifecycleMethodsDisabled" class="org.springframework.beans.factory.xml.DefaultLifecycleMethodsTests$LifecycleAwareBean"
+			parent="overrideLifecycleMethods" init-method="" destroy-method=""/>
+
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.management.MBeanServer;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link FactoryBean} that obtains a WebSphere {@link javax.management.MBeanServer}
@@ -52,6 +53,7 @@ public class WebSphereMBeanServerFactoryBean implements FactoryBean<MBeanServer>
 	private static final String GET_MBEAN_SERVER_METHOD = "getMBeanServer";
 
 
+	@Nullable
 	private MBeanServer mbeanServer;
 
 
@@ -82,6 +84,7 @@ public class WebSphereMBeanServerFactoryBean implements FactoryBean<MBeanServer>
 
 
 	@Override
+	@Nullable
 	public MBeanServer getObject() {
 		return this.mbeanServer;
 	}

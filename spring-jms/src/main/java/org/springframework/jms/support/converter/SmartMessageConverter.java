@@ -20,6 +20,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
+import org.springframework.lang.Nullable;
+
 /**
  * An extended {@link MessageConverter} SPI with conversion hint support.
  *
@@ -45,7 +47,7 @@ public interface SmartMessageConverter extends MessageConverter {
 	 * @throws MessageConversionException in case of conversion failure
 	 * @see #toMessage(Object, Session)
 	 */
-	Message toMessage(Object object, Session session, Object conversionHint)
+	Message toMessage(Object object, Session session, @Nullable Object conversionHint)
 			throws JMSException, MessageConversionException;
 
 }

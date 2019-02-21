@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 
 	private DataSource dataSource;
 
-	/** The name of the sequence/table containing the sequence */
+	/** The name of the sequence/table containing the sequence. */
 	private String incrementerName;
 
-	/** The length to which a string result should be pre-pended with zeroes */
+	/** The length to which a string result should be pre-pended with zeroes. */
 	protected int paddingLength = 0;
 
 

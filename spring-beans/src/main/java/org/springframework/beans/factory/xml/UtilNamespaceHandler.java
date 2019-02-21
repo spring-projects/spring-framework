@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 				parserContext.getReaderContext().error("Attribute 'path' must not be empty", element);
 				return;
 			}
-			int dotIndex = path.indexOf(".");
+			int dotIndex = path.indexOf('.');
 			if (dotIndex == -1) {
 				parserContext.getReaderContext().error(
 						"Attribute 'path' must follow pattern 'beanName.propertyName'", element);
@@ -200,6 +200,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 			String location = element.getAttribute("location");
 			if (StringUtils.hasLength(location)) {
+				location = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(location);
 				String[] locations = StringUtils.commaDelimitedListToStringArray(location);
 				builder.addPropertyValue("locations", locations);
 			}

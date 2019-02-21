@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.env;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -49,6 +50,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Chris Beams
  * @since 3.1
+ * @param <T> the source type
  * @see PropertySources
  * @see PropertyResolver
  * @see PropertySourcesPropertyResolver
@@ -87,7 +89,7 @@ public abstract class PropertySource<T> {
 
 
 	/**
-	 * Return the name of this {@code PropertySource}
+	 * Return the name of this {@code PropertySource}.
 	 */
 	public String getName() {
 		return this.name;
@@ -117,6 +119,7 @@ public abstract class PropertySource<T> {
 	 * @param name the property to find
 	 * @see PropertyResolver#getRequiredProperty(String)
 	 */
+	@Nullable
 	public abstract Object getProperty(String name);
 
 
@@ -129,9 +132,9 @@ public abstract class PropertySource<T> {
 	 * <p>No properties other than {@code name} are evaluated.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (this == obj || (obj instanceof PropertySource &&
-				ObjectUtils.nullSafeEquals(this.name, ((PropertySource<?>) obj).name)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof PropertySource &&
+				ObjectUtils.nullSafeEquals(this.name, ((PropertySource<?>) other).name)));
 	}
 
 	/**
@@ -155,11 +158,11 @@ public abstract class PropertySource<T> {
 	@Override
 	public String toString() {
 		if (logger.isDebugEnabled()) {
-			return String.format("%s@%s [name='%s', properties=%s]",
-					getClass().getSimpleName(), System.identityHashCode(this), this.name, this.source);
+			return getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+					" {name='" + this.name + "', properties=" + this.source + "}";
 		}
 		else {
-			return String.format("%s [name='%s']", getClass().getSimpleName(), this.name);
+			return getClass().getSimpleName() + " {name='" + this.name + "'}";
 		}
 	}
 
@@ -208,6 +211,7 @@ public abstract class PropertySource<T> {
 		 * Always returns {@code null}.
 		 */
 		@Override
+		@Nullable
 		public String getProperty(String name) {
 			return null;
 		}
@@ -215,6 +219,9 @@ public abstract class PropertySource<T> {
 
 
 	/**
+	 * A {@code PropertySource} implementation intended for collection comparison
+	 * purposes.
+	 *
 	 * @see PropertySource#named(String)
 	 */
 	static class ComparisonPropertySource extends StubPropertySource {
@@ -237,13 +244,9 @@ public abstract class PropertySource<T> {
 		}
 
 		@Override
+		@Nullable
 		public String getProperty(String name) {
 			throw new UnsupportedOperationException(USAGE_ERROR);
-		}
-
-		@Override
-		public String toString() {
-			return String.format("%s [name='%s']", getClass().getSimpleName(), this.name);
 		}
 	}
 

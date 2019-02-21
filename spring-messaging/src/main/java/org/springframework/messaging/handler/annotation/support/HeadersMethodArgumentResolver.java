@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,17 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Resolves the following method parameters:
+ * {@link HandlerMethodArgumentResolver} for header method parameters. Resolves the
+ * following method parameters:
  * <ul>
  * <li>Parameters assignable to {@link Map} annotated with {@link Headers @Headers}
  * <li>Parameters of type {@link MessageHeaders}
@@ -45,15 +46,13 @@ public class HeadersMethodArgumentResolver implements HandlerMethodArgumentResol
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return ((parameter.hasParameterAnnotation(Headers.class) && Map.class.isAssignableFrom(paramType)) ||
-				MessageHeaders.class == paramType ||
-				MessageHeaderAccessor.class.isAssignableFrom(paramType));
+				MessageHeaders.class == paramType || MessageHeaderAccessor.class.isAssignableFrom(paramType));
 	}
 
 	@Override
+	@Nullable
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
 		Class<?> paramType = parameter.getParameterType();
-
 		if (Map.class.isAssignableFrom(paramType)) {
 			return message.getHeaders();
 		}
@@ -68,7 +67,10 @@ public class HeadersMethodArgumentResolver implements HandlerMethodArgumentResol
 			}
 			else {
 				Method method = ReflectionUtils.findMethod(paramType, "wrap", Message.class);
-				Assert.notNull(method, "Cannot create accessor of type " + paramType + " for message " +  message);
+				if (method == null) {
+					throw new IllegalStateException(
+							"Cannot create accessor of type " + paramType + " for message " + message);
+				}
 				return ReflectionUtils.invokeMethod(method, null, message);
 			}
 		}

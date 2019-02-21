@@ -126,7 +126,7 @@ public class UserRegistryMessageHandlerTests {
 
 		MultiServerUserRegistry remoteRegistry = new MultiServerUserRegistry(mock(SimpUserRegistry.class));
 		remoteRegistry.addRemoteRegistryDto(message, this.converter, 20000);
-		assertEquals(2, remoteRegistry.getUsers().size());
+		assertEquals(2, remoteRegistry.getUserCount());
 		assertNotNull(remoteRegistry.getUser("joe"));
 		assertNotNull(remoteRegistry.getUser("jane"));
 	}
@@ -142,6 +142,7 @@ public class UserRegistryMessageHandlerTests {
 
 		HashSet<SimpUser> simpUsers = new HashSet<>(Arrays.asList(simpUser1, simpUser2));
 		SimpUserRegistry remoteUserRegistry = mock(SimpUserRegistry.class);
+		when(remoteUserRegistry.getUserCount()).thenReturn(2);
 		when(remoteUserRegistry.getUsers()).thenReturn(simpUsers);
 
 		MultiServerUserRegistry remoteRegistry = new MultiServerUserRegistry(remoteUserRegistry);
@@ -149,7 +150,7 @@ public class UserRegistryMessageHandlerTests {
 
 		this.handler.handleMessage(message);
 
-		assertEquals(2, remoteRegistry.getUsers().size());
+		assertEquals(2, remoteRegistry.getUserCount());
 		assertNotNull(this.multiServerRegistry.getUser("joe"));
 		assertNotNull(this.multiServerRegistry.getUser("jane"));
 	}
@@ -159,13 +160,14 @@ public class UserRegistryMessageHandlerTests {
 
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
+		when(this.localRegistry.getUserCount()).thenReturn(1);
 		when(this.localRegistry.getUsers()).thenReturn(Collections.singleton(simpUser));
 
-		assertEquals(1, this.multiServerRegistry.getUsers().size());
+		assertEquals(1, this.multiServerRegistry.getUserCount());
 
 		Message<?> message = this.converter.toMessage(this.multiServerRegistry.getLocalRegistryDto(), null);
 		this.multiServerRegistry.addRemoteRegistryDto(message, this.converter, 20000);
-		assertEquals(1, this.multiServerRegistry.getUsers().size());
+		assertEquals(1, this.multiServerRegistry.getUserCount());
 	}
 
 

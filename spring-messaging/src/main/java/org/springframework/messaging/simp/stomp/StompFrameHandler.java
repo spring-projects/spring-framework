@@ -18,6 +18,8 @@ package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Contract to handle a STOMP frame.
  *
@@ -37,8 +39,8 @@ public interface StompFrameHandler {
 	 * Handle a STOMP frame with the payload converted to the target type returned
 	 * from {@link #getPayloadType(StompHeaders)}.
 	 * @param headers the headers of the frame
-	 * @param payload the payload or {@code null} if there was no payload
+	 * @param payload the payload, or {@code null} if there was no payload
 	 */
-	void handleFrame(StompHeaders headers, Object payload);
+	void handleFrame(StompHeaders headers, @Nullable Object payload);
 
 }

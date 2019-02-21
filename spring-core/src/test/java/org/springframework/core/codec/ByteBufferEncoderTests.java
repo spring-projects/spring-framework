@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,61 +19,52 @@ package org.springframework.core.codec;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase {
+public class ByteBufferEncoderTests extends AbstractEncoderTestCase<ByteBufferEncoder> {
 
-	private ByteBufferEncoder encoder;
+	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
-	@Before
-	public void createEncoder() {
-		this.encoder = new ByteBufferEncoder();
+	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
+
+	public ByteBufferEncoderTests() {
+		super(new ByteBufferEncoder());
 	}
 
+	@Override
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.APPLICATION_JSON));
+
+		// SPR-15464
+		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
+	@Override
 	@Test
 	public void encode() {
-		byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
-		byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
-		Flux<ByteBuffer> source =
-				Flux.just(ByteBuffer.wrap(fooBytes), ByteBuffer.wrap(barBytes));
+		Flux<ByteBuffer> input = Flux.just(this.fooBytes, this.barBytes)
+				.map(ByteBuffer::wrap);
 
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
-				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
-				null);
-		TestSubscriber
-				.subscribe(output)
-				.assertValuesWith(b -> {
-					byte[] buf = new byte[3];
-					b.read(buf);
-					assertArrayEquals(fooBytes, buf);
-				}, b -> {
-					byte[] buf = new byte[3];
-					b.read(buf);
-					assertArrayEquals(barBytes, buf);
-				});
+		testEncodeAll(input, ByteBuffer.class, step -> step
+				.consumeNextWith(expectBytes(this.fooBytes))
+				.consumeNextWith(expectBytes(this.barBytes))
+				.verifyComplete());
+
+
 	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.orm.hibernate5;
 import org.hibernate.HibernateException;
 
 import org.springframework.dao.UncategorizedDataAccessException;
+import org.springframework.lang.Nullable;
 
 /**
  * Hibernate-specific subclass of UncategorizedDataAccessException,
@@ -37,7 +38,7 @@ public class HibernateSystemException extends UncategorizedDataAccessException {
 	 * wrapping an arbitrary HibernateException.
 	 * @param cause the HibernateException thrown
 	 */
-	public HibernateSystemException(HibernateException cause) {
+	public HibernateSystemException(@Nullable HibernateException cause) {
 		super(cause != null ? cause.getMessage() : null, cause);
 	}
 

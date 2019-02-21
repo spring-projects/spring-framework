@@ -204,7 +204,7 @@ public class ServletRequestDataBinderTests {
 		request.addParameter("test_age", "" + 50);
 
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertTrue("Didn't fidn normal when given prefix", !pvs.contains("forname"));
+		assertTrue("Didn't find normal when given prefix", !pvs.contains("forname"));
 		assertTrue("Did treat prefix as normal when not given prefix", pvs.contains("test_forname"));
 
 		pvs = new ServletRequestParameterPropertyValues(request, "test");

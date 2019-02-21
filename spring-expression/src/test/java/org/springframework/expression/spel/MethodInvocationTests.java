@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		eContext.setVariable("bar", 3);
 		Object o = expr.getValue(eContext);
-		assertEquals(o, 3);
+		assertEquals(3, o);
 		assertEquals(1, parser.parseExpression("counter").getValue(eContext));
 
 		// Now the expression has cached that throwException(int) is the right thing to call
@@ -163,9 +163,9 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
-		eContext.setVariable("bar", 2);
+		context.setVariable("bar", 2);
 		try {
-			expr.getValue(eContext);
+			expr.getValue(context);
 			fail();
 		}
 		catch (Exception ex) {
@@ -187,9 +187,9 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
-		eContext.setVariable("bar", 4);
+		context.setVariable("bar", 4);
 		try {
-			expr.getValue(eContext);
+			expr.getValue(context);
 			fail();
 		}
 		catch (ExpressionInvocationTargetException ex) {
@@ -294,7 +294,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	public void testMethodOfClass() throws Exception {
 		Expression expression = parser.parseExpression("getName()");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
-		assertEquals(value, "java.lang.String");
+		assertEquals("java.lang.String", value);
 	}
 
 	@Test

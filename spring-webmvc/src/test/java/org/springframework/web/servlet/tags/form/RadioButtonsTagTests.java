@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -495,8 +495,10 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals(2, rootElement.elements().size());
 		Node value1 = rootElement.selectSingleNode("//input[@value = 'VALUE_1']");
 		Node value2 = rootElement.selectSingleNode("//input[@value = 'VALUE_2']");
-		assertEquals("TestEnum: VALUE_1", rootElement.selectSingleNode("//label[@for = '" + value1.valueOf("@id") + "']").getText());
-		assertEquals("TestEnum: VALUE_2", rootElement.selectSingleNode("//label[@for = '" + value2.valueOf("@id") + "']").getText());
+		assertEquals("TestEnum: VALUE_1",
+				rootElement.selectSingleNode("//label[@for = '" + value1.valueOf("@id") + "']").getText());
+		assertEquals("TestEnum: VALUE_2",
+				rootElement.selectSingleNode("//label[@for = '" + value2.valueOf("@id") + "']").getText());
 		assertEquals(value2, rootElement.selectSingleNode("//input[@checked]"));
 	}
 
@@ -520,8 +522,10 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals(2, rootElement.elements().size());
 		Node value1 = rootElement.selectSingleNode("//input[@value = 'Value: VALUE_1']");
 		Node value2 = rootElement.selectSingleNode("//input[@value = 'Value: VALUE_2']");
-		assertEquals("Label: VALUE_1", rootElement.selectSingleNode("//label[@for = '" + value1.valueOf("@id") + "']").getText());
-		assertEquals("Label: VALUE_2", rootElement.selectSingleNode("//label[@for = '" + value2.valueOf("@id") + "']").getText());
+		assertEquals("Label: VALUE_1",
+				rootElement.selectSingleNode("//label[@for = '" + value1.valueOf("@id") + "']").getText());
+		assertEquals("Label: VALUE_2",
+				rootElement.selectSingleNode("//label[@for = '" + value2.valueOf("@id") + "']").getText());
 		assertEquals(value2, rootElement.selectSingleNode("//input[@checked]"));
 	}
 
@@ -620,7 +624,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		this.bean.setDate(getDate());
 		this.bean.setName("Rob Harrop");
 		this.bean.setJedi(true);
-		this.bean.setSomeBoolean(new Boolean(true));
+		this.bean.setSomeBoolean(Boolean.TRUE);
 		this.bean.setStringArray(new String[] {"bar", "foo"});
 		this.bean.setSomeIntegerArray(new Integer[] {new Integer(2), new Integer(1)});
 		this.bean.setOtherColours(colours);

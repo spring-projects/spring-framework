@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.function.Function;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -82,6 +83,7 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	@Nullable
 	public ValueWrapper get(Object key) {
 		if (this.cache instanceof LoadingCache) {
 			Object value = ((LoadingCache<Object, Object>) this.cache).get(key);
@@ -92,22 +94,25 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Nullable
 	public <T> T get(Object key, final Callable<T> valueLoader) {
 		return (T) fromStoreValue(this.cache.get(key, new LoadFunction(valueLoader)));
 	}
 
 	@Override
+	@Nullable
 	protected Object lookup(Object key) {
 		return this.cache.getIfPresent(key);
 	}
 
 	@Override
-	public void put(Object key, Object value) {
+	public void put(Object key, @Nullable Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(Object key, final Object value) {
+	@Nullable
+	public ValueWrapper putIfAbsent(Object key, @Nullable final Object value) {
 		PutIfAbsentFunction callable = new PutIfAbsentFunction(value);
 		Object result = this.cache.get(key, callable);
 		return (callable.called ? null : toValueWrapper(result));
@@ -126,11 +131,12 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 
 	private class PutIfAbsentFunction implements Function<Object, Object> {
 
+		@Nullable
 		private final Object value;
 
 		private boolean called;
 
-		public PutIfAbsentFunction(Object value) {
+		public PutIfAbsentFunction(@Nullable Object value) {
 			this.value = value;
 		}
 
@@ -153,10 +159,10 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		@Override
 		public Object apply(Object o) {
 			try {
-				return toStoreValue(valueLoader.call());
+				return toStoreValue(this.valueLoader.call());
 			}
 			catch (Exception ex) {
-				throw new ValueRetrievalException(o, valueLoader, ex);
+				throw new ValueRetrievalException(o, this.valueLoader, ex);
 			}
 		}
 	}

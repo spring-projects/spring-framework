@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server;
 
 import reactor.core.publisher.Mono;
@@ -27,7 +28,6 @@ public interface WebFilterChain {
 
 	/**
 	 * Delegate to the next {@code WebFilter} in the chain.
-	 *
 	 * @param exchange the current server exchange
 	 * @return {@code Mono<Void>} to indicate when request handling is complete
 	 */

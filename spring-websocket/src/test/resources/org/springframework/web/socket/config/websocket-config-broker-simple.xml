@@ -7,10 +7,11 @@
 	<websocket:message-broker application-destination-prefix="/app"
 							  user-destination-prefix="/personal"
 							  path-matcher="pathMatcher"
-							  path-helper="urlPathHelper">
+							  path-helper="urlPathHelper"
+							  preserve-publish-order="true">
 
 		<!-- message-size=128*1024, send-buffer-size=1024*1024 -->
-		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576">
+		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576" time-to-first-message="30000">
 			<websocket:decorator-factories>
 				<bean class="org.springframework.web.socket.config.TestWebSocketHandlerDecoratorFactory" />
 			</websocket:decorator-factories>
@@ -35,7 +36,8 @@
 
 		<websocket:stomp-error-handler ref="errorHandler" />
 
-		<websocket:simple-broker prefix="/topic, /queue" heartbeat="15000,15000" scheduler="scheduler" />
+		<websocket:simple-broker prefix="/topic, /queue" selector-header="my-selector"
+				heartbeat="15000,15000" scheduler="scheduler" />
 
 	</websocket:message-broker>
 

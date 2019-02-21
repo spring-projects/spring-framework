@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.core.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 
 /**
  * Extended interface for a resource that supports writing to it.
@@ -50,5 +52,20 @@ public interface WritableResource extends Resource {
 	 * @see #getInputStream()
 	 */
 	OutputStream getOutputStream() throws IOException;
+
+	/**
+	 * Return a {@link WritableByteChannel}.
+	 * <p>It is expected that each call creates a <i>fresh</i> channel.
+	 * <p>The default implementation returns {@link Channels#newChannel(OutputStream)}
+	 * with the result of {@link #getOutputStream()}.
+	 * @return the byte channel for the underlying resource (must not be {@code null})
+	 * @throws java.io.FileNotFoundException if the underlying resource doesn't exist
+	 * @throws IOException if the content channel could not be opened
+	 * @since 5.0
+	 * @see #getOutputStream()
+	 */
+	default WritableByteChannel writableChannel() throws IOException {
+		return Channels.newChannel(getOutputStream());
+	}
 
 }

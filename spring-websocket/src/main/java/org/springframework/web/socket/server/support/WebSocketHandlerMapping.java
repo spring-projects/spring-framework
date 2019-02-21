@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,15 +46,6 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 		}
 	}
 
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
 
 	@Override
 	public void start() {
@@ -78,12 +69,6 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 				}
 			}
 		}
-	}
-
-	@Override
-	public void stop(Runnable callback) {
-		stop();
-		callback.run();
 	}
 
 	@Override

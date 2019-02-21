@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
+ * <p>Compatible with Jackson 2.9 and higher, as of Spring 5.0.
  *
  * @author Sebastien Deleuze
  * @since 4.1
@@ -60,16 +60,17 @@ public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2Http
 		super(objectMapper, new MediaType("application", "xml"),
 				new MediaType("text", "xml"),
 				new MediaType("application", "*+xml"));
-		Assert.isAssignable(XmlMapper.class, objectMapper.getClass());
+		Assert.isInstanceOf(XmlMapper.class, objectMapper, "XmlMapper required");
 	}
+
 
 	/**
 	 * {@inheritDoc}
-	 * The {@code objectMapper} parameter must be a {@link XmlMapper} instance.
+	 * The {@code ObjectMapper} parameter must be a {@link XmlMapper} instance.
 	 */
 	@Override
 	public void setObjectMapper(ObjectMapper objectMapper) {
-		Assert.isAssignable(XmlMapper.class, objectMapper.getClass());
+		Assert.isInstanceOf(XmlMapper.class, objectMapper, "XmlMapper required");
 		super.setObjectMapper(objectMapper);
 	}
 

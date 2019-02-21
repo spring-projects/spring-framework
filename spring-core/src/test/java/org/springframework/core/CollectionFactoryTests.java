@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.Test;
+
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.CollectionFactory.*;
 
@@ -103,7 +104,7 @@ public class CollectionFactoryTests {
 	 * {@link CollectionFactory#createApproximateMap(Object, int)}
 	 * is not type-safe.
 	 * <p>The reasoning is similar that described in
-	 * {@link #createApproximateCollectionIsNotTypeSafe()}.
+	 * {@link #createApproximateCollectionIsNotTypeSafeForEnumSet}.
 	 */
 	@Test
 	public void createApproximateMapIsNotTypeSafeForEnumMap() {
@@ -165,7 +166,7 @@ public class CollectionFactoryTests {
 	@Test
 	public void createApproximateCollectionFromEmptyHashSet() {
 		Collection<String> set = createApproximateCollection(new HashSet<String>(), 2);
-		assertThat(set.size(), is(0));
+		assertThat(set, is(empty()));
 	}
 
 	@Test
@@ -173,19 +174,19 @@ public class CollectionFactoryTests {
 		HashSet<String> hashSet = new HashSet<>();
 		hashSet.add("foo");
 		Collection<String> set = createApproximateCollection(hashSet, 2);
-		assertThat(set.size(), is(0));
+		assertThat(set, is(empty()));
 	}
 
 	@Test
 	public void createApproximateCollectionFromEmptyEnumSet() {
 		Collection<Color> colors = createApproximateCollection(EnumSet.noneOf(Color.class), 2);
-		assertThat(colors.size(), is(0));
+		assertThat(colors, is(empty()));
 	}
 
 	@Test
 	public void createApproximateCollectionFromNonEmptyEnumSet() {
 		Collection<Color> colors = createApproximateCollection(EnumSet.of(Color.BLUE), 2);
-		assertThat(colors.size(), is(0));
+		assertThat(colors, is(empty()));
 	}
 
 	@Test
@@ -239,6 +240,12 @@ public class CollectionFactoryTests {
 	@Test
 	public void createsEnumSet() {
 		assertThat(createCollection(EnumSet.class, Color.class, 0), is(instanceOf(EnumSet.class)));
+	}
+
+	@Test  // SPR-17619
+	public void createsEnumSetSubclass() {
+		EnumSet<Color> enumSet = EnumSet.noneOf(Color.class);
+		assertThat(createCollection(enumSet.getClass(), Color.class, 0), is(instanceOf(enumSet.getClass())));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -296,7 +303,8 @@ public class CollectionFactoryTests {
 	}
 
 
-	static enum Color {
+	enum Color {
 		RED, BLUE;
 	}
+
 }

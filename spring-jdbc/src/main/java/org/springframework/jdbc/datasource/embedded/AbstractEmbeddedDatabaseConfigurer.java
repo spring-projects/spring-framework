@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Base class for {@link EmbeddedDatabaseConfigurer} implementations providing common shutdown behavior.
+ * Base class for {@link EmbeddedDatabaseConfigurer} implementations
+ * providing common shutdown behavior through a "SHUTDOWN" statement.
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller
@@ -40,10 +41,12 @@ abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseCon
 		Connection con = null;
 		try {
 			con = dataSource.getConnection();
-			con.createStatement().execute("SHUTDOWN");
+			if (con != null) {
+				con.createStatement().execute("SHUTDOWN");
+			}
 		}
 		catch (SQLException ex) {
-			logger.warn("Could not shut down embedded database", ex);
+			logger.info("Could not shut down embedded database", ex);
 		}
 		finally {
 			if (con != null) {

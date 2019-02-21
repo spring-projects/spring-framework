@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,8 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
-import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Indexed;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -54,6 +53,7 @@ import static org.springframework.core.annotation.AnnotationUtilsTests.*;
  *
  * @author Sam Brannen
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0.3
  * @see AnnotationUtilsTests
  * @see MultipleComposedAnnotationsOnSingleAnnotatedElementTests
@@ -69,26 +69,30 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void getMetaAnnotationTypesOnNonAnnotatedClass() {
-		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class));
-		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class.getName()));
+		assertTrue(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class).isEmpty());
+		assertTrue(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class.getName()).isEmpty());
 	}
 
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth1() {
 		Set<String> names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class);
-		assertEquals(names(Transactional.class, Component.class), names);
+		assertEquals(names(Transactional.class, Component.class, Indexed.class), names);
 
 		names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class.getName());
-		assertEquals(names(Transactional.class, Component.class), names);
+		assertEquals(names(Transactional.class, Component.class, Indexed.class), names);
 	}
 
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth2() {
 		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class);
-		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class), names);
+		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class), names);
 
 		names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName());
-		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class), names);
+		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class), names);
+	}
+
+	private Set<String> names(Class<?>... classes) {
+		return stream(classes).map(Class::getName).collect(toSet());
 	}
 
 	@Test
@@ -258,7 +262,7 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = SubSubClassWithInheritedComposedAnnotation.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		assertNotNull("AnnotationAttributtes for @Transactional on SubSubClassWithInheritedComposedAnnotation.", attributes);
+		assertNotNull("AnnotationAttributes for @Transactional on SubSubClassWithInheritedComposedAnnotation.", attributes);
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
 		assertFalse("readOnly flag for SubSubClassWithInheritedComposedAnnotation.", attributes.getBoolean("readOnly"));
@@ -521,19 +525,11 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Should find @Transactional on ConcreteClassWithInheritedAnnotation.handle() method", attributes);
 	}
 
-	/**
-	 * <p>{@code AbstractClassWithInheritedAnnotation} declares {@code handleParameterized(T)}; whereas,
-	 * {@code ConcreteClassWithInheritedAnnotation} declares {@code handleParameterized(String)}.
-	 * <p>As of Spring 4.2, {@code AnnotatedElementUtils.processWithFindSemantics()} does not resolve an
-	 * <em>equivalent</em> method in {@code AbstractClassWithInheritedAnnotation} for the <em>bridged</em>
-	 * {@code handleParameterized(String)} method.
-	 * @since 4.2
-	 */
 	@Test
 	public void findMergedAnnotationAttributesInheritedFromBridgedMethod() throws NoSuchMethodException {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleParameterized", String.class);
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(method, Transactional.class);
-		assertNull("Should not find @Transactional on bridged ConcreteClassWithInheritedAnnotation.handleParameterized()", attributes);
+		assertNotNull("Should find @Transactional on bridged ConcreteClassWithInheritedAnnotation.handleParameterized()", attributes);
 	}
 
 	/**
@@ -542,7 +538,7 @@ public class AnnotatedElementUtilsTests {
 	 * @since 4.2
 	 */
 	@Test
-	public void findMergedAnnotationAttributesFromBridgeMethod() throws NoSuchMethodException {
+	public void findMergedAnnotationAttributesFromBridgeMethod() {
 		Method[] methods = StringGenericParameter.class.getMethods();
 		Method bridgeMethod = null;
 		Method bridgedMethod = null;
@@ -715,8 +711,32 @@ public class AnnotatedElementUtilsTests {
 		assertEquals(SpringAppConfigClass.class.getAnnotation(Resource.class), findMergedAnnotation(SpringAppConfigClass.class, Resource.class));
 	}
 
-	private Set<String> names(Class<?>... classes) {
-		return stream(classes).map(Class::getName).collect(toSet());
+	@Test
+	public void getAllMergedAnnotationsOnClassWithInterface() throws Exception {
+		Method m = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations = getAllMergedAnnotations(m, Transactional.class);
+		assertTrue(allMergedAnnotations.isEmpty());
+	}
+
+	@Test
+	public void findAllMergedAnnotationsOnClassWithInterface() throws Exception {
+		Method m = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations = findAllMergedAnnotations(m, Transactional.class);
+		assertEquals(1, allMergedAnnotations.size());
+	}
+
+	@Test  // SPR-16060
+	public void findMethodAnnotationFromGenericInterface() throws Exception {
+		Method method = ImplementsInterfaceWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
+		Order order = findMergedAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
+	@Test  // SPR-17146
+	public void findMethodAnnotationFromGenericSuperclass() throws Exception {
+		Method method = ExtendsBaseClassWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
+		Order order = findMergedAnnotation(method, Order.class);
+		assertNotNull(order);
 	}
 
 
@@ -1269,6 +1289,19 @@ public class AnnotatedElementUtilsTests {
 
 	@Resource(name = "x")
 	static class ResourceHolder {
+	}
+
+	interface TransactionalService {
+
+		@Transactional
+		void doIt();
+	}
+
+	class TransactionalServiceImpl implements TransactionalService {
+
+		@Override
+		public void doIt() {
+		}
 	}
 
 }

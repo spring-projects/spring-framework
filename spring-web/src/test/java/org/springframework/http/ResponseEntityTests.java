@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.Matchers;
@@ -73,6 +74,25 @@ public class ResponseEntityTests {
 	}
 
 	@Test
+	public void ofOptional() {
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.of(entity));
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void ofEmptyOptional() {
+		ResponseEntity<Integer> responseEntity = ResponseEntity.of(Optional.empty());
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test
 	public void createdLocation() throws URISyntaxException {
 		URI location = new URI("location");
 		ResponseEntity<Void> responseEntity = ResponseEntity.created(location).build();
@@ -90,6 +110,15 @@ public class ResponseEntityTests {
 	@Test
 	public void acceptedNoBody() throws URISyntaxException {
 		ResponseEntity<Void> responseEntity = ResponseEntity.accepted().build();
+
+		assertNotNull(responseEntity);
+		assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
+		assertNull(responseEntity.getBody());
+	}
+
+	@Test // SPR-14939
+	public void acceptedNoBodyWithAlternativeBodyType() throws URISyntaxException {
+		ResponseEntity<String> responseEntity = ResponseEntity.accepted().build();
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpStatus.ACCEPTED, responseEntity.getStatusCode());
@@ -151,7 +180,7 @@ public class ResponseEntityTests {
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 
 		assertEquals("GET", responseHeaders.getFirst("Allow"));
-		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT",
+		assertEquals("Thu, 1 Jan 1970 00:00:12 GMT",
 				responseHeaders.getFirst("Last-Modified"));
 		assertEquals(location.toASCIIString(),
 				responseHeaders.getFirst("Location"));
@@ -203,7 +232,7 @@ public class ResponseEntityTests {
 
 	@Test
 	public void emptyCacheControl() {
-		Integer entity = new Integer(42);
+		Integer entity = 42;
 
 		ResponseEntity<Integer> responseEntity =
 				ResponseEntity.status(HttpStatus.OK)
@@ -218,7 +247,7 @@ public class ResponseEntityTests {
 
 	@Test
 	public void cacheControl() {
-		Integer entity = new Integer(42);
+		Integer entity = 42;
 
 		ResponseEntity<Integer> responseEntity =
 				ResponseEntity.status(HttpStatus.OK)
@@ -231,12 +260,13 @@ public class ResponseEntityTests {
 		assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
 		assertEquals(entity, responseEntity.getBody());
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
-		assertThat(cacheControlHeader, Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
+		assertThat(cacheControlHeader,
+				Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
 	}
 
 	@Test
 	public void cacheControlNoCache() {
-		Integer entity = new Integer(42);
+		Integer entity = 42;
 
 		ResponseEntity<Integer> responseEntity =
 				ResponseEntity.status(HttpStatus.OK)
@@ -254,7 +284,7 @@ public class ResponseEntityTests {
 
 	@Test
 	public void statusCodeAsInt() {
-		Integer entity = new Integer(42);
+		Integer entity = 42;
 		ResponseEntity<Integer> responseEntity = ResponseEntity.status(200).body(entity);
 
 		assertEquals(200, responseEntity.getStatusCode().value());
@@ -263,7 +293,7 @@ public class ResponseEntityTests {
 
 	@Test
 	public void customStatusCode() {
-		Integer entity = new Integer(42);
+		Integer entity = 42;
 		ResponseEntity<Integer> responseEntity = ResponseEntity.status(299).body(entity);
 
 		assertEquals(299, responseEntity.getStatusCodeValue());

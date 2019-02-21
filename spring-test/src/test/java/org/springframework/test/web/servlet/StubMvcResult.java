@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ public class StubMvcResult implements MvcResult {
 	private MockHttpServletResponse response;
 
 	public StubMvcResult(MockHttpServletRequest request,
-						 Object handler,
-						 HandlerInterceptor[] interceptors,
-						 Exception resolvedException,
-						 ModelAndView mav,
-						 FlashMap flashMap,
-						 MockHttpServletResponse response) {
+						Object handler,
+						HandlerInterceptor[] interceptors,
+						Exception resolvedException,
+						ModelAndView mav,
+						FlashMap flashMap,
+						MockHttpServletResponse response) {
 		this.request = request;
 		this.handler = handler;
 		this.interceptors = interceptors;

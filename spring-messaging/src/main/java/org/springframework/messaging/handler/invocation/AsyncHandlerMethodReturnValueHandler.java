@@ -17,6 +17,7 @@
 package org.springframework.messaging.handler.invocation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -61,6 +62,7 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * @return the resulting ListenableFuture or {@code null} in which case no
 	 * further handling will be performed.
 	 */
+	@Nullable
 	ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType);
 
 }

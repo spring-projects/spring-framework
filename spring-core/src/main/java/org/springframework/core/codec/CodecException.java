@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,33 @@
 package org.springframework.core.codec;
 
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.lang.Nullable;
 
 /**
- * Codec related exception, usually used as a wrapper for a cause exception.
+ * General error that indicates a problem while encoding and decoding to and
+ * from an Object stream.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 @SuppressWarnings("serial")
 public class CodecException extends NestedRuntimeException {
 
+	/**
+	 * Create a new CodecException.
+	 * @param msg the detail message
+	 */
 	public CodecException(String msg) {
 		super(msg);
 	}
 
-	public CodecException(String msg, Throwable cause) {
+	/**
+	 * Create a new CodecException.
+	 * @param msg the detail message
+	 * @param cause root cause for the exception, if any
+	 */
+	public CodecException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

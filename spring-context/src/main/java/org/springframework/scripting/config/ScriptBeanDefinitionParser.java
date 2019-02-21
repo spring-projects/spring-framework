@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlReaderContext;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -103,6 +104,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
+	@Nullable
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		// Engine attribute only supported for <lang:std>
 		String engine = element.getAttribute(ENGINE_ATTRIBUTE);
@@ -132,11 +134,11 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
 		int autowireMode = parserContext.getDelegate().getAutowireMode(autowire);
 		// Only "byType" and "byName" supported, but maybe other default inherited...
-		if (autowireMode == GenericBeanDefinition.AUTOWIRE_AUTODETECT) {
-			autowireMode = GenericBeanDefinition.AUTOWIRE_BY_TYPE;
+		if (autowireMode == AbstractBeanDefinition.AUTOWIRE_AUTODETECT) {
+			autowireMode = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
 		}
-		else if (autowireMode == GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
-			autowireMode = GenericBeanDefinition.AUTOWIRE_NO;
+		else if (autowireMode == AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+			autowireMode = AbstractBeanDefinition.AUTOWIRE_NO;
 		}
 		bd.setAutowireMode(autowireMode);
 
@@ -213,6 +215,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 * the '{@code inline-script}' element. Logs and {@link XmlReaderContext#error} and
 	 * returns {@code null} if neither or both of these values are specified.
 	 */
+	@Nullable
 	private String resolveScriptSource(Element element, XmlReaderContext readerContext) {
 		boolean hasScriptSource = element.hasAttribute(SCRIPT_SOURCE_ATTRIBUTE);
 		List<Element> elements = DomUtils.getChildElementsByTagName(element, INLINE_SCRIPT_ELEMENT);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -85,15 +86,6 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private final Jackson2ObjectMapperFactoryBean factory = new Jackson2ObjectMapperFactoryBean();
 
-
-	@Test
-	public void settingNullValuesShouldNotThrowExceptions() {
-		this.factory.setSerializers((JsonSerializer<?>[]) null);
-		this.factory.setSerializersByType(null);
-		this.factory.setDeserializersByType(null);
-		this.factory.setFeaturesToEnable((Object[]) null);
-		this.factory.setFeaturesToDisable((Object[]) null);
-	}
 
 	@Test(expected = FatalBeanException.class)
 	public void unknownFeature() {
@@ -389,6 +381,16 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertNotNull(this.factory.getObject());
 		assertTrue(this.factory.isSingleton());
 		assertEquals(XmlMapper.class, this.factory.getObjectType());
+	}
+
+	@Test  // SPR-14435
+	public void setFactory() {
+		this.factory.setFactory(new SmileFactory());
+		this.factory.afterPropertiesSet();
+
+		assertNotNull(this.factory.getObject());
+		assertTrue(this.factory.isSingleton());
+		assertEquals(SmileFactory.class, this.factory.getObject().getFactory().getClass());
 	}
 
 

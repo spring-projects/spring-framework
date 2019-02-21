@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,18 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpResponse;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpResponse} implementation
- * that uses Netty 4 to parse responses.
+ * {@link ClientHttpResponse} implementation based on Netty 4.
  *
  * @author Arjen Poutsma
  * @since 4.1.2
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.http.client.reactive.ReactorClientHttpConnector}
  */
+@Deprecated
 class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final ChannelHandlerContext context;
@@ -42,6 +45,7 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final ByteBufInputStream body;
 
+	@Nullable
 	private volatile HttpHeaders headers;
 
 
@@ -56,27 +60,26 @@ class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
 
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public int getRawStatusCode() throws IOException {
 		return this.nettyResponse.getStatus().code();
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public String getStatusText() throws IOException {
 		return this.nettyResponse.getStatus().reasonPhrase();
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			HttpHeaders headers = new HttpHeaders();
+		HttpHeaders headers = this.headers;
+		if (headers == null) {
+			headers = new HttpHeaders();
 			for (Map.Entry<String, String> entry : this.nettyResponse.headers()) {
 				headers.add(entry.getKey(), entry.getValue());
 			}
 			this.headers = headers;
 		}
-		return this.headers;
+		return headers;
 	}
 
 	@Override

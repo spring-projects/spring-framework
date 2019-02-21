@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,13 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -37,8 +40,24 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class MultipartResolutionDelegate {
 
+	/**
+	 * Indicates an unresolvable value.
+	 */
 	public static final Object UNRESOLVABLE = new Object();
 
+
+	@Nullable
+	public static MultipartRequest resolveMultipartRequest(NativeWebRequest webRequest) {
+		MultipartRequest multipartRequest = webRequest.getNativeRequest(MultipartRequest.class);
+		if (multipartRequest != null) {
+			return multipartRequest;
+		}
+		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+		if (servletRequest != null && isMultipartContent(servletRequest)) {
+			return new StandardMultipartHttpServletRequest(servletRequest);
+		}
+		return null;
+	}
 
 	public static boolean isMultipartRequest(HttpServletRequest request) {
 		return (WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class) != null ||
@@ -66,6 +85,7 @@ public abstract class MultipartResolutionDelegate {
 				(Part.class == paramType || isPartCollection(parameter) || isPartArray(parameter)));
 	}
 
+	@Nullable
 	public static Object resolveMultipartArgument(String name, MethodParameter parameter, HttpServletRequest request)
 			throws Exception {
 
@@ -91,20 +111,20 @@ public abstract class MultipartResolutionDelegate {
 			}
 			if (multipartRequest != null) {
 				List<MultipartFile> multipartFiles = multipartRequest.getFiles(name);
-				return multipartFiles.toArray(new MultipartFile[multipartFiles.size()]);
+				return multipartFiles.toArray(new MultipartFile[0]);
 			}
 			else {
 				return null;
 			}
 		}
 		else if (Part.class == parameter.getNestedParameterType()) {
-			return (isMultipart ? resolvePart(request, name) : null);
+			return (isMultipart ? request.getPart(name): null);
 		}
 		else if (isPartCollection(parameter)) {
 			return (isMultipart ? resolvePartList(request, name) : null);
 		}
 		else if (isPartArray(parameter)) {
-			return (isMultipart ? resolvePartArray(request, name) : null);
+			return (isMultipart ? resolvePartList(request, name).toArray(new Part[0]) : null);
 		}
 		else {
 			return UNRESOLVABLE;
@@ -127,10 +147,11 @@ public abstract class MultipartResolutionDelegate {
 		return (Part.class == methodParam.getNestedParameterType().getComponentType());
 	}
 
+	@Nullable
 	private static Class<?> getCollectionParameterType(MethodParameter methodParam) {
 		Class<?> paramType = methodParam.getNestedParameterType();
 		if (Collection.class == paramType || List.class.isAssignableFrom(paramType)){
-			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
+			Class<?> valueType = ResolvableType.forMethodParameter(methodParam).asCollection().resolveGeneric();
 			if (valueType != null) {
 				return valueType;
 			}
@@ -138,12 +159,8 @@ public abstract class MultipartResolutionDelegate {
 		return null;
 	}
 
-	private static Part resolvePart(HttpServletRequest servletRequest, String name) throws Exception {
-		return servletRequest.getPart(name);
-	}
-
-	private static List<Part> resolvePartList(HttpServletRequest servletRequest, String name) throws Exception {
-		Collection<Part> parts = servletRequest.getParts();
+	private static List<Part> resolvePartList(HttpServletRequest request, String name) throws Exception {
+		Collection<Part> parts = request.getParts();
 		List<Part> result = new ArrayList<>(parts.size());
 		for (Part part : parts) {
 			if (part.getName().equals(name)) {
@@ -151,17 +168,6 @@ public abstract class MultipartResolutionDelegate {
 			}
 		}
 		return result;
-	}
-
-	private static Part[] resolvePartArray(HttpServletRequest servletRequest, String name) throws Exception {
-		Collection<Part> parts = servletRequest.getParts();
-		List<Part> result = new ArrayList<>(parts.size());
-		for (Part part : parts) {
-			if (part.getName().equals(name)) {
-				result.add(part);
-			}
-		}
-		return result.toArray(new Part[result.size()]);
 	}
 
 }

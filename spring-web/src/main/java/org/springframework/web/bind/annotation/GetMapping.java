@@ -31,9 +31,6 @@ import org.springframework.core.annotation.AliasFor;
  * <p>Specifically, {@code @GetMapping} is a <em>composed annotation</em> that
  * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.GET)}.
  *
- * <h5>Difference between {@code @GetMapping} &amp; {@code @RequestMapping}</h5>
- * <p>{@code @GetMapping} does not support the {@link RequestMapping#consumes consumes}
- * attribute of {@code @RequestMapping}.
  *
  * @author Sam Brannen
  * @since 4.3
@@ -78,6 +75,13 @@ public @interface GetMapping {
 	 */
 	@AliasFor(annotation = RequestMapping.class)
 	String[] headers() default {};
+
+	/**
+	 * Alias for {@link RequestMapping#consumes}.
+	 * @since 4.3.5
+	 */
+	@AliasFor(annotation = RequestMapping.class)
+	String[] consumes() default {};
 
 	/**
 	 * Alias for {@link RequestMapping#produces}.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,14 @@ public class SubtypeSensitiveMatchingTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		nonSerializableBean = (NonSerializableFoo) ctx.getBean("testClassA");
 		serializableBean = (SerializableFoo) ctx.getBean("testClassB");
 		bar = (Bar) ctx.getBean("testClassC");
 	}
+
 
 	@Test
 	public void testBeansAreProxiedOnStaticMatch() {
@@ -68,10 +69,14 @@ public class SubtypeSensitiveMatchingTests {
 
 }
 
+
 //strange looking interfaces are just to set up certain test conditions...
+
 interface NonSerializableFoo { void foo(); }
 
+
 interface SerializableFoo extends Serializable { void foo(); }
+
 
 class SubtypeMatchingTestClassA implements NonSerializableFoo {
 
@@ -79,6 +84,7 @@ class SubtypeMatchingTestClassA implements NonSerializableFoo {
 	public void foo() {}
 
 }
+
 
 @SuppressWarnings("serial")
 class SubtypeMatchingTestClassB implements SerializableFoo {
@@ -88,7 +94,9 @@ class SubtypeMatchingTestClassB implements SerializableFoo {
 
 }
 
+
 interface Bar { void bar(Object o); }
+
 
 class SubtypeMatchingTestClassC implements Bar {
 

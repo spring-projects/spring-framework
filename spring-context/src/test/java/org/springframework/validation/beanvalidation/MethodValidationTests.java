@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import javax.validation.Validator;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
@@ -26,6 +27,11 @@ import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
@@ -35,11 +41,8 @@ import org.springframework.validation.annotation.Validated;
 import static org.junit.Assert.*;
 
 /**
- * Tests against Hibernate Validator 5.x.
- *
  * @author Juergen Hoeller
  */
-@SuppressWarnings("rawtypes")
 public class MethodValidationTests {
 
 	@Test
@@ -64,8 +67,6 @@ public class MethodValidationTests {
 		ac.close();
 	}
 
-
-	@SuppressWarnings("unchecked")
 	private void doTestProxyValidation(MyValidInterface proxy) {
 		assertNotNull(proxy.myValidMethod("value", 5));
 		try {
@@ -116,9 +117,54 @@ public class MethodValidationTests {
 		}
 	}
 
+	@Test
+	public void testLazyValidatorForMethodValidation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				LazyMethodValidationConfig.class, CustomValidatorBean.class,
+				MyValidBean.class, MyValidFactoryBean.class);
+		ctx.getBeansOfType(MyValidInterface.class).values().forEach(bean -> bean.myValidMethod("value", 5));
+	}
+
+	@Test
+	public void testLazyValidatorForMethodValidationWithProxyTargetClass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				LazyMethodValidationConfigWithProxyTargetClass.class, CustomValidatorBean.class,
+				MyValidBean.class, MyValidFactoryBean.class);
+		ctx.getBeansOfType(MyValidInterface.class).values().forEach(bean -> bean.myValidMethod("value", 5));
+	}
+
 
 	@MyStereotype
 	public static class MyValidBean implements MyValidInterface<String> {
+
+		@Override
+		public Object myValidMethod(String arg1, int arg2) {
+			return (arg2 == 0 ? null : "value");
+		}
+
+		@Override
+		public void myValidAsyncMethod(String arg1, int arg2) {
+		}
+
+		@Override
+		public String myGenericMethod(String value) {
+			return value;
+		}
+	}
+
+
+	@MyStereotype
+	public static class MyValidFactoryBean implements FactoryBean<String>, MyValidInterface<String> {
+
+		@Override
+		public String getObject() {
+			return null;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
+		}
 
 		@Override
 		public Object myValidMethod(String arg1, int arg2) {
@@ -164,6 +210,31 @@ public class MethodValidationTests {
 	@Validated({OtherGroup.class, Default.class})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyValid {
+	}
+
+
+	@Configuration
+	public static class LazyMethodValidationConfig {
+
+		@Bean
+		public static MethodValidationPostProcessor methodValidationPostProcessor(@Lazy Validator validator) {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setValidator(validator);
+			return postProcessor;
+		}
+	}
+
+
+	@Configuration
+	public static class LazyMethodValidationConfigWithProxyTargetClass {
+
+		@Bean
+		public static MethodValidationPostProcessor methodValidationPostProcessor(@Lazy Validator validator) {
+			MethodValidationPostProcessor postProcessor = new MethodValidationPostProcessor();
+			postProcessor.setValidator(validator);
+			postProcessor.setProxyTargetClass(true);
+			return postProcessor;
+		}
 	}
 
 }

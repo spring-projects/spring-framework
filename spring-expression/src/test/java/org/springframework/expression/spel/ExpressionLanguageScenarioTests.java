@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,13 +80,9 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			assertEquals("hello world", value);
 			assertEquals(String.class, value.getClass());
 		}
-		catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		}
-		catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+		catch (EvaluationException | ParseException ex) {
+			ex.printStackTrace();
+			fail("Unexpected Exception: " + ex.getMessage());
 		}
 	}
 
@@ -189,13 +185,9 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			assertEquals("hellohello", value);
 
 		}
-		catch (EvaluationException ee) {
-			ee.printStackTrace();
-			fail("Unexpected Exception: " + ee.getMessage());
-		}
-		catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
+		catch (EvaluationException | ParseException ex) {
+			ex.printStackTrace();
+			fail("Unexpected Exception: " + ex.getMessage());
 		}
 	}
 
@@ -219,7 +211,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			fail("Should not be allowed to set oranges to be blue !");
 		}
 		catch (SpelEvaluationException ee) {
-			assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+			assertEquals(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, ee.getMessageCode());
 		}
 	}
 
@@ -240,7 +232,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			fail("Should not be allowed to set peas to be blue !");
 		}
 		catch (SpelEvaluationException ee) {
-			assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+			assertEquals(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, ee.getMessageCode());
 		}
 	}
 

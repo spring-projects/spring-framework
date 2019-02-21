@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
@@ -36,8 +36,7 @@ public class DestroyMethodInferenceTests {
 
 	@Test
 	public void beanMethods() {
-		ConfigurableApplicationContext ctx =
-				new AnnotationConfigApplicationContext(Config.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class);
 		WithExplicitDestroyMethod c0 = ctx.getBean(WithExplicitDestroyMethod.class);
 		WithLocalCloseMethod c1 = ctx.getBean("c1", WithLocalCloseMethod.class);
 		WithLocalCloseMethod c2 = ctx.getBean("c2", WithLocalCloseMethod.class);
@@ -47,6 +46,7 @@ public class DestroyMethodInferenceTests {
 		WithNoCloseMethod c6 = ctx.getBean("c6", WithNoCloseMethod.class);
 		WithLocalShutdownMethod c7 = ctx.getBean("c7", WithLocalShutdownMethod.class);
 		WithInheritedCloseMethod c8 = ctx.getBean("c8", WithInheritedCloseMethod.class);
+		WithDisposableBean c9 = ctx.getBean("c9", WithDisposableBean.class);
 
 		assertThat(c0.closed, is(false));
 		assertThat(c1.closed, is(false));
@@ -57,6 +57,7 @@ public class DestroyMethodInferenceTests {
 		assertThat(c6.closed, is(false));
 		assertThat(c7.closed, is(false));
 		assertThat(c8.closed, is(false));
+		assertThat(c9.closed, is(false));
 		ctx.close();
 		assertThat("c0", c0.closed, is(true));
 		assertThat("c1", c1.closed, is(true));
@@ -67,6 +68,7 @@ public class DestroyMethodInferenceTests {
 		assertThat("c6", c6.closed, is(false));
 		assertThat("c7", c7.closed, is(true));
 		assertThat("c8", c8.closed, is(false));
+		assertThat("c9", c9.closed, is(true));
 	}
 
 	@Test
@@ -91,9 +93,11 @@ public class DestroyMethodInferenceTests {
 		assertThat(x8.closed, is(false));
 	}
 
+
 	@Configuration
 	static class Config {
-		@Bean(destroyMethod="explicitClose")
+
+		@Bean(destroyMethod = "explicitClose")
 		public WithExplicitDestroyMethod c0() {
 			return new WithExplicitDestroyMethod();
 		}
@@ -118,12 +122,12 @@ public class DestroyMethodInferenceTests {
 			return new WithInheritedCloseMethod();
 		}
 
-		@Bean(destroyMethod="other")
+		@Bean(destroyMethod = "other")
 		public WithInheritedCloseMethod c5() {
 			return new WithInheritedCloseMethod() {
 				@Override
-				public void close() throws IOException {
-					throw new RuntimeException("close() should not be called");
+				public void close() {
+					throw new IllegalStateException("close() should not be called");
 				}
 				@SuppressWarnings("unused")
 				public void other() {
@@ -146,37 +150,66 @@ public class DestroyMethodInferenceTests {
 		public WithInheritedCloseMethod c8() {
 			return new WithInheritedCloseMethod();
 		}
+
+		@Bean(destroyMethod = "")
+		public WithDisposableBean c9() {
+			return new WithDisposableBean();
+		}
 	}
 
 
 	static class WithExplicitDestroyMethod {
+
 		boolean closed = false;
+
 		public void explicitClose() {
 			closed = true;
 		}
 	}
 
+
 	static class WithLocalCloseMethod {
+
 		boolean closed = false;
+
 		public void close() {
 			closed = true;
 		}
 	}
 
+
 	static class WithInheritedCloseMethod implements Closeable {
+
 		boolean closed = false;
+
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			closed = true;
 		}
 	}
 
+
+	static class WithDisposableBean implements DisposableBean {
+
+		boolean closed = false;
+
+		@Override
+		public void destroy() {
+			closed = true;
+		}
+	}
+
+
 	static class WithNoCloseMethod {
+
 		boolean closed = false;
 	}
 
+
 	static class WithLocalShutdownMethod {
+
 		boolean closed = false;
+
 		public void shutdown() {
 			closed = true;
 		}

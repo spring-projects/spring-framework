@@ -46,7 +46,7 @@ import org.springframework.test.context.jdbc.TransactionalSqlScriptsTests;
 public class TransactionalSqlScriptsSpringRuleTests extends TransactionalSqlScriptsTests {
 
 	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+	public static final SpringClassRule springClassRule = new SpringClassRule();
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();

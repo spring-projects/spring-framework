@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.servlet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented by objects that can resolve exceptions thrown during
@@ -44,10 +46,11 @@ public interface HandlerExceptionResolver {
 	 * @param handler the executed handler, or {@code null} if none chosen at the
 	 * time of the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding {@code ModelAndView} to forward to, or {@code null}
-	 * for default processing
+	 * @return a corresponding {@code ModelAndView} to forward to,
+	 * or {@code null} for default processing in the resolution chain
 	 */
+	@Nullable
 	ModelAndView resolveException(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex);
 
 }

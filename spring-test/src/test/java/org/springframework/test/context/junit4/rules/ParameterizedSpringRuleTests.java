@@ -52,7 +52,7 @@ public class ParameterizedSpringRuleTests {
 	private static final AtomicInteger invocationCount = new AtomicInteger();
 
 	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+	public static final SpringClassRule springClassRule = new SpringClassRule();
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();

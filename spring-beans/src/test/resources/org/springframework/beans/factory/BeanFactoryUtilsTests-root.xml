@@ -10,6 +10,8 @@
 
 	<bean id="indexedBean" class="org.springframework.tests.sample.beans.IndexedTestBean"/>
 
+	<bean id="annotatedBean" class="org.springframework.tests.sample.beans.AnnotatedBean"/>
+
 	<!-- Overridden by next factory -->
 	<bean id="test" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>custom</value></property>

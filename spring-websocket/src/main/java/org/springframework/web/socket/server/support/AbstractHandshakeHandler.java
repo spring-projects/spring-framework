@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -70,23 +71,34 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
 
-	private static final boolean jettyWsPresent = ClassUtils.isPresent(
-			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", AbstractHandshakeHandler.class.getClassLoader());
+	private static final boolean jettyWsPresent;
 
-	private static final boolean tomcatWsPresent = ClassUtils.isPresent(
-			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", AbstractHandshakeHandler.class.getClassLoader());
+	private static final boolean tomcatWsPresent;
 
-	private static final boolean undertowWsPresent = ClassUtils.isPresent(
-			"io.undertow.websockets.jsr.ServerWebSocketContainer", AbstractHandshakeHandler.class.getClassLoader());
+	private static final boolean undertowWsPresent;
 
-	private static final boolean glassfishWsPresent = ClassUtils.isPresent(
-			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", AbstractHandshakeHandler.class.getClassLoader());
+	private static final boolean glassfishWsPresent;
 
-	private static final boolean weblogicWsPresent = ClassUtils.isPresent(
-			"weblogic.websocket.tyrus.TyrusServletWriter", AbstractHandshakeHandler.class.getClassLoader());
+	private static final boolean weblogicWsPresent;
 
-	private static final boolean websphereWsPresent = ClassUtils.isPresent(
-			"com.ibm.websphere.wsoc.WsWsocServerContainer", AbstractHandshakeHandler.class.getClassLoader());
+	private static final boolean websphereWsPresent;
+
+	static {
+		ClassLoader classLoader = AbstractHandshakeHandler.class.getClassLoader();
+		jettyWsPresent = ClassUtils.isPresent(
+				"org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
+		tomcatWsPresent = ClassUtils.isPresent(
+				"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
+		undertowWsPresent = ClassUtils.isPresent(
+				"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
+		glassfishWsPresent = ClassUtils.isPresent(
+				"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", classLoader);
+		weblogicWsPresent = ClassUtils.isPresent(
+				"weblogic.websocket.tyrus.TyrusServletWriter", classLoader);
+		websphereWsPresent = ClassUtils.isPresent(
+				"com.ibm.websphere.wsoc.WsWsocServerContainer", classLoader);
+
+	}
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -181,13 +193,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * Return the list of supported sub-protocols.
 	 */
 	public String[] getSupportedProtocols() {
-		return this.supportedProtocols.toArray(new String[this.supportedProtocols.size()]);
+		return StringUtils.toStringArray(this.supportedProtocols);
 	}
 
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
 
 	@Override
 	public void start() {
@@ -215,6 +223,11 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		if (this.requestUpgradeStrategy instanceof Lifecycle) {
 			((Lifecycle) this.requestUpgradeStrategy).stop();
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 
@@ -340,16 +353,15 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @return the selected protocols or {@code null}
 	 * @see #determineHandlerSupportedProtocols(WebSocketHandler)
 	 */
+	@Nullable
 	protected String selectProtocol(List<String> requestedProtocols, WebSocketHandler webSocketHandler) {
-		if (requestedProtocols != null) {
-			List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
-			for (String protocol : requestedProtocols) {
-				if (handlerProtocols.contains(protocol.toLowerCase())) {
-					return protocol;
-				}
-				if (this.supportedProtocols.contains(protocol.toLowerCase())) {
-					return protocol;
-				}
+		List<String> handlerProtocols = determineHandlerSupportedProtocols(webSocketHandler);
+		for (String protocol : requestedProtocols) {
+			if (handlerProtocols.contains(protocol.toLowerCase())) {
+				return protocol;
+			}
+			if (this.supportedProtocols.contains(protocol.toLowerCase())) {
+				return protocol;
 			}
 		}
 		return null;
@@ -367,7 +379,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		if (handlerToCheck instanceof SubProtocolCapable) {
 			subProtocols = ((SubProtocolCapable) handlerToCheck).getSubProtocols();
 		}
-		return (subProtocols != null ? subProtocols : Collections.<String>emptyList());
+		return (subProtocols != null ? subProtocols : Collections.emptyList());
 	}
 
 	/**
@@ -402,8 +414,9 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * @param attributes handshake attributes to pass to the WebSocket session
 	 * @return the user for the WebSocket session, or {@code null} if not available
 	 */
-	protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler,
-			Map<String, Object> attributes) {
+	@Nullable
+	protected Principal determineUser(
+			ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 		return request.getPrincipal();
 	}

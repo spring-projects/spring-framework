@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,14 +58,19 @@ public class JsonPathResultMatchersTests {
 		}
 	}
 
+	@Test(expected = AssertionError.class)
+	public void valueWithMismatch() throws Exception {
+		new JsonPathResultMatchers("$.str").value("bogus").match(stubMvcResult);
+	}
+
 	@Test
-	public void value() throws Exception {
+	public void valueWithDirectMatch() throws Exception {
 		new JsonPathResultMatchers("$.str").value("foo").match(stubMvcResult);
 	}
 
-	@Test(expected = AssertionError.class)
-	public void valueNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.str").value("bogus").match(stubMvcResult);
+	@Test // SPR-16587
+	public void valueWithNumberConversion() throws Exception {
+		new JsonPathResultMatchers("$.num").value(5.0f).match(stubMvcResult);
 	}
 
 	@Test
@@ -73,8 +78,13 @@ public class JsonPathResultMatchersTests {
 		new JsonPathResultMatchers("$.str").value(Matchers.equalTo("foo")).match(stubMvcResult);
 	}
 
+	@Test // SPR-16587
+	public void valueWithMatcherAndNumberConversion() throws Exception {
+		new JsonPathResultMatchers("$.num").value(Matchers.equalTo(5.0f), Float.class).match(stubMvcResult);
+	}
+
 	@Test(expected = AssertionError.class)
-	public void valueWithMatcherNoMatch() throws Exception {
+	public void valueWithMatcherAndMismatch() throws Exception {
 		new JsonPathResultMatchers("$.str").value(Matchers.equalTo("bogus")).match(stubMvcResult);
 	}
 

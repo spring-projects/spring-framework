@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2015 the original author or authors.
+ * Copyright 2004-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.core.Is.is;
 
 /**
  * Unit tests for {@link JsonPathExpectationsHelper}.
@@ -218,15 +218,66 @@ public class JsonPathExpectationsHelperTests {
 	}
 
 	@Test
+	public void hasJsonPath() {
+		new JsonPathExpectationsHelper("$.abc").hasJsonPath("{\"abc\": \"123\"}");
+	}
+
+	@Test
+	public void hasJsonPathWithNull() {
+		new JsonPathExpectationsHelper("$.abc").hasJsonPath("{\"abc\": null}");
+	}
+
+	@Test
+	public void hasJsonPathForIndefinatePathWithResults() {
+		new JsonPathExpectationsHelper("$.familyMembers[?(@.name == 'Bart')]").hasJsonPath(SIMPSONS);
+	}
+
+	@Test
+	public void hasJsonPathForIndefinatePathWithEmptyResults() {
+		String expression = "$.familyMembers[?(@.name == 'Dilbert')]";
+		exception.expect(AssertionError.class);
+		exception.expectMessage("No values for JSON path \"" + expression + "\"");
+		new JsonPathExpectationsHelper(expression).hasJsonPath(SIMPSONS);
+	}
+
+	@Test // SPR-16339
+	public void doesNotHaveJsonPath() {
+		new JsonPathExpectationsHelper("$.abc").doesNotHaveJsonPath("{}");
+	}
+
+	@Test // SPR-16339
+	public void doesNotHaveJsonPathWithNull() {
+		exception.expect(AssertionError.class);
+		new JsonPathExpectationsHelper("$.abc").doesNotHaveJsonPath("{\"abc\": null}");
+	}
+
+	@Test
+	public void doesNotHaveJsonPathForIndefinatePathWithEmptyResults() {
+		new JsonPathExpectationsHelper("$.familyMembers[?(@.name == 'Dilbert')]").doesNotHaveJsonPath(SIMPSONS);
+	}
+
+	@Test
+	public void doesNotHaveEmptyPathForIndefinatePathWithResults() {
+		String expression = "$.familyMembers[?(@.name == 'Bart')]";
+		exception.expect(AssertionError.class);
+		exception.expectMessage("Expected no values at JSON path \"" + expression + "\" " +
+				"but found: [{\"name\":\"Bart\"}]");
+		new JsonPathExpectationsHelper(expression).doesNotHaveJsonPath(SIMPSONS);
+	}
+
+	@Test
 	public void assertValue() throws Exception {
 		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, 5);
 	}
 
-	@Test
-	public void assertValueWithDifferentExpectedType() throws Exception {
-		exception.expect(AssertionError.class);
-		exception.expectMessage(equalTo("At JSON path \"$.num\", type of value expected:<java.lang.String> but was:<java.lang.Integer>"));
-		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, "5");
+	@Test // SPR-14498
+	public void assertValueWithNumberConversion() throws Exception {
+		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, 5.0);
+	}
+
+	@Test // SPR-14498
+	public void assertValueWithNumberConversionAndMatcher() throws Exception {
+		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, is(5.0), Double.class);
 	}
 
 	@Test

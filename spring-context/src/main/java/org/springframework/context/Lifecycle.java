@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ package org.springframework.context;
  * restricting the visibility of activity-controlled components to the Lifecycle
  * interface.
  *
- * <p>Note that the Lifecycle interface is only supported on <b>top-level singleton
- * beans</b>. On any other component, the Lifecycle interface will remain undetected
- * and hence ignored. Also, note that the extended {@link SmartLifecycle} interface
- * provides integration with the application context's startup and shutdown phases.
+ * <p>Note that the present {@code Lifecycle} interface is only supported on
+ * <b>top-level singleton beans</b>. On any other component, the {@code Lifecycle}
+ * interface will remain undetected and hence ignored. Also, note that the extended
+ * {@link SmartLifecycle} interface provides sophisticated integration with the
+ * application context's startup and shutdown phases.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -61,11 +62,12 @@ public interface Lifecycle {
 	 * Stop this component, typically in a synchronous fashion, such that the component is
 	 * fully stopped upon return of this method. Consider implementing {@link SmartLifecycle}
 	 * and its {@code stop(Runnable)} variant when asynchronous stop behavior is necessary.
-	 * <p>Note that this stop notification is not guaranteed to come before destruction: On
-	 * regular shutdown, {@code Lifecycle} beans will first receive a stop notification before
-	 * the general destruction callbacks are being propagated; however, on hot refresh during a
-	 * context's lifetime or on aborted refresh attempts, only destroy methods will be called.
-	 * <p>Should not throw an exception if the component isn't started yet.
+	 * <p>Note that this stop notification is not guaranteed to come before destruction:
+	 * On regular shutdown, {@code Lifecycle} beans will first receive a stop notification
+	 * before the general destruction callbacks are being propagated; however, on hot
+	 * refresh during a context's lifetime or on aborted refresh attempts, a given bean's
+	 * destroy method will be called without any consideration of stop signals upfront.
+	 * <p>Should not throw an exception if the component is not running (not started yet).
 	 * <p>In the case of a container, this will propagate the stop signal to all components
 	 * that apply.
 	 * @see SmartLifecycle#stop(Runnable)

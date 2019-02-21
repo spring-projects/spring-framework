@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj;
 import java.io.Serializable;
 
 import org.springframework.core.Ordered;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -53,6 +54,7 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory, Se
 	}
 
 	@Override
+	@Nullable
 	public ClassLoader getAspectClassLoader() {
 		return this.aspectInstance.getClass().getClassLoader();
 	}

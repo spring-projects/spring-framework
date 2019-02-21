@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -32,6 +33,7 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 
 	private final Method method;
 
+	@Nullable
 	private final Class<?> targetClass;
 
 
@@ -41,7 +43,7 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 	 * @param targetClass the target class that the method will be invoked
 	 * on (may be {@code null} if identical to the declaring class)
 	 */
-	public MethodClassKey(Method method, Class<?> targetClass) {
+	public MethodClassKey(Method method, @Nullable Class<?> targetClass) {
 		this.method = method;
 		this.targetClass = targetClass;
 	}
@@ -75,7 +77,7 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 		int result = this.method.getName().compareTo(other.method.getName());
 		if (result == 0) {
 			result = this.method.toString().compareTo(other.method.toString());
-			if (result == 0 && this.targetClass != null) {
+			if (result == 0 && this.targetClass != null && other.targetClass != null) {
 				result = this.targetClass.getName().compareTo(other.targetClass.getName());
 			}
 		}

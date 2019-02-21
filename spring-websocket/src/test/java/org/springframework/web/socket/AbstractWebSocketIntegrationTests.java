@@ -86,11 +86,10 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 		this.server.setup();
 		this.server.deployConfig(this.wac);
-		// Set ServletContext in WebApplicationContext after deployment but before
-		// starting the server.
+		this.server.start();
+
 		this.wac.setServletContext(this.server.getServletContext());
 		this.wac.refresh();
-		this.server.start();
 	}
 
 	protected abstract Class<?>[] getAnnotatedConfigClasses();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,10 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.sample.beans.AnnotatedBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.TestAnnotation;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.ObjectUtils;
@@ -91,8 +93,8 @@ public class BeanFactoryUtilsTests {
 		// Leaf count
 		assertTrue(this.listableBeanFactory.getBeanDefinitionCount() == 1);
 		// Count minus duplicate
-		assertTrue("Should count 7 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory),
-				BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 7);
+		assertTrue("Should count 8 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory),
+				BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 8);
 	}
 
 	@Test
@@ -263,6 +265,34 @@ public class BeanFactoryUtilsTests {
 		assertEquals(2, beans.size());
 		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));
 		assertEquals(this.listableBeanFactory.getBean("&testFactory2"), beans.get("&testFactory2"));
+	}
+
+	@Test
+	public void testHierarchicalNamesForAnnotationWithNoMatch() throws Exception {
+		List<String> names = Arrays.asList(
+				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, Override.class));
+		assertEquals(0, names.size());
+	}
+
+	@Test
+	public void testHierarchicalNamesForAnnotationWithMatchOnlyInRoot() throws Exception {
+		List<String> names = Arrays.asList(
+				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
+		assertEquals(1, names.size());
+		assertTrue(names.contains("annotatedBean"));
+		// Distinguish from default ListableBeanFactory behavior
+		assertTrue(listableBeanFactory.getBeanNamesForAnnotation(TestAnnotation.class).length == 0);
+	}
+
+	@Test
+	public void testGetBeanNamesForAnnotationWithOverride() throws Exception {
+		AnnotatedBean annotatedBean = new AnnotatedBean();
+		this.listableBeanFactory.registerSingleton("anotherAnnotatedBean", annotatedBean);
+		List<String> names = Arrays.asList(
+				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
+		assertEquals(2, names.size());
+		assertTrue(names.contains("annotatedBean"));
+		assertTrue(names.contains("anotherAnnotatedBean"));
 	}
 
 	@Test

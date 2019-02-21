@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.lang.Nullable;
 
 /**
  * Spring AOP advice that wraps an AspectJ before method.
@@ -39,7 +40,7 @@ public class AspectJMethodBeforeAdvice extends AbstractAspectJAdvice implements 
 
 
 	@Override
-	public void before(Method method, Object[] args, Object target) throws Throwable {
+	public void before(Method method, Object[] args, @Nullable Object target) throws Throwable {
 		invokeAdviceMethod(getJoinPointMatch(), null, null);
 	}
 

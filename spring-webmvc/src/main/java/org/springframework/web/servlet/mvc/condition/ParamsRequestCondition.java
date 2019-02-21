@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.WebUtils;
 
@@ -54,10 +56,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 	private static Collection<ParamExpression> parseExpressions(String... params) {
 		Set<ParamExpression> expressions = new LinkedHashSet<>();
-		if (params != null) {
-			for (String param : params) {
-				expressions.add(new ParamExpression(param));
-			}
+		for (String param : params) {
+			expressions.add(new ParamExpression(param));
 		}
 		return expressions;
 	}
@@ -96,8 +96,9 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * or {@code null} otherwise.
 	 */
 	@Override
+	@Nullable
 	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		for (ParamExpression expression : expressions) {
+		for (ParamExpression expression : this.expressions) {
 			if (!expression.match(request)) {
 				return null;
 			}
@@ -106,19 +107,27 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	}
 
 	/**
-	 * Returns:
-	 * <ul>
-	 * <li>0 if the two conditions have the same number of parameter expressions
-	 * <li>Less than 0 if "this" instance has more parameter expressions
-	 * <li>Greater than 0 if the "other" instance has more parameter expressions
-	 * </ul>
+	 * Compare to another condition based on parameter expressions. A condition
+	 * is considered to be a more specific match, if it has:
+	 * <ol>
+	 * <li>A greater number of expressions.
+	 * <li>A greater number of non-negated expressions with a concrete value.
+	 * </ol>
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance
 	 * contains the matching parameter expressions only or is otherwise empty.
 	 */
 	@Override
 	public int compareTo(ParamsRequestCondition other, HttpServletRequest request) {
-		return (other.expressions.size() - this.expressions.size());
+		int result = other.expressions.size() - this.expressions.size();
+		if (result != 0) {
+			return result;
+		}
+		return (int) (getValueMatchCount(other.expressions) - getValueMatchCount(this.expressions));
+	}
+
+	private long getValueMatchCount(Set<ParamExpression> expressions) {
+		return expressions.stream().filter(e -> e.getValue() != null && !e.isNegated()).count();
 	}
 
 
@@ -143,12 +152,13 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
-			return WebUtils.hasSubmitParameter(request, name);
+			return (WebUtils.hasSubmitParameter(request, this.name) ||
+					request.getParameterMap().containsKey(this.name));
 		}
 
 		@Override
 		protected boolean matchValue(HttpServletRequest request) {
-			return value.equals(request.getParameter(name));
+			return ObjectUtils.nullSafeEquals(this.value, request.getParameter(this.name));
 		}
 	}
 

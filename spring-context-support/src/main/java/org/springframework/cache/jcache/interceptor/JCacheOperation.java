@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@ import org.springframework.cache.interceptor.BasicOperation;
 import org.springframework.cache.interceptor.CacheResolver;
 
 /**
- * Model the base of JSR-107 cache operation.
- * <p>A cache operation can be statically cached as it does not contain
- * any runtime operation of a specific cache invocation.
+ * Model the base of JSR-107 cache operation through an interface contract.
+ *
+ * <p>A cache operation can be statically cached as it does not contain any
+ * runtime operation of a specific cache invocation.
  *
  * @author Stephane Nicoll
  * @since 4.1

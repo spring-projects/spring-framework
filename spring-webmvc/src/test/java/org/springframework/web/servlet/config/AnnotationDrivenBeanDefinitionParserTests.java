@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.config;
 
 import java.util.List;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -29,6 +29,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -53,18 +54,14 @@ import static org.junit.Assert.*;
 
 /**
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
+ *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Agim Emruli
  */
 public class AnnotationDrivenBeanDefinitionParserTests {
 
-	private GenericWebApplicationContext appContext;
-
-	@Before
-	public void setup() {
-		this.appContext = new GenericWebApplicationContext();
-	}
+	private final GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 
 	@Test
 	public void testMessageCodesResolver() {
@@ -190,7 +187,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("responseBodyAdvice");
 		assertNotNull(value);
 		assertTrue(value instanceof List);
-		List<ResponseBodyAdvice> converters = (List<ResponseBodyAdvice>) value;
+		List<ResponseBodyAdvice<?>> converters = (List<ResponseBodyAdvice<?>>) value;
 		assertTrue(converters.get(0) instanceof JsonViewResponseBodyAdvice);
 	}
 
@@ -200,7 +197,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("requestResponseBodyAdvice");
 		assertNotNull(value);
 		assertTrue(value instanceof List);
-		List<ResponseBodyAdvice> converters = (List<ResponseBodyAdvice>) value;
+		List<ResponseBodyAdvice<?>> converters = (List<ResponseBodyAdvice<?>>) value;
 		assertTrue(converters.get(0) instanceof JsonViewRequestBodyAdvice);
 		assertTrue(converters.get(1) instanceof JsonViewResponseBodyAdvice);
 	}
@@ -254,7 +251,7 @@ class TestMessageCodesResolver implements MessageCodesResolver {
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType) {
+	public String[] resolveMessageCodes(String errorCode, String objectName, String field, @Nullable Class fieldType) {
 		return new String[] { "test.foo.bar" };
 	}
 

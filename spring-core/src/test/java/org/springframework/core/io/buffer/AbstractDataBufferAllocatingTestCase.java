@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,33 @@
 package org.springframework.core.io.buffer;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PoolArenaMetric;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocatorMetric;
 import io.netty.buffer.UnpooledByteBufAllocator;
+import org.junit.Rule;
+import org.junit.rules.Verifier;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
 import static org.junit.Assert.*;
 
 /**
+ * Base class for tests that read or write data buffers with a rule to check
+ * that allocated buffers have been released.
+ *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
 public abstract class AbstractDataBufferAllocatingTestCase {
@@ -40,25 +53,37 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Object[][] dataBufferFactories() {
-		return new Object[][]{
+		return new Object[][] {
 				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))},
 				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))},
-				{new NettyDataBufferFactory(new PooledByteBufAllocator(true))},
-				{new NettyDataBufferFactory(new PooledByteBufAllocator(false))},
+				// disable caching for reliable leak detection, see https://github.com/netty/netty/issues/5275
+				{new NettyDataBufferFactory(new PooledByteBufAllocator(true, 1, 1, 8192, 11, 0, 0, 0, true))},
+				{new NettyDataBufferFactory(new PooledByteBufAllocator(false, 1, 1, 8192, 11, 0, 0, 0, true))},
 				{new DefaultDataBufferFactory(true)},
 				{new DefaultDataBufferFactory(false)}
 
 		};
 	}
 
+	@Rule
+	public final Verifier leakDetector = new LeakDetector();
+
+
 	protected DataBuffer createDataBuffer(int capacity) {
 		return this.bufferFactory.allocateBuffer(capacity);
 	}
 
 	protected DataBuffer stringBuffer(String value) {
-		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
-		buffer.write(bytes);
+		return byteBuffer(value.getBytes(StandardCharsets.UTF_8));
+	}
+
+	protected Mono<DataBuffer> deferStringBuffer(String value) {
+		return Mono.defer(() -> Mono.just(stringBuffer(value)));
+	}
+
+	protected DataBuffer byteBuffer(byte[] value) {
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(value.length);
+		buffer.write(value);
 		return buffer;
 	}
 
@@ -70,9 +95,50 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 		return dataBuffer -> {
 			String value =
 					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
-			assertEquals(expected, value);
 			DataBufferUtils.release(dataBuffer);
+			assertEquals(expected, value);
 		};
+	}
+
+	/**
+	 * Wait until allocations are at 0, or the given duration elapses.
+	 */
+	protected void waitForDataBufferRelease(Duration duration) throws InterruptedException {
+		Instant start = Instant.now();
+		while (Instant.now().isBefore(start.plus(duration))) {
+			try {
+				verifyAllocations();
+				break;
+			}
+			catch (AssertionError ex) {
+				// ignore;
+			}
+			Thread.sleep(50);
+		}
+	}
+
+	private void verifyAllocations() {
+		if (this.bufferFactory instanceof NettyDataBufferFactory) {
+			ByteBufAllocator allocator = ((NettyDataBufferFactory) this.bufferFactory).getByteBufAllocator();
+			if (allocator instanceof PooledByteBufAllocator) {
+				PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
+				long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
+				assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
+			}
+		}
+	}
+
+	private static long getAllocations(List<PoolArenaMetric> metrics) {
+		return metrics.stream().mapToLong(PoolArenaMetric::numActiveAllocations).sum();
+	}
+
+
+	protected class LeakDetector extends Verifier {
+
+		@Override
+		public void verify() {
+			AbstractDataBufferAllocatingTestCase.this.verifyAllocations();
+		}
 	}
 
 }

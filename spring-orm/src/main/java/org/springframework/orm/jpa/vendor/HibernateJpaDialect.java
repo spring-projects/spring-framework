@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
+import org.hibernate.JDBCException;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectDeletedException;
@@ -58,6 +59,8 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.orm.jpa.DefaultJpaDialect;
@@ -66,12 +69,13 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.support.ResourceTransactionDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Hibernate EntityManager. Developed against Hibernate 5.0/5.1/5.2.
+ * Hibernate EntityManager. Developed against Hibernate 5.1/5.2/5.3.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -100,11 +104,14 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			}
 		}
 		// Check that it is the Hibernate FlushMode type, not JPA's...
-		Assert.state(FlushMode.class == getFlushMode.getReturnType());
+		Assert.state(FlushMode.class == getFlushMode.getReturnType(), "Could not find Hibernate getFlushMode method");
 	}
 
 
 	boolean prepareConnection = true;
+
+	@Nullable
+	private SQLExceptionTranslator jdbcExceptionTranslator;
 
 
 	/**
@@ -112,10 +119,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 * Hibernate Session, that is, whether to apply a transaction-specific
 	 * isolation level and/or the transaction's read-only flag to the underlying
 	 * JDBC Connection.
-	 * <p>Default is "true" on Hibernate EntityManager 4.x (with its 'on-close'
-	 * connection release mode.
-	 * <p>If you turn this flag off, JPA transaction management will not support
-	 * per-transaction isolation levels anymore. It will not call
+	 * <p>Default is "true". If you turn this flag off, JPA transaction management
+	 * will not support per-transaction isolation levels anymore. It will not call
 	 * {@code Connection.setReadOnly(true)} for read-only transactions anymore either.
 	 * If this flag is turned off, no cleanup of a JDBC Connection is required after
 	 * a transaction, since no Connection settings will get modified.
@@ -131,6 +136,21 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	 */
 	public void setPrepareConnection(boolean prepareConnection) {
 		this.prepareConnection = prepareConnection;
+	}
+
+	/**
+	 * Set the JDBC exception translator for Hibernate exception translation purposes.
+	 * <p>Applied to any detected {@link java.sql.SQLException} root cause of a Hibernate
+	 * {@link JDBCException}, overriding Hibernate's own {@code SQLException} translation
+	 * (which is based on a Hibernate Dialect for a specific target database).
+	 * @since 5.1
+	 * @see java.sql.SQLException
+	 * @see org.hibernate.JDBCException
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 */
+	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
+		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 	}
 
 
@@ -164,11 +184,20 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		// Adapt flush mode and store previous isolation level, if any.
 		FlushMode previousFlushMode = prepareFlushMode(session, definition.isReadOnly());
+		if (definition instanceof ResourceTransactionDefinition &&
+				((ResourceTransactionDefinition) definition).isLocalResource()) {
+			// As of 5.1, we explicitly optimize for a transaction-local EntityManager,
+			// aligned with native HibernateTransactionManager behavior.
+			previousFlushMode = null;
+			if (definition.isReadOnly()) {
+				session.setDefaultReadOnly(true);
+			}
+		}
 		return new SessionTransactionData(session, previousFlushMode, preparedCon, previousIsolationLevel);
 	}
 
 	@Override
-	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
+	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, @Nullable String name)
 			throws PersistenceException {
 
 		Session session = getSession(entityManager);
@@ -177,8 +206,10 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@SuppressWarnings("deprecation")
+	@Nullable
 	protected FlushMode prepareFlushMode(Session session, boolean readOnly) throws PersistenceException {
 		FlushMode flushMode = (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+		Assert.state(flushMode != null, "No FlushMode from Session");
 		if (readOnly) {
 			// We should suppress flushing for a read-only transaction.
 			if (!flushMode.equals(FlushMode.MANUAL)) {
@@ -198,8 +229,10 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@Override
-	public void cleanupTransaction(Object transactionData) {
-		((SessionTransactionData) transactionData).resetSessionState();
+	public void cleanupTransaction(@Nullable Object transactionData) {
+		if (transactionData instanceof SessionTransactionData) {
+			((SessionTransactionData) transactionData).resetSessionState();
+		}
 	}
 
 	@Override
@@ -211,6 +244,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	@Override
+	@Nullable
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);
@@ -224,10 +258,19 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	/**
 	 * Convert the given HibernateException to an appropriate exception
 	 * from the {@code org.springframework.dao} hierarchy.
-	 * @param ex HibernateException that occurred
+	 * @param ex the HibernateException that occurred
 	 * @return the corresponding DataAccessException instance
 	 */
 	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
+		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
+			JDBCException jdbcEx = (JDBCException) ex;
+			DataAccessException dae = this.jdbcExceptionTranslator.translate(
+					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
+			if (dae != null) {
+				throw dae;
+			}
+		}
+
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
@@ -317,14 +360,18 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		private final Session session;
 
+		@Nullable
 		private final FlushMode previousFlushMode;
 
+		@Nullable
 		private final Connection preparedCon;
 
+		@Nullable
 		private final Integer previousIsolationLevel;
 
-		public SessionTransactionData(
-				Session session, FlushMode previousFlushMode, Connection preparedCon, Integer previousIsolationLevel) {
+		public SessionTransactionData(Session session, @Nullable FlushMode previousFlushMode,
+				@Nullable Connection preparedCon, @Nullable Integer previousIsolationLevel) {
+
 			this.session = session;
 			this.previousFlushMode = previousFlushMode;
 			this.preparedCon = preparedCon;
@@ -352,6 +399,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	private static class HibernateConnectionHandle implements ConnectionHandle {
 
+		@Nullable
 		private static volatile Method connectionMethodToUse;
 
 		private final Session session;
@@ -365,17 +413,17 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			return doGetConnection(this.session);
 		}
 
-		@Override
-		public void releaseConnection(Connection con) {
-		}
-
 		public static Connection doGetConnection(Session session) {
 			try {
-				if (connectionMethodToUse == null) {
+				Method methodToUse = connectionMethodToUse;
+				if (methodToUse == null) {
 					// Reflective lookup to find SessionImpl's connection() method on Hibernate 4.x/5.x
-					connectionMethodToUse = session.getClass().getMethod("connection");
+					methodToUse = session.getClass().getMethod("connection");
+					connectionMethodToUse = methodToUse;
 				}
-				return (Connection) ReflectionUtils.invokeMethod(connectionMethodToUse, session);
+				Connection con = (Connection) ReflectionUtils.invokeMethod(methodToUse, session);
+				Assert.state(con != null, "No Connection from Session");
+				return con;
 			}
 			catch (NoSuchMethodException ex) {
 				throw new IllegalStateException("Cannot find connection() method on Hibernate Session", ex);

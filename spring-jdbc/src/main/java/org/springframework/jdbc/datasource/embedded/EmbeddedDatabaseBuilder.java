@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,8 @@ public class EmbeddedDatabaseBuilder {
 	 * <p>Enabling this flag overrides any explicit name set via {@link #setName}.
 	 * @param flag {@code true} if a unique database name should be generated
 	 * @return {@code this}, to facilitate method chaining
-	 * @see #setName
 	 * @since 4.2
+	 * @see #setName
 	 */
 	public EmbeddedDatabaseBuilder generateUniqueName(boolean flag) {
 		this.databaseFactory.setGenerateUniqueDatabaseName(flag);

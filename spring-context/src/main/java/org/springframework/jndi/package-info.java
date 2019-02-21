@@ -7,4 +7,9 @@
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson (Wrox, 2002).
  */
+@NonNullApi
+@NonNullFields
 package org.springframework.jndi;
+
+import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

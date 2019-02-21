@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,22 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.hamcrest.Matcher;
 
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 /**
  * Factory for assertions on the request.
+ *
  * <p>An instance of this class is typically accessed via
  * {@link MockMvcResultMatchers#request}.
  *
@@ -59,12 +61,9 @@ public class RequestResultMatchers {
 	 * perform asynchronous dispatches.
 	 */
 	public ResultMatcher asyncStarted() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) {
-				HttpServletRequest request = result.getRequest();
-				assertAsyncStarted(request);
-			}
+		return result -> {
+			HttpServletRequest request = result.getRequest();
+			assertAsyncStarted(request);
 		};
 	}
 
@@ -73,12 +72,9 @@ public class RequestResultMatchers {
 	 * @see #asyncStarted()
 	 */
 	public ResultMatcher asyncNotStarted() {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) {
-				HttpServletRequest request = result.getRequest();
-				assertEquals("Async started", false, request.isAsyncStarted());
-			}
+		return result -> {
+			HttpServletRequest request = result.getRequest();
+			assertEquals("Async started", false, request.isAsyncStarted());
 		};
 	}
 
@@ -87,15 +83,12 @@ public class RequestResultMatchers {
 	 * <p>This method can be used when a controller method returns {@link Callable}
 	 * or {@link WebAsyncTask}.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> ResultMatcher asyncResult(final Matcher<T> matcher) {
-		return new ResultMatcher() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public void match(MvcResult result) {
-				HttpServletRequest request = result.getRequest();
-				assertAsyncStarted(request);
-				assertThat("Async result", (T) result.getAsyncResult(), matcher);
-			}
+		return result -> {
+			HttpServletRequest request = result.getRequest();
+			assertAsyncStarted(request);
+			assertThat("Async result", (T) result.getAsyncResult(), matcher);
 		};
 	}
 
@@ -106,27 +99,21 @@ public class RequestResultMatchers {
 	 * {@code Callable} or the exception raised.
 	 */
 	public <T> ResultMatcher asyncResult(final Object expectedResult) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) {
-				HttpServletRequest request = result.getRequest();
-				assertAsyncStarted(request);
-				assertEquals("Async result", expectedResult, result.getAsyncResult());
-			}
+		return result -> {
+			HttpServletRequest request = result.getRequest();
+			assertAsyncStarted(request);
+			assertEquals("Async result", expectedResult, result.getAsyncResult());
 		};
 	}
 
 	/**
 	 * Assert a request attribute value with the given Hamcrest {@link Matcher}.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> ResultMatcher attribute(final String name, final Matcher<T> matcher) {
-		return new ResultMatcher() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public void match(MvcResult result) {
-				T value = (T) result.getRequest().getAttribute(name);
-				assertThat("Request attribute '" + name + "'", value, matcher);
-			}
+		return result -> {
+			T value = (T) result.getRequest().getAttribute(name);
+			assertThat("Request attribute '" + name + "'", value, matcher);
 		};
 	}
 
@@ -134,25 +121,20 @@ public class RequestResultMatchers {
 	 * Assert a request attribute value.
 	 */
 	public <T> ResultMatcher attribute(final String name, final Object expectedValue) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) {
+		return result ->
 				assertEquals("Request attribute '" + name + "'", expectedValue, result.getRequest().getAttribute(name));
-			}
-		};
 	}
 
 	/**
 	 * Assert a session attribute value with the given Hamcrest {@link Matcher}.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> ResultMatcher sessionAttribute(final String name, final Matcher<T> matcher) {
-		return new ResultMatcher() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public void match(MvcResult result) {
-				T value = (T) result.getRequest().getSession().getAttribute(name);
-				assertThat("Session attribute '" + name + "'", value, matcher);
-			}
+		return result -> {
+			HttpSession session = result.getRequest().getSession();
+			Assert.state(session != null, "No HttpSession");
+			T value = (T) session.getAttribute(name);
+			assertThat("Session attribute '" + name + "'", value, matcher);
 		};
 	}
 
@@ -160,11 +142,10 @@ public class RequestResultMatchers {
 	 * Assert a session attribute value.
 	 */
 	public <T> ResultMatcher sessionAttribute(final String name, final Object value) {
-		return new ResultMatcher() {
-			@Override
-			public void match(MvcResult result) {
-				assertEquals("Session attribute '" + name + "'", value, result.getRequest().getSession().getAttribute(name));
-			}
+		return result -> {
+			HttpSession session = result.getRequest().getSession();
+			Assert.state(session != null, "No HttpSession");
+			assertEquals("Session attribute '" + name + "'", value, session.getAttribute(name));
 		};
 	}
 

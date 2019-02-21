@@ -13,7 +13,7 @@
 		</value>
 	</option>
 	<option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="50"/>
-	<option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1"/>
+	<option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="50"/>
 	<option name="IMPORT_LAYOUT_TABLE">
 		<value>
 			<package name="" withSubpackages="true" static="true"/>

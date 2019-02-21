@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.aspectj.weaver.patterns.TypePattern;
 
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Type filter that uses AspectJ type pattern for matching.
@@ -49,7 +50,7 @@ public class AspectJTypeFilter implements TypeFilter {
 	private final TypePattern typePattern;
 
 
-	public AspectJTypeFilter(String typePatternExpression, ClassLoader classLoader) {
+	public AspectJTypeFilter(String typePatternExpression, @Nullable ClassLoader classLoader) {
 		this.world = new BcelWorld(classLoader, IMessageHandler.THROW, null);
 		this.world.setBehaveInJava5Way(true);
 		PatternParser patternParser = new PatternParser(typePatternExpression);

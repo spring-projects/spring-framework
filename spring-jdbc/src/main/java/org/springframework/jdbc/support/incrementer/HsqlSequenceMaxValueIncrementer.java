@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ package org.springframework.jdbc.support.incrementer;
 import javax.sql.DataSource;
 
 /**
- * {@link DataFieldMaxValueIncrementer} that retrieves the next value of a given HSQL sequence.
- * Thanks to Guillaume Bilodeau for the suggestion!
+ * {@link DataFieldMaxValueIncrementer} that retrieves the next value
+ * of a given HSQL sequence.
  *
- * <p><b>NOTE:</b> This is an alternative to using a regular table to support generating
- * unique keys that was necessary in previous versions of HSQL.
+ * <p>Thanks to Guillaume Bilodeau for the suggestion!
+ *
+ * <p><b>NOTE:</b> This is an alternative to using a regular table to support
+ * generating unique keys that was necessary in previous versions of HSQL.
  *
  * @author Thomas Risberg
  * @since 2.5

@@ -32,25 +32,25 @@ public class CachingDestinationResolverTests {
 	@Test
 	public void cachedDestination() {
 		@SuppressWarnings("unchecked")
-		DestinationResolver<String> destinationResolver = mock(DestinationResolver.class);
-		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<>(destinationResolver);
+		DestinationResolver<String> resolver = mock(DestinationResolver.class);
+		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>(resolver);
 
-		given(destinationResolver.resolveDestination("abcd")).willReturn("dcba");
-		given(destinationResolver.resolveDestination("1234")).willReturn("4321");
+		given(resolver.resolveDestination("abcd")).willReturn("dcba");
+		given(resolver.resolveDestination("1234")).willReturn("4321");
 
-		assertEquals("dcba", cachingDestinationResolver.resolveDestination("abcd"));
-		assertEquals("4321", cachingDestinationResolver.resolveDestination("1234"));
-		assertEquals("4321", cachingDestinationResolver.resolveDestination("1234"));
-		assertEquals("dcba", cachingDestinationResolver.resolveDestination("abcd"));
+		assertEquals("dcba", resolverProxy.resolveDestination("abcd"));
+		assertEquals("4321", resolverProxy.resolveDestination("1234"));
+		assertEquals("4321", resolverProxy.resolveDestination("1234"));
+		assertEquals("dcba", resolverProxy.resolveDestination("abcd"));
 
-		verify(destinationResolver, times(1)).resolveDestination("abcd");
-		verify(destinationResolver, times(1)).resolveDestination("1234");
+		verify(resolver, times(1)).resolveDestination("abcd");
+		verify(resolver, times(1)).resolveDestination("1234");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void noTargetSet() {
-		CachingDestinationResolverProxy<String> cachingDestinationResolver = new CachingDestinationResolverProxy<>();
-		cachingDestinationResolver.afterPropertiesSet();
+		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>();
+		resolverProxy.afterPropertiesSet();
 	}
 
 	@Test(expected = IllegalArgumentException.class)

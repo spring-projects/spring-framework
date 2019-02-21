@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,7 @@ public class ScriptUtilsUnitTests {
 			statements.get(0));
 	}
 
-	/**
-	 * See <a href="https://jira.spring.io/browse/SPR-13218">SPR-13218</a>
-	 */
-	@Test
+	@Test  // SPR-13218
 	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() throws Exception {
 		String statement1 = "select '1' as \"Dogbert's owner's\" from dual";
 		String statement2 = "select '2' as \"Dilbert's\" from dual";
@@ -102,10 +99,7 @@ public class ScriptUtilsUnitTests {
 		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
 	}
 
-	/**
-	 * See <a href="https://jira.spring.io/browse/SPR-11560">SPR-11560</a>
-	 */
-	@Test
+	@Test  // SPR-11560
 	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() throws Exception {
 		String script = readScript("db-test-data-multi-newline.sql");
 		List<String> statements = new ArrayList<>();
@@ -138,10 +132,7 @@ public class ScriptUtilsUnitTests {
 		assertEquals("statement 4 not split correctly", statement4, statements.get(3));
 	}
 
-	/**
-	 * See <a href="https://jira.spring.io/browse/SPR-10330">SPR-10330</a>
-	 */
-	@Test
+	@Test  // SPR-10330
 	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
 		List<String> statements = new ArrayList<>();
@@ -157,11 +148,8 @@ public class ScriptUtilsUnitTests {
 		assertEquals("statement 3 not split correctly", statement3, statements.get(2));
 	}
 
-	/**
-	 * See <a href="https://jira.spring.io/browse/SPR-9531">SPR-9531</a>
-	 */
-	@Test
-	public void readAndSplitScriptContainingMuliLineComments() throws Exception {
+	@Test  // SPR-9531
+	public void readAndSplitScriptContainingMultiLineComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
@@ -175,11 +163,33 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
+	public void readAndSplitScriptContainingMultiLineNestedComments() throws Exception {
+		String script = readScript("test-data-with-multi-line-nested-comments.sql");
+		List<String> statements = new ArrayList<>();
+		splitSqlScript(script, ';', statements);
+
+		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
+		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
+
+		assertEquals("wrong number of statements", 2, statements.size());
+		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
+		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
+	}
+
+	@Test
 	public void containsDelimiters() {
-		assertTrue("test with ';' is wrong", !containsSqlScriptDelimiters("select 1\n select ';'", ";"));
-		assertTrue("test with delimiter ; is wrong", containsSqlScriptDelimiters("select 1; select 2", ";"));
-		assertTrue("test with '\\n' is wrong", !containsSqlScriptDelimiters("select 1; select '\\n\n';", "\n"));
-		assertTrue("test with delimiter \\n is wrong", containsSqlScriptDelimiters("select 1\n select 2", "\n"));
+		assertFalse(containsSqlScriptDelimiters("select 1\n select ';'", ";"));
+		assertTrue(containsSqlScriptDelimiters("select 1; select 2", ";"));
+
+		assertFalse(containsSqlScriptDelimiters("select 1; select '\\n\n';", "\n"));
+		assertTrue(containsSqlScriptDelimiters("select 1\n select 2", "\n"));
+		
+		assertFalse(containsSqlScriptDelimiters("select 1\n select 2", "\n\n"));
+		assertTrue(containsSqlScriptDelimiters("select 1\n\n select 2", "\n\n"));
+
+		// MySQL style escapes '\\'
+		assertFalse(containsSqlScriptDelimiters("insert into users(first_name, last_name)\nvalues('a\\\\', 'b;')", ";"));
+		assertTrue(containsSqlScriptDelimiters("insert into users(first_name, last_name)\nvalues('Charles', 'd\\'Artagnan'); select 1;", ";"));
 	}
 
 	private String readScript(String path) throws Exception {

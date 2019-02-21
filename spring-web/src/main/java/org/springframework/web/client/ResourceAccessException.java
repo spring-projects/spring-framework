@@ -30,7 +30,7 @@ public class ResourceAccessException extends RestClientException {
 
 
 	/**
-	 * Construct a new {@code HttpIOException} with the given message.
+	 * Construct a new {@code ResourceAccessException} with the given message.
 	 * @param msg the message
 	 */
 	public ResourceAccessException(String msg) {
@@ -38,7 +38,7 @@ public class ResourceAccessException extends RestClientException {
 	}
 
 	/**
-	 * Construct a new {@code HttpIOException} with the given message and {@link IOException}.
+	 * Construct a new {@code ResourceAccessException} with the given message and {@link IOException}.
 	 * @param msg the message
 	 * @param ex the {@code IOException}
 	 */

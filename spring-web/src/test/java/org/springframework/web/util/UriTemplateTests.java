@@ -153,9 +153,7 @@ public class UriTemplateTests {
 		assertEquals("Invalid match", expected, result);
 	}
 
-	// SPR-13627
-
-	@Test
+	@Test // SPR-13627
 	public void matchCustomRegexWithNestedCurlyBraces() throws Exception {
 		UriTemplate template = new UriTemplate("/site.{domain:co.[a-z]{2}}");
 		Map<String, String> result = template.match("/site.co.eu");
@@ -180,6 +178,12 @@ public class UriTemplateTests {
 		assertEquals("Invalid match", expected, result);
 	}
 
+	@Test // SPR-16169
+	public void matchWithMultipleSegmentsAtTheEnd() {
+		UriTemplate template = new UriTemplate("/account/{accountId}");
+		assertFalse(template.matches("/account/15/alias/5"));
+	}
+
 	@Test
 	public void queryVariables() throws Exception {
 		UriTemplate template = new UriTemplate("/search?q={query}");
@@ -195,9 +199,7 @@ public class UriTemplateTests {
 		assertTrue(template.matches("/search?query=foo#bar"));
 	}
 
-	// SPR-13705
-
-	@Test
+	@Test // SPR-13705
 	public void matchesWithSlashAtTheEnd() {
 		UriTemplate uriTemplate = new UriTemplate("/test/");
 		assertTrue(uriTemplate.matches("/test/"));

@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface that defines a registry for shared bean instances.
  * Can be implemented by {@link org.springframework.beans.factory.BeanFactory}
@@ -68,6 +70,7 @@ public interface SingletonBeanRegistry {
 	 * @return the registered singleton object, or {@code null} if none found
 	 * @see ConfigurableListableBeanFactory#getBeanDefinition
 	 */
+	@Nullable
 	Object getSingleton(String beanName);
 
 	/**

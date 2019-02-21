@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class CustomizableTraceInterceptorTests {
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
 
 		MethodInvocation methodInvocation = mock(MethodInvocation.class);
-		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[]{}));
+		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(methodInvocation.getThis()).willReturn(this);
 
 		Log log = mock(Log.class);
@@ -101,7 +101,7 @@ public class CustomizableTraceInterceptorTests {
 		MethodInvocation methodInvocation = mock(MethodInvocation.class);
 
 		IllegalArgumentException exception = new IllegalArgumentException();
-		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[]{}));
+		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(methodInvocation.getThis()).willReturn(this);
 		given(methodInvocation.proceed()).willThrow(exception);
 

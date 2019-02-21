@@ -17,9 +17,8 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Collections;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
@@ -37,7 +36,10 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * Test fixture with {@link InitBinderDataBinderFactory}.
@@ -46,23 +48,19 @@ import static org.junit.Assert.*;
  */
 public class InitBinderDataBinderFactoryTests {
 
-	private ConfigurableWebBindingInitializer bindingInitializer;
+	private final ConfigurableWebBindingInitializer bindingInitializer =
+			new ConfigurableWebBindingInitializer();
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers;
+	private final HandlerMethodArgumentResolverComposite argumentResolvers =
+			new HandlerMethodArgumentResolverComposite();
 
-	private NativeWebRequest webRequest;
+	private final NativeWebRequest webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
-	@Before
-	public void setUp() throws Exception {
-		bindingInitializer = new ConfigurableWebBindingInitializer();
-		argumentResolvers = new HandlerMethodArgumentResolverComposite();
-		webRequest = new ServletWebRequest(new MockHttpServletRequest());
-	}
 
 	@Test
 	public void createBinder() throws Exception {
-		WebDataBinderFactory factory = createBinderFactory("initBinder", WebDataBinder.class);
-		WebDataBinder dataBinder = factory.createBinder(webRequest, null, null);
+		WebDataBinderFactory factory = createFactory("initBinder", WebDataBinder.class);
+		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, null);
 
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("id", dataBinder.getDisallowedFields()[0]);
@@ -73,16 +71,16 @@ public class InitBinderDataBinderFactoryTests {
 		ConversionService conversionService = new DefaultFormattingConversionService();
 		bindingInitializer.setConversionService(conversionService);
 
-		WebDataBinderFactory factory = createBinderFactory("initBinder", WebDataBinder.class);
-		WebDataBinder dataBinder = factory.createBinder(webRequest, null, null);
+		WebDataBinderFactory factory = createFactory("initBinder", WebDataBinder.class);
+		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, null);
 
 		assertSame(conversionService, dataBinder.getConversionService());
 	}
 
 	@Test
 	public void createBinderWithAttrName() throws Exception {
-		WebDataBinderFactory factory = createBinderFactory("initBinderWithAttributeName", WebDataBinder.class);
-		WebDataBinder dataBinder = factory.createBinder(webRequest, null, "foo");
+		WebDataBinderFactory factory = createFactory("initBinderWithAttributeName", WebDataBinder.class);
+		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, "foo");
 
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("id", dataBinder.getDisallowedFields()[0]);
@@ -90,51 +88,53 @@ public class InitBinderDataBinderFactoryTests {
 
 	@Test
 	public void createBinderWithAttrNameNoMatch() throws Exception {
-		WebDataBinderFactory factory = createBinderFactory("initBinderWithAttributeName", WebDataBinder.class);
-		WebDataBinder dataBinder = factory.createBinder(webRequest, null, "invalidName");
+		WebDataBinderFactory factory = createFactory("initBinderWithAttributeName", WebDataBinder.class);
+		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, "invalidName");
 
 		assertNull(dataBinder.getDisallowedFields());
 	}
 
 	@Test
 	public void createBinderNullAttrName() throws Exception {
-		WebDataBinderFactory factory = createBinderFactory("initBinderWithAttributeName", WebDataBinder.class);
-		WebDataBinder dataBinder = factory.createBinder(webRequest, null, null);
+		WebDataBinderFactory factory = createFactory("initBinderWithAttributeName", WebDataBinder.class);
+		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, null);
 
 		assertNull(dataBinder.getDisallowedFields());
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void returnValueNotExpected() throws Exception {
-		WebDataBinderFactory factory = createBinderFactory("initBinderReturnValue", WebDataBinder.class);
-		factory.createBinder(webRequest, null, "invalidName");
+		WebDataBinderFactory factory = createFactory("initBinderReturnValue", WebDataBinder.class);
+		factory.createBinder(this.webRequest, null, "invalidName");
 	}
 
 	@Test
 	public void createBinderTypeConversion() throws Exception {
-		webRequest.getNativeRequest(MockHttpServletRequest.class).setParameter("requestParam", "22");
-		argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(null, false));
+		this.webRequest.getNativeRequest(MockHttpServletRequest.class).setParameter("requestParam", "22");
+		this.argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(null, false));
 
-		WebDataBinderFactory factory = createBinderFactory("initBinderTypeConversion", WebDataBinder.class, int.class);
-		WebDataBinder dataBinder = factory.createBinder(webRequest, null, "foo");
+		WebDataBinderFactory factory = createFactory("initBinderTypeConversion", WebDataBinder.class, int.class);
+		WebDataBinder dataBinder = factory.createBinder(this.webRequest, null, "foo");
 
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("requestParam-22", dataBinder.getDisallowedFields()[0]);
 	}
 
-	private WebDataBinderFactory createBinderFactory(String methodName, Class<?>... parameterTypes)
+	private WebDataBinderFactory createFactory(String methodName, Class<?>... parameterTypes)
 			throws Exception {
 
 		Object handler = new InitBinderHandler();
 		Method method = handler.getClass().getMethod(methodName, parameterTypes);
 
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(handler, method);
-		handlerMethod.setHandlerMethodArgumentResolvers(argumentResolvers);
+		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 		handlerMethod.setDataBinderFactory(new DefaultDataBinderFactory(null));
 		handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 
-		return new InitBinderDataBinderFactory(Arrays.asList(handlerMethod), bindingInitializer);
+		return new InitBinderDataBinderFactory(
+				Collections.singletonList(handlerMethod), this.bindingInitializer);
 	}
+
 
 	private static class InitBinderHandler {
 

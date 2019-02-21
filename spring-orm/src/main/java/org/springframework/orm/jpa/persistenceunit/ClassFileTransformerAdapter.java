@@ -23,6 +23,7 @@ import javax.persistence.spi.ClassTransformer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -52,6 +53,7 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 
 
 	@Override
+	@Nullable
 	public byte[] transform(
 			ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) {

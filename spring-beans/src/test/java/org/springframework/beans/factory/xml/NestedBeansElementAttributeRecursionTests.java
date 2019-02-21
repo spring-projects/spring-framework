@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,21 @@ public class NestedBeansElementAttributeRecursionTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("NestedBeansElementAttributeRecursionTests-lazy-context.xml", this.getClass()));
 
+		assertLazyInits(bf);
+	}
+
+	@Test
+	public void defaultLazyInitWithNonValidatingParser() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader xmlBeanDefinitionReader = new XmlBeanDefinitionReader(bf);
+		xmlBeanDefinitionReader.setValidating(false);
+		xmlBeanDefinitionReader.loadBeanDefinitions(
+				new ClassPathResource("NestedBeansElementAttributeRecursionTests-lazy-context.xml", this.getClass()));
+
+		assertLazyInits(bf);
+	}
+
+	private void assertLazyInits(DefaultListableBeanFactory bf) {
 		BeanDefinition foo = bf.getBeanDefinition("foo");
 		BeanDefinition bar = bf.getBeanDefinition("bar");
 		BeanDefinition baz = bf.getBeanDefinition("baz");
@@ -61,6 +76,22 @@ public class NestedBeansElementAttributeRecursionTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("NestedBeansElementAttributeRecursionTests-merge-context.xml", this.getClass()));
 
+		assertMerge(bf);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void defaultMergeWithNonValidatingParser() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader xmlBeanDefinitionReader = new XmlBeanDefinitionReader(bf);
+		xmlBeanDefinitionReader.setValidating(false);
+		xmlBeanDefinitionReader.loadBeanDefinitions(
+				new ClassPathResource("NestedBeansElementAttributeRecursionTests-merge-context.xml", this.getClass()));
+
+		assertMerge(bf);
+	}
+
+	private void assertMerge(DefaultListableBeanFactory bf) {
 		TestBean topLevel = bf.getBean("topLevelConcreteTestBean", TestBean.class);
 		// has the concrete child bean values
 		assertThat((Iterable<String>) topLevel.getSomeList(), hasItems("charlie", "delta"));
@@ -84,6 +115,21 @@ public class NestedBeansElementAttributeRecursionTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("NestedBeansElementAttributeRecursionTests-autowire-candidates-context.xml", this.getClass()));
 
+		assertAutowireCandidates(bf);
+	}
+
+	@Test
+	public void defaultAutowireCandidatesWithNonValidatingParser() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader xmlBeanDefinitionReader = new XmlBeanDefinitionReader(bf);
+		xmlBeanDefinitionReader.setValidating(false);
+		xmlBeanDefinitionReader.loadBeanDefinitions(
+				new ClassPathResource("NestedBeansElementAttributeRecursionTests-autowire-candidates-context.xml", this.getClass()));
+
+		assertAutowireCandidates(bf);
+	}
+
+	private void assertAutowireCandidates(DefaultListableBeanFactory bf) {
 		assertThat(bf.getBeanDefinition("fooService").isAutowireCandidate(), is(true));
 		assertThat(bf.getBeanDefinition("fooRepository").isAutowireCandidate(), is(true));
 		assertThat(bf.getBeanDefinition("other").isAutowireCandidate(), is(false));

@@ -59,7 +59,7 @@ public class LiteralExpressionTests {
 		}
 		catch (EvaluationException ee) {
 			// success, not allowed - whilst here, check the expression value in the exception
-			assertEquals(ee.getExpressionString(), "somevalue");
+			assertEquals("somevalue", ee.getExpressionString());
 		}
 		try {
 			LiteralExpression lEx = new LiteralExpression("somevalue");
@@ -68,7 +68,7 @@ public class LiteralExpressionTests {
 		}
 		catch (EvaluationException ee) {
 			// success, not allowed - whilst here, check the expression value in the exception
-			assertEquals(ee.getExpressionString(), "somevalue");
+			assertEquals("somevalue", ee.getExpressionString());
 		}
 		try {
 			LiteralExpression lEx = new LiteralExpression("somevalue");
@@ -77,7 +77,7 @@ public class LiteralExpressionTests {
 		}
 		catch (EvaluationException ee) {
 			// success, not allowed - whilst here, check the expression value in the exception
-			assertEquals(ee.getExpressionString(), "somevalue");
+			assertEquals("somevalue", ee.getExpressionString());
 		}
 	}
 

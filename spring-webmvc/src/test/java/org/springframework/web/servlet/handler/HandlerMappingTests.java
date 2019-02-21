@@ -56,18 +56,18 @@ public class HandlerMappingTests {
 
 	@Test
 	public void orderedInterceptors() throws Exception {
-		MappedInterceptor firstMappedInterceptor = new MappedInterceptor(new String[]{"/**"}, Mockito.mock(HandlerInterceptor.class));
-		HandlerInterceptor secondHandlerInterceptor = Mockito.mock(HandlerInterceptor.class);
-		MappedInterceptor thirdMappedInterceptor = new MappedInterceptor(new String[]{"/**"}, Mockito.mock(HandlerInterceptor.class));
-		HandlerInterceptor fourthHandlerInterceptor = Mockito.mock(HandlerInterceptor.class);
+		HandlerInterceptor i1 = Mockito.mock(HandlerInterceptor.class);
+		MappedInterceptor mappedInterceptor1 = new MappedInterceptor(new String[]{"/**"}, i1);
+		HandlerInterceptor i2 = Mockito.mock(HandlerInterceptor.class);
+		HandlerInterceptor i3 = Mockito.mock(HandlerInterceptor.class);
+		MappedInterceptor mappedInterceptor3 = new MappedInterceptor(new String[]{"/**"}, i3);
+		HandlerInterceptor i4 = Mockito.mock(HandlerInterceptor.class);
 
-		this.handlerMapping.setInterceptors(new Object[]{firstMappedInterceptor, secondHandlerInterceptor,
-				thirdMappedInterceptor, fourthHandlerInterceptor});
+		this.handlerMapping.setInterceptors(mappedInterceptor1, i2, mappedInterceptor3, i4);
 		this.handlerMapping.setApplicationContext(this.context);
 		HandlerExecutionChain chain = this.handlerMapping.getHandlerExecutionChain(new SimpleHandler(), this.request);
-		Assert.assertThat(chain.getInterceptors(),
-				Matchers.arrayContaining(firstMappedInterceptor.getInterceptor(), secondHandlerInterceptor,
-						thirdMappedInterceptor.getInterceptor(), fourthHandlerInterceptor));
+		Assert.assertThat(chain.getInterceptors(), Matchers.arrayContaining(
+				mappedInterceptor1.getInterceptor(), i2, mappedInterceptor3.getInterceptor(), i4));
 	}
 
 	class TestHandlerMapping extends AbstractHandlerMapping {

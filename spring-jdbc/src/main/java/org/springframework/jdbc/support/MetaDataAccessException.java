@@ -19,11 +19,11 @@ package org.springframework.jdbc.support;
 import org.springframework.core.NestedCheckedException;
 
 /**
- * Exception indicating that something went wrong during JDBC metadata lookup.
+ * Exception indicating that something went wrong during JDBC meta-data lookup.
  *
  * <p>This is a checked exception since we want it to be caught, logged and
  * handled rather than cause the application to fail. Failure to read JDBC
- * metadata is usually not a fatal problem.
+ * meta-data is usually not a fatal problem.
  *
  * @author Thomas Risberg
  * @since 1.0.1

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,10 +65,11 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 		this.multipartRequest = MultipartResolutionDelegate.asMultipartHttpServletRequest(request);
 		this.partName = partName;
 
-		this.headers = this.multipartRequest.getMultipartHeaders(this.partName);
-		if (this.headers == null) {
+		HttpHeaders headers = this.multipartRequest.getMultipartHeaders(this.partName);
+		if (headers == null) {
 			throw new MissingServletRequestPartException(partName);
 		}
+		this.headers = headers;
 	}
 
 
@@ -76,7 +77,6 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
-
 
 	@Override
 	public InputStream getBody() throws IOException {

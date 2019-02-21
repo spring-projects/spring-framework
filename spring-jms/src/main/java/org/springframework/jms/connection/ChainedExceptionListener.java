@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  */
 public class ChainedExceptionListener implements ExceptionListener {
 
-	/** List of ExceptionListeners */
+	/** List of ExceptionListeners. */
 	private final List<ExceptionListener> delegates = new ArrayList<>(2);
 
 
@@ -48,7 +48,7 @@ public class ChainedExceptionListener implements ExceptionListener {
 	 * Return all registered ExceptionListener delegates (as array).
 	 */
 	public final ExceptionListener[] getDelegates() {
-		return this.delegates.toArray(new ExceptionListener[this.delegates.size()]);
+		return this.delegates.toArray(new ExceptionListener[0]);
 	}
 
 

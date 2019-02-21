@@ -26,6 +26,7 @@ import javax.jms.Topic;
 import javax.naming.NamingException;
 
 import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -99,7 +100,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 
 
 	@Override
-	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
+	public Destination resolveDestinationName(@Nullable Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 
 		Assert.notNull(destinationName, "Destination name must not be null");

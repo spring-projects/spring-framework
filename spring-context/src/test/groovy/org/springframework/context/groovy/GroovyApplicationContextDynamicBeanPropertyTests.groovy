@@ -48,6 +48,7 @@ class GroovyApplicationContextDynamicBeanPropertyTests {
 
 		def err = shouldFail NoSuchBeanDefinitionException, { ctx.someNonExistentBean }
 
-		assertEquals "No bean named 'someNonExistentBean' is defined", err.message
+		assertEquals "No bean named 'someNonExistentBean' available", err.message
 	}
+
 }

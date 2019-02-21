@@ -99,7 +99,8 @@ public class TagWriterTests {
 		}
 		this.writer.endTag();
 
-		assertEquals("<span class=\"highlight\"><strong>Rob</strong> <emphasis>Harrop</emphasis></span>", this.data.toString());
+		assertEquals("<span class=\"highlight\"><strong>Rob</strong> <emphasis>Harrop</emphasis></span>",
+				this.data.toString());
 	}
 
 	@Test

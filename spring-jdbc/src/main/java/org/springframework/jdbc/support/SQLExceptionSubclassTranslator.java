@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link SQLExceptionTranslator} implementation which analyzes the specific
@@ -62,7 +63,8 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 	}
 
 	@Override
-	protected DataAccessException doTranslate(String task, String sql, SQLException ex) {
+	@Nullable
+	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {
 		if (ex instanceof SQLTransientException) {
 			if (ex instanceof SQLTransientConnectionException) {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
@@ -88,7 +90,7 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 				return new PermissionDeniedDataAccessException(buildMessage(task, sql, ex), ex);
 			}
 			else if (ex instanceof SQLSyntaxErrorException) {
-				return new BadSqlGrammarException(task, sql, ex);
+				return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
 			}
 			else if (ex instanceof SQLFeatureNotSupportedException) {
 				return new InvalidDataAccessApiUsageException(buildMessage(task, sql, ex), ex);

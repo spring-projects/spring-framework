@@ -18,8 +18,6 @@ package org.springframework.web.servlet.mvc;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
@@ -28,6 +26,10 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -150,16 +152,16 @@ public class UrlFilenameViewControllerTests {
 	public void settingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setPrefix(null);
-		assertNotNull("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getPrefix());
-		assertEquals("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getPrefix());
+		assertNotNull("For setPrefix(..) with null, the empty string must be used instead.", ctrl.getPrefix());
+		assertEquals("For setPrefix(..) with null, the empty string must be used instead.", "", ctrl.getPrefix());
 	}
 
 	@Test
 	public void settingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setSuffix(null);
-		assertNotNull("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getSuffix());
-		assertEquals("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getSuffix());
+		assertNotNull("For setPrefix(..) with null, the empty string must be used instead.", ctrl.getSuffix());
+		assertEquals("For setPrefix(..) with null, the empty string must be used instead.", "", ctrl.getSuffix());
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,23 +43,24 @@ public class DefaultServletHandlerConfigurerTests {
 
 	private MockHttpServletResponse response;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		response = new MockHttpServletResponse();
 		servletContext = new DispatchingMockServletContext();
 		configurer = new DefaultServletHandlerConfigurer(servletContext);
 	}
 
+
 	@Test
 	public void notEnabled() {
-		assertNull(configurer.getHandlerMapping());
+		assertNull(configurer.buildHandlerMapping());
 	}
 
 	@Test
 	public void enable() throws Exception {
 		configurer.enable();
-		SimpleUrlHandlerMapping getHandlerMapping = getHandlerMapping();
-		SimpleUrlHandlerMapping handlerMapping = getHandlerMapping;
+		SimpleUrlHandlerMapping handlerMapping = configurer.buildHandlerMapping();
 		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
 
 		assertNotNull(handler);
@@ -75,7 +76,7 @@ public class DefaultServletHandlerConfigurerTests {
 	@Test
 	public void enableWithServletName() throws Exception {
 		configurer.enable("defaultServlet");
-		SimpleUrlHandlerMapping handlerMapping = getHandlerMapping();
+		SimpleUrlHandlerMapping handlerMapping = configurer.buildHandlerMapping();
 		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
 
 		assertNotNull(handler);
@@ -88,6 +89,7 @@ public class DefaultServletHandlerConfigurerTests {
 		assertEquals("The request was not forwarded", expected, response.getForwardedUrl());
 	}
 
+
 	private static class DispatchingMockServletContext extends MockServletContext {
 
 		private String url;
@@ -97,10 +99,6 @@ public class DefaultServletHandlerConfigurerTests {
 			this.url = url;
 			return new MockRequestDispatcher(url);
 		}
-	}
-
-	private SimpleUrlHandlerMapping getHandlerMapping() {
-		return (SimpleUrlHandlerMapping) configurer.getHandlerMapping();
 	}
 
 }

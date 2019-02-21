@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import javax.jms.QueueSender;
 import javax.jms.Topic;
 import javax.jms.TopicPublisher;
 
+import org.springframework.lang.Nullable;
+
 /**
  * JMS MessageProducer decorator that adapts calls to a shared MessageProducer
  * instance underneath, managing QoS settings locally within the decorator.
@@ -37,10 +39,13 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 
 	private final MessageProducer target;
 
+	@Nullable
 	private Boolean originalDisableMessageID;
 
+	@Nullable
 	private Boolean originalDisableMessageTimestamp;
 
+	@Nullable
 	private Long originalDeliveryDelay;
 
 	private int deliveryMode;

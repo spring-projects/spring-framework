@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class SimpleMappingExceptionResolverTests {
 	@Test
 	public void defaultErrorViewDifferentHandlerClass() {
 		exceptionResolver.setDefaultErrorView("default-view");
-		exceptionResolver.setMappedHandlerClasses(new Class[] {String.class});
+		exceptionResolver.setMappedHandlerClasses(String.class);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
 		assertNull(mav);
 	}
@@ -161,7 +161,7 @@ public class SimpleMappingExceptionResolverTests {
 	public void exactExceptionMappingWithHandlerClassSpecified() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
-		exceptionResolver.setMappedHandlerClasses(new Class[] {String.class});
+		exceptionResolver.setMappedHandlerClasses(String.class);
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals("error", mav.getViewName());
@@ -171,7 +171,7 @@ public class SimpleMappingExceptionResolverTests {
 	public void exactExceptionMappingWithHandlerInterfaceSpecified() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
-		exceptionResolver.setMappedHandlerClasses(new Class[] {Comparable.class});
+		exceptionResolver.setMappedHandlerClasses(Comparable.class);
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals("error", mav.getViewName());
@@ -191,7 +191,7 @@ public class SimpleMappingExceptionResolverTests {
 	public void simpleExceptionMappingWithHandlerClassSpecifiedButWrongHandler() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
-		exceptionResolver.setMappedHandlerClasses(new Class[] {String.class});
+		exceptionResolver.setMappedHandlerClasses(String.class);
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
 		assertNull(mav);

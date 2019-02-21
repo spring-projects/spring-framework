@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server;
 
 import java.util.Collections;
@@ -22,7 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 /**
- * Exception for errors that fit response status 405 (not acceptable).
+ * Exception for errors that fit response status 406 (not acceptable).
  *
  * @author Rossen Stoyanchev
  * @since 5.0

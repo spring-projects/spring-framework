@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.http;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -29,7 +31,6 @@ import org.springframework.core.io.support.ResourceRegion;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link HttpRange}.
@@ -40,57 +41,57 @@ import static org.mockito.Mockito.mock;
 public class HttpRangeTests {
 
 	@Test(expected = IllegalArgumentException.class)
-	public void invalidFirstPosition() throws Exception {
+	public void invalidFirstPosition() {
 		HttpRange.createByteRange(-1);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void invalidLastLessThanFirst() throws Exception {
+	public void invalidLastLessThanFirst() {
 		HttpRange.createByteRange(10, 9);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void invalidSuffixLength() throws Exception {
+	public void invalidSuffixLength() {
 		HttpRange.createSuffixRange(-1);
 	}
 
 	@Test
-	public void byteRange() throws Exception {
+	public void byteRange() {
 		HttpRange range = HttpRange.createByteRange(0, 499);
 		assertEquals(0, range.getRangeStart(1000));
 		assertEquals(499, range.getRangeEnd(1000));
 	}
 
 	@Test
-	public void byteRangeWithoutLastPosition() throws Exception {
+	public void byteRangeWithoutLastPosition() {
 		HttpRange range = HttpRange.createByteRange(9500);
 		assertEquals(9500, range.getRangeStart(10000));
 		assertEquals(9999, range.getRangeEnd(10000));
 	}
 
 	@Test
-	public void byteRangeOfZeroLength() throws Exception {
+	public void byteRangeOfZeroLength() {
 		HttpRange range = HttpRange.createByteRange(9500, 9500);
 		assertEquals(9500, range.getRangeStart(10000));
 		assertEquals(9500, range.getRangeEnd(10000));
 	}
 
 	@Test
-	public void suffixRange() throws Exception {
+	public void suffixRange() {
 		HttpRange range = HttpRange.createSuffixRange(500);
 		assertEquals(500, range.getRangeStart(1000));
 		assertEquals(999, range.getRangeEnd(1000));
 	}
 
 	@Test
-	public void suffixRangeShorterThanRepresentation() throws Exception {
+	public void suffixRangeShorterThanRepresentation() {
 		HttpRange range = HttpRange.createSuffixRange(500);
 		assertEquals(0, range.getRangeStart(350));
 		assertEquals(349, range.getRangeEnd(350));
 	}
 
 	@Test
-	public void parseRanges() throws Exception {
+	public void parseRanges() {
 		List<HttpRange> ranges = HttpRange.parseRanges("bytes=0-0,500-,-1");
 		assertEquals(3, ranges.size());
 		assertEquals(0, ranges.get(0).getRangeStart(1000));
@@ -99,6 +100,31 @@ public class HttpRangeTests {
 		assertEquals(999, ranges.get(1).getRangeEnd(1000));
 		assertEquals(999, ranges.get(2).getRangeStart(1000));
 		assertEquals(999, ranges.get(2).getRangeEnd(1000));
+	}
+
+	@Test
+	public void parseRangesValidations() {
+
+		// 1. At limit..
+		StringBuilder sb = new StringBuilder("bytes=0-0");
+		for (int i=0; i < 99; i++) {
+			sb.append(",").append(i).append("-").append(i + 1);
+		}
+		List<HttpRange> ranges = HttpRange.parseRanges(sb.toString());
+		assertEquals(100, ranges.size());
+
+		// 2. Above limit..
+		sb = new StringBuilder("bytes=0-0");
+		for (int i=0; i < 100; i++) {
+			sb.append(",").append(i).append("-").append(i + 1);
+		}
+		try {
+			HttpRange.parseRanges(sb.toString());
+			fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// Expected
+		}
 	}
 
 	@Test
@@ -138,11 +164,32 @@ public class HttpRangeTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	@SuppressWarnings("unchecked")
-	public void toResourceRegionExceptionLength() {
-		ByteArrayResource resource = mock(ByteArrayResource.class);
+	public void toResourceRegionExceptionLength() throws IOException {
+		InputStreamResource resource = mock(InputStreamResource.class);
 		given(resource.contentLength()).willThrow(IOException.class);
 		HttpRange range = HttpRange.createByteRange(0, 9);
 		range.toResourceRegion(resource);
+	}
+
+	@Test
+	public void toResourceRegionsValidations() {
+		byte[] bytes = "12345".getBytes(StandardCharsets.UTF_8);
+		ByteArrayResource resource = new ByteArrayResource(bytes);
+
+		// 1. Below length
+		List<HttpRange> ranges = HttpRange.parseRanges("bytes=0-1,2-3");
+		List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
+		assertEquals(2, regions.size());
+
+		// 2. At length
+		ranges = HttpRange.parseRanges("bytes=0-1,2-4");
+		try {
+			HttpRange.toResourceRegions(ranges, resource);
+			fail();
+		}
+		catch (IllegalArgumentException ex) {
+			// Expected..
+		}
 	}
 
 }

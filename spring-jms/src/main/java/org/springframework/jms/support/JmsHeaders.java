@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public interface JmsHeaders {
 	 * user-defined headers and other internal headers (e.g. correlationId).
 	 * @see SimpleJmsHeaderMapper
 	 */
-	public static final String PREFIX = "jms_";
+	String PREFIX = "jms_";
 
 	/**
 	 * Correlation ID for the message. This may be the {@link #MESSAGE_ID} of
@@ -39,7 +39,7 @@ public interface JmsHeaders {
 	 * application-specific identifier.
 	 * @see javax.jms.Message#getJMSCorrelationID()
 	 */
-	public static final String CORRELATION_ID = PREFIX + "correlationId";
+	String CORRELATION_ID = PREFIX + "correlationId";
 
 	/**
 	 * Name of the destination (topic or queue) of the message.
@@ -49,7 +49,7 @@ public interface JmsHeaders {
 	 * @see javax.jms.Queue
 	 * @see javax.jms.Topic
 	 */
-	public static final String DESTINATION = PREFIX + "destination";
+	String DESTINATION = PREFIX + "destination";
 
 	/**
 	 * Distribution mode.
@@ -57,35 +57,35 @@ public interface JmsHeaders {
 	 * @see javax.jms.Message#getJMSDeliveryMode()
 	 * @see javax.jms.DeliveryMode
 	 */
-	public static final String DELIVERY_MODE = PREFIX + "deliveryMode";
+	String DELIVERY_MODE = PREFIX + "deliveryMode";
 
 	/**
 	 * Message expiration date and time.
 	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSExpiration()
 	 */
-	public static final String EXPIRATION = PREFIX + "expiration";
+	String EXPIRATION = PREFIX + "expiration";
 
 	/**
-	 * Unique Identifier for a message.
+	 * Unique identifier for a message.
 	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSMessageID()
 	 */
-	public static final String MESSAGE_ID = PREFIX + "messageId";
+	String MESSAGE_ID = PREFIX + "messageId";
 
 	/**
 	 * The message priority level.
 	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSPriority()
 	 */
-	public static final String PRIORITY = PREFIX + "priority";
+	String PRIORITY = PREFIX + "priority";
 
 	/**
 	 * Name of the destination (topic or queue) the message replies should
 	 * be sent to.
 	 * @see javax.jms.Message#getJMSReplyTo()
 	 */
-	public static final String REPLY_TO = PREFIX + "replyTo";
+	String REPLY_TO = PREFIX + "replyTo";
 
 	/**
 	 * Specify if the message was resent. This occurs when a message
@@ -93,20 +93,20 @@ public interface JmsHeaders {
 	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSRedelivered()
 	 */
-	public static final String REDELIVERED = PREFIX + "redelivered";
+	String REDELIVERED = PREFIX + "redelivered";
 
 	/**
 	 * Message type label. This type is a string value describing the message
 	 * in a functional manner.
 	 * @see javax.jms.Message#getJMSType()
 	 */
-	public static final String TYPE = PREFIX + "type";
+	String TYPE = PREFIX + "type";
 
 	/**
 	 * Date and time of the message sending operation.
 	 * <p>Read-only value.
 	 * @see javax.jms.Message#getJMSTimestamp()
 	 */
-	public static final String TIMESTAMP = PREFIX + "timestamp";
+	String TIMESTAMP = PREFIX + "timestamp";
 
 }

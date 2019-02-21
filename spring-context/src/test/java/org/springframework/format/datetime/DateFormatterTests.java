@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class DateFormatterTests {
 	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
 	@Rule
-	public ExpectedException thown = ExpectedException.none();
+	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -124,17 +124,9 @@ public class DateFormatterTests {
 		formatter.setTimeZone(UTC);
 		formatter.setIso(ISO.TIME);
 		Date date = getDate(2009, Calendar.JANUARY, 1, 14, 23, 5, 3);
-		assertThat(formatter.print(date, Locale.US), is("14:23:05.003+0000"));
-		assertThat(formatter.parse("14:23:05.003+0000", Locale.US),
+		assertThat(formatter.print(date, Locale.US), is("14:23:05.003Z"));
+		assertThat(formatter.parse("14:23:05.003Z", Locale.US),
 				is(getDate(1970, Calendar.JANUARY, 1, 14, 23, 5, 3)));
-	}
-
-	@Test
-	public void shouldParseIsoTimeWithZeros() throws Exception {
-		DateFormatter formatter = new DateFormatter();
-		formatter.setIso(ISO.TIME);
-		Date date = formatter.parse("12:00:00.000-00005", Locale.US);
-		System.out.println(date);
 	}
 
 	@Test
@@ -143,8 +135,8 @@ public class DateFormatterTests {
 		formatter.setTimeZone(UTC);
 		formatter.setIso(ISO.DATE_TIME);
 		Date date = getDate(2009, Calendar.JUNE, 1, 14, 23, 5, 3);
-		assertThat(formatter.print(date, Locale.US), is("2009-06-01T14:23:05.003+0000"));
-		assertThat(formatter.parse("2009-06-01T14:23:05.003+0000", Locale.US), is(date));
+		assertThat(formatter.print(date, Locale.US), is("2009-06-01T14:23:05.003Z"));
+		assertThat(formatter.parse("2009-06-01T14:23:05.003Z", Locale.US), is(date));
 	}
 
 	@Test
@@ -183,8 +175,8 @@ public class DateFormatterTests {
 	public void shouldThrowOnUnsupportedStylePattern() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setStylePattern("OO");
-		thown.expect(IllegalStateException.class);
-		thown.expectMessage("Unsupported style pattern 'OO'");
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("Unsupported style pattern 'OO'");
 		formatter.parse("2009", Locale.US);
 	}
 
@@ -201,7 +193,7 @@ public class DateFormatterTests {
 		assertThat("uses pattern",formatter.print(date, Locale.US), is("2009"));
 
 		formatter.setPattern("");
-		assertThat("uses ISO", formatter.print(date, Locale.US), is("2009-06-01T14:23:05.003+0000"));
+		assertThat("uses ISO", formatter.print(date, Locale.US), is("2009-06-01T14:23:05.003Z"));
 
 		formatter.setIso(ISO.NONE);
 		assertThat("uses style pattern", formatter.print(date, Locale.US), is("June 1, 2009"));

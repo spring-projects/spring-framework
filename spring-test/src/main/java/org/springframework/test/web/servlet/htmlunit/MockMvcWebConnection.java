@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.Cookie;
+import org.apache.http.impl.cookie.BasicClientCookie;
 
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
@@ -85,8 +87,8 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * to {@link javax.servlet.http.HttpServletRequest#getContextPath()}
 	 * which states that it can be an empty string and otherwise must start
 	 * with a "/" character and not end with a "/" character.
-	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
-	 * @param webClient  the {@link WebClient} to use. never {@code null}
+	 * @param mockMvc the {@code MockMvc} instance to use (never {@code null})
+	 * @param webClient the {@link WebClient} to use (never {@code null})
 	 * @param contextPath the contextPath to use
 	 */
 	public MockMvcWebConnection(MockMvc mockMvc, WebClient webClient, String contextPath) {
@@ -107,7 +109,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * a "/" character and not end with a "/" character.
 	 * @param contextPath the path to validate
 	 */
-	static void validateContextPath(String contextPath) {
+	static void validateContextPath(@Nullable String contextPath) {
 		if (contextPath == null || "".equals(contextPath)) {
 			return;
 		}
@@ -152,16 +154,13 @@ public final class MockMvcWebConnection implements WebConnection {
 	}
 
 	private void storeCookies(WebRequest webRequest, javax.servlet.http.Cookie[] cookies) {
-		if (cookies == null) {
-			return;
-		}
 		Date now = new Date();
 		CookieManager cookieManager = this.webClient.getCookieManager();
 		for (javax.servlet.http.Cookie cookie : cookies) {
 			if (cookie.getDomain() == null) {
 				cookie.setDomain(webRequest.getUrl().getHost());
 			}
-			Cookie toManage = MockWebResponseBuilder.createCookie(cookie);
+			Cookie toManage = createCookie(cookie);
 			Date expires = toManage.getExpires();
 			if (expires == null || expires.after(now)) {
 				cookieManager.addCookie(toManage);
@@ -170,6 +169,23 @@ public final class MockMvcWebConnection implements WebConnection {
 				cookieManager.removeCookie(toManage);
 			}
 		}
+	}
+
+	private static com.gargoylesoftware.htmlunit.util.Cookie createCookie(javax.servlet.http.Cookie cookie) {
+		Date expires = null;
+		if (cookie.getMaxAge() > -1) {
+			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);
+		}
+		BasicClientCookie result = new BasicClientCookie(cookie.getName(), cookie.getValue());
+		result.setDomain(cookie.getDomain());
+		result.setComment(cookie.getComment());
+		result.setExpiryDate(expires);
+		result.setPath(cookie.getPath());
+		result.setSecure(cookie.getSecure());
+		if (cookie.isHttpOnly()) {
+			result.setAttribute("httponly", "true");
+		}
+		return new com.gargoylesoftware.htmlunit.util.Cookie(result);
 	}
 
 	@Override

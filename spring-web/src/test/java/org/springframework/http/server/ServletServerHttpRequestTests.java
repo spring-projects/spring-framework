@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.http.server;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -33,6 +35,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
 public class ServletServerHttpRequestTests {
 
@@ -42,42 +45,68 @@ public class ServletServerHttpRequestTests {
 
 
 	@Before
-	public void create() throws Exception {
+	public void create() {
 		mockRequest = new MockHttpServletRequest();
 		request = new ServletServerHttpRequest(mockRequest);
 	}
 
 
 	@Test
-	public void getMethod() throws Exception {
+	public void getMethod() {
 		mockRequest.setMethod("POST");
 		assertEquals("Invalid method", HttpMethod.POST, request.getMethod());
 	}
 
 	@Test
-	public void getURI() throws Exception {
+	public void getUriForSimplePath() throws URISyntaxException {
+		URI uri = new URI("http://example.com/path");
+		mockRequest.setServerName(uri.getHost());
+		mockRequest.setServerPort(uri.getPort());
+		mockRequest.setRequestURI(uri.getPath());
+		mockRequest.setQueryString(uri.getQuery());
+		assertEquals(uri, request.getURI());
+	}
+
+	@Test
+	public void getUriWithQueryString() throws URISyntaxException {
 		URI uri = new URI("http://example.com/path?query");
 		mockRequest.setServerName(uri.getHost());
 		mockRequest.setServerPort(uri.getPort());
 		mockRequest.setRequestURI(uri.getPath());
 		mockRequest.setQueryString(uri.getQuery());
-		assertEquals("Invalid uri", uri, request.getURI());
+		assertEquals(uri, request.getURI());
+	}
+
+	@Test  // SPR-16414
+	public void getUriWithQueryParam() throws URISyntaxException {
+		mockRequest.setServerName("example.com");
+		mockRequest.setRequestURI("/path");
+		mockRequest.setQueryString("query=foo");
+		assertEquals(new URI("http://example.com/path?query=foo"), request.getURI());
+	}
+
+	@Test  // SPR-16414
+	public void getUriWithMalformedQueryParam() throws URISyntaxException {
+		mockRequest.setServerName("example.com");
+		mockRequest.setRequestURI("/path");
+		mockRequest.setQueryString("query=foo%%x");
+		assertEquals(new URI("http://example.com/path"), request.getURI());
 	}
 
 	@Test  // SPR-13876
-	public void getUriWithEncoding() throws Exception {
-        URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87" +
+	public void getUriWithEncoding() throws URISyntaxException {
+		URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87" +
 				"?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
-        mockRequest.setScheme(uri.getScheme());
-        mockRequest.setServerName(uri.getHost());
-        mockRequest.setServerPort(uri.getPort());
-        mockRequest.setRequestURI(uri.getRawPath());
-        mockRequest.setQueryString(uri.getRawQuery());
-        assertEquals("Invalid uri", uri, request.getURI());
+		mockRequest.setScheme(uri.getScheme());
+		mockRequest.setServerName(uri.getHost());
+		mockRequest.setServerPort(uri.getPort());
+		mockRequest.setRequestURI(uri.getRawPath());
+		mockRequest.setQueryString(uri.getRawQuery());
+		assertEquals(uri, request.getURI());
     }
 
 	@Test
-	public void getHeaders() throws Exception {
+	public void getHeaders() {
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
 		String headerValue2 = "value2";
@@ -98,7 +127,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test
-	public void getHeadersWithEmptyContentTypeAndEncoding() throws Exception {
+	public void getHeadersWithEmptyContentTypeAndEncoding() {
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
 		String headerValue2 = "value2";
@@ -118,7 +147,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test
-	public void getBody() throws Exception {
+	public void getBody() throws IOException {
 		byte[] content = "Hello World".getBytes("UTF-8");
 		mockRequest.setContent(content);
 
@@ -127,7 +156,7 @@ public class ServletServerHttpRequestTests {
 	}
 
 	@Test
-	public void getFormBody() throws Exception {
+	public void getFormBody() throws IOException {
 		// Charset (SPR-8676)
 		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
 		mockRequest.setMethod("POST");

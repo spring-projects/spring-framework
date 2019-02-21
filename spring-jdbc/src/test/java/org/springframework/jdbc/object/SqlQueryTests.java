@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -106,7 +108,7 @@ public class SqlQueryTests  {
 
 		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<Integer>() {
 			@Override
-			protected Integer mapRow(ResultSet rs, int rownum, Object[] params, Map<? ,?> context)
+			protected Integer mapRow(ResultSet rs, int rownum, @Nullable Object[] params, @Nullable Map<? ,?> context)
 					throws SQLException {
 				assertTrue("params were null", params == null);
 				assertTrue("context was null", context == null);
@@ -614,7 +616,7 @@ public class SqlQueryTests  {
 		ids.add(2);
 		List<Customer> cust = query.findCustomers(ids);
 
-		assertEquals("We got two customers back", cust.size(), 2);
+		assertEquals("We got two customers back", 2, cust.size());
 		assertEquals("First customer id was assigned correctly", cust.get(0).getId(), 1);
 		assertEquals("First customer forename was assigned correctly", cust.get(0).getForename(), "rod");
 		assertEquals("Second customer id was assigned correctly", cust.get(1).getId(), 2);
@@ -663,7 +665,7 @@ public class SqlQueryTests  {
 		CustomerQuery query = new CustomerQuery(dataSource);
 		List<Customer> cust = query.findCustomers(1);
 
-		assertEquals("We got two customers back", cust.size(), 2);
+		assertEquals("We got two customers back", 2, cust.size());
 		assertEquals("First customer id was assigned correctly", cust.get(0).getId(), 1);
 		assertEquals("First customer forename was assigned correctly", cust.get(0).getForename(), "rod");
 		assertEquals("Second customer id was assigned correctly", cust.get(1).getId(), 2);
@@ -729,7 +731,7 @@ public class SqlQueryTests  {
 			}
 
 			@Override
-			protected Customer updateRow(ResultSet rs, int rownum, Map<? ,?> context)
+			protected Customer updateRow(ResultSet rs, int rownum, @Nullable Map<? ,?> context)
 					throws SQLException {
 				rs.updateString(2, "" + context.get(rs.getInt(COLUMN_NAMES[0])));
 				return null;
@@ -763,9 +765,7 @@ public class SqlQueryTests  {
 		}
 
 		public String[] run() {
-			List<String> list = execute();
-			String[] results = list.toArray(new String[list.size()]);
-			return results;
+			return StringUtils.toStringArray(execute());
 		}
 	}
 

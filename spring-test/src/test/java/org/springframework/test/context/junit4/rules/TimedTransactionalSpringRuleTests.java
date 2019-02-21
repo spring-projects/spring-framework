@@ -42,7 +42,7 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
 public class TimedTransactionalSpringRuleTests extends TimedTransactionalSpringRunnerTests {
 
 	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+	public static final SpringClassRule springClassRule = new SpringClassRule();
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();

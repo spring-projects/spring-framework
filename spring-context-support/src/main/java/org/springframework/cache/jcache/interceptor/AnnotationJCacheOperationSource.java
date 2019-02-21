@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.cache.annotation.CacheResult;
 
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -44,7 +45,7 @@ import org.springframework.util.StringUtils;
 public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJCacheOperationSource {
 
 	@Override
-	protected JCacheOperation<?> findCacheOperation(Method method, Class<?> targetType) {
+	protected JCacheOperation<?> findCacheOperation(Method method, @Nullable Class<?> targetType) {
 		CacheResult cacheResult = method.getAnnotation(CacheResult.class);
 		CachePut cachePut = method.getAnnotation(CachePut.class);
 		CacheRemove cacheRemove = method.getAnnotation(CacheRemove.class);
@@ -73,15 +74,16 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		}
 	}
 
-	protected CacheDefaults getCacheDefaults(Method method, Class<?> targetType) {
+	@Nullable
+	protected CacheDefaults getCacheDefaults(Method method, @Nullable Class<?> targetType) {
 		CacheDefaults annotation = method.getDeclaringClass().getAnnotation(CacheDefaults.class);
 		if (annotation != null) {
 			return annotation;
 		}
-		return targetType.getAnnotation(CacheDefaults.class);
+		return (targetType != null ? targetType.getAnnotation(CacheDefaults.class) : null);
 	}
 
-	protected CacheResultOperation createCacheResultOperation(Method method, CacheDefaults defaults, CacheResult ann) {
+	protected CacheResultOperation createCacheResultOperation(Method method, @Nullable CacheDefaults defaults, CacheResult ann) {
 		String cacheName = determineCacheName(method, defaults, ann.cacheName());
 		CacheResolverFactory cacheResolverFactory =
 				determineCacheResolverFactory(defaults, ann.cacheResolverFactory());
@@ -99,7 +101,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		return new CacheResultOperation(methodDetails, cacheResolver, keyGenerator, exceptionCacheResolver);
 	}
 
-	protected CachePutOperation createCachePutOperation(Method method, CacheDefaults defaults, CachePut ann) {
+	protected CachePutOperation createCachePutOperation(Method method, @Nullable CacheDefaults defaults, CachePut ann) {
 		String cacheName = determineCacheName(method, defaults, ann.cacheName());
 		CacheResolverFactory cacheResolverFactory =
 				determineCacheResolverFactory(defaults, ann.cacheResolverFactory());
@@ -110,7 +112,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		return new CachePutOperation(methodDetails, cacheResolver, keyGenerator);
 	}
 
-	protected CacheRemoveOperation createCacheRemoveOperation(Method method, CacheDefaults defaults, CacheRemove ann) {
+	protected CacheRemoveOperation createCacheRemoveOperation(Method method, @Nullable CacheDefaults defaults, CacheRemove ann) {
 		String cacheName = determineCacheName(method, defaults, ann.cacheName());
 		CacheResolverFactory cacheResolverFactory =
 				determineCacheResolverFactory(defaults, ann.cacheResolverFactory());
@@ -121,7 +123,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		return new CacheRemoveOperation(methodDetails, cacheResolver, keyGenerator);
 	}
 
-	protected CacheRemoveAllOperation createCacheRemoveAllOperation(Method method, CacheDefaults defaults, CacheRemoveAll ann) {
+	protected CacheRemoveAllOperation createCacheRemoveAllOperation(Method method, @Nullable CacheDefaults defaults, CacheRemoveAll ann) {
 		String cacheName = determineCacheName(method, defaults, ann.cacheName());
 		CacheResolverFactory cacheResolverFactory =
 				determineCacheResolverFactory(defaults, ann.cacheResolverFactory());
@@ -135,7 +137,9 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		return new DefaultCacheMethodDetails<>(method, annotation, cacheName);
 	}
 
-	protected CacheResolver getCacheResolver(CacheResolverFactory factory, CacheMethodDetails<?> details) {
+	protected CacheResolver getCacheResolver(
+			@Nullable CacheResolverFactory factory, CacheMethodDetails<?> details) {
+
 		if (factory != null) {
 			javax.cache.annotation.CacheResolver cacheResolver = factory.getCacheResolver(details);
 			return new CacheResolverAdapter(cacheResolver);
@@ -145,8 +149,8 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		}
 	}
 
-	protected CacheResolver getExceptionCacheResolver(CacheResolverFactory factory,
-			CacheMethodDetails<CacheResult> details) {
+	protected CacheResolver getExceptionCacheResolver(
+			@Nullable CacheResolverFactory factory, CacheMethodDetails<CacheResult> details) {
 
 		if (factory != null) {
 			javax.cache.annotation.CacheResolver cacheResolver = factory.getExceptionCacheResolver(details);
@@ -157,13 +161,14 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		}
 	}
 
-	protected CacheResolverFactory determineCacheResolverFactory(CacheDefaults defaults,
-			Class<? extends CacheResolverFactory> candidate) {
+	@Nullable
+	protected CacheResolverFactory determineCacheResolverFactory(
+			@Nullable CacheDefaults defaults, Class<? extends CacheResolverFactory> candidate) {
 
-		if (CacheResolverFactory.class != candidate) {
+		if (candidate != CacheResolverFactory.class) {
 			return getBean(candidate);
 		}
-		else if (defaults != null && CacheResolverFactory.class != defaults.cacheResolverFactory()) {
+		else if (defaults != null && defaults.cacheResolverFactory() != CacheResolverFactory.class) {
 			return getBean(defaults.cacheResolverFactory());
 		}
 		else {
@@ -171,8 +176,10 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		}
 	}
 
-	protected KeyGenerator determineKeyGenerator(CacheDefaults defaults, Class<? extends CacheKeyGenerator> candidate) {
-		if (CacheKeyGenerator.class != candidate) {
+	protected KeyGenerator determineKeyGenerator(
+			@Nullable CacheDefaults defaults, Class<? extends CacheKeyGenerator> candidate) {
+
+		if (candidate != CacheKeyGenerator.class) {
 			return new KeyGeneratorAdapter(this, getBean(candidate));
 		}
 		else if (defaults != null && CacheKeyGenerator.class != defaults.cacheKeyGenerator()) {
@@ -183,7 +190,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 		}
 	}
 
-	protected String determineCacheName(Method method, CacheDefaults defaults, String candidate) {
+	protected String determineCacheName(Method method, @Nullable CacheDefaults defaults, String candidate) {
 		if (StringUtils.hasText(candidate)) {
 			return candidate;
 		}

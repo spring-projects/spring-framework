@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,9 @@ public class Jsr354NumberFormatAnnotationFormatterFactory extends EmbeddedValueR
 
 
 	private Formatter<MonetaryAmount> configureFormatterFrom(NumberFormat annotation) {
-		if (StringUtils.hasLength(annotation.pattern())) {
-			return new PatternDecoratingFormatter(resolveEmbeddedValue(annotation.pattern()));
+		String pattern = resolveEmbeddedValue(annotation.pattern());
+		if (StringUtils.hasLength(pattern)) {
+			return new PatternDecoratingFormatter(pattern);
 		}
 		else {
 			Style style = annotation.style();

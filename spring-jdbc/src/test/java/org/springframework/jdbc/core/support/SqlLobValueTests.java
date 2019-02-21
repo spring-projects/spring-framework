@@ -112,7 +112,7 @@ public class SqlLobValueTests  {
 		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 		verify(creator).setClobAsAsciiStream(eq(preparedStatement), eq(1), inputStreamCaptor.capture(), eq(3));
 		byte[] bytes = new byte[3];
-		inputStreamCaptor.getValue().read(bytes );
+		inputStreamCaptor.getValue().read(bytes);
 		assertThat(bytes, equalTo(testContent));
 	}
 

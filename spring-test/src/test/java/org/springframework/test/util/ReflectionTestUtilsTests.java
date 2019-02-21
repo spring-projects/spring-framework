@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import static org.springframework.test.util.ReflectionTestUtils.*;
  */
 public class ReflectionTestUtilsTests {
 
-	private static final Float PI = new Float((float) 22 / 7);
+	private static final Float PI = Float.valueOf((float) 22 / 7);
 
 	private final Person person = new PersonEntity();
 
@@ -63,7 +63,7 @@ public class ReflectionTestUtilsTests {
 	public void setFieldWithNullTargetObject() throws Exception {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		setField((Object) null, "id", new Long(99));
+		setField((Object) null, "id", Long.valueOf(99));
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class ReflectionTestUtilsTests {
 	public void setFieldWithNullTargetClass() throws Exception {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		setField((Class<?>) null, "id", new Long(99));
+		setField((Class<?>) null, "id", Long.valueOf(99));
 	}
 
 	@Test
@@ -91,21 +91,21 @@ public class ReflectionTestUtilsTests {
 	public void setFieldWithNullNameAndNullType() throws Exception {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(startsWith("Either name or type"));
-		setField(person, null, new Long(99), null);
+		setField(person, null, Long.valueOf(99), null);
 	}
 
 	@Test
 	public void setFieldWithBogusName() throws Exception {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(startsWith("Could not find field 'bogus'"));
-		setField(person, "bogus", new Long(99), long.class);
+		setField(person, "bogus", Long.valueOf(99), long.class);
 	}
 
 	@Test
 	public void setFieldWithWrongType() throws Exception {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(startsWith("Could not find field"));
-		setField(person, "id", new Long(99), String.class);
+		setField(person, "id", Long.valueOf(99), String.class);
 	}
 
 	@Test
@@ -133,17 +133,17 @@ public class ReflectionTestUtilsTests {
 
 	private static void assertSetFieldAndGetFieldBehavior(Person person) {
 		// Set reflectively
-		setField(person, "id", new Long(99), long.class);
+		setField(person, "id", Long.valueOf(99), long.class);
 		setField(person, "name", "Tom");
-		setField(person, "age", new Integer(42));
+		setField(person, "age", Integer.valueOf(42));
 		setField(person, "eyeColor", "blue", String.class);
 		setField(person, "likesPets", Boolean.TRUE);
 		setField(person, "favoriteNumber", PI, Number.class);
 
 		// Get reflectively
-		assertEquals(new Long(99), getField(person, "id"));
+		assertEquals(Long.valueOf(99), getField(person, "id"));
 		assertEquals("Tom", getField(person, "name"));
-		assertEquals(new Integer(42), getField(person, "age"));
+		assertEquals(Integer.valueOf(42), getField(person, "age"));
 		assertEquals("blue", getField(person, "eyeColor"));
 		assertEquals(Boolean.TRUE, getField(person, "likesPets"));
 		assertEquals(PI, getField(person, "favoriteNumber"));
@@ -247,33 +247,33 @@ public class ReflectionTestUtilsTests {
 
 	@Test
 	public void invokeSetterMethodAndInvokeGetterMethodWithExplicitMethodNames() throws Exception {
-		invokeSetterMethod(person, "setId", new Long(1), long.class);
+		invokeSetterMethod(person, "setId", Long.valueOf(1), long.class);
 		invokeSetterMethod(person, "setName", "Jerry", String.class);
-		invokeSetterMethod(person, "setAge", new Integer(33), int.class);
+		invokeSetterMethod(person, "setAge", Integer.valueOf(33), int.class);
 		invokeSetterMethod(person, "setEyeColor", "green", String.class);
 		invokeSetterMethod(person, "setLikesPets", Boolean.FALSE, boolean.class);
-		invokeSetterMethod(person, "setFavoriteNumber", new Integer(42), Number.class);
+		invokeSetterMethod(person, "setFavoriteNumber", Integer.valueOf(42), Number.class);
 
 		assertEquals("ID (protected method in a superclass)", 1, person.getId());
 		assertEquals("name (private method)", "Jerry", person.getName());
 		assertEquals("age (protected method)", 33, person.getAge());
 		assertEquals("eye color (package private method)", "green", person.getEyeColor());
 		assertEquals("'likes pets' flag (protected method for a boolean)", false, person.likesPets());
-		assertEquals("'favorite number' (protected method for a Number)", new Integer(42), person.getFavoriteNumber());
+		assertEquals("'favorite number' (protected method for a Number)", Integer.valueOf(42), person.getFavoriteNumber());
 
-		assertEquals(new Long(1), invokeGetterMethod(person, "getId"));
+		assertEquals(Long.valueOf(1), invokeGetterMethod(person, "getId"));
 		assertEquals("Jerry", invokeGetterMethod(person, "getName"));
-		assertEquals(new Integer(33), invokeGetterMethod(person, "getAge"));
+		assertEquals(Integer.valueOf(33), invokeGetterMethod(person, "getAge"));
 		assertEquals("green", invokeGetterMethod(person, "getEyeColor"));
 		assertEquals(Boolean.FALSE, invokeGetterMethod(person, "likesPets"));
-		assertEquals(new Integer(42), invokeGetterMethod(person, "getFavoriteNumber"));
+		assertEquals(Integer.valueOf(42), invokeGetterMethod(person, "getFavoriteNumber"));
 	}
 
 	@Test
 	public void invokeSetterMethodAndInvokeGetterMethodWithJavaBeanPropertyNames() throws Exception {
-		invokeSetterMethod(person, "id", new Long(99), long.class);
+		invokeSetterMethod(person, "id", Long.valueOf(99), long.class);
 		invokeSetterMethod(person, "name", "Tom");
-		invokeSetterMethod(person, "age", new Integer(42));
+		invokeSetterMethod(person, "age", Integer.valueOf(42));
 		invokeSetterMethod(person, "eyeColor", "blue", String.class);
 		invokeSetterMethod(person, "likesPets", Boolean.TRUE);
 		invokeSetterMethod(person, "favoriteNumber", PI, Number.class);
@@ -285,9 +285,9 @@ public class ReflectionTestUtilsTests {
 		assertEquals("'likes pets' flag (protected method for a boolean)", true, person.likesPets());
 		assertEquals("'favorite number' (protected method for a Number)", PI, person.getFavoriteNumber());
 
-		assertEquals(new Long(99), invokeGetterMethod(person, "id"));
+		assertEquals(Long.valueOf(99), invokeGetterMethod(person, "id"));
 		assertEquals("Tom", invokeGetterMethod(person, "name"));
-		assertEquals(new Integer(42), invokeGetterMethod(person, "age"));
+		assertEquals(Integer.valueOf(42), invokeGetterMethod(person, "age"));
 		assertEquals("blue", invokeGetterMethod(person, "eyeColor"));
 		assertEquals(Boolean.TRUE, invokeGetterMethod(person, "likesPets"));
 		assertEquals(PI, invokeGetterMethod(person, "favoriteNumber"));
@@ -347,8 +347,8 @@ public class ReflectionTestUtilsTests {
 		assertNull("text", component.getText());
 
 		// Simulate autowiring a configuration method
-		invokeMethod(component, "configure", new Integer(42), "enigma");
-		assertEquals("number should have been configured", new Integer(42), component.getNumber());
+		invokeMethod(component, "configure", Integer.valueOf(42), "enigma");
+		assertEquals("number should have been configured", Integer.valueOf(42), component.getNumber());
 		assertEquals("text should have been configured", "enigma", component.getText());
 
 		// Simulate @PostConstruct life-cycle event
@@ -379,14 +379,14 @@ public class ReflectionTestUtilsTests {
 	public void invokeMethodWithTooFewArguments() {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage(startsWith("Method not found"));
-		invokeMethod(component, "configure", new Integer(42));
+		invokeMethod(component, "configure", Integer.valueOf(42));
 	}
 
 	@Test
 	public void invokeMethodWithTooManyArguments() {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage(startsWith("Method not found"));
-		invokeMethod(component, "configure", new Integer(42), "enigma", "baz", "quux");
+		invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux");
 	}
 
 	@Test // SPR-14363
@@ -404,8 +404,8 @@ public class ReflectionTestUtilsTests {
 
 	@Test // SPR-14363
 	public void invokeMethodOnLegacyEntityWithSideEffectsInToString() {
-		invokeMethod(entity, "configure", new Integer(42), "enigma");
-		assertEquals("number should have been configured", new Integer(42), entity.getNumber());
+		invokeMethod(entity, "configure", Integer.valueOf(42), "enigma");
+		assertEquals("number should have been configured", Integer.valueOf(42), entity.getNumber());
 		assertEquals("text should have been configured", "enigma", entity.getText());
 	}
 

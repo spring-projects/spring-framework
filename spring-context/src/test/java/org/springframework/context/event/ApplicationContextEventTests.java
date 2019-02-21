@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.context.event;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -44,6 +46,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -60,6 +63,8 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	@Test
 	public void multicastSimpleEvent() {
+		multicastEvent(true, ApplicationListener.class,
+				new ContextRefreshedEvent(new StaticApplicationContext()), null);
 		multicastEvent(true, ApplicationListener.class,
 				new ContextClosedEvent(new StaticApplicationContext()), null);
 	}
@@ -184,6 +189,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
+		assertEquals(2, listener1.seenEvents.size());
 	}
 
 	@Test
@@ -197,6 +203,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
+		assertEquals(2, listener1.seenEvents.size());
 	}
 
 	@Test
@@ -213,6 +220,26 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
+		assertEquals(2, listener1.seenEvents.size());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void proxiedListenersMixedWithTargetListeners() {
+		MyOrderedListener1 listener1 = new MyOrderedListener1();
+		MyOrderedListener2 listener2 = new MyOrderedListener2(listener1);
+		ApplicationListener<ApplicationEvent> proxy1 = (ApplicationListener<ApplicationEvent>) new ProxyFactory(listener1).getProxy();
+		ApplicationListener<ApplicationEvent> proxy2 = (ApplicationListener<ApplicationEvent>) new ProxyFactory(listener2).getProxy();
+
+		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
+		smc.addApplicationListener(listener1);
+		smc.addApplicationListener(listener2);
+		smc.addApplicationListener(proxy1);
+		smc.addApplicationListener(proxy2);
+
+		smc.multicastEvent(new MyEvent(this));
+		smc.multicastEvent(new MyOtherEvent(this));
+		assertEquals(2, listener1.seenEvents.size());
 	}
 
 	@Test
@@ -380,6 +407,98 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	}
 
 	@Test
+	public void anonymousClassAsListener() {
+		final Set<MyEvent> seenEvents = new HashSet<>();
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.addApplicationListener(new ApplicationListener<MyEvent>() {
+			@Override
+			public void onApplicationEvent(MyEvent event) {
+				seenEvents.add(event);
+			}
+		});
+		context.refresh();
+
+		MyEvent event1 = new MyEvent(context);
+		context.publishEvent(event1);
+		context.publishEvent(new MyOtherEvent(context));
+		MyEvent event2 = new MyEvent(context);
+		context.publishEvent(event2);
+		assertSame(2, seenEvents.size());
+		assertTrue(seenEvents.contains(event1));
+		assertTrue(seenEvents.contains(event2));
+
+		context.close();
+	}
+
+	@Test
+	public void lambdaAsListener() {
+		final Set<MyEvent> seenEvents = new HashSet<>();
+		StaticApplicationContext context = new StaticApplicationContext();
+		ApplicationListener<MyEvent> listener = seenEvents::add;
+		context.addApplicationListener(listener);
+		context.refresh();
+
+		MyEvent event1 = new MyEvent(context);
+		context.publishEvent(event1);
+		context.publishEvent(new MyOtherEvent(context));
+		MyEvent event2 = new MyEvent(context);
+		context.publishEvent(event2);
+		assertSame(2, seenEvents.size());
+		assertTrue(seenEvents.contains(event1));
+		assertTrue(seenEvents.contains(event2));
+
+		context.close();
+	}
+
+	@Test
+	public void lambdaAsListenerWithErrorHandler() {
+		final Set<MyEvent> seenEvents = new HashSet<>();
+		StaticApplicationContext context = new StaticApplicationContext();
+		SimpleApplicationEventMulticaster multicaster = new SimpleApplicationEventMulticaster();
+		multicaster.setErrorHandler(ReflectionUtils::rethrowRuntimeException);
+		context.getBeanFactory().registerSingleton(
+				StaticApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME, multicaster);
+		ApplicationListener<MyEvent> listener = seenEvents::add;
+		context.addApplicationListener(listener);
+		context.refresh();
+
+		MyEvent event1 = new MyEvent(context);
+		context.publishEvent(event1);
+		context.publishEvent(new MyOtherEvent(context));
+		MyEvent event2 = new MyEvent(context);
+		context.publishEvent(event2);
+		assertSame(2, seenEvents.size());
+		assertTrue(seenEvents.contains(event1));
+		assertTrue(seenEvents.contains(event2));
+
+		context.close();
+	}
+
+	@Test
+	public void lambdaAsListenerWithJava8StyleClassCastMessage() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		ApplicationListener<ApplicationEvent> listener =
+				event -> { throw new ClassCastException(event.getClass().getName()); };
+		context.addApplicationListener(listener);
+		context.refresh();
+
+		context.publishEvent(new MyEvent(context));
+		context.close();
+	}
+
+	@Test
+	public void lambdaAsListenerWithJava9StyleClassCastMessage() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		ApplicationListener<ApplicationEvent> listener =
+				event -> { throw new ClassCastException("spring.context/" + event.getClass().getName()); };
+		context.addApplicationListener(listener);
+		context.refresh();
+
+		context.publishEvent(new MyEvent(context));
+		context.close();
+	}
+
+	@Test
 	public void beanPostProcessorPublishesEvents() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("listener", new RootBeanDefinition(BeanThatListens.class));
@@ -415,7 +534,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyOrderedListener1 implements ApplicationListener<ApplicationEvent>, Ordered {
 
-		public final Set<ApplicationEvent> seenEvents = new HashSet<>();
+		public final List<ApplicationEvent> seenEvents = new LinkedList<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {

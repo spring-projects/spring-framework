@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,9 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
  */
 public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
+	/**
+	 * The bean name used for the {@code ViewResolverComposite}.
+	 */
 	public static final String VIEW_RESOLVER_BEAN_NAME = "mvcViewResolver";
 
 
@@ -72,7 +75,8 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
 		ManagedList<Object> resolvers = new ManagedList<>(4);
 		resolvers.setSource(context.extractSource(element));
-		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "groovy", "script-template", "bean", "ref"};
+		String[] names = new String[] {
+				"jsp", "tiles", "bean-name", "freemarker", "groovy", "script-template", "bean", "ref"};
 
 		for (Element resolverElement : DomUtils.getChildElementsByTagName(element, names)) {
 			String name = resolverElement.getLocalName();
@@ -123,19 +127,19 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		compositeResolverBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 		names = new String[] {"content-negotiation"};
-		List<Element> contentnNegotiationElements = DomUtils.getChildElementsByTagName(element, names);
-		if (contentnNegotiationElements.isEmpty()) {
+		List<Element> contentNegotiationElements = DomUtils.getChildElementsByTagName(element, names);
+		if (contentNegotiationElements.isEmpty()) {
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", resolvers);
 		}
-		else if (contentnNegotiationElements.size() == 1) {
-			BeanDefinition beanDef = createContentNegotiatingViewResolver(contentnNegotiationElements.get(0), context);
+		else if (contentNegotiationElements.size() == 1) {
+			BeanDefinition beanDef = createContentNegotiatingViewResolver(contentNegotiationElements.get(0), context);
 			beanDef.getPropertyValues().add("viewResolvers", resolvers);
 			ManagedList<Object> list = new ManagedList<>(1);
 			list.add(beanDef);
 			compositeResolverBeanDef.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", list);
 		}
-		else if (contentnNegotiationElements.size() > 1) {
+		else {
 			throw new IllegalArgumentException("Only one <content-negotiation> element is allowed.");
 		}
 
@@ -173,7 +177,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		MutablePropertyValues values = beanDef.getPropertyValues();
 
-		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, new String[] {"default-views"});
+		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, "default-views");
 		if (!elements.isEmpty()) {
 			ManagedList<Object> list = new ManagedList<>();
 			for (Element element : DomUtils.getChildElementsByTagName(elements.get(0), "bean", "ref")) {

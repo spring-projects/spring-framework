@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,12 +44,13 @@ import org.springframework.util.Assert;
  * lifecycle of the listener containers, in particular within the lifecycle
  * of the application context.
  *
- * <p>Contrary to {@link MessageListenerContainer}s created manually, listener
- * containers managed by registry are not beans in the application context and
- * are not candidates for autowiring. Use {@link #getListenerContainers()} if
- * you need to access this registry's listener containers for management purposes.
- * If you need to access to a specific message listener container, use
- * {@link #getListenerContainer(String)} with the id of the endpoint.
+ * <p>Contrary to {@link MessageListenerContainer MessageListenerContainers}
+ * created manually, listener containers managed by registry are not beans
+ * in the application context and are not candidates for autowiring.
+ * Use {@link #getListenerContainers()} if you need to access this registry's
+ * listener containers for management purposes. If you need to access to a
+ * specific message listener container, use {@link #getListenerContainer(String)}
+ * with the id of the endpoint.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
@@ -65,8 +67,9 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	private final Map<String, MessageListenerContainer> listenerContainers =
 			new ConcurrentHashMap<>();
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	private boolean contextRefreshed;
@@ -93,6 +96,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	 * @see JmsListenerEndpoint#getId()
 	 * @see #getListenerContainerIds()
 	 */
+	@Nullable
 	public MessageListenerContainer getListenerContainer(String id) {
 		Assert.notNull(id, "Container identifier must not be null");
 		return this.listenerContainers.get(id);
@@ -100,8 +104,8 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 	/**
 	 * Return the ids of the managed {@link MessageListenerContainer} instance(s).
-	 * @see #getListenerContainer(String)
 	 * @since 4.2.3
+	 * @see #getListenerContainer(String)
 	 */
 	public Set<String> getListenerContainerIds() {
 		return Collections.unmodifiableSet(this.listenerContainers.keySet());
@@ -131,9 +135,9 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 		Assert.notNull(endpoint, "Endpoint must not be null");
 		Assert.notNull(factory, "Factory must not be null");
-
 		String id = endpoint.getId();
-		Assert.notNull(id, "Endpoint id must not be null");
+		Assert.hasText(id, "Endpoint id must be set");
+
 		synchronized (this.listenerContainers) {
 			if (this.listenerContainers.containsKey(id)) {
 				throw new IllegalStateException("Another endpoint is already registered with id '" + id + "'");
@@ -193,11 +197,6 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	@Override
 	public int getPhase() {
 		return this.phase;
-	}
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
 	}
 
 	@Override

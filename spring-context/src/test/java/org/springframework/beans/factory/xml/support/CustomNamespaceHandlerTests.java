@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ public class CustomNamespaceHandlerTests {
 
 	private GenericApplicationContext beanFactory;
 
+
 	@Before
 	public void setUp() throws Exception {
 		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(CLASS.getClassLoader(), NS_PROPS);
@@ -114,7 +115,7 @@ public class CustomNamespaceHandlerTests {
 		assertTrue(AopUtils.isAopProxy(bean));
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
 		assertEquals("Incorrect number of advisors", 1, advisors.length);
-		assertEquals("Incorrect advice class.", DebugInterceptor.class, advisors[0].getAdvice().getClass());
+		assertEquals("Incorrect advice class", DebugInterceptor.class, advisors[0].getAdvice().getClass());
 	}
 
 	@Test
@@ -138,8 +139,8 @@ public class CustomNamespaceHandlerTests {
 		assertTrue(AopUtils.isAopProxy(bean));
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
 		assertEquals("Incorrect number of advisors", 2, advisors.length);
-		assertEquals("Incorrect advice class.", DebugInterceptor.class, advisors[0].getAdvice().getClass());
-		assertEquals("Incorrect advice class.", NopInterceptor.class, advisors[1].getAdvice().getClass());
+		assertEquals("Incorrect advice class", DebugInterceptor.class, advisors[0].getAdvice().getClass());
+		assertEquals("Incorrect advice class", NopInterceptor.class, advisors[1].getAdvice().getClass());
 	}
 
 	@Test
@@ -148,30 +149,21 @@ public class CustomNamespaceHandlerTests {
 		assertEquals("foo", beanDefinition.getAttribute("objectName"));
 	}
 
-	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
-	 */
-	@Test
+	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilList() throws Exception {
 		List<?> things = (List<?>) this.beanFactory.getBean("list.of.things");
 		assertNotNull(things);
 		assertEquals(2, things.size());
 	}
 
-	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
-	 */
-	@Test
+	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilSet() throws Exception {
 		Set<?> things = (Set<?>) this.beanFactory.getBean("set.of.things");
 		assertNotNull(things);
 		assertEquals(2, things.size());
 	}
 
-	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
-	 */
-	@Test
+	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilMap() throws Exception {
 		Map<?, ?> things = (Map<?, ?>) this.beanFactory.getBean("map.of.things");
 		assertNotNull(things);
@@ -229,6 +221,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionDecoratorForAttribute("object-name", new ObjectNameBeanDefinitionDecorator());
 	}
 
+
 	private static class TestBeanDefinitionParser implements BeanDefinitionParser {
 
 		@Override
@@ -242,10 +235,10 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			definition.setPropertyValues(mpvs);
 
 			parserContext.getRegistry().registerBeanDefinition(element.getAttribute("id"), definition);
-
 			return null;
 		}
 	}
+
 
 	private static final class PersonDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
@@ -260,6 +253,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			builder.addPropertyValue("age", element.getAttribute("age"));
 		}
 	}
+
 
 	private static class PropertyModifyingBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
@@ -277,6 +271,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	private static class DebugBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
 		@Override
@@ -285,6 +280,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	private static class NopInterceptorBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
 		@Override
@@ -292,6 +288,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			return new RootBeanDefinition(NopInterceptor.class);
 		}
 	}
+
 
 	private static class ObjectNameBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
@@ -302,5 +299,5 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 			return definition;
 		}
 	}
-}
 
+}

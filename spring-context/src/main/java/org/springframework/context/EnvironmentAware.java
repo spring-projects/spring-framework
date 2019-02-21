@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,12 @@ import org.springframework.core.env.Environment;
  *
  * @author Chris Beams
  * @since 3.1
+ * @see org.springframework.core.env.EnvironmentCapable
  */
 public interface EnvironmentAware extends Aware {
 
 	/**
-	 * Set the {@code Environment} that this object runs in.
+	 * Set the {@code Environment} that this component runs in.
 	 */
 	void setEnvironment(Environment environment);
 

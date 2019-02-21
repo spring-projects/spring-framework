@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.junit.After;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
@@ -34,9 +35,9 @@ import static org.junit.Assert.*;
 /**
  * Base class for tests using on the DispatcherServlet and HandlerMethod infrastructure classes:
  * <ul>
- * 	<li>RequestMappingHandlerMapping
- * 	<li>RequestMappingHandlerAdapter
- * 	<li>ExceptionHandlerExceptionResolver
+ * <li>RequestMappingHandlerMapping
+ * <li>RequestMappingHandlerAdapter
+ * <li>ExceptionHandlerExceptionResolver
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -45,14 +46,15 @@ public abstract class AbstractServletHandlerMethodTests {
 
 	private DispatcherServlet servlet;
 
-	@After
-	public void tearDown() {
-		this.servlet = null;
-	}
 
 	protected DispatcherServlet getServlet() {
 		assertNotNull("DispatcherServlet not initialized", servlet);
 		return servlet;
+	}
+
+	@After
+	public void tearDown() {
+		this.servlet = null;
 	}
 
 	/**
@@ -60,6 +62,7 @@ public abstract class AbstractServletHandlerMethodTests {
 	 */
 	protected WebApplicationContext initServletWithControllers(final Class<?>... controllerClasses)
 			throws ServletException {
+
 		return initServlet(null, controllerClasses);
 	}
 
@@ -76,27 +79,22 @@ public abstract class AbstractServletHandlerMethodTests {
 
 		servlet = new DispatcherServlet() {
 			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+			protected WebApplicationContext createWebApplicationContext(@Nullable WebApplicationContext parent) {
 				for (Class<?> clazz : controllerClasses) {
 					wac.registerBeanDefinition(clazz.getSimpleName(), new RootBeanDefinition(clazz));
 				}
 
-				Class<?> mappingType = RequestMappingHandlerMapping.class;
-				RootBeanDefinition beanDef = new RootBeanDefinition(mappingType);
-				beanDef.getPropertyValues().add("removeSemicolonContent", "false");
-				wac.registerBeanDefinition("handlerMapping", beanDef);
-
-				Class<?> adapterType = RequestMappingHandlerAdapter.class;
-				wac.registerBeanDefinition("handlerAdapter", new RootBeanDefinition(adapterType));
-
-				Class<?> resolverType = ExceptionHandlerExceptionResolver.class;
-				wac.registerBeanDefinition("requestMappingResolver", new RootBeanDefinition(resolverType));
-
-				resolverType = ResponseStatusExceptionResolver.class;
-				wac.registerBeanDefinition("responseStatusResolver", new RootBeanDefinition(resolverType));
-
-				resolverType = DefaultHandlerExceptionResolver.class;
-				wac.registerBeanDefinition("defaultResolver", new RootBeanDefinition(resolverType));
+				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+				mappingDef.getPropertyValues().add("removeSemicolonContent", "false");
+				wac.registerBeanDefinition("handlerMapping", mappingDef);
+				wac.registerBeanDefinition("handlerAdapter",
+						new RootBeanDefinition(RequestMappingHandlerAdapter.class));
+				wac.registerBeanDefinition("requestMappingResolver",
+						new RootBeanDefinition(ExceptionHandlerExceptionResolver.class));
+				wac.registerBeanDefinition("responseStatusResolver",
+						new RootBeanDefinition(ResponseStatusExceptionResolver.class));
+				wac.registerBeanDefinition("defaultResolver",
+						new RootBeanDefinition(DefaultHandlerExceptionResolver.class));
 
 				if (initializer != null) {
 					initializer.initialize(wac);

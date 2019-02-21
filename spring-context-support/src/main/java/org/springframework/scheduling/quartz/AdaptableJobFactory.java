@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * JobFactory implementation that supports {@link java.lang.Runnable}
+ * {@link JobFactory} implementation that supports {@link java.lang.Runnable}
  * objects as well as standard Quartz {@link org.quartz.Job} instances.
  *
  * <p>Compatible with Quartz 2.1.4 and higher, as of Spring 4.1.
@@ -43,7 +43,7 @@ public class AdaptableJobFactory implements JobFactory {
 			Object jobObject = createJobInstance(bundle);
 			return adaptJob(jobObject);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new SchedulerException("Job instantiation failed", ex);
 		}
 	}
@@ -78,7 +78,8 @@ public class AdaptableJobFactory implements JobFactory {
 			return new DelegatingJob((Runnable) jobObject);
 		}
 		else {
-			throw new IllegalArgumentException("Unable to execute job class [" + jobObject.getClass().getName() +
+			throw new IllegalArgumentException(
+					"Unable to execute job class [" + jobObject.getClass().getName() +
 					"]: only [org.quartz.Job] and [java.lang.Runnable] supported.");
 		}
 	}

@@ -1,0 +1,15 @@
+description = "Spring JDBC"
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	compile(project(":spring-tx"))
+	optional(project(":spring-context"))  // for JndiDataSourceLookup
+	optional("javax.transaction:javax.transaction-api:1.3")
+	optional("org.hsqldb:hsqldb:${hsqldbVersion}")
+	optional("com.h2database:h2:1.4.197")
+	optional("org.apache.derby:derby:10.14.2.0")
+	optional("org.apache.derby:derbyclient:10.14.2.0")
+	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+}

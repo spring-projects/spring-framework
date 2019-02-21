@@ -103,7 +103,7 @@ public class IndexingTests {
 
 		@Override
 		public Class<?>[] getSpecificTargetClasses() {
-			return new Class[] { Map.class };
+			return new Class<?>[] {Map.class};
 		}
 
 	}

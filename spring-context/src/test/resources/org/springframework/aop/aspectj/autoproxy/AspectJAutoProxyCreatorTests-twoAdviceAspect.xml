@@ -7,9 +7,13 @@
 
 	<bean id="aspect" class="test.aspect.TwoAdviceAspect"/>
 
-	<bean id="adrian" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
-		<property name="name" value="adrian"/>
-		<property name="age" value="34"/>
+	<bean id="adrian" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target">
+			<bean class="org.springframework.tests.sample.beans.TestBean">
+				<property name="name" value="adrian"/>
+				<property name="age" value="34"/>
+			</bean>
+		</property>
 	</bean>
 
 </beans>

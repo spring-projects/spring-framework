@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
@@ -79,22 +79,18 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 	private final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private BootstrapContext bootstrapContext;
 
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setBootstrapContext(BootstrapContext bootstrapContext) {
 		this.bootstrapContext = bootstrapContext;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public BootstrapContext getBootstrapContext() {
+		Assert.state(this.bootstrapContext != null, "No BootstrapContext set");
 		return this.bootstrapContext;
 	}
 
@@ -113,9 +109,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				getCacheAwareContextLoaderDelegate());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final List<TestExecutionListener> getTestExecutionListeners() {
 		Class<?> clazz = getBootstrapContext().getTestClass();
@@ -168,48 +161,43 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 
+		Collection<Class<? extends TestExecutionListener>> classesToUse = classesList;
 		// Remove possible duplicates if we loaded default listeners.
 		if (usingDefaults) {
-			Set<Class<? extends TestExecutionListener>> classesSet = new HashSet<>();
-			classesSet.addAll(classesList);
-			classesList.clear();
-			classesList.addAll(classesSet);
+			classesToUse = new LinkedHashSet<>(classesList);
 		}
 
-		List<TestExecutionListener> listeners = instantiateListeners(classesList);
-
+		List<TestExecutionListener> listeners = instantiateListeners(classesToUse);
 		// Sort by Ordered/@Order if we loaded default listeners.
 		if (usingDefaults) {
 			AnnotationAwareOrderComparator.sort(listeners);
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("Using TestExecutionListeners: %s", listeners));
+			logger.info("Using TestExecutionListeners: " + listeners);
 		}
 		return listeners;
 	}
 
-	private List<TestExecutionListener> instantiateListeners(List<Class<? extends TestExecutionListener>> classesList) {
-		List<TestExecutionListener> listeners = new ArrayList<>(classesList.size());
-		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
-			NoClassDefFoundError ncdfe = null;
+	private List<TestExecutionListener> instantiateListeners(Collection<Class<? extends TestExecutionListener>> classes) {
+		List<TestExecutionListener> listeners = new ArrayList<>(classes.size());
+		for (Class<? extends TestExecutionListener> listenerClass : classes) {
 			try {
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
 			}
-			catch (NoClassDefFoundError err) {
-				ncdfe = err;
-			}
 			catch (BeanInstantiationException ex) {
 				if (ex.getCause() instanceof NoClassDefFoundError) {
-					ncdfe = (NoClassDefFoundError) ex.getCause();
+					// TestExecutionListener not applicable due to a missing dependency
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format(
+								"Skipping candidate TestExecutionListener [%s] due to a missing dependency. " +
+								"Specify custom listener classes or make the default listener classes " +
+								"and their required dependencies available. Offending class: [%s]",
+								listenerClass.getName(), ex.getCause().getMessage()));
+					}
 				}
-			}
-			if (ncdfe != null) {
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " +
-							"Specify custom listener classes or make the default listener classes " +
-							"(and their required dependencies) available. Offending class: [%s]",
-							listenerClass.getName(), ncdfe.getMessage()));
+				else {
+					throw ex;
 				}
 			}
 		}
@@ -299,6 +287,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 
 			// Return the last level in the context hierarchy
+			Assert.state(mergedConfig != null, "No merged context configuration");
 			return mergedConfig;
 		}
 		else {
@@ -350,7 +339,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @see MergedContextConfiguration
 	 */
 	private MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
-			List<ContextConfigurationAttributes> configAttributesList, MergedContextConfiguration parentConfig,
+			List<ContextConfigurationAttributes> configAttributesList, @Nullable MergedContextConfiguration parentConfig,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate,
 			boolean requireLocationsClassesOrInitializers) {
 
@@ -396,8 +385,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		MergedTestPropertySources mergedTestPropertySources =
 				TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(testClass,
-				StringUtils.toStringArray(locations),
-				ClassUtils.toClassArray(classes),
+				StringUtils.toStringArray(locations), ClassUtils.toClassArray(classes),
 				ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList),
 				ActiveProfilesUtils.resolveActiveProfiles(testClass),
 				mergedTestPropertySources.getLocations(),
@@ -461,7 +449,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Class<? extends ContextLoader> contextLoaderClass = resolveExplicitContextLoaderClass(configAttributesList);
 		if (contextLoaderClass == null) {
 			contextLoaderClass = getDefaultContextLoaderClass(testClass);
-			Assert.state(contextLoaderClass != null, "getDefaultContextLoaderClass() must not return null");
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",
@@ -490,6 +477,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 * @throws IllegalArgumentException if supplied configuration attributes are
 	 * {@code null} or <em>empty</em>
 	 */
+	@Nullable
 	protected Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
 			List<ContextConfigurationAttributes> configAttributesList) {
 

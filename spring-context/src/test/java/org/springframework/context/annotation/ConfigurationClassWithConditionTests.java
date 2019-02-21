@@ -290,6 +290,7 @@ public class ConfigurationClassWithConditionTests {
 	@Never
 	@Import({ConfigurationNotCreated.class, RegistrarNotCreated.class, ImportSelectorNotCreated.class})
 	static class ImportsNotCreated {
+
 		static {
 			if (true) throw new RuntimeException();
 		}
@@ -297,12 +298,14 @@ public class ConfigurationClassWithConditionTests {
 
 	@Configuration
 	static class ConfigurationNotCreated {
+
 		static {
 			if (true) throw new RuntimeException();
 		}
 	}
 
 	static class RegistrarNotCreated implements ImportBeanDefinitionRegistrar {
+
 		static {
 			if (true) throw new RuntimeException();
 		}

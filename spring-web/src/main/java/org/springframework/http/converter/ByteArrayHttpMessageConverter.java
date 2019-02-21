@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -41,7 +42,7 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	 * Create a new instance of the {@code ByteArrayHttpMessageConverter}.
 	 */
 	public ByteArrayHttpMessageConverter() {
-		super(new MediaType("application", "octet-stream"), MediaType.ALL);
+		super(MediaType.APPLICATION_OCTET_STREAM, MediaType.ALL);
 	}
 
 
@@ -60,7 +61,7 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 	}
 
 	@Override
-	protected Long getContentLength(byte[] bytes, MediaType contentType) {
+	protected Long getContentLength(byte[] bytes, @Nullable MediaType contentType) {
 		return (long) bytes.length;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,21 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * Parse the <mvc:freemarker-configurer> MVC namespace element and register
- * FreeMarkerConfigurer bean
+ * Parse the <code>&lt;mvc:freemarker-configurer&gt;</code> MVC namespace element and
+ * register {@code FreeMarkerConfigurer} bean.
  *
  * @author Rossen Stoyanchev
  * @since 4.1
  */
 public class FreeMarkerConfigurerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+	/**
+	 * The bean name used for the {@code FreeMarkerConfigurer}.
+	 */
 	public static final String BEAN_NAME = "mvcFreeMarkerConfigurer";
 
 
@@ -60,7 +64,7 @@ public class FreeMarkerConfigurerBeanDefinitionParser extends AbstractSingleBean
 			if (locations.isEmpty()) {
 				locations.add("/WEB-INF/");
 			}
-			builder.addPropertyValue("templateLoaderPaths", locations.toArray(new String[locations.size()]));
+			builder.addPropertyValue("templateLoaderPaths", StringUtils.toStringArray(locations));
 		}
 	}
 

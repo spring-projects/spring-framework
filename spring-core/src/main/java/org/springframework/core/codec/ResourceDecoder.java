@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.core.codec;
 
 import java.io.ByteArrayInputStream;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -28,16 +28,18 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decoder for {@link Resource}s.
+ * Decoder for {@link Resource Resources}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ResourceDecoder extends AbstractDecoder<Resource> {
+public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 
 	public ResourceDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -45,37 +47,39 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
-		Class<?> clazz = elementType.getRawClass();
-		return (InputStreamResource.class.equals(clazz) ||
-				clazz.isAssignableFrom(ByteArrayResource.class)) &&
-				super.canDecode(elementType, mimeType, hints);
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		return (Resource.class.isAssignableFrom(elementType.toClass()) &&
+				super.canDecode(elementType, mimeType));
 	}
 
 	@Override
 	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Class<?> clazz = elementType.getRawClass();
+		return Flux.from(decodeToMono(inputStream, elementType, mimeType, hints));
+	}
 
-		Mono<byte[]> byteArray = Flux.from(inputStream).
-				reduce(DataBuffer::write).
-				map(dataBuffer -> {
-					byte[] bytes = new byte[dataBuffer.readableByteCount()];
-					dataBuffer.read(bytes);
-					DataBufferUtils.release(dataBuffer);
-					return bytes;
-				});
+	@Override
+	protected Resource decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		byte[] bytes = new byte[dataBuffer.readableByteCount()];
+		dataBuffer.read(bytes);
+		DataBufferUtils.release(dataBuffer);
 
-		if (InputStreamResource.class.equals(clazz)) {
-			return Flux.from(byteArray.map(ByteArrayInputStream::new).map(InputStreamResource::new));
+		if (logger.isDebugEnabled()) {
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + bytes.length + " bytes");
 		}
-		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
-			return Flux.from(byteArray.map(ByteArrayResource::new));
+
+		Class<?> clazz = elementType.toClass();
+		if (clazz == InputStreamResource.class) {
+			return new InputStreamResource(new ByteArrayInputStream(bytes));
+		}
+		else if (Resource.class.isAssignableFrom(clazz)) {
+			return new ByteArrayResource(bytes);
 		}
 		else {
-			return Flux.error(new IllegalStateException("Unsupported resource class: " + clazz));
+			throw new IllegalStateException("Unsupported resource class: " + clazz);
 		}
 	}
 

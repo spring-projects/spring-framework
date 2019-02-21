@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@ package org.springframework.messaging.handler.invocation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.ExceptionDepthComparator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Cache exception handling method mappings and provide options to look up a method
@@ -38,11 +38,9 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AbstractExceptionHandlerMethodResolver {
 
-	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
+	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
 
-	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentHashMap<>(16);
-
-	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentHashMap<>(16);
+	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentReferenceHashMap<>(16);
 
 
 	/**
@@ -66,7 +64,9 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 				result.add((Class<? extends Throwable>) paramType);
 			}
 		}
-		Assert.notEmpty(result, "No exception types mapped to {" + method + "}");
+		if (result.isEmpty()) {
+			throw new IllegalStateException("No exception types mapped to " + method);
+		}
 		return result;
 	}
 
@@ -75,7 +75,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * Whether the contained type has any exception mappings.
 	 */
 	public boolean hasExceptionMappings() {
-		return (this.mappedMethods.size() > 0);
+		return !this.mappedMethods.isEmpty();
 	}
 
 	/**
@@ -84,6 +84,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
+	@Nullable
 	public Method resolveMethod(Exception exception) {
 		Method method = resolveMethodByExceptionType(exception.getClass());
 		if (method == null) {
@@ -102,18 +103,20 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 * @since 4.3.1
 	 */
+	@Nullable
 	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);
-			this.exceptionLookupCache.put(exceptionType, method != null ? method : NO_METHOD_FOUND);
+			this.exceptionLookupCache.put(exceptionType, method);
 		}
-		return method != NO_METHOD_FOUND ? method : null;
+		return method;
 	}
 
 	/**
 	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
+	@Nullable
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
@@ -122,7 +125,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 			}
 		}
 		if (!matches.isEmpty()) {
-			Collections.sort(matches, new ExceptionDepthComparator(exceptionType));
+			matches.sort(new ExceptionDepthComparator(exceptionType));
 			return this.mappedMethods.get(matches.get(0));
 		}
 		else {

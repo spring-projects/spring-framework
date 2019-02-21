@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,14 +55,14 @@ public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
 	@Override
 	protected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {
 		String invocationDescription = getInvocationDescription(invocation);
-		logger.trace("Entering " + invocationDescription);
+		writeToLog(logger, "Entering " + invocationDescription);
 		try {
 			Object rval = invocation.proceed();
-			logger.trace("Exiting " + invocationDescription);
+			writeToLog(logger, "Exiting " + invocationDescription);
 			return rval;
 		}
 		catch (Throwable ex) {
-			logger.trace("Exception thrown in " + invocationDescription, ex);
+			writeToLog(logger, "Exception thrown in " + invocationDescription, ex);
 			throw ex;
 		}
 	}

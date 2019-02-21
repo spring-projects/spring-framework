@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class CommonsPool2TargetSourceTests {
 		// Just check that it works--we can't make assumptions
 		// about the count
 		pooled.doWork();
-		//assertEquals(INITIAL_COUNT + 1, apartment.getCount() );
+		//assertEquals(INITIAL_COUNT + 1, apartment.getCount());
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class CommonsPool2TargetSourceTests {
 			// desired
 		}
 
-		// lets now release an object and try to accquire a new one
+		// lets now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
 		pooledInstances[9] = targetSource.getTarget();
 
@@ -194,7 +194,7 @@ public class CommonsPool2TargetSourceTests {
 			// desired
 		}
 
-		// lets now release an object and try to accquire a new one
+		// lets now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
 		pooledInstances[9] = targetSource.getTarget();
 

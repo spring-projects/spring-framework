@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.socket;
 
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.lang.Nullable;
+
 /**
  * A text WebSocket message.
  *
@@ -26,6 +28,7 @@ import java.nio.charset.StandardCharsets;
  */
 public final class TextMessage extends AbstractWebSocketMessage<String> {
 
+	@Nullable
 	private final byte[] bytes;
 
 

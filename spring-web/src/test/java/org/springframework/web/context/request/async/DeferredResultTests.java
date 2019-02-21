@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.context.request.async;
+
+import java.util.function.Consumer;
 
 import org.junit.Test;
 
@@ -123,6 +125,29 @@ public class DeferredResultTests {
 		assertEquals("timeout event", sb.toString());
 		assertFalse("Should not be able to set result a second time", result.setResult("hello"));
 		verify(handler).handleResult("timeout result");
+	}
+
+	@Test
+	public void onError() throws Exception {
+		final StringBuilder sb = new StringBuilder();
+
+		DeferredResultHandler handler = mock(DeferredResultHandler.class);
+
+		DeferredResult<String> result = new DeferredResult<>(null, "error result");
+		result.setResultHandler(handler);
+		Exception e = new Exception();
+		result.onError(new Consumer<Throwable>() {
+			@Override
+			public void accept(Throwable t) {
+				sb.append("error event");
+			}
+		});
+
+		result.getInterceptor().handleError(null, null, e);
+
+		assertEquals("error event", sb.toString());
+		assertFalse("Should not be able to set result a second time", result.setResult("hello"));
+		verify(handler).handleResult(e);
 	}
 
 }

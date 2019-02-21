@@ -16,12 +16,12 @@
 
 package org.springframework.web.context.request;
 
+import org.springframework.lang.Nullable;
 import org.springframework.ui.ModelMap;
 
 /**
  * Interface for general web request interception. Allows for being applied
- * to Servlet request as well as Portlet request environments, by building
- * on the {@link WebRequest} abstraction.
+ * to Servlet request by building on the {@link WebRequest} abstraction.
  *
  * <p>This interface assumes MVC-style request processing: A handler gets executed,
  * exposes a set of model objects, then a view gets rendered based on that model.
@@ -38,13 +38,6 @@ import org.springframework.ui.ModelMap;
  *
  * <p>This interface is deliberately minimalistic to keep the dependencies of
  * generic request interceptors as minimal as feasible.
- *
- * <p><b>NOTE:</b> While this interceptor is applied to the entire request processing
- * in a Servlet environment, it is by default only applied to the <i>render</i> phase
- * in a Portlet environment, preparing and rendering a Portlet view. To apply
- * WebRequestInterceptors to the <i>action</i> phase as well, set the HandlerMapping's
- * "applyWebRequestInterceptorsToRenderPhaseOnly" flag to "false". Alternatively,
- * consider using the Portlet-specific HandlerInterceptor mechanism for such needs.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -75,7 +68,7 @@ public interface WebRequestInterceptor {
 	 * and/or to add further model attributes, if desired.
 	 * @throws Exception in case of errors
 	 */
-	void postHandle(WebRequest request, ModelMap model) throws Exception;
+	void postHandle(WebRequest request, @Nullable ModelMap model) throws Exception;
 
 	/**
 	 * Callback after completion of request processing, that is, after rendering
@@ -87,6 +80,6 @@ public interface WebRequestInterceptor {
 	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */
-	void afterCompletion(WebRequest request, Exception ex) throws Exception;
+	void afterCompletion(WebRequest request, @Nullable Exception ex) throws Exception;
 
 }

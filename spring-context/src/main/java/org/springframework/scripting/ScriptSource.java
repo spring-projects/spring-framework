@@ -18,6 +18,8 @@ package org.springframework.scripting;
 
 import java.io.IOException;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Interface that defines the source of a script.
  * Tracks whether the underlying script has been modified.
@@ -47,6 +49,7 @@ public interface ScriptSource {
 	 * Determine a class name for the underlying script.
 	 * @return the suggested class name, or {@code null} if none available
 	 */
+	@Nullable
 	String suggestedClassName();
 
 }

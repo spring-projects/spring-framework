@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketExtension;
@@ -79,6 +80,7 @@ public class WebSocketSessionDecorator implements WebSocketSession {
 	}
 
 	@Override
+	@Nullable
 	public URI getUri() {
 		return this.delegate.getUri();
 	}

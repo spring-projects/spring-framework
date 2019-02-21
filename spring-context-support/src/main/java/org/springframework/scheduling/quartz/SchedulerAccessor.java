@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.quartz.xml.XMLSchedulingDataProcessor;
 
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -63,22 +64,31 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	private boolean overwriteExistingJobs = false;
 
+	@Nullable
 	private String[] jobSchedulingDataLocations;
 
+	@Nullable
 	private List<JobDetail> jobDetails;
 
+	@Nullable
 	private Map<String, Calendar> calendars;
 
+	@Nullable
 	private List<Trigger> triggers;
 
+	@Nullable
 	private SchedulerListener[] schedulerListeners;
 
+	@Nullable
 	private JobListener[] globalJobListeners;
 
+	@Nullable
 	private TriggerListener[] globalTriggerListeners;
 
+	@Nullable
 	private PlatformTransactionManager transactionManager;
 
+	@Nullable
 	protected ResourceLoader resourceLoader;
 
 
@@ -131,7 +141,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	/**
 	 * Register a list of Quartz Calendar objects with the Scheduler
 	 * that this FactoryBean creates, to be referenced by Triggers.
-	 * @param calendars Map with calendar names as keys as Calendar
+	 * @param calendars a Map with calendar names as keys as Calendar
 	 * objects as values
 	 * @see org.quartz.Calendar
 	 */
@@ -296,14 +306,23 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		// Check if the Trigger is aware of an associated JobDetail.
 		JobDetail jobDetail = (JobDetail) trigger.getJobDataMap().remove("jobDetail");
 		if (triggerExists) {
-			if (jobDetail != null && !this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
+			if (jobDetail != null && this.jobDetails != null &&
+					!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
 				this.jobDetails.add(jobDetail);
 			}
-			getScheduler().rescheduleJob(trigger.getKey(), trigger);
+			try {
+				getScheduler().rescheduleJob(trigger.getKey(), trigger);
+			}
+			catch (ObjectAlreadyExistsException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unexpectedly encountered existing trigger on rescheduling, assumably due to " +
+							"cluster race condition: " + ex.getMessage() + " - can safely be ignored");
+				}
+			}
 		}
 		else {
 			try {
-				if (jobDetail != null && !this.jobDetails.contains(jobDetail) &&
+				if (jobDetail != null && this.jobDetails != null && !this.jobDetails.contains(jobDetail) &&
 						(this.overwriteExistingJobs || getScheduler().getJobDetail(jobDetail.getKey()) == null)) {
 					getScheduler().scheduleJob(jobDetail, trigger);
 					this.jobDetails.add(jobDetail);
@@ -314,8 +333,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 			}
 			catch (ObjectAlreadyExistsException ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
-							ex.getMessage() + " - can safely be ignored");
+					logger.debug("Unexpectedly encountered existing trigger on job scheduling, assumably due to " +
+							"cluster race condition: " + ex.getMessage() + " - can safely be ignored");
 				}
 				if (this.overwriteExistingJobs) {
 					getScheduler().rescheduleJob(trigger.getKey(), trigger);

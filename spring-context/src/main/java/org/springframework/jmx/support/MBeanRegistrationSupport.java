@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -76,6 +76,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * The {@code MBeanServer} instance being used to register beans.
 	 */
+	@Nullable
 	protected MBeanServer server;
 
 	/**
@@ -95,13 +96,14 @@ public class MBeanRegistrationSupport {
 	 * be registered. The {@code MBeanExporter} will attempt to locate an
 	 * existing {@code MBeanServer} if none is supplied.
 	 */
-	public void setServer(MBeanServer server) {
+	public void setServer(@Nullable MBeanServer server) {
 		this.server = server;
 	}
 
 	/**
 	 * Return the {@code MBeanServer} that the beans will be registered with.
 	 */
+	@Nullable
 	public final MBeanServer getServer() {
 		return this.server;
 	}
@@ -126,6 +128,7 @@ public class MBeanRegistrationSupport {
 	 * @throws JMException if the registration failed
 	 */
 	protected void doRegister(Object mbean, ObjectName objectName) throws JMException {
+		Assert.state(this.server != null, "No MBeanServer set");
 		ObjectName actualObjectName;
 
 		synchronized (this.registeredBeans) {
@@ -148,7 +151,9 @@ public class MBeanRegistrationSupport {
 						registeredBean = this.server.registerMBean(mbean, objectName);
 					}
 					catch (InstanceNotFoundException ex2) {
-						logger.error("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						if (logger.isInfoEnabled()) {
+							logger.info("Unable to replace existing MBean at [" + objectName + "]", ex2);
+						}
 						throw ex;
 					}
 				}
@@ -177,10 +182,10 @@ public class MBeanRegistrationSupport {
 			snapshot = new LinkedHashSet<>(this.registeredBeans);
 		}
 		if (!snapshot.isEmpty()) {
-			logger.info("Unregistering JMX-exposed beans");
-		}
-		for (ObjectName objectName : snapshot) {
-			doUnregister(objectName);
+			logger.debug("Unregistering JMX-exposed beans");
+			for (ObjectName objectName : snapshot) {
+				doUnregister(objectName);
+			}
 		}
 	}
 
@@ -189,6 +194,7 @@ public class MBeanRegistrationSupport {
 	 * @param objectName the suggested ObjectName for the MBean
 	 */
 	protected void doUnregister(ObjectName objectName) {
+		Assert.state(this.server != null, "No MBeanServer set");
 		boolean actuallyUnregistered = false;
 
 		synchronized (this.registeredBeans) {
@@ -200,15 +206,15 @@ public class MBeanRegistrationSupport {
 						actuallyUnregistered = true;
 					}
 					else {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Could not unregister MBean [" + objectName + "] as said MBean " +
+						if (logger.isInfoEnabled()) {
+							logger.info("Could not unregister MBean [" + objectName + "] as said MBean " +
 									"is not registered (perhaps already unregistered by an external process)");
 						}
 					}
 				}
 				catch (JMException ex) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Could not unregister MBean [" + objectName + "]", ex);
+					if (logger.isInfoEnabled()) {
+						logger.info("Could not unregister MBean [" + objectName + "]", ex);
 					}
 				}
 			}
@@ -224,7 +230,7 @@ public class MBeanRegistrationSupport {
 	 */
 	protected final ObjectName[] getRegisteredObjectNames() {
 		synchronized (this.registeredBeans) {
-			return this.registeredBeans.toArray(new ObjectName[this.registeredBeans.size()]);
+			return this.registeredBeans.toArray(new ObjectName[0]);
 		}
 	}
 

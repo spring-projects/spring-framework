@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Editor for byte arrays. Strings will simply be converted to
  * their corresponding byte representations.
@@ -29,7 +31,7 @@ import java.beans.PropertyEditorSupport;
 public class ByteArrayPropertyEditor extends PropertyEditorSupport {
 
 	@Override
-	public void setAsText(String text) {
+	public void setAsText(@Nullable String text) {
 		setValue(text != null ? text.getBytes() : null);
 	}
 

@@ -62,7 +62,7 @@ public class MappingMediaTypeFileExtensionResolverTests {
 		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(mapping);
 		MediaType mediaType = resolver.lookupMediaType("JSON");
 
-		assertEquals(mediaType, MediaType.APPLICATION_JSON);
+		assertEquals(MediaType.APPLICATION_JSON, mediaType);
 	}
 
 }

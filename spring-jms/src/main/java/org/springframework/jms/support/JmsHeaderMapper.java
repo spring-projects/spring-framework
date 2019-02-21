@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import javax.jms.Message;
 import org.springframework.messaging.support.HeaderMapper;
 
 /**
- * Strategy interface for mapping messaging Message headers to an outbound
- * JMS Message (e.g. to configure JMS properties) or extracting messaging
- * header values from an inbound JMS Message.
+ * Strategy interface for mapping {@link org.springframework.messaging.Message}
+ * headers to an outbound JMS {@link javax.jms.Message} (e.g. to configure JMS
+ * properties) or extracting messaging header values from an inbound JMS Message.
  *
  * @author Mark Fisher
  * @author Oleg Zhurakousky
@@ -32,7 +32,10 @@ import org.springframework.messaging.support.HeaderMapper;
  */
 public interface JmsHeaderMapper extends HeaderMapper<Message> {
 
-	static final String CONTENT_TYPE_PROPERTY = "content_type";
+	/**
+	 * The JMS-compliant {@code content_type} property.
+	 */
+	String CONTENT_TYPE_PROPERTY = "content_type";
 
 }
 

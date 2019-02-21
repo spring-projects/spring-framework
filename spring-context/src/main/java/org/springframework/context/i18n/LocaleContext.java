@@ -18,6 +18,8 @@ package org.springframework.context.i18n;
 
 import java.util.Locale;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy interface for determining the current Locale.
  *
@@ -36,6 +38,7 @@ public interface LocaleContext {
 	 * depending on the implementation strategy.
 	 * @return the current Locale, or {@code null} if no specific Locale associated
 	 */
+	@Nullable
 	Locale getLocale();
 
 }

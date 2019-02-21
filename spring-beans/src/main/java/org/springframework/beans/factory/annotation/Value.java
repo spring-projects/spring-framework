@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * for dynamic resolution of handler method parameters, e.g. in Spring MVC.
  *
  * <p>A common use case is to assign default field values using
- * "#{systemProperties.myProp}" style expressions.
+ * {@code #{systemProperties.myProp}} style expressions.
  *
  * <p>Note that actual processing of the {@code @Value} annotation is performed
  * by a {@link org.springframework.beans.factory.config.BeanPostProcessor
@@ -55,7 +55,7 @@ import java.lang.annotation.Target;
 public @interface Value {
 
 	/**
-	 * The actual value expression: e.g. "#{systemProperties.myProp}".
+	 * The actual value expression: for example {@code #{systemProperties.myProp}}.
 	 */
 	String value();
 

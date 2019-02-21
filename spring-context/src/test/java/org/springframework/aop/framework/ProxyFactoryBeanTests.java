@@ -49,6 +49,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.TestListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.TimeStamped;
 import org.springframework.tests.aop.advice.CountingBeforeAdvice;
 import org.springframework.tests.aop.advice.MyThrowsHandler;
@@ -144,7 +145,7 @@ public class ProxyFactoryBeanTests {
 		catch (BeanCreationException ex) {
 			// Root cause of the problem must be an AOP exception
 			AopConfigException aex = (AopConfigException) ex.getCause();
-			assertTrue(aex.getMessage().indexOf("TargetSource") != -1);
+			assertTrue(aex.getMessage().contains("TargetSource"));
 		}
 	}
 
@@ -259,22 +260,22 @@ public class ProxyFactoryBeanTests {
 
 		// Check it works without AOP
 		SideEffectBean raw = (SideEffectBean) bf.getBean("prototypeTarget");
-		assertEquals(INITIAL_COUNT, raw.getCount() );
+		assertEquals(INITIAL_COUNT, raw.getCount());
 		raw.doWork();
-		assertEquals(INITIAL_COUNT+1, raw.getCount() );
+		assertEquals(INITIAL_COUNT+1, raw.getCount());
 		raw = (SideEffectBean) bf.getBean("prototypeTarget");
-		assertEquals(INITIAL_COUNT, raw.getCount() );
+		assertEquals(INITIAL_COUNT, raw.getCount());
 
 		// Now try with advised instances
 		SideEffectBean prototype2FirstInstance = (SideEffectBean) bf.getBean(beanName);
-		assertEquals(INITIAL_COUNT, prototype2FirstInstance.getCount() );
+		assertEquals(INITIAL_COUNT, prototype2FirstInstance.getCount());
 		prototype2FirstInstance.doWork();
-		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount() );
+		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount());
 
 		SideEffectBean prototype2SecondInstance = (SideEffectBean) bf.getBean(beanName);
 		assertFalse("Prototypes are not ==", prototype2FirstInstance == prototype2SecondInstance);
-		assertEquals(INITIAL_COUNT, prototype2SecondInstance.getCount() );
-		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount() );
+		assertEquals(INITIAL_COUNT, prototype2SecondInstance.getCount());
+		assertEquals(INITIAL_COUNT + 1, prototype2FirstInstance.getCount());
 
 		return prototype2FirstInstance;
 	}
@@ -397,7 +398,7 @@ public class ProxyFactoryBeanTests {
 		config.removeAdvice(debugInterceptor);
 		it.getSpouse();
 
-		// Still invoked wiht old reference
+		// Still invoked with old reference
 		assertEquals(2, debugInterceptor.getCount());
 
 		// not invoked with new object
@@ -730,7 +731,7 @@ public class ProxyFactoryBeanTests {
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
-				public boolean matches(Method m, Class<?> targetClass, Object... args) {
+				public boolean matches(Method m, @Nullable Class<?> targetClass, Object... args) {
 					return m.getReturnType() == Void.TYPE;
 				}
 			});

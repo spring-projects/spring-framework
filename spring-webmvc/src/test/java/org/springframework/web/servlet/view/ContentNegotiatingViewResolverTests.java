@@ -134,7 +134,10 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameWithInvalidAcceptHeader() throws Exception {
 		request.addHeader("Accept", "application");
 
+		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 		viewResolver.afterPropertiesSet();
+
 		View result = viewResolver.resolveViewName("test", Locale.ENGLISH);
 		assertNull(result);
 	}

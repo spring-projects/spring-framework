@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.handler;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.socket.CloseStatus;
 
 /**
@@ -31,9 +32,9 @@ public class SessionLimitExceededException extends RuntimeException {
 	private final CloseStatus status;
 
 
-	public SessionLimitExceededException(String message, CloseStatus status) {
+	public SessionLimitExceededException(String message, @Nullable CloseStatus status) {
 		super(message);
-		this.status = (status != null) ? status : CloseStatus.NO_STATUS_CODE;
+		this.status = (status != null ? status : CloseStatus.NO_STATUS_CODE);
 	}
 
 

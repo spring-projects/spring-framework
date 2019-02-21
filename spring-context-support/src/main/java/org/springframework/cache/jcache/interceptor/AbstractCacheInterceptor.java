@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.cache.interceptor.AbstractCacheInvoker;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -35,6 +36,8 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ * @param <O> the operation type
+ * @param <A> the annotation type
  */
 @SuppressWarnings("serial")
 abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A extends Annotation>
@@ -48,6 +51,7 @@ abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A 
 	}
 
 
+	@Nullable
 	protected abstract Object invoke(CacheOperationInvocationContext<O> context, CacheOperationInvoker invoker)
 			throws Throwable;
 
@@ -71,6 +75,7 @@ abstract class AbstractCacheInterceptor<O extends AbstractJCacheOperation<A>, A 
 	 * <p>Throw an {@link IllegalStateException} if the collection holds more than one element
 	 * @return the single element or {@code null} if the collection is empty
 	 */
+	@Nullable
 	static Cache extractFrom(Collection<? extends Cache> caches) {
 		if (CollectionUtils.isEmpty(caches)) {
 			return null;

@@ -28,7 +28,10 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see commonj.timers.TimerListener
  * @see java.lang.Runnable
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public class DelegatingTimerListener implements TimerListener {
 
 	private final Runnable runnable;

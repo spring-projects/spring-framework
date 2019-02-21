@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,17 +322,6 @@ public class MappingJackson2JsonViewTests {
 		assertFalse(content.contains(FilterProvider.class.getName()));
 	}
 
-	@Test
-	public void renderWithJsonp() throws Exception {
-		testJsonp("jsonp", "callback", true);
-		testJsonp("jsonp", "_callback", true);
-		testJsonp("jsonp", "_Call.bAcK", true);
-		testJsonp("jsonp", "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", true);
-
-		testJsonp("jsonp", "<script>", false);
-		testJsonp("jsonp", "!foo!bar", false);
-	}
-
 	private void validateResult() throws Exception {
 		String json = response.getContentAsString();
 		DirectFieldAccessor viewAccessor = new DirectFieldAccessor(view);
@@ -344,26 +333,6 @@ public class MappingJackson2JsonViewTests {
 				jsContext.evaluateString(jsScope, "(" + json + ")", "JSON Stream", 1, null);
 		assertNotNull("Json Result did not eval as valid JavaScript", jsResult);
 		assertEquals("application/json", response.getContentType());
-	}
-
-	private void testJsonp(String paramName, String paramValue, boolean validValue) throws Exception {
-		Map<String, Object> model = new HashMap<>();
-		model.put("foo", "bar");
-
-		this.request = new MockHttpServletRequest();
-		this.request.addParameter("otherparam", "value");
-		this.request.addParameter(paramName, paramValue);
-		this.response = new MockHttpServletResponse();
-
-		this.view.render(model, this.request, this.response);
-
-		String content = this.response.getContentAsString();
-		if (validValue) {
-			assertEquals("/**/" + paramValue + "({\"foo\":\"bar\"});", content);
-		}
-		else {
-			assertEquals("{\"foo\":\"bar\"}", content);
-		}
 	}
 
 
@@ -454,6 +423,7 @@ public class MappingJackson2JsonViewTests {
 
 
 	@JsonFilter("myJacksonFilter")
+	@SuppressWarnings("unused")
 	private static class TestSimpleBeanFiltered {
 
 		private String property1;

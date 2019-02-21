@@ -22,6 +22,7 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -46,7 +47,7 @@ public class DynamicDestinationResolver implements DestinationResolver {
 	 * @see #resolveQueue(javax.jms.Session, String)
 	 */
 	@Override
-	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
+	public Destination resolveDestinationName(@Nullable Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 
 		Assert.notNull(session, "Session must not be null");

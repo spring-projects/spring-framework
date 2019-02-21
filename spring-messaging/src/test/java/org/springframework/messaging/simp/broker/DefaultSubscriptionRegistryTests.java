@@ -258,13 +258,15 @@ public class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	public void registerSubscriptionWithSelector() throws Exception {
+	public void registerSubscriptionWithSelector() {
 		String sessionId = "sess01";
 		String subscriptionId = "subs01";
 		String destination = "/foo";
 		String selector = "headers.foo == 'bar'";
 
 		this.registry.registerSubscription(subscribeMessage(sessionId, subscriptionId, destination, selector));
+
+		// First, try with selector header
 
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
 		accessor.setDestination(destination);
@@ -276,9 +278,32 @@ public class DefaultSubscriptionRegistryTests {
 		assertEquals(1, actual.size());
 		assertEquals(Collections.singletonList(subscriptionId), actual.get(sessionId));
 
+		// Then without
+
 		actual = this.registry.findSubscriptions(createMessage(destination));
 		assertNotNull(actual);
 		assertEquals(0, actual.size());
+	}
+
+	@Test
+	public void registerSubscriptionWithSelectorNotSupported() {
+		String sessionId = "sess01";
+		String subscriptionId = "subs01";
+		String destination = "/foo";
+		String selector = "headers.foo == 'bar'";
+
+		this.registry.setSelectorHeaderName(null);
+		this.registry.registerSubscription(subscribeMessage(sessionId, subscriptionId, destination, selector));
+
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
+		accessor.setDestination(destination);
+		accessor.setNativeHeader("foo", "bazz");
+		Message<?> message = MessageBuilder.createMessage("", accessor.getMessageHeaders());
+
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message);
+		assertNotNull(actual);
+		assertEquals(1, actual.size());
+		assertEquals(Collections.singletonList(subscriptionId), actual.get(sessionId));
 	}
 
 	@Test  // SPR-11931

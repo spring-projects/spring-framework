@@ -18,6 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.io.Serializable;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.DelegatingTransactionDefinition;
 
 /**
@@ -47,6 +48,7 @@ public abstract class DelegatingTransactionAttribute extends DelegatingTransacti
 
 
 	@Override
+	@Nullable
 	public String getQualifier() {
 		return this.targetAttribute.getQualifier();
 	}

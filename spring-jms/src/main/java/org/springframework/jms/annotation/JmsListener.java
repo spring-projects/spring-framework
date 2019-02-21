@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,12 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * the JMS listener container. If not set, a <em>default</em> container factory is
  * assumed to be available with a bean name of {@code jmsListenerContainerFactory}
  * unless an explicit default has been provided through configuration.
+ *
+ * <p><b>Consider setting up a custom
+ * {@link org.springframework.jms.config.DefaultJmsListenerContainerFactory} bean.</b>
+ * For production purposes, you'll typically fine-tune timeouts and recovery settings.
+ * Most importantly, the default 'AUTO_ACKNOWLEDGE' mode does not provide reliability
+ * guarantees, so make sure to use transacted sessions in case of reliability needs.
  *
  * <p>Processing of {@code @JmsListener} annotations is performed by registering a
  * {@link JmsListenerAnnotationBeanPostProcessor}. This can be done manually or,

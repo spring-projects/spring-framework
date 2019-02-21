@@ -4,7 +4,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-	<websocket:message-broker order="2">
+	<websocket:message-broker order="2" preserve-publish-order="true">
 		<websocket:stomp-endpoint path="/foo">
 			<websocket:sockjs/>
 		</websocket:stomp-endpoint>

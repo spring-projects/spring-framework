@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.concurrent.Callable;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
@@ -51,17 +54,14 @@ import org.springframework.web.util.NestedServletException;
  * a method argument that provides access to the response stream.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private static final Method CALLABLE_METHOD = ClassUtils.getMethod(Callable.class, "call");
 
-
-	private HttpStatus responseStatus;
-
-	private String responseReason;
-
+	@Nullable
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 
@@ -70,7 +70,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	public ServletInvocableHandlerMethod(Object handler, Method method) {
 		super(handler, method);
-		initResponseStatus();
 	}
 
 	/**
@@ -78,18 +77,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	public ServletInvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
-		initResponseStatus();
-	}
-
-	private void initResponseStatus() {
-		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
-		if (annotation == null) {
-			annotation = AnnotatedElementUtils.findMergedAnnotation(getBeanType(), ResponseStatus.class);
-		}
-		if (annotation != null) {
-			this.responseStatus = annotation.code();
-			this.responseReason = annotation.reason();
-		}
 	}
 
 
@@ -101,38 +88,40 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		this.returnValueHandlers = returnValueHandlers;
 	}
 
+
 	/**
-	 * Invokes the method and handles the return value through one of the
-	 * configured {@link HandlerMethodReturnValueHandler}s.
+	 * Invoke the method and handle the return value through one of the
+	 * configured {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}.
 	 * @param webRequest the current request
 	 * @param mavContainer the ModelAndViewContainer for this request
 	 * @param providedArgs "given" arguments matched by type (not resolved)
 	 */
-	public void invokeAndHandle(ServletWebRequest webRequest,
-			ModelAndViewContainer mavContainer, Object... providedArgs) throws Exception {
+	public void invokeAndHandle(ServletWebRequest webRequest, ModelAndViewContainer mavContainer,
+			Object... providedArgs) throws Exception {
 
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
 		setResponseStatus(webRequest);
 
 		if (returnValue == null) {
-			if (isRequestNotModified(webRequest) || hasResponseStatus() || mavContainer.isRequestHandled()) {
+			if (isRequestNotModified(webRequest) || getResponseStatus() != null || mavContainer.isRequestHandled()) {
 				mavContainer.setRequestHandled(true);
 				return;
 			}
 		}
-		else if (StringUtils.hasText(this.responseReason)) {
+		else if (StringUtils.hasText(getResponseStatusReason())) {
 			mavContainer.setRequestHandled(true);
 			return;
 		}
 
 		mavContainer.setRequestHandled(false);
+		Assert.state(this.returnValueHandlers != null, "No return value handlers");
 		try {
 			this.returnValueHandlers.handleReturnValue(
 					returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
 		}
 		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
-				logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
+				logger.trace(formatErrorForReturnValue(returnValue), ex);
 			}
 			throw ex;
 		}
@@ -142,17 +131,24 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Set the response status according to the {@link ResponseStatus} annotation.
 	 */
 	private void setResponseStatus(ServletWebRequest webRequest) throws IOException {
-		if (this.responseStatus == null) {
+		HttpStatus status = getResponseStatus();
+		if (status == null) {
 			return;
 		}
-		if (StringUtils.hasText(this.responseReason)) {
-			webRequest.getResponse().sendError(this.responseStatus.value(), this.responseReason);
+
+		HttpServletResponse response = webRequest.getResponse();
+		if (response != null) {
+			String reason = getResponseStatusReason();
+			if (StringUtils.hasText(reason)) {
+				response.sendError(status.value(), reason);
+			}
+			else {
+				response.setStatus(status.value());
+			}
 		}
-		else {
-			webRequest.getResponse().setStatus(this.responseStatus.value());
-		}
-		// to be picked up by the RedirectView
-		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, this.responseStatus);
+
+		// To be picked up by RedirectView
+		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, status);
 	}
 
 	/**
@@ -164,20 +160,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		return webRequest.isNotModified();
 	}
 
-	/**
-	 * Does this method have the response status instruction?
-	 */
-	private boolean hasResponseStatus() {
-		return (this.responseStatus != null);
-	}
-
-	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
-		StringBuilder sb = new StringBuilder(message);
-		if (returnValue != null) {
-			sb.append(" [type=").append(returnValue.getClass().getName()).append("]");
-		}
-		sb.append(" [value=").append(returnValue).append("]");
-		return getDetailedErrorMessage(sb.toString());
+	private String formatErrorForReturnValue(@Nullable Object returnValue) {
+		return "Error handling return value=[" + returnValue + "]" +
+				(returnValue != null ? ", type=" + returnValue.getClass().getName() : "") +
+				" in " + toString();
 	}
 
 	/**
@@ -202,19 +188,19 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		private final MethodParameter returnType;
 
 		public ConcurrentResultHandlerMethod(final Object result, ConcurrentResultMethodParameter returnType) {
-			super(new Callable<Object>() {
-				@Override
-				public Object call() throws Exception {
-					if (result instanceof Exception) {
-						throw (Exception) result;
-					}
-					else if (result instanceof Throwable) {
-						throw new NestedServletException("Async processing failed", (Throwable) result);
-					}
-					return result;
+			super((Callable<Object>) () -> {
+				if (result instanceof Exception) {
+					throw (Exception) result;
 				}
+				else if (result instanceof Throwable) {
+					throw new NestedServletException("Async processing failed", (Throwable) result);
+				}
+				return result;
 			}, CALLABLE_METHOD);
-			setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
+
+			if (ServletInvocableHandlerMethod.this.returnValueHandlers != null) {
+				setHandlerMethodReturnValueHandlers(ServletInvocableHandlerMethod.this.returnValueHandlers);
+			}
 			this.returnType = returnType;
 		}
 
@@ -231,7 +217,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		 * async return type, e.g. Foo instead of {@code DeferredResult<Foo>}.
 		 */
 		@Override
-		public MethodParameter getReturnValueType(Object returnValue) {
+		public MethodParameter getReturnValueType(@Nullable Object returnValue) {
 			return this.returnType;
 		}
 
@@ -260,6 +246,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	private class ConcurrentResultMethodParameter extends HandlerMethodParameter {
 
+		@Nullable
 		private final Object returnValue;
 
 		private final ResolvableType returnType;
@@ -267,7 +254,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		public ConcurrentResultMethodParameter(Object returnValue) {
 			super(-1);
 			this.returnValue = returnValue;
-			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
+			this.returnType = (returnValue instanceof ReactiveTypeHandler.CollectedValuesList ?
+					((ReactiveTypeHandler.CollectedValuesList) returnValue).getReturnType() :
+					ResolvableType.forType(super.getGenericParameterType()).getGeneric());
 		}
 
 		public ConcurrentResultMethodParameter(ConcurrentResultMethodParameter original) {
@@ -282,7 +271,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 				return this.returnValue.getClass();
 			}
 			if (!ResolvableType.NONE.equals(this.returnType)) {
-				return this.returnType.getRawClass();
+				return this.returnType.toClass();
 			}
 			return super.getParameterType();
 		}
@@ -290,6 +279,15 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		@Override
 		public Type getGenericParameterType() {
 			return this.returnType.getType();
+		}
+
+		@Override
+		public <T extends Annotation> boolean hasMethodAnnotation(Class<T> annotationType) {
+			// Ensure @ResponseBody-style handling for values collected from a reactive type
+			// even if actual return type is ResponseEntity<Flux<T>>
+			return (super.hasMethodAnnotation(annotationType) ||
+					(annotationType == ResponseBody.class &&
+							this.returnValue instanceof ReactiveTypeHandler.CollectedValuesList));
 		}
 
 		@Override

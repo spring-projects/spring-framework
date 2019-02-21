@@ -22,17 +22,16 @@
 		<xsd:complexType>
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.cache.annotation.AnnotationCacheOperationDefinitionSource"><![CDATA[
-	Indicates that cache configuration is defined by Java 5
-	annotations on bean classes, and that proxies are automatically
-	to be created for the relevant annotated beans.
+	Indicates that cache configuration is defined by annotations on bean classes,
+	and that proxies are automatically to be created for the relevant annotated beans.
 
-	The default annotations supported are Spring's @Cacheable, @CachePut and @CacheEvict. If
-	spring-context-support and the JSR-107 API are on the classpath, additional proxies are
-	automatically created for JSR-107 annotated beans, that is @CacheResult, @CachePut,
+	The default annotations supported are Spring's @Cacheable, @CachePut and @CacheEvict.
+	If spring-context-support and the JSR-107 API are on the classpath, additional proxies
+	are automatically created for JSR-107 annotated beans, that is @CacheResult, @CachePut,
 	@CacheRemove and @CacheRemoveAll.
 
-	See org.springframework.cache.annotation.EnableCaching Javadoc
-	for information on code-based alternatives to this XML element.
+	See org.springframework.cache.annotation.EnableCaching javadoc for information on
+	code-based alternatives to this XML element.
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:attribute name="cache-manager" type="xsd:string" default="cacheManager">
@@ -148,8 +147,7 @@
 		<xsd:complexType>
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.cache.interceptor.CacheInterceptor"><![CDATA[
-	Defines the cache semantics of the AOP advice that is to be
-	executed.
+	Defines the cache semantics of the AOP advice that is to be executed.
 
 	That is, this advice element is where the cacheable semantics of
 	any	number of methods are defined (where cacheable semantics
@@ -243,7 +241,6 @@
 	example, 'get*', 'handle*', '*Order', 'on*Event', etc.]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-
 	</xsd:complexType>
 
 	<xsd:complexType name="definitionsType">
@@ -303,7 +300,6 @@
 	invoked (default) or before.]]></xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>
-
 								</xsd:extension>
 							</xsd:complexContent>
 						</xsd:complexType>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,6 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	private static int numTearDownCalls = 0;
 	private static int numTearDownCallsInTransaction = 0;
 
-	private boolean beanInitialized = false;
-
-	private String beanName = "replace me with [" + getClass().getName() + "]";
 
 	private Employee employee;
 
@@ -71,25 +68,26 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	private Pet pet;
 
 	@Autowired(required = false)
-	protected Long nonrequiredLong;
+	private Long nonrequiredLong;
 
-	@Resource()
-	protected String foo;
+	@Resource
+	private String foo;
 
-	protected String bar;
+	private String bar;
+
+	private String beanName;
+
+	private boolean beanInitialized = false;
 
 
-	private int createPerson(String name) {
-		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
+	@Autowired
+	private void setEmployee(Employee employee) {
+		this.employee = employee;
 	}
 
-	private int deletePerson(String name) {
-		return jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		this.beanInitialized = true;
+	@Resource
+	private void setBar(String bar) {
+		this.bar = bar;
 	}
 
 	@Override
@@ -97,24 +95,11 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		this.beanName = beanName;
 	}
 
-	@Autowired
-	protected void setEmployee(Employee employee) {
-		this.employee = employee;
+	@Override
+	public void afterPropertiesSet() {
+		this.beanInitialized = true;
 	}
 
-	@Resource
-	protected void setBar(String bar) {
-		this.bar = bar;
-	}
-
-	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
-		assertEquals(countRowsInTable("person"), expectedNumRows, "the number of rows in the person table ("
-				+ testState + ").");
-	}
-
-	private void assertAddPerson(final String name) {
-		assertEquals(createPerson(name), 1, "Adding '" + name + "'");
-	}
 
 	@BeforeClass
 	void beforeClass() {
@@ -132,12 +117,51 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertEquals(numTearDownCallsInTransaction, NUM_TX_TESTS, "number of calls to tearDown() within a transaction.");
 	}
 
+	@BeforeMethod
+	void setUp() {
+		numSetUpCalls++;
+		if (inTransaction()) {
+			numSetUpCallsInTransaction++;
+		}
+		assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
+	}
+
+	@AfterMethod
+	void tearDown() {
+		numTearDownCalls++;
+		if (inTransaction()) {
+			numTearDownCallsInTransaction++;
+		}
+		assertNumRowsInPersonTable((inTransaction() ? 4 : 1), "after a test method");
+	}
+
+	@BeforeTransaction
+	void beforeTransaction() {
+		assertNumRowsInPersonTable(1, "before a transactional test method");
+		assertAddPerson(YODA);
+	}
+
+	@AfterTransaction
+	void afterTransaction() {
+		assertEquals(deletePerson(YODA), 1, "Deleting yoda");
+		assertNumRowsInPersonTable(1, "after a transactional test method");
+	}
+
+
+	@Test
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	void verifyBeanNameSet() {
+		assertInTransaction(false);
+		assertTrue(this.beanName.startsWith(getClass().getName()), "The bean name of this test instance " +
+				"should have been set to the fully qualified class name due to BeanNameAware semantics.");
+	}
+
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	void verifyApplicationContextSet() {
 		assertInTransaction(false);
 		assertNotNull(super.applicationContext,
-			"The application context should have been set due to ApplicationContextAware semantics.");
+				"The application context should have been set due to ApplicationContextAware semantics.");
 		Employee employeeBean = (Employee) super.applicationContext.getBean("employee");
 		assertEquals(employeeBean.getName(), "John Smith", "employee's name.");
 	}
@@ -147,15 +171,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	void verifyBeanInitialized() {
 		assertInTransaction(false);
 		assertTrue(beanInitialized,
-			"This test instance should have been initialized due to InitializingBean semantics.");
-	}
-
-	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	void verifyBeanNameSet() {
-		assertInTransaction(false);
-		assertEquals(beanName, getClass().getName(),
-			"The bean name of this test instance should have been set due to BeanNameAware semantics.");
+				"This test instance should have been initialized due to InitializingBean semantics.");
 	}
 
 	@Test
@@ -189,21 +205,6 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertEquals(bar, "Bar", "The setBar() method should have been injected via @Resource.");
 	}
 
-	@BeforeTransaction
-	void beforeTransaction() {
-		assertNumRowsInPersonTable(1, "before a transactional test method");
-		assertAddPerson(YODA);
-	}
-
-	@BeforeMethod
-	void setUp() throws Exception {
-		numSetUpCalls++;
-		if (inTransaction()) {
-			numSetUpCallsInTransaction++;
-		}
-		assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
-	}
-
 	@Test
 	void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
@@ -212,19 +213,22 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertNumRowsInPersonTable(4, "in modifyTestDataWithinTransaction()");
 	}
 
-	@AfterMethod
-	void tearDown() throws Exception {
-		numTearDownCalls++;
-		if (inTransaction()) {
-			numTearDownCallsInTransaction++;
-		}
-		assertNumRowsInPersonTable((inTransaction() ? 4 : 1), "after a test method");
+
+	private int createPerson(String name) {
+		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
-	@AfterTransaction
-	void afterTransaction() {
-		assertEquals(deletePerson(YODA), 1, "Deleting yoda");
-		assertNumRowsInPersonTable(1, "after a transactional test method");
+	private int deletePerson(String name) {
+		return jdbcTemplate.update("DELETE FROM person WHERE name=?", name);
+	}
+
+	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
+		assertEquals(countRowsInTable("person"), expectedNumRows,
+				"the number of rows in the person table (" + testState + ").");
+	}
+
+	private void assertAddPerson(String name) {
+		assertEquals(createPerson(name), 1, "Adding '" + name + "'");
 	}
 
 }

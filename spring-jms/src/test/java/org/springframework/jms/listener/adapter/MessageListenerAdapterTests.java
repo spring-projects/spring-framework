@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jms.listener.adapter;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import javax.jms.BytesMessage;
-import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -375,40 +374,6 @@ public class MessageListenerAdapterTests {
 			fail("expected ListenerExecutionFailedException");
 		}
 		catch (ListenerExecutionFailedException ex) { /* expected */ }
-	}
-
-	@Test
-	public void testFailsIfNoDefaultListenerMethodNameIsSupplied() throws Exception {
-		final TextMessage message = mock(TextMessage.class);
-		given(message.getText()).willReturn(TEXT);
-
-		final MessageListenerAdapter adapter = new MessageListenerAdapter() {
-			@Override
-			protected void handleListenerException(Throwable ex) {
-				assertTrue(ex instanceof IllegalStateException);
-			}
-		};
-		adapter.setDefaultListenerMethod(null);
-		adapter.onMessage(message);
-	}
-
-	@Test
-	public void testFailsWhenOverriddenGetListenerMethodNameReturnsNull() throws Exception {
-		final TextMessage message = mock(TextMessage.class);
-		given(message.getText()).willReturn(TEXT);
-
-		final MessageListenerAdapter adapter = new MessageListenerAdapter() {
-			@Override
-			protected void handleListenerException(Throwable ex) {
-				assertTrue(ex instanceof javax.jms.IllegalStateException);
-			}
-			@Override
-			protected String getListenerMethodName(Message originalMessage, Object extractedMessage) {
-				return null;
-			}
-		};
-		adapter.setDefaultListenerMethod(null);
-		adapter.onMessage(message);
 	}
 
 	@Test

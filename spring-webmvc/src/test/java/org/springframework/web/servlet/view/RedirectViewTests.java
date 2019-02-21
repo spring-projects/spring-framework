@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,8 +137,8 @@ public class RedirectViewTests {
 		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
 	}
 
-	@SuppressWarnings("AssertEqualsBetweenInconvertibleTypes")
 	@Test
+	@SuppressWarnings("AssertEqualsBetweenInconvertibleTypes")
 	public void flashMap() throws Exception {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com/path");
@@ -172,9 +172,7 @@ public class RedirectViewTests {
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 
 		given(mockProcessor.processUrl(request, "/path")).willReturn("/path?key=123");
-
 		rv.render(new ModelMap(), request, response);
-
 		verify(mockProcessor).processUrl(request, "/path");
 	}
 
@@ -196,9 +194,7 @@ public class RedirectViewTests {
 			rv.setUrl("/path");
 
 			given(mockProcessor.processUrl(request, "/path")).willReturn("/path?key=123");
-
 			rv.render(new ModelMap(), request, response);
-
 			verify(mockProcessor).processUrl(request, "/path");
 		}
 		finally {
@@ -206,9 +202,7 @@ public class RedirectViewTests {
 		}
 	}
 
-	// SPR-13693
-
-	@Test
+	@Test // SPR-13693
 	public void remoteHost() throws Exception {
 		RedirectView rv = new RedirectView();
 
@@ -222,6 +216,19 @@ public class RedirectViewTests {
 		assertFalse(rv.isRemoteHost("/path"));
 		assertTrue(rv.isRemoteHost("http://url.somewhereelse.com"));
 
+	}
+
+	@Test // SPR-16752
+	public void contextRelativeWithValidatedContextPath() throws Exception {
+		String url = "/myUrl";
+
+		this.request.setContextPath("//context");
+		this.response = new MockHttpServletResponse();
+		doTest(new HashMap<>(), url, true, "/context" + url);
+
+		this.request.setContextPath("///context");
+		this.response = new MockHttpServletResponse();
+		doTest(new HashMap<>(), url, true, "/context" + url);
 	}
 
 	@Test

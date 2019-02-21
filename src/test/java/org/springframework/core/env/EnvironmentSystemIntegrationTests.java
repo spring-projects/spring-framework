@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,6 +303,37 @@ public class EnvironmentSystemIntegrationTests {
 		assertThat("should not have dev bean", ctx.containsBean(DEV_BEAN_NAME), is(false));
 		assertThat("should not have derived dev bean", ctx.containsBean(DERIVED_DEV_BEAN_NAME), is(false));
 		assertThat("should not have transitive bean", ctx.containsBean(TRANSITIVE_BEAN_NAME), is(false));
+	}
+
+	@Test
+	public void annotationConfigApplicationContext_withProfileExpressionMatchOr() {
+		testProfileExpression(true, "p3");
+	}
+
+	@Test
+	public void annotationConfigApplicationContext_withProfileExpressionMatchAnd() {
+		testProfileExpression(true, "p1", "p2");
+	}
+
+	@Test
+	public void annotationConfigApplicationContext_withProfileExpressionNoMatchAnd() {
+		testProfileExpression(false, "p1");
+	}
+
+	@Test
+	public void annotationConfigApplicationContext_withProfileExpressionNoMatchNone() {
+		testProfileExpression(false, "p4");
+	}
+
+	private void testProfileExpression(boolean expected, String... activeProfiles) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		StandardEnvironment environment = new StandardEnvironment();
+		environment.setActiveProfiles(activeProfiles);
+		ctx.setEnvironment(environment);
+		ctx.register(ProfileExpressionConfig.class);
+		ctx.refresh();
+		assertThat("wrong presence of expression bean",
+				ctx.containsBean("expressionBean"), is(expected));
 	}
 
 	@Test
@@ -640,6 +671,15 @@ public class EnvironmentSystemIntegrationTests {
 	static class DerivedDevConfig extends DevConfig {
 		@Bean
 		public Object derivedDevBean() {
+			return new Object();
+		}
+	}
+
+	@Profile("(p1 & p2) | p3")
+	@Configuration
+	static class ProfileExpressionConfig {
+		@Bean
+		public Object expressionBean() {
 			return new Object();
 		}
 	}

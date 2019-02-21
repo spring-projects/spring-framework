@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,18 @@ public @interface EventListener {
 	/**
 	 * Spring Expression Language (SpEL) attribute used for making the
 	 * event handling conditional.
-	 * <p>Default is "", meaning the event is always handled.
+	 * <p>Default is {@code ""}, meaning the event is always handled.
+	 * <p>The SpEL expression evaluates against a dedicated context that
+	 * provides the following meta-data:
+	 * <ul>
+	 * <li>{@code #root.event}, {@code #root.args} for
+	 * references to the {@link ApplicationEvent} and method arguments
+	 * respectively.</li>
+	 * <li>Method arguments can be accessed by index. For instance the
+	 * first argument can be accessed via {@code #root.args[0]}, {@code #p0}
+	 * or {@code #a0}. Arguments can also be accessed by name if that
+	 * information is available.</li>
+	 * </ul>
 	 */
 	String condition() default "";
 

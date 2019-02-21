@@ -63,7 +63,8 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 		testBean.setCustomEnum(CustomEnum.VALUE_1);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
 		String selectName = "testBean.customEnum";
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE,
+				new BindStatus(getRequestContext(), selectName, false));
 
 		this.tag.setValue("VALUE_1");
 

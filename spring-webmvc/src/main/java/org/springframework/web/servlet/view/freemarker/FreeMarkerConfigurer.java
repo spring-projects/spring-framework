@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import freemarker.template.TemplateException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
+import org.springframework.util.Assert;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -78,8 +80,10 @@ import org.springframework.web.context.ServletContextAware;
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware, ServletContextAware {
 
+	@Nullable
 	private Configuration configuration;
 
+	@Nullable
 	private TaglibFactory taglibFactory;
 
 
@@ -105,7 +109,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 
 	/**
 	 * Initialize FreeMarkerConfigurationFactory's Configuration
-	 * if not overridden by a preconfigured FreeMarker Configuation.
+	 * if not overridden by a preconfigured FreeMarker Configuration.
 	 * <p>Sets up a ClassTemplateLoader to use for loading Spring macros.
 	 * @see #createConfiguration
 	 * @see #setConfiguration
@@ -124,7 +128,6 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	@Override
 	protected void postProcessTemplateLoaders(List<TemplateLoader> templateLoaders) {
 		templateLoaders.add(new ClassTemplateLoader(FreeMarkerConfigurer.class, ""));
-		logger.info("ClassTemplateLoader for Spring macros added to FreeMarker configuration");
 	}
 
 
@@ -133,6 +136,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 */
 	@Override
 	public Configuration getConfiguration() {
+		Assert.state(this.configuration != null, "No Configuration available");
 		return this.configuration;
 	}
 
@@ -141,6 +145,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 */
 	@Override
 	public TaglibFactory getTaglibFactory() {
+		Assert.state(this.taglibFactory != null, "No TaglibFactory available");
 		return this.taglibFactory;
 	}
 

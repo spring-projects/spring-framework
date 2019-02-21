@@ -43,17 +43,17 @@ public class BasicAuthorizationInterceptorTests {
 	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
-	public void createWhenUsernameIsNullShouldThrowException() {
+	public void createWhenUsernameContainsColonShouldThrowException() {
 		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Username must not be empty");
-		new BasicAuthorizationInterceptor(null, "password");
+		this.thrown.expectMessage("Username must not contain a colon");
+		new BasicAuthorizationInterceptor("username:", "password");
 	}
 
 	@Test
-	public void createWhenUsernameIsEmptyShouldThrowException() throws Exception {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Username must not be empty");
-		new BasicAuthorizationInterceptor("", "password");
+	public void createWhenUsernameIsNullShouldUseEmptyUsername() throws Exception {
+		BasicAuthorizationInterceptor interceptor = new BasicAuthorizationInterceptor(
+				null, "password");
+		assertEquals("", new DirectFieldAccessor(interceptor).getPropertyValue("username"));
 	}
 
 	@Test

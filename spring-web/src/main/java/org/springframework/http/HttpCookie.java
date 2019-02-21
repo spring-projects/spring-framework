@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -33,7 +35,7 @@ public class HttpCookie {
 	private final String value;
 
 
-	public HttpCookie(String name, String value) {
+	public HttpCookie(String name, @Nullable String value) {
 		Assert.hasLength(name, "'name' is required and must not be empty.");
 		this.name = name;
 		this.value = (value != null ? value : "");
@@ -47,7 +49,7 @@ public class HttpCookie {
 	}
 
 	/**
-	 * Return the cookie value or an empty string, never {@code null}.
+	 * Return the cookie value or an empty string (never {@code null}).
 	 */
 	public String getValue() {
 		return this.value;
@@ -69,6 +71,11 @@ public class HttpCookie {
 		}
 		HttpCookie otherCookie = (HttpCookie) other;
 		return (this.name.equalsIgnoreCase(otherCookie.getName()));
+	}
+
+	@Override
+	public String toString() {
+		return this.name + '=' + this.value;
 	}
 
 }

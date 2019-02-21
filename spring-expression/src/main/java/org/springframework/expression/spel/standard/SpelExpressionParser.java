@@ -20,6 +20,7 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.TemplateAwareExpressionParser;
 import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -56,7 +57,7 @@ public class SpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	@Override
-	protected SpelExpression doParseExpression(String expressionString, ParserContext context) throws ParseException {
+	protected SpelExpression doParseExpression(String expressionString, @Nullable ParserContext context) throws ParseException {
 		return new InternalSpelExpressionParser(this.configuration).doParseExpression(expressionString, context);
 	}
 

@@ -16,6 +16,8 @@
 
 package org.springframework.validation;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Strategy interface for building message codes from validation error codes.
  * Used by DataBinder to build the codes list for ObjectErrors and FieldErrors.
@@ -50,6 +52,6 @@ public interface MessageCodesResolver {
 	 * @param fieldType the field type (may be {@code null} if not determinable)
 	 * @return the message codes to use
 	 */
-	String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType);
+	String[] resolveMessageCodes(String errorCode, String objectName, String field, @Nullable Class<?> fieldType);
 
 }

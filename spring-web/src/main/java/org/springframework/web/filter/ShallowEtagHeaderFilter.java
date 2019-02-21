@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @author Juergen Hoeller
  * @since 3.0
  */
@@ -70,8 +71,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * Set whether the ETag value written to the response should be weak, as per RFC 7232.
 	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "writeWeakETag" in the filter definition in {@code web.xml}.
-	 * @see  <a href="https://tools.ietf.org/html/rfc7232#section-2.3">RFC 7232 section 2.3</a>
 	 * @since 4.3
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">RFC 7232 section 2.3</a>
 	 */
 	public void setWriteWeakETag(boolean writeWeakETag) {
 		this.writeWeakETag = writeWeakETag;
@@ -87,8 +88,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * The default value is "false" so that the filter may delay the generation of
-	 * an ETag until the last asynchronously dispatched thread.
+	 * The default value is {@code false} so that the filter may delay the generation
+	 * of an ETag until the last asynchronously dispatched thread.
 	 */
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {
@@ -125,27 +126,14 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			String responseETag = generateETagHeaderValue(responseWrapper.getContentInputStream(), this.writeWeakETag);
 			rawResponse.setHeader(HEADER_ETAG, responseETag);
 			String requestETag = request.getHeader(HEADER_IF_NONE_MATCH);
-			if (requestETag != null
-					&& (responseETag.equals(requestETag)
-					|| responseETag.replaceFirst("^W/", "").equals(requestETag.replaceFirst("^W/", ""))
-					|| "*".equals(requestETag))) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
-				}
+			if (requestETag != null && ("*".equals(requestETag) || compareETagHeaderValue(requestETag, responseETag))) {
 				rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("ETag [" + responseETag + "] not equal to If-None-Match [" + requestETag +
-							"], sending normal response");
-				}
 				responseWrapper.copyBodyToResponse();
 			}
 		}
 		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
-			}
 			responseWrapper.copyBodyToResponse();
 		}
 	}
@@ -162,19 +150,15 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * @param response the HTTP response
 	 * @param responseStatusCode the HTTP response status code
 	 * @param inputStream the response body
-	 * @return {@code true} if eligible for ETag generation; {@code false} otherwise
+	 * @return {@code true} if eligible for ETag generation, {@code false} otherwise
 	 */
 	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
 			int responseStatusCode, InputStream inputStream) {
 
 		String method = request.getMethod();
-		if (responseStatusCode >= 200 && responseStatusCode < 300 &&
-				(HttpMethod.GET.matches(method) || HttpMethod.HEAD.matches(method))) {
-
+		if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.matches(method)) {
 			String cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
-			if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
-				return true;
-			}
+			return (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE));
 		}
 		return false;
 	}
@@ -188,7 +172,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	 * @see org.springframework.util.DigestUtils
 	 */
 	protected String generateETagHeaderValue(InputStream inputStream, boolean isWeak) throws IOException {
-		// length of W/ + 0 + " + 32bits md5 hash + "
+		// length of W/ + " + 0 + 32bits md5 hash + "
 		StringBuilder builder = new StringBuilder(37);
 		if (isWeak) {
 			builder.append("W/");
@@ -197,6 +181,16 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
 		builder.append('"');
 		return builder.toString();
+	}
+
+	private boolean compareETagHeaderValue(String requestETag, String responseETag) {
+		if (requestETag.startsWith("W/")) {
+			requestETag = requestETag.substring(2);
+		}
+		if (responseETag.startsWith("W/")) {
+			responseETag = responseETag.substring(2);
+		}
+		return requestETag.equals(responseETag);
 	}
 
 

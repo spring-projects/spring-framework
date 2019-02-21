@@ -31,7 +31,6 @@ import org.junit.Test;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
@@ -59,15 +58,13 @@ public class JettyWebSocketClientTests {
 	@Before
 	public void setup() throws Exception {
 
-		int port = SocketUtils.findAvailableTcpPort();
-
-		this.server = new TestJettyWebSocketServer(port, new TextWebSocketHandler());
+		this.server = new TestJettyWebSocketServer(new TextWebSocketHandler());
 		this.server.start();
 
 		this.client = new JettyWebSocketClient();
 		this.client.start();
 
-		this.wsUrl = "ws://localhost:" + port + "/test";
+		this.wsUrl = "ws://localhost:" + this.server.getPort() + "/test";
 	}
 
 	@After
@@ -109,11 +106,11 @@ public class JettyWebSocketClientTests {
 		private final Server server;
 
 
-		public TestJettyWebSocketServer(int port, final WebSocketHandler webSocketHandler) {
+		public TestJettyWebSocketServer(final WebSocketHandler webSocketHandler) {
 
 			this.server = new Server();
 			ServerConnector connector = new ServerConnector(this.server);
-			connector.setPort(port);
+			connector.setPort(0);
 
 			this.server.addConnector(connector);
 			this.server.setHandler(new org.eclipse.jetty.websocket.server.WebSocketHandler() {
@@ -139,6 +136,10 @@ public class JettyWebSocketClientTests {
 
 		public void stop() throws Exception {
 			this.server.stop();
+		}
+
+		public int getPort() {
+			return ((ServerConnector) this.server.getConnectors()[0]).getLocalPort();
 		}
 	}
 

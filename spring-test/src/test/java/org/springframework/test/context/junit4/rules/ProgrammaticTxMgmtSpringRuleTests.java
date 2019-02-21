@@ -44,7 +44,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class ProgrammaticTxMgmtSpringRuleTests extends ProgrammaticTxMgmtTests {
 
 	@ClassRule
-	public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+	public static final SpringClassRule springClassRule = new SpringClassRule();
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();

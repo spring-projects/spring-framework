@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,7 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")  // on JDK 9
 	public void withEquivalentIntegerInstanceTwice() {
 		Collection<Integer> col = new ArrayList<>(2);
 		col.add(new Integer(5));
@@ -273,10 +274,8 @@ public class DataAccessUtilsTests {
 
 	public static class MapPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 
-		/**
-		 * in to out
-		 */
-		private Map<RuntimeException,RuntimeException> translations = new HashMap<>();
+		// in to out
+		private final Map<RuntimeException, RuntimeException> translations = new HashMap<>();
 
 		public void addTranslation(RuntimeException in, RuntimeException out) {
 			this.translations.put(in, out);

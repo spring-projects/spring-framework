@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -39,40 +40,41 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 
 
 	/**
+	 * Create an instance without any mappings to start with. Mappings may be
+	 * added later when extensions are resolved through
+	 * {@link ServletContext#getMimeType(String)} or via
+	 * {@link org.springframework.http.MediaTypeFactory}.
+	 */
+	public ServletPathExtensionContentNegotiationStrategy(ServletContext context) {
+		this(context, null);
+	}
+
+	/**
 	 * Create an instance with the given extension-to-MediaType lookup.
 	 */
 	public ServletPathExtensionContentNegotiationStrategy(
-			ServletContext servletContext, Map<String, MediaType> mediaTypes) {
+			ServletContext servletContext, @Nullable Map<String, MediaType> mediaTypes) {
 
 		super(mediaTypes);
 		Assert.notNull(servletContext, "ServletContext is required");
 		this.servletContext = servletContext;
 	}
 
-	/**
-	 * Create an instance without any mappings to start with. Mappings may be
-	 * added later when extensions are resolved through
-	 * {@link ServletContext#getMimeType(String)} or via JAF.
-	 */
-	public ServletPathExtensionContentNegotiationStrategy(ServletContext context) {
-		this(context, null);
-	}
-
 
 	/**
 	 * Resolve file extension via {@link ServletContext#getMimeType(String)}
-	 * and also delegate to base class for a potential JAF lookup.
+	 * and also delegate to base class for a potential
+	 * {@link org.springframework.http.MediaTypeFactory} lookup.
 	 */
 	@Override
+	@Nullable
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)
 			throws HttpMediaTypeNotAcceptableException {
 
 		MediaType mediaType = null;
-		if (this.servletContext != null) {
-			String mimeType = this.servletContext.getMimeType("file." + extension);
-			if (StringUtils.hasText(mimeType)) {
-				mediaType = MediaType.parseMediaType(mimeType);
-			}
+		String mimeType = this.servletContext.getMimeType("file." + extension);
+		if (StringUtils.hasText(mimeType)) {
+			mediaType = MediaType.parseMediaType(mimeType);
 		}
 		if (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 			MediaType superMediaType = super.handleNoMatch(webRequest, extension);
@@ -88,16 +90,15 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource}
 	 * with the ability to also look up through the ServletContext.
 	 * @param resource the resource to look up
-	 * @return the MediaType for the extension or {@code null}.
+	 * @return the MediaType for the extension, or {@code null} if none found
 	 * @since 4.3
 	 */
+	@Override
 	public MediaType getMediaTypeForResource(Resource resource) {
 		MediaType mediaType = null;
-		if (this.servletContext != null) {
-			String mimeType = this.servletContext.getMimeType(resource.getFilename());
-			if (StringUtils.hasText(mimeType)) {
-				mediaType = MediaType.parseMediaType(mimeType);
-			}
+		String mimeType = this.servletContext.getMimeType(resource.getFilename());
+		if (StringUtils.hasText(mimeType)) {
+			mediaType = MediaType.parseMediaType(mimeType);
 		}
 		if (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 			MediaType superMediaType = super.getMediaTypeForResource(resource);

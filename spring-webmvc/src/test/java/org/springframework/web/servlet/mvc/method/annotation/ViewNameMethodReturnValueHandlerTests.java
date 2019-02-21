@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,12 +45,14 @@ public class ViewNameMethodReturnValueHandlerTests {
 
 
 	@Before
-	public void setUp() throws NoSuchMethodException {
+	public void setup() throws NoSuchMethodException {
 		this.handler = new ViewNameMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
+
 		this.param = new MethodParameter(getClass().getDeclaredMethod("viewName"), -1);
 	}
+
 
 	@Test
 	public void supportsReturnType() throws Exception {

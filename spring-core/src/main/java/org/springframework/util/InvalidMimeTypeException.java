@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ package org.springframework.util;
 @SuppressWarnings("serial")
 public class InvalidMimeTypeException extends IllegalArgumentException {
 
-	private String mimeType;
+	private final String mimeType;
 
 
 	/**
@@ -38,7 +38,6 @@ public class InvalidMimeTypeException extends IllegalArgumentException {
 	public InvalidMimeTypeException(String mimeType, String message) {
 		super("Invalid mime type \"" + mimeType + "\": " + message);
 		this.mimeType = mimeType;
-
 	}
 
 

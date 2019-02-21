@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,15 +58,15 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	}
 
 	/**
-	 * Create a SqlRowSet that wraps the given ResultSet,
+	 * Create a {@link SqlRowSet} that wraps the given {@link ResultSet},
 	 * representing its data in a disconnected fashion.
-	 * <p>This implementation creates a Spring ResultSetWrappingSqlRowSet
-	 * instance that wraps a standard JDBC CachedRowSet instance.
+	 * <p>This implementation creates a Spring {@link ResultSetWrappingSqlRowSet}
+	 * instance that wraps a standard JDBC {@link CachedRowSet} instance.
 	 * Can be overridden to use a different implementation.
 	 * @param rs the original ResultSet (connected)
 	 * @return the disconnected SqlRowSet
 	 * @throws SQLException if thrown by JDBC methods
-	 * @see #newCachedRowSet
+	 * @see #newCachedRowSet()
 	 * @see org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet
 	 */
 	protected SqlRowSet createSqlRowSet(ResultSet rs) throws SQLException {
@@ -76,14 +76,14 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	}
 
 	/**
-	 * Create a new CachedRowSet instance, to be populated by
+	 * Create a new {@link CachedRowSet} instance, to be populated by
 	 * the {@code createSqlRowSet} implementation.
-	 * <p>The default implementation uses JDBC 4.1's RowSetProvider
-	 * when running on JDK 7 or higher, falling back to Sun's
-	 * {@code com.sun.rowset.CachedRowSetImpl} class on older JDKs.
+	 * <p>The default implementation uses JDBC 4.1's {@link RowSetFactory}.
 	 * @return a new CachedRowSet instance
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #createSqlRowSet
+	 * @see RowSetProvider#newFactory()
+	 * @see RowSetFactory#createCachedRowSet()
 	 */
 	protected CachedRowSet newCachedRowSet() throws SQLException {
 		return rowSetFactory.createCachedRowSet();

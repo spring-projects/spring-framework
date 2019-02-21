@@ -18,6 +18,7 @@ package org.springframework.web.servlet.handler;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -37,6 +38,7 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	 * @param pattern the pattern to match
 	 * @return the result from request matching, or {@code null} if none
 	 */
+	@Nullable
 	RequestMatchResult match(HttpServletRequest request, String pattern);
 
 }

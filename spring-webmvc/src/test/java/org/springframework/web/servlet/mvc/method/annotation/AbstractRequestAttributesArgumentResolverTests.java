@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * Base class for {@code @RequestAttribute} and {@code @SessionAttribute} method
@@ -62,11 +61,13 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(request, response);
+
 		this.resolver = createResolver();
+
 		this.handleMethod = AbstractRequestAttributesArgumentResolverTests.class
 				.getDeclaredMethod(getHandleMethodName(), Foo.class, Foo.class, Foo.class, Optional.class);
 	}
@@ -130,7 +131,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		Object actual = testResolveArgument(param, factory);
 		assertNotNull(actual);
 		assertEquals(Optional.class, actual.getClass());
-		assertFalse(((Optional) actual).isPresent());
+		assertFalse(((Optional<?>) actual).isPresent());
 
 		Foo foo = new Foo();
 		this.webRequest.setAttribute("foo", foo, getScope());
@@ -138,8 +139,8 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		actual = testResolveArgument(param, factory);
 		assertNotNull(actual);
 		assertEquals(Optional.class, actual.getClass());
-		assertTrue(((Optional) actual).isPresent());
-		assertSame(foo, ((Optional) actual).get());
+		assertTrue(((Optional<?>) actual).isPresent());
+		assertSame(foo, ((Optional<?>) actual).get());
 	}
 
 	private Object testResolveArgument(MethodParameter param) throws Exception {
