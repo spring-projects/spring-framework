@@ -112,7 +112,8 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		Flux<DataBuffer> encodedContent = encodeContent(
 				returnValue, returnType, bufferFactory, mimeType, Collections.emptyMap());
 
-		return handleEncodedContent(encodedContent, returnType, message);
+		return new ChannelSendOperator<>(encodedContent, publisher ->
+				handleEncodedContent(Flux.from(publisher), returnType, message));
 	}
 
 	@SuppressWarnings("unchecked")

@@ -15,6 +15,7 @@
  */
 package org.springframework.messaging.handler.invocation.reactive;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
@@ -43,7 +44,14 @@ public class TestReturnValueHandler implements HandlerMethodReturnValueHandler {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Mono<Void> handleReturnValue(@Nullable Object value, MethodParameter returnType, Message<?> message) {
+		return value instanceof Publisher ?
+				new ChannelSendOperator((Publisher) value, this::saveValue) :
+				saveValue(value);
+	}
+
+	private Mono<Void> saveValue(@Nullable Object value) {
 		this.lastReturnValue = value;
 		return Mono.empty();
 	}

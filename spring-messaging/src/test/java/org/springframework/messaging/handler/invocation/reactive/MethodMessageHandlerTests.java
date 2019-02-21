@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -63,7 +64,7 @@ public class MethodMessageHandlerTests {
 
 		assertEquals(5, mappings.keySet().size());
 		assertThat(mappings.keySet(), Matchers.containsInAnyOrder(
-				"/handleMessage", "/handleMessageWithArgument", "/handleMessageAndThrow",
+				"/handleMessage", "/handleMessageWithArgument", "/handleMessageWithError",
 				"/handleMessageMatch1", "/handleMessageMatch2"));
 	}
 
@@ -80,7 +81,7 @@ public class MethodMessageHandlerTests {
 
 		handler.handleMessage(message).block(Duration.ofSeconds(5));
 
-		StepVerifier.create((Mono<Object>) handler.getLastReturnValue())
+		StepVerifier.create((Publisher<Object>) handler.getLastReturnValue())
 				.expectNext("handleMessageMatch1")
 				.verifyComplete();
 	}
@@ -100,7 +101,7 @@ public class MethodMessageHandlerTests {
 
 		handler.handleMessage(message).block(Duration.ofSeconds(5));
 
-		StepVerifier.create((Mono<Object>) handler.getLastReturnValue())
+		StepVerifier.create((Publisher<Object>) handler.getLastReturnValue())
 				.expectNext("handleMessageWithArgument,payload=foo")
 				.verifyComplete();
 	}
@@ -111,11 +112,11 @@ public class MethodMessageHandlerTests {
 		TestMethodMessageHandler handler = initMethodMessageHandler(TestController.class);
 
 		Message<?> message = new GenericMessage<>("body", Collections.singletonMap(
-				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, "/handleMessageAndThrow"));
+				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, "/handleMessageWithError"));
 
 		handler.handleMessage(message).block(Duration.ofSeconds(5));
 
-		StepVerifier.create((Mono<Object>) handler.getLastReturnValue())
+		StepVerifier.create((Publisher<Object>) handler.getLastReturnValue())
 				.expectNext("handleIllegalStateException,ex=rejected")
 				.verifyComplete();
 	}
@@ -153,7 +154,7 @@ public class MethodMessageHandlerTests {
 			return delay("handleMessageWithArgument,payload=" + payload);
 		}
 
-		public Mono<Void> handleMessageAndThrow() {
+		public Mono<String> handleMessageWithError() {
 			return Mono.delay(Duration.ofMillis(10))
 					.flatMap(aLong -> Mono.error(new IllegalStateException("rejected")));
 		}

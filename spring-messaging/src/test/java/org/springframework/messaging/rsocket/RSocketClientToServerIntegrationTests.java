@@ -35,9 +35,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.ReactiveMessageChannel;
 import org.springframework.messaging.ReactiveSubscribableChannel;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.support.DefaultReactiveMessageChannel;
 import org.springframework.stereotype.Controller;
@@ -171,6 +171,26 @@ public class RSocketClientToServerIntegrationTests {
 	}
 
 	@Test
+	public void handleWithThrownException() {
+
+		Mono<String> result = requester.route("thrown-exception").data("a").retrieveMono(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Invalid input error handled")
+				.verifyComplete();
+	}
+
+	@Test
+	public void handleWithErrorSignal() {
+
+		Mono<String> result = requester.route("error-signal").data("a").retrieveMono(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Invalid input error handled")
+				.verifyComplete();
+	}
+
+	@Test
 	public void noMatchingRoute() {
 		Mono<String> result = requester.route("invalid").data("anything").retrieveMono(String.class);
 		StepVerifier.create(result).verifyErrorMessage("RSocket request not handled");
@@ -208,6 +228,20 @@ public class RSocketClientToServerIntegrationTests {
 			return payloads.delayElements(Duration.ofMillis(10)).map(payload -> payload + " async");
 		}
 
+		@MessageMapping("thrown-exception")
+		Mono<String> handleAndThrow(String payload) {
+			throw new IllegalArgumentException("Invalid input error");
+		}
+
+		@MessageMapping("error-signal")
+		Mono<String> handleAndReturnError(String payload) {
+			return Mono.error(new IllegalArgumentException("Invalid input error"));
+		}
+
+		@MessageExceptionHandler
+		Mono<String> handleException(IllegalArgumentException ex) {
+			return Mono.delay(Duration.ofMillis(10)).map(aLong -> ex.getMessage() + " handled");
+		}
 	}
 
 
