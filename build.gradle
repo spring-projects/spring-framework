@@ -33,7 +33,7 @@ ext {
 	groovyVersion        = "2.5.6"
 	hsqldbVersion        = "2.4.1"
 	jackson2Version      = "2.9.8"
-	jettyVersion         = "9.4.14.v20181114"
+	jettyVersion         = "9.4.15.v20190215"
 	junit5Version        = "5.3.2"
 	kotlinVersion        = "1.2.71"
 	log4jVersion         = "2.11.2"
@@ -45,7 +45,7 @@ ext {
 	slf4jVersion         = "1.7.25"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
 	tomcatVersion        = "9.0.16"
-	undertowVersion      = "2.0.17.Final"
+	undertowVersion      = "2.0.18.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4J = {
