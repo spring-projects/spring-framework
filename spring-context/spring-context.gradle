@@ -20,7 +20,7 @@ dependencies {
 	optional("org.codehaus.groovy:groovy:${groovyVersion}")
 	optional("org.beanshell:bsh:2.0b5")
 	optional("joda-time:joda-time:2.10.1")
-	optional("org.hibernate:hibernate-validator:5.4.2.Final")
+	optional("org.hibernate:hibernate-validator:5.4.3.Final")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("org.codehaus.groovy:groovy-jsr223:${groovyVersion}")
