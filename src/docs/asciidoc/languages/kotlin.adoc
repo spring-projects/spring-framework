@@ -326,6 +326,31 @@ class UserHandler(builder: WebClient.Builder) {
 Read this blog post about https://medium.com/@elizarov/structured-concurrency-722d765aa952[structured concurrency]
 to understand how to run code concurrently with Coroutines.
 
+=== MockMvc DSL
+
+A Kotlin DSL is provided via `MockMvc` Kotlin extensions in order to provide a more idiomatic Kotlin API and to allow
+better discoverability (no usage of static methods).
+
+[source,kotlin,indent=0]
+----
+val mockMvc: MockMvc = ...
+mockMvc.get("/person/{name}", "Lee") {
+	secure = true
+	accept = MediaType.APPLICATION_JSON
+	headers {
+		contentLanguage = Locale.FRANCE
+	}
+	principal = Principal { "foo" }
+} andExpect {
+	status { isOk }
+	content { contentType("application/json;charset=UTF-8") }
+	jsonPath("$.name") { value("Lee") }
+	content { json("""{"someBoolean": false}""", false) }
+} andDo {
+	print()
+}
+----
+
 === Kotlin Script Templates
 
 As of version 4.3, Spring Framework provides a
