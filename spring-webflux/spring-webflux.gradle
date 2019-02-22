@@ -33,14 +33,14 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
-	optional("org.apache.httpcomponents:httpclient:4.5.6") {
+	optional("org.apache.httpcomponents:httpclient:4.5.7") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("javax.xml.bind:jaxb-api:2.3.0")
 	testCompile("com.fasterxml:aalto-xml:1.0.0")
-	testCompile("org.hibernate:hibernate-validator:6.0.14.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.15.Final")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
