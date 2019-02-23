@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.StringUtils;
 
 /**
  * Spring's common transaction attribute implementation.
@@ -82,7 +83,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 * to process this specific transaction.
 	 * @since 3.0
 	 */
-	public void setQualifier(String qualifier) {
+	public void setQualifier(@Nullable String qualifier) {
 		this.qualifier = qualifier;
 	}
 
@@ -141,7 +142,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	 */
 	protected final StringBuilder getAttributeDescription() {
 		StringBuilder result = getDefinitionDescription();
-		if (this.qualifier != null) {
+		if (StringUtils.hasText(this.qualifier)) {
 			result.append("; '").append(this.qualifier).append("'");
 		}
 		return result;

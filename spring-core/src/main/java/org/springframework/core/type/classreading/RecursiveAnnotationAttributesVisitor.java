@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.core.type.classreading;
 
+import org.springframework.asm.AnnotationVisitor;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 
 /**
+ * {@link AnnotationVisitor} to recursively visit annotation attributes.
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1.1

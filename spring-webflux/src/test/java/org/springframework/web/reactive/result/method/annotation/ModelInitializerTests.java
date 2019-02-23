@@ -79,7 +79,7 @@ public class ModelInitializerTests {
 		resolverConfigurer.addCustomResolver(new ModelArgumentResolver(adapterRegistry));
 
 		ControllerMethodResolver methodResolver = new ControllerMethodResolver(
-				resolverConfigurer, Collections.emptyList(), adapterRegistry, new StaticApplicationContext());
+				resolverConfigurer, adapterRegistry, new StaticApplicationContext(), Collections.emptyList());
 
 		this.modelInitializer = new ModelInitializer(methodResolver, adapterRegistry);
 	}
@@ -214,7 +214,7 @@ public class ModelInitializerTests {
 				MethodIntrospector.selectMethods(controller.getClass(), BINDER_METHODS)
 						.stream()
 						.map(method -> new SyncInvocableHandlerMethod(controller, method))
-						.collect(Collectors.toList());;
+						.collect(Collectors.toList());
 
 		WebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		return new InitBinderBindingContext(bindingInitializer, binderMethods);

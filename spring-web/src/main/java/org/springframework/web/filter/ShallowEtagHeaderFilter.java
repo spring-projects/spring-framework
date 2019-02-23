@@ -126,25 +126,14 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			String responseETag = generateETagHeaderValue(responseWrapper.getContentInputStream(), this.writeWeakETag);
 			rawResponse.setHeader(HEADER_ETAG, responseETag);
 			String requestETag = request.getHeader(HEADER_IF_NONE_MATCH);
-			if (requestETag != null && ("*".equals(requestETag) || responseETag.equals(requestETag) ||
-					responseETag.replaceFirst("^W/", "").equals(requestETag.replaceFirst("^W/", "")))) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
-				}
+			if (requestETag != null && ("*".equals(requestETag) || compareETagHeaderValue(requestETag, responseETag))) {
 				rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 			}
 			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("ETag [" + responseETag + "] not equal to If-None-Match [" + requestETag +
-							"], sending normal response");
-				}
 				responseWrapper.copyBodyToResponse();
 			}
 		}
 		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
-			}
 			responseWrapper.copyBodyToResponse();
 		}
 	}
@@ -192,6 +181,16 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
 		builder.append('"');
 		return builder.toString();
+	}
+
+	private boolean compareETagHeaderValue(String requestETag, String responseETag) {
+		if (requestETag.startsWith("W/")) {
+			requestETag = requestETag.substring(2);
+		}
+		if (responseETag.startsWith("W/")) {
+			responseETag = responseETag.substring(2);
+		}
+		return requestETag.equals(responseETag);
 	}
 
 

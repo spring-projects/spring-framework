@@ -32,11 +32,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
+ * Internal utility methods used with JDBC configuration.
+ *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.1
  */
-class DatabasePopulatorConfigUtils {
+abstract class DatabasePopulatorConfigUtils {
 
 	public static void setDatabasePopulator(Element element, BeanDefinitionBuilder builder) {
 		List<Element> scripts = DomUtils.getChildElementsByTagName(element, "script");

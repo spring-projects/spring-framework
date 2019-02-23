@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,8 @@ public class Projection extends SpelNodeImpl {
 	private final boolean nullSafe;
 
 
-	public Projection(boolean nullSafe, int pos, SpelNodeImpl expression) {
-		super(pos, expression);
+	public Projection(boolean nullSafe, int startPos, int endPos, SpelNodeImpl expression) {
+		super(startPos, endPos, expression);
 		this.nullSafe = nullSafe;
 	}
 

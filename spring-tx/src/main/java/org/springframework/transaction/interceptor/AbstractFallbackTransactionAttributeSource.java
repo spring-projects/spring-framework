@@ -55,7 +55,13 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Canonical value held in cache to indicate no transaction attribute was
 	 * found for this method, and we don't need to look again.
 	 */
-	private static final TransactionAttribute NULL_TRANSACTION_ATTRIBUTE = new DefaultTransactionAttribute();
+	@SuppressWarnings("serial")
+	private static final TransactionAttribute NULL_TRANSACTION_ATTRIBUTE = new DefaultTransactionAttribute() {
+		@Override
+		public String toString() {
+			return "null";
+		}
+	};
 
 
 	/**
@@ -78,7 +84,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
 	 * @param method the method for the current invocation (never {@code null})
 	 * @param targetClass the target class for this invocation (may be {@code null})
-	 * @return TransactionAttribute for this method, or {@code null} if the method
+	 * @return a TransactionAttribute for this method, or {@code null} if the method
 	 * is not transactional
 	 */
 	@Override
@@ -90,7 +96,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
-		Object cached = this.attributeCache.get(cacheKey);
+		TransactionAttribute cached = this.attributeCache.get(cacheKey);
 		if (cached != null) {
 			// Value will either be canonical value indicating there is no transaction attribute,
 			// or an actual transaction attribute.
@@ -98,7 +104,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 				return null;
 			}
 			else {
-				return (TransactionAttribute) cached;
+				return cached;
 			}
 		}
 		else {
@@ -113,8 +119,8 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 				if (txAttr instanceof DefaultTransactionAttribute) {
 					((DefaultTransactionAttribute) txAttr).setDescriptor(methodIdentification);
 				}
-				if (logger.isDebugEnabled()) {
-					logger.debug("Adding transactional method '" + methodIdentification + "' with attribute: " + txAttr);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Adding transactional method '" + methodIdentification + "' with attribute: " + txAttr);
 				}
 				this.attributeCache.put(cacheKey, txAttr);
 			}
@@ -182,25 +188,22 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 
 	/**
-	 * Subclasses need to implement this to return the transaction attribute
-	 * for the given method, if any.
-	 * @param method the method to retrieve the attribute for
-	 * @return all transaction attribute associated with this method
-	 * (or {@code null} if none)
-	 */
-	@Nullable
-	protected abstract TransactionAttribute findTransactionAttribute(Method method);
-
-	/**
-	 * Subclasses need to implement this to return the transaction attribute
-	 * for the given class, if any.
+	 * Subclasses need to implement this to return the transaction attribute for the
+	 * given class, if any.
 	 * @param clazz the class to retrieve the attribute for
-	 * @return all transaction attribute associated with this class
-	 * (or {@code null} if none)
+	 * @return all transaction attribute associated with this class, or {@code null} if none
 	 */
 	@Nullable
 	protected abstract TransactionAttribute findTransactionAttribute(Class<?> clazz);
 
+	/**
+	 * Subclasses need to implement this to return the transaction attribute for the
+	 * given method, if any.
+	 * @param method the method to retrieve the attribute for
+	 * @return all transaction attribute associated with this method, or {@code null} if none
+	 */
+	@Nullable
+	protected abstract TransactionAttribute findTransactionAttribute(Method method);
 
 	/**
 	 * Should only public methods be allowed to have transactional semantics?

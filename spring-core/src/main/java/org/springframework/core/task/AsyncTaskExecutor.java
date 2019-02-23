@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ import java.util.concurrent.Future;
  */
 public interface AsyncTaskExecutor extends TaskExecutor {
 
-	/** Constant that indicates immediate execution */
+	/** Constant that indicates immediate execution. */
 	long TIMEOUT_IMMEDIATE = 0;
 
-	/** Constant that indicates no time limit */
+	/** Constant that indicates no time limit. */
 	long TIMEOUT_INDEFINITE = Long.MAX_VALUE;
 
 

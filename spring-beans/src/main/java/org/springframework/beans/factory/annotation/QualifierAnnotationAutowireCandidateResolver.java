@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -326,6 +326,21 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	/**
+	 * Determine whether the given dependency declares a qualifier annotation.
+	 * @see #isQualifier(Class)
+	 * @see Qualifier
+	 */
+	@Override
+	public boolean hasQualifier(DependencyDescriptor descriptor) {
+		for (Annotation ann : descriptor.getAnnotations()) {
+			if (isQualifier(ann.annotationType())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Determine whether the given dependency declares a value annotation.
 	 * @see Value
 	 */
@@ -347,10 +362,12 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	 */
 	@Nullable
 	protected Object findValue(Annotation[] annotationsToSearch) {
-		AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
-				AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);
-		if (attr != null) {
-			return extractValue(attr);
+		if (annotationsToSearch.length > 0) {   // qualifier annotations have to be local
+			AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
+					AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);
+			if (attr != null) {
+				return extractValue(attr);
+			}
 		}
 		return null;
 	}

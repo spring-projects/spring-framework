@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.util;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -101,6 +102,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	private final String subtype;
 
 	private final Map<String, String> parameters;
+
+	@Nullable
+	private volatile String toStringValue;
 
 
 	/**
@@ -383,6 +387,37 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		return false;
 	}
 
+	/**
+	 * Similar to {@link #equals(Object)} but based on the type and subtype
+	 * only, i.e. ignoring parameters.
+	 * @param other the other mime type to compare to
+	 * @return whether the two mime types have the same type and subtype
+	 * @since 5.1.4
+	 */
+	public boolean equalsTypeAndSubtype(@Nullable MimeType other) {
+		if (other == null) {
+			return false;
+		}
+		return this.type.equalsIgnoreCase(other.type) && this.subtype.equalsIgnoreCase(other.subtype);
+	}
+
+	/**
+	 * Unlike {@link Collection#contains(Object)} which relies on
+	 * {@link MimeType#equals(Object)}, this method only checks the type and the
+	 * subtype, but otherwise ignores parameters.
+	 * @param mimeTypes the list of mime types to perform the check against
+	 * @return whether the list contains the given mime type
+	 * @since 5.1.4
+	 */
+	public boolean isPresentIn(Collection<? extends MimeType> mimeTypes) {
+		for (MimeType mimeType : mimeTypes) {
+			if (mimeType.equalsTypeAndSubtype(this)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	@Override
 	public boolean equals(Object other) {
@@ -401,7 +436,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Determine if the parameters in this {@code MimeType} and the supplied
 	 * {@code MimeType} are equal, performing case-insensitive comparisons
-	 * for {@link Charset}s.
+	 * for {@link Charset Charsets}.
 	 * @since 4.2
 	 */
 	private boolean parametersAreEqual(MimeType other) {
@@ -437,9 +472,14 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		appendTo(builder);
-		return builder.toString();
+		String value = this.toStringValue;
+		if (value == null) {
+			StringBuilder builder = new StringBuilder();
+			appendTo(builder);
+			value = builder.toString();
+			this.toStringValue = value;
+		}
+		return value;
 	}
 
 	protected void appendTo(StringBuilder builder) {
@@ -542,6 +582,11 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 
+	/**
+	 * Comparator to sort {@link MimeType MimeTypes} in order of specificity.
+	 *
+	 * @param <T> the type of mime types that may be compared by this comparator
+	 */
 	public static class SpecificityComparator<T extends MimeType> implements Comparator<T> {
 
 		@Override

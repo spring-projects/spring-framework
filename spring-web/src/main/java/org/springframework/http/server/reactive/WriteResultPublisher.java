@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.springframework.http.server.reactive;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Operators;
 
+import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -38,7 +38,15 @@ import org.springframework.util.Assert;
  */
 class WriteResultPublisher implements Publisher<Void> {
 
-	private static final Log logger = LogFactory.getLog(WriteResultPublisher.class);
+	/**
+	 * Special logger for debugging Reactive Streams signals.
+	 * @see LogDelegateFactory#getHiddenLog(Class)
+	 * @see AbstractListenerReadPublisher#rsReadLogger
+	 * @see AbstractListenerWriteProcessor#rsWriteLogger
+	 * @see AbstractListenerWriteFlushProcessor#rsWriteFlushLogger
+	 */
+	private static final Log rsWriteResultLogger = LogDelegateFactory.getHiddenLog(WriteResultPublisher.class);
+
 
 	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
@@ -50,11 +58,18 @@ class WriteResultPublisher implements Publisher<Void> {
 	@Nullable
 	private volatile Throwable errorBeforeSubscribed;
 
+	private final String logPrefix;
+
+
+	public WriteResultPublisher(String logPrefix) {
+		this.logPrefix = logPrefix;
+	}
+
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " subscribe: " + subscriber);
+		if (rsWriteResultLogger.isTraceEnabled()) {
+			rsWriteResultLogger.trace(this.logPrefix + this.state + " subscribe: " + subscriber);
 		}
 		this.state.get().subscribe(this, subscriber);
 	}
@@ -63,8 +78,8 @@ class WriteResultPublisher implements Publisher<Void> {
 	 * Invoke this to delegate a completion signal to the subscriber.
 	 */
 	public void publishComplete() {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " publishComplete");
+		if (rsWriteResultLogger.isTraceEnabled()) {
+			rsWriteResultLogger.trace(this.logPrefix + this.state + " publishComplete");
 		}
 		this.state.get().publishComplete(this);
 	}
@@ -73,8 +88,8 @@ class WriteResultPublisher implements Publisher<Void> {
 	 * Invoke this to delegate an error signal to the subscriber.
 	 */
 	public void publishError(Throwable t) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(this.state + " publishError: " + t);
+		if (rsWriteResultLogger.isTraceEnabled()) {
+			rsWriteResultLogger.trace(this.logPrefix + this.state + " publishError: " + t);
 		}
 		this.state.get().publishError(this, t);
 	}
@@ -98,16 +113,16 @@ class WriteResultPublisher implements Publisher<Void> {
 
 		@Override
 		public final void request(long n) {
-			if (logger.isTraceEnabled()) {
-				logger.trace(state() + " request: " + n);
+			if (rsWriteResultLogger.isTraceEnabled()) {
+				rsWriteResultLogger.trace(this.publisher.logPrefix + state() + " request: " + n);
 			}
 			state().request(this.publisher, n);
 		}
 
 		@Override
 		public final void cancel() {
-			if (logger.isTraceEnabled()) {
-				logger.trace(state() + " cancel");
+			if (rsWriteResultLogger.isTraceEnabled()) {
+				rsWriteResultLogger.trace(this.publisher.logPrefix + state() + " cancel");
 			}
 			state().cancel(this.publisher);
 		}

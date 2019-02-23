@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,15 @@ public interface ClientHttpConnector {
 
 	/**
 	 * Connect to the origin server using the given {@code HttpMethod} and
-	 * {@code URI}, then apply the given {@code requestCallback} on the
-	 * {@link ClientHttpRequest} once the connection has been established.
-	 * <p>Return a publisher of the {@link ClientHttpResponse}.
+	 * {@code URI} and apply the given {@code requestCallback} when the HTTP
+	 * request of the underlying API can be initialized and written to.
 	 * @param method the HTTP request method
 	 * @param uri the HTTP request URI
-	 * @param requestCallback a function that prepares and writes the request,
-	 * returning a publisher that signals when it's done interacting with the
-	 * request. Implementations should return a {@code Mono<Void>} by calling
+	 * @param requestCallback a function that prepares and writes to the request,
+	 * returning a publisher that signals when it's done writing.
+	 * Implementations can return a {@code Mono<Void>} by calling
 	 * {@link ClientHttpRequest#writeWith} or {@link ClientHttpRequest#setComplete}.
-	 * @return a publisher of the {@link ClientHttpResponse}
+	 * @return publisher for the {@link ClientHttpResponse}
 	 */
 	Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback);

@@ -172,8 +172,8 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerHttpOptions() throws Exception {
-		testHttpOptions("/foo", "GET,HEAD");
-		testHttpOptions("/person/1", "PUT");
+		testHttpOptions("/foo", "GET,HEAD,OPTIONS");
+		testHttpOptions("/person/1", "PUT,OPTIONS");
 		testHttpOptions("/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
 		testHttpOptions("/something", "PUT,POST");
 	}
@@ -311,6 +311,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		MultiValueMap<String, String> matrixVariables;
 		Map<String, String> uriVariables;
 
+		// URI var parsed into path variable + matrix params..
 		request = new MockHttpServletRequest();
 		handleMatch(request, "/{cars}", "/cars;colors=red,blue,green;year=2012");
 
@@ -322,6 +323,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("2012", matrixVariables.getFirst("year"));
 		assertEquals("cars", uriVariables.get("cars"));
 
+		// URI var with regex for path variable, and URI var for matrix params..
 		request = new MockHttpServletRequest();
 		handleMatch(request, "/{cars:[^;]+}{params}", "/cars;colors=red,blue,green;year=2012");
 
@@ -334,6 +336,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("cars", uriVariables.get("cars"));
 		assertEquals(";colors=red,blue,green;year=2012", uriVariables.get("params"));
 
+		// URI var with regex for path variable, and (empty) URI var for matrix params..
 		request = new MockHttpServletRequest();
 		handleMatch(request, "/{cars:[^;]+}{params}", "/cars");
 
@@ -343,9 +346,22 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertNull(matrixVariables);
 		assertEquals("cars", uriVariables.get("cars"));
 		assertEquals("", uriVariables.get("params"));
+
+		// SPR-11897
+		request = new MockHttpServletRequest();
+		handleMatch(request, "/{foo}", "/a=42;b=c");
+
+		matrixVariables = getMatrixVariables(request, "foo");
+		uriVariables = getUriTemplateVariables(request);
+
+		assertNotNull(matrixVariables);
+		assertEquals(2, matrixVariables.size());
+		assertEquals("42", matrixVariables.getFirst("a"));
+		assertEquals("c", matrixVariables.getFirst("b"));
+		assertEquals("a=42", uriVariables.get("foo"));
 	}
 
-	@Test
+	@Test // SPR-10140, SPR-16867
 	public void handleMatchMatrixVariablesDecoding() {
 
 		MockHttpServletRequest request;
@@ -357,14 +373,14 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.setUrlPathHelper(urlPathHelper);
 
 		request = new MockHttpServletRequest();
-		handleMatch(request, "/path{filter}", "/path;mvar=a%2fb");
+		handleMatch(request, "/{cars}", "/cars;mvar=a%2Fb");
 
-		MultiValueMap<String, String> matrixVariables = getMatrixVariables(request, "filter");
+		MultiValueMap<String, String> matrixVariables = getMatrixVariables(request, "cars");
 		Map<String, String> uriVariables = getUriTemplateVariables(request);
 
 		assertNotNull(matrixVariables);
 		assertEquals(Collections.singletonList("a/b"), matrixVariables.get("mvar"));
-		assertEquals(";mvar=a/b", uriVariables.get("filter"));
+		assertEquals("cars", uriVariables.get("cars"));
 	}
 
 

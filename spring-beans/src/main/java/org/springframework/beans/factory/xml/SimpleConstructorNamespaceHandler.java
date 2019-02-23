@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 								"Constructor argument '" + argName + "' specifies a negative index", attr);
 					}
 
-					if (cvs.hasIndexedArgumentValue(index)){
+					if (cvs.hasIndexedArgumentValue(index)) {
 						parserContext.getReaderContext().error(
 								"Constructor argument '" + argName + "' with index "+ index+" already defined using <constructor-arg>." +
 								" Only one approach may be used per argument.", attr);
@@ -130,7 +130,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 			// no escaping -> ctr name
 			else {
 				String name = Conventions.attributeNameToPropertyName(argName);
-				if (containsArgWithName(name, cvs)){
+				if (containsArgWithName(name, cvs)) {
 					parserContext.getReaderContext().error(
 							"Constructor argument '" + argName + "' already defined using <constructor-arg>." +
 							" Only one approach may be used per argument.", attr);

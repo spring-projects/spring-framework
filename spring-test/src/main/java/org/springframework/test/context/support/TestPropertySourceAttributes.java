@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,11 +141,11 @@ class TestPropertySourceAttributes {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)//
-		.append("declaringClass", declaringClass.getName())//
-		.append("locations", ObjectUtils.nullSafeToString(locations))//
-		.append("inheritLocations", inheritLocations)//
-		.append("properties", ObjectUtils.nullSafeToString(properties))//
-		.append("inheritProperties", inheritProperties)//
+		.append("declaringClass", this.declaringClass.getName())//
+		.append("locations", ObjectUtils.nullSafeToString(this.locations))//
+		.append("inheritLocations", this.inheritLocations)//
+		.append("properties", ObjectUtils.nullSafeToString(this.properties))//
+		.append("inheritProperties", this.inheritProperties)//
 		.toString();
 	}
 

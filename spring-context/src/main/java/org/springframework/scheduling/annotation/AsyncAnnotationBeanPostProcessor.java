@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.scheduling.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * Bean post-processor that automatically applies asynchronous invocation
@@ -76,19 +78,54 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
+	private Supplier<Executor> executor;
+
+	@Nullable
+	private Supplier<AsyncUncaughtExceptionHandler> exceptionHandler;
+
+	@Nullable
 	private Class<? extends Annotation> asyncAnnotationType;
 
-	@Nullable
-	private Executor executor;
-
-	@Nullable
-	private AsyncUncaughtExceptionHandler exceptionHandler;
 
 
 	public AsyncAnnotationBeanPostProcessor() {
 		setBeforeExistingAdvisors(true);
 	}
 
+
+	/**
+	 * Configure this post-processor with the given executor and exception handler suppliers,
+	 * applying the corresponding default if a supplier is not resolvable.
+	 * @since 5.1
+	 */
+	public void configure(
+			@Nullable Supplier<Executor> executor, @Nullable Supplier<AsyncUncaughtExceptionHandler> exceptionHandler) {
+
+		this.executor = executor;
+		this.exceptionHandler = exceptionHandler;
+	}
+
+	/**
+	 * Set the {@link Executor} to use when invoking methods asynchronously.
+	 * <p>If not specified, default executor resolution will apply: searching for a
+	 * unique {@link TaskExecutor} bean in the context, or for an {@link Executor}
+	 * bean named "taskExecutor" otherwise. If neither of the two is resolvable,
+	 * a local default executor will be created within the interceptor.
+	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
+	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
+	 */
+	public void setExecutor(Executor executor) {
+		this.executor = SingletonSupplier.of(executor);
+	}
+
+	/**
+	 * Set the {@link AsyncUncaughtExceptionHandler} to use to handle uncaught
+	 * exceptions thrown by asynchronous method executions.
+	 * @since 4.1
+	 */
+	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
+		this.exceptionHandler = SingletonSupplier.of(exceptionHandler);
+	}
 
 	/**
 	 * Set the 'async' annotation type to be detected at either class or method
@@ -102,29 +139,6 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 	public void setAsyncAnnotationType(Class<? extends Annotation> asyncAnnotationType) {
 		Assert.notNull(asyncAnnotationType, "'asyncAnnotationType' must not be null");
 		this.asyncAnnotationType = asyncAnnotationType;
-	}
-
-	/**
-	 * Set the {@link Executor} to use when invoking methods asynchronously.
-	 * <p>If not specified, default executor resolution will apply: searching for a
-	 * unique {@link TaskExecutor} bean in the context, or for an {@link Executor}
-	 * bean named "taskExecutor" otherwise. If neither of the two is resolvable,
-	 * a local default executor will be created within the interceptor.
-	 * @see AsyncAnnotationAdvisor#AsyncAnnotationAdvisor(Executor, AsyncUncaughtExceptionHandler)
-	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
-	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
-	 */
-	public void setExecutor(Executor executor) {
-		this.executor = executor;
-	}
-
-	/**
-	 * Set the {@link AsyncUncaughtExceptionHandler} to use to handle uncaught
-	 * exceptions thrown by asynchronous method executions.
-	 * @since 4.1
-	 */
-	public void setExceptionHandler(AsyncUncaughtExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
 	}
 
 

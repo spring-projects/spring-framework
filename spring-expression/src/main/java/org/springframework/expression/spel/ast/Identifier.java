@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,11 @@ package org.springframework.expression.spel.ast;
 
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelNode;
 
 /**
+ * An 'identifier' {@link SpelNode}.
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -28,8 +31,8 @@ public class Identifier extends SpelNodeImpl {
 	private final TypedValue id;
 
 
-	public Identifier(String payload, int pos) {
-		super(pos);
+	public Identifier(String payload, int startPos, int endPos) {
+		super(startPos, endPos);
 		this.id = new TypedValue(payload);
 	}
 

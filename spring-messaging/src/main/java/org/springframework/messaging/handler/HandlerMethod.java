@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.messaging.handler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +33,8 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Encapsulates information about a handler method consisting of a
@@ -50,8 +54,11 @@ import org.springframework.util.ClassUtils;
  */
 public class HandlerMethod {
 
-	/** Logger that is available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	/** Public for wrapping with fallback logger. */
+	public static final Log defaultLogger = LogFactory.getLog(HandlerMethod.class);
+
+
+	protected Log logger = defaultLogger;
 
 	private final Object bean;
 
@@ -159,6 +166,24 @@ public class HandlerMethod {
 			result[i] = parameter;
 		}
 		return result;
+	}
+
+
+	/**
+	 * Set an alternative logger to use than the one based on the class name.
+	 * @param logger the logger to use
+	 * @since 5.1
+	 */
+	public void setLogger(Log logger) {
+		this.logger = logger;
+	}
+
+	/**
+	 * Return the currently configured Logger.
+	 * @since 5.1
+	 */
+	public Log getLogger() {
+		return logger;
 	}
 
 	/**
@@ -297,6 +322,59 @@ public class HandlerMethod {
 	@Override
 	public String toString() {
 		return this.method.toGenericString();
+	}
+
+
+	// Support methods for use in "InvocableHandlerMethod" sub-class variants..
+
+	@Nullable
+	protected static Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
+		if (!ObjectUtils.isEmpty(providedArgs)) {
+			for (Object providedArg : providedArgs) {
+				if (parameter.getParameterType().isInstance(providedArg)) {
+					return providedArg;
+				}
+			}
+		}
+		return null;
+	}
+
+	protected static String formatArgumentError(MethodParameter param, String message) {
+		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
+				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
+	}
+
+	/**
+	 * Assert that the target bean class is an instance of the class where the given
+	 * method is declared. In some cases the actual endpoint instance at request-
+	 * processing time may be a JDK dynamic proxy (lazy initialization, prototype
+	 * beans, and others). Endpoint classes that require proxying should prefer
+	 * class-based proxy mechanisms.
+	 */
+	protected void assertTargetBean(Method method, Object targetBean, Object[] args) {
+		Class<?> methodDeclaringClass = method.getDeclaringClass();
+		Class<?> targetBeanClass = targetBean.getClass();
+		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
+			String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
+					"' is not an instance of the actual endpoint bean class '" +
+					targetBeanClass.getName() + "'. If the endpoint requires proxying " +
+					"(e.g. due to @Transactional), please use class-based proxying.";
+			throw new IllegalStateException(formatInvokeError(text, args));
+		}
+	}
+
+	protected String formatInvokeError(String text, Object[] args) {
+
+		String formattedArgs = IntStream.range(0, args.length)
+				.mapToObj(i -> (args[i] != null ?
+						"[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
+						"[" + i + "] [null]"))
+				.collect(Collectors.joining(",\n", " ", " "));
+
+		return text + "\n" +
+				"Endpoint [" + getBeanType().getName() + "]\n" +
+				"Method [" + getBridgedMethod().toGenericString() + "] " +
+				"with argument values:\n" + formattedArgs;
 	}
 
 

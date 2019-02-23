@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors
+ * Copyright 2002-2019 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package org.springframework.jdbc.core
 
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Answers
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.junit.MockitoJUnitRunner
 import java.sql.*
 
 /**
@@ -31,24 +28,22 @@ import java.sql.*
  * @author Mario Arias
  * @author Sebastien Deleuze
  */
-@RunWith(MockitoJUnitRunner::class)
 class JdbcOperationsExtensionsTests {
 
-	@Mock(answer = Answers.RETURNS_MOCKS)
-	lateinit var template: JdbcTemplate
+	val template = mockk<JdbcTemplate>(relaxed = true)
 
 	@Test
 	fun `queryForObject with reified type parameters`() {
 		val sql = "select age from customer where id = 3"
 		template.queryForObject<Int>(sql)
-		verify(template, times(1)).queryForObject(sql, Integer::class.java)
+		verify { template.queryForObject(sql, Integer::class.java) }
 	}
 
 	@Test
 	fun `queryForObject with RowMapper-like function`() {
 		val sql = "select age from customer where id = ?"
 		template.queryForObject(sql, 3) { rs: ResultSet, _: Int -> rs.getInt(1) }
-		verify(template, times(1)).queryForObject(eq(sql), any<RowMapper<Int>>(), eq(3))
+		verify { template.queryForObject(eq(sql), any<RowMapper<Int>>(), eq(3)) }
 	}
 
 	@Test
@@ -57,7 +52,7 @@ class JdbcOperationsExtensionsTests {
 		val args = arrayOf(3)
 		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber)
 		template.queryForObject<Int>(sql, args, argTypes)
-		verify(template, times(1)).queryForObject(sql, args, argTypes, Integer::class.java)
+		verify { template.queryForObject(sql, args, argTypes, Integer::class.java) }
 	}
 
 	@Test
@@ -65,14 +60,14 @@ class JdbcOperationsExtensionsTests {
 		val sql = "select age from customer where id = ?"
 		val args = arrayOf(3)
 		template.queryForObject<Int>(sql, args)
-		verify(template, times(1)).queryForObject(sql, args, Integer::class.java)
+		verify { template.queryForObject(sql, args, Integer::class.java) }
 	}
 
 	@Test
 	fun `queryForList with reified type parameters`() {
 		val sql = "select age from customer where id = 3"
 		template.queryForList<Int>(sql)
-		verify(template, times(1)).queryForList(sql, Integer::class.java)
+		verify { template.queryForList(sql, Integer::class.java) }
 	}
 
 	@Test
@@ -81,7 +76,7 @@ class JdbcOperationsExtensionsTests {
 		val args = arrayOf(3)
 		val argTypes = intArrayOf(JDBCType.INTEGER.vendorTypeNumber)
 		template.queryForList<Int>(sql, args, argTypes)
-		verify(template, times(1)).queryForList(sql, args, argTypes, Integer::class.java)
+		verify { template.queryForList(sql, args, argTypes, Integer::class.java) }
 	}
 
 	@Test
@@ -89,7 +84,7 @@ class JdbcOperationsExtensionsTests {
 		val sql = "select age from customer where id = ?"
 		val args = arrayOf(3)
 		template.queryForList<Int>(sql, args)
-		verify(template, times(1)).queryForList(sql, args, Integer::class.java)
+		verify { template.queryForList(sql, args, Integer::class.java) }
 	}
 
 	@Test
@@ -99,16 +94,17 @@ class JdbcOperationsExtensionsTests {
 			rs.next()
 			rs.getInt(1)
 		}
-		verify(template, times(1)).query(eq(sql), any<ResultSetExtractor<Int>>(), eq(3))
+		verify { template.query(eq(sql), any<ResultSetExtractor<Int>>(), eq(3)) }
 	}
 
+	@Suppress("RemoveExplicitTypeArguments")
 	@Test
 	fun `query with RowCallbackHandler-like function`() {
 		val sql = "select age from customer where id = ?"
 		template.query(sql, 3) { rs ->
 			assertEquals(22, rs.getInt(1))
 		}
-		verify(template, times(1)).query(eq(sql), any<RowCallbackHandler>(), eq(3))
+		verify { template.query(sql, ofType<RowCallbackHandler>(), 3) }
 	}
 
 	@Test
@@ -117,7 +113,7 @@ class JdbcOperationsExtensionsTests {
 		template.query(sql, 3) { rs, _ ->
 			rs.getInt(1)
 		}
-		verify(template, times(1)).query(eq(sql), any<RowMapper<Int>>(), eq(3))
+		verify { template.query(sql, ofType<RowMapper<*>>(), 3) }
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,28 @@ package org.springframework.cache.interceptor;
 
 import org.springframework.cache.Cache;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * A base component for invoking {@link Cache} operations and using a
  * configurable {@link CacheErrorHandler} when an exception occurs.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see org.springframework.cache.interceptor.CacheErrorHandler
  */
 public abstract class AbstractCacheInvoker {
 
-	private CacheErrorHandler errorHandler;
+	protected SingletonSupplier<CacheErrorHandler> errorHandler;
 
 
 	protected AbstractCacheInvoker() {
-		this.errorHandler = new SimpleCacheErrorHandler();
+		this.errorHandler = SingletonSupplier.of(SimpleCacheErrorHandler::new);
 	}
 
 	protected AbstractCacheInvoker(CacheErrorHandler errorHandler) {
-		this.errorHandler = errorHandler;
+		this.errorHandler = SingletonSupplier.of(errorHandler);
 	}
 
 
@@ -48,15 +49,14 @@ public abstract class AbstractCacheInvoker {
 	 * is used who throws any exception as is.
 	 */
 	public void setErrorHandler(CacheErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "CacheErrorHandler must not be null");
-		this.errorHandler = errorHandler;
+		this.errorHandler = SingletonSupplier.of(errorHandler);
 	}
 
 	/**
 	 * Return the {@link CacheErrorHandler} to use.
 	 */
 	public CacheErrorHandler getErrorHandler() {
-		return this.errorHandler;
+		return this.errorHandler.obtain();
 	}
 
 

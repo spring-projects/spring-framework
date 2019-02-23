@@ -72,6 +72,11 @@ import org.springframework.util.ClassUtils;
  * (e.g. to perform manual transaction control). For typical application purposes,
  * simply use the standard JMS Session interface.
  *
+ * <p>As of Spring Framework 5, this class delegates JMS 2.0 {@code JMSContext}
+ * calls and therefore requires the JMS 2.0 API to be present at runtime.
+ * It may nevertheless run against a JMS 1.1 driver (bound to the JMS 2.0 API)
+ * as long as no actual JMS 2.0 calls are triggered by the application's setup.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see UserCredentialsConnectionFactoryAdapter

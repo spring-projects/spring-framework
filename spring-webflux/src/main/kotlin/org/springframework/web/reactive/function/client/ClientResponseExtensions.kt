@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.client
 
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
 import reactor.core.publisher.Flux
@@ -64,3 +65,30 @@ inline fun <reified T : Any> ClientResponse.toEntity(): Mono<ResponseEntity<T>> 
  */
 inline fun <reified T : Any> ClientResponse.toEntityList(): Mono<ResponseEntity<List<T>>> =
 		toEntityList(object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Coroutines variant of [ClientResponse.bodyToMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> ClientResponse.awaitBody(): T =
+		bodyToMono<T>().awaitSingle()
+
+/**
+ * Coroutines variant of [ClientResponse.toEntity].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> ClientResponse.awaitEntity(): ResponseEntity<T> =
+		toEntity<T>().awaitSingle()
+
+/**
+ * Coroutines variant of [ClientResponse.toEntityList].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> ClientResponse.awaitEntityList(): ResponseEntity<List<T>> =
+		toEntityList<T>().awaitSingle()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.time.Duration;
 
 import org.junit.Test;
 import reactor.core.publisher.MonoProcessor;
@@ -26,14 +27,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link StatusAssertions}.
- *
  * @author Rossen Stoyanchev
- * @since 5.0
  */
 public class StatusAssertionTests {
 
@@ -158,6 +158,23 @@ public class StatusAssertionTests {
 		}
 	}
 
+	@Test
+	public void matches() {
+		StatusAssertions assertions = statusAssertions(HttpStatus.CONFLICT);
+
+		// Success
+		assertions.value(equalTo(409));
+		assertions.value(greaterThan(400));
+
+		try {
+			assertions.value(equalTo(200));
+			fail("Wrong status expected");
+		}
+		catch (AssertionError error) {
+			// Expected
+		}
+	}
+
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
@@ -166,7 +183,7 @@ public class StatusAssertionTests {
 		MonoProcessor<byte[]> emptyContent = MonoProcessor.create();
 		emptyContent.onComplete();
 
-		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, null);
+		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null);
 		return new StatusAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,25 +56,24 @@ import org.springframework.core.Ordered;
  * configuration:
  *
  * <pre class="code">
- * {@code
- * <beans>
+ * &lt;beans&gt;
  *
- *     <cache:annotation-driven/>
+ *     &lt;cache:annotation-driven/&gt;
  *
- *     <bean id="myService" class="com.foo.MyService"/>
+ *     &lt;bean id="myService" class="com.foo.MyService"/&gt;
  *
- *     <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
- *         <property name="caches">
- *             <set>
- *                 <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
- *                     <property name="name" value="default"/>
- *                 </bean>
- *             </set>
- *         </property>
- *     </bean>
+ *     &lt;bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager"&gt;
+ *         &lt;property name="caches"&gt;
+ *             &lt;set&gt;
+ *                 &lt;bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"&gt;
+ *                     &lt;property name="name" value="default"/&gt;
+ *                 &lt;/bean&gt;
+ *             &lt;/set&gt;
+ *         &lt;/property&gt;
+ *     &lt;/bean&gt;
  *
- * </beans>
- * }</pre>
+ * &lt;/beans&gt;
+ * </pre>
  *
  * In both of the scenarios above, {@code @EnableCaching} and {@code
  * <cache:annotation-driven/>} are responsible for registering the necessary Spring

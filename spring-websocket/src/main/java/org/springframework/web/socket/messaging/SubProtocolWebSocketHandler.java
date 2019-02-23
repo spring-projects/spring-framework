@@ -68,13 +68,8 @@ import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSe
 public class SubProtocolWebSocketHandler
 		implements WebSocketHandler, SubProtocolCapable, MessageHandler, SmartLifecycle {
 
-	/**
-	 * Sessions connected to this handler use a sub-protocol. Hence we expect to
-	 * receive some client messages. If we don't receive any within a minute, the
-	 * connection isn't doing well (proxy issue, slow network?) and can be closed.
-	 * @see #checkSessions()
-	 */
-	private static final int TIME_TO_FIRST_MESSAGE = 60 * 1000;
+	/** The default value for {@link #setTimeToFirstMessage(int) timeToFirstMessage}. */
+	private static final int DEFAULT_TIME_TO_FIRST_MESSAGE = 60 * 1000;
 
 
 	private final Log logger = LogFactory.getLog(SubProtocolWebSocketHandler.class);
@@ -97,6 +92,8 @@ public class SubProtocolWebSocketHandler
 	private int sendTimeLimit = 10 * 1000;
 
 	private int sendBufferSizeLimit = 512 * 1024;
+
+	private int timeToFirstMessage = DEFAULT_TIME_TO_FIRST_MESSAGE;
 
 	private volatile long lastSessionCheckTime = System.currentTimeMillis();
 
@@ -225,22 +222,37 @@ public class SubProtocolWebSocketHandler
 	}
 
 	/**
+	 * Set the maximum time allowed in milliseconds after the WebSocket connection
+	 * is established and before the first sub-protocol message is received.
+	 * <p>This handler is for WebSocket connections that use a sub-protocol.
+	 * Therefore, we expect the client to send at least one sub-protocol message
+	 * in the beginning, or else we assume the connection isn't doing well, e.g.
+	 * proxy issue, slow network, and can be closed.
+	 * <p>By default this is set to {@code 60,000} (1 minute).
+	 * @param timeToFirstMessage the maximum time allowed in milliseconds
+	 * @since 5.1
+	 * @see #checkSessions()
+	 */
+	public void setTimeToFirstMessage(int timeToFirstMessage) {
+		this.timeToFirstMessage = timeToFirstMessage;
+	}
+
+	/**
+	 * Return the maximum time allowed after the WebSocket connection is
+	 * established and before the first sub-protocol message.
+	 * @since 5.1
+	 */
+	public int getTimeToFirstMessage() {
+		return this.timeToFirstMessage;
+	}
+
+	/**
 	 * Return a String describing internal state and counters.
 	 */
 	public String getStatsInfo() {
 		return this.stats.toString();
 	}
 
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
 
 	@Override
 	public final void start() {
@@ -457,7 +469,7 @@ public class SubProtocolWebSocketHandler
 	 */
 	private void checkSessions() {
 		long currentTime = System.currentTimeMillis();
-		if (!isRunning() || (currentTime - this.lastSessionCheckTime < TIME_TO_FIRST_MESSAGE)) {
+		if (!isRunning() || (currentTime - this.lastSessionCheckTime < getTimeToFirstMessage())) {
 			return;
 		}
 
@@ -468,7 +480,7 @@ public class SubProtocolWebSocketHandler
 						continue;
 					}
 					long timeSinceCreated = currentTime - holder.getCreateTime();
-					if (timeSinceCreated < TIME_TO_FIRST_MESSAGE) {
+					if (timeSinceCreated < getTimeToFirstMessage()) {
 						continue;
 					}
 					WebSocketSession session = holder.getSession();

@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.List;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
@@ -434,11 +433,10 @@ public abstract class ResponseEntityExceptionHandler {
 
 		if (webRequest instanceof ServletWebRequest) {
 			ServletWebRequest servletWebRequest = (ServletWebRequest) webRequest;
-			HttpServletRequest request = servletWebRequest.getRequest();
 			HttpServletResponse response = servletWebRequest.getResponse();
 			if (response != null && response.isCommitted()) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Async timeout for " + request.getMethod() + " [" + request.getRequestURI() + "]");
+				if (logger.isWarnEnabled()) {
+					logger.warn("Async request timed out");
 				}
 				return null;
 			}

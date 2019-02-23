@@ -43,8 +43,8 @@ public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
 			new MimeType("application", "x-jackson-smile", StandardCharsets.UTF_8),
 			new MimeType("application", "*+x-jackson-smile", StandardCharsets.UTF_8)};
-	
-	
+
+
 	public Jackson2SmileEncoder() {
 		this(Jackson2ObjectMapperBuilder.smile().build(), DEFAULT_SMILE_MIME_TYPES);
 	}

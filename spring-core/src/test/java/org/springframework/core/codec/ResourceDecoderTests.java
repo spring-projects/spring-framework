@@ -17,30 +17,42 @@
 package org.springframework.core.codec;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * @author Arjen Poutsma
  */
-public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
+public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecoder> {
 
-	private final ResourceDecoder decoder = new ResourceDecoder();
+	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
+	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
+
+
+	public ResourceDecoderTests() {
+		super(new ResourceDecoder());
+	}
+
+	@Override
 	@Test
 	public void canDecode() {
 		assertTrue(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN));
@@ -50,16 +62,15 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		assertFalse(this.decoder.canDecode(forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
 	}
 
+
+	@Override
 	@Test
 	public void decode() {
-		DataBuffer fooBuffer = stringBuffer("foo");
-		DataBuffer barBuffer = stringBuffer("bar");
-		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
+		Flux<DataBuffer> input = Flux.concat(
+				dataBuffer(this.fooBytes),
+				dataBuffer(this.barBytes));
 
-		Flux<Resource> result = this.decoder
-				.decode(source, forClass(Resource.class), null, Collections.emptyMap());
-
-		StepVerifier.create(result)
+		testDecodeAll(input, Resource.class, step -> step
 				.consumeNextWith(resource -> {
 					try {
 						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
@@ -70,7 +81,42 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 					}
 				})
 				.expectComplete()
+				.verify());
+	}
+
+	@Override
+	protected void testDecodeError(Publisher<DataBuffer> input, ResolvableType outputType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		input = Flux.concat(
+				Flux.from(input).take(1),
+				Flux.error(new InputException()));
+
+		Flux<Resource> result = this.decoder.decode(input, outputType, mimeType, hints);
+
+		StepVerifier.create(result)
+				.expectError(InputException.class)
 				.verify();
+	}
+
+	@Override
+	public void decodeToMono() throws Exception {
+		Flux<DataBuffer> input = Flux.concat(
+				dataBuffer(this.fooBytes),
+				dataBuffer(this.barBytes));
+
+		testDecodeToMonoAll(input, Resource.class, step -> step
+				.consumeNextWith(resource -> {
+					try {
+						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
+						assertEquals("foobar", new String(bytes));
+					}
+					catch (IOException e) {
+						fail(e.getMessage());
+					}
+				})
+				.expectComplete()
+				.verify());
 	}
 
 }

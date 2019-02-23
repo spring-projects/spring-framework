@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  */
 public class OperatorBetween extends Operator {
 
-	public OperatorBetween(int pos, SpelNodeImpl... operands) {
-		super("between", pos, operands);
+	public OperatorBetween(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("between", startPos, endPos, operands);
 	}
 
 

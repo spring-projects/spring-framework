@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,20 @@ public interface AutowireCandidateResolver {
 	 */
 	default boolean isRequired(DependencyDescriptor descriptor) {
 		return descriptor.isRequired();
+	}
+
+	/**
+	 * Determine whether the given descriptor declares a qualifier beyond the type
+	 * (typically - but not necessarily - a specific kind of annotation).
+	 * <p>The default implementation returns {@code false}.
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @return whether the descriptor declares a qualifier, narrowing the candidate
+	 * status beyond the type match
+	 * @since 5.1
+	 * @see org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#hasQualifier
+	 */
+	default boolean hasQualifier(DependencyDescriptor descriptor) {
+		return false;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,12 @@ import org.springframework.messaging.Message;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <P> the message payload type
  */
 public interface ReactorNettyCodec<P> {
 
 	/**
-	 * Decode the input {@link ByteBuf} into one or more {@link Message}s.
+	 * Decode the input {@link ByteBuf} into one or more {@link Message Messages}.
 	 * @param inputBuffer the input buffer to decode from
 	 * @return 0 or more decoded messages
 	 */
@@ -41,7 +42,7 @@ public interface ReactorNettyCodec<P> {
 
 	/**
 	 * Encode the given {@link Message} to the output {@link ByteBuf}.
-	 * @param message the message the encode
+	 * @param message the message to encode
 	 * @param outputBuffer the buffer to write to
 	 */
 	void encode(Message<P> message, ByteBuf outputBuffer);

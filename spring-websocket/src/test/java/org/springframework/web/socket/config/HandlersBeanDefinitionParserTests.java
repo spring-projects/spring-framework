@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -55,8 +55,6 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.EventSourceTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.HtmlFileTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.JsonpPollingTransportHandler;
-import org.springframework.web.socket.sockjs.transport.handler.JsonpReceivingTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.XhrPollingTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.XhrReceivingTransportHandler;
@@ -178,8 +176,6 @@ public class HandlersBeanDefinitionParserTests {
 				containsInAnyOrder(
 						instanceOf(XhrPollingTransportHandler.class),
 						instanceOf(XhrReceivingTransportHandler.class),
-						instanceOf(JsonpPollingTransportHandler.class),
-						instanceOf(JsonpReceivingTransportHandler.class),
 						instanceOf(XhrStreamingTransportHandler.class),
 						instanceOf(EventSourceTransportHandler.class),
 						instanceOf(HtmlFileTransportHandler.class),
@@ -289,7 +285,7 @@ class TestHandshakeHandler implements HandshakeHandler {
 }
 
 
-class TestChannelInterceptor extends ChannelInterceptorAdapter {
+class TestChannelInterceptor implements ChannelInterceptor {
 }
 
 

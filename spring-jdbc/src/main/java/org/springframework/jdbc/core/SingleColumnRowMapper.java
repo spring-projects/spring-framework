@@ -41,6 +41,7 @@ import org.springframework.util.NumberUtils;
  * @author Juergen Hoeller
  * @author Kazuki Shimizu
  * @since 1.2
+ * @param <T> the result type
  * @see JdbcTemplate#queryForList(String, Class)
  * @see JdbcTemplate#queryForObject(String, Class)
  */

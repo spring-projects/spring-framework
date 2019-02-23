@@ -24,22 +24,49 @@ package org.springframework.expression.spel.ast;
  */
 public enum TypeCode {
 
+	/**
+	 * An {@link Object}.
+	 */
 	OBJECT(Object.class),
 
+	/**
+	 * A {@code boolean}.
+	 */
 	BOOLEAN(Boolean.TYPE),
 
+	/**
+	 * A {@code byte}.
+	 */
 	BYTE(Byte.TYPE),
 
+	/**
+	 * A {@code char}.
+	 */
 	CHAR(Character.TYPE),
 
+	/**
+	 * A {@code double}.
+	 */
 	DOUBLE(Double.TYPE),
 
+	/**
+	 * A {@code float}.
+	 */
 	FLOAT(Float.TYPE),
 
+	/**
+	 * An {@code int}.
+	 */
 	INT(Integer.TYPE),
 
+	/**
+	 * A {@code long}.
+	 */
 	LONG(Long.TYPE),
 
+	/**
+	 * An {@link Object}.
+	 */
 	SHORT(Short.TYPE);
 
 

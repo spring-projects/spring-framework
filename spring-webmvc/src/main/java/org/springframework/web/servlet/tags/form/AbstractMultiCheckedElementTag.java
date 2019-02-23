@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.servlet.jsp.JspException;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -50,17 +51,20 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of objects
 	 * used to generate the '{@code input type="checkbox/radio"}' tags.
 	 */
+	@Nullable
 	private Object items;
 
 	/**
 	 * The name of the property mapped to the '{@code value}' attribute
 	 * of the '{@code input type="checkbox/radio"}' tag.
 	 */
+	@Nullable
 	private String itemValue;
 
 	/**
 	 * The value to be displayed as part of the '{@code input type="checkbox/radio"}' tag.
 	 */
+	@Nullable
 	private String itemLabel;
 
 	/**
@@ -71,6 +75,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	/**
 	 * Delimiter to use between each '{@code input type="checkbox/radio"}' tags.
 	 */
+	@Nullable
 	private String delimiter;
 
 
@@ -89,6 +94,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	 * Get the {@link java.util.Collection}, {@link java.util.Map} or array of objects
 	 * used to generate the '{@code input type="checkbox/radio"}' tags.
 	 */
+	@Nullable
 	protected Object getItems() {
 		return this.items;
 	}
@@ -107,6 +113,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	 * Get the name of the property mapped to the '{@code value}' attribute
 	 * of the '{@code input type="checkbox/radio"}' tag.
 	 */
+	@Nullable
 	protected String getItemValue() {
 		return this.itemValue;
 	}
@@ -125,6 +132,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	 * Get the value to be displayed as part of the
 	 * '{@code input type="checkbox/radio"}' tag.
 	 */
+	@Nullable
 	protected String getItemLabel() {
 		return this.itemLabel;
 	}
@@ -142,6 +150,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	 * Return the delimiter to be used between each
 	 * '{@code input type="radio"}' tag.
 	 */
+	@Nullable
 	public String getDelimiter() {
 		return this.delimiter;
 	}
@@ -236,8 +245,8 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		return SKIP_BODY;
 	}
 
-	private void writeObjectEntry(TagWriter tagWriter, String valueProperty,
-			String labelProperty, Object item, int itemIndex) throws JspException {
+	private void writeObjectEntry(TagWriter tagWriter, @Nullable String valueProperty,
+			@Nullable String labelProperty, Object item, int itemIndex) throws JspException {
 
 		BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(item);
 		Object renderValue;
@@ -254,8 +263,8 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		writeElementTag(tagWriter, item, renderValue, renderLabel, itemIndex);
 	}
 
-	private void writeMapEntry(TagWriter tagWriter, String valueProperty,
-			String labelProperty, Map.Entry<?, ?> entry, int itemIndex) throws JspException {
+	private void writeMapEntry(TagWriter tagWriter, @Nullable String valueProperty,
+			@Nullable String labelProperty, Map.Entry<?, ?> entry, int itemIndex) throws JspException {
 
 		Object mapKey = entry.getKey();
 		Object mapValue = entry.getValue();
@@ -268,8 +277,8 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		writeElementTag(tagWriter, mapKey, renderValue, renderLabel, itemIndex);
 	}
 
-	private void writeElementTag(TagWriter tagWriter, Object item, Object value, Object label, int itemIndex)
-			throws JspException {
+	private void writeElementTag(TagWriter tagWriter, Object item, @Nullable Object value,
+			@Nullable Object label, int itemIndex) throws JspException {
 
 		tagWriter.startTag(getElement());
 		if (itemIndex > 0) {
@@ -280,6 +289,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		}
 		tagWriter.startTag("input");
 		String id = resolveId();
+		Assert.state(id != null, "Attribute 'id' is required");
 		writeOptionalAttribute(tagWriter, "id", id);
 		writeOptionalAttribute(tagWriter, "name", getName());
 		writeOptionalAttributes(tagWriter);

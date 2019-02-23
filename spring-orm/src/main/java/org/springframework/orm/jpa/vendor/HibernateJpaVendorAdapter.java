@@ -41,7 +41,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
- * EntityManager. Developed and tested against Hibernate 5.0, 5.1 and 5.2;
+ * EntityManager. Developed and tested against Hibernate 5.0, 5.1, 5.2 and 5.3;
  * backwards-compatible with Hibernate 4.3 at runtime on a best-effort basis.
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,

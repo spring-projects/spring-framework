@@ -306,10 +306,11 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
 			logMessage(message);
 			if (sessionId != null) {
-				long[] clientHeartbeat = SimpMessageHeaderAccessor.getHeartbeat(headers);
-				long[] serverHeartbeat = getHeartbeatValue();
+				long[] heartbeatIn = SimpMessageHeaderAccessor.getHeartbeat(headers);
+				long[] heartbeatOut = getHeartbeatValue();
 				Principal user = SimpMessageHeaderAccessor.getUser(headers);
-				this.sessions.put(sessionId, new SessionInfo(sessionId, user, clientHeartbeat, serverHeartbeat));
+				MessageChannel outChannel = getClientOutboundChannelForSession(sessionId);
+				this.sessions.put(sessionId, new SessionInfo(sessionId, user, outChannel, heartbeatIn, heartbeatOut));
 				SimpMessageHeaderAccessor connectAck = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
 				initHeaders(connectAck);
 				connectAck.setSessionId(sessionId);
@@ -317,7 +318,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 					connectAck.setUser(user);
 				}
 				connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, message);
-				connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, serverHeartbeat);
+				connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, heartbeatOut);
 				Message<byte[]> messageOut = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAck.getMessageHeaders());
 				getClientOutboundChannel().send(messageOut);
 			}
@@ -391,19 +392,20 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 				headerAccessor.setSessionId(sessionId);
 				headerAccessor.setSubscriptionId(subscriptionId);
 				headerAccessor.copyHeadersIfAbsent(message.getHeaders());
+				headerAccessor.setLeaveMutable(true);
 				Object payload = message.getPayload();
 				Message<?> reply = MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
-				try {
-					getClientOutboundChannel().send(reply);
-				}
-				catch (Throwable ex) {
-					if (logger.isErrorEnabled()) {
-						logger.error("Failed to send " + message, ex);
+				SessionInfo info = this.sessions.get(sessionId);
+				if (info != null) {
+					try {
+						info.getClientOutboundChannel().send(reply);
 					}
-				}
-				finally {
-					SessionInfo info = this.sessions.get(sessionId);
-					if (info != null) {
+					catch (Throwable ex) {
+						if (logger.isErrorEnabled()) {
+							logger.error("Failed to send " + message, ex);
+						}
+					}
+					finally {
 						info.setLastWriteTime(now);
 					}
 				}
@@ -427,6 +429,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		@Nullable
 		private final Principal user;
 
+		private final MessageChannel clientOutboundChannel;
+
 		private final long readInterval;
 
 		private final long writeInterval;
@@ -435,11 +439,13 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		private volatile long lastWriteTime;
 
-		public SessionInfo(String sessionId, @Nullable Principal user,
+
+		public SessionInfo(String sessionId, @Nullable Principal user, MessageChannel outboundChannel,
 				@Nullable long[] clientHeartbeat, @Nullable long[] serverHeartbeat) {
 
 			this.sessionId = sessionId;
 			this.user = user;
+			this.clientOutboundChannel = outboundChannel;
 			if (clientHeartbeat != null && serverHeartbeat != null) {
 				this.readInterval = (clientHeartbeat[0] > 0 && serverHeartbeat[1] > 0 ?
 						Math.max(clientHeartbeat[0], serverHeartbeat[1]) * HEARTBEAT_MULTIPLIER : 0);
@@ -460,6 +466,10 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		@Nullable
 		public Principal getUser() {
 			return this.user;
+		}
+
+		public MessageChannel getClientOutboundChannel() {
+			return this.clientOutboundChannel;
 		}
 
 		public long getReadInterval() {
@@ -505,8 +515,9 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 						accessor.setUser(user);
 					}
 					initHeaders(accessor);
+					accessor.setLeaveMutable(true);
 					MessageHeaders headers = accessor.getMessageHeaders();
-					getClientOutboundChannel().send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers));
+					info.getClientOutboundChannel().send(MessageBuilder.createMessage(EMPTY_PAYLOAD, headers));
 				}
 			}
 		}

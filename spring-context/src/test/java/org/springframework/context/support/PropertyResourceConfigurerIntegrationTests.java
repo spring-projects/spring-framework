@@ -65,7 +65,7 @@ public class PropertyResourceConfigurerIntegrationTests {
 			if (userDir.startsWith("/")) {
 				userDir = userDir.substring(1);
 			}
-			assertTrue(ex.getMessage().indexOf(userDir) != -1);
+			assertTrue(ex.getMessage().contains(userDir));
 		}
 	}
 

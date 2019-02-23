@@ -37,7 +37,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.util.xml.StaxUtils;
 
@@ -98,8 +97,9 @@ public abstract class AbstractUnmarshallerTests<U extends Unmarshaller> {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void unmarshalSAXSource() throws Exception {
-		XMLReader reader = XMLReaderFactory.createXMLReader();
+		XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		SAXSource source = new SAXSource(reader, new InputSource(new StringReader(INPUT_STRING)));
 		Object flights = unmarshaller.unmarshal(source);
 		testFlights(flights);

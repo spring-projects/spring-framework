@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.support;
 
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
@@ -52,17 +51,17 @@ public interface RequestDataValueProcessor {
 	/**
 	 * Invoked when a form field value is rendered.
 	 * @param request the current request
-	 * @param name the form field name
+	 * @param name the form field name (if any)
 	 * @param value the form field value
 	 * @param type the form field type ("text", "hidden", etc.)
 	 * @return the form field value to use, possibly modified
 	 */
-	String processFormFieldValue(HttpServletRequest request, String name, String value, String type);
+	String processFormFieldValue(HttpServletRequest request, @Nullable String name, String value, String type);
 
 	/**
 	 * Invoked after all form fields have been rendered.
 	 * @param request the current request
-	 * @return additional hidden form fields to be added, or {@code null}
+	 * @return additional hidden form fields to be added, or {@code null} if none
 	 */
 	@Nullable
 	Map<String, String> getExtraHiddenFields(HttpServletRequest request);

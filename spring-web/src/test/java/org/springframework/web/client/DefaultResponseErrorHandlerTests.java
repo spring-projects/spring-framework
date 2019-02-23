@@ -65,7 +65,7 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(response.getStatusText()).willReturn("Not Found");
 		given(response.getHeaders()).willReturn(headers);
-		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes("UTF-8")));
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes(StandardCharsets.UTF_8)));
 
 		try {
 			handler.handleError(response);
@@ -101,18 +101,6 @@ public class DefaultResponseErrorHandlerTests {
 		handler.handleError(response);
 	}
 
-	@Test(expected = UnknownHttpStatusCodeException.class)  // SPR-9406
-	public void unknownStatusCode() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.TEXT_PLAIN);
-
-		given(response.getRawStatusCode()).willReturn(999);
-		given(response.getStatusText()).willReturn("Custom status code");
-		given(response.getHeaders()).willReturn(headers);
-
-		handler.handleError(response);
-	}
-
 	@Test  // SPR-16108
 	public void hasErrorForUnknownStatusCode() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
@@ -123,6 +111,66 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 
 		assertFalse(handler.hasError(response));
+	}
+
+	@Test(expected = UnknownHttpStatusCodeException.class)  // SPR-9406
+	public void handleErrorUnknownStatusCode() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		given(response.getRawStatusCode()).willReturn(999);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+
+		handler.handleError(response);
+	}
+
+	@Test  // SPR-17461
+	public void hasErrorForCustomClientError() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		given(response.getRawStatusCode()).willReturn(499);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+
+		assertTrue(handler.hasError(response));
+	}
+
+	@Test(expected = UnknownHttpStatusCodeException.class)
+	public void handleErrorForCustomClientError() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		given(response.getRawStatusCode()).willReturn(499);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+
+		handler.handleError(response);
+	}
+
+	@Test  // SPR-17461
+	public void hasErrorForCustomServerError() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		given(response.getRawStatusCode()).willReturn(599);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+
+		assertTrue(handler.hasError(response));
+	}
+
+	@Test(expected = UnknownHttpStatusCodeException.class)
+	public void handleErrorForCustomServerError() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		given(response.getRawStatusCode()).willReturn(599);
+		given(response.getStatusText()).willReturn("Custom status code");
+		given(response.getHeaders()).willReturn(headers);
+
+		handler.handleError(response);
 	}
 
 	@Test  // SPR-16604

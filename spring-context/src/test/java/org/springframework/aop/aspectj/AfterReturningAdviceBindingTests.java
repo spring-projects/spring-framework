@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,14 +48,10 @@ public class AfterReturningAdviceBindingTests {
 	private AfterReturningAdviceBindingCollaborator mockCollaborator;
 
 
-	public void setAfterReturningAdviceAspect(AfterReturningAdviceBindingTestAspect anAspect) {
-		this.afterAdviceAspect = anAspect;
-	}
-
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		afterAdviceAspect = (AfterReturningAdviceBindingTestAspect) ctx.getBean("testAspect");
 

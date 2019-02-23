@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A contract for invoking a chain of {@link ResourceResolver}s where each resolver
+ * A contract for invoking a chain of {@link ResourceResolver ResourceResolvers} where each resolver
  * is given a reference to the chain allowing it to delegate when necessary.
  *
  * @author Rossen Stoyanchev

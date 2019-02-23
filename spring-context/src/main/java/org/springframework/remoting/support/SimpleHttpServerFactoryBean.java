@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.UsesSunHttpServer;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a simple
@@ -51,8 +50,10 @@ import org.springframework.lang.UsesSunHttpServer;
  * @since 2.5.1
  * @see #setPort
  * @see #setContexts
+ * @deprecated as of Spring Framework 5.1, in favor of embedded Tomcat/Jetty/Undertow
  */
-@UsesSunHttpServer
+@Deprecated
+@org.springframework.lang.UsesSunHttpServer
 public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -163,8 +164,8 @@ public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, Ini
 				}
 			});
 		}
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Starting HttpServer at address " + address);
+		if (logger.isInfoEnabled()) {
+			logger.info("Starting HttpServer at address " + address);
 		}
 		this.server.start();
 	}

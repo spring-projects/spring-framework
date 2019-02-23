@@ -66,7 +66,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
-	/** Map from path pattern -> VersionStrategy */
+	/** Map from path pattern -> VersionStrategy. */
 	private final Map<String, VersionStrategy> versionStrategyMap = new LinkedHashMap<>();
 
 
@@ -169,17 +169,10 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 		String candidateVersion = versionStrategy.extractVersion(requestPath);
 		if (StringUtils.isEmpty(candidateVersion)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No version found in path \"" + requestPath + "\"");
-			}
 			return null;
 		}
 
 		String simplePath = versionStrategy.removeVersion(requestPath, candidateVersion);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Extracted version from path, re-resolving without version: \"" + simplePath + "\"");
-		}
-
 		Resource baseResource = chain.resolveResource(request, simplePath, locations);
 		if (baseResource == null) {
 			return null;
@@ -187,14 +180,11 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 		String actualVersion = versionStrategy.getResourceVersion(baseResource);
 		if (candidateVersion.equals(actualVersion)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resource matches extracted version [" + candidateVersion + "]");
-			}
 			return new FileNameVersionedResource(baseResource, candidateVersion);
 		}
 		else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Potential resource found for \"" + requestPath + "\", but version [" +
+				logger.trace("Found resource for \"" + requestPath + "\", but version [" +
 						candidateVersion + "] does not match");
 			}
 			return null;
@@ -211,15 +201,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			if (versionStrategy == null) {
 				return baseUrl;
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("Getting the original resource to determine version for path \"" + resourceUrlPath + "\"");
-			}
 			Resource resource = chain.resolveResource(null, baseUrl, locations);
 			Assert.state(resource != null, "Unresolvable resource");
 			String version = versionStrategy.getResourceVersion(resource);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Determined version [" + version + "] for " + resource);
-			}
 			return versionStrategy.addVersion(baseUrl, version);
 		}
 		return baseUrl;
@@ -316,23 +300,18 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 
 		@Override
 		public String getDescription() {
-			return original.getDescription();
+			return this.original.getDescription();
 		}
 
 		@Override
 		public InputStream getInputStream() throws IOException {
-			return original.getInputStream();
+			return this.original.getInputStream();
 		}
 
 		@Override
 		public HttpHeaders getResponseHeaders() {
-			HttpHeaders headers;
-			if (this.original instanceof HttpResource) {
-				headers = ((HttpResource) this.original).getResponseHeaders();
-			}
-			else {
-				headers = new HttpHeaders();
-			}
+			HttpHeaders headers = (this.original instanceof HttpResource ?
+					((HttpResource) this.original).getResponseHeaders() : new HttpHeaders());
 			headers.setETag("\"" + this.version + "\"");
 			return headers;
 		}

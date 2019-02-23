@@ -34,7 +34,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code HandlerResultHandler} implementation that supports {@link ServerResponse}s.
+ * {@code HandlerResultHandler} implementation that supports {@link ServerResponse ServerResponses}.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -64,7 +64,6 @@ public class ServerResponseResultHandler implements HandlerResultHandler, Initia
 	 * Set the order for this result handler relative to others.
 	 * <p>By default set to 0. It is generally safe to place it early in the
 	 * order as it looks for a concrete return type.
-	 * @param order the order
 	 */
 	public void setOrder(int order) {
 		this.order = order;

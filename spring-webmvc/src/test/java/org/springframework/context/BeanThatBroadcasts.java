@@ -29,7 +29,7 @@ public class BeanThatBroadcasts implements ApplicationContextAware {
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
-		if (applicationContext.getDisplayName().indexOf("listener") != -1) {
+		if (applicationContext.getDisplayName().contains("listener")) {
 			applicationContext.getBean("listener");
 		}
 	}

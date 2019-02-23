@@ -29,6 +29,8 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.ResolvableType;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.jndi.TypeMismatchNamingException;
@@ -63,10 +65,10 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	/** JNDI names of resources that are known to be shareable, i.e. can be cached */
 	private final Set<String> shareableResources = new HashSet<>();
 
-	/** Cache of shareable singleton objects: bean name --> bean instance */
+	/** Cache of shareable singleton objects: bean name to bean instance. */
 	private final Map<String, Object> singletonObjects = new HashMap<>();
 
-	/** Cache of the types of nonshareable resources: bean name --> bean type */
+	/** Cache of the types of nonshareable resources: bean name to bean type. */
 	private final Map<String, Class<?>> resourceTypes = new HashMap<>();
 
 
@@ -107,7 +109,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	}
 
 	@Override
-	public <T> T getBean(String name, @Nullable Class<T> requiredType) throws BeansException {
+	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		try {
 			if (isSingleton(name)) {
 				return doGetSingleton(name, requiredType);
@@ -148,6 +150,49 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 					"SimpleJndiBeanFactory does not support explicit bean creation arguments");
 		}
 		return getBean(requiredType);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) {
+		return new ObjectProvider<T>() {
+			@Override
+			public T getObject() throws BeansException {
+				return getBean(requiredType);
+			}
+			@Override
+			public T getObject(Object... args) throws BeansException {
+				return getBean(requiredType, args);
+			}
+			@Override
+			@Nullable
+			public T getIfAvailable() throws BeansException {
+				try {
+					return getBean(requiredType);
+				}
+				catch (NoUniqueBeanDefinitionException ex) {
+					throw ex;
+				}
+				catch (NoSuchBeanDefinitionException ex) {
+					return null;
+				}
+			}
+			@Override
+			@Nullable
+			public T getIfUnique() throws BeansException {
+				try {
+					return getBean(requiredType);
+				}
+				catch (NoSuchBeanDefinitionException ex) {
+					return null;
+				}
+			}
+		};
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+		throw new UnsupportedOperationException(
+				"SimpleJndiBeanFactory does not support resolution by ResolvableType");
 	}
 
 	@Override

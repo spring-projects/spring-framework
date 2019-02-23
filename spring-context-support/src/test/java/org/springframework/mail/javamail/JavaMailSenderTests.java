@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public class JavaMailSenderTests {
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
+
 	@Test
 	public void javaMailSenderWithSimpleMessage() throws MessagingException, IOException {
 		MockJavaMailSender sender = new MockJavaMailSender();
@@ -68,8 +69,8 @@ public class JavaMailSenderTests {
 		simpleMessage.setFrom("me@mail.org");
 		simpleMessage.setReplyTo("reply@mail.org");
 		simpleMessage.setTo("you@mail.org");
-		simpleMessage.setCc(new String[] {"he@mail.org", "she@mail.org"});
-		simpleMessage.setBcc(new String[] {"us@mail.org", "them@mail.org"});
+		simpleMessage.setCc("he@mail.org", "she@mail.org");
+		simpleMessage.setBcc("us@mail.org", "them@mail.org");
 		Date sentDate = new GregorianCalendar(2004, 1, 1).getTime();
 		simpleMessage.setSentDate(sentDate);
 		simpleMessage.setSubject("my subject");
@@ -105,7 +106,8 @@ public class JavaMailSenderTests {
 		assertEquals("my text", sentMessage.getContent());
 	}
 
-	public void testJavaMailSenderWithSimpleMessages() throws MessagingException, IOException {
+	@Test
+	public void javaMailSenderWithSimpleMessages() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -133,7 +135,8 @@ public class JavaMailSenderTests {
 		assertEquals("she@mail.org", ((InternetAddress) tos2.get(0)).getAddress());
 	}
 
-	public void testJavaMailSenderWithMimeMessage() throws MessagingException {
+	@Test
+	public void javaMailSenderWithMimeMessage() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -394,7 +397,7 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void failedMailServerConnect() throws Exception {
+	public void failedMailServerConnect() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost(null);
 		sender.setUsername("username");
@@ -415,7 +418,7 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void failedMailServerClose() throws Exception {
+	public void failedMailServerClose() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("");
 		sender.setUsername("username");
@@ -434,7 +437,7 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void failedSimpleMessage() throws Exception {
+	public void failedSimpleMessage() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -466,7 +469,7 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void fFailedMimeMessage() throws Exception {
+	public void failedMimeMessage() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.setUsername("username");
@@ -498,14 +501,14 @@ public class JavaMailSenderTests {
 	}
 
 	@Test
-	public void testConnection() throws Exception {
+	public void testConnection() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost("host");
 		sender.testConnection();
 	}
 
 	@Test
-	public void testConnectionWithFailure() throws Exception {
+	public void testConnectionWithFailure() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost(null);
 
@@ -592,7 +595,8 @@ public class JavaMailSenderTests {
 			if ("fail".equals(message.getSubject())) {
 				throw new MessagingException("failed");
 			}
-			if (!ObjectUtils.nullSafeEquals(addresses, message.getAllRecipients())) {
+			if (addresses == null || (message.getAllRecipients() == null ? addresses.length > 0 :
+					!ObjectUtils.nullSafeEquals(addresses, message.getAllRecipients()))) {
 				throw new MessagingException("addresses not correct");
 			}
 			if (message.getSentDate() == null) {

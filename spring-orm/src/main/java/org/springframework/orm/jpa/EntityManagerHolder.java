@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,12 @@ import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
 /**
- * Holder wrapping a JPA EntityManager.
- * JpaTransactionManager binds instances of this class to the thread,
- * for a given EntityManagerFactory.
+ * Resource holder wrapping a JPA {@link EntityManager}.
+ * {@link JpaTransactionManager} binds instances of this class to the thread,
+ * for a given {@link javax.persistence.EntityManagerFactory}.
+ *
+ * <p>Also serves as a base class for {@link org.springframework.orm.hibernate5.SessionHolder},
+ * as of 5.1.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
@@ -37,6 +40,7 @@ import org.springframework.util.Assert;
  */
 public class EntityManagerHolder extends ResourceHolderSupport {
 
+	@Nullable
 	private final EntityManager entityManager;
 
 	private boolean transactionActive;
@@ -45,13 +49,13 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 	private SavepointManager savepointManager;
 
 
-	public EntityManagerHolder(EntityManager entityManager) {
-		Assert.notNull(entityManager, "EntityManager must not be null");
+	public EntityManagerHolder(@Nullable EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
 
 
 	public EntityManager getEntityManager() {
+		Assert.state(this.entityManager != null, "No EntityManager available");
 		return this.entityManager;
 	}
 

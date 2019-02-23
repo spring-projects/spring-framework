@@ -95,7 +95,7 @@ public class DelegatingWebFluxConfigurationTests {
 		assertNotNull(initializer);
 		assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
 		assertSame(formatterRegistry.getValue(), initializer.getConversionService());
-		assertEquals(12, codecsConfigurer.getValue().getReaders().size());
+		assertEquals(13, codecsConfigurer.getValue().getReaders().size());
 	}
 
 	@Test

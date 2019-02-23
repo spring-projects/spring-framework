@@ -115,7 +115,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 
 	/**
-	 * Return Undertow's native HTTP client
+	 * Return Undertow's native HTTP client.
 	 */
 	public UndertowClient getHttpClient() {
 		return this.httpClient;

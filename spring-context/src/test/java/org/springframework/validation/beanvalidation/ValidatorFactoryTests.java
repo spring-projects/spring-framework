@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import static org.junit.Assert.*;
 public class ValidatorFactoryTests {
 
 	@Test
-	public void testSimpleValidation() throws Exception {
+	public void testSimpleValidation() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -86,7 +86,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSimpleValidationWithCustomProvider() throws Exception {
+	public void testSimpleValidationWithCustomProvider() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.setProviderClass(HibernateValidator.class);
 		validator.afterPropertiesSet();
@@ -113,9 +113,10 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSimpleValidationWithClassLevel() throws Exception {
+	public void testSimpleValidationWithClassLevel() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
+
 		ValidPerson person = new ValidPerson();
 		person.setName("Juergen");
 		person.getAddress().setStreet("Juergen's Street");
@@ -128,7 +129,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSpringValidationFieldType() throws Exception {
+	public void testSpringValidationFieldType() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -143,7 +144,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSpringValidation() throws Exception {
+	public void testSpringValidation() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -171,7 +172,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSpringValidationWithClassLevel() throws Exception {
+	public void testSpringValidationWithClassLevel() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -189,7 +190,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSpringValidationWithAutowiredValidator() throws Exception {
+	public void testSpringValidationWithAutowiredValidator() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LocalValidatorFactoryBean.class);
 		LocalValidatorFactoryBean validator = ctx.getBean(LocalValidatorFactoryBean.class);
@@ -210,7 +211,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSpringValidationWithErrorInListElement() throws Exception {
+	public void testSpringValidationWithErrorInListElement() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -228,7 +229,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testSpringValidationWithErrorInSetElement() throws Exception {
+	public void testSpringValidationWithErrorInSetElement() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -246,7 +247,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testInnerBeanValidation() throws Exception {
+	public void testInnerBeanValidation() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -258,7 +259,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testValidationWithOptionalField() throws Exception {
+	public void testValidationWithOptionalField() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -270,7 +271,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
-	public void testListValidation() throws Exception {
+	public void testListValidation() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 
@@ -428,7 +429,7 @@ public class ValidatorFactoryTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	@Constraint(validatedBy=InnerValidator.class)
-	public static @interface InnerValid {
+	public @interface InnerValid {
 
 		String message() default "NOT VALID";
 

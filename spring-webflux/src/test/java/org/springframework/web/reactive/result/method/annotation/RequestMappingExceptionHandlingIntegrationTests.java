@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -32,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 import static org.junit.Assert.*;
@@ -73,8 +76,8 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		doTest("/mono-error", "Recovered from error: Argument");
 	}
 
-	@Test // SPR-16051
-	public void exceptionAfterSeveralItems() throws Exception {
+	@Test  // SPR-16051
+	public void exceptionAfterSeveralItems() {
 		try {
 			performGet("/SPR-16051", new HttpHeaders(), String.class).getBody();
 			fail();
@@ -83,6 +86,21 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 			String message = ex.getMessage();
 			assertNotNull(message);
 			assertTrue("Actual: " + message, message.startsWith("Error while extracting response"));
+		}
+	}
+
+	@Test  // SPR-16318
+	public void exceptionFromMethodWithProducesCondition() throws Exception {
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Accept", "text/plain, application/problem+json");
+			performGet("/SPR-16318", headers, String.class).getBody();
+			fail();
+		}
+		catch (HttpStatusCodeException ex) {
+			assertEquals(500, ex.getRawStatusCode());
+			assertEquals("application/problem+json;charset=UTF-8", ex.getResponseHeaders().getContentType().toString());
+			assertEquals("{\"reason\":\"error\"}", ex.getResponseBodyAsString());
 		}
 	}
 
@@ -118,7 +136,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 			throw new RuntimeException("State", new IOException("IO"));
 		}
 
-		@GetMapping("/mono-error")
+		@GetMapping(path = "/mono-error")
 		public Publisher<String> handleWithError() {
 			return Mono.error(new IllegalArgumentException("Argument"));
 		}
@@ -134,6 +152,10 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 					});
 		}
 
+		@GetMapping(path = "/SPR-16318", produces = "text/plain")
+		public Mono<String> handleTextPlain() throws Exception {
+			return Mono.error(new Spr16318Exception());
+		}
 
 		@ExceptionHandler
 		public Publisher<String> handleArgumentException(IOException ex) {
@@ -149,6 +171,16 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		public ResponseEntity<Publisher<String>> handleStateException(IllegalStateException ex) {
 			return ResponseEntity.ok(Mono.just("Recovered from error: " + ex.getMessage()));
 		}
+
+		@ExceptionHandler
+		public ResponseEntity<Map<String, String>> handle(Spr16318Exception ex) {
+			return ResponseEntity.status(500).body(Collections.singletonMap("reason", "error"));
+		}
+	}
+
+
+	@SuppressWarnings("serial")
+	private static class Spr16318Exception extends Exception {
 	}
 
 }

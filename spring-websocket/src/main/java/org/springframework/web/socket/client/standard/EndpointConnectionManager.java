@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,13 +139,13 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 				if (logger.isInfoEnabled()) {
 					logger.info("Connecting to WebSocket at " + getUri());
 				}
-				Endpoint endpointToUse = endpoint;
+				Endpoint endpointToUse = this.endpoint;
 				if (endpointToUse == null) {
-					Assert.state(endpointProvider != null, "No endpoint set");
-					endpointToUse = endpointProvider.getHandler();
+					Assert.state(this.endpointProvider != null, "No endpoint set");
+					endpointToUse = this.endpointProvider.getHandler();
 				}
-				ClientEndpointConfig endpointConfig = configBuilder.build();
-				session = getWebSocketContainer().connectToServer(endpointToUse, endpointConfig, getUri());
+				ClientEndpointConfig endpointConfig = this.configBuilder.build();
+				this.session = getWebSocketContainer().connectToServer(endpointToUse, endpointConfig, getUri());
 				logger.info("Successfully connected to WebSocket");
 			}
 			catch (Throwable ex) {

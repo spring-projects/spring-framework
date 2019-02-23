@@ -36,7 +36,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -70,31 +69,29 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Mono<Resource> transform(ServerWebExchange exchange, Resource inputResource,
 			ResourceTransformerChain transformerChain) {
 
 		return transformerChain.transform(exchange, inputResource)
-				.flatMap(ouptputResource -> {
-					String filename = ouptputResource.getFilename();
+				.flatMap(outputResource -> {
+					String filename = outputResource.getFilename();
 					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
+							inputResource instanceof EncodedResourceResolver.EncodedResource ||
 							inputResource instanceof GzipResourceResolver.GzippedResource) {
-						return Mono.just(ouptputResource);
-					}
-
-					if (logger.isTraceEnabled()) {
-						logger.trace("Transforming resource: " + ouptputResource);
+						return Mono.just(outputResource);
 					}
 
 					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
 					Flux<DataBuffer> flux = DataBufferUtils
-							.read(ouptputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
+							.read(outputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
 					return DataBufferUtils.join(flux)
 							.flatMap(dataBuffer -> {
 								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
 								DataBufferUtils.release(dataBuffer);
 								String cssContent = charBuffer.toString();
-								return transformContent(cssContent, ouptputResource, transformerChain, exchange);
+								return transformContent(cssContent, outputResource, transformerChain, exchange);
 							});
 				});
 	}
@@ -104,9 +101,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		List<ContentChunkInfo> contentChunkInfos = parseContent(cssContent);
 		if (contentChunkInfos.isEmpty()) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No links found.");
-			}
 			return Mono.just(resource);
 		}
 
@@ -167,6 +161,9 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
+	/**
+	 * Abstract base class for {@link LinkParser} implementations.
+	 */
 	protected abstract static class AbstractLinkParser implements LinkParser {
 
 		/** Return the keyword to use to search for links, e.g. "@import", "url(" */
@@ -226,8 +223,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			if (content.substring(position, position + 4).equals("url(")) {
 				// Ignore, UrlFunctionContentParser will take care
 			}
-			else if (logger.isErrorEnabled()) {
-				logger.error("Unexpected syntax for @import link at index " + position);
+			else if (logger.isTraceEnabled()) {
+				logger.trace("Unexpected syntax for @import link at index " + position);
 			}
 			return position;
 		}
@@ -283,19 +280,19 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		@Override
 		public int compareTo(ContentChunkInfo other) {
-			return (this.start < other.start ? -1 : (this.start == other.start ? 0 : 1));
+			return Integer.compare(this.start, other.start);
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			if (this == obj) {
+		public boolean equals(Object other) {
+			if (this == other) {
 				return true;
 			}
-			if (obj != null && obj instanceof ContentChunkInfo) {
-				ContentChunkInfo other = (ContentChunkInfo) obj;
-				return (this.start == other.start && this.end == other.end);
+			if (!(other instanceof ContentChunkInfo)) {
+				return false;
 			}
-			return false;
+			ContentChunkInfo otherCci = (ContentChunkInfo) other;
+			return (this.start == otherCci.start && this.end == otherCci.end);
 		}
 
 		@Override

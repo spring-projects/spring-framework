@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 * under the supplied name.
 	 * @see #addAttribute(String, Object)
 	 */
-	public ModelMap(String attributeName, Object attributeValue) {
+	public ModelMap(String attributeName, @Nullable Object attributeValue) {
 		addAttribute(attributeName, attributeValue);
 	}
 
@@ -80,10 +80,10 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	/**
 	 * Add the supplied attribute to this {@code Map} using a
 	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
-	 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
+	 * <p><i>Note: Empty {@link Collection Collections} are not added to
 	 * the model when using this method because we cannot correctly determine
 	 * the true convention name. View code should check for {@code null} rather
-	 * than for empty collections as is already done by JSTL tags.</emphasis>
+	 * than for empty collections as is already done by JSTL tags.</i>
 	 * @param attributeValue the model attribute value (never {@code null})
 	 */
 	public ModelMap addAttribute(Object attributeValue) {
@@ -142,6 +142,17 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 */
 	public boolean containsAttribute(String attributeName) {
 		return containsKey(attributeName);
+	}
+
+	/**
+	 * Return the attribute value for the given name, if any.
+	 * @param attributeName the name of the model attribute (never {@code null})
+	 * @return the corresponding attribute value, or {@code null} if none
+	 * @since 5.2
+	 */
+	@Nullable
+	public Object getAttribute(String attributeName) {
+		return get(attributeName);
 	}
 
 }

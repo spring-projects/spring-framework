@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,31 @@
 
 package org.springframework.beans.factory
 
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Answers
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.junit.MockitoJUnitRunner
+import org.springframework.core.ResolvableType
 
 /**
  * Mock object based tests for BeanFactory Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */
-@RunWith(MockitoJUnitRunner::class)
 class BeanFactoryExtensionsTests {
 
-	@Mock(answer = Answers.RETURNS_MOCKS)
-	lateinit var bf: BeanFactory
+	val bf = mockk<BeanFactory>(relaxed = true)
 
 	@Test
 	fun `getBean with reified type parameters`() {
 		bf.getBean<Foo>()
-		verify(bf, times(1)).getBean(Foo::class.java)
+		verify { bf.getBean(Foo::class.java) }
 	}
 
 	@Test
 	fun `getBean with String and reified type parameters`() {
 		val name = "foo"
 		bf.getBean<Foo>(name)
-		verify(bf, times(1)).getBean(name, Foo::class.java)
+		verify { bf.getBean(name, Foo::class.java) }
 	}
 
 	@Test
@@ -52,7 +48,13 @@ class BeanFactoryExtensionsTests {
 		val arg1 = "arg1"
 		val arg2 = "arg2"
 		bf.getBean<Foo>(arg1, arg2)
-		verify(bf, times(1)).getBean(Foo::class.java, arg1, arg2)
+		verify { bf.getBean(Foo::class.java, arg1, arg2) }
+	}
+
+	@Test
+	fun `getBeanProvider with reified type parameters`() {
+		bf.getBeanProvider<Foo>()
+		verify { bf.getBeanProvider<ObjectProvider<Foo>>(ofType<ResolvableType>()) }
 	}
 
 	class Foo

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ import org.springframework.lang.Nullable;
  * Advice invoked before a method is invoked. Such advices cannot
  * prevent the method call proceeding, unless they throw a Throwable.
  *
+ * @author Rod Johnson
  * @see AfterReturningAdvice
  * @see ThrowsAdvice
- *
- * @author Rod Johnson
  */
 public interface MethodBeforeAdvice extends BeforeAdvice {
 

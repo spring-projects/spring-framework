@@ -66,7 +66,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Reproduction tests cornering various SpEL JIRA issues.
+ * Reproduction tests cornering various reported SpEL issues.
  *
  * @author Andy Clement
  * @author Juergen Hoeller

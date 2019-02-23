@@ -95,14 +95,14 @@ public class ServletServerHttpRequestTests {
 
 	@Test  // SPR-13876
 	public void getUriWithEncoding() throws URISyntaxException {
-        URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87" +
+		URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87" +
 				"?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
-        mockRequest.setScheme(uri.getScheme());
-        mockRequest.setServerName(uri.getHost());
-        mockRequest.setServerPort(uri.getPort());
-        mockRequest.setRequestURI(uri.getRawPath());
-        mockRequest.setQueryString(uri.getRawQuery());
-        assertEquals(uri, request.getURI());
+		mockRequest.setScheme(uri.getScheme());
+		mockRequest.setServerName(uri.getHost());
+		mockRequest.setServerPort(uri.getPort());
+		mockRequest.setRequestURI(uri.getRawPath());
+		mockRequest.setQueryString(uri.getRawQuery());
+		assertEquals(uri, request.getURI());
     }
 
 	@Test

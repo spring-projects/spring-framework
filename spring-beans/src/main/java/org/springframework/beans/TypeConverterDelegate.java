@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -81,42 +80,6 @@ class TypeConverterDelegate {
 		this.targetObject = targetObject;
 	}
 
-
-	/**
-	 * Convert the value to the specified required type.
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or {@code null} if not known, for example in case of a collection element)
-	 * @param methodParam the method parameter that is the target of the conversion
-	 * (may be {@code null})
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object newValue, @Nullable Class<T> requiredType,
-			@Nullable MethodParameter methodParam) throws IllegalArgumentException {
-
-		return convertIfNecessary(null, null, newValue, requiredType,
-				(methodParam != null ? new TypeDescriptor(methodParam) : TypeDescriptor.valueOf(requiredType)));
-	}
-
-	/**
-	 * Convert the value to the specified required type.
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or {@code null} if not known, for example in case of a collection element)
-	 * @param field the reflective field that is the target of the conversion
-	 * (may be {@code null})
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object newValue, @Nullable Class<T> requiredType, @Nullable Field field)
-			throws IllegalArgumentException {
-
-		return convertIfNecessary(null, null, newValue, requiredType,
-				(field != null ? new TypeDescriptor(field) : TypeDescriptor.valueOf(requiredType)));
-	}
 
 	/**
 	 * Convert the value to the required type for the specified property.
@@ -247,7 +210,7 @@ class TypeConverterDelegate {
 						}
 					}
 					String trimmedValue = ((String) convertedValue).trim();
-					if (requiredType.isEnum() && "".equals(trimmedValue)) {
+					if (requiredType.isEnum() && trimmedValue.isEmpty()) {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,18 +37,18 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class RequestHandledEvent extends ApplicationEvent {
 
-	/** Session id that applied to the request, if any */
+	/** Session id that applied to the request, if any. */
 	@Nullable
 	private String sessionId;
 
-	/** Usually the UserPrincipal */
+	/** Usually the UserPrincipal. */
 	@Nullable
 	private String userName;
 
-	/** Request processing time */
+	/** Request processing time. */
 	private final long processingTimeMillis;
 
-	/** Cause of failure, if any */
+	/** Cause of failure, if any. */
 	@Nullable
 	private Throwable failureCause;
 

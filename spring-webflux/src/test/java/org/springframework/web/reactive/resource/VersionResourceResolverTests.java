@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +33,9 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.never;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link VersionResourceResolver}.
@@ -72,7 +65,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceExisting() throws Exception {
+	public void resolveResourceExisting() {
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(Mono.just(expected));
@@ -88,7 +81,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceNoVersionStrategy() throws Exception {
+	public void resolveResourceNoVersionStrategy() {
 		String file = "missing.css";
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(Mono.empty());
 
@@ -102,7 +95,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceNoVersionInPath() throws Exception {
+	public void resolveResourceNoVersionInPath() {
 		String file = "bar.css";
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(Mono.empty());
 		given(this.versionStrategy.extractVersion(file)).willReturn("");
@@ -118,7 +111,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceNoResourceAfterVersionRemoved() throws Exception {
+	public void resolveResourceNoResourceAfterVersionRemoved() {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -137,7 +130,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceVersionDoesNotMatch() throws Exception {
+	public void resolveResourceVersionDoesNotMatch() {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -158,7 +151,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceSuccess() throws Exception {
+	public void resolveResourceSuccess() {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -183,7 +176,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void getStrategyForPath() throws Exception {
+	public void getStrategyForPath() {
 		Map<String, VersionStrategy> strategies = new HashMap<>();
 		VersionStrategy jsStrategy = mock(VersionStrategy.class);
 		VersionStrategy catchAllStrategy = mock(VersionStrategy.class);
@@ -198,7 +191,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test // SPR-13883
-	public void shouldConfigureFixedPrefixAutomatically() throws Exception {
+	public void shouldConfigureFixedPrefixAutomatically() {
 
 		this.resolver.addFixedVersionStrategy("fixedversion", "/js/**", "/css/**", "/fixedversion/css/**");
 
@@ -218,7 +211,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test // SPR-15372
-	public void resolveUrlPathNoVersionStrategy() throws Exception {
+	public void resolveUrlPathNoVersionStrategy() {
 		given(this.chain.resolveUrlPath("/foo.css", this.locations)).willReturn(Mono.just("/foo.css"));
 		String resolved = this.resolver.resolveUrlPathInternal("/foo.css", this.locations, this.chain)
 				.block(Duration.ofMillis(1000));

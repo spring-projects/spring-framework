@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import org.springframework.lang.Nullable;
  *
  * @author Arjen Poutsma
  * @since 3.0
+ * @param <K> the key type
+ * @param <V> the value element type
  */
 public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 
@@ -73,7 +75,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	void setAll(Map<K, V> values);
 
 	/**
-	 * Returns the first values contained in this {@code MultiValueMap}.
+	 * Return a {@code Map} with the first values contained in this {@code MultiValueMap}.
 	 * @return a single value representation of this map
 	 */
 	Map<K, V> toSingleValueMap();

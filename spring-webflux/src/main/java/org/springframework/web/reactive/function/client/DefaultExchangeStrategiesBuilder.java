@@ -33,6 +33,15 @@ import org.springframework.http.codec.HttpMessageWriter;
  */
 final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Builder {
 
+	final static ExchangeStrategies DEFAULT_EXCHANGE_STRATEGIES;
+
+	static {
+		DefaultExchangeStrategiesBuilder builder = new DefaultExchangeStrategiesBuilder();
+		builder.defaultConfiguration();
+		DEFAULT_EXCHANGE_STRATEGIES = builder.build();
+	}
+
+
 	private final ClientCodecConfigurer codecConfigurer = ClientCodecConfigurer.create();
 
 
@@ -53,36 +62,36 @@ final class DefaultExchangeStrategiesBuilder implements ExchangeStrategies.Build
 
 	@Override
 	public ExchangeStrategies build() {
-		return new DefaultExchangeStrategies(this.codecConfigurer.getReaders(),
-				this.codecConfigurer.getWriters());
+		return new DefaultExchangeStrategies(
+				this.codecConfigurer.getReaders(), this.codecConfigurer.getWriters());
 	}
 
 
 	private static class DefaultExchangeStrategies implements ExchangeStrategies {
 
-		private final List<HttpMessageReader<?>> messageReaders;
+		private final List<HttpMessageReader<?>> readers;
 
-		private final List<HttpMessageWriter<?>> messageWriters;
+		private final List<HttpMessageWriter<?>> writers;
 
-		public DefaultExchangeStrategies(
-				List<HttpMessageReader<?>> messageReaders, List<HttpMessageWriter<?>> messageWriters) {
 
-			this.messageReaders = unmodifiableCopy(messageReaders);
-			this.messageWriters = unmodifiableCopy(messageWriters);
+		public DefaultExchangeStrategies(List<HttpMessageReader<?>> readers, List<HttpMessageWriter<?>> writers) {
+			this.readers = unmodifiableCopy(readers);
+			this.writers = unmodifiableCopy(writers);
 		}
 
 		private static <T> List<T> unmodifiableCopy(List<? extends T> list) {
 			return Collections.unmodifiableList(new ArrayList<>(list));
 		}
 
+
 		@Override
 		public List<HttpMessageReader<?>> messageReaders() {
-			return this.messageReaders;
+			return this.readers;
 		}
 
 		@Override
 		public List<HttpMessageWriter<?>> messageWriters() {
-			return this.messageWriters;
+			return this.writers;
 		}
 	}
 

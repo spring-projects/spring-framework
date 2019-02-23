@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,14 @@ import org.springframework.lang.Nullable;
  */
 public class DatabaseStartupValidator implements InitializingBean {
 
+	/**
+	 * The default interval.
+	 */
 	public static final int DEFAULT_INTERVAL = 1;
 
+	/**
+	 * The default timeout.
+	 */
 	public static final int DEFAULT_TIMEOUT = 60;
 
 
@@ -98,8 +104,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		DataSource dataSource = this.dataSource;
-		if (dataSource == null) {
+		if (this.dataSource == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
 		if (this.validationQuery == null) {
@@ -116,10 +121,10 @@ public class DatabaseStartupValidator implements InitializingBean {
 				Connection con = null;
 				Statement stmt = null;
 				try {
-					con = dataSource.getConnection();
+					con = this.dataSource.getConnection();
 					if (con == null) {
 						throw new CannotGetJdbcConnectionException("Failed to execute validation query: " +
-								"DataSource returned null from getConnection(): " + dataSource);
+								"DataSource returned null from getConnection(): " + this.dataSource);
 					}
 					stmt = con.createStatement();
 					stmt.execute(this.validationQuery);
@@ -130,10 +135,10 @@ public class DatabaseStartupValidator implements InitializingBean {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
 					}
-					if (logger.isWarnEnabled()) {
+					if (logger.isInfoEnabled()) {
 						float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
 						if (rest > this.interval) {
-							logger.warn("Database has not started up yet - retrying in " + this.interval +
+							logger.info("Database has not started up yet - retrying in " + this.interval +
 									" seconds (timeout in " + rest + " seconds)");
 						}
 					}
@@ -144,7 +149,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 				}
 
 				if (!validated) {
-					Thread.sleep(TimeUnit.SECONDS.toMillis(this.interval));
+					TimeUnit.SECONDS.sleep(this.interval);
 				}
 			}
 

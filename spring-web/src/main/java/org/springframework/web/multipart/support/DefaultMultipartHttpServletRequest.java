@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,11 +90,20 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 	@Override
 	public String[] getParameterValues(String name) {
-		String[] values = getMultipartParameters().get(name);
-		if (values != null) {
-			return values;
+		String[] parameterValues = super.getParameterValues(name);
+		String[] mpValues = getMultipartParameters().get(name);
+		if (mpValues == null) {
+			return parameterValues;
 		}
-		return super.getParameterValues(name);
+		if (parameterValues == null || getQueryString() == null) {
+			return mpValues;
+		}
+		else {
+			String[] result = new String[mpValues.length + parameterValues.length];
+			System.arraycopy(mpValues, 0, result, 0, mpValues.length);
+			System.arraycopy(parameterValues, 0, result, mpValues.length, parameterValues.length);
+			return result;
+		}
 	}
 
 	@Override
@@ -105,25 +114,20 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		}
 
 		Set<String> paramNames = new LinkedHashSet<>();
-		Enumeration<String> paramEnum = super.getParameterNames();
-		while (paramEnum.hasMoreElements()) {
-			paramNames.add(paramEnum.nextElement());
-		}
+		paramNames.addAll(Collections.list(super.getParameterNames()));
 		paramNames.addAll(multipartParameters.keySet());
 		return Collections.enumeration(paramNames);
 	}
 
 	@Override
 	public Map<String, String[]> getParameterMap() {
-		Map<String, String[]> multipartParameters = getMultipartParameters();
-		if (multipartParameters.isEmpty()) {
-			return super.getParameterMap();
+		Map<String, String[]> result = new LinkedHashMap<>();
+		Enumeration<String> names = getParameterNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			result.put(name, getParameterValues(name));
 		}
-
-		Map<String, String[]> paramMap = new LinkedHashMap<>();
-		paramMap.putAll(super.getParameterMap());
-		paramMap.putAll(multipartParameters);
-		return paramMap;
+		return result;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,6 +130,38 @@ public class CorsUrlHandlerMappingTests {
 		assertEquals("*", exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 	}
 
+	@Test
+	public void actualRequestWithCorsConfigurationSource() throws Exception {
+		this.handlerMapping.setCorsConfigurationSource(new CustomCorsConfigurationSource());
+
+		String origin = "http://domain2.com";
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin);
+		Object actual = this.handlerMapping.getHandler(exchange).block();
+
+		assertNotNull(actual);
+		assertSame(this.welcomeController, actual);
+		assertEquals("http://domain2.com", exchange.getResponse().getHeaders()
+				.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("true", exchange.getResponse().getHeaders()
+				.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
+	}
+
+	@Test
+	public void preFlightRequestWithCorsConfigurationSource() throws Exception {
+		this.handlerMapping.setCorsConfigurationSource(new CustomCorsConfigurationSource());
+
+		String origin = "http://domain2.com";
+		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin);
+		Object actual = this.handlerMapping.getHandler(exchange).block();
+
+		assertNotNull(actual);
+		assertNotSame(this.welcomeController, actual);
+		assertEquals("http://domain2.com", exchange.getResponse().getHeaders()
+				.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("true", exchange.getResponse().getHeaders()
+				.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
+	}
+
 
 	private ServerWebExchange createExchange(HttpMethod method, String path, String origin) {
 
@@ -146,6 +178,17 @@ public class CorsUrlHandlerMappingTests {
 		public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
 			CorsConfiguration config = new CorsConfiguration();
 			config.addAllowedOrigin("*");
+			return config;
+		}
+	}
+
+	public class CustomCorsConfigurationSource implements CorsConfigurationSource {
+
+		@Override
+		public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
+			CorsConfiguration config = new CorsConfiguration();
+			config.addAllowedOrigin("*");
+			config.setAllowCredentials(true);
 			return config;
 		}
 	}

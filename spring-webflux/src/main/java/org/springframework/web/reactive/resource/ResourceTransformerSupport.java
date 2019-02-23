@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 */
 	protected String toAbsolutePath(String path, ServerWebExchange exchange) {
 		String requestPath = exchange.getRequest().getURI().getPath();
-		String absolutePath = StringUtils.applyRelativePath(requestPath, path);
+		String absolutePath = (path.startsWith("/") ? path : StringUtils.applyRelativePath(requestPath, path));
 		return StringUtils.cleanPath(absolutePath);
 	}
 

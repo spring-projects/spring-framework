@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,27 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.time.Duration;
 import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.lang.Nullable;
 
 /**
  * {@code ExchangeResult} variant with the response body decoded as
  * {@code Flux<T>} but not yet consumed.
  *
- * @param <T> the type of elements in the response body
- *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @param <T> the type of elements in the response body
  * @see EntityExchangeResult
  */
 public class FluxExchangeResult<T> extends ExchangeResult {
 
-	private static final IllegalStateException TIMEOUT_ERROR =
-			new IllegalStateException("Response timeout: for infinite streams " +
-					"use getResponseBody() first with explicit cancellation, e.g. via take(n).");
-
-
 	private final Flux<T> body;
 
-	private final Duration timeout;
 
-
-	FluxExchangeResult(ExchangeResult result, Flux<T> body, Duration timeout) {
+	FluxExchangeResult(ExchangeResult result, Flux<T> body) {
 		super(result);
 		this.body = body;
-		this.timeout = timeout;
 	}
 
 
@@ -61,7 +48,7 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 	 * consumed from the (possibly infinite) stream:
 	 *
 	 * <pre>
-	 * FluxExchangeResult<Person> result = this.client.get()
+	 * FluxExchangeResult&lt;Person&gt; result = this.client.get()
 	 * 	.uri("/persons")
 	 * 	.accept(TEXT_EVENT_STREAM)
 	 * 	.exchange()
@@ -80,22 +67,6 @@ public class FluxExchangeResult<T> extends ExchangeResult {
 	 */
 	public Flux<T> getResponseBody() {
 		return this.body;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p><strong>Note:</strong> this method should typically be called after
-	 * the response has been consumed in full via {@link #getResponseBody()}.
-	 * Calling it first will cause the response {@code Flux<T>} to be consumed
-	 * via {@code getResponseBody.ignoreElements()}.
-	 */
-	@Override
-	@Nullable
-	public byte[] getResponseBodyContent() {
-		return this.body.ignoreElements()
-				.timeout(this.timeout, Mono.error(TIMEOUT_ERROR))
-				.then(Mono.defer(() -> Mono.justOrEmpty(super.getResponseBodyContent())))
-				.block();
 	}
 
 	/**

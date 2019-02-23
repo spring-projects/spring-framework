@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.List;
+import java.util.function.Supplier;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -58,11 +59,21 @@ public abstract class StaxUtils {
 	/**
 	 * Create an {@link XMLInputFactory} with Spring's defensive setup,
 	 * i.e. no support for the resolution of DTDs and external entities.
-	 * @return a new input factory to use
+	 * @return a new defensively initialized input factory instance to use
 	 * @since 5.0
 	 */
 	public static XMLInputFactory createDefensiveInputFactory() {
-		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		return createDefensiveInputFactory(XMLInputFactory::newInstance);
+	}
+
+	/**
+	 * Variant of {@link #createDefensiveInputFactory()} with a custom instance.
+	 * @param instanceSupplier supplier for the input factory instance
+	 * @return a new defensively initialized input factory instance to use
+	 * @since 5.0.12
+	 */
+	public static <T extends XMLInputFactory> T createDefensiveInputFactory(Supplier<T> instanceSupplier) {
+		T inputFactory = instanceSupplier.get();
 		inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 		inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 		inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
@@ -243,7 +254,7 @@ public abstract class StaxUtils {
 
 	/**
 	 * Create a {@link XMLEventReader} from the given list of {@link XMLEvent}.
-	 * @param events the list of {@link XMLEvent}s.
+	 * @param events the list of {@link XMLEvent XMLEvents}.
 	 * @return an {@code XMLEventReader} that reads from the given events
 	 * @since 5.0
 	 */

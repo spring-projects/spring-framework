@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package org.springframework.messaging.simp.annotation.support
 
+import io.mockk.mockk
 import java.util.Collections
 import java.util.HashMap
 
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 import org.springframework.context.support.StaticApplicationContext
 import org.springframework.messaging.Message
@@ -49,19 +48,16 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 class SimpAnnotationMethodMessageHandlerKotlinTests {
 
 
-    lateinit var messageHandler: TestSimpAnnotationMethodMessageHandler
+	lateinit var messageHandler: TestSimpAnnotationMethodMessageHandler
 
-    lateinit var testController: TestController
+	lateinit var testController: TestController
 
-    @Mock
-    lateinit var channel: SubscribableChannel
+    val channel = mockk<SubscribableChannel>(relaxed = true)
 
-    @Mock
-    lateinit var converter: MessageConverter
+    val converter = mockk<MessageConverter>(relaxed = true)
 
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
         val brokerTemplate = SimpMessagingTemplate(channel)
         brokerTemplate.messageConverter = converter
         messageHandler = TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel, channel)

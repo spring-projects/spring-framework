@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,17 @@ import java.util.function.IntPredicate;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
-
 /**
  * Default implementation of the {@link DataBuffer} interface that uses a
  * {@link ByteBuffer} internally. with separate read and write positions.
  * Constructed using the {@link DefaultDataBufferFactory}.
  *
- * <p>Inspired by Netty's {@code ByteBuf}. Introduced so that non-Netty runtimes (i.e. Servlet)
- * do not require Netty on the classpath.
+ * <p>Inspired by Netty's {@code ByteBuf}. Introduced so that non-Netty runtimes
+ * (i.e. Servlet) do not require Netty on the classpath.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 5.0
  * @see DefaultDataBufferFactory
  */
@@ -52,32 +52,29 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	private ByteBuffer byteBuffer;
 
+	private int capacity;
+
 	private int readPosition;
 
 	private int writePosition;
 
-	private int capacity;
 
 	private DefaultDataBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
-		Assert.notNull(byteBuffer, "'byteBuffer' must not be null");
-
+		Assert.notNull(dataBufferFactory, "DefaultDataBufferFactory must not be null");
+		Assert.notNull(byteBuffer, "ByteBuffer must not be null");
 		this.dataBufferFactory = dataBufferFactory;
 		ByteBuffer slice = byteBuffer.slice();
 		this.byteBuffer = slice;
 		this.capacity = slice.remaining();
 	}
 
-	static DefaultDataBuffer fromFilledByteBuffer(DefaultDataBufferFactory dataBufferFactory,
-			ByteBuffer byteBuffer) {
-
+	static DefaultDataBuffer fromFilledByteBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {
 		DefaultDataBuffer dataBuffer = new DefaultDataBuffer(dataBufferFactory, byteBuffer);
 		dataBuffer.writePosition(byteBuffer.remaining());
 		return dataBuffer;
 	}
 
-	static DefaultDataBuffer fromEmptyByteBuffer(DefaultDataBufferFactory dataBufferFactory,
-			ByteBuffer byteBuffer) {
+	static DefaultDataBuffer fromEmptyByteBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {
 		return new DefaultDataBuffer(dataBufferFactory, byteBuffer);
 	}
 
@@ -95,6 +92,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		this.capacity = byteBuffer.remaining();
 	}
 
+
 	@Override
 	public DefaultDataBufferFactory factory() {
 		return this.dataBufferFactory;
@@ -102,8 +100,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public int indexOf(IntPredicate predicate, int fromIndex) {
-		Assert.notNull(predicate, "'predicate' must not be null");
-
+		Assert.notNull(predicate, "IntPredicate must not be null");
 		if (fromIndex < 0) {
 			fromIndex = 0;
 		}
@@ -121,7 +118,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public int lastIndexOf(IntPredicate predicate, int fromIndex) {
-		Assert.notNull(predicate, "'predicate' must not be null");
+		Assert.notNull(predicate, "IntPredicate must not be null");
 		int i = Math.min(fromIndex, this.writePosition - 1);
 		for (; i >= 0; i--) {
 			byte b = this.byteBuffer.get(i);
@@ -152,7 +149,6 @@ public class DefaultDataBuffer implements DataBuffer {
 		assertIndex(readPosition >= 0, "'readPosition' %d must be >= 0", readPosition);
 		assertIndex(readPosition <= this.writePosition, "'readPosition' %d must be <= %d",
 				readPosition, this.writePosition);
-
 		this.readPosition = readPosition;
 		return this;
 	}
@@ -168,7 +164,6 @@ public class DefaultDataBuffer implements DataBuffer {
 				writePosition, this.readPosition);
 		assertIndex(writePosition <= this.capacity, "'writePosition' %d must be <= %d",
 				writePosition, this.capacity);
-
 		this.writePosition = writePosition;
 		return this;
 	}
@@ -180,9 +175,9 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public DefaultDataBuffer capacity(int newCapacity) {
-		Assert.isTrue(newCapacity > 0,
-				String.format("'newCapacity' %d must be higher than 0", newCapacity));
-
+		if (newCapacity <= 0) {
+			throw new IllegalArgumentException(String.format("'newCapacity' %d must be higher than 0", newCapacity));
+		}
 		int readPosition = readPosition();
 		int writePosition = writePosition();
 		int oldCapacity = capacity();
@@ -218,16 +213,23 @@ public class DefaultDataBuffer implements DataBuffer {
 		return this;
 	}
 
+	@Override
+	public DataBuffer ensureCapacity(int length) {
+		if (length > writableByteCount()) {
+			int newCapacity = calculateCapacity(this.writePosition + length);
+			capacity(newCapacity);
+		}
+		return this;
+	}
+
 	private static ByteBuffer allocate(int capacity, boolean direct) {
-		return direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
+		return (direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity));
 	}
 
 	@Override
 	public byte getByte(int index) {
 		assertIndex(index >= 0, "index %d must be >= 0", index);
-		assertIndex(index <= this.writePosition - 1, "index %d must be <= %d",
-				index, this.writePosition - 1);
-
+		assertIndex(index <= this.writePosition - 1, "index %d must be <= %d", index, this.writePosition - 1);
 		return this.byteBuffer.get(index);
 	}
 
@@ -243,14 +245,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public DefaultDataBuffer read(byte[] destination) {
-		Assert.notNull(destination, "'destination' must not be null");
+		Assert.notNull(destination, "Byte array must not be null");
 		read(destination, 0, destination.length);
 		return this;
 	}
 
 	@Override
 	public DefaultDataBuffer read(byte[] destination, int offset, int length) {
-		Assert.notNull(destination, "'destination' must not be null");
+		Assert.notNull(destination, "Byte array must not be null");
 		assertIndex(this.readPosition <= this.writePosition - length,
 				"readPosition %d and length %d should be smaller than writePosition %d",
 				this.readPosition, length, this.writePosition);
@@ -275,14 +277,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public DefaultDataBuffer write(byte[] source) {
-		Assert.notNull(source, "'source' must not be null");
+		Assert.notNull(source, "Byte array must not be null");
 		write(source, 0, source.length);
 		return this;
 	}
 
 	@Override
 	public DefaultDataBuffer write(byte[] source, int offset, int length) {
-		Assert.notNull(source, "'source' must not be null");
+		Assert.notNull(source, "Byte array must not be null");
 		ensureCapacity(length);
 
 		ByteBuffer tmp = this.byteBuffer.duplicate();
@@ -297,20 +299,18 @@ public class DefaultDataBuffer implements DataBuffer {
 	@Override
 	public DefaultDataBuffer write(DataBuffer... buffers) {
 		if (!ObjectUtils.isEmpty(buffers)) {
-			ByteBuffer[] byteBuffers =
-					Arrays.stream(buffers).map(DataBuffer::asByteBuffer)
-							.toArray(ByteBuffer[]::new);
-			write(byteBuffers);
+			write(Arrays.stream(buffers).map(DataBuffer::asByteBuffer).toArray(ByteBuffer[]::new));
 		}
 		return this;
 	}
 
 	@Override
-	public DefaultDataBuffer write(ByteBuffer... byteBuffers) {
-		Assert.notEmpty(byteBuffers, "'byteBuffers' must not be empty");
-		int capacity = Arrays.stream(byteBuffers).mapToInt(ByteBuffer::remaining).sum();
-		ensureCapacity(capacity);
-		Arrays.stream(byteBuffers).forEach(this::write);
+	public DefaultDataBuffer write(ByteBuffer... buffers) {
+		if (!ObjectUtils.isEmpty(buffers)) {
+			int capacity = Arrays.stream(buffers).mapToInt(ByteBuffer::remaining).sum();
+			ensureCapacity(capacity);
+			Arrays.stream(buffers).forEach(this::write);
+		}
 		return this;
 	}
 
@@ -375,15 +375,9 @@ public class DefaultDataBuffer implements DataBuffer {
 		return new DefaultDataBufferOutputStream();
 	}
 
-	private void ensureCapacity(int length) {
-		if (length <= writableByteCount()) {
-			return;
-		}
-		int newCapacity = calculateCapacity(this.writePosition + length);
-		capacity(newCapacity);
-	}
 
 	/**
+	 * Calculate the capacity of the buffer.
 	 * @see io.netty.buffer.AbstractByteBufAllocator#calculateNewCapacity(int, int)
 	 */
 	private int calculateCapacity(int neededCapacity) {
@@ -413,17 +407,17 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof DefaultDataBuffer)) {
+		if (!(other instanceof DefaultDataBuffer)) {
 			return false;
 		}
-		DefaultDataBuffer other = (DefaultDataBuffer) obj;
-		return (this.readPosition == other.readPosition &&
-				this.writePosition == other.writePosition &&
-				this.byteBuffer.equals(other.byteBuffer));
+		DefaultDataBuffer otherBuffer = (DefaultDataBuffer) other;
+		return (this.readPosition == otherBuffer.readPosition &&
+				this.writePosition == otherBuffer.writePosition &&
+				this.byteBuffer.equals(otherBuffer.byteBuffer));
 	}
 
 	@Override
@@ -433,9 +427,10 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public String toString() {
-		return String.format("DefaultDataBuffer (r: %d, w %d, c %d)", this.readPosition,
-				this.writePosition, this.capacity);
+		return String.format("DefaultDataBuffer (r: %d, w: %d, c: %d)",
+				this.readPosition, this.writePosition, this.capacity);
 	}
+
 
 	private void checkIndex(int index, int length) {
 		assertIndex(index >= 0, "index %d must be >= 0", index);
@@ -444,12 +439,13 @@ public class DefaultDataBuffer implements DataBuffer {
 		assertIndex(length <= this.capacity, "length %d must be <= %d", index, this.capacity);
 	}
 
-	private static void assertIndex(boolean expression, String format, Object... args) {
+	private void assertIndex(boolean expression, String format, Object... args) {
 		if (!expression) {
 			String message = String.format(format, args);
 			throw new IndexOutOfBoundsException(message);
 		}
 	}
+
 
 	private class DefaultDataBufferInputStream extends InputStream {
 
@@ -478,7 +474,6 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 
-
 	private class DefaultDataBufferOutputStream extends OutputStream {
 
 		@Override
@@ -495,16 +490,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	private static class SlicedDefaultDataBuffer extends DefaultDataBuffer {
 
-		SlicedDefaultDataBuffer(ByteBuffer byteBuffer, DefaultDataBufferFactory dataBufferFactory,
-				int length) {
+		SlicedDefaultDataBuffer(ByteBuffer byteBuffer, DefaultDataBufferFactory dataBufferFactory, int length) {
 			super(dataBufferFactory, byteBuffer);
 			writePosition(length);
 		}
 
 		@Override
 		public DefaultDataBuffer capacity(int newCapacity) {
-			throw new UnsupportedOperationException(
-					"Changing the capacity of a sliced buffer is not supported");
+			throw new UnsupportedOperationException("Changing the capacity of a sliced buffer is not supported");
 		}
 	}
 

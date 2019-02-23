@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class TypeDescriptor implements Serializable {
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
 		this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
-		this.type = this.resolvableType.resolve(methodParameter.getParameterType());
+		this.type = this.resolvableType.resolve(methodParameter.getNestedParameterType());
 		this.annotatedElement = new AnnotatedElementAdapter(methodParameter.getParameterIndex() == -1 ?
 				methodParameter.getMethodAnnotations() : methodParameter.getParameterAnnotations());
 	}
@@ -110,17 +110,18 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Create a new type descriptor from a {@link ResolvableType}. This protected
-	 * constructor is used internally and may also be used by subclasses that support
-	 * non-Java languages with extended type systems.
+	 * Create a new type descriptor from a {@link ResolvableType}.
+	 * <p>This constructor is used internally and may also be used by subclasses
+	 * that support non-Java languages with extended type systems. It is public
+	 * as of 5.1.4 whereas it was protected before.
 	 * @param resolvableType the resolvable type
 	 * @param type the backing type (or {@code null} if it should get resolved)
 	 * @param annotations the type annotations
 	 * @since 4.0
 	 */
-	protected TypeDescriptor(ResolvableType resolvableType, @Nullable Class<?> type, @Nullable Annotation[] annotations) {
+	public TypeDescriptor(ResolvableType resolvableType, @Nullable Class<?> type, @Nullable Annotation[] annotations) {
 		this.resolvableType = resolvableType;
-		this.type = (type != null ? type : resolvableType.resolve(Object.class));
+		this.type = (type != null ? type : resolvableType.toClass());
 		this.annotatedElement = new AnnotatedElementAdapter(annotations);
 	}
 
@@ -616,7 +617,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Creates a type descriptor for a nested type declared within the method parameter.
+	 * Create a type descriptor for a nested type declared within the method parameter.
 	 * <p>For example, if the methodParameter is a {@code List<String>} and the
 	 * nesting level is 1, the nested type descriptor will be String.class.
 	 * <p>If the methodParameter is a {@code List<List<String>>} and the nesting
@@ -647,7 +648,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Creates a type descriptor for a nested type declared within the field.
+	 * Create a type descriptor for a nested type declared within the field.
 	 * <p>For example, if the field is a {@code List<String>} and the nesting
 	 * level is 1, the nested type descriptor will be {@code String.class}.
 	 * <p>If the field is a {@code List<List<String>>} and the nesting level is
@@ -656,8 +657,9 @@ public class TypeDescriptor implements Serializable {
 	 * is 1, the nested type descriptor will be String, derived from the map value.
 	 * <p>If the field is a {@code List<Map<Integer, String>>} and the nesting
 	 * level is 2, the nested type descriptor will be String, derived from the map value.
-	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not declared.
-	 * For example, if the field is a {@code List<?>}, the nested type descriptor returned will be {@code null}.
+	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not
+	 * declared. For example, if the field is a {@code List<?>}, the nested type
+	 * descriptor returned will be {@code null}.
 	 * @param field the field
 	 * @param nestingLevel the nesting level of the collection/array element or
 	 * map key/value declaration within the field
@@ -672,7 +674,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Creates a type descriptor for a nested type declared within the property.
+	 * Create a type descriptor for a nested type declared within the property.
 	 * <p>For example, if the property is a {@code List<String>} and the nesting
 	 * level is 1, the nested type descriptor will be {@code String.class}.
 	 * <p>If the property is a {@code List<List<String>>} and the nesting level
@@ -681,9 +683,9 @@ public class TypeDescriptor implements Serializable {
 	 * is 1, the nested type descriptor will be String, derived from the map value.
 	 * <p>If the property is a {@code List<Map<Integer, String>>} and the nesting
 	 * level is 2, the nested type descriptor will be String, derived from the map value.
-	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not declared.
-	 * For example, if the property is a {@code List<?>}, the nested type descriptor
-	 * returned will be {@code null}.
+	 * <p>Returns {@code null} if a nested type cannot be obtained because it was not
+	 * declared. For example, if the property is a {@code List<?>}, the nested type
+	 * descriptor returned will be {@code null}.
 	 * @param property the property
 	 * @param nestingLevel the nesting level of the collection/array element or
 	 * map key/value declaration within the property

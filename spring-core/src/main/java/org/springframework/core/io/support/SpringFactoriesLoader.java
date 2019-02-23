@@ -19,7 +19,6 @@ package org.springframework.core.io.support;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -60,7 +59,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 3.2
  */
-public abstract class SpringFactoriesLoader {
+public final class SpringFactoriesLoader {
 
 	/**
 	 * The location to look for factories.
@@ -74,6 +73,10 @@ public abstract class SpringFactoriesLoader {
 	private static final Map<ClassLoader, MultiValueMap<String, String>> cache = new ConcurrentReferenceHashMap<>();
 
 
+	private SpringFactoriesLoader() {
+	}
+
+
 	/**
 	 * Load and instantiate the factory implementations of the given type from
 	 * {@value #FACTORIES_RESOURCE_LOCATION}, using the given class loader.
@@ -82,9 +85,9 @@ public abstract class SpringFactoriesLoader {
 	 * to obtain all registered factory names.
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
-	 * @see #loadFactoryNames
 	 * @throws IllegalArgumentException if any factory implementation class cannot
 	 * be loaded or if an error occurs while instantiating any factory
+	 * @see #loadFactoryNames
 	 */
 	public static <T> List<T> loadFactories(Class<T> factoryClass, @Nullable ClassLoader classLoader) {
 		Assert.notNull(factoryClass, "'factoryClass' must not be null");
@@ -111,8 +114,8 @@ public abstract class SpringFactoriesLoader {
 	 * @param factoryClass the interface or abstract class representing the factory
 	 * @param classLoader the ClassLoader to use for loading resources; can be
 	 * {@code null} to use the default
-	 * @see #loadFactories
 	 * @throws IllegalArgumentException if an error occurs while loading factory names
+	 * @see #loadFactories
 	 */
 	public static List<String> loadFactoryNames(Class<?> factoryClass, @Nullable ClassLoader classLoader) {
 		String factoryClassName = factoryClass.getName();
@@ -135,9 +138,10 @@ public abstract class SpringFactoriesLoader {
 				UrlResource resource = new UrlResource(url);
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {
-					List<String> factoryClassNames = Arrays.asList(
-							StringUtils.commaDelimitedListToStringArray((String) entry.getValue()));
-					result.addAll((String) entry.getKey(), factoryClassNames);
+					String factoryClassName = ((String) entry.getKey()).trim();
+					for (String factoryName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
+						result.add(factoryClassName, factoryName.trim());
+					}
 				}
 			}
 			cache.put(classLoader, result);

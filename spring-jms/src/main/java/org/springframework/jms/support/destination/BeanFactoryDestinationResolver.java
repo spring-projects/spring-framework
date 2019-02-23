@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 	 * replaced by the {@link BeanFactory} that creates it (c.f. the
 	 * {@link BeanFactoryAware} contract). So only use this constructor if you
 	 * are using this class outside the context of a Spring IoC container.
-	 * @param beanFactory the bean factory to be used to lookup {@link javax.jms.Destination Destinatiosn}
+	 * @param beanFactory the bean factory to be used to lookup {@link javax.jms.Destination Destination}
 	 */
 	public BeanFactoryDestinationResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory is required");
@@ -81,7 +81,7 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 		}
 		catch (BeansException ex) {
 			throw new DestinationResolutionException(
-					"Failed to look up Destinaton bean with name '" + destinationName + "'", ex);
+					"Failed to look up Destination bean with name '" + destinationName + "'", ex);
 		}
 	}
 

@@ -25,7 +25,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -289,7 +288,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		else {
 			Type type = getHttpEntityType(returnType);
 			type = (type != null ? type : Object.class);
-			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
+			return ResolvableType.forMethodParameter(returnType, type).toClass();
 		}
 	}
 

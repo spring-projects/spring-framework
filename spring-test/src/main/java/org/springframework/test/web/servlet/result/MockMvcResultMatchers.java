@@ -21,11 +21,13 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Static factory methods for {@link ResultMatcher}-based result actions.
@@ -84,7 +86,7 @@ public abstract class MockMvcResultMatchers {
 	 * <p>This method accepts only exact matches.
 	 * @param expectedUrl the exact URL expected
 	 */
-	public static ResultMatcher forwardedUrl(String expectedUrl) {
+	public static ResultMatcher forwardedUrl(@Nullable String expectedUrl) {
 		return result -> assertEquals("Forwarded URL", expectedUrl, result.getResponse().getForwardedUrl());
 	}
 

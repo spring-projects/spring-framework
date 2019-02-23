@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
@@ -47,6 +49,7 @@ import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriBuilder;
@@ -62,8 +65,12 @@ class DefaultServerRequest implements ServerRequest {
 
 	private static final Function<UnsupportedMediaTypeException, UnsupportedMediaTypeStatusException> ERROR_MAPPER =
 			ex -> (ex.getContentType() != null ?
-					new UnsupportedMediaTypeStatusException(ex.getContentType(), ex.getSupportedMediaTypes()) :
+					new UnsupportedMediaTypeStatusException(
+							ex.getContentType(), ex.getSupportedMediaTypes(), ex.getBodyType()) :
 					new UnsupportedMediaTypeStatusException(ex.getMessage()));
+
+	private static final Function<DecodingException, ServerWebInputException> DECODING_MAPPER =
+			ex -> new ServerWebInputException("Failed to read HTTP message", null, ex);
 
 
 	private final ServerWebExchange exchange;
@@ -122,11 +129,16 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
-		return body(extractor, Collections.emptyMap());
+		return bodyInternal(extractor, Hints.from(Hints.LOG_PREFIX_HINT, exchange().getLogPrefix()));
 	}
 
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
+		hints = Hints.merge(hints, Hints.LOG_PREFIX_HINT, exchange().getLogPrefix());
+		return bodyInternal(extractor, hints);
+	}
+
+	private <T> T bodyInternal(BodyExtractor<T, ? super ServerHttpRequest> extractor, Map<String, Object> hints) {
 		return extractor.extract(request(),
 				new BodyExtractor.Context() {
 					@Override
@@ -147,25 +159,29 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
 		Mono<T> mono = body(BodyExtractors.toMono(elementClass));
-		return mono.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return mono.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER)
+				.onErrorMap(DecodingException.class, DECODING_MAPPER);
 	}
 
 	@Override
 	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
 		Mono<T> mono = body(BodyExtractors.toMono(typeReference));
-		return mono.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return mono.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER)
+				.onErrorMap(DecodingException.class, DECODING_MAPPER);
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
 		Flux<T> flux = body(BodyExtractors.toFlux(elementClass));
-		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER)
+				.onErrorMap(DecodingException.class, DECODING_MAPPER);
 	}
 
 	@Override
 	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
 		Flux<T> flux = body(BodyExtractors.toFlux(typeReference));
-		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER);
+		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER)
+				.onErrorMap(DecodingException.class, DECODING_MAPPER);
 	}
 
 	@Override
@@ -215,7 +231,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public String toString() {
-		return String.format("%s %s", method(), path());
+		return String.format("HTTP %s %s", method(), path());
 	}
 
 

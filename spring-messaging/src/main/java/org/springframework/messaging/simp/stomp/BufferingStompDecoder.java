@@ -88,7 +88,7 @@ public class BufferingStompDecoder {
 
 	/**
 	 * Decodes one or more STOMP frames from the given {@code ByteBuffer} into a
-	 * list of {@link Message}s.
+	 * list of {@link Message Messages}.
 	 * <p>If there was enough data to parse a "content-length" header, then the
 	 * value is used to determine how much more data is needed before a new
 	 * attempt to decode is made.

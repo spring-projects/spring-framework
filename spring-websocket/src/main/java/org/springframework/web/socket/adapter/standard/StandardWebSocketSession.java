@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,7 @@ import org.springframework.web.socket.adapter.AbstractWebSocketSession;
  */
 public class StandardWebSocketSession extends AbstractWebSocketSession<Session> {
 
-	@Nullable
-	private String id;
+	private final String id;
 
 	@Nullable
 	private URI uri;
@@ -102,6 +101,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 			@Nullable Principal user) {
 
 		super(attributes);
+		this.id = idGenerator.generateId().toString();
 		headers = (headers != null ? headers : new HttpHeaders());
 		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
 		this.user = user;
@@ -112,7 +112,6 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	@Override
 	public String getId() {
-		Assert.state(this.id != null, "WebSocket session is not yet initialized");
 		return this.id;
 	}
 
@@ -189,9 +188,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	public void initializeNativeSession(Session session) {
 		super.initializeNativeSession(session);
 
-		this.id = session.getId();
 		this.uri = session.getRequestURI();
-
 		this.acceptedProtocol = session.getNegotiatedSubprotocol();
 
 		List<Extension> standardExtensions = getNativeSession().getNegotiatedExtensions();

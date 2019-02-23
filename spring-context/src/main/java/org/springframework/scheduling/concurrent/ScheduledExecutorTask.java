@@ -132,7 +132,7 @@ public class ScheduledExecutorTask {
 	/**
 	 * Set the period between repeated task executions, in milliseconds.
 	 * <p>Default is -1, leading to one-time execution. In case of a positive value,
-	 * the task will be executed repeatedly, with the given interval inbetween executions.
+	 * the task will be executed repeatedly, with the given interval in-between executions.
 	 * <p>Note that the semantics of the period value vary between fixed-rate and
 	 * fixed-delay execution.
 	 * <p><b>Note:</b> A period of 0 (for example as fixed delay) is <i>not</i> supported,

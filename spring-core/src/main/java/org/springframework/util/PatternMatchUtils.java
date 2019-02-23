@@ -52,7 +52,7 @@ public abstract class PatternMatchUtils {
 				return str.endsWith(pattern.substring(1));
 			}
 			String part = pattern.substring(1, nextIndex);
-			if ("".equals(part)) {
+			if (part.isEmpty()) {
 				return simpleMatch(pattern.substring(nextIndex), str);
 			}
 			int partIndex = str.indexOf(part);

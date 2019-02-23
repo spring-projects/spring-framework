@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,9 +82,10 @@ public class ReplaceOverride extends MethodOverride {
 		if (this.typeIdentifiers.size() != method.getParameterCount()) {
 			return false;
 		}
+		Class<?>[] parameterTypes = method.getParameterTypes();
 		for (int i = 0; i < this.typeIdentifiers.size(); i++) {
 			String identifier = this.typeIdentifiers.get(i);
-			if (!method.getParameterTypes()[i].getName().contains(identifier)) {
+			if (!parameterTypes[i].getName().contains(identifier)) {
 				return false;
 			}
 		}

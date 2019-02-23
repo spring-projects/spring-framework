@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public interface HandlerAdapter {
 	 * to the {@code supports} method of this interface, which must have
 	 * returned {@code true}.
 	 * @throws Exception in case of errors
-	 * @return ModelAndView object with the name of the view and the required
+	 * @return a ModelAndView object with the name of the view and the required
 	 * model data, or {@code null} if the request has been handled directly
 	 */
 	@Nullable

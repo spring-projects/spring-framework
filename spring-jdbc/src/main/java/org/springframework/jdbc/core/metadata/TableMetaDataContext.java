@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.metadata;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -253,7 +254,7 @@ public class TableMetaDataContext {
 					for (Map.Entry<String, ?> entry : inParameters.entrySet()) {
 						if (column.equalsIgnoreCase(entry.getKey())) {
 							value = entry.getValue();
-							// TODO: break;
+							break;
 						}
 					}
 				}
@@ -265,7 +266,7 @@ public class TableMetaDataContext {
 
 
 	/**
-	 * Build the insert string based on configuration and meta-data information
+	 * Build the insert string based on configuration and meta-data information.
 	 * @return the insert string to be used
 	 */
 	public String createInsertString(String... generatedKeyNames) {
@@ -294,20 +295,18 @@ public class TableMetaDataContext {
 		insertStatement.append(") VALUES(");
 		if (columnCount < 1) {
 			if (this.generatedKeyColumnsUsed) {
-				logger.info("Unable to locate non-key columns for table '" +
-						getTableName() + "' so an empty insert statement is generated");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unable to locate non-key columns for table '" +
+							getTableName() + "' so an empty insert statement is generated");
+				}
 			}
 			else {
 				throw new InvalidDataAccessApiUsageException("Unable to locate columns for table '" +
 						getTableName() + "' so an insert statement can't be generated");
 			}
 		}
-		for (int i = 0; i < columnCount; i++) {
-			if (i > 0) {
-				insertStatement.append(", ");
-			}
-			insertStatement.append("?");
-		}
+		String params = String.join(", ", Collections.nCopies(columnCount, "?"));
+		insertStatement.append(params);
 		insertStatement.append(")");
 		return insertStatement.toString();
 	}
@@ -361,6 +360,9 @@ public class TableMetaDataContext {
 	}
 
 	/**
+	 * Does this database support a simple query to retrieve generated keys
+	 * when the JDBC 3.0 feature is not supported:
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}?
 	 * @deprecated as of 4.3.15, in favor of {@link #getSimpleQueryForGetGeneratedKey}
 	 */
 	@Deprecated

@@ -28,7 +28,7 @@ import org.springframework.web.server.WebSession;
 /**
  * Default implementation of {@link WebSessionManager} delegating to a
  * {@link WebSessionIdResolver} for session id resolution and to a
- * {@link WebSessionStore}
+ * {@link WebSessionStore}.
  *
  * @author Rossen Stoyanchev
  * @author Rob Winch

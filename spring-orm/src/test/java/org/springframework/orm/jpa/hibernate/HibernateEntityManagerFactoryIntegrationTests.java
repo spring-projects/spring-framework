@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.hibernate;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Test;
@@ -41,7 +42,8 @@ public class HibernateEntityManagerFactoryIntegrationTests extends AbstractConta
 
 	@Override
 	protected String[] getConfigLocations() {
-		return HIBERNATE_CONFIG_LOCATIONS;
+		return new String[] {"/org/springframework/orm/jpa/hibernate/hibernate-manager.xml",
+				"/org/springframework/orm/jpa/memdb.xml", "/org/springframework/orm/jpa/inject.xml"};
 	}
 
 
@@ -67,6 +69,18 @@ public class HibernateEntityManagerFactoryIntegrationTests extends AbstractConta
 		assertTrue(proxy.unwrap(org.hibernate.jpa.HibernateEntityManager.class) != null);
 		assertSame(em, proxy.unwrap(org.hibernate.jpa.HibernateEntityManager.class));
 		assertSame(em.getDelegate(), proxy.getDelegate());
+	}
+
+	@Test  // SPR-16956
+	public void testReadOnly() {
+		assertSame(FlushMode.AUTO, sharedEntityManager.unwrap(Session.class).getHibernateFlushMode());
+		assertFalse(sharedEntityManager.unwrap(Session.class).isDefaultReadOnly());
+		endTransaction();
+
+		this.transactionDefinition.setReadOnly(true);
+		startNewTransaction();
+		assertSame(FlushMode.MANUAL, sharedEntityManager.unwrap(Session.class).getHibernateFlushMode());
+		assertTrue(sharedEntityManager.unwrap(Session.class).isDefaultReadOnly());
 	}
 
 }

@@ -49,17 +49,17 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSource, BeanFactoryAware, Serializable {
 
-	/** use serialVersionUID from Spring 1.2.7 for interoperability */
+	/** use serialVersionUID from Spring 1.2.7 for interoperability. */
 	private static final long serialVersionUID = -4721607536018568393L;
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Name of the target bean we will create on each invocation */
+	/** Name of the target bean we will create on each invocation. */
 	private String targetBeanName;
 
-	/** Class of the target */
+	/** Class of the target. */
 	private volatile Class<?> targetClass;
 
 	/**

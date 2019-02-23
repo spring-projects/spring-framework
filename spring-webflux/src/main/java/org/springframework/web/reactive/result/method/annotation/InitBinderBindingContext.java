@@ -16,12 +16,11 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.SimpleSessionStatus;
@@ -43,7 +42,6 @@ class InitBinderBindingContext extends BindingContext {
 
 	private final List<SyncInvocableHandlerMethod> binderMethods;
 
-	/* Simple BindingContext to help with the invoking @InitBinder methods */
 	private final BindingContext binderMethodContext;
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
@@ -71,36 +69,32 @@ class InitBinderBindingContext extends BindingContext {
 
 
 	@Override
-	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder dataBinder,
-			ServerWebExchange exchange) {
-
+	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder dataBinder, ServerWebExchange exchange) {
 		this.binderMethods.stream()
 				.filter(binderMethod -> {
 					InitBinder ann = binderMethod.getMethodAnnotation(InitBinder.class);
 					Assert.state(ann != null, "No InitBinder annotation");
-					Collection<String> names = Arrays.asList(ann.value());
-					return (names.isEmpty() || names.contains(dataBinder.getObjectName()));
+					String[] names = ann.value();
+					return (ObjectUtils.isEmpty(names) ||
+							ObjectUtils.containsElement(names, dataBinder.getObjectName()));
 				})
 				.forEach(method -> invokeBinderMethod(dataBinder, exchange, method));
 
 		return dataBinder;
 	}
 
-	private void invokeBinderMethod(WebExchangeDataBinder dataBinder,
-			ServerWebExchange exchange, SyncInvocableHandlerMethod binderMethod) {
+	private void invokeBinderMethod(
+			WebExchangeDataBinder dataBinder, ServerWebExchange exchange, SyncInvocableHandlerMethod binderMethod) {
 
-		HandlerResult result = binderMethod.invokeForHandlerResult(
-				exchange, this.binderMethodContext, dataBinder);
-
+		HandlerResult result = binderMethod.invokeForHandlerResult(exchange, this.binderMethodContext, dataBinder);
 		if (result != null && result.getReturnValue() != null) {
 			throw new IllegalStateException(
-					"@InitBinder methods should return void: " + binderMethod);
+					"@InitBinder methods must not return a value (should be void): " + binderMethod);
 		}
-
 		// Should not happen (no Model argument resolution) ...
 		if (!this.binderMethodContext.getModel().asMap().isEmpty()) {
 			throw new IllegalStateException(
-					"@InitBinder methods should not add model attributes: " + binderMethod);
+					"@InitBinder methods are not allowed to add model attributes: " + binderMethod);
 		}
 	}
 

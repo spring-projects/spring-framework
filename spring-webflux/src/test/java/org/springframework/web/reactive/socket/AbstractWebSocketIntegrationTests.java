@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
-
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
@@ -128,7 +127,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 	@After
-	public void stop() throws Exception {
+	public void stop() {
 		if (this.client instanceof Lifecycle) {
 			((Lifecycle) this.client).stop();
 		}

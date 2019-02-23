@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,12 +118,12 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 			return Mono.empty();
 		}
 
-		this.commitActions.add(() -> {
-			applyHeaders();
-			applyCookies();
-			this.state.set(State.COMMITTED);
-			return Mono.empty();
-		});
+		this.commitActions.add(() ->
+				Mono.fromRunnable(() -> {
+					applyHeaders();
+					applyCookies();
+					this.state.set(State.COMMITTED);
+				}));
 
 		if (writeAction != null) {
 			this.commitActions.add(writeAction);
@@ -132,7 +132,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		List<? extends Publisher<Void>> actions = this.commitActions.stream()
 				.map(Supplier::get).collect(Collectors.toList());
 
-		return Mono.fromDirect(Flux.concat(actions));
+		return Flux.concat(actions).then();
 	}
 
 

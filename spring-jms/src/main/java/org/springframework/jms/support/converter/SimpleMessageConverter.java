@@ -124,7 +124,7 @@ public class SimpleMessageConverter implements MessageConverter {
 
 	/**
 	 * Create a JMS BytesMessage for the given byte array.
-	 * @param bytes the byyte array to convert
+	 * @param bytes the byte array to convert
 	 * @param session current JMS session
 	 * @return the resulting message
 	 * @throws JMSException if thrown by JMS methods

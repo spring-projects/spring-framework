@@ -19,7 +19,6 @@ package org.springframework.core.io;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -66,18 +65,17 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 						return false;
 					}
 				}
-				if (con.getContentLength() >= 0) {
+				if (con.getContentLengthLong() > 0) {
 					return true;
 				}
 				if (httpCon != null) {
-					// no HTTP OK status, and no content-length header: give up
+					// No HTTP OK status, and no content-length header: give up
 					httpCon.disconnect();
 					return false;
 				}
 				else {
 					// Fall back to stream existence: can we open the stream?
-					InputStream is = getInputStream();
-					is.close();
+					getInputStream().close();
 					return true;
 				}
 			}
@@ -97,7 +95,30 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				return (file.canRead() && !file.isDirectory());
 			}
 			else {
-				return true;
+				// Try InputStream resolution for jar resources
+				URLConnection con = url.openConnection();
+				customizeConnection(con);
+				if (con instanceof HttpURLConnection) {
+					HttpURLConnection httpCon = (HttpURLConnection) con;
+					int code = httpCon.getResponseCode();
+					if (code != HttpURLConnection.HTTP_OK) {
+						httpCon.disconnect();
+						return false;
+					}
+				}
+				long contentLength = con.getContentLengthLong();
+				if (contentLength > 0) {
+					return true;
+				}
+				else if (contentLength == 0) {
+					// Empty file or directory -> not considered readable...
+					return false;
+				}
+				else {
+					// Fall back to stream existence: can we open the stream?
+					getInputStream().close();
+					return true;
+				}
 			}
 		}
 		catch (IOException ex) {
@@ -205,23 +226,35 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		URL url = getURL();
 		if (ResourceUtils.isFileURL(url)) {
 			// Proceed with file system resolution
-			return getFile().length();
+			File file = getFile();
+			long length = file.length();
+			if (length == 0L && !file.exists()) {
+				throw new FileNotFoundException(getDescription() +
+						" cannot be resolved in the file system for checking its content length");
+			}
+			return length;
 		}
 		else {
 			// Try a URL connection content-length header
 			URLConnection con = url.openConnection();
 			customizeConnection(con);
-			return con.getContentLength();
+			return con.getContentLengthLong();
 		}
 	}
 
 	@Override
 	public long lastModified() throws IOException {
 		URL url = getURL();
+		boolean fileCheck = false;
 		if (ResourceUtils.isFileURL(url) || ResourceUtils.isJarURL(url)) {
 			// Proceed with file system resolution
+			fileCheck = true;
 			try {
-				return super.lastModified();
+				File fileToCheck = getFileForLastModifiedCheck();
+				long lastModified = fileToCheck.lastModified();
+				if (lastModified > 0L || fileToCheck.exists()) {
+					return lastModified;
+				}
 			}
 			catch (FileNotFoundException ex) {
 				// Defensively fall back to URL connection check instead
@@ -230,7 +263,12 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		// Try a URL connection last-modified header
 		URLConnection con = url.openConnection();
 		customizeConnection(con);
-		return con.getLastModified();
+		long lastModified = con.getLastModified();
+		if (fileCheck && lastModified == 0 && con.getContentLengthLong() <= 0) {
+			throw new FileNotFoundException(getDescription() +
+					" cannot be resolved in the file system for checking its last-modified timestamp");
+		}
+		return lastModified;
 	}
 
 	/**

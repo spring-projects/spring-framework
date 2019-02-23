@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,6 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 
 	private boolean ignoreInvalidLocale = false;
 
-	private boolean languageTagCompliant = false;
-
 
 	/**
 	 * Set the name of the parameter that contains a locale specification
@@ -113,22 +111,29 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 	/**
 	 * Specify whether to parse request parameter values as BCP 47 language tags
 	 * instead of Java's legacy locale specification format.
-	 * The default is {@code false}.
+	 * <p><b>NOTE: As of 5.1, this resolver leniently accepts the legacy
+	 * {@link Locale#toString} format as well as BCP 47 language tags.</b>
 	 * @since 4.3
 	 * @see Locale#forLanguageTag(String)
 	 * @see Locale#toLanguageTag()
+	 * @deprecated as of 5.1 since it only accepts {@code true} now
 	 */
+	@Deprecated
 	public void setLanguageTagCompliant(boolean languageTagCompliant) {
-		this.languageTagCompliant = languageTagCompliant;
+		if (!languageTagCompliant) {
+			throw new IllegalArgumentException("LocaleChangeInterceptor always accepts BCP 47 language tags");
+		}
 	}
 
 	/**
 	 * Return whether to use BCP 47 language tags instead of Java's legacy
 	 * locale specification format.
 	 * @since 4.3
+	 * @deprecated as of 5.1 since it always returns {@code true} now
 	 */
+	@Deprecated
 	public boolean isLanguageTagCompliant() {
-		return this.languageTagCompliant;
+		return true;
 	}
 
 
@@ -176,16 +181,15 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 
 	/**
 	 * Parse the given locale value as coming from a request parameter.
-	 * <p>The default implementation calls {@link StringUtils#parseLocaleString(String)}
-	 * or JDK 7's {@link Locale#forLanguageTag(String)}, depending on the
-	 * {@link #setLanguageTagCompliant "languageTagCompliant"} configuration property.
-	 * @param locale the locale value to parse
+	 * <p>The default implementation calls {@link StringUtils#parseLocale(String)},
+	 * accepting the {@link Locale#toString} format as well as BCP 47 language tags.
+	 * @param localeValue the locale value to parse
 	 * @return the corresponding {@code Locale} instance
 	 * @since 4.3
 	 */
 	@Nullable
-	protected Locale parseLocaleValue(String locale) {
-		return (isLanguageTagCompliant() ? Locale.forLanguageTag(locale) : StringUtils.parseLocaleString(locale));
+	protected Locale parseLocaleValue(String localeValue) {
+		return StringUtils.parseLocale(localeValue);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,13 @@
 
 package org.springframework.beans;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -27,7 +34,33 @@ import org.springframework.lang.Nullable;
  * @since 13 May 2001
  * @see PropertyValue
  */
-public interface PropertyValues {
+public interface PropertyValues extends Iterable<PropertyValue> {
+
+	/**
+	 * Return an {@link Iterator} over the property values.
+	 * @since 5.1
+	 */
+	@Override
+	default Iterator<PropertyValue> iterator() {
+		return Arrays.asList(getPropertyValues()).iterator();
+	}
+
+	/**
+	 * Return a {@link Spliterator} over the property values.
+	 * @since 5.1
+	 */
+	@Override
+	default Spliterator<PropertyValue> spliterator() {
+		return Spliterators.spliterator(getPropertyValues(), 0);
+	}
+
+	/**
+	 * Return a sequential {@link Stream} containing the property values.
+	 * @since 5.1
+	 */
+	default Stream<PropertyValue> stream() {
+		return StreamSupport.stream(spliterator(), false);
+	}
 
 	/**
 	 * Return an array of the PropertyValue objects held in this object.
@@ -46,7 +79,7 @@ public interface PropertyValues {
 	 * Return the changes since the previous PropertyValues.
 	 * Subclasses should also override {@code equals}.
 	 * @param old old property values
-	 * @return PropertyValues updated or new properties.
+	 * @return the updated or new properties.
 	 * Return empty PropertyValues if there are no changes.
 	 * @see Object#equals
 	 */

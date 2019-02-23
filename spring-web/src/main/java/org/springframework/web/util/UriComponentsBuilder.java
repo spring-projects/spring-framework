@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
+import org.springframework.web.util.UriComponents.UriTemplateVariables;
 
 /**
  * Builder for {@link UriComponents}.
@@ -119,6 +123,12 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Nullable
 	private String fragment;
 
+	private final Map<String, Object> uriVariables = new HashMap<>(4);
+
+	private boolean encodeTemplate;
+
+	private Charset charset = StandardCharsets.UTF_8;
+
 
 	/**
 	 * Default constructor. Protected to prevent direct instantiation.
@@ -144,6 +154,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		this.pathBuilder = other.pathBuilder.cloneBuilder();
 		this.queryParams.putAll(other.queryParams);
 		this.fragment = other.fragment;
+		this.encodeTemplate = other.encodeTemplate;
+		this.charset = other.charset;
 	}
 
 
@@ -319,7 +331,43 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 
-	// build methods
+	// Encode methods
+
+	/**
+	 * Request to have the URI template pre-encoded at build time, and
+	 * URI variables encoded separately when expanded.
+	 * <p>In comparison to {@link UriComponents#encode()}, this method has the
+	 * same effect on the URI template, i.e. each URI component is encoded by
+	 * replacing non-ASCII and illegal (within the URI component type) characters
+	 * with escaped octets. However URI variables are encoded more strictly, by
+	 * also escaping characters with reserved meaning.
+	 * <p>For most cases, this method is more likely to give the expected result
+	 * because in treats URI variables as opaque data to be fully encoded, while
+	 * {@link UriComponents#encode()} is useful only if intentionally expanding
+	 * URI variables that contain reserved characters.
+	 * <p>For example ';' is legal in a path but has reserved meaning. This
+	 * method replaces ";" with "%3B" in URI variables but not in the URI
+	 * template. By contrast, {@link UriComponents#encode()} never replaces ";"
+	 * since it is a legal character in a path.
+	 * @since 5.0.8
+	 */
+	public final UriComponentsBuilder encode() {
+		return encode(StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * A variant of {@link #encode()} with a charset other than "UTF-8".
+	 * @param charset the charset to use for encoding
+	 * @since 5.0.8
+	 */
+	public UriComponentsBuilder encode(Charset charset) {
+		this.encodeTemplate = true;
+		this.charset = charset;
+		return this;
+	}
+
+
+	// Build methods
 
 	/**
 	 * Build a {@code UriComponents} instance from the various components contained in this builder.
@@ -337,13 +385,27 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
+		return buildInternal(encoded ?
+				EncodingHint.FULLY_ENCODED :
+				this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE);
+	}
+
+	private UriComponents buildInternal(EncodingHint hint) {
+		UriComponents result;
 		if (this.ssp != null) {
-			return new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
+			result = new OpaqueUriComponents(this.scheme, this.ssp, this.fragment);
 		}
 		else {
-			return new HierarchicalUriComponents(this.scheme, this.fragment, this.userInfo,
-					this.host, this.port, this.pathBuilder.build(), this.queryParams, encoded, true);
+			HierarchicalUriComponents uric = new HierarchicalUriComponents(this.scheme, this.fragment,
+					this.userInfo, this.host, this.port, this.pathBuilder.build(), this.queryParams,
+					hint == EncodingHint.FULLY_ENCODED);
+
+			result = hint == EncodingHint.ENCODE_TEMPLATE ? uric.encodeTemplate(this.charset) : uric;
 		}
+		if (!this.uriVariables.isEmpty()) {
+			result = result.expand(name -> this.uriVariables.getOrDefault(name, UriTemplateVariables.SKIP_VALUE));
+		}
+		return result;
 	}
 
 	/**
@@ -354,53 +416,50 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @return the URI components with expanded values
 	 */
 	public UriComponents buildAndExpand(Map<String, ?> uriVariables) {
-		return build(false).expand(uriVariables);
+		return build().expand(uriVariables);
 	}
 
 	/**
 	 * Build a {@code UriComponents} instance and replaces URI template variables
 	 * with the values from an array. This is a shortcut method which combines
 	 * calls to {@link #build()} and then {@link UriComponents#expand(Object...)}.
-	 * @param uriVariableValues URI variable values
+	 * @param uriVariableValues the URI variable values
 	 * @return the URI components with expanded values
 	 */
 	public UriComponents buildAndExpand(Object... uriVariableValues) {
-		return build(false).expand(uriVariableValues);
+		return build().expand(uriVariableValues);
 	}
 
-
-	/**
-	 * Build a {@link URI} instance and replaces URI template variables
-	 * with the values from an array.
-	 * @param uriVariables the map of URI variables
-	 * @return the URI
-	 */
 	@Override
 	public URI build(Object... uriVariables) {
-		return buildAndExpand(uriVariables).encode().toUri();
+		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
-	/**
-	 * Build a {@link URI} instance and replaces URI template variables
-	 * with the values from a map.
-	 * @param uriVariables the map of URI variables
-	 * @return the URI
-	 */
 	@Override
 	public URI build(Map<String, ?> uriVariables) {
-		return buildAndExpand(uriVariables).encode().toUri();
+		return buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();
 	}
 
-
 	/**
-	 * Build a URI String. This is a shortcut method which combines calls
-	 * to {@link #build()}, then {@link UriComponents#encode()} and finally
-	 * {@link UriComponents#toUriString()}.
+	 * Build a URI String.
+	 * <p>Effectively, a shortcut for building, encoding, and returning the
+	 * String representation:
+	 * <pre class="code">
+	 * String uri = builder.build().encode().toUriString()
+	 * </pre>
+	 * <p>However if {@link #uriVariables(Map) URI variables} have been provided
+	 * then the URI template is pre-encoded separately from URI variables (see
+	 * {@link #encode()} for details), i.e. equivalent to:
+	 * <pre>
+	 * String uri = builder.encode().build().toUriString()
+	 * </pre>
 	 * @since 4.1
 	 * @see UriComponents#toUriString()
 	 */
 	public String toUriString() {
-		return build(false).encode().toUriString();
+		return this.uriVariables.isEmpty() ?
+				build().encode().toUriString() :
+				buildInternal(EncodingHint.ENCODE_TEMPLATE).toUriString();
 	}
 
 
@@ -663,7 +722,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	@Override
 	public UriComponentsBuilder queryParams(@Nullable MultiValueMap<String, String> params) {
 		if (params != null) {
-			this.queryParams.putAll(params);
+			this.queryParams.addAll(params);
 		}
 		return this;
 	}
@@ -720,6 +779,25 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	/**
+	 * Configure URI variables to be expanded at build time.
+	 * <p>The provided variables may be a subset of all required ones. At build
+	 * time, the available ones are expanded, while unresolved URI placeholders
+	 * are left in place and can still be expanded later.
+	 * <p>In contrast to {@link UriComponents#expand(Map)} or
+	 * {@link #buildAndExpand(Map)}, this method is useful when you need to
+	 * supply URI variables without building the {@link UriComponents} instance
+	 * just yet, or perhaps pre-expand some shared default values such as host
+	 * and port.
+	 * @param uriVariables the URI variables to use
+	 * @return this UriComponentsBuilder
+	 * @since 5.0.8
+	 */
+	public UriComponentsBuilder uriVariables(Map<String, Object> uriVariables) {
+		this.uriVariables.putAll(uriVariables);
+		return this;
+	}
+
+	/**
 	 * Adapt this builder's scheme+host+port from the given headers, specifically
 	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>,
 	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
@@ -743,6 +821,10 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 					scheme(matcher.group(1).trim());
 					port(null);
 				}
+				else if (isForwardedSslOn(headers)) {
+					scheme("https");
+					port(null);
+				}
 				matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
 				if (matcher.find()) {
 					adaptForwardedHost(matcher.group(1).trim());
@@ -752,6 +834,10 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				String protocolHeader = headers.getFirst("X-Forwarded-Proto");
 				if (StringUtils.hasText(protocolHeader)) {
 					scheme(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
+					port(null);
+				}
+				else if (isForwardedSslOn(headers)) {
+					scheme("https");
 					port(null);
 				}
 
@@ -778,6 +864,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 
 		return this;
+	}
+
+	private boolean isForwardedSslOn(HttpHeaders headers) {
+		String forwardedSsl = headers.getFirst("X-Forwarded-Ssl");
+		return StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on");
 	}
 
 	private void adaptForwardedHost(String hostToUse) {
@@ -974,5 +1065,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			return builder;
 		}
 	}
+
+
+	private enum EncodingHint { ENCODE_TEMPLATE, FULLY_ENCODED, NONE }
 
 }

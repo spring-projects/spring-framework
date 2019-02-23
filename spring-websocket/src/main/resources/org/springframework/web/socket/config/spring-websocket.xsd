@@ -148,7 +148,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="stream-bytes-limit" type="xsd:string">
+		<xsd:attribute name="stream-bytes-limit" type="xsd:int">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	Minimum number of bytes that can be send over a single HTTP streaming request before it will be closed.
@@ -165,7 +165,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="heartbeat-time" type="xsd:string">
+		<xsd:attribute name="heartbeat-time" type="xsd:long">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	The amount of time in milliseconds when the server has not sent any messages and after which the server
@@ -174,7 +174,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="disconnect-delay" type="xsd:string">
+		<xsd:attribute name="disconnect-delay" type="xsd:long">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	The amount of time in milliseconds before a client is considered disconnected after not having
@@ -183,7 +183,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="message-cache-size" type="xsd:string">
+		<xsd:attribute name="message-cache-size" type="xsd:int">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	The number of server-to-client messages that a session can cache while waiting for
@@ -192,7 +192,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="websocket-enabled" type="xsd:string">
+		<xsd:attribute name="websocket-enabled" type="xsd:boolean">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	Some load balancers don't support websockets. Set this option to "false" to disable the WebSocket transport on the server side.
@@ -216,7 +216,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="suppress-cors" type="xsd:string">
+		<xsd:attribute name="suppress-cors" type="xsd:boolean">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.web.socket.sockjs.support.AbstractSockJsService"><![CDATA[
 	This option can be used to disable automatic addition of CORS headers for SockJS requests.
@@ -252,7 +252,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="relay-port" type="xsd:string">
+		<xsd:attribute name="relay-port" type="xsd:int">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
 	The STOMP message broker port.
@@ -295,14 +295,14 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="heartbeat-send-interval" type="xsd:string">
+		<xsd:attribute name="heartbeat-send-interval" type="xsd:long">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
 	The interval, in milliseconds, at which the "system" connection will send heartbeats to the STOMP broker.
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="heartbeat-receive-interval" type="xsd:string">
+		<xsd:attribute name="heartbeat-receive-interval" type="xsd:long">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler"><![CDATA[
 	The interval, in milliseconds, at which the "system" connection expects to receive heartbeats from the STOMP broker.
@@ -416,7 +416,7 @@
 	Configuration for the ThreadPoolTaskExecutor that sends messages for the message channel.
                 ]]></xsd:documentation>
 		</xsd:annotation>
-		<xsd:attribute name="core-pool-size" type="xsd:string" use="optional">
+		<xsd:attribute name="core-pool-size" type="xsd:int" use="optional">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	Set the core pool size of the ThreadPoolExecutor.
@@ -429,7 +429,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="max-pool-size" type="xsd:string" use="optional">
+		<xsd:attribute name="max-pool-size" type="xsd:int" use="optional">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	 Set the max pool size of the ThreadPoolExecutor.
@@ -439,7 +439,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="keep-alive-seconds" type="xsd:string" use="optional">
+		<xsd:attribute name="keep-alive-seconds" type="xsd:int" use="optional">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	 Set the time limit for which threads may remain idle before being terminated.
@@ -449,7 +449,7 @@
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="queue-capacity" type="xsd:string" use="optional">
+		<xsd:attribute name="queue-capacity" type="xsd:int" use="optional">
 			<xsd:annotation>
 				<xsd:documentation source="java:org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor"><![CDATA[
 	 Set the queue capacity for the ThreadPoolExecutor.
@@ -526,14 +526,14 @@
 			<xsd:attribute name="allowed-origins" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-		Configure allowed {@code Origin} header values. Multiple origins may be specified
+		Configure allowed Origin header values. Multiple origins may be specified
 		as a comma-separated list.
 
 		This check is mostly designed for browser clients. There is noting preventing other
 		types of client to modify the Origin header value.
 
 		When SockJS is enabled and allowed origins are restricted, transport types that do not
-		use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		use Origin headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
 		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
 		supported anymore and IE8/IE9 will only be supported without cookies.
 
@@ -596,7 +596,7 @@
 								</xsd:complexType>
 							</xsd:element>
 						</xsd:sequence>
-						<xsd:attribute name="message-size" type="xsd:string">
+						<xsd:attribute name="message-size" type="xsd:int">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	Configure the maximum size for an incoming sub-protocol message.
@@ -619,7 +619,7 @@
                                 ]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
-						<xsd:attribute name="send-timeout" type="xsd:string">
+						<xsd:attribute name="send-timeout" type="xsd:int">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	Configure a time limit (in milliseconds) for the maximum amount of a time
@@ -628,10 +628,10 @@
 
 	In general WebSocket servers expect that messages to a single WebSocket
 	session are sent from a single thread at a time. This is automatically
-	guaranteed when using {@code @EnableWebSocketMessageBroker} configuration.
+	guaranteed when using @EnableWebSocketMessageBroker configuration.
 	If message sending is slow, or at least slower than rate of messages sending,
-	subsequent messages are buffered until either the {@code sendTimeLimit}
-	or the {@code sendBufferSizeLimit} are reached at which point the session
+	subsequent messages are buffered until either the sendTimeLimit
+	or the sendBufferSizeLimit are reached at which point the session
 	state is cleared and an attempt is made to close the session.
 
 	NOTE that the session time limit is checked only
@@ -648,13 +648,13 @@
 	the server is using non-blocking IO such as Tomcat's NIO connector that
 	is used by default on Tomcat 8. If you must use blocking IO consider
 	customizing OS-level TCP settings, for example
-	{@code /proc/sys/net/ipv4/tcp_retries2} on Linux.
+	/proc/sys/net/ipv4/tcp_retries2 on Linux.
 
 	The default value is 10 seconds (i.e. 10 * 10000).
                                 ]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
-						<xsd:attribute name="send-buffer-size" type="xsd:string">
+						<xsd:attribute name="send-buffer-size" type="xsd:int">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	Configure the maximum amount of data to buffer when sending messages
@@ -663,10 +663,10 @@
 
 	In general WebSocket servers expect that messages to a single WebSocket
 	session are sent from a single thread at a time. This is automatically
-	guaranteed when using {@code @EnableWebSocketMessageBroker} configuration.
+	guaranteed when using @EnableWebSocketMessageBroker configuration.
 	If message sending is slow, or at least slower than rate of messages sending,
-	subsequent messages are buffered until either the {@code sendTimeLimit}
-	or the {@code sendBufferSizeLimit} are reached at which point the session
+	subsequent messages are buffered until either the sendTimeLimit
+	or the sendBufferSizeLimit are reached at which point the session
 	state is cleared and an attempt is made to close the session.
 
 	NOTE that closing the session may not succeed in
@@ -675,14 +675,27 @@
 	configured by default on Tomcat 7. Therefore it is recommended to ensure
 	the server is using non-blocking IO such as Tomcat's NIO connector used
 	by default on Tomcat 8. If you must use blocking IO consider customizing
-	OS-level TCP settings, for example {@code /proc/sys/net/ipv4/tcp_retries2}
+	OS-level TCP settings, for example /proc/sys/net/ipv4/tcp_retries2
 	on Linux.
 
-	The default value is 512K (i.e. 512 * 1024).
+	The default value is 512K (i.e. 512 * 1024). If the value is set to less
+	than or equal to 0 then buffering is effectively disabled.
+                                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="time-to-first-message" type="xsd:int">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	 Set the maximum time allowed in milliseconds after the WebSocket
+	 connection is established and before the first sub-protocol message is
+	 received.
 
-	@param sendBufferSizeLimit the maximum number of bytes to buffer when
-	sending messages; if the value is less than or equal to 0 then buffering
-	is effectively disabled.
+	 This handler is for WebSocket connections that use a sub-protocol.
+	 Therefore, we expect the client to send at least one sub-protocol message
+	 in the beginning, or else we assume the connection isn't doing well, e.g.
+	 proxy issue, slow network, and can be closed.
+
+	 By default this is set to 60,000 (1 minute).
                                 ]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -711,14 +724,14 @@
 						<xsd:attribute name="allowed-origins" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-		Configure allowed {@code Origin} header values. Multiple origins may be specified
+		Configure allowed Origin header values. Multiple origins may be specified
 		as a comma-separated list.
 
 		This check is mostly designed for browser clients. There is noting preventing other
 		types of client to modify the Origin header value.
 
 		When SockJS is enabled and allowed origins are restricted, transport types that do not
-		use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
+		use Origin headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
 		iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
 		supported anymore and IE8/IE9 will only be supported without cookies.
 
@@ -882,6 +895,22 @@
 
 	Prefixes without a trailing slash will have one appended automatically.
 	By default the list of prefixes is empty in which case all destinations match.
+                    ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="preserve-publish-order" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether the client must receive messages in the order of publication.
+
+	By default messages sent to the clientOutboundChannel may
+	not be processed in the same order because the channel is backed by a
+	ThreadPoolExecutor that in turn does not guarantee processing in order.
+
+	When this flag is set to true messages within the same session
+	will be sent to the clientOutboundChannel one at a time in
+	order to preserve the order of publication. Enable this only if needed
+	since there is some performance overhead to keep messages in order.
                     ]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

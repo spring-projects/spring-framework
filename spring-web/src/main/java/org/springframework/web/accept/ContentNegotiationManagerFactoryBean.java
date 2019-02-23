@@ -198,6 +198,8 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
+	 * Indicate whether to use the Java Activation Framework as a fallback option
+	 * to map from file extensions to media types.
 	 * @deprecated as of 5.0, in favor of {@link #setUseRegisteredExtensionsOnly(boolean)}, which
 	 * has reverse behavior.
 	 */
@@ -261,8 +263,8 @@ public class ContentNegotiationManagerFactoryBean
 	/**
 	 * Set the default content types to use when no content type is requested.
 	 * <p>By default this is not set.
-	 * @see #setDefaultContentTypeStrategy
 	 * @since 5.0
+	 * @see #setDefaultContentTypeStrategy
 	 */
 	public void setDefaultContentTypes(List<MediaType> contentTypes) {
 		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(contentTypes);
@@ -272,8 +274,8 @@ public class ContentNegotiationManagerFactoryBean
 	 * Set a custom {@link ContentNegotiationStrategy} to use to determine
 	 * the content type to use when no content type is requested.
 	 * <p>By default this is not set.
-	 * @see #setDefaultContentType
 	 * @since 4.1.2
+	 * @see #setDefaultContentType
 	 */
 	public void setDefaultContentTypeStrategy(ContentNegotiationStrategy strategy) {
 		this.defaultNegotiationStrategy = strategy;

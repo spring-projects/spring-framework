@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class MethodNameBasedMBeanInfoAssembler extends AbstractConfigurableMBean
 	 * The property key should match the bean key and the property value should match
 	 * the list of method names. When searching for method names for a bean, Spring
 	 * will check these mappings first.
-	 * @param mappings the mappins of bean keys to method names
+	 * @param mappings the mappings of bean keys to method names
 	 */
 	public void setMethodMappings(Properties mappings) {
 		this.methodMappings = new HashMap<>();

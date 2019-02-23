@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.lang.Nullable;
 
 /**
- * Reader that supports a stream of {@link ServerSentEvent}s and also plain
- * {@link Object}s which is the same as an {@link ServerSentEvent} with data only.
+ * Reader that supports a stream of {@link ServerSentEvent ServerSentEvents} and also plain
+ * {@link Object Objects} which is the same as an {@link ServerSentEvent} with data only.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -93,19 +93,18 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	private boolean isServerSentEvent(ResolvableType elementType) {
-		Class<?> rawClass = elementType.getRawClass();
-		return (rawClass != null && ServerSentEvent.class.isAssignableFrom(rawClass));
+		return ServerSentEvent.class.isAssignableFrom(elementType.toClass());
 	}
 
 
 	@Override
-	public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
+	public Flux<Object> read(
+			ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
 		boolean shouldWrap = isServerSentEvent(elementType);
-		ResolvableType valueType = (shouldWrap ? elementType.getGeneric(0) : elementType);
+		ResolvableType valueType = (shouldWrap ? elementType.getGeneric() : elementType);
 
-		return stringDecoder.decode(message.getBody(), STRING_TYPE, null, Collections.emptyMap())
+		return stringDecoder.decode(message.getBody(), STRING_TYPE, null, hints)
 				.bufferUntil(line -> line.equals(""))
 				.concatMap(lines -> buildEvent(lines, valueType, shouldWrap, hints));
 	}
@@ -120,21 +119,21 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		for (String line : lines) {
 			if (line.startsWith("data:")) {
 				data = (data != null ? data : new StringBuilder());
-				data.append(line.substring(5)).append("\n");
+				data.append(line.substring(5).trim()).append("\n");
 			}
 			if (shouldWrap) {
 				if (line.startsWith("id:")) {
-					sseBuilder.id(line.substring(3));
+					sseBuilder.id(line.substring(3).trim());
 				}
 				else if (line.startsWith("event:")) {
-					sseBuilder.event(line.substring(6));
+					sseBuilder.event(line.substring(6).trim());
 				}
 				else if (line.startsWith("retry:")) {
-					sseBuilder.retry(Duration.ofMillis(Long.valueOf(line.substring(6))));
+					sseBuilder.retry(Duration.ofMillis(Long.valueOf(line.substring(6).trim())));
 				}
 				else if (line.startsWith(":")) {
 					comment = (comment != null ? comment : new StringBuilder());
-					comment.append(line.substring(1)).append("\n");
+					comment.append(line.substring(1).trim()).append("\n");
 				}
 			}
 		}
@@ -170,13 +169,13 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 	}
 
 	@Override
-	public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
+	public Mono<Object> readMono(
+			ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 
 		// We're ahead of String + "*/*"
 		// Let's see if we can aggregate the output (lest we time out)...
 
-		if (String.class.equals(elementType.getRawClass())) {
+		if (elementType.resolve() == String.class) {
 			Flux<DataBuffer> body = message.getBody();
 			return stringDecoder.decodeToMono(body, elementType, null, null).cast(Object.class);
 		}

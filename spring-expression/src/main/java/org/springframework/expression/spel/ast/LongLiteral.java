@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ public class LongLiteral extends Literal {
 	private final TypedValue value;
 
 
-	public LongLiteral(String payload, int pos, long value) {
-		super(payload, pos);
+	public LongLiteral(String payload, int startPos, int endPos, long value) {
+		super(payload, startPos, endPos);
 		this.value = new TypedValue(value);
 		this.exitTypeDescriptor = "J";
 	}
@@ -42,12 +42,12 @@ public class LongLiteral extends Literal {
 	public TypedValue getLiteralValue() {
 		return this.value;
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		return true;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		mv.visitLdcInsn(this.value.getValue());

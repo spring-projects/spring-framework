@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class DefaultMessageHandlerMethodFactoryTests {
 				createInvocableHandlerMethod(instance, "simpleString", String.class);
 
 		thrown.expect(MethodArgumentResolutionException.class);
-		thrown.expectMessage("No suitable resolver for");
+		thrown.expectMessage("No suitable resolver");
 		invocableHandlerMethod2.invoke(message);
 	}
 

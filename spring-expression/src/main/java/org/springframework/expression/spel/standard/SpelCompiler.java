@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A SpelCompiler will take a regular parsed expression and create (and load) a class
@@ -64,7 +65,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Andy Clement
  * @since 4.1
  */
-public class SpelCompiler implements Opcodes {
+public final class SpelCompiler implements Opcodes {
 
 	private static final Log logger = LogFactory.getLog(SpelCompiler.class);
 
@@ -132,9 +133,9 @@ public class SpelCompiler implements Opcodes {
 	@Nullable
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
-		String clazzName = "spel/Ex" + getNextSuffix();
+		String className = "spel/Ex" + getNextSuffix();
 		ClassWriter cw = new ExpressionClassWriter();
-		cw.visit(V1_5, ACC_PUBLIC, clazzName, null, "org/springframework/expression/spel/CompiledExpression", null);
+		cw.visit(V1_5, ACC_PUBLIC, className, null, "org/springframework/expression/spel/CompiledExpression", null);
 
 		// Create default constructor
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
@@ -152,7 +153,7 @@ public class SpelCompiler implements Opcodes {
 				new String[ ]{"org/springframework/expression/EvaluationException"});
 		mv.visitCode();
 
-		CodeFlow cf = new CodeFlow(clazzName, cw);
+		CodeFlow cf = new CodeFlow(className, cw);
 
 		// Ask the expression AST to generate the body of the method
 		try {
@@ -181,7 +182,7 @@ public class SpelCompiler implements Opcodes {
 		byte[] data = cw.toByteArray();
 		// TODO need to make this conditionally occur based on a debug flag
 		// dump(expressionToCompile.toStringAST(), clazzName, data);
-		return loadClass(clazzName.replaceAll("/", "."), data);
+		return loadClass(StringUtils.replace(className, "/", "."), data);
 	}
 
 	/**
@@ -256,12 +257,12 @@ public class SpelCompiler implements Opcodes {
 		}
 
 		int getClassesDefinedCount() {
-			return classesDefinedCount;
+			return this.classesDefinedCount;
 		}
 
 		public Class<?> defineClass(String name, byte[] bytes) {
 			Class<?> clazz = super.defineClass(name, bytes, 0, bytes.length);
-			classesDefinedCount++;
+			this.classesDefinedCount++;
 			return clazz;
 		}
 	}

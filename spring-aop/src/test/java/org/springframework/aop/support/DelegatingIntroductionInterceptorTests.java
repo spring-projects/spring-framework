@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ public class DelegatingIntroductionInterceptorTests {
 		TimeStamped ts = (TimeStamped) pf.getProxy();
 
 		assertThat(ts, instanceOf(TimeStamped.class));
-		// Shoulnd't proxy framework interfaces
+		// Shouldn't proxy framework interfaces
 		assertTrue(!(ts instanceof MethodInterceptor));
 		assertTrue(!(ts instanceof IntroductionInterceptor));
 

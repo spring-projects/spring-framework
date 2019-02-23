@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +26,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -323,29 +323,30 @@ public class MediaType extends MimeType implements Serializable {
 
 
 	static {
-		ALL = valueOf(ALL_VALUE);
-		APPLICATION_ATOM_XML = valueOf(APPLICATION_ATOM_XML_VALUE);
-		APPLICATION_FORM_URLENCODED = valueOf(APPLICATION_FORM_URLENCODED_VALUE);
-		APPLICATION_JSON = valueOf(APPLICATION_JSON_VALUE);
-		APPLICATION_JSON_UTF8 = valueOf(APPLICATION_JSON_UTF8_VALUE);
-		APPLICATION_OCTET_STREAM = valueOf(APPLICATION_OCTET_STREAM_VALUE);
-		APPLICATION_PDF = valueOf(APPLICATION_PDF_VALUE);
-		APPLICATION_PROBLEM_JSON = valueOf(APPLICATION_PROBLEM_JSON_VALUE);
-		APPLICATION_PROBLEM_JSON_UTF8 = valueOf(APPLICATION_PROBLEM_JSON_UTF8_VALUE);
-		APPLICATION_PROBLEM_XML = valueOf(APPLICATION_PROBLEM_XML_VALUE);
-		APPLICATION_RSS_XML = valueOf(APPLICATION_RSS_XML_VALUE);
-		APPLICATION_STREAM_JSON = valueOf(APPLICATION_STREAM_JSON_VALUE);
-		APPLICATION_XHTML_XML = valueOf(APPLICATION_XHTML_XML_VALUE);
-		APPLICATION_XML = valueOf(APPLICATION_XML_VALUE);
-		IMAGE_GIF = valueOf(IMAGE_GIF_VALUE);
-		IMAGE_JPEG = valueOf(IMAGE_JPEG_VALUE);
-		IMAGE_PNG = valueOf(IMAGE_PNG_VALUE);
-		MULTIPART_FORM_DATA = valueOf(MULTIPART_FORM_DATA_VALUE);
-		TEXT_EVENT_STREAM = valueOf(TEXT_EVENT_STREAM_VALUE);
-		TEXT_HTML = valueOf(TEXT_HTML_VALUE);
-		TEXT_MARKDOWN = valueOf(TEXT_MARKDOWN_VALUE);
-		TEXT_PLAIN = valueOf(TEXT_PLAIN_VALUE);
-		TEXT_XML = valueOf(TEXT_XML_VALUE);
+		// Not using "valueOf' to avoid static init cost
+		ALL = new MediaType("*", "*");
+		APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
+		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
+		APPLICATION_JSON = new MediaType("application", "json");
+		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
+		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
+		APPLICATION_PDF = new MediaType("application", "pdf");
+		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
+		APPLICATION_PROBLEM_JSON_UTF8 = new MediaType("application", "problem", StandardCharsets.UTF_8);
+		APPLICATION_PROBLEM_XML = new MediaType("application", "problem+xml");
+		APPLICATION_RSS_XML = new MediaType("application", "rss+xml");
+		APPLICATION_STREAM_JSON = new MediaType("application", "stream+json");
+		APPLICATION_XHTML_XML = new MediaType("application", "xhtml+xml");
+		APPLICATION_XML = new MediaType("application", "xml");
+		IMAGE_GIF = new MediaType("image", "gif");
+		IMAGE_JPEG = new MediaType("image", "jpeg");
+		IMAGE_PNG = new MediaType("image", "png");
+		MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
+		TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
+		TEXT_HTML = new MediaType("text", "html");
+		TEXT_MARKDOWN = new MediaType("text", "markdown");
+		TEXT_PLAIN = new MediaType("text", "plain");
+		TEXT_XML = new MediaType("text", "xml");
 	}
 
 
@@ -542,7 +543,7 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 	/**
-	 * Parse the given comma-separated string into a list of {@code MediaType} objects.
+	 * Parse the comma-separated string into a list of {@code MediaType} objects.
 	 * <p>This method can be used to parse an Accept or Content-Type header.
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
@@ -552,10 +553,11 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = StringUtils.tokenizeToStringArray(mediaTypes, ",");
-		List<MediaType> result = new ArrayList<>(tokens.length);
-		for (String token : tokens) {
-			result.add(parseMediaType(token));
+		// Avoid using java.util.stream.Stream in hot paths
+		List<String> tokenizedTypes = MimeTypeUtils.tokenize(mediaTypes);
+		List<MediaType> result = new ArrayList<>(tokenizedTypes.size());
+		for (String type : tokenizedTypes) {
+			result.add(parseMediaType(type));
 		}
 		return result;
 	}
@@ -590,7 +592,11 @@ public class MediaType extends MimeType implements Serializable {
 	 * @since 5.0
 	 */
 	public static List<MediaType> asMediaTypes(List<MimeType> mimeTypes) {
-		return mimeTypes.stream().map(MediaType::asMediaType).collect(Collectors.toList());
+		List<MediaType> mediaTypes = new ArrayList<>(mimeTypes.size());
+		for(MimeType mimeType : mimeTypes) {
+			mediaTypes.add(MediaType.asMediaType(mimeType));
+		}
+		return mediaTypes;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import org.springframework.util.NumberUtils;
  */
 public class OpModulus extends Operator {
 
-	public OpModulus(int pos, SpelNodeImpl... operands) {
-		super("%", pos, operands);
+	public OpModulus(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("%", startPos, endPos, operands);
 	}
 
 
@@ -93,9 +93,9 @@ public class OpModulus extends Operator {
 			return false;
 		}
 		if (this.children.length > 1) {
-			 if (!getRightOperand().isCompilable()) {
-				 return false;
-			 }
+			if (!getRightOperand().isCompilable()) {
+				return false;
+			}
 		}
 		return (this.exitTypeDescriptor != null);
 	}
@@ -121,12 +121,12 @@ public class OpModulus extends Operator {
 				case 'J':
 					mv.visitInsn(LREM);
 					break;
-				case 'F': 
+				case 'F':
 					mv.visitInsn(FREM);
 					break;
 				case 'D':
 					mv.visitInsn(DREM);
-					break;				
+					break;
 				default:
 					throw new IllegalStateException(
 							"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");

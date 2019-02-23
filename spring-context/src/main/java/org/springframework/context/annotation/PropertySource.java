@@ -54,25 +54,30 @@ import org.springframework.core.io.support.PropertySourceFactory;
  *     }
  * }</pre>
  *
- * Notice that the {@code Environment} object is
+ * <p>Notice that the {@code Environment} object is
  * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} into the
  * configuration class and then used when populating the {@code TestBean} object. Given
  * the configuration above, a call to {@code testBean.getName()} will return "myTestBean".
  *
- * <h3>Resolving ${...} placeholders in {@code <bean>} and {@code @Value} annotations</h3>
+ * <h3>Resolving <code>${...}</code> placeholders in {@code <bean>} and {@code @Value} annotations</h3>
  *
- * In order to resolve ${...} placeholders in {@code <bean>} definitions or {@code @Value}
- * annotations using properties from a {@code PropertySource}, one must register
- * a {@code PropertySourcesPlaceholderConfigurer}. This happens automatically when using
- * {@code <context:property-placeholder>} in XML, but must be explicitly registered using
- * a {@code static} {@code @Bean} method when using {@code @Configuration} classes. See
- * the "Working with externalized values" section of @{@link Configuration}'s javadoc and
- * "a note on BeanFactoryPostProcessor-returning @Bean methods" of @{@link Bean}'s javadoc
- * for details and examples.
+ * <p>In order to resolve ${...} placeholders in {@code <bean>} definitions or {@code @Value}
+ * annotations using properties from a {@code PropertySource}, you must ensure that an
+ * appropriate <em>embedded value resolver</em> is registered in the {@code BeanFactory}
+ * used by the {@code ApplicationContext}. This happens automatically when using
+ * {@code <context:property-placeholder>} in XML. When using {@code @Configuration} classes
+ * this can be achieved by explicitly registering a {@code PropertySourcesPlaceholderConfigurer}
+ * via a {@code static} {@code @Bean} method. Note, however, that explicit registration
+ * of a {@code PropertySourcesPlaceholderConfigurer} via a {@code static} {@code @Bean}
+ * method is typically only required if you need to customize configuration such as the
+ * placeholder syntax, etc. See the "Working with externalized values" section of
+ * {@link Configuration @Configuration}'s javadocs and "a note on
+ * BeanFactoryPostProcessor-returning {@code @Bean} methods" of {@link Bean @Bean}'s
+ * javadocs for details and examples.
  *
  * <h3>Resolving ${...} placeholders within {@code @PropertySource} resource locations</h3>
  *
- * Any ${...} placeholders present in a {@code @PropertySource} {@linkplain #value()
+ * <p>Any ${...} placeholders present in a {@code @PropertySource} {@linkplain #value()
  * resource location} will be resolved against the set of property sources already
  * registered against the environment. For example:
  *
@@ -92,7 +97,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  *     }
  * }</pre>
  *
- * Assuming that "my.placeholder" is present in one of the property sources already
+ * <p>Assuming that "my.placeholder" is present in one of the property sources already
  * registered, e.g. system properties or environment variables, the placeholder will
  * be resolved to the corresponding value. If not, then "default/path" will be used as a
  * default. Expressing a default value (delimited by colon ":") is optional.  If no
@@ -101,10 +106,10 @@ import org.springframework.core.io.support.PropertySourceFactory;
  *
  * <h3>A note on property overriding with @PropertySource</h3>
  *
- * In cases where a given property key exists in more than one {@code .properties}
+ * <p>In cases where a given property key exists in more than one {@code .properties}
  * file, the last {@code @PropertySource} annotation processed will 'win' and override.
  *
- * For example, given two properties files {@code a.properties} and
+ * <p>For example, given two properties files {@code a.properties} and
  * {@code b.properties}, consider the following two configuration classes
  * that reference them with {@code @PropertySource} annotations:
  *
@@ -118,7 +123,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * public class ConfigB { }
  * </pre>
  *
- * The override ordering depends on the order in which these classes are registered
+ * <p>The override ordering depends on the order in which these classes are registered
  * with the application context.
  *
  * <pre class="code">
@@ -128,12 +133,12 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * ctx.refresh();
  * </pre>
  *
- * In the scenario above, the properties in {@code b.properties} will override any
+ * <p>In the scenario above, the properties in {@code b.properties} will override any
  * duplicates that exist in {@code a.properties}, because {@code ConfigB} was registered
  * last.
  *
  * <p>In certain situations, it may not be possible or practical to tightly control
- * property source ordering when using {@code @ProperySource} annotations. For example,
+ * property source ordering when using {@code @PropertySource} annotations. For example,
  * if the {@code @Configuration} classes above were registered via component-scanning,
  * the ordering is difficult to predict. In such cases - and if overriding is important -
  * it is recommended that the user fall back to using the programmatic PropertySource API.
@@ -150,6 +155,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.1
  * @see PropertySources
  * @see Configuration

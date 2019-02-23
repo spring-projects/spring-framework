@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,21 +82,21 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 
 	@Override
 	public void close() {
-        // Release underlying connection back to the connection manager
-        try {
-            try {
-                // Attempt to keep connection alive by consuming its remaining content
-                EntityUtils.consume(this.httpResponse.getEntity());
-            }
+		// Release underlying connection back to the connection manager
+		try {
+			try {
+				// Attempt to keep connection alive by consuming its remaining content
+				EntityUtils.consume(this.httpResponse.getEntity());
+			}
 			finally {
 				if (this.httpResponse instanceof Closeable) {
 					((Closeable) this.httpResponse).close();
 				}
-            }
-        }
-        catch (IOException ex) {
+			}
+		}
+		catch (IOException ex) {
 			// Ignore exception on close...
-        }
+		}
 	}
 
 }

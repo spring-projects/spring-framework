@@ -41,10 +41,11 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>Subclasses are passed the message to write to the log in the {@code beforeRequest} and
  * {@code afterRequest} methods. By default, only the URI of the request is logged. However,
- * setting the {@code includeQueryString} property to {@code true} will cause the query string
- * of the request to be included also. The payload (body) of the request can be logged via the
- * {@code includePayload} flag. Note that this will only log that which is read, which might
- * not be the entire payload.
+ * setting the {@code includeQueryString} property to {@code true} will cause the query string of
+ * the request to be included also; this can be further extended through {@code includeClientInfo}
+ * and {@code includeHeaders}. The payload (body content) of the request can be logged via the
+ * {@code includePayload} flag: Note that this will only log the part of the payload which has
+ * actually been read, not necessarily the entire body of the request.
  *
  * <p>Prefixes and suffixes for the before and after messages can be configured using the
  * {@code beforeMessagePrefix}, {@code afterMessagePrefix}, {@code beforeMessageSuffix} and
@@ -59,12 +60,28 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter {
 
+	/**
+	 * The default value prepended to the log message written <i>before</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_BEFORE_MESSAGE_PREFIX = "Before request [";
 
+	/**
+	 * The default value appended to the log message written <i>before</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_BEFORE_MESSAGE_SUFFIX = "]";
 
+	/**
+	 * The default value prepended to the log message written <i>after</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_AFTER_MESSAGE_PREFIX = "After request [";
 
+	/**
+	 * The default value appended to the log message written <i>after</i> a request is
+	 * processed.
+	 */
 	public static final String DEFAULT_AFTER_MESSAGE_SUFFIX = "]";
 
 	private static final int DEFAULT_MAX_PAYLOAD_LENGTH = 50;
@@ -137,7 +154,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * Return whether the request headers should be included in the log message.
 	 * @since 4.3
 	 */
-	public boolean isIncludeHeaders() {
+	protected boolean isIncludeHeaders() {
 		return this.includeHeaders;
 	}
 

@@ -29,15 +29,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * Parse the <mvc:tiles-configurer> MVC namespace element and register
- * a corresponding TilesConfigurer bean.
-
+ * Parse the <code>&lt;mvc:tiles-configurer&gt;</code> MVC namespace element and register
+ * a corresponding {@code TilesConfigurer} bean.
+ *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 4.1
  */
 public class TilesConfigurerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+	/**
+	 * The bean name used for the {@code TilesConfigurer}.
+	 */
 	public static final String BEAN_NAME = "mvcTilesConfigurer";
 
 

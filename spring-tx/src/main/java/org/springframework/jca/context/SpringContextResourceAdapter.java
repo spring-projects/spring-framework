@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,9 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	public static final String CONFIG_LOCATION_DELIMITERS = ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS;
 
+	/**
+	 * The default {@code applicationContext.xml} location.
+	 */
 	public static final String DEFAULT_CONTEXT_CONFIG_LOCATION = "META-INF/applicationContext.xml";
 
 
@@ -161,8 +164,8 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	@Override
 	public void start(BootstrapContext bootstrapContext) throws ResourceAdapterInternalException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Starting SpringContextResourceAdapter with BootstrapContext: " + bootstrapContext);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Starting SpringContextResourceAdapter with BootstrapContext: " + bootstrapContext);
 		}
 		this.applicationContext = createApplicationContext(bootstrapContext);
 	}
@@ -208,7 +211,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 */
 	@Override
 	public void stop() {
-		logger.info("Stopping SpringContextResourceAdapter");
+		logger.debug("Stopping SpringContextResourceAdapter");
 		if (this.applicationContext != null) {
 			this.applicationContext.close();
 		}
@@ -243,10 +246,10 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		return (obj instanceof SpringContextResourceAdapter &&
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof SpringContextResourceAdapter &&
 				ObjectUtils.nullSafeEquals(getContextConfigLocation(),
-						((SpringContextResourceAdapter) obj).getContextConfigLocation()));
+						((SpringContextResourceAdapter) other).getContextConfigLocation())));
 	}
 
 	@Override

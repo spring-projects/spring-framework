@@ -106,6 +106,18 @@ public class SimpleClientHttpResponseTests {
 		verify(is).close();
 	}
 
+	@Test // SPR-17181
+	public void shouldDrainResponseEvenIfResponseNotRead() throws Exception {
+		TestByteArrayInputStream is = new TestByteArrayInputStream("SpringSpring".getBytes(StandardCharsets.UTF_8));
+		given(this.connection.getErrorStream()).willReturn(null);
+		given(this.connection.getInputStream()).willReturn(is);
+
+		this.response.close();
+		assertThat(is.available(), is(0));
+		assertTrue(is.isClosed());
+		verify(this.connection, never()).disconnect();
+	}
+
 
 	private static class TestByteArrayInputStream extends ByteArrayInputStream {
 

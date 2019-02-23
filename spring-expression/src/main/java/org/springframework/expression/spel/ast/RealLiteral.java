@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ public class RealLiteral extends Literal {
 	private final TypedValue value;
 
 
-	public RealLiteral(String payload, int pos, double value) {
-		super(payload, pos);
+	public RealLiteral(String payload, int startPos, int endPos, double value) {
+		super(payload, startPos, endPos);
 		this.value = new TypedValue(value);
 		this.exitTypeDescriptor = "D";
 	}
@@ -47,7 +47,7 @@ public class RealLiteral extends Literal {
 	public boolean isCompilable() {
 		return true;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		mv.visitLdcInsn(this.value.getValue());

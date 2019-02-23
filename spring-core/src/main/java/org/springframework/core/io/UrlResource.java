@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,18 +141,20 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * Determine a cleaned URL for the given original URL.
 	 * @param originalUrl the original URL
 	 * @param originalPath the original URL path
-	 * @return the cleaned URL
+	 * @return the cleaned URL (possibly the original URL as-is)
 	 * @see org.springframework.util.StringUtils#cleanPath
 	 */
 	private URL getCleanedUrl(URL originalUrl, String originalPath) {
-		try {
-			return new URL(StringUtils.cleanPath(originalPath));
+		String cleanedPath = StringUtils.cleanPath(originalPath);
+		if (!cleanedPath.equals(originalPath)) {
+			try {
+				return new URL(cleanedPath);
+			}
+			catch (MalformedURLException ex) {
+				// Cleaned URL path cannot be converted to URL -> take original URL.
+			}
 		}
-		catch (MalformedURLException ex) {
-			// Cleaned URL path cannot be converted to URL
-			// -> take original URL.
-			return originalUrl;
-		}
+		return originalUrl;
 	}
 
 	/**
@@ -261,9 +263,9 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * This implementation compares the underlying URL references.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof UrlResource && this.cleanedUrl.equals(((UrlResource) obj).cleanedUrl)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof UrlResource &&
+				this.cleanedUrl.equals(((UrlResource) other).cleanedUrl)));
 	}
 
 	/**

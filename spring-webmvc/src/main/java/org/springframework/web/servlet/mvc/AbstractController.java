@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.web.util.WebUtils;
  * Convenient superclass for controller implementations, using the Template Method
  * design pattern.
  *
- * <p><b><a name="workflow">Workflow
+ * <p><b>Workflow
  * (<a href="Controller.html#workflow">and that defined by interface</a>):</b><br>
  * <ol>
  * <li>{@link #handleRequest(HttpServletRequest, HttpServletResponse) handleRequest()}
@@ -50,7 +50,7 @@ import org.springframework.web.util.WebUtils;
  * (<a href="Controller.html#config">and those defined by interface</a>):</b><br>
  * <table border="1">
  * <tr>
- * <td><b>name</b></th>
+ * <td><b>name</b></td>
  * <td><b>default</b></td>
  * <td><b>description</b></td>
  * </tr>

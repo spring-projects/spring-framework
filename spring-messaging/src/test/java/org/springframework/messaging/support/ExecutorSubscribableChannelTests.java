@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,8 +65,9 @@ public class ExecutorSubscribableChannelTests {
 		MockitoAnnotations.initMocks(this);
 	}
 
+
 	@Test
-	public void messageMustNotBeNull() throws Exception {
+	public void messageMustNotBeNull() {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("Message must not be null");
 		this.channel.send(null);
@@ -84,7 +85,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void sendWithExecutor() throws Exception {
+	public void sendWithExecutor() {
 		BeforeHandleInterceptor interceptor = new BeforeHandleInterceptor();
 		TaskExecutor executor = mock(TaskExecutor.class);
 		ExecutorSubscribableChannel testChannel = new ExecutorSubscribableChannel(executor);
@@ -100,7 +101,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void subscribeTwice() throws Exception {
+	public void subscribeTwice()  {
 		assertThat(this.channel.subscribe(this.handler), equalTo(true));
 		assertThat(this.channel.subscribe(this.handler), equalTo(false));
 		this.channel.send(this.message);
@@ -108,7 +109,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void unsubscribeTwice() throws Exception {
+	public void unsubscribeTwice()  {
 		this.channel.subscribe(this.handler);
 		assertThat(this.channel.unsubscribe(this.handler), equalTo(true));
 		assertThat(this.channel.unsubscribe(this.handler), equalTo(false));
@@ -117,7 +118,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void failurePropagates() throws Exception {
+	public void failurePropagates()  {
 		RuntimeException ex = new RuntimeException();
 		willThrow(ex).given(this.handler).handleMessage(this.message);
 		MessageHandler secondHandler = mock(MessageHandler.class);
@@ -133,7 +134,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 	@Test
-	public void concurrentModification() throws Exception {
+	public void concurrentModification()  {
 		this.channel.subscribe(message1 -> channel.unsubscribe(handler));
 		this.channel.subscribe(this.handler);
 		this.channel.send(this.message);
@@ -186,8 +187,7 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 
-	private abstract static class AbstractTestInterceptor extends ChannelInterceptorAdapter
-			implements ExecutorChannelInterceptor {
+	private abstract static class AbstractTestInterceptor implements ChannelInterceptor, ExecutorChannelInterceptor {
 
 		private AtomicInteger counter = new AtomicInteger();
 
@@ -209,7 +209,9 @@ public class ExecutorSubscribableChannelTests {
 		}
 
 		@Override
-		public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
+		public void afterMessageHandled(
+				Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
+
 			this.afterHandledInvoked = true;
 		}
 	}

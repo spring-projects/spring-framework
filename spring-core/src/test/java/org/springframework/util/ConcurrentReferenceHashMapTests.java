@@ -85,7 +85,7 @@ public class ConcurrentReferenceHashMapTests {
 	}
 
 	@Test
-	public void shouldCreateWithInitialCapacityAndConcurrenyLevel() {
+	public void shouldCreateWithInitialCapacityAndConcurrentLevel() {
 		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(16, 2);
 		assertThat(map.getSegmentsSize(), is(2));
 		assertThat(map.getSegment(0).getSize(), is(8));
@@ -173,11 +173,11 @@ public class ConcurrentReferenceHashMapTests {
 	}
 
 	@Test
-	public void shouldApplySupplimentalHash() {
+	public void shouldApplySupplementalHash() {
 		Integer key = 123;
 		this.map.put(key, "123");
-		assertThat(this.map.getSupplimentalHash(), is(not(key.hashCode())));
-		assertThat(this.map.getSupplimentalHash() >> 30 & 0xFF, is(not(0)));
+		assertThat(this.map.getSupplementalHash(), is(not(key.hashCode())));
+		assertThat(this.map.getSupplementalHash() >> 30 & 0xFF, is(not(0)));
 	}
 
 	@Test
@@ -240,7 +240,7 @@ public class ConcurrentReferenceHashMapTests {
 	}
 
 	@Test
-	public void shouldPergeOnPut() {
+	public void shouldPurgeOnPut() {
 		this.map = new TestWeakConcurrentCache<>(1, 0.75f, 1);
 		for (int i = 1; i <= 5; i++) {
 			this.map.put(i, String.valueOf(i));
@@ -559,7 +559,7 @@ public class ConcurrentReferenceHashMapTests {
 
 	private static class TestWeakConcurrentCache<K, V> extends ConcurrentReferenceHashMap<K, V> {
 
-		private int supplimentalHash;
+		private int supplementalHash;
 
 		private final LinkedList<MockReference<K, V>> queue = new LinkedList<>();
 
@@ -587,12 +587,12 @@ public class ConcurrentReferenceHashMapTests {
 				return super.getHash(o);
 			}
 			// For testing we want more control of the hash
-			this.supplimentalHash = super.getHash(o);
+			this.supplementalHash = super.getHash(o);
 			return o == null ? 0 : o.hashCode();
 		}
 
-		public int getSupplimentalHash() {
-			return this.supplimentalHash;
+		public int getSupplementalHash() {
+			return this.supplementalHash;
 		}
 
 		@Override

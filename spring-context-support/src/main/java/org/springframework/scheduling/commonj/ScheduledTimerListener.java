@@ -36,10 +36,10 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see commonj.timers.TimerListener
- * @see commonj.timers.TimerManager#schedule(commonj.timers.TimerListener, long, long)
- * @see commonj.timers.TimerManager#scheduleAtFixedRate(commonj.timers.TimerListener, long, long)
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public class ScheduledTimerListener {
 
 	@Nullable
@@ -177,7 +177,7 @@ public class ScheduledTimerListener {
 	 * Set the period between repeated task executions, in milliseconds.
 	 * <p>Default is -1, leading to one-time execution. In case of zero or a
 	 * positive value, the task will be executed repeatedly, with the given
-	 * interval inbetween executions.
+	 * interval in-between executions.
 	 * <p>Note that the semantics of the period value vary between fixed-rate
 	 * and fixed-delay execution.
 	 * <p><b>Note:</b> A period of 0 (for example as fixed delay) <i>is</i>

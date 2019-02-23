@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -292,12 +292,24 @@ public class QuartzSupportTests {
 		bean.destroy();
 	}
 
-	/**
-	 * Tests the creation of multiple schedulers (SPR-772)
-	 */
-	@Test
+	@Test  // SPR-772
 	public void multipleSchedulers() throws Exception {
 		ClassPathXmlApplicationContext ctx = context("multipleSchedulers.xml");
+		try {
+			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
+			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
+			assertNotSame(scheduler1, scheduler2);
+			assertEquals("quartz1", scheduler1.getSchedulerName());
+			assertEquals("quartz2", scheduler2.getSchedulerName());
+		}
+		finally {
+			ctx.close();
+		}
+	}
+
+	@Test  // SPR-16884
+	public void multipleSchedulersWithQuartzProperties() throws Exception {
+		ClassPathXmlApplicationContext ctx = context("multipleSchedulersWithQuartzProperties.xml");
 		try {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
@@ -363,8 +375,8 @@ public class QuartzSupportTests {
 	@SuppressWarnings("resource")
 	public void schedulerAutoStartupFalse() throws Exception {
 		StaticApplicationContext context = new StaticApplicationContext();
-		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(
-				SchedulerFactoryBean.class).addPropertyValue("autoStartup", false).getBeanDefinition();
+		BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SchedulerFactoryBean.class)
+				.addPropertyValue("autoStartup", false).getBeanDefinition();
 		context.registerBeanDefinition("scheduler", beanDefinition);
 		Scheduler bean = context.getBean("scheduler", Scheduler.class);
 		assertFalse(bean.isStarted());

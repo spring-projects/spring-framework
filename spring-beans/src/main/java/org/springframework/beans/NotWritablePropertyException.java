@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 public class NotWritablePropertyException extends InvalidPropertyException {
 
 	@Nullable
-	private String[] possibleMatches;
+	private final String[] possibleMatches;
 
 
 	/**
@@ -42,6 +42,7 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 		super(beanClass, propertyName,
 				"Bean property '" + propertyName + "' is not writable or has an invalid setter method: " +
 				"Does the return type of the getter match the parameter type of the setter?");
+		this.possibleMatches = null;
 	}
 
 	/**
@@ -52,6 +53,7 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 	 */
 	public NotWritablePropertyException(Class<?> beanClass, String propertyName, String msg) {
 		super(beanClass, propertyName, msg);
+		this.possibleMatches = null;
 	}
 
 	/**
@@ -63,6 +65,7 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 	 */
 	public NotWritablePropertyException(Class<?> beanClass, String propertyName, String msg, Throwable cause) {
 		super(beanClass, propertyName, msg, cause);
+		this.possibleMatches = null;
 	}
 
 	/**

@@ -29,7 +29,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 /**
  * Spring {@link WebSocketSession} adapter for Tomcat's
  * {@link javax.websocket.Session}.
- * 
+ *
  * @author Violeta Georgieva
  * @since 5.0
  */

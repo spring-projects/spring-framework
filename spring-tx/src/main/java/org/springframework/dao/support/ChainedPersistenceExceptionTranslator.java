@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  */
 public class ChainedPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 
-	/** List of PersistenceExceptionTranslators */
+	/** List of PersistenceExceptionTranslators. */
 	private final List<PersistenceExceptionTranslator> delegates = new ArrayList<>(4);
 
 

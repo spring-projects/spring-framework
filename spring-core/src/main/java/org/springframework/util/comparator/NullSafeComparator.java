@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
+ * @param <T> the type of objects that may be compared by this comparator
  * @see Comparable
  */
 public class NullSafeComparator<T> implements Comparator<T> {
@@ -107,15 +108,15 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof NullSafeComparator)) {
+		if (!(other instanceof NullSafeComparator)) {
 			return false;
 		}
-		NullSafeComparator<T> other = (NullSafeComparator<T>) obj;
-		return (this.nonNullComparator.equals(other.nonNullComparator) && this.nullsLow == other.nullsLow);
+		NullSafeComparator<T> otherComp = (NullSafeComparator<T>) other;
+		return (this.nonNullComparator.equals(otherComp.nonNullComparator) && this.nullsLow == otherComp.nullsLow);
 	}
 
 	@Override

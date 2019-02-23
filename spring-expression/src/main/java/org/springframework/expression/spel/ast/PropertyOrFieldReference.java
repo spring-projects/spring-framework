@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	private volatile PropertyAccessor cachedWriteAccessor;
 
 
-	public PropertyOrFieldReference(boolean nullSafe, String propertyOrFieldName, int pos) {
-		super(pos);
+	public PropertyOrFieldReference(boolean nullSafe, String propertyOrFieldName, int startPos, int endPos) {
+		super(startPos, endPos);
 		this.nullSafe = nullSafe;
 		this.name = propertyOrFieldName;
 	}
@@ -322,20 +322,19 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				}
 			}
 		}
-		List<PropertyAccessor> resolvers = new ArrayList<>();
-		resolvers.addAll(specificAccessors);
+		List<PropertyAccessor> resolvers = new ArrayList<>(specificAccessors);
 		generalAccessors.removeAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
 		return (accessorToUse instanceof CompilablePropertyAccessor &&
 				((CompilablePropertyAccessor) accessorToUse).isCompilable());
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;

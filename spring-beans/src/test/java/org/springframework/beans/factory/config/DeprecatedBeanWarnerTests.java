@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,28 +28,23 @@ import static org.junit.Assert.*;
  */
 public class DeprecatedBeanWarnerTests {
 
-	private DefaultListableBeanFactory beanFactory;
-
 	private String beanName;
 
 	private BeanDefinition beanDefinition;
-
-	private DeprecatedBeanWarner warner;
 
 
 	@Test
 	@SuppressWarnings("deprecation")
 	public void postProcess() {
-		beanFactory = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		BeanDefinition def = new RootBeanDefinition(MyDeprecatedBean.class);
 		String beanName = "deprecated";
 		beanFactory.registerBeanDefinition(beanName, def);
 
-		warner = new MyDeprecatedBeanWarner();
+		DeprecatedBeanWarner warner = new MyDeprecatedBeanWarner();
 		warner.postProcessBeanFactory(beanFactory);
 		assertEquals(beanName, this.beanName);
 		assertEquals(def, this.beanDefinition);
-
 	}
 
 

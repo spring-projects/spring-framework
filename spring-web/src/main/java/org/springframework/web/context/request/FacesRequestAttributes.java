@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 	}
 
 	/**
-	 * Return the JSF attribute Map for the specified scope
+	 * Return the JSF attribute Map for the specified scope.
 	 * @param scope constant indicating request or session scope
 	 * @return the Map representation of the attributes in the specified scope
 	 * @see #SCOPE_REQUEST
@@ -191,7 +191,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 	public String getSessionId() {
 		Object session = getExternalContext().getSession(true);
 		try {
-			// Both HttpSession and PortletSession have a getId() method.
+			// HttpSession has a getId() method.
 			Method getIdMethod = session.getClass().getMethod("getId");
 			return String.valueOf(ReflectionUtils.invokeMethod(getIdMethod, session));
 		}

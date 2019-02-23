@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -105,13 +107,13 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 	/**
 	 * Register all handlers specified in the URL map for the corresponding paths.
-	 * @param urlMap Map with URL paths as keys and handler beans or bean names as values
+	 * @param urlMap a Map with URL paths as keys and handler beans or bean names as values
 	 * @throws BeansException if a handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 */
 	protected void registerHandlers(Map<String, Object> urlMap) throws BeansException {
 		if (urlMap.isEmpty()) {
-			logger.warn("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
+			logger.trace("No patterns in " + formatMappingName());
 		}
 		else {
 			urlMap.forEach((url, handler) -> {
@@ -125,6 +127,17 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 				}
 				registerHandler(url, handler);
 			});
+			if (logger.isDebugEnabled()) {
+				List<String> patterns = new ArrayList<>();
+				if (getRootHandler() != null) {
+					patterns.add("/");
+				}
+				if (getDefaultHandler() != null) {
+					patterns.add("/**");
+				}
+				patterns.addAll(getHandlerMap().keySet());
+				logger.debug("Patterns " + patterns + " in " + formatMappingName());
+			}
 		}
 	}
 

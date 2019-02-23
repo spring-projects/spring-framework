@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class BeanWrapperGenericsTests {
 			fail("Should have thrown TypeMismatchException");
 		}
 		catch (TypeMismatchException ex) {
-			assertTrue(ex.getMessage().indexOf("java.lang.Integer") != -1);
+			assertTrue(ex.getMessage().contains("java.lang.Integer"));
 		}
 	}
 
@@ -644,25 +644,25 @@ public class BeanWrapperGenericsTests {
 
 	public interface ObjectWithId<T extends Comparable<T>> {
 
-	  T getId();
+		T getId();
 
-	  void setId(T aId);
+		void setId(T aId);
 	}
 
 
 	public class Promotion implements ObjectWithId<Long> {
 
-	  private Long id;
+		private Long id;
 
-	  @Override
-	  public Long getId() {
-		  return id;
-	  }
+		@Override
+		public Long getId() {
+			return id;
+		}
 
-	  @Override
-	  public void setId(Long aId) {
-		  this.id = aId;
-	  }
+		@Override
+		public void setId(Long aId) {
+			this.id = aId;
+		}
 	}
 
 }

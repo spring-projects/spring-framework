@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
- * ASM visitor which looks for the annotations defined on a class or method, including
- * tracking meta-annotations.
+ * ASM visitor which looks for annotations defined on a class or method,
+ * including meta-annotations.
  *
- * <p>As of Spring 3.1.1, this visitor is fully recursive, taking into account any nested
- * annotations or nested annotation arrays. These annotations are in turn read into
- * {@link AnnotationAttributes} map structures.
+ * <p>This visitor is fully recursive, taking into account any nested
+ * annotations or nested annotation arrays.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -64,7 +63,7 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 	public void visitEnd() {
 		super.visitEnd();
 
-		Class<?> annotationClass = this.attributes.annotationType();
+		Class<? extends Annotation> annotationClass = this.attributes.annotationType();
 		if (annotationClass != null) {
 			List<AnnotationAttributes> attributeList = this.attributesMap.get(this.annotationType);
 			if (attributeList == null) {
@@ -73,20 +72,29 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 			else {
 				attributeList.add(0, this.attributes);
 			}
-			Set<Annotation> visited = new LinkedHashSet<>();
-			Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
-			if (!ObjectUtils.isEmpty(metaAnnotations)) {
-				for (Annotation metaAnnotation : metaAnnotations) {
-					if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
-						recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationClass.getName())) {
+				try {
+					Annotation[] metaAnnotations = annotationClass.getAnnotations();
+					if (!ObjectUtils.isEmpty(metaAnnotations)) {
+						Set<Annotation> visited = new LinkedHashSet<>();
+						for (Annotation metaAnnotation : metaAnnotations) {
+							recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+						}
+						if (!visited.isEmpty()) {
+							Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
+							for (Annotation ann : visited) {
+								metaAnnotationTypeNames.add(ann.annotationType().getName());
+							}
+							this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
+						}
+					}
+				}
+				catch (Throwable ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to introspect meta-annotations on " + annotationClass + ": " + ex);
 					}
 				}
 			}
-			Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
-			for (Annotation ann : visited) {
-				metaAnnotationTypeNames.add(ann.annotationType().getName());
-			}
-			this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 		}
 	}
 
@@ -108,7 +116,7 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 			}
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to introspect meta-annotations on [" + annotation + "]: " + ex);
+					logger.debug("Failed to introspect meta-annotations on " + annotation + ": " + ex);
 				}
 			}
 		}

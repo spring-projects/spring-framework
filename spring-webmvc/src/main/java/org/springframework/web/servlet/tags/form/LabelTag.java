@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -190,21 +191,21 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * The {@link TagWriter} instance being used.
 	 * <p>Stored so we can close the tag on {@link #doEndTag()}.
 	 */
+	@Nullable
 	private TagWriter tagWriter;
 
 	/**
 	 * The value of the '{@code for}' attribute.
 	 */
+	@Nullable
 	private String forId;
 
 
 	/**
 	 * Set the value of the '{@code for}' attribute.
 	 * <p>Defaults to the value of {@link #getPath}; may be a runtime expression.
-	 * @throws IllegalArgumentException if the supplied value is {@code null}
 	 */
 	public void setFor(String forId) {
-		Assert.notNull(forId, "'forId' must not be null");
 		this.forId = forId;
 	}
 
@@ -212,7 +213,8 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * Get the value of the '{@code id}' attribute.
 	 * <p>May be a runtime expression.
 	 */
-	public String getFor() {
+	@Nullable
+	protected String getFor() {
 		return this.forId;
 	}
 
@@ -239,6 +241,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * @return the value for the HTML '{@code name}' attribute
 	 */
 	@Override
+	@Nullable
 	protected String getName() throws JspException {
 		// This also suppresses the 'id' attribute (which is okay for a <label/>)
 		return null;
@@ -273,6 +276,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 */
 	@Override
 	public int doEndTag() throws JspException {
+		Assert.state(this.tagWriter != null, "No TagWriter set");
 		this.tagWriter.endTag();
 		return EVAL_PAGE;
 	}

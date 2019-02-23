@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ package org.springframework.core.convert.converter;
  *
  * @author Keith Donald
  * @since 3.0
- * @see ConditionalConverter
  * @param <S> the source type converters created by this factory can convert from
  * @param <R> the target range (or base) type converters created by this factory can convert to;
  * for example {@link Number} for a set of number subtypes.
+ * @see ConditionalConverter
  */
 public interface ConverterFactory<S, R> {
 

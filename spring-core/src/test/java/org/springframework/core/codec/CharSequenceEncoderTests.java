@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,38 @@
 
 package org.springframework.core.codec;
 
-import java.util.Collections;
+import java.nio.charset.Charset;
+import java.util.stream.Stream;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static java.nio.charset.StandardCharsets.UTF_16;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
  */
-@RunWith(Parameterized.class)
-public class CharSequenceEncoderTests extends AbstractDataBufferAllocatingTestCase {
+public class CharSequenceEncoderTests
+		extends AbstractEncoderTestCase<CharSequenceEncoder> {
 
-	private CharSequenceEncoder encoder;
+	private final String foo = "foo";
 
-	@Before
-	public void createEncoder() {
-		this.encoder = CharSequenceEncoder.textPlainOnly();
+	private final String bar = "bar";
+
+	public CharSequenceEncoderTests() {
+		super(CharSequenceEncoder.textPlainOnly());
 	}
 
-	@Test
-	public void canWrite() {
+
+	@Override
+	public void canEncode() throws Exception {
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(String.class),
 				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class),
@@ -63,26 +63,27 @@ public class CharSequenceEncoderTests extends AbstractDataBufferAllocatingTestCa
 		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
 	}
 
-	@Test
-	public void writeString() {
-		Flux<String> stringFlux = Flux.just("foo");
-		Flux<DataBuffer> output = Flux.from(
-				this.encoder.encode(stringFlux, this.bufferFactory, null, null, Collections.emptyMap()));
-		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer("foo"))
-				.expectComplete()
-				.verify();
+	@Override
+	public void encode() {
+		Flux<CharSequence> input = Flux.just(this.foo, this.bar);
+
+		testEncodeAll(input, CharSequence.class, step -> step
+				.consumeNextWith(expectString(this.foo))
+				.consumeNextWith(expectString(this.bar))
+				.verifyComplete());
 	}
 
 	@Test
-	public void writeStringBuilder() {
-		Flux<StringBuilder> stringBuilderFlux = Flux.just(new StringBuilder("foo"));
-		Flux<DataBuffer> output = Flux.from(
-				this.encoder.encode(stringBuilderFlux, this.bufferFactory, null, null, Collections.emptyMap()));
-		StepVerifier.create(output)
-				.consumeNextWith(stringConsumer("foo"))
-				.expectComplete()
-				.verify();
+	public void calculateCapacity() {
+		String sequence = "Hello World!";
+		Stream.of(UTF_8, UTF_16, ISO_8859_1, US_ASCII, Charset.forName("BIG5"))
+				.forEach(charset -> {
+					int capacity = this.encoder.calculateCapacity(sequence, charset);
+					int length = sequence.length();
+					assertTrue(String.format("%s has capacity %d; length %d", charset, capacity, length),
+							capacity >= length);
+				});
+
 	}
 
 }

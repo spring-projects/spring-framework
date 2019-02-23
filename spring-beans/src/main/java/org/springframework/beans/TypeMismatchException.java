@@ -69,9 +69,9 @@ public class TypeMismatchException extends PropertyAccessException {
 				"Failed to convert property value of type '" +
 				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +
 				(requiredType != null ?
-				 " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
+				" to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
 				(propertyChangeEvent.getPropertyName() != null ?
-				 " for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
+				" for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				cause);
 		this.propertyName = propertyChangeEvent.getPropertyName();
 		this.value = propertyChangeEvent.getNewValue();

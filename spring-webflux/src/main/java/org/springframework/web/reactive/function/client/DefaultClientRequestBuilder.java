@@ -28,6 +28,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,6 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -62,13 +64,6 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	private BodyInserter<?, ? super ClientHttpRequest> body = BodyInserters.empty();
 
 
-	public DefaultClientRequestBuilder(HttpMethod method, URI url) {
-		Assert.notNull(method, "HttpMethod must not be null");
-		Assert.notNull(url, "URI must not be null");
-		this.method = method;
-		this.url = url;
-	}
-
 	public DefaultClientRequestBuilder(ClientRequest other) {
 		Assert.notNull(other, "ClientRequest must not be null");
 		this.method = other.method();
@@ -79,17 +74,24 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		body(other.body());
 	}
 
+	public DefaultClientRequestBuilder(HttpMethod method, URI url) {
+		Assert.notNull(method, "HttpMethod must not be null");
+		Assert.notNull(url, "URI must not be null");
+		this.method = method;
+		this.url = url;
+	}
+
 
 	@Override
 	public ClientRequest.Builder method(HttpMethod method) {
-		Assert.notNull(method, "'method' must not be null");
+		Assert.notNull(method, "HttpMethod must not be null");
 		this.method = method;
 		return this;
 	}
 
 	@Override
 	public ClientRequest.Builder url(URI url) {
-		Assert.notNull(url, "'url' must not be null");
+		Assert.notNull(url, "URI must not be null");
 		this.url = url;
 		return this;
 	}
@@ -124,9 +126,6 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher, Class<S> elementClass) {
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementClass, "'elementClass' must not be null");
-
 		this.body = BodyInserters.fromPublisher(publisher, elementClass);
 		return this;
 	}
@@ -134,9 +133,6 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	@Override
 	public <S, P extends Publisher<S>> ClientRequest.Builder body(
 			P publisher, ParameterizedTypeReference<S> typeReference) {
-
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(typeReference, "'typeReference' must not be null");
 
 		this.body = BodyInserters.fromPublisher(publisher, typeReference);
 		return this;
@@ -180,6 +176,8 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		private final Map<String, Object> attributes;
 
+		private final String logPrefix;
+
 		public BodyInserterRequest(HttpMethod method, URI url, HttpHeaders headers,
 				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> body,
 				Map<String, Object> attributes) {
@@ -190,6 +188,9 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
 			this.body = body;
 			this.attributes = Collections.unmodifiableMap(attributes);
+
+			Object id = attributes.computeIfAbsent(LOG_ID_ATTRIBUTE, name -> ObjectUtils.getIdentityHexString(this));
+			this.logPrefix = "[" + id + "] ";
 		}
 
 		@Override
@@ -223,6 +224,11 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		}
 
 		@Override
+		public String logPrefix() {
+			return this.logPrefix;
+		}
+
+		@Override
 		public Mono<Void> writeTo(ClientHttpRequest request, ExchangeStrategies strategies) {
 			HttpHeaders requestHeaders = request.getHeaders();
 			if (!this.headers.isEmpty()) {
@@ -251,7 +257,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 				}
 				@Override
 				public Map<String, Object> hints() {
-					return Collections.emptyMap();
+					return Hints.from(Hints.LOG_PREFIX_HINT, logPrefix());
 				}
 			});
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Internal utilities for the conversion package.
@@ -62,14 +63,12 @@ abstract class ConversionUtils {
 			// yes
 			return true;
 		}
-		else if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
+		if (ClassUtils.isAssignable(sourceElementType.getType(), targetElementType.getType())) {
 			// maybe
 			return true;
 		}
-		else {
-			// no
-			return false;
-		}
+		// no
+		return false;
 	}
 
 	public static Class<?> getEnumType(Class<?> targetType) {

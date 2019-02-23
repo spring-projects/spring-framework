@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.config.WebSocketMessageBrokerStats;
@@ -61,16 +60,11 @@ import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
- * Test fixture for
- * {@link org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurationSupport}.
+ * Test fixture for {@link WebSocketMessageBrokerConfigurationSupport}.
  *
  * @author Rossen Stoyanchev
  */
@@ -100,8 +94,8 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		session.setOpen(true);
 		webSocketHandler.afterConnectionEstablished(session);
 
-		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/foo").build();
-		webSocketHandler.handleMessage(session, textMessage);
+		webSocketHandler.handleMessage(session,
+				StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/foo").build());
 
 		Message<?> message = channel.messages.get(0);
 		StompHeaderAccessor accessor = StompHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -145,6 +139,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		assertEquals(1024 * 1024, subWsHandler.getSendBufferSizeLimit());
 		assertEquals(25 * 1000, subWsHandler.getSendTimeLimit());
+		assertEquals(30 * 1000, subWsHandler.getTimeToFirstMessage());
 
 		Map<String, SubProtocolHandler> handlerMap = subWsHandler.getProtocolHandlerMap();
 		StompSubProtocolHandler protocolHandler = (StompSubProtocolHandler) handlerMap.get("v12.stomp");
@@ -177,7 +172,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
 				"stompBrokerRelay\\[null\\], " +
 				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
+				"outboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
 				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\]";
 
 		assertTrue("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual, actual.matches(expected));
@@ -240,6 +235,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 			registration.setMessageSizeLimit(128 * 1024);
 			registration.setSendTimeLimit(25 * 1000);
 			registration.setSendBufferSizeLimit(1024 * 1024);
+			registration.setTimeToFirstMessage(30 * 1000);
 		}
 
 		@Override

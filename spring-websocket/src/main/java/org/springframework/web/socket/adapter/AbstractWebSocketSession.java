@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
+import org.springframework.util.IdGenerator;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.PingMessage;
@@ -38,10 +40,14 @@ import org.springframework.web.socket.WebSocketSession;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <T> the native session type
  */
 public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSession {
 
+	protected static final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
+
 	protected static final Log logger = LogFactory.getLog(NativeWebSocketSession.class);
+
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 

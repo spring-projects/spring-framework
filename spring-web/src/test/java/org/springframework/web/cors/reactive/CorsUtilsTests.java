@@ -92,6 +92,15 @@ public class CorsUtilsTests {
 		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
 	}
 
+	@Test  // SPR-16362
+	public void isSameOriginWithDifferentSchemes() {
+		MockServerHttpRequest request = MockServerHttpRequest
+				.get("http://mydomain1.com")
+				.header(HttpHeaders.ORIGIN, "https://mydomain1.com")
+				.build();
+		assertFalse(CorsUtils.isSameOrigin(request));
+	}
+
 	private void testWithXForwardedHeaders(String serverName, int port,
 			String forwardedProto, String forwardedHost, int forwardedPort, String originHeader) {
 

@@ -26,6 +26,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -355,10 +356,17 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void cacheControlEmpty() {
+		headers.setCacheControl(CacheControl.empty());
+		assertNull("Invalid Cache-Control header", headers.getCacheControl());
+		assertNull("Invalid Cache-Control header", headers.getFirst("cache-control"));
+	}
+
+	@Test
 	public void cacheControlAllValues() {
 		headers.add(HttpHeaders.CACHE_CONTROL, "max-age=1000, public");
 		headers.add(HttpHeaders.CACHE_CONTROL, "s-maxage=1000");
-		assertThat(headers.getCacheControl(), is("max-age=1000, public, s-maxage=1000"));
+		assertEquals("max-age=1000, public, s-maxage=1000", headers.getCacheControl());
 	}
 
 	@Test
@@ -374,7 +382,7 @@ public class HttpHeadersTests {
 
 	@Test  // SPR-11917
 	public void getAllowEmptySet() {
-		headers.setAllow(Collections.<HttpMethod> emptySet());
+		headers.setAllow(Collections.emptySet());
 		assertThat(headers.getAllow(), Matchers.emptyCollectionOf(HttpMethod.class));
 	}
 
@@ -527,6 +535,34 @@ public class HttpHeadersTests {
 		headers.clear();
 		headers.set(HttpHeaders.DATE, "Thu Jun 22 22:22:00 2017");
 		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+	}
+
+	@Test
+	public void basicAuth() {
+		String username = "foo";
+		String password = "bar";
+		headers.setBasicAuth(username, password);
+		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+		assertNotNull(authorization);
+		assertTrue(authorization.startsWith("Basic "));
+		byte[] result = Base64.getDecoder().decode(authorization.substring(6).getBytes(StandardCharsets.ISO_8859_1));
+		assertEquals("foo:bar", new String(result, StandardCharsets.ISO_8859_1));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void basicAuthIllegalChar() {
+		String username = "foo";
+		String password = "\u03BB";
+		headers.setBasicAuth(username, password);
+	}
+
+	@Test
+	public void bearerAuth() {
+		String token = "foo";
+
+		headers.setBearerAuth(token);
+		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
+		assertEquals("Bearer foo", authorization);
 	}
 
 }

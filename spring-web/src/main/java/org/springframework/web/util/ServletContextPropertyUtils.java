@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,25 +36,25 @@ import org.springframework.util.SystemPropertyUtils;
  */
 public abstract class ServletContextPropertyUtils {
 
-    private static final PropertyPlaceholderHelper strictHelper =
-            new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
+	private static final PropertyPlaceholderHelper strictHelper =
+			new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
 					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR, false);
 
-    private static final PropertyPlaceholderHelper nonStrictHelper =
-            new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
+	private static final PropertyPlaceholderHelper nonStrictHelper =
+			new PropertyPlaceholderHelper(SystemPropertyUtils.PLACEHOLDER_PREFIX,
 					SystemPropertyUtils.PLACEHOLDER_SUFFIX, SystemPropertyUtils.VALUE_SEPARATOR, true);
 
 
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding
 	 * servlet context init parameter or system property values.
-     * @param text the String to resolve
-     * @param servletContext the servletContext to use for lookups.
+	 * @param text the String to resolve
+	 * @param servletContext the servletContext to use for lookups.
 	 * @return the resolved String
+	 * @throws IllegalArgumentException if there is an unresolvable placeholder
 	 * @see SystemPropertyUtils#PLACEHOLDER_PREFIX
 	 * @see SystemPropertyUtils#PLACEHOLDER_SUFFIX
-     * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
-	 * @throws IllegalArgumentException if there is an unresolvable placeholder
+	 * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
 	 */
 	public static String resolvePlaceholders(String text, ServletContext servletContext) {
 		return resolvePlaceholders(text, servletContext, false);
@@ -65,13 +65,13 @@ public abstract class ServletContextPropertyUtils {
 	 * servlet context init parameter or system property values. Unresolvable placeholders
 	 * with no default value are ignored and passed through unchanged if the flag is set to true.
 	 * @param text the String to resolve
-     * @param servletContext the servletContext to use for lookups.
+	 * @param servletContext the servletContext to use for lookups.
 	 * @param ignoreUnresolvablePlaceholders flag to determine is unresolved placeholders are ignored
 	 * @return the resolved String
+	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
 	 * @see SystemPropertyUtils#PLACEHOLDER_PREFIX
 	 * @see SystemPropertyUtils#PLACEHOLDER_SUFFIX
-     * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
-	 * @throws IllegalArgumentException if there is an unresolvable placeholder and the flag is false
+	 * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
 	 */
 	public static String resolvePlaceholders(String text, ServletContext servletContext,
 			boolean ignoreUnresolvablePlaceholders) {
@@ -84,20 +84,20 @@ public abstract class ServletContextPropertyUtils {
 	private static class ServletContextPlaceholderResolver
 			implements PropertyPlaceholderHelper.PlaceholderResolver {
 
-        private final String text;
+		private final String text;
 
-        private final ServletContext servletContext;
+		private final ServletContext servletContext;
 
-        public ServletContextPlaceholderResolver(String text, ServletContext servletContext) {
-            this.text = text;
-            this.servletContext = servletContext;
-        }
+		public ServletContextPlaceholderResolver(String text, ServletContext servletContext) {
+			this.text = text;
+			this.servletContext = servletContext;
+		}
 
-        @Override
+		@Override
 		@Nullable
 		public String resolvePlaceholder(String placeholderName) {
-            try {
-                String propVal = this.servletContext.getInitParameter(placeholderName);
+			try {
+				String propVal = this.servletContext.getInitParameter(placeholderName);
 				if (propVal == null) {
 					// Fall back to system properties.
 					propVal = System.getProperty(placeholderName);
@@ -108,12 +108,12 @@ public abstract class ServletContextPropertyUtils {
 				}
 				return propVal;
 			}
-            catch (Throwable ex) {
-                System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" +
-                        this.text + "] as ServletContext init-parameter or system property: " + ex);
-                return null;
-            }
-        }
-    }
+			catch (Throwable ex) {
+				System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" +
+						this.text + "] as ServletContext init-parameter or system property: " + ex);
+				return null;
+			}
+		}
+	}
 
 }

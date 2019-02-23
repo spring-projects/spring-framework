@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,16 +70,22 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 	public void setInterceptors(List<ChannelInterceptor> interceptors) {
 		super.setInterceptors(interceptors);
 		this.executorInterceptors.clear();
-		for (ChannelInterceptor interceptor : interceptors) {
-			if (interceptor instanceof ExecutorChannelInterceptor) {
-				this.executorInterceptors.add((ExecutorChannelInterceptor) interceptor);
-			}
-		}
+		interceptors.forEach(this::updateExecutorInterceptorsFor);
 	}
 
 	@Override
 	public void addInterceptor(ChannelInterceptor interceptor) {
 		super.addInterceptor(interceptor);
+		updateExecutorInterceptorsFor(interceptor);
+	}
+
+	@Override
+	public void addInterceptor(int index, ChannelInterceptor interceptor) {
+		super.addInterceptor(index, interceptor);
+		updateExecutorInterceptorsFor(interceptor);
+	}
+
+	private void updateExecutorInterceptorsFor(ChannelInterceptor interceptor) {
 		if (interceptor instanceof ExecutorChannelInterceptor) {
 			this.executorInterceptors.add((ExecutorChannelInterceptor) interceptor);
 		}

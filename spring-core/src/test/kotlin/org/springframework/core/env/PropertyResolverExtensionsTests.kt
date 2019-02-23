@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,35 @@
 
 package org.springframework.core.env
 
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Answers
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.junit.MockitoJUnitRunner
 
 /**
  * Mock object based tests for PropertyResolver Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */
-@RunWith(MockitoJUnitRunner::class)
 class PropertyResolverExtensionsTests {
 
-	@Mock(answer = Answers.RETURNS_MOCKS)
-	lateinit var propertyResolver: PropertyResolver
+	val propertyResolver = mockk<PropertyResolver>(relaxed = true)
 
-	@Suppress("UNUSED_VARIABLE")
 	@Test
 	fun `get operator`() {
-		val name = propertyResolver["name"]
-		Mockito.verify(propertyResolver, Mockito.times(1)).getRequiredProperty("name")
+		propertyResolver["name"]
+		verify { propertyResolver.getProperty("name") }
+	}
+
+	@Test
+	fun `getProperty extension`() {
+		propertyResolver.getProperty<String>("name")
+		verify { propertyResolver.getProperty("name", String::class.java) }
+	}
+
+	@Test
+	fun `getRequiredProperty extension`() {
+		propertyResolver.getRequiredProperty<String>("name")
+		verify { propertyResolver.getRequiredProperty("name", String::class.java) }
 	}
 
 }

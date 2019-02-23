@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,19 @@ import org.springframework.cache.interceptor.KeyGenerator;
  */
 public class SomeCustomKeyGenerator implements KeyGenerator {
 
-    @Override
-    public Object generate(Object target, Method method, Object... params) {
-        return generateKey(method.getName(), params);
-    }
+	@Override
+	public Object generate(Object target, Method method, Object... params) {
+		return generateKey(method.getName(), params);
+	}
 
-    /**
-     * @see #generate(Object, java.lang.reflect.Method, Object...)
-     */
-    static Object generateKey(String methodName, Object... params) {
-        final StringBuilder sb = new StringBuilder(methodName);
-        for (Object param : params) {
-            sb.append(param);
-        }
-        return sb.toString();
-    }
+	/**
+	 * @see #generate(Object, java.lang.reflect.Method, Object...)
+	 */
+	static Object generateKey(String methodName, Object... params) {
+		final StringBuilder sb = new StringBuilder(methodName);
+		for (Object param : params) {
+			sb.append(param);
+		}
+		return sb.toString();
+	}
 }

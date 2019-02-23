@@ -26,7 +26,7 @@ import javax.xml.bind.Unmarshaller;
 import org.springframework.util.Assert;
 
 /**
- * Holder for {@link JAXBContext} isntances.
+ * Holder for {@link JAXBContext} instances.
  *
  * @author Arjen Poutsma
  * @since 5.0

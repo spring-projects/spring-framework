@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -60,7 +61,7 @@ public class MockServletConfig implements ServletConfig {
 	 * Create a new MockServletConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 */
-	public MockServletConfig(ServletContext servletContext) {
+	public MockServletConfig(@Nullable ServletContext servletContext) {
 		this(servletContext, "");
 	}
 
@@ -69,7 +70,7 @@ public class MockServletConfig implements ServletConfig {
 	 * @param servletContext the ServletContext that the servlet runs in
 	 * @param servletName the name of the servlet
 	 */
-	public MockServletConfig(ServletContext servletContext, String servletName) {
+	public MockServletConfig(@Nullable ServletContext servletContext, String servletName) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.servletName = servletName;
 	}

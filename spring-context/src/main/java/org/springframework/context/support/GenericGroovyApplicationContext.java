@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class GenericGroovyApplicationContext extends GenericApplicationContext i
 
 	private final BeanWrapper contextWrapper = new BeanWrapperImpl(this);
 
-    private MetaClass metaClass = GroovySystem.getMetaClassRegistry().getMetaClass(getClass());
+	private MetaClass metaClass = GroovySystem.getMetaClassRegistry().getMetaClass(getClass());
 
 
 	/**
@@ -229,7 +229,7 @@ public class GenericGroovyApplicationContext extends GenericApplicationContext i
 		this.metaClass = metaClass;
 	}
 
-    public MetaClass getMetaClass() {
+	public MetaClass getMetaClass() {
 		return this.metaClass;
 	}
 
@@ -247,7 +247,7 @@ public class GenericGroovyApplicationContext extends GenericApplicationContext i
 	}
 
 	@Nullable
-    public Object getProperty(String property) {
+	public Object getProperty(String property) {
 		if (containsBean(property)) {
 			return getBean(property);
 		}

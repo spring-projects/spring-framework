@@ -16,9 +16,6 @@
 
 package org.springframework.test.context.support;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -88,33 +85,36 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	protected abstract SmartContextLoader getAnnotationConfigLoader();
 
 
+	// ContextLoader
+
+	/**
+	 * {@code AbstractDelegatingSmartContextLoader} does not support the
+	 * {@link ContextLoader#processLocations(Class, String...)} method. Call
+	 * {@link #processContextConfiguration(ContextConfigurationAttributes)} instead.
+	 * @throws UnsupportedOperationException in this implementation
+	 */
+	@Override
+	public final String[] processLocations(Class<?> clazz, @Nullable String... locations) {
+		throw new UnsupportedOperationException(
+				"DelegatingSmartContextLoaders do not support the ContextLoader SPI. " +
+						"Call processContextConfiguration(ContextConfigurationAttributes) instead.");
+	}
+
+	/**
+	 * {@code AbstractDelegatingSmartContextLoader} does not support the
+	 * {@link ContextLoader#loadContext(String...) } method. Call
+	 * {@link #loadContext(MergedContextConfiguration)} instead.
+	 * @throws UnsupportedOperationException in this implementation
+	 */
+	@Override
+	public final ApplicationContext loadContext(String... locations) throws Exception {
+		throw new UnsupportedOperationException(
+				"DelegatingSmartContextLoaders do not support the ContextLoader SPI. " +
+						"Call loadContext(MergedContextConfiguration) instead.");
+	}
+
+
 	// SmartContextLoader
-
-	private static void delegateProcessing(SmartContextLoader loader, ContextConfigurationAttributes configAttributes) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Delegating to %s to process context configuration %s.",
-					name(loader), configAttributes));
-		}
-		loader.processContextConfiguration(configAttributes);
-	}
-
-	private static ApplicationContext delegateLoading(SmartContextLoader loader, MergedContextConfiguration mergedConfig)
-			throws Exception {
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
-		}
-		return loader.loadContext(mergedConfig);
-	}
-
-	private boolean supports(SmartContextLoader loader, MergedContextConfiguration mergedConfig) {
-		if (loader == getAnnotationConfigLoader()) {
-			return (mergedConfig.hasClasses() && !mergedConfig.hasLocations());
-		}
-		else {
-			return (mergedConfig.hasLocations() && !mergedConfig.hasClasses());
-		}
-	}
 
 	/**
 	 * Delegates to candidate {@code SmartContextLoaders} to process the supplied
@@ -228,14 +228,14 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 */
 	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
-		Assert.notNull(mergedConfig, "mergedConfig must not be null");
-		List<SmartContextLoader> candidates = Arrays.asList(getXmlLoader(), getAnnotationConfigLoader());
+		Assert.notNull(mergedConfig, "MergedContextConfiguration must not be null");
 
 		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> String.format(
 				"Neither %s nor %s supports loading an ApplicationContext from %s: " +
 				"declare either 'locations' or 'classes' but not both.", name(getXmlLoader()),
 				name(getAnnotationConfigLoader()), mergedConfig));
 
+		SmartContextLoader[] candidates = {getXmlLoader(), getAnnotationConfigLoader()};
 		for (SmartContextLoader loader : candidates) {
 			// Determine if each loader can load a context from the mergedConfig. If it
 			// can, let it; otherwise, keep iterating.
@@ -253,41 +253,39 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 
 		// else...
 		throw new IllegalStateException(String.format(
-				"Neither %s nor %s was able to load an ApplicationContext from %s.", name(getXmlLoader()),
-				name(getAnnotationConfigLoader()), mergedConfig));
+				"Neither %s nor %s was able to load an ApplicationContext from %s.",
+				name(getXmlLoader()), name(getAnnotationConfigLoader()), mergedConfig));
+	}
+
+
+	private static void delegateProcessing(SmartContextLoader loader, ContextConfigurationAttributes configAttributes) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Delegating to %s to process context configuration %s.",
+					name(loader), configAttributes));
+		}
+		loader.processContextConfiguration(configAttributes);
+	}
+
+	private static ApplicationContext delegateLoading(SmartContextLoader loader, MergedContextConfiguration mergedConfig)
+			throws Exception {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
+		}
+		return loader.loadContext(mergedConfig);
+	}
+
+	private boolean supports(SmartContextLoader loader, MergedContextConfiguration mergedConfig) {
+		if (loader == getAnnotationConfigLoader()) {
+			return (mergedConfig.hasClasses() && !mergedConfig.hasLocations());
+		}
+		else {
+			return (mergedConfig.hasLocations() && !mergedConfig.hasClasses());
+		}
 	}
 
 	private static String name(SmartContextLoader loader) {
 		return loader.getClass().getSimpleName();
-	}
-
-
-	// ContextLoader
-
-	/**
-	 * {@code AbstractDelegatingSmartContextLoader} does not support the
-	 * {@link ContextLoader#processLocations(Class, String...)} method. Call
-	 * {@link #processContextConfiguration(ContextConfigurationAttributes)} instead.
-	 * @throws UnsupportedOperationException in this implementation
-	 */
-	@Override
-	public final String[] processLocations(Class<?> clazz, @Nullable String... locations) {
-		throw new UnsupportedOperationException(
-				"DelegatingSmartContextLoaders do not support the ContextLoader SPI. " +
-				"Call processContextConfiguration(ContextConfigurationAttributes) instead.");
-	}
-
-	/**
-	 * {@code AbstractDelegatingSmartContextLoader} does not support the
-	 * {@link ContextLoader#loadContext(String...) } method. Call
-	 * {@link #loadContext(MergedContextConfiguration)} instead.
-	 * @throws UnsupportedOperationException in this implementation
-	 */
-	@Override
-	public final ApplicationContext loadContext(String... locations) throws Exception {
-		throw new UnsupportedOperationException(
-				"DelegatingSmartContextLoaders do not support the ContextLoader SPI. " +
-				"Call loadContext(MergedContextConfiguration) instead.");
 	}
 
 }

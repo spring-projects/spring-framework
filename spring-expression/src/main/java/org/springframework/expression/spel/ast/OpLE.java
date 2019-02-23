@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.springframework.util.NumberUtils;
  */
 public class OpLE extends Operator {
 
-	public OpLE(int pos, SpelNodeImpl... operands) {
-		super("<=", pos, operands);
+	public OpLE(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("<=", startPos, endPos, operands);
 		this.exitTypeDescriptor = "Z";
 	}
 
@@ -49,7 +49,7 @@ public class OpLE extends Operator {
 
 		this.leftActualDescriptor = CodeFlow.toDescriptorFromObject(left);
 		this.rightActualDescriptor = CodeFlow.toDescriptorFromObject(right);
-		
+
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
@@ -90,12 +90,12 @@ public class OpLE extends Operator {
 
 		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) <= 0);
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		return isCompilableOperatorUsingNumerics();
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		generateComparisonCode(mv, cf, IFGT, IF_ICMPGT);

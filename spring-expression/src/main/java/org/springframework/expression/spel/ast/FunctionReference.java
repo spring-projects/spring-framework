@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.StringJoiner;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.MethodParameter;
@@ -37,13 +38,10 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined
- * in the context prior to the expression being evaluated or within the expression itself
- * using a lambda function definition. For example: Lambda function definition in an
- * expression: "(#max = {|x,y|$x>$y?$x:$y};max(2,3))" Calling context defined function:
- * "#isEven(37)". Functions may also be static java methods, registered in the context
- * prior to invocation of the expression.
+ * in the context prior to the expression being evaluated. Functions may also be static
+ * Java methods, registered in the context prior to invocation of the expression.
  *
- * <p>Functions are very simplistic, the arguments are not part of the definition
+ * <p>Functions are very simplistic. The arguments are not part of the definition
  * (right now), so the names must be unique.
  *
  * @author Andy Clement
@@ -60,8 +58,8 @@ public class FunctionReference extends SpelNodeImpl {
 	private volatile Method method;
 
 
-	public FunctionReference(String functionName, int pos, SpelNodeImpl... arguments) {
-		super(pos, arguments);
+	public FunctionReference(String functionName, int startPos, int endPos, SpelNodeImpl... arguments) {
+		super(startPos, endPos, arguments);
 		this.name = functionName;
 	}
 
@@ -73,7 +71,7 @@ public class FunctionReference extends SpelNodeImpl {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
 		if (!(value.getValue() instanceof Method)) {
-			// Two possibilities: a lambda function or a Java static method registered as a function
+			// Possibly a static Java method registered as a function
 			throw new SpelEvaluationException(
 					SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, value.getClass());
 		}
@@ -142,16 +140,11 @@ public class FunctionReference extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder("#").append(this.name);
-		sb.append("(");
+		StringJoiner sj = new StringJoiner(",", "(", ")");
 		for (int i = 0; i < getChildCount(); i++) {
-			if (i > 0) {
-				sb.append(",");
-			}
-			sb.append(getChild(i).toStringAST());
+			sj.add(getChild(i).toStringAST());
 		}
-		sb.append(")");
-		return sb.toString();
+		return '#' + this.name + sj.toString();
 	}
 
 	/**
@@ -166,7 +159,7 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 		return arguments;
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		Method method = this.method;
@@ -185,8 +178,8 @@ public class FunctionReference extends SpelNodeImpl {
 		}
 		return true;
 	}
-	
-	@Override 
+
+	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		Method method = this.method;
 		Assert.state(method != null, "No method handle");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.springframework.util.NumberUtils;
  */
 public class OpLT extends Operator {
 
-	public OpLT(int pos, SpelNodeImpl... operands) {
-		super("<", pos, operands);
+	public OpLT(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("<", startPos, endPos, operands);
 		this.exitTypeDescriptor = "Z";
 	}
 
@@ -95,12 +95,12 @@ public class OpLT extends Operator {
 
 		return BooleanTypedValue.forValue(state.getTypeComparator().compare(left, right) < 0);
 	}
-	
+
 	@Override
 	public boolean isCompilable() {
 		return isCompilableOperatorUsingNumerics();
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		generateComparisonCode(mv, cf, IFGE, IF_ICMPGE);

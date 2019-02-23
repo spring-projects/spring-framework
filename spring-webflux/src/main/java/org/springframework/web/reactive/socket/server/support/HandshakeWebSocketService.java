@@ -16,8 +16,14 @@
 
 package org.springframework.web.reactive.socket.server.support;
 
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +38,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.WebSocketService;
@@ -54,28 +61,33 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 
 	private static final String SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 
+	private static final Mono<Map<String, Object>> EMPTY_ATTRIBUTES = Mono.just(Collections.emptyMap());
 
-	private static final boolean tomcatPresent = ClassUtils.isPresent(
-			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler",
-			HandshakeWebSocketService.class.getClassLoader());
 
-	private static final boolean jettyPresent = ClassUtils.isPresent(
-			"org.eclipse.jetty.websocket.server.WebSocketServerFactory",
-			HandshakeWebSocketService.class.getClassLoader());
+	private static final boolean tomcatPresent;
 
-	private static final boolean undertowPresent = ClassUtils.isPresent(
-			"io.undertow.websockets.WebSocketProtocolHandshakeHandler",
-			HandshakeWebSocketService.class.getClassLoader());
+	private static final boolean jettyPresent;
 
-	private static final boolean reactorNettyPresent = ClassUtils.isPresent(
-			"reactor.ipc.netty.http.server.HttpServerResponse",
-			HandshakeWebSocketService.class.getClassLoader());
+	private static final boolean undertowPresent;
+
+	private static final boolean reactorNettyPresent;
+
+	static {
+		ClassLoader classLoader = HandshakeWebSocketService.class.getClassLoader();
+		tomcatPresent = ClassUtils.isPresent("org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
+		jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
+		undertowPresent = ClassUtils.isPresent("io.undertow.websockets.WebSocketProtocolHandshakeHandler", classLoader);
+		reactorNettyPresent = ClassUtils.isPresent("reactor.netty.http.server.HttpServerResponse", classLoader);
+	}
 
 
 	protected static final Log logger = LogFactory.getLog(HandshakeWebSocketService.class);
 
 
 	private final RequestUpgradeStrategy upgradeStrategy;
+
+	@Nullable
+	private Predicate<String> sessionAttributePredicate;
 
 	private volatile boolean running = false;
 
@@ -135,6 +147,28 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		return this.upgradeStrategy;
 	}
 
+	/**
+	 * Configure a predicate to use to extract
+	 * {@link org.springframework.web.server.WebSession WebSession} attributes
+	 * and use them to initialize the WebSocket session with.
+	 * <p>By default this is not set in which case no attributes are passed.
+	 * @param predicate the predicate
+	 * @since 5.1
+	 */
+	public void setSessionAttributePredicate(@Nullable Predicate<String> predicate) {
+		this.sessionAttributePredicate = predicate;
+	}
+
+	/**
+	 * Return the configured predicate for initialization WebSocket session
+	 * attributes from {@code WebSession} attributes.
+	 * @since 5.1
+	 */
+	@Nullable
+	public Predicate<String> getSessionAttributePredicate() {
+		return this.sessionAttributePredicate;
+	}
+
 
 	@Override
 	public void start() {
@@ -176,36 +210,36 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 		HttpMethod method = request.getMethod();
 		HttpHeaders headers = request.getHeaders();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Handling " + request.getURI() + " with headers: " + headers);
-		}
-
 		if (HttpMethod.GET != method) {
 			return Mono.error(new MethodNotAllowedException(
 					request.getMethodValue(), Collections.singleton(HttpMethod.GET)));
 		}
 
 		if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
-			return handleBadRequest("Invalid 'Upgrade' header: " + headers);
+			return handleBadRequest(exchange, "Invalid 'Upgrade' header: " + headers);
 		}
 
 		List<String> connectionValue = headers.getConnection();
 		if (!connectionValue.contains("Upgrade") && !connectionValue.contains("upgrade")) {
-			return handleBadRequest("Invalid 'Connection' header: " + headers);
+			return handleBadRequest(exchange, "Invalid 'Connection' header: " + headers);
 		}
 
 		String key = headers.getFirst(SEC_WEBSOCKET_KEY);
 		if (key == null) {
-			return handleBadRequest("Missing \"Sec-WebSocket-Key\" header");
+			return handleBadRequest(exchange, "Missing \"Sec-WebSocket-Key\" header");
 		}
 
 		String protocol = selectProtocol(headers, handler);
-		return this.upgradeStrategy.upgrade(exchange, handler, protocol);
+
+		return initAttributes(exchange).flatMap(attributes ->
+				this.upgradeStrategy.upgrade(exchange, handler, protocol,
+						() -> createHandshakeInfo(exchange, request, protocol, attributes))
+		);
 	}
 
-	private Mono<Void> handleBadRequest(String reason) {
+	private Mono<Void> handleBadRequest(ServerWebExchange exchange, String reason) {
 		if (logger.isDebugEnabled()) {
-			logger.debug(reason);
+			logger.debug(exchange.getLogPrefix() + reason);
 		}
 		return Mono.error(new ServerWebInputException(reason));
 	}
@@ -222,6 +256,30 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 			}
 		}
 		return null;
+	}
+
+	private Mono<Map<String, Object>> initAttributes(ServerWebExchange exchange) {
+		if (this.sessionAttributePredicate == null) {
+			return EMPTY_ATTRIBUTES;
+		}
+		return exchange.getSession().map(session ->
+				session.getAttributes().entrySet().stream()
+						.filter(entry -> this.sessionAttributePredicate.test(entry.getKey()))
+						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+	}
+
+	private HandshakeInfo createHandshakeInfo(ServerWebExchange exchange, ServerHttpRequest request,
+			@Nullable String protocol, Map<String, Object> attributes) {
+
+		URI uri = request.getURI();
+		// Copy request headers, as they might be pooled and recycled by
+		// the server implementation once the handshake HTTP exchange is done.
+		HttpHeaders headers = new HttpHeaders();
+		headers.addAll(request.getHeaders());
+		Mono<Principal> principal = exchange.getPrincipal();
+		String logPrefix = exchange.getLogPrefix();
+		InetSocketAddress remoteAddress = request.getRemoteAddress();
+		return new HandshakeInfo(uri, headers, principal, protocol, remoteAddress, attributes, logPrefix);
 	}
 
 }

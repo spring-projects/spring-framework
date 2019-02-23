@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base class to provide common methods for
@@ -36,7 +38,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * '{@code input}' element as 'checked' if the supplied value matches the
 	 * bound value.
 	 */
-	protected void renderFromValue(Object value, TagWriter tagWriter) throws JspException {
+	protected void renderFromValue(@Nullable Object value, TagWriter tagWriter) throws JspException {
 		renderFromValue(value, value, tagWriter);
 	}
 
@@ -45,7 +47,9 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * '{@code input}' element as 'checked' if the supplied value matches the
 	 * bound value.
 	 */
-	protected void renderFromValue(Object item, Object value, TagWriter tagWriter) throws JspException {
+	protected void renderFromValue(@Nullable Object item, @Nullable Object value, TagWriter tagWriter)
+			throws JspException {
+
 		String displayValue = convertToDisplayString(value);
 		tagWriter.writeAttribute("value", processFieldValue(getName(), displayValue, getInputType()));
 		if (isOptionSelected(value) || (value != item && isOptionSelected(item))) {
@@ -57,7 +61,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * Determines whether the supplied value matched the selected value
 	 * through delegating to {@link SelectedValueComparator#isSelected}.
 	 */
-	private boolean isOptionSelected(Object value) throws JspException {
+	private boolean isOptionSelected(@Nullable Object value) throws JspException {
 		return SelectedValueComparator.isSelected(getBindStatus(), value);
 	}
 
@@ -77,8 +81,10 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * Return a unique ID for the bound name within the current PageContext.
 	 */
 	@Override
+	@Nullable
 	protected String autogenerateId() throws JspException {
-		return TagIdGenerator.nextId(super.autogenerateId(), this.pageContext);
+		String id = super.autogenerateId();
+		return (id != null ? TagIdGenerator.nextId(id, this.pageContext) : null);
 	}
 
 

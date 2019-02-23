@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 
-import org.springframework.util.Assert;
-
 /**
  * Implementation of the {@link javax.xml.stream.XMLStreamWriter} interface
  * that wraps an {@link XMLEventWriter}.
@@ -53,8 +51,6 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 
 
 	public XMLEventStreamWriter(XMLEventWriter eventWriter, XMLEventFactory eventFactory) {
-		Assert.notNull(eventWriter, "'eventWriter' must not be null");
-		Assert.notNull(eventFactory, "'eventFactory' must not be null");
 		this.eventWriter = eventWriter;
 		this.eventFactory = eventFactory;
 	}

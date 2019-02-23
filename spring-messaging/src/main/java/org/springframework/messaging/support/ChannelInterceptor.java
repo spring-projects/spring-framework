@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.springframework.messaging.MessageChannel;
  * @author Mark Fisher
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @see Message
+ * @see MessageChannel
  */
 public interface ChannelInterceptor {
 
@@ -38,13 +40,16 @@ public interface ChannelInterceptor {
 	 * send invocation will not occur.
 	 */
 	@Nullable
-	Message<?> preSend(Message<?> message, MessageChannel channel);
+	default Message<?> preSend(Message<?> message, MessageChannel channel) {
+		return message;
+	}
 
 	/**
 	 * Invoked immediately after the send invocation. The boolean
 	 * value argument represents the return value of that invocation.
 	 */
-	void postSend(Message<?> message, MessageChannel channel, boolean sent);
+	default void postSend(Message<?> message, MessageChannel channel, boolean sent) {
+	}
 
 	/**
 	 * Invoked after the completion of a send regardless of any exception that
@@ -53,14 +58,18 @@ public interface ChannelInterceptor {
 	 * completed and returned a Message, i.e. it did not return {@code null}.
 	 * @since 4.1
 	 */
-	void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex);
+	default void afterSendCompletion(
+			Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
+	}
 
 	/**
 	 * Invoked as soon as receive is called and before a Message is
 	 * actually retrieved. If the return value is 'false', then no
 	 * Message will be retrieved. This only applies to PollableChannels.
 	 */
-	boolean preReceive(MessageChannel channel);
+	default boolean preReceive(MessageChannel channel) {
+		return true;
+	}
 
 	/**
 	 * Invoked immediately after a Message has been retrieved but before
@@ -69,7 +78,9 @@ public interface ChannelInterceptor {
 	 * This only applies to PollableChannels.
 	 */
 	@Nullable
-	Message<?> postReceive(Message<?> message, MessageChannel channel);
+	default Message<?> postReceive(Message<?> message, MessageChannel channel) {
+		return message;
+	}
 
 	/**
 	 * Invoked after the completion of a receive regardless of any exception that
@@ -78,6 +89,8 @@ public interface ChannelInterceptor {
 	 * completed and returned {@code true}.
 	 * @since 4.1
 	 */
-	void afterReceiveCompletion(@Nullable Message<?> message, MessageChannel channel, @Nullable Exception ex);
+	default void afterReceiveCompletion(@Nullable Message<?> message, MessageChannel channel,
+			@Nullable Exception ex) {
+	}
 
 }

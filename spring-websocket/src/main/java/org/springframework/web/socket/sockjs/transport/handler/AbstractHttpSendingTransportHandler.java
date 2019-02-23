@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		implements SockJsSessionFactory {
 
 	/**
-	 * Pattern for validating jsonp callback parameter values.
+	 * Pattern for validating callback parameter values.
 	 */
 	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
 

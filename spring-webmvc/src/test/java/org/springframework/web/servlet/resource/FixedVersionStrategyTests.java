@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,50 +22,52 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link org.springframework.web.servlet.resource.FixedVersionStrategy}.
+ * Unit tests for {@link FixedVersionStrategy}.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  */
 public class FixedVersionStrategyTests {
 
-	private final String version = "1df341f";
+	private static final String VERSION = "1df341f";
 
-	private final String path = "js/foo.js";
+	private static final String PATH = "js/foo.js";
+
 
 	private FixedVersionStrategy strategy;
 
 
 	@Before
 	public void setup() {
-		this.strategy = new FixedVersionStrategy(this.version);
+		this.strategy = new FixedVersionStrategy(VERSION);
 	}
 
 
 	@Test(expected = IllegalArgumentException.class)
-	public void emptyPrefixVersion() throws Exception {
+	public void emptyPrefixVersion() {
 		new FixedVersionStrategy("  ");
 	}
 
 	@Test
-	public void extractVersion() throws Exception {
-		assertEquals(this.version, this.strategy.extractVersion(this.version + "/" + this.path));
-		assertNull(this.strategy.extractVersion(this.path));
+	public void extractVersion() {
+		assertEquals(VERSION, this.strategy.extractVersion(VERSION + "/" + PATH));
+		assertNull(this.strategy.extractVersion(PATH));
 	}
 
 	@Test
-	public void removeVersion() throws Exception {
-		assertEquals("/" + this.path, this.strategy.removeVersion(this.version + "/" + this.path, this.version));
+	public void removeVersion() {
+		assertEquals("/" + PATH, this.strategy.removeVersion(VERSION + "/" + PATH, VERSION));
 	}
 
 	@Test
-	public void addVersion() throws Exception {
-		assertEquals(this.version + "/" + this.path, this.strategy.addVersion("/" + this.path, this.version));
+	public void addVersion() {
+		assertEquals(VERSION + "/" + PATH, this.strategy.addVersion("/" + PATH, VERSION));
 	}
 
 	@Test  // SPR-13727
-	public void addVersionRelativePath() throws Exception {
-		String relativePath = "../" + this.path;
-		assertEquals(relativePath, this.strategy.addVersion(relativePath, this.version));
+	public void addVersionRelativePath() {
+		String relativePath = "../" + PATH;
+		assertEquals(relativePath, this.strategy.addVersion(relativePath, VERSION));
 	}
 
 }

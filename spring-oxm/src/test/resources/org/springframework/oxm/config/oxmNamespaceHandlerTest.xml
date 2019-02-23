@@ -12,15 +12,4 @@
 		<oxm:class-to-be-bound name="org.springframework.oxm.jaxb.test.FlightType"/>
 	</oxm:jaxb2-marshaller>
 
-	<!-- Castor -->
-
-	<oxm:castor-marshaller id="castorEncodingMarshaller" encoding="ISO-8859-1"/>
-
-	<oxm:castor-marshaller id="castorTargetClassMarshaller" target-class="org.springframework.oxm.castor.Flight"/>
-
-	<oxm:castor-marshaller id="castorTargetPackageMarshaller" target-package="org.springframework.oxm.castor"/>
-
-	<oxm:castor-marshaller id="castorMappingLocationMarshaller"
-						   mapping-location="classpath:org/springframework/oxm/castor/mapping.xml"/>
-
 </beans>

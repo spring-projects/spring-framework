@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -27,6 +26,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Hints;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -52,7 +52,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 
 
 	/**
-	 * Constructor with {@link HttpMessageWriter}s and a
+	 * Constructor with {@link HttpMessageWriter HttpMessageWriters} and a
 	 * {@code RequestedContentTypeResolver}.
 	 * @param messageWriters for serializing Objects to the response body stream
 	 * @param contentTypeResolver for resolving the requested content type
@@ -103,58 +103,62 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 * Write a given body to the response with {@link HttpMessageWriter}.
 	 * @param body the object to write
 	 * @param bodyParameter the {@link MethodParameter} of the body to write
-	 * @param actualParameter the actual return type of the method that returned the
-	 * value; could be different from {@code bodyParameter} when processing {@code HttpEntity}
+	 * @param actualParam the actual return type of the method that returned the value;
+	 * could be different from {@code bodyParameter} when processing {@code HttpEntity}
 	 * for example
 	 * @param exchange the current exchange
 	 * @return indicates completion or error
 	 * @since 5.0.2
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected Mono<Void> writeBody(@Nullable Object body, MethodParameter bodyParameter,
-			@Nullable MethodParameter actualParameter, ServerWebExchange exchange) {
+			@Nullable MethodParameter actualParam, ServerWebExchange exchange) {
 
 		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
-		ResolvableType actualType = (actualParameter == null ?
-				bodyType : ResolvableType.forMethodParameter(actualParameter));
-		Class<?> bodyClass = bodyType.resolve();
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyClass, body);
+		ResolvableType actualType = (actualParam != null ? ResolvableType.forMethodParameter(actualParam) : bodyType);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(bodyType.resolve(), body);
 
 		Publisher<?> publisher;
 		ResolvableType elementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
-			ResolvableType genericType = bodyType.getGeneric(0);
+			ResolvableType genericType = bodyType.getGeneric();
 			elementType = getElementType(adapter, genericType);
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
-			elementType = ((bodyClass == null || bodyClass.equals(Object.class)) && body != null ?
+			elementType = (bodyType.toClass() == Object.class && body != null ?
 					ResolvableType.forInstance(body) : bodyType);
 		}
 
-		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
+		if (elementType.resolve() == void.class || elementType.resolve() == Void.class) {
 			return Mono.from((Publisher<Void>) publisher);
 		}
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		MediaType bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType));
+		List<MediaType> writableMediaTypes = getMediaTypesFor(elementType);
+		MediaType bestMediaType = selectMediaType(exchange, () -> writableMediaTypes);
 		if (bestMediaType != null) {
+			String logPrefix = exchange.getLogPrefix();
+			if (logger.isDebugEnabled()) {
+				logger.debug(logPrefix +
+						(publisher instanceof Mono ? "0..1" : "0..N") + " [" + elementType + "]");
+			}
 			for (HttpMessageWriter<?> writer : getMessageWriters()) {
 				if (writer.canWrite(elementType, bestMediaType)) {
-					return writer.write((Publisher) publisher, actualType, elementType,
-							bestMediaType, request, response, Collections.emptyMap());
+					return writer.write((Publisher) publisher, actualType, elementType, bestMediaType,
+							request, response, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix));
 				}
 			}
 		}
 		else {
-			if (getMediaTypesFor(elementType).isEmpty()) {
+			if (writableMediaTypes.isEmpty()) {
 				return Mono.error(new IllegalStateException("No writer for : " + elementType));
 			}
 		}
 
-		return Mono.error(new NotAcceptableStatusException(getMediaTypesFor(elementType)));
+		return Mono.error(new NotAcceptableStatusException(writableMediaTypes));
 	}
 
 	private ResolvableType getElementType(ReactiveAdapter adapter, ResolvableType genericType) {
@@ -170,10 +174,13 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	}
 
 	private List<MediaType> getMediaTypesFor(ResolvableType elementType) {
-		return getMessageWriters().stream()
-				.filter(converter -> converter.canWrite(elementType, null))
-				.flatMap(converter -> converter.getWritableMediaTypes().stream())
-				.collect(Collectors.toList());
+		List<MediaType> writableMediaTypes = new ArrayList<>();
+		for (HttpMessageWriter<?> converter : getMessageWriters()) {
+			if (converter.canWrite(elementType, null)) {
+				writableMediaTypes.addAll(converter.getWritableMediaTypes());
+			}
+		}
+		return writableMediaTypes;
 	}
 
 }

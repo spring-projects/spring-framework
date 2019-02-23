@@ -40,7 +40,7 @@ public interface RequestAttributes {
 	/**
 	 * Constant that indicates session scope.
 	 * <p>This preferably refers to a locally isolated session, if such
-	 * a distinction is available (for example, in a Portlet environment).
+	 * a distinction is available.
 	 * Else, it simply refers to the common session.
 	 */
 	int SCOPE_SESSION = 1;
@@ -120,8 +120,8 @@ public interface RequestAttributes {
 
 	/**
 	 * Resolve the contextual reference for the given key, if any.
-	 * <p>At a minimum: the HttpServletRequest/PortletRequest reference for key
-	 * "request", and the HttpSession/PortletSession reference for key "session".
+	 * <p>At a minimum: the HttpServletRequest reference for key "request", and
+	 * the HttpSession reference for key "session".
 	 * @param key the contextual key
 	 * @return the corresponding object, or {@code null} if none found
 	 */

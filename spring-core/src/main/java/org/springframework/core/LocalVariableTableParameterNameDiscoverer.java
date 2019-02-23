@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,7 +164,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			// exclude synthetic + bridged && static class initialization
 			if (!isSyntheticOrBridged(access) && !STATIC_CLASS_INIT.equals(name)) {
-				return new LocalVariableTableVisitor(clazz, memberMap, name, desc, isStatic(access));
+				return new LocalVariableTableVisitor(this.clazz, this.memberMap, name, desc, isStatic(access));
 			}
 			return null;
 		}

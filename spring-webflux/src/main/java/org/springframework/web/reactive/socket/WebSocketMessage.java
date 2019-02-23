@@ -134,10 +134,31 @@ public class WebSocketMessage {
 		return this.type.hashCode() * 29 + this.payload.hashCode();
 	}
 
+	@Override
+	public String toString() {
+		return "WebSocket " + this.type.name() + " message (" + this.payload.readableByteCount() + " bytes)";
+	}
 
 	/**
 	 * WebSocket message types.
 	 */
-	public enum Type { TEXT, BINARY, PING, PONG }
+	public enum Type {
+		/**
+		 * Text WebSocket message.
+		 */
+		TEXT,
+		/**
+		 * Binary WebSocket message.
+		 */
+		BINARY,
+		/**
+		 * WebSocket ping.
+		 */
+		PING,
+		/**
+		 * WebSocket pong.
+		 */
+		PONG;
+	}
 
 }

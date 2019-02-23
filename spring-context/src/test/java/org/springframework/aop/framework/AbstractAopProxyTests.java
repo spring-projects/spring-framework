@@ -175,7 +175,7 @@ public abstract class AbstractAopProxyTests {
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		pf1.addAdvice(new NopInterceptor());
 		pf1.addAdvice(new NopInterceptor());
-		ITestBean proxies[] = new ITestBean[howMany];
+		ITestBean[] proxies = new ITestBean[howMany];
 		for (int i = 0; i < howMany; i++) {
 			proxies[i] = (ITestBean) createAopProxy(pf1).getProxy();
 			assertEquals(age1, proxies[i].getAge());
@@ -365,7 +365,7 @@ public abstract class AbstractAopProxyTests {
 		assertEquals("Only one invocation via AOP as use of this wasn't proxied", 1, di.getCount());
 		// 1 invocation
 		assertEquals("Increment happened", 1, proxied.getCount());
-		proxied.incrementViaProxy(); // 2 invoocations
+		proxied.incrementViaProxy(); // 2 invocations
 		assertEquals("Increment happened", 2, target.getCount());
 		assertEquals("3 more invocations via AOP as the first call was reentrant through the proxy", 4, di.getCount());
 	}
@@ -511,7 +511,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 	@Test
-	public void testUndeclaredUnheckedException() throws Throwable {
+	public void testUndeclaredUncheckedException() throws Throwable {
 		final RuntimeException unexpectedException = new RuntimeException();
 		// Test return value
 		MethodInterceptor mi = new MethodInterceptor() {
@@ -736,7 +736,7 @@ public abstract class AbstractAopProxyTests {
 			fail("Shouldn't be able to add introduction interceptor except via introduction advice");
 		}
 		catch (AopConfigException ex) {
-			assertTrue(ex.getMessage().indexOf("ntroduction") > -1);
+			assertTrue(ex.getMessage().contains("ntroduction"));
 		}
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		ITestBean proxied = (ITestBean) createProxy(pc);
@@ -786,7 +786,7 @@ public abstract class AbstractAopProxyTests {
 
 	/**
 	 * Note that an introduction can't throw an unexpected checked exception,
-	 * as it's constained by the interface.
+	 * as it's constrained by the interface.
 	 */
 	@Test
 	public void testIntroductionThrowsUncheckedException() throws Throwable {
@@ -849,7 +849,7 @@ public abstract class AbstractAopProxyTests {
 			fail("Shouldn't be able to add interceptor when frozen");
 		}
 		catch (AopConfigException ex) {
-			assertTrue(ex.getMessage().indexOf("frozen") > -1);
+			assertTrue(ex.getMessage().contains("frozen"));
 		}
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertEquals(target.getAge(), proxied.getAge());
@@ -1356,7 +1356,7 @@ public abstract class AbstractAopProxyTests {
 				rmi.getUserAttributes().putAll(valuesToAdd);
 				return invocation.proceed();
 			}
-		};
+		}
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<>(), new HashMap<String, String>());
 		Map<String, String> firstValuesToAdd = new HashMap<>();

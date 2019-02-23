@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers,
-			ReactiveAdapterRegistry registry) {
-
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
 		super(readers, registry);
 	}
 
@@ -64,9 +62,9 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 	}
 
 	private Object createEntity(@Nullable Object body, Class<?> entityType, ServerHttpRequest request) {
-		return RequestEntity.class.equals(entityType) ?
+		return (RequestEntity.class.equals(entityType) ?
 				new RequestEntity<>(body, request.getHeaders(), request.getMethod(), request.getURI()) :
-				new HttpEntity<>(body, request.getHeaders());
+				new HttpEntity<>(body, request.getHeaders()));
 	}
 
 }

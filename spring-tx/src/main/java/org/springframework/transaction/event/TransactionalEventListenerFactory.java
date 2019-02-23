@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.lang.reflect.Method;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListenerFactory;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 
 /**
  * {@link EventListenerFactory} implementation that handles {@link TransactionalEventListener}
- * annotated method.
+ * annotated methods.
  *
  * @author Stephane Nicoll
  * @since 4.2
@@ -47,7 +47,7 @@ public class TransactionalEventListenerFactory implements EventListenerFactory, 
 
 	@Override
 	public boolean supportsMethod(Method method) {
-		return (AnnotationUtils.findAnnotation(method, TransactionalEventListener.class) != null);
+		return AnnotatedElementUtils.hasAnnotation(method, TransactionalEventListener.class);
 	}
 
 	@Override

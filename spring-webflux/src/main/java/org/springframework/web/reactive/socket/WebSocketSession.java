@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.web.reactive.socket;
 
+import java.util.Map;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
@@ -25,15 +26,11 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
- * Represents a WebSocket session with Reactive Streams input and output.
+ * Represents a WebSocket session.
  *
- * <p>On the server side a WebSocket session can be handled by mapping
- * requests to a {@link WebSocketHandler} and ensuring there is a
- * {@link org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter
- * WebSocketHandlerAdapter} strategy registered in Spring configuration.
- * On the client side a {@link WebSocketHandler} can be provided to a
- * {@link org.springframework.web.reactive.socket.client.WebSocketClient
- * WebSocketClient}.
+ * <p>Use {@link WebSocketSession#receive() session.receive()} to compose on
+ * the inbound message stream, and {@link WebSocketSession#send(Publisher)
+ * session.send(publisher)} to provide the outbound message stream.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -57,13 +54,31 @@ public interface WebSocketSession {
 	DataBufferFactory bufferFactory();
 
 	/**
-	 * Get access to the stream of incoming messages.
+	 * Return the map with attributes associated with the WebSocket session.
+	 * @return a Map with the session attributes (never {@code null})
+	 * @since 5.1
+	 */
+	Map<String, Object> getAttributes();
+
+	/**
+	 * Provides access to the stream of inbound messages.
+	 * <p>This stream receives a completion or error signal when the connection
+	 * is closed. In a typical {@link WebSocketHandler} implementation this
+	 * stream is composed into the overall processing flow, so that when the
+	 * connection is closed, handling will end.
+	 *
+	 * <p>See the class-level doc of {@link WebSocketHandler} and the reference
+	 * for more details and examples of how to handle the session.
 	 */
 	Flux<WebSocketMessage> receive();
 
 	/**
-	 * Write the given messages to the WebSocket connection.
-	 * @param messages the messages to write
+	 * Give a source of outgoing messages, write the messages and return a
+	 * {@code Mono<Void>} that completes when the source completes and writing
+	 * is done.
+	 *
+	 * <p>See the class-level doc of {@link WebSocketHandler} and the reference
+	 * for more details and examples of how to handle the session.
 	 */
 	Mono<Void> send(Publisher<WebSocketMessage> messages);
 

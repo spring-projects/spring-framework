@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 
 package org.springframework.orm.hibernate5;
 
+import javax.persistence.EntityManager;
+
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import org.springframework.lang.Nullable;
-import org.springframework.transaction.support.ResourceHolderSupport;
-import org.springframework.util.Assert;
+import org.springframework.orm.jpa.EntityManagerHolder;
 
 /**
- * Session holder, wrapping a Hibernate Session and a Hibernate Transaction.
- * HibernateTransactionManager binds instances of this class to the thread,
- * for a given SessionFactory.
+ * Resource holder wrapping a Hibernate {@link Session} (plus an optional {@link Transaction}).
+ * {@link HibernateTransactionManager} binds instances of this class to the thread,
+ * for a given {@link org.hibernate.SessionFactory}. Extends {@link EntityManagerHolder}
+ * as of 5.1, automatically exposing an {@code EntityManager} handle on Hibernate 5.2+.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
@@ -36,7 +38,7 @@ import org.springframework.util.Assert;
  * @see HibernateTransactionManager
  * @see SessionFactoryUtils
  */
-public class SessionHolder extends ResourceHolderSupport {
+public class SessionHolder extends EntityManagerHolder {
 
 	private final Session session;
 
@@ -48,7 +50,8 @@ public class SessionHolder extends ResourceHolderSupport {
 
 
 	public SessionHolder(Session session) {
-		Assert.notNull(session, "Session must not be null");
+		// Check below is always true against Hibernate >= 5.2 but not against 5.0/5.1 at runtime
+		super(EntityManager.class.isInstance(session) ? session : null);
 		this.session = session;
 	}
 
@@ -59,6 +62,7 @@ public class SessionHolder extends ResourceHolderSupport {
 
 	public void setTransaction(@Nullable Transaction transaction) {
 		this.transaction = transaction;
+		setTransactionActive(transaction != null);
 	}
 
 	@Nullable

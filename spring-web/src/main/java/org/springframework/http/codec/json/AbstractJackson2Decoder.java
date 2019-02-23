@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,9 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -56,10 +58,19 @@ import org.springframework.util.MimeType;
 public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
 
 	/**
+	 * Until https://github.com/FasterXML/jackson-core/issues/476 is resolved,
+	 * we need to ensure buffer recycling is off.
+	 */
+	private final JsonFactory jsonFactory;
+
+
+	/**
 	 * Constructor with a Jackson {@link ObjectMapper} to use.
 	 */
 	protected AbstractJackson2Decoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
+		this.jsonFactory = mapper.getFactory().copy()
+				.disable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING);
 	}
 
 
@@ -67,7 +78,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		JavaType javaType = getObjectMapper().getTypeFactory().constructType(elementType.getType());
 		// Skip String: CharSequenceDecoder + "*/*" comes after
-		return (!CharSequence.class.isAssignableFrom(elementType.resolve(Object.class)) &&
+		return (!CharSequence.class.isAssignableFrom(elementType.toClass()) &&
 				getObjectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
 	}
 
@@ -75,7 +86,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = tokenize(input, true);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, true);
 		return decodeInternal(tokens, elementType, mimeType, hints);
 	}
 
@@ -83,14 +94,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = tokenize(input, false);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, false);
 		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
-	}
-
-	private Flux<TokenBuffer> tokenize(Publisher<DataBuffer> input, boolean tokenizeArrayElements) {
-		Flux<DataBuffer> inputFlux = Flux.from(input);
-		JsonFactory factory = getObjectMapper().getFactory();
-		return Jackson2Tokenizer.tokenize(inputFlux, factory, tokenizeArrayElements);
 	}
 
 	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens, ResolvableType elementType,
@@ -108,18 +113,25 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 				getObjectMapper().readerWithView(jsonView).forType(javaType) :
 				getObjectMapper().readerFor(javaType));
 
-		return tokens.map(tokenBuffer -> {
+		return tokens.flatMap(tokenBuffer -> {
 			try {
-				return reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				if (!Hints.isLoggingSuppressed(hints)) {
+					LogFormatUtils.traceDebug(logger, traceOn -> {
+						String formatted = LogFormatUtils.formatValue(value, !traceOn);
+						return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+					});
+				}
+				return Mono.justOrEmpty(value);
 			}
 			catch (InvalidDefinitionException ex) {
-				throw new CodecException("Type definition error: " + ex.getType(), ex);
+				return Mono.error(new CodecException("Type definition error: " + ex.getType(), ex));
 			}
 			catch (JsonProcessingException ex) {
-				throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
+				return Mono.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
 			}
 			catch (IOException ex) {
-				throw new DecodingException("I/O error while parsing input stream", ex);
+				return Mono.error(new DecodingException("I/O error while parsing input stream", ex));
 			}
 		});
 	}

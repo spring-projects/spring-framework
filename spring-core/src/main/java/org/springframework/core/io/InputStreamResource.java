@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,9 +115,9 @@ public class InputStreamResource extends AbstractResource {
 	 * This implementation compares the underlying InputStream.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		return (obj == this ||
-			(obj instanceof InputStreamResource && ((InputStreamResource) obj).inputStream.equals(this.inputStream)));
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof InputStreamResource &&
+				((InputStreamResource) other).inputStream.equals(this.inputStream)));
 	}
 
 	/**

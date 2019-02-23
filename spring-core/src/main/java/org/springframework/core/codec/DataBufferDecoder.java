@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,22 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Simple pass-through decoder for {@link DataBuffer}s.
- * <p><strong>Note</strong> that the "decoded" buffers returned by instances of this class should
- * be released after usage by calling
- * {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)}.
+ * Simple pass-through decoder for {@link DataBuffer DataBuffers}.
+ *
+ * <p><strong>Note:</strong> The data buffers should be released via
+ * {@link org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)}
+ * after they have been consumed. In addition, if using {@code Flux} or
+ * {@code Mono} operators such as flatMap, reduce, and others that prefetch,
+ * cache, and skip or filter out data items internally, please add
+ * {@code doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release)} to the
+ * composition chain to ensure cached data buffers are released prior to an
+ * error or cancellation signal.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
-
 
 	public DataBufferDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -47,8 +52,8 @@ public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.getRawClass();
-		return (super.canDecode(elementType, mimeType) && clazz != null && DataBuffer.class.isAssignableFrom(clazz));
+		return (DataBuffer.class.isAssignableFrom(elementType.toClass()) &&
+				super.canDecode(elementType, mimeType));
 	}
 
 	@Override
@@ -62,6 +67,9 @@ public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 	protected DataBuffer decodeDataBuffer(DataBuffer buffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
+		if (logger.isDebugEnabled()) {
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + buffer.readableByteCount() + " bytes");
+		}
 		return buffer;
 	}
 

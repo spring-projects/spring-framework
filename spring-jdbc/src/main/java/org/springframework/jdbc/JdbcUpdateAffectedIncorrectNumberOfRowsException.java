@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,16 @@ import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 @SuppressWarnings("serial")
 public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectUpdateSemanticsDataAccessException {
 
-	/** Number of rows that should have been affected */
-	private int expected;
+	/** Number of rows that should have been affected. */
+	private final int expected;
 
-	/** Number of rows that actually were affected */
-	private int actual;
+	/** Number of rows that actually were affected. */
+	private final int actual;
 
 
 	/**
 	 * Constructor for JdbcUpdateAffectedIncorrectNumberOfRowsException.
-	 * @param sql SQL we were tring to execute
+	 * @param sql the SQL we were trying to execute
 	 * @param expected the expected number of rows affected
 	 * @param actual the actual number of rows affected
 	 */

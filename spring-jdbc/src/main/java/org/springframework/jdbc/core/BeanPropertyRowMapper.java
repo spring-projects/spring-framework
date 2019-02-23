@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,31 +73,32 @@ import org.springframework.util.StringUtils;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 2.5
+ * @param <T> the result type
  */
 public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** The class we are mapping to */
+	/** The class we are mapping to. */
 	@Nullable
 	private Class<T> mappedClass;
 
-	/** Whether we're strictly validating */
+	/** Whether we're strictly validating. */
 	private boolean checkFullyPopulated = false;
 
-	/** Whether we're defaulting primitives when mapping a null value */
+	/** Whether we're defaulting primitives when mapping a null value. */
 	private boolean primitivesDefaultedForNullValue = false;
 
-	/** ConversionService for binding JDBC values to bean properties */
+	/** ConversionService for binding JDBC values to bean properties. */
 	@Nullable
 	private ConversionService conversionService = DefaultConversionService.getSharedInstance();
 
-	/** Map of the fields we provide mapping for */
+	/** Map of the fields we provide mapping for. */
 	@Nullable
 	private Map<String, PropertyDescriptor> mappedFields;
 
-	/** Set of bean properties we provide mapping for */
+	/** Set of bean properties we provide mapping for. */
 	@Nullable
 	private Set<String> mappedProperties;
 
@@ -291,7 +292,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
-			String field = lowerCaseName(column.replaceAll(" ", ""));
+			String field = lowerCaseName(StringUtils.delete(column, " "));
 			PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(field) : null);
 			if (pd != null) {
 				try {

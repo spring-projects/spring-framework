@@ -72,7 +72,7 @@ public class SpringValidatorAdapterTests {
 	@Before
 	public void setupSpringValidatorAdapter() {
 		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} is must be between {2} and {1}");
-		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value with {1}");
+		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value as {1}");
 		messageSource.addMessage("password", Locale.ENGLISH, "Password");
 		messageSource.addMessage("confirmPassword", Locale.ENGLISH, "Password(Confirm)");
 	}
@@ -115,7 +115,7 @@ public class SpringValidatorAdapterTests {
 		assertThat(errors.getFieldValue("password"), is("password"));
 		FieldError error = errors.getFieldError("password");
 		assertNotNull(error);
-		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Password must be same value with Password(Confirm)"));
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Password must be same value as Password(Confirm)"));
 		assertTrue(error.contains(ConstraintViolation.class));
 		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("password"));
 	}
@@ -136,7 +136,7 @@ public class SpringValidatorAdapterTests {
 		FieldError error2 = errors.getFieldError("confirmEmail");
 		assertNotNull(error1);
 		assertNotNull(error2);
-		assertThat(messageSource.getMessage(error1, Locale.ENGLISH), is("email must be same value with confirmEmail"));
+		assertThat(messageSource.getMessage(error1, Locale.ENGLISH), is("email must be same value as confirmEmail"));
 		assertThat(messageSource.getMessage(error2, Locale.ENGLISH), is("Email required"));
 		assertTrue(error1.contains(ConstraintViolation.class));
 		assertThat(error1.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("email"));
@@ -162,7 +162,7 @@ public class SpringValidatorAdapterTests {
 		FieldError error2 = errors.getFieldError("confirmEmail");
 		assertNotNull(error1);
 		assertNotNull(error2);
-		assertThat(messageSource.getMessage(error1, Locale.ENGLISH), is("email must be same value with confirmEmail"));
+		assertThat(messageSource.getMessage(error1, Locale.ENGLISH), is("email must be same value as confirmEmail"));
 		assertThat(messageSource.getMessage(error2, Locale.ENGLISH), is("Email required"));
 		assertTrue(error1.contains(ConstraintViolation.class));
 		assertThat(error1.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("email"));
@@ -185,7 +185,7 @@ public class SpringValidatorAdapterTests {
 	@Test  // SPR-16177
 	public void testWithSet() {
 		Parent parent = new Parent();
-		parent.setName("Parent whith set");
+		parent.setName("Parent with set");
 		parent.getChildSet().addAll(createChildren(parent));
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(parent, "parent");
@@ -378,13 +378,13 @@ public class SpringValidatorAdapterTests {
 
 		private Integer id;
 
-		@javax.validation.constraints.NotNull
+		@NotNull
 		private String name;
 
-		@javax.validation.constraints.NotNull
+		@NotNull
 		private Integer age;
 
-		@javax.validation.constraints.NotNull
+		@NotNull
 		private Parent parent;
 
 		public Integer getId() {

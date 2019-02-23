@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ import org.springframework.util.Assert;
  */
 public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations {
 
-	/** Internal ResourceFactory adapter for interacting with ConnectionFactoryUtils */
+	/** Internal ResourceFactory adapter for interacting with ConnectionFactoryUtils. */
 	private final JmsTemplateResourceFactory transactionalResourceFactory = new JmsTemplateResourceFactory();
 
 
@@ -368,11 +368,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Set the {@link QosSettings} to use when sending a message.
 	 * @param settings the deliveryMode, priority, and timeToLive settings to use
+	 * @since 5.0
 	 * @see #setExplicitQosEnabled(boolean)
 	 * @see #setDeliveryMode(int)
 	 * @see #setPriority(int)
 	 * @see #setTimeToLive(long)
-	 * @since 5.0
 	 */
 	public void setQosSettings(QosSettings settings) {
 		Assert.notNull(settings, "Settings must not be null");
@@ -723,8 +723,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		return receiveSelected(destinationName, null);
 	}
 
-	@Override@Nullable
-	
+	@Override
+	@Nullable
 	public Message receiveSelected(String messageSelector) throws JmsException {
 		Destination defaultDestination = getDefaultDestination();
 		if (defaultDestination != null) {

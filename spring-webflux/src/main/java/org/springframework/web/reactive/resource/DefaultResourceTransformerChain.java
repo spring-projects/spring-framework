@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-201/ the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.web.reactive.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 import reactor.core.publisher.Mono;
 
@@ -27,8 +29,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A default implementation of {@link ResourceTransformerChain} for invoking
- * a list of {@link ResourceTransformer}s.
+ * Default immutable implementation of {@link ResourceTransformerChain}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -37,52 +38,56 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 
 	private final ResourceResolverChain resolverChain;
 
-	private final List<ResourceTransformer> transformers = new ArrayList<>();
+	@Nullable
+	private final ResourceTransformer transformer;
 
-	private int index = -1;
+	@Nullable
+	private final ResourceTransformerChain nextChain;
 
 
-	public DefaultResourceTransformerChain(ResourceResolverChain resolverChain,
-			@Nullable List<ResourceTransformer> transformers) {
+	public DefaultResourceTransformerChain(
+			ResourceResolverChain resolverChain, @Nullable List<ResourceTransformer> transformers) {
 
 		Assert.notNull(resolverChain, "ResourceResolverChain is required");
 		this.resolverChain = resolverChain;
-		if (transformers != null) {
-			this.transformers.addAll(transformers);
-		}
+		transformers = (transformers != null ? transformers : Collections.emptyList());
+		DefaultResourceTransformerChain chain = initTransformerChain(resolverChain, new ArrayList<>(transformers));
+		this.transformer = chain.transformer;
+		this.nextChain = chain.nextChain;
 	}
 
+	private DefaultResourceTransformerChain initTransformerChain(ResourceResolverChain resolverChain,
+			ArrayList<ResourceTransformer> transformers) {
 
-	public ResourceResolverChain getResolverChain() {
-		return this.resolverChain;
+		DefaultResourceTransformerChain chain = new DefaultResourceTransformerChain(resolverChain, null, null);
+		ListIterator<? extends ResourceTransformer> it = transformers.listIterator(transformers.size());
+		while (it.hasPrevious()) {
+			chain = new DefaultResourceTransformerChain(resolverChain, it.previous(), chain);
+		}
+		return chain;
+	}
+
+	public DefaultResourceTransformerChain(ResourceResolverChain resolverChain,
+			@Nullable ResourceTransformer transformer, @Nullable ResourceTransformerChain chain) {
+
+		Assert.isTrue((transformer == null && chain == null) || (transformer != null && chain != null),
+				"Both transformer and transformer chain must be null, or neither is");
+		this.resolverChain = resolverChain;
+		this.transformer = transformer;
+		this.nextChain = chain;
 	}
 
 
 	@Override
-	public Mono<Resource> transform(ServerWebExchange exchange, Resource resource) {
-		ResourceTransformer transformer = getNext();
-		if (transformer == null) {
-			return Mono.just(resource);
-		}
-		try {
-			return transformer.transform(exchange, resource, this);
-		}
-		finally {
-			this.index--;
-		}
+	public ResourceResolverChain getResolverChain() {
+		return this.resolverChain;
 	}
 
-	@Nullable
-	private ResourceTransformer getNext() {
-		Assert.state(this.index <= this.transformers.size(),
-				"Current index exceeds the number of configured ResourceTransformer's");
-
-		if (this.index == (this.transformers.size() - 1)) {
-			return null;
-		}
-
-		this.index++;
-		return this.transformers.get(this.index);
+	@Override
+	public Mono<Resource> transform(ServerWebExchange exchange, Resource resource) {
+		return (this.transformer != null && this.nextChain != null ?
+				this.transformer.transform(exchange, resource, this.nextChain) :
+				Mono.just(resource));
 	}
 
 }

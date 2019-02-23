@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.context.annotation.Import;
  *         registry.addEndpoint("/portfolio").withSockJS();
  *     }
  *
- *     &#064;Bean
+ *     &#064;Override
  *     public void configureMessageBroker(MessageBrokerRegistry registry) {
  *         registry.enableStompBrokerRelay("/queue/", "/topic/");
  *         registry.setApplicationDestinationPrefixes("/app/");

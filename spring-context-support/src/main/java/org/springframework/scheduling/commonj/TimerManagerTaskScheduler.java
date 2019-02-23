@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,10 @@ import org.springframework.util.ErrorHandler;
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 3.0
+ * @deprecated as of 5.1, in favor of EE 7's
+ * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler}
  */
+@Deprecated
 public class TimerManagerTaskScheduler extends TimerManagerAccessor implements TaskScheduler {
 
 	@Nullable
@@ -151,7 +154,7 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 				return 0;
 			}
 			long diff = getDelay(TimeUnit.MILLISECONDS) - other.getDelay(TimeUnit.MILLISECONDS);
-			return (diff == 0 ? 0 : ((diff < 0)? -1 : 1));
+			return (diff == 0 ? 0 : ((diff < 0) ? -1 : 1));
 		}
 	}
 

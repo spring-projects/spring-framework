@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,16 @@ package org.springframework.web.reactive.socket.client;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
+import org.apache.tomcat.websocket.WsWebSocketContainer;
+import reactor.core.publisher.MonoProcessor;
+
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 import org.springframework.web.reactive.socket.adapter.TomcatWebSocketSession;
 
-import org.apache.tomcat.websocket.WsWebSocketContainer;
-import reactor.core.publisher.MonoProcessor;
-
 /**
  * {@link WebSocketClient} implementation for use with the Java WebSocket API.
- * 
+ *
  * @author Violeta Georgieva
  * @since 5.0
  */

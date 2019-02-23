@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <T> the callback result type
  */
 public class ListenableFutureCallbackRegistry<T> {
 

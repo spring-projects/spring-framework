@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class CommonsLogWriter extends Writer {
 
 	public void write(char ch) {
 		if (ch == '\n' && this.buffer.length() > 0) {
-			this.logger.debug(this.buffer.toString());
+			logger.debug(this.buffer.toString());
 			this.buffer.setLength(0);
 		}
 		else {
@@ -58,7 +58,7 @@ public class CommonsLogWriter extends Writer {
 		for (int i = 0; i < length; i++) {
 			char ch = buffer[offset + i];
 			if (ch == '\n' && this.buffer.length() > 0) {
-				this.logger.debug(this.buffer.toString());
+				logger.debug(this.buffer.toString());
 				this.buffer.setLength(0);
 			}
 			else {

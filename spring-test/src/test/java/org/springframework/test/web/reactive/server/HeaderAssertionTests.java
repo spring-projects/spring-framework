@@ -17,6 +17,9 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
@@ -30,15 +33,14 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link HeaderAssertions}.
- *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
- * @since 5.0
  */
 public class HeaderAssertionTests {
 
@@ -77,7 +79,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void valueEqualsWithMultipeValues() {
+	public void valueEqualsWithMultipleValues() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		headers.add("foo", "baz");
@@ -123,6 +125,15 @@ public class HeaderAssertionTests {
 			assertEquals("Response header 'Content-Type'=[application/json;charset=UTF-8] " +
 					"does not match [.*ISO-8859-1.*]", cause.getMessage());
 		}
+	}
+
+	@Test
+	public void valueMatcher() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("foo", "bar");
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		assertions.value("foo", containsString("a"));
 	}
 
 	@Test
@@ -207,6 +218,37 @@ public class HeaderAssertionTests {
 		}
 	}
 
+	@Test
+	public void expires() {
+		HttpHeaders headers = new HttpHeaders();
+		ZonedDateTime expires = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+		headers.setExpires(expires);
+		HeaderAssertions assertions = headerAssertions(headers);
+		assertions.expires(expires.toInstant().toEpochMilli());
+		try {
+			assertions.expires(expires.toInstant().toEpochMilli() + 1);
+			fail("Wrong value expected");
+		}
+		catch (AssertionError error) {
+			// Expected
+		}
+	}
+
+	@Test
+	public void lastModified() {
+		HttpHeaders headers = new HttpHeaders();
+		ZonedDateTime lastModified = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+		headers.setLastModified(lastModified.toInstant().toEpochMilli());
+		HeaderAssertions assertions = headerAssertions(headers);
+		assertions.lastModified(lastModified.toInstant().toEpochMilli());
+		try {
+			assertions.lastModified(lastModified.toInstant().toEpochMilli() + 1);
+			fail("Wrong value expected");
+		}
+		catch (AssertionError error) {
+			// Expected
+		}
+	}
 
 	private HeaderAssertions headerAssertions(HttpHeaders responseHeaders) {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
@@ -216,7 +258,7 @@ public class HeaderAssertionTests {
 		MonoProcessor<byte[]> emptyContent = MonoProcessor.create();
 		emptyContent.onComplete();
 
-		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, null);
+		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null);
 		return new HeaderAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 

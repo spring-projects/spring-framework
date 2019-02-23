@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
 public class RequestPredicateTests {
 
 	@Test
-	public void and() throws Exception {
+	public void and() {
 		RequestPredicate predicate1 = request -> true;
 		RequestPredicate predicate2 = request -> true;
 		RequestPredicate predicate3 = request -> false;
@@ -38,7 +38,7 @@ public class RequestPredicateTests {
 	}
 
 	@Test
-	public void negate() throws Exception {
+	public void negate() {
 		RequestPredicate predicate = request -> false;
 		RequestPredicate negated = predicate.negate();
 
@@ -52,7 +52,7 @@ public class RequestPredicateTests {
 	}
 
 	@Test
-	public void or() throws Exception {
+	public void or() {
 		RequestPredicate predicate1 = request -> true;
 		RequestPredicate predicate2 = request -> false;
 		RequestPredicate predicate3 = request -> false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.net.URI;
-import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.websockets.WebSocketConnectionCallback;
@@ -32,7 +31,6 @@ import io.undertow.websockets.spi.WebSocketHttpExchange;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -46,14 +44,17 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
 * A {@link RequestUpgradeStrategy} for use with Undertow.
-  * 
+  *
  * @author Violeta Georgieva
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 	@Override
-	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler, @Nullable String subProtocol) {
+	public Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler handler,
+			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
+
 		ServerHttpRequest request = exchange.getRequest();
 		Assert.isInstanceOf(AbstractServerHttpRequest.class, request);
 		HttpServerExchange httpExchange = ((AbstractServerHttpRequest) request).getNativeRequest();
@@ -62,14 +63,11 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		Hybi13Handshake handshake = new Hybi13Handshake(protocols, false);
 		List<Handshake> handshakes = Collections.singletonList(handshake);
 
-		URI url = request.getURI();
-		HttpHeaders headers = request.getHeaders();
-		Mono<Principal> principal = exchange.getPrincipal();
-		HandshakeInfo info = new HandshakeInfo(url, headers, principal, subProtocol);
+		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
 
 		try {
-			DefaultCallback callback = new DefaultCallback(info, handler, bufferFactory);
+			DefaultCallback callback = new DefaultCallback(handshakeInfo, handler, bufferFactory);
 			new WebSocketProtocolHandshakeHandler(handshakes, callback).handleRequest(httpExchange);
 		}
 		catch (Exception ex) {

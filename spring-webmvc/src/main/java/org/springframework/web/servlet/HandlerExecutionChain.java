@@ -202,21 +202,23 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Delegates to the handler's {@code toString()}.
+	 * Delegates to the handler and interceptors' {@code toString()}.
 	 */
 	@Override
 	public String toString() {
 		Object handler = getHandler();
 		StringBuilder sb = new StringBuilder();
-		sb.append("HandlerExecutionChain with handler [").append(handler).append("]");
-		HandlerInterceptor[] interceptors = getInterceptors();
-		if (!ObjectUtils.isEmpty(interceptors)) {
-			sb.append(" and ").append(interceptors.length).append(" interceptor");
-			if (interceptors.length > 1) {
-				sb.append("s");
-			}
+		sb.append("HandlerExecutionChain with [").append(handler).append("] and ");
+		if (this.interceptorList != null) {
+			sb.append(this.interceptorList.size());
 		}
-		return sb.toString();
+		else if (this.interceptors != null) {
+			sb.append(this.interceptors.length);
+		}
+		else {
+			sb.append(0);
+		}
+		return sb.append(" interceptors").toString();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator() {
-		/* no-op */
 	}
 
 	/**
@@ -87,7 +86,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator(Resource... scripts) {
-		this();
 		setScripts(scripts);
 	}
 
@@ -97,8 +95,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * logged but not cause a failure
 	 * @param ignoreFailedDrops flag to indicate that a failed SQL {@code DROP}
 	 * statement can be ignored
-	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts; may
-	 * be {@code null} or <em>empty</em> to indicate platform encoding
+	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts
+	 * (may be {@code null} or <em>empty</em> to indicate platform encoding)
 	 * @param scripts the scripts to execute to initialize or clean up the database
 	 * (never {@code null})
 	 * @since 4.0.3
@@ -106,10 +104,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops,
 			@Nullable String sqlScriptEncoding, Resource... scripts) {
 
-		this(scripts);
 		this.continueOnError = continueOnError;
 		this.ignoreFailedDrops = ignoreFailedDrops;
 		setSqlScriptEncoding(sqlScriptEncoding);
+		setScripts(scripts);
 	}
 
 
@@ -148,10 +146,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Specify the encoding for the configured SQL scripts, if different from the
-	 * platform encoding.
-	 * @param sqlScriptEncoding the encoding used in scripts; may be {@code null}
-	 * or empty to indicate platform encoding
+	 * Specify the encoding for the configured SQL scripts,
+	 * if different from the platform encoding.
+	 * @param sqlScriptEncoding the encoding used in scripts
+	 * (may be {@code null} or empty to indicate platform encoding)
 	 * @see #addScript(Resource)
 	 */
 	public void setSqlScriptEncoding(@Nullable String sqlScriptEncoding) {

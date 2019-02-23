@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,10 +114,14 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	@Test
 	public void submitListenableRunnable() throws Exception {
 		TestTask task = new TestTask(1);
+		// Act
 		ListenableFuture<?> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
-		Thread.sleep(1000);
-		assertTrue(future.isDone());
+		// Assert
+		Awaitility.await()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(future::isDone);
 		assertNull(outcome);
 		assertThreadNamePrefix(task);
 	}
@@ -126,8 +131,12 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestTask task = new TestTask(0);
 		ListenableFuture<?> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
-		Thread.sleep(1000);
-		assertTrue(future.isDone());
+
+		Awaitility.await()
+					.dontCatchUncaughtExceptions()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> future.isDone() && outcome != null);
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
 
@@ -165,27 +174,36 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task2 = new TestCallable(-1);
 		Future<?> future2 = executor.submit(task2);
 		shutdownExecutor();
-		future1.get(100, TimeUnit.MILLISECONDS);
-		future2.get(100, TimeUnit.MILLISECONDS);
+		future1.get(1000, TimeUnit.MILLISECONDS);
+		future2.get(1000, TimeUnit.MILLISECONDS);
 	}
 
 	@Test
 	public void submitListenableCallable() throws Exception {
 		TestCallable task = new TestCallable(1);
+		// Act
 		ListenableFuture<String> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
-		Thread.sleep(100);
-		assertTrue(future.isDone());
+		// Assert
+		Awaitility.await()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> future.isDone() && outcome != null);
 		assertEquals(THREAD_NAME_PREFIX, outcome.toString().substring(0, THREAD_NAME_PREFIX.length()));
 	}
 
 	@Test
 	public void submitFailingListenableCallable() throws Exception {
 		TestCallable task = new TestCallable(0);
+		// Act
 		ListenableFuture<String> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
-		Thread.sleep(100);
-		assertTrue(future.isDone());
+		// Assert
+		Awaitility.await()
+					.dontCatchUncaughtExceptions()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> future.isDone() && outcome != null);
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
 
@@ -196,8 +214,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task2 = new TestCallable(-1);
 		ListenableFuture<?> future2 = executor.submitListenable(task2);
 		shutdownExecutor();
-		future1.get(100, TimeUnit.MILLISECONDS);
-		future2.get(100, TimeUnit.MILLISECONDS);
+		future1.get(1000, TimeUnit.MILLISECONDS);
+		future2.get(1000, TimeUnit.MILLISECONDS);
 	}
 
 

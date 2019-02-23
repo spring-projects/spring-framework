@@ -43,7 +43,7 @@ import org.springframework.util.MultiValueMap;
  * Resource image = new ClassPathResource("image.jpg");
  * builder.part("image", image).header("Baz", "Qux");
  *
- * MultiValueMap<String, HttpEntity<?>> multipartBody = builder.build();
+ * MultiValueMap&lt;String, HttpEntity&lt;?&gt;&gt; multipartBody = builder.build();
  * // use multipartBody with RestTemplate or WebClient
  * </pre>
 
@@ -101,9 +101,9 @@ public final class MultipartBodyBuilder {
 		HttpHeaders partHeaders = new HttpHeaders();
 
 		if (part instanceof HttpEntity) {
-			HttpEntity<?> other = (HttpEntity<?>) part;
-			partBody = other.getBody();
-			partHeaders.addAll(other.getHeaders());
+			HttpEntity<?> httpEntity = (HttpEntity<?>) part;
+			partBody = httpEntity.getBody();
+			partHeaders.addAll(httpEntity.getHeaders());
 		}
 		else {
 			partBody = part;
@@ -260,8 +260,8 @@ public final class MultipartBodyBuilder {
 	 * Specialization of {@link HttpEntity} for use with a
 	 * {@link Publisher}-based body, for which we also need to keep track of
 	 * the element type.
-	 * @param <T> The type contained in the publisher
-	 * @param <P> The publisher
+	 * @param <T> the type contained in the publisher
+	 * @param <P> the publisher
 	 */
 	public static final class PublisherEntity<T, P extends Publisher<T>> extends HttpEntity<P> {
 

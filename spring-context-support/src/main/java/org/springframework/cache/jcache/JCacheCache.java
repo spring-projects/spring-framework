@@ -17,6 +17,7 @@
 package org.springframework.cache.jcache;
 
 import java.util.concurrent.Callable;
+import javax.cache.Cache;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.MutableEntry;
@@ -27,7 +28,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.cache.Cache} implementation on top of a
- * {@link javax.cache.Cache} instance.
+ * {@link Cache javax.cache.Cache} instance.
  *
  * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
@@ -37,23 +38,23 @@ import org.springframework.util.Assert;
  */
 public class JCacheCache extends AbstractValueAdaptingCache {
 
-	private final javax.cache.Cache<Object, Object> cache;
+	private final Cache<Object, Object> cache;
 
 
 	/**
-	 * Create an {@link org.springframework.cache.jcache.JCacheCache} instance.
+	 * Create a {@code JCacheCache} instance.
 	 * @param jcache backing JCache Cache instance
 	 */
-	public JCacheCache(javax.cache.Cache<Object, Object> jcache) {
+	public JCacheCache(Cache<Object, Object> jcache) {
 		this(jcache, true);
 	}
 
 	/**
-	 * Create an {@link org.springframework.cache.jcache.JCacheCache} instance.
+	 * Create a {@code JCacheCache} instance.
 	 * @param jcache backing JCache Cache instance
 	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
-	public JCacheCache(javax.cache.Cache<Object, Object> jcache, boolean allowNullValues) {
+	public JCacheCache(Cache<Object, Object> jcache, boolean allowNullValues) {
 		super(allowNullValues);
 		Assert.notNull(jcache, "Cache must not be null");
 		this.cache = jcache;
@@ -66,7 +67,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	public final javax.cache.Cache<Object, Object> getNativeCache() {
+	public final Cache<Object, Object> getNativeCache() {
 		return this.cache;
 	}
 
@@ -127,7 +128,7 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 				}
 				catch (Exception ex) {
 					throw new EntryProcessorException("Value loader '" + valueLoader + "' failed " +
-							"to compute  value for key '" + entry.getKey() + "'", ex);
+							"to compute value for key '" + entry.getKey() + "'", ex);
 				}
 				entry.setValue(toStoreValue(value));
 				return value;

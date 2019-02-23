@@ -43,7 +43,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 /**
  * Integration tests for auto proxy creation by advisor recognition working in
- * conjunction with transaction managment resources.
+ * conjunction with transaction management resources.
  *
  * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorTests
  *

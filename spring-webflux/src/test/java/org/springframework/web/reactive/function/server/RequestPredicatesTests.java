@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ import static org.junit.Assert.*;
 public class RequestPredicatesTests {
 
 	@Test
-	public void all() throws Exception {
+	public void all() {
 		RequestPredicate predicate = RequestPredicates.all();
 		MockServerRequest request = MockServerRequest.builder().build();
 		assertTrue(predicate.test(request));
 	}
 
 	@Test
-	public void method() throws Exception {
+	public void method() {
 		HttpMethod httpMethod = HttpMethod.GET;
 		RequestPredicate predicate = RequestPredicates.method(httpMethod);
 		MockServerRequest request = MockServerRequest.builder().method(httpMethod).build();
@@ -52,7 +52,20 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void methods() throws Exception {
+	public void methods() {
+		RequestPredicate predicate = RequestPredicates.methods(HttpMethod.GET, HttpMethod.HEAD);
+		MockServerRequest request = MockServerRequest.builder().method(HttpMethod.GET).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().method(HttpMethod.HEAD).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().method(HttpMethod.POST).build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void allMethods() {
 		URI uri = URI.create("http://localhost/path");
 
 		RequestPredicate predicate = RequestPredicates.GET("/p*");
@@ -85,7 +98,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void path() throws Exception {
+	public void path() {
 		URI uri = URI.create("http://localhost/path");
 		RequestPredicate predicate = RequestPredicates.path("/p*");
 		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
@@ -96,7 +109,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathEncoded() throws Exception {
+	public void pathEncoded() {
 		URI uri = URI.create("http://localhost/foo%20bar");
 		RequestPredicate predicate = RequestPredicates.path("/foo bar");
 		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
@@ -107,7 +120,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathPredicates() throws Exception {
+	public void pathPredicates() {
 		PathPatternParser parser = new PathPatternParser();
 		parser.setCaseSensitive(false);
 		Function<String, RequestPredicate> pathPredicates = RequestPredicates.pathPredicates(parser);
@@ -119,7 +132,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void headers() throws Exception {
+	public void headers() {
 		String name = "MyHeader";
 		String value = "MyValue";
 		RequestPredicate predicate =
@@ -133,7 +146,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void contentType() throws Exception {
+	public void contentType() {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.contentType(json);
 		MockServerRequest request = MockServerRequest.builder().header("Content-Type", json.toString()).build();
@@ -144,7 +157,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void accept() throws Exception {
+	public void accept() {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.accept(json);
 		MockServerRequest request = MockServerRequest.builder().header("Accept", json.toString()).build();
@@ -155,7 +168,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void pathExtension() throws Exception {
+	public void pathExtension() {
 		RequestPredicate predicate = RequestPredicates.pathExtension("txt");
 
 		URI uri = URI.create("http://localhost/file.txt");
@@ -175,7 +188,7 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
-	public void queryParam() throws Exception {
+	public void queryParam() {
 		MockServerRequest request = MockServerRequest.builder().queryParam("foo", "bar").build();
 		RequestPredicate predicate = RequestPredicates.queryParam("foo", s -> s.equals("bar"));
 		assertTrue(predicate.test(request));

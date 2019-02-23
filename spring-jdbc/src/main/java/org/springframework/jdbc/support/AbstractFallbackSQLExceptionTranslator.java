@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExceptionTranslator {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -95,7 +95,7 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * is allowed to return {@code null} to indicate that no exception match has
 	 * been found and that fallback translation should kick in.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem (if known)
+	 * @param sql the SQL query or update that caused the problem (if known)
 	 * @param ex the offending {@code SQLException}
 	 * @return the DataAccessException, wrapping the {@code SQLException};
 	 * or {@code null} if no exception match found
@@ -114,7 +114,7 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * @return the message {@code String} to use
 	 */
 	protected String buildMessage(String task, @Nullable String sql, SQLException ex) {
-		return task + "; " + (sql != null ? "SQL [" + sql : "]; " + "") + ex.getMessage();
+		return task + "; " + (sql != null ? ("SQL [" + sql + "]; ") : "") + ex.getMessage();
 	}
 
 }

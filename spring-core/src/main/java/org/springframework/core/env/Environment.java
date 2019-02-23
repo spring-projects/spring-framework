@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public interface Environment extends PropertyResolver {
 	/**
 	 * Return the set of profiles explicitly made active for this environment. Profiles
 	 * are used for creating logical groupings of bean definitions to be registered
-	 * conditionally, for example based on deployment environment.  Profiles can be
+	 * conditionally, for example based on deployment environment. Profiles can be
 	 * activated by setting {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
 	 * "spring.profiles.active"} as a system property or by calling
 	 * {@link ConfigurableEnvironment#setActiveProfiles(String...)}.
@@ -98,14 +98,23 @@ public interface Environment extends PropertyResolver {
 	 * Return whether one or more of the given profiles is active or, in the case of no
 	 * explicit active profiles, whether one or more of the given profiles is included in
 	 * the set of default profiles. If a profile begins with '!' the logic is inverted,
-	 * i.e. the method will return true if the given profile is <em>not</em> active.
-	 * For example, <pre class="code">env.acceptsProfiles("p1", "!p2")</pre> will
-	 * return {@code true} if profile 'p1' is active or 'p2' is not active.
+	 * i.e. the method will return {@code true} if the given profile is <em>not</em> active.
+	 * For example, {@code env.acceptsProfiles("p1", "!p2")} will return {@code true} if
+	 * profile 'p1' is active or 'p2' is not active.
 	 * @throws IllegalArgumentException if called with zero arguments
-	 * or if any profile is {@code null}, empty or whitespace-only
+	 * or if any profile is {@code null}, empty, or whitespace only
 	 * @see #getActiveProfiles
 	 * @see #getDefaultProfiles
+	 * @see #acceptsProfiles(Profiles)
+	 * @deprecated as of 5.1 in favor of {@link #acceptsProfiles(Profiles)}
 	 */
+	@Deprecated
 	boolean acceptsProfiles(String... profiles);
+
+	/**
+	 * Return whether the {@linkplain #getActiveProfiles() active profiles}
+	 * match the given {@link Profiles} predicate.
+	 */
+	boolean acceptsProfiles(Profiles profiles);
 
 }

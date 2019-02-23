@@ -63,7 +63,7 @@ public class DefaultWebSessionManagerTests {
 	@Mock
 	private WebSession updateSession;
 
-	
+
 	@Before
 	public void setUp() throws Exception {
 

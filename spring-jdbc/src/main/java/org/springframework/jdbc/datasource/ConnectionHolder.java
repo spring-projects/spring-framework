@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
 /**
- * Connection holder, wrapping a JDBC Connection.
+ * Resource holder wrapping a JDBC {@link Connection}.
  * {@link DataSourceTransactionManager} binds instances of this class
- * to the thread, for a specific DataSource.
+ * to the thread, for a specific {@link javax.sql.DataSource}.
  *
  * <p>Inherits rollback-only support for nested JDBC transactions
  * and reference count functionality from the base class.
@@ -41,6 +41,9 @@ import org.springframework.util.Assert;
  */
 public class ConnectionHolder extends ResourceHolderSupport {
 
+	/**
+	 * Prefix for savepoint names.
+	 */
 	public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
 
 

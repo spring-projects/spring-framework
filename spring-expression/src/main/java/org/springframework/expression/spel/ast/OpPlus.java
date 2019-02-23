@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ import org.springframework.util.NumberUtils;
  */
 public class OpPlus extends Operator {
 
-	public OpPlus(int pos, SpelNodeImpl... operands) {
-		super("+", pos, operands);
+	public OpPlus(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("+", startPos, endPos, operands);
 		Assert.notEmpty(operands, "Operands must not be empty");
 	}
 
@@ -178,9 +178,9 @@ public class OpPlus extends Operator {
 			return false;
 		}
 		if (this.children.length > 1) {
-			 if (!getRightOperand().isCompilable()) {
-				 return false;
-			 }
+			if (!getRightOperand().isCompilable()) {
+				return false;
+			}
 		}
 		return (this.exitTypeDescriptor != null);
 	}
@@ -205,10 +205,10 @@ public class OpPlus extends Operator {
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 		}
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		if (this.exitTypeDescriptor == "Ljava/lang/String") {
+		if ("Ljava/lang/String".equals(this.exitTypeDescriptor)) {
 			mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
 			mv.visitInsn(DUP);
 			mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
@@ -236,12 +236,12 @@ public class OpPlus extends Operator {
 					case 'J':
 						mv.visitInsn(LADD);
 						break;
-					case 'F': 
+					case 'F':
 						mv.visitInsn(FADD);
 						break;
 					case 'D':
 						mv.visitInsn(DADD);
-						break;				
+						break;
 					default:
 						throw new IllegalStateException(
 								"Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");

@@ -145,7 +145,7 @@ public class ProxyFactoryBeanTests {
 		catch (BeanCreationException ex) {
 			// Root cause of the problem must be an AOP exception
 			AopConfigException aex = (AopConfigException) ex.getCause();
-			assertTrue(aex.getMessage().indexOf("TargetSource") != -1);
+			assertTrue(aex.getMessage().contains("TargetSource"));
 		}
 	}
 
@@ -398,7 +398,7 @@ public class ProxyFactoryBeanTests {
 		config.removeAdvice(debugInterceptor);
 		it.getSpouse();
 
-		// Still invoked wiht old reference
+		// Still invoked with old reference
 		assertEquals(2, debugInterceptor.getCount());
 
 		// not invoked with new object

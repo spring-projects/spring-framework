@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,15 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.util.IllegalReferenceCountException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.test.publisher.TestPublisher;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -39,6 +43,9 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.DecoderHttpMessageReader;
@@ -53,23 +60,25 @@ import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.mock.http.client.reactive.test.MockClientHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
+import static org.junit.Assert.*;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
 
 /**
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  */
 public class BodyExtractorsTests {
 
 	private BodyExtractor.Context context;
 
 	private Map<String, Object> hints;
+
+	private Optional<ServerHttpResponse> serverResponse = Optional.empty();
 
 
 	@Before
@@ -94,7 +103,7 @@ public class BodyExtractorsTests {
 
 			@Override
 			public Optional<ServerHttpResponse> serverResponse() {
-				return Optional.empty();
+				return serverResponse;
 			}
 
 			@Override
@@ -107,7 +116,7 @@ public class BodyExtractorsTests {
 
 
 	@Test
-	public void toMono() throws Exception {
+	public void toMono() {
 		BodyExtractor<Mono<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
@@ -125,7 +134,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toMonoParameterizedTypeReference() throws Exception {
+	public void toMonoParameterizedTypeReference() {
 		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
 				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
@@ -147,7 +156,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toMonoWithHints() throws Exception {
+	public void toMonoWithHints() {
 		BodyExtractor<Mono<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(User.class);
 		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
 
@@ -171,8 +180,8 @@ public class BodyExtractorsTests {
 				.verify();
 	}
 
-	@Test // SPR-15758
-	public void toMonoWithEmptyBodyAndNoContentType() throws Exception {
+	@Test  // SPR-15758
+	public void toMonoWithEmptyBodyAndNoContentType() {
 		BodyExtractor<Mono<Map<String, String>>, ReactiveHttpInputMessage> extractor =
 				BodyExtractors.toMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
@@ -183,7 +192,44 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toFlux() throws Exception {
+	public void toMonoVoidAsClientShouldConsumeAndCancel() {
+		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBuffer dataBuffer =
+				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		TestPublisher<DataBuffer> body = TestPublisher.create();
+
+		BodyExtractor<Mono<Void>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(Void.class);
+		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
+		response.setBody(body.flux());
+
+		StepVerifier.create(extractor.extract(response, this.context))
+				.then(() -> {
+					body.assertWasSubscribed();
+					body.emit(dataBuffer);
+				})
+				.verifyComplete();
+
+		body.assertCancelled();
+	}
+
+	@Test
+	public void toMonoVoidAsClientWithEmptyBody() {
+		TestPublisher<DataBuffer> body = TestPublisher.create();
+
+		BodyExtractor<Mono<Void>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(Void.class);
+		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
+		response.setBody(body.flux());
+
+		StepVerifier.create(extractor.extract(response, this.context))
+				.then(() -> {
+					body.assertWasSubscribed();
+					body.complete();
+				})
+				.verifyComplete();
+	}
+
+	@Test
+	public void toFlux() {
 		BodyExtractor<Flux<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
@@ -201,7 +247,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toFluxWithHints() throws Exception {
+	public void toFluxWithHints() {
 		BodyExtractor<Flux<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(User.class);
 		this.hints.put(JSON_VIEW_HINT, SafeToDeserialize.class);
 
@@ -230,7 +276,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toFluxUnacceptable() throws Exception {
+	public void toFluxUnacceptable() {
 		BodyExtractor<Flux<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
@@ -266,9 +312,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toFormData() throws Exception {
-		BodyExtractor<Mono<MultiValueMap<String, String>>, ServerHttpRequest> extractor = BodyExtractors.toFormData();
-
+	public void toFormData() {
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		String text = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
@@ -278,7 +322,7 @@ public class BodyExtractorsTests {
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.body(body);
 
-		Mono<MultiValueMap<String, String>> result = extractor.extract(request, this.context);
+		Mono<MultiValueMap<String, String>> result = BodyExtractors.toFormData().extract(request, this.context);
 
 		StepVerifier.create(result)
 				.consumeNextWith(form -> {
@@ -295,7 +339,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toParts() throws Exception {
+	public void toParts() {
 		BodyExtractor<Flux<Part>, ServerHttpRequest> extractor = BodyExtractors.toParts();
 
 		String bodyContents = "-----------------------------9051914041544843365972754266\r\n" +
@@ -353,7 +397,7 @@ public class BodyExtractorsTests {
 	}
 
 	@Test
-	public void toDataBuffers() throws Exception {
+	public void toDataBuffers() {
 		BodyExtractor<Flux<DataBuffer>, ReactiveHttpInputMessage> extractor = BodyExtractors.toDataBuffers();
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
@@ -368,6 +412,34 @@ public class BodyExtractorsTests {
 				.expectNext(dataBuffer)
 				.expectComplete()
 				.verify();
+	}
+
+	@Test // SPR-17054
+	public void unsupportedMediaTypeShouldConsumeAndCancel() {
+		NettyDataBufferFactory factory = new NettyDataBufferFactory(new PooledByteBufAllocator(true));
+		NettyDataBuffer buffer = factory.wrap(ByteBuffer.wrap("spring".getBytes(StandardCharsets.UTF_8)));
+		TestPublisher<DataBuffer> body = TestPublisher.create();
+
+		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
+		response.getHeaders().setContentType(MediaType.APPLICATION_PDF);
+		response.setBody(body.flux());
+
+		BodyExtractor<Mono<User>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(User.class);
+		StepVerifier.create(extractor.extract(response, this.context))
+				.then(() -> {
+					body.assertWasSubscribed();
+					body.emit(buffer);
+				})
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof UnsupportedMediaTypeException);
+					try {
+						buffer.release();
+						Assert.fail("releasing the buffer should have failed");
+					} catch (IllegalReferenceCountException exc) {
+
+					}
+					body.assertCancelled();
+				}).verify();
 	}
 
 

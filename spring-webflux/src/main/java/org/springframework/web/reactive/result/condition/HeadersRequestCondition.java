@@ -113,7 +113,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return PRE_FLIGHT_MATCH;
 		}
-		for (HeaderExpression expression : expressions) {
+		for (HeaderExpression expression : this.expressions) {
 			if (!expression.match(exchange)) {
 				return null;
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,17 @@ public class ClassPathResourceTests {
 	public void preserveLeadingSlashForClassRelativeAccess() {
 		assertEquals("/test.html", new ClassPathResource("/test.html", getClass()).getPath());
 		assertEquals("/test.html", ((ClassPathResource) new ClassPathResource("", getClass()).createRelative("/test.html")).getPath());
+	}
+
+	@Test
+	public void directoryNotReadable() {
+		Resource fileDir = new ClassPathResource("org/springframework/core");
+		assertTrue(fileDir.exists());
+		assertFalse(fileDir.isReadable());
+
+		Resource jarDir = new ClassPathResource("reactor/core");
+		assertTrue(jarDir.exists());
+		assertFalse(jarDir.isReadable());
 	}
 
 

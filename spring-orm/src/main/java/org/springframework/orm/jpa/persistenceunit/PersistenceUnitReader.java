@@ -276,8 +276,9 @@ final class PersistenceUnitReader {
 		List<Element> classes = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_CLASS_NAME);
 		for (Element element : classes) {
 			String value = DomUtils.getTextValue(element).trim();
-			if (StringUtils.hasText(value))
+			if (StringUtils.hasText(value)) {
 				unitInfo.addManagedClassName(value);
+			}
 		}
 	}
 

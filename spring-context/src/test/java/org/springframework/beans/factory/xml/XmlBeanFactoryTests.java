@@ -482,7 +482,7 @@ public class XmlBeanFactoryTests {
 		}
 		catch (BeanDefinitionStoreException ex) {
 			// check exception message contains the name
-			assertTrue(ex.getMessage().indexOf("bogusParent") != -1);
+			assertTrue(ex.getMessage().contains("bogusParent"));
 			assertTrue(ex.getCause() instanceof NoSuchBeanDefinitionException);
 		}
 	}
@@ -678,7 +678,7 @@ public class XmlBeanFactoryTests {
 			fail();
 		}
 		catch (BeanCreationException ex) {
-			assertTrue(ex.getResourceDescription().indexOf("initializers.xml") != -1);
+			assertTrue(ex.getResourceDescription().contains("initializers.xml"));
 			assertEquals("init-method2", ex.getBeanName());
 			assertTrue(ex.getCause() instanceof IOException);
 		}
@@ -694,9 +694,9 @@ public class XmlBeanFactoryTests {
 		}
 		catch (FatalBeanException ex) {
 			// check message is helpful
-			assertTrue(ex.getMessage().indexOf("initializers.xml") != -1);
-			assertTrue(ex.getMessage().indexOf("init-method3") != -1);
-			assertTrue(ex.getMessage().indexOf("init") != -1);
+			assertTrue(ex.getMessage().contains("initializers.xml"));
+			assertTrue(ex.getMessage().contains("init-method3"));
+			assertTrue(ex.getMessage().contains("init"));
 		}
 	}
 
@@ -934,7 +934,7 @@ public class XmlBeanFactoryTests {
 			xbf.getBean("rod2Accessor");
 		}
 		catch (BeanCreationException ex) {
-			assertTrue(ex.toString().indexOf("touchy") != -1);
+			assertTrue(ex.toString().contains("touchy"));
 			ex.printStackTrace();
 			assertNull(ex.getRelatedCauses());
 		}
@@ -1115,7 +1115,7 @@ public class XmlBeanFactoryTests {
 			fail("Must have thrown a CannotLoadBeanClassException");
 		}
 		catch (CannotLoadBeanClassException ex) {
-			assertTrue(ex.getResourceDescription().indexOf("classNotFound.xml") != -1);
+			assertTrue(ex.getResourceDescription().contains("classNotFound.xml"));
 			assertTrue(ex.getCause() instanceof ClassNotFoundException);
 		}
 	}
@@ -1367,7 +1367,7 @@ public class XmlBeanFactoryTests {
 		}
 		catch (BeanDefinitionStoreException ex) {
 			// Check that the bogus method name was included in the error message
-			assertTrue("Bogus method name correctly reported", ex.getMessage().indexOf("bogusMethod") != -1);
+			assertTrue("Bogus method name correctly reported", ex.getMessage().contains("bogusMethod"));
 		}
 	}
 

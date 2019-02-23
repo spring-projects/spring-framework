@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,9 @@ import org.springframework.lang.Nullable;
  * @see #setSystemTreePath
  * @see #setUserTreePath
  * @see java.util.prefs.Preferences
+ * @deprecated as of 5.2, along with {@link PropertyPlaceholderConfigurer}
  */
+@Deprecated
 public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigurer implements InitializingBean {
 
 	@Nullable
@@ -121,7 +123,7 @@ public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigu
 	@Nullable
 	protected String resolvePlaceholder(@Nullable String path, String key, Preferences preferences) {
 		if (path != null) {
-			 // Do not create the node if it does not exist...
+			// Do not create the node if it does not exist...
 			try {
 				if (preferences.nodeExists(path)) {
 					return preferences.node(path).get(key, null);

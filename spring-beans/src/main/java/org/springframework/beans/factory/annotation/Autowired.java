@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a constructor, field, setter method or config method as to be autowired
- * by Spring's dependency injection facilities.
+ * Marks a constructor, field, setter method or config method as to be autowired by
+ * Spring's dependency injection facilities. This is an alternative to the JSR-330
+ * {@link javax.inject.Inject} annotation, adding required-vs-optional semantics.
  *
- * <p>Only one constructor (at max) of any given bean class may carry this annotation,
- * indicating the constructor to autowire when used as a Spring bean. Such a
- * constructor does not have to be public.
+ * <p>Only one constructor (at max) of any given bean class may declare this annotation
+ * with the 'required' parameter set to {@code true}, indicating <i>the</i> constructor
+ * to autowire when used as a Spring bean. If multiple <i>non-required</i> constructors
+ * declare the annotation, they will be considered as candidates for autowiring.
+ * The constructor with the greatest number of dependencies that can be satisfied by
+ * matching beans in the Spring container will be chosen. If none of the candidates
+ * can be satisfied, then a primary/default constructor (if present) will be used.
+ * If a class only declares a single constructor to begin with, it will always be used,
+ * even if not annotated. An annotated constructor does not have to be public.
  *
- * <p>Fields are injected right after construction of a bean, before any config
- * methods are invoked. Such a config field does not have to be public.
+ * <p>Fields are injected right after construction of a bean, before any config methods
+ * are invoked. Such a config field does not have to be public.
  *
  * <p>Config methods may have an arbitrary name and any number of arguments; each of
  * those arguments will be autowired with a matching bean in the Spring container.

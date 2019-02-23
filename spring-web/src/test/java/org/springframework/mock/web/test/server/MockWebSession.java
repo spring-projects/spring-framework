@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.web.test.server;
 
 import java.time.Clock;
@@ -22,6 +23,8 @@ import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.InMemoryWebSessionStore;
 
@@ -46,13 +49,14 @@ public class MockWebSession implements WebSession {
 		this(null);
 	}
 
-	@SuppressWarnings("ConstantConditions")
-	public MockWebSession(Clock clock) {
+	public MockWebSession(@Nullable Clock clock) {
 		InMemoryWebSessionStore sessionStore = new InMemoryWebSessionStore();
 		if (clock != null) {
 			sessionStore.setClock(clock);
 		}
-		this.delegate = sessionStore.createWebSession().block();
+		WebSession session = sessionStore.createWebSession().block();
+		Assert.state(session != null, "WebSession must not be null");
+		this.delegate = session;
 	}
 
 

@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -90,10 +91,11 @@ public class Spr8954Tests {
 		}
 	}
 
+
 	static class FooFactoryBean implements FactoryBean<Foo>, AnInterface {
 
 		@Override
-		public Foo getObject() throws Exception {
+		public Foo getObject() {
 			return new Foo();
 		}
 
@@ -108,24 +110,29 @@ public class Spr8954Tests {
 		}
 	}
 
+
 	interface AnInterface {
 	}
+
 
 	static class Foo {
 	}
 
+
 	interface PredictedType {
 	}
 
-	static class PredictedTypeImpl implements PredictedType {
-	}
 
 	static class PredictingBPP extends InstantiationAwareBeanPostProcessorAdapter {
 
 		@Override
 		public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
-			return FactoryBean.class.isAssignableFrom(beanClass) ?
-					PredictedType.class : null;
+			return FactoryBean.class.isAssignableFrom(beanClass) ? PredictedType.class : null;
+		}
+
+		@Override
+		public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+			return pvs;
 		}
 	}
 
