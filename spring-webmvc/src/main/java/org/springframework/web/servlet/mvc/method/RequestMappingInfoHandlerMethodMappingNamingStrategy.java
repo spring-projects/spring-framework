@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class RequestMappingInfoHandlerMethodMappingNamingStrategy
 		}
 		StringBuilder sb = new StringBuilder();
 		String simpleTypeName = handlerMethod.getBeanType().getSimpleName();
-		for (int i = 0 ; i < simpleTypeName.length(); i++) {
+		for (int i = 0; i < simpleTypeName.length(); i++) {
 			if (Character.isUpperCase(simpleTypeName.charAt(i))) {
 				sb.append(simpleTypeName.charAt(i));
 			}

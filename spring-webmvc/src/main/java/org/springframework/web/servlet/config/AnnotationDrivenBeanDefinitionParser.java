@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,7 +213,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		configurePathMatchingProperties(handlerMappingDef, element, context);
-		readerContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME , handlerMappingDef);
+		readerContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME, handlerMappingDef);
 
 		RuntimeBeanReference corsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
 		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsRef);
@@ -265,7 +265,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		handlerAdapterDef.getPropertyValues().add("callableInterceptors", callableInterceptors);
 		handlerAdapterDef.getPropertyValues().add("deferredResultInterceptors", deferredResultInterceptors);
-		readerContext.getRegistry().registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME , handlerAdapterDef);
+		readerContext.getRegistry().registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME, handlerAdapterDef);
 
 		RootBeanDefinition uriContributorDef =
 				new RootBeanDefinition(CompositeUriComponentsContributorFactoryBean.class);
@@ -391,7 +391,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			factoryBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			factoryBeanDef.getPropertyValues().add("mediaTypes", getDefaultMediaTypes());
 			String name = CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
-			context.getReaderContext().getRegistry().registerBeanDefinition(name , factoryBeanDef);
+			context.getReaderContext().getRegistry().registerBeanDefinition(name, factoryBeanDef);
 			context.registerComponent(new BeanComponentDefinition(factoryBeanDef, name));
 			beanRef = new RuntimeBeanReference(name);
 		}
