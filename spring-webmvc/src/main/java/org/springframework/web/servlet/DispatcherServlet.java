@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -960,7 +960,7 @@ public class DispatcherServlet extends FrameworkServlet {
 						.collect(Collectors.joining(", "));
 			}
 			else {
-				params = (request.getParameterMap().isEmpty() ? "" :  "masked");
+				params = (request.getParameterMap().isEmpty() ? "" : "masked");
 			}
 
 			String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
@@ -1166,7 +1166,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					logger.trace("Request already resolved to MultipartHttpServletRequest, e.g. by MultipartFilter");
 				}
 			}
-			else if (hasMultipartException(request) ) {
+			else if (hasMultipartException(request)) {
 				logger.debug("Multipart resolution previously failed for current request - " +
 						"skipping re-resolution for undisturbed error rendering");
 			}
@@ -1432,7 +1432,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param attributesSnapshot the snapshot of the request attributes before the include
 	 */
 	@SuppressWarnings("unchecked")
-	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?,?> attributesSnapshot) {
+	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?, ?> attributesSnapshot) {
 		// Need to copy into separate Collection here, to avoid side effects
 		// on the Enumeration when removing attributes.
 		Set<String> attrsToCheck = new HashSet<>();
@@ -1451,7 +1451,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// or removing the attribute, respectively, if appropriate.
 		for (String attrName : attrsToCheck) {
 			Object attrValue = attributesSnapshot.get(attrName);
-			if (attrValue == null){
+			if (attrValue == null) {
 				request.removeAttribute(attrName);
 			}
 			else if (attrValue != request.getAttribute(attrName)) {
