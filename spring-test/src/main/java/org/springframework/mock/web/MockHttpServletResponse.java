@@ -168,11 +168,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
-			StringBuilder sb = new StringBuilder(this.contentType);
-			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.charset) {
-				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
+			String value = this.contentType;
+			if (this.charset && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
+				value = value + ';' + CHARSET_PREFIX + this.characterEncoding;
 			}
-			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, sb.toString(), true);
+			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, value, true);
 		}
 	}
 
