@@ -49,7 +49,7 @@ import org.springframework.util.ClassUtils;
  * @since 1.1.2
  * @see AbstractAutowireCapableBeanFactory
  */
-abstract class AutowireUtils {
+public abstract class AutowireUtils {
 
 	private static final Comparator<Executable> EXECUTABLE_COMPARATOR = (e1, e2) -> {
 		int result = Boolean.compare(Modifier.isPublic(e2.getModifiers()), Modifier.isPublic(e1.getModifiers()));
@@ -64,7 +64,7 @@ abstract class AutowireUtils {
 	 * decreasing number of arguments.
 	 * @param constructors the constructor array to sort
 	 */
-	public static void sortConstructors(Constructor<?>[] constructors) {
+	static void sortConstructors(Constructor<?>[] constructors) {
 		Arrays.sort(constructors, EXECUTABLE_COMPARATOR);
 	}
 
@@ -75,7 +75,7 @@ abstract class AutowireUtils {
 	 * decreasing number of arguments.
 	 * @param factoryMethods the factory method array to sort
 	 */
-	public static void sortFactoryMethods(Method[] factoryMethods) {
+	static void sortFactoryMethods(Method[] factoryMethods) {
 		Arrays.sort(factoryMethods, EXECUTABLE_COMPARATOR);
 	}
 
@@ -85,7 +85,7 @@ abstract class AutowireUtils {
 	 * @param pd the PropertyDescriptor of the bean property
 	 * @return whether the bean property is excluded
 	 */
-	public static boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
+	static boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
 		Method wm = pd.getWriteMethod();
 		if (wm == null) {
 			return false;
@@ -107,7 +107,7 @@ abstract class AutowireUtils {
 	 * @param interfaces the Set of interfaces (Class objects)
 	 * @return whether the setter method is defined by an interface
 	 */
-	public static boolean isSetterDefinedInInterface(PropertyDescriptor pd, Set<Class<?>> interfaces) {
+	static boolean isSetterDefinedInInterface(PropertyDescriptor pd, Set<Class<?>> interfaces) {
 		Method setter = pd.getWriteMethod();
 		if (setter != null) {
 			Class<?> targetClass = setter.getDeclaringClass();
@@ -128,7 +128,7 @@ abstract class AutowireUtils {
 	 * @param requiredType the type to assign the result to
 	 * @return the resolved value
 	 */
-	public static Object resolveAutowiringValue(Object autowiringValue, Class<?> requiredType) {
+	static Object resolveAutowiringValue(Object autowiringValue, Class<?> requiredType) {
 		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
 			ObjectFactory<?> factory = (ObjectFactory<?>) autowiringValue;
 			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
@@ -173,7 +173,7 @@ abstract class AutowireUtils {
 	 * @return the resolved target return type or the standard method return type
 	 * @since 3.2.5
 	 */
-	public static Class<?> resolveReturnTypeForFactoryMethod(
+	static Class<?> resolveReturnTypeForFactoryMethod(
 			Method method, Object[] args, @Nullable ClassLoader classLoader) {
 
 		Assert.notNull(method, "Method must not be null");
