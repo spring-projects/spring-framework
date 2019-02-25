@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,8 +197,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	/**
 	 * Configure the {@code ApplicationContext} associated with the web application,
 	 * if it was initialized with one via
-	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
-	 * WebHttpHandlerBuilder#applicationContext}.
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)}.
 	 * @param applicationContext the context
 	 * @since 5.0.3
 	 */
@@ -232,11 +231,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-
 		if (this.forwardedHeaderTransformer != null) {
 			request = this.forwardedHeaderTransformer.apply(request);
 		}
-
 		ServerWebExchange exchange = createExchange(request, response);
 
 		LogFormatUtils.traceDebug(logger, traceOn ->
@@ -274,7 +271,6 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	private Mono<Void> handleUnresolvedError(ServerWebExchange exchange, Throwable ex) {
-
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 		String logPrefix = exchange.getLogPrefix();
@@ -294,18 +290,19 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 			return Mono.empty();
 		}
 		else {
-			// After the response is committed, propagate errors to the server..
+			// After the response is committed, propagate errors to the server...
 			logger.error(logPrefix + "Error [" + ex + "] for " + formatRequest(request) +
 					", but ServerHttpResponse already committed (" + response.getStatusCode() + ")");
 			return Mono.error(ex);
 		}
 	}
 
-	private boolean isDisconnectedClientError(Throwable ex)  {
+	private boolean isDisconnectedClientError(Throwable ex) {
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
-		message = (message != null ? message.toLowerCase() : "");
-		String className = ex.getClass().getSimpleName();
-		return (message.contains("broken pipe") || DISCONNECTED_CLIENT_EXCEPTIONS.contains(className));
+		if (message != null && message.toLowerCase().contains("broken pipe")) {
+			return true;
+		}
+		return DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName());
 	}
 
 }

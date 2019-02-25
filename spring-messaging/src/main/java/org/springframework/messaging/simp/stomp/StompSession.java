@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.messaging.simp.stomp;
 import org.springframework.lang.Nullable;
 
 /**
- * Represents a STOMP session with operations to send messages, create
- * subscriptions and receive messages on those subscriptions.
+ * Represents a STOMP session with operations to send messages,
+ * create subscriptions and receive messages on those subscriptions.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -63,7 +63,7 @@ public interface StompSession {
 	 * {@link StompHeaders} instead of just a destination. The headers must
 	 * contain a destination and may also have other headers such as
 	 * "content-type" or custom headers for the broker to propagate to
-	 * subscribers, or broker-specific, non-standard headers..
+	 * subscribers, or broker-specific, non-standard headers.
 	 * @param headers the message headers
 	 * @param payload the message payload
 	 * @return a Receiptable for tracking receipts
