@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,8 +179,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
-				this.useTrailingSlashMatch, this.fileExtensions);
+		return new PatternsRequestCondition(result, this.pathHelper, this.pathMatcher,
+				this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions);
 	}
 
 	/**
@@ -201,17 +201,14 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
-
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
-
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		List<String> matches = getMatchingPatterns(lookupPath);
-
-		return matches.isEmpty() ? null :
-			new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher, this.useSuffixPatternMatch,
-					this.useTrailingSlashMatch, this.fileExtensions);
+		return (!matches.isEmpty() ?
+				new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher,
+						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions) : null);
 	}
 
 	/**
@@ -259,7 +256,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		}
 		if (this.useTrailingSlashMatch) {
 			if (!pattern.endsWith("/") && this.pathMatcher.match(pattern + "/", lookupPath)) {
-				return pattern +"/";
+				return pattern + "/";
 			}
 		}
 		return null;

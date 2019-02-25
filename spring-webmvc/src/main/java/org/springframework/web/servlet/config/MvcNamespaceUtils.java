@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,8 @@ public abstract class MvcNamespaceUtils {
 			}
 			parserContext.getRegistry().registerAlias(urlPathHelperRef.getBeanName(), URL_PATH_HELPER_BEAN_NAME);
 		}
-		else if (!parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME)
-				&& !parserContext.getRegistry().containsBeanDefinition(URL_PATH_HELPER_BEAN_NAME)) {
+		else if (!parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME) &&
+				!parserContext.getRegistry().containsBeanDefinition(URL_PATH_HELPER_BEAN_NAME)) {
 			RootBeanDefinition urlPathHelperDef = new RootBeanDefinition(UrlPathHelper.class);
 			urlPathHelperDef.setSource(source);
 			urlPathHelperDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -106,8 +106,8 @@ public abstract class MvcNamespaceUtils {
 			}
 			parserContext.getRegistry().registerAlias(pathMatcherRef.getBeanName(), PATH_MATCHER_BEAN_NAME);
 		}
-		else if (!parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)
-				&& !parserContext.getRegistry().containsBeanDefinition(PATH_MATCHER_BEAN_NAME)) {
+		else if (!parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME) &&
+				!parserContext.getRegistry().containsBeanDefinition(PATH_MATCHER_BEAN_NAME)) {
 			RootBeanDefinition pathMatcherDef = new RootBeanDefinition(AntPathMatcher.class);
 			pathMatcherDef.setSource(source);
 			pathMatcherDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -122,7 +122,7 @@ public abstract class MvcNamespaceUtils {
 	 * name unless already registered.
 	 */
 	private static void registerBeanNameUrlHandlerMapping(ParserContext context, Object source) {
-		if (!context.getRegistry().containsBeanDefinition(BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME)){
+		if (!context.getRegistry().containsBeanDefinition(BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME)) {
 			RootBeanDefinition mappingDef = new RootBeanDefinition(BeanNameUrlHandlerMapping.class);
 			mappingDef.setSource(source);
 			mappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -193,7 +193,7 @@ public abstract class MvcNamespaceUtils {
 	 * unless already registered.
 	 */
 	private static void registerHandlerMappingIntrospector(ParserContext parserContext, Object source) {
-		if (!parserContext.getRegistry().containsBeanDefinition(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME)){
+		if (!parserContext.getRegistry().containsBeanDefinition(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME)) {
 			RootBeanDefinition beanDef = new RootBeanDefinition(HandlerMappingIntrospector.class);
 			beanDef.setSource(source);
 			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

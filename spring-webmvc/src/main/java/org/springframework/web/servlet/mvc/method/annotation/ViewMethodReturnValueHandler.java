@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 		if (returnValue == null) {
 			return;
 		}
-		else if (returnValue instanceof View){
+		else if (returnValue instanceof View) {
 			View view = (View) returnValue;
 			mavContainer.setView(view);
 			if (view instanceof SmartView) {
