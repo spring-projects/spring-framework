@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.Advisor;
@@ -51,6 +50,7 @@ import static org.junit.Assert.*;
  * Integration tests for the @EnableTransactionManagement annotation.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1
  */
 @SuppressWarnings("resource")
@@ -89,13 +89,9 @@ public class EnableTransactionManagementIntegrationTests {
 		assertTxProxying(ctx);
 	}
 
-	@Ignore @Test // TODO SPR-8207
+	@Test
 	public void repositoryIsTxProxy_withNonConventionalTxManagerName_fallsBackToByTypeLookup() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(Config.class, NonConventionalTxManagerNameConfig.class);
-		ctx.refresh();
-
-		assertTxProxying(ctx);
+		assertTxProxying(new AnnotationConfigApplicationContext(Config.class, NonConventionalTxManagerNameConfig.class));
 	}
 
 	@Test
