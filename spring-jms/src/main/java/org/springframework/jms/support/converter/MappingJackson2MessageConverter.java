@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,8 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 
 	private MessageType targetType = MessageType.BYTES;
 
-	private String encoding = DEFAULT_ENCODING;
+	@Nullable
+	private String encoding;
 
 	@Nullable
 	private String encodingPropertyName;
@@ -293,13 +294,21 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 			throws JMSException, IOException {
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
-		OutputStreamWriter writer = new OutputStreamWriter(bos, this.encoding);
-		objectWriter.writeValue(writer, object);
+		if (this.encoding != null) {
+			OutputStreamWriter writer = new OutputStreamWriter(bos, this.encoding);
+			objectWriter.writeValue(writer, object);
+		}
+		else {
+			// Jackson usually defaults to UTF-8 but can also go straight to bytes, e.g. for Smile.
+			// We use a direct byte array argument for the latter case to work as well.
+			objectWriter.writeValue(bos, object);
+		}
 
 		BytesMessage message = session.createBytesMessage();
 		message.writeBytes(bos.toByteArray());
 		if (this.encodingPropertyName != null) {
-			message.setStringProperty(this.encodingPropertyName, this.encoding);
+			message.setStringProperty(this.encodingPropertyName,
+					(this.encoding != null ? this.encoding : DEFAULT_ENCODING));
 		}
 		return message;
 	}
@@ -393,12 +402,18 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 		}
 		byte[] bytes = new byte[(int) message.getBodyLength()];
 		message.readBytes(bytes);
-		try {
-			String body = new String(bytes, encoding);
-			return this.objectMapper.readValue(body, targetJavaType);
+		if (encoding != null) {
+			try {
+				String body = new String(bytes, encoding);
+				return this.objectMapper.readValue(body, targetJavaType);
+			}
+			catch (UnsupportedEncodingException ex) {
+				throw new MessageConversionException("Cannot convert bytes to String", ex);
+			}
 		}
-		catch (UnsupportedEncodingException ex) {
-			throw new MessageConversionException("Cannot convert bytes to String", ex);
+		else {
+			// Jackson internally performs encoding detection, falling back to UTF-8.
+			return this.objectMapper.readValue(bytes, targetJavaType);
 		}
 	}
 

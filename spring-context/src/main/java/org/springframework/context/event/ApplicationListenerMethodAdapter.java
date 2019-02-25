@@ -188,9 +188,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	/**
 	 * Resolve the method arguments to use for the specified {@link ApplicationEvent}.
-	 * <p>These arguments will be used to invoke the method handled by this instance. Can
-	 * return {@code null} to indicate that no suitable arguments could be resolved and
-	 * therefore the method should not be invoked at all for the specified event.
+	 * <p>These arguments will be used to invoke the method handled by this instance.
+	 * Can return {@code null} to indicate that no suitable arguments could be resolved
+	 * and therefore the method should not be invoked at all for the specified event.
 	 */
 	@Nullable
 	protected Object[] resolveArguments(ApplicationEvent event) {
@@ -201,13 +201,15 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (this.method.getParameterCount() == 0) {
 			return new Object[0];
 		}
-		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.toClass()) &&
+		Class<?> declaredEventClass = declaredEventType.toClass();
+		if (!ApplicationEvent.class.isAssignableFrom(declaredEventClass) &&
 				event instanceof PayloadApplicationEvent) {
-			return new Object[] {((PayloadApplicationEvent) event).getPayload()};
+			Object payload = ((PayloadApplicationEvent) event).getPayload();
+			if (declaredEventClass.isInstance(payload)) {
+				return new Object[] {payload};
+			}
 		}
-		else {
-			return new Object[] {event};
-		}
+		return new Object[] {event};
 	}
 
 	protected void handleResult(Object result) {

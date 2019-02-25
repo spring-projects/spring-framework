@@ -82,8 +82,8 @@ public abstract class MvcNamespaceUtils {
 			}
 			parserContext.getRegistry().registerAlias(urlPathHelperRef.getBeanName(), URL_PATH_HELPER_BEAN_NAME);
 		}
-		else if (!parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME)
-				&& !parserContext.getRegistry().containsBeanDefinition(URL_PATH_HELPER_BEAN_NAME)) {
+		else if (!parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME) &&
+				!parserContext.getRegistry().containsBeanDefinition(URL_PATH_HELPER_BEAN_NAME)) {
 			RootBeanDefinition urlPathHelperDef = new RootBeanDefinition(UrlPathHelper.class);
 			urlPathHelperDef.setSource(source);
 			urlPathHelperDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -107,8 +107,8 @@ public abstract class MvcNamespaceUtils {
 			}
 			parserContext.getRegistry().registerAlias(pathMatcherRef.getBeanName(), PATH_MATCHER_BEAN_NAME);
 		}
-		else if (!parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)
-				&& !parserContext.getRegistry().containsBeanDefinition(PATH_MATCHER_BEAN_NAME)) {
+		else if (!parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME) &&
+				!parserContext.getRegistry().containsBeanDefinition(PATH_MATCHER_BEAN_NAME)) {
 			RootBeanDefinition pathMatcherDef = new RootBeanDefinition(AntPathMatcher.class);
 			pathMatcherDef.setSource(source);
 			pathMatcherDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
