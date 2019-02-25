@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,18 @@ import org.springframework.util.ClassUtils;
 /**
  * {@link LoadTimeWeaver} relying on VM {@link Instrumentation}.
  *
- * <p>Start the JVM specifying the Java agent to be used, like as follows:
+ * <p>Start the JVM specifying the Java agent to be used &mdash; for example, as
+ * follows where <code>spring-instrument-{version}.jar</code> is a JAR file
+ * containing the {@link InstrumentationSavingAgent} class shipped with Spring
+ * and where <code>{version}</code> is the release version of the Spring
+ * Framework (e.g., {@code 5.1.5.RELEASE}).
  *
- * <p><code class="code">-javaagent:path/to/org.springframework.instrument.jar</code>
+ * <p><code>-javaagent:path/to/spring-instrument-{version}.jar</code>
  *
- * <p>where {@code org.springframework.instrument.jar} is a JAR file containing
- * the {@link InstrumentationSavingAgent} class, as shipped with Spring.
+ * <p>In Eclipse, for example, add something similar to the following to the
+ * JVM arguments for the Eclipse "Run configuration":
  *
- * <p>In Eclipse, for example, set the "Run configuration"'s JVM args to be of the form:
- *
- * <p><code class="code">-javaagent:${project_loc}/lib/org.springframework.instrument.jar</code>
+ * <p><code>-javaagent:${project_loc}/lib/spring-instrument-{version}.jar</code>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

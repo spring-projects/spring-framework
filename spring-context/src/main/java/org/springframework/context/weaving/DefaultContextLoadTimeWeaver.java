@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,13 @@ import org.springframework.util.Assert;
  * Default {@link LoadTimeWeaver} bean for use in an application context,
  * decorating an automatically detected internal {@code LoadTimeWeaver}.
  *
- * <p>Typically registered for the default bean name
- * "{@code loadTimeWeaver}"; the most convenient way to achieve this is
- * Spring's {@code <context:load-time-weaver>} XML tag.
+ * <p>Typically registered for the default bean name "{@code loadTimeWeaver}";
+ * the most convenient way to achieve this is Spring's
+ * {@code <context:load-time-weaver>} XML tag or {@code @EnableLoadTimeWeaving}
+ * on a {@code @Configuration} class.
  *
  * <p>This class implements a runtime environment check for obtaining the
- * appropriate weaver implementation: As of Spring Framework 5.0, it detects
+ * appropriate weaver implementation. As of Spring Framework 5.0, it detects
  * Oracle WebLogic 10+, GlassFish 4+, Tomcat 8+, WildFly 8+, IBM WebSphere 8.5+,
  * {@link InstrumentationSavingAgent Spring's VM agent}, and any {@link ClassLoader}
  * supported by Spring's {@link ReflectiveLoadTimeWeaver} (such as Liberty's).
@@ -95,7 +96,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 			}
 			catch (IllegalStateException ex) {
 				throw new IllegalStateException(ex.getMessage() + " Specify a custom LoadTimeWeaver or start your " +
-						"Java virtual machine with Spring's agent: -javaagent:org.springframework.instrument.jar");
+						"Java virtual machine with Spring's agent: -javaagent:spring-instrument-{version}.jar");
 			}
 		}
 	}
