@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,13 @@ import org.springframework.lang.Nullable;
  * or through a {@link org.springframework.beans.factory.config.CustomScopeConfigurer} bean.
  *
  * <p>{@code SimpleThreadScope} <em>does not clean up any objects</em> associated with it.
- * As such, it is typically preferable to use
- * {@link org.springframework.web.context.request.RequestScope RequestScope}
- * in web environments.
+ * It is therefore typically preferable to use a request-bound scope implementation such
+ * as {@code org.springframework.web.context.request.RequestScope} in web environments,
+ * implementing the full lifecycle for scoped attributes (including reliable destruction).
  *
- * <p>For an implementation of a thread-based {@code Scope} with support for
- * destruction callbacks, refer to the
- * <a href="http://www.springbyexample.org/examples/custom-thread-scope-module.html">
-*  Spring by Example Custom Thread Scope Module</a>.
+ * <p>For an implementation of a thread-based {@code Scope} with support for destruction
+ * callbacks, refer to
+ * <a href="http://www.springbyexample.org/examples/custom-thread-scope-module.html">Spring by Example</a>.
  *
  * <p>Thanks to Eugene Kuleshov for submitting the original prototype for a thread scope!
  *
