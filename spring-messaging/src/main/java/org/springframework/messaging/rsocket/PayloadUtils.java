@@ -15,9 +15,6 @@
  */
 package org.springframework.messaging.rsocket;
 
-import java.nio.ByteBuffer;
-
-import io.netty.buffer.ByteBuf;
 import io.rsocket.Payload;
 import io.rsocket.util.ByteBufPayload;
 import io.rsocket.util.DefaultPayload;
@@ -44,7 +41,7 @@ abstract class PayloadUtils {
 	 * @param bufferFactory the BufferFactory to use to wrap
 	 * @return the DataBuffer wrapper
 	 */
-	public static DataBuffer asDataBuffer(Payload payload, DataBufferFactory bufferFactory) {
+	public static DataBuffer wrapPayloadData(Payload payload, DataBufferFactory bufferFactory) {
 		if (bufferFactory instanceof NettyDataBufferFactory) {
 			return ((NettyDataBufferFactory) bufferFactory).wrap(payload.retain().sliceData());
 		}
@@ -59,12 +56,16 @@ abstract class PayloadUtils {
 	 * @param data the data part for the payload
 	 * @return the created Payload
 	 */
-	public static Payload asPayload(DataBuffer metadata, DataBuffer data) {
+	public static Payload createPayload(DataBuffer metadata, DataBuffer data) {
 		if (metadata instanceof NettyDataBuffer && data instanceof NettyDataBuffer) {
-			return ByteBufPayload.create(getByteBuf(data), getByteBuf(metadata));
+			return ByteBufPayload.create(
+					((NettyDataBuffer) data).getNativeBuffer(),
+					((NettyDataBuffer) metadata).getNativeBuffer());
 		}
 		else if (metadata instanceof DefaultDataBuffer && data instanceof DefaultDataBuffer) {
-			return DefaultPayload.create(getByteBuffer(data), getByteBuffer(metadata));
+			return DefaultPayload.create(
+					((DefaultDataBuffer) data).getNativeBuffer(),
+					((DefaultDataBuffer) metadata).getNativeBuffer());
 		}
 		else {
 			return DefaultPayload.create(data.asByteBuffer(), metadata.asByteBuffer());
@@ -76,24 +77,16 @@ abstract class PayloadUtils {
 	 * @param data the data part for the payload
 	 * @return the created Payload
 	 */
-	public static Payload asPayload(DataBuffer data) {
+	public static Payload createPayload(DataBuffer data) {
 		if (data instanceof NettyDataBuffer) {
-			return ByteBufPayload.create(getByteBuf(data));
+			return ByteBufPayload.create(((NettyDataBuffer) data).getNativeBuffer());
 		}
 		else if (data instanceof DefaultDataBuffer) {
-			return DefaultPayload.create(getByteBuffer(data));
+			return DefaultPayload.create(((DefaultDataBuffer) data).getNativeBuffer());
 		}
 		else {
 			return DefaultPayload.create(data.asByteBuffer());
 		}
 	}
 
-	private static ByteBuf getByteBuf(DataBuffer dataBuffer) {
-		return ((NettyDataBuffer) dataBuffer).getNativeBuffer();
-	}
-
-	private static
-	ByteBuffer getByteBuffer(DataBuffer dataBuffer) {
-		return ((DefaultDataBuffer) dataBuffer).getNativeBuffer();
-	}
 }

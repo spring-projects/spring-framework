@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 
 import io.rsocket.Closeable;
-import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
 import io.rsocket.transport.netty.client.TcpClientTransport;
@@ -140,13 +139,22 @@ public class RSocketServerToClientIntegrationTests {
 		volatile MonoProcessor<Void> result;
 
 
+		public void reset() {
+			this.result = MonoProcessor.create();
+		}
+
+		public void await(Duration duration) {
+			this.result.block(duration);
+		}
+
+
 		@MessageMapping("connect.echo")
 		void echo(RSocketRequester requester) {
 			runTest(() -> {
-				Flux<String> result = Flux.range(1, 3).concatMap(i ->
+				Flux<String> flux = Flux.range(1, 3).concatMap(i ->
 						requester.route("echo").data("Hello " + i).retrieveMono(String.class));
 
-				StepVerifier.create(result)
+				StepVerifier.create(flux)
 						.expectNext("Hello 1")
 						.expectNext("Hello 2")
 						.expectNext("Hello 3")
@@ -157,10 +165,10 @@ public class RSocketServerToClientIntegrationTests {
 		@MessageMapping("connect.echo-async")
 		void echoAsync(RSocketRequester requester) {
 			runTest(() -> {
-				Flux<String> result = Flux.range(1, 3).concatMap(i ->
+				Flux<String> flux = Flux.range(1, 3).concatMap(i ->
 						requester.route("echo-async").data("Hello " + i).retrieveMono(String.class));
 
-				StepVerifier.create(result)
+				StepVerifier.create(flux)
 						.expectNext("Hello 1 async")
 						.expectNext("Hello 2 async")
 						.expectNext("Hello 3 async")
@@ -171,9 +179,9 @@ public class RSocketServerToClientIntegrationTests {
 		@MessageMapping("connect.echo-stream")
 		void echoStream(RSocketRequester requester) {
 			runTest(() -> {
-				Flux<String> result = requester.route("echo-stream").data("Hello").retrieveFlux(String.class);
+				Flux<String> flux = requester.route("echo-stream").data("Hello").retrieveFlux(String.class);
 
-				StepVerifier.create(result)
+				StepVerifier.create(flux)
 						.expectNext("Hello 0")
 						.expectNextCount(5)
 						.expectNext("Hello 6")
@@ -186,11 +194,11 @@ public class RSocketServerToClientIntegrationTests {
 		@MessageMapping("connect.echo-channel")
 		void echoChannel(RSocketRequester requester) {
 			runTest(() -> {
-				Flux<String> result = requester.route("echo-channel")
+				Flux<String> flux = requester.route("echo-channel")
 						.data(Flux.range(1, 10).map(i -> "Hello " + i), String.class)
 						.retrieveFlux(String.class);
 
-				StepVerifier.create(result)
+				StepVerifier.create(flux)
 						.expectNext("Hello 1 async")
 						.expectNextCount(7)
 						.expectNext("Hello 9 async")
@@ -206,19 +214,6 @@ public class RSocketServerToClientIntegrationTests {
 					.doOnSuccess(o -> result.onComplete())
 					.subscribeOn(Schedulers.elastic())
 					.subscribe();
-		}
-
-		private static Payload payload(String destination, String data) {
-			return DefaultPayload.create(data, destination);
-		}
-
-
-		public void reset() {
-			this.result = MonoProcessor.create();
-		}
-
-		public void await(Duration duration) {
-			this.result.block(duration);
 		}
 	}
 

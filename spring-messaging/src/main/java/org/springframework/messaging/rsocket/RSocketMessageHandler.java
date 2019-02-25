@@ -21,13 +21,10 @@ import java.util.List;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.lang.Nullable;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.ReactiveSubscribableChannel;
 import org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * RSocket-specific extension of {@link MessageMappingMessageHandler}.
@@ -122,16 +119,6 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		handlers.add(new RSocketPayloadReturnValueHandler(this.encoders, getReactiveAdapterRegistry()));
 		handlers.addAll(getReturnValueHandlerConfigurer().getCustomHandlers());
 		return handlers;
-	}
-
-
-	@Override
-	protected void handleNoMatch(@Nullable String destination, Message<?> message) {
-		// Ignore empty destination, probably the ConnectionSetupPayload
-		if (!StringUtils.isEmpty(destination)) {
-			super.handleNoMatch(destination, message);
-			throw new MessageDeliveryException("No handler for '" + destination + "'");
-		}
 	}
 
 }

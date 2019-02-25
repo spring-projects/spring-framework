@@ -63,7 +63,7 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 		Assert.isInstanceOf(MonoProcessor.class, headerValue, "Expected MonoProcessor");
 
 		MonoProcessor<Flux<Payload>> monoProcessor = (MonoProcessor<Flux<Payload>>) headerValue;
-		monoProcessor.onNext(encodedContent.map(PayloadUtils::asPayload));
+		monoProcessor.onNext(encodedContent.map(PayloadUtils::createPayload));
 		monoProcessor.onComplete();
 
 		return Mono.empty();

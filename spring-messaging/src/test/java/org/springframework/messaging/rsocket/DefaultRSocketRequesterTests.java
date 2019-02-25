@@ -199,7 +199,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	private Payload toPayload(String value) {
-		return PayloadUtils.asPayload(bufferFactory.wrap(value.getBytes(StandardCharsets.UTF_8)));
+		return PayloadUtils.createPayload(bufferFactory.wrap(value.getBytes(StandardCharsets.UTF_8)));
 	}
 
 

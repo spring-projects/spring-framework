@@ -28,7 +28,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.ReactiveMessageChannel;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
 
 /**
  * RSocket acceptor for
@@ -79,10 +78,9 @@ public final class MessagingAcceptor implements SocketAcceptor, Function<RSocket
 
 
 	/**
-	 * Configure the default content type for data payloads. For server
-	 * acceptors this is available from the {@link ConnectionSetupPayload} but
-	 * for client acceptors it's not and must be provided here.
-	 * <p>By default this is not set.
+	 * Configure the default content type to use for data payloads.
+	 * <p>By default this is not set. However a server acceptor will use the
+	 * content type from the {@link ConnectionSetupPayload}.
 	 * @param defaultDataMimeType the MimeType to use
 	 */
 	public void setDefaultDataMimeType(@Nullable MimeType defaultDataMimeType) {
@@ -92,21 +90,18 @@ public final class MessagingAcceptor implements SocketAcceptor, Function<RSocket
 
 	@Override
 	public Mono<RSocket> accept(ConnectionSetupPayload setupPayload, RSocket sendingRSocket) {
-
-		MimeType mimeType = setupPayload.dataMimeType() != null ?
-				MimeTypeUtils.parseMimeType(setupPayload.dataMimeType()) : this.defaultDataMimeType;
-
-		MessagingRSocket rsocket = createRSocket(sendingRSocket, mimeType);
-		return rsocket.afterConnectionEstablished(setupPayload).then(Mono.just(rsocket));
+		MessagingRSocket rsocket = createRSocket(sendingRSocket);
+		rsocket.handleConnectionSetupPayload(setupPayload).subscribe();
+		return Mono.just(rsocket);
 	}
 
 	@Override
 	public RSocket apply(RSocket sendingRSocket) {
-		return createRSocket(sendingRSocket, this.defaultDataMimeType);
+		return createRSocket(sendingRSocket);
 	}
 
-	private MessagingRSocket createRSocket(RSocket sendingRSocket, @Nullable MimeType dataMimeType) {
-		return new MessagingRSocket(this.messageChannel, sendingRSocket, dataMimeType, this.rsocketStrategies);
+	private MessagingRSocket createRSocket(RSocket rsocket) {
+		return new MessagingRSocket(this.messageChannel, rsocket, this.defaultDataMimeType, this.rsocketStrategies);
 	}
 
 }

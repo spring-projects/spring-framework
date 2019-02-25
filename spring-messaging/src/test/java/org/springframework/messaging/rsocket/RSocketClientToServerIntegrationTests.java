@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.ReactiveMessageChannel;
 import org.springframework.messaging.ReactiveSubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -167,6 +168,12 @@ public class RSocketClientToServerIntegrationTests {
 				.expectNext("Hello 9 async")
 				.expectNext("Hello 10 async")
 				.verifyComplete();
+	}
+
+	@Test
+	public void noMatchingRoute() {
+		Mono<String> result = requester.route("invalid").data("anything").retrieveMono(String.class);
+		StepVerifier.create(result).verifyErrorMessage("RSocket request not handled");
 	}
 
 

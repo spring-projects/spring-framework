@@ -149,9 +149,14 @@ final class DefaultRSocketRequester implements RSocketRequester {
 					.concatMap(value -> encodeValue(value, dataType, encoder))
 					.switchOnFirst((signal, inner) -> {
 						DataBuffer data = signal.get();
-						return data != null ?
-								Flux.concat(Mono.just(firstPayload(data)), inner.skip(1).map(PayloadUtils::asPayload)) :
-								inner.map(PayloadUtils::asPayload);
+						if (data != null) {
+							return Flux.concat(
+									Mono.just(firstPayload(data)),
+									inner.skip(1).map(PayloadUtils::createPayload));
+						}
+						else {
+							return inner.map(PayloadUtils::createPayload);
+						}
 					})
 					.switchIfEmpty(emptyPayload());
 			return new DefaultResponseSpec(payloadFlux);
@@ -167,7 +172,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		private Payload firstPayload(DataBuffer data) {
-			return PayloadUtils.asPayload(getMetadata(), data);
+			return PayloadUtils.createPayload(getMetadata(), data);
 		}
 
 		private Mono<Payload> emptyPayload() {
@@ -239,7 +244,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
 			return (Mono<T>) decoder.decodeToMono(
-					payloadMono.map(this::asDataBuffer), elementType, dataMimeType, EMPTY_HINTS);
+					payloadMono.map(this::wrapPayloadData), elementType, dataMimeType, EMPTY_HINTS);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -255,12 +260,12 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
 
-			return payloadFlux.map(this::asDataBuffer).concatMap(dataBuffer ->
+			return payloadFlux.map(this::wrapPayloadData).concatMap(dataBuffer ->
 					(Mono<T>) decoder.decodeToMono(Mono.just(dataBuffer), elementType, dataMimeType, EMPTY_HINTS));
 		}
 
-		private DataBuffer asDataBuffer(Payload payload) {
-			return PayloadUtils.asDataBuffer(payload, strategies.dataBufferFactory());
+		private DataBuffer wrapPayloadData(Payload payload) {
+			return PayloadUtils.wrapPayloadData(payload, strategies.dataBufferFactory());
 		}
 	}
 

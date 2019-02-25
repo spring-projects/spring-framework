@@ -7,7 +7,7 @@ dependencyManagement {
 	}
 }
 
-def rsocketVersion = "0.11.15"
+def rsocketVersion = "0.11.17"
 
 dependencies {
 	compile(project(":spring-beans"))
