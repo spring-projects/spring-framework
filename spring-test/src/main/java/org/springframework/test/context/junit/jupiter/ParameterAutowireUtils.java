@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -63,20 +62,19 @@ abstract class ParameterAutowireUtils {
 
 
 	/**
-	 * Determine if the supplied {@link Parameter} can potentially be
-	 * autowired from an {@link ApplicationContext}.
-	 * <p>Returns {@code true} if the supplied parameter is of type
-	 * {@link ApplicationContext} (or a sub-type thereof) or is annotated or
+	 * Determine if the supplied {@link Parameter} can <em>potentially</em> be
+	 * autowired from an {@link AutowireCapableBeanFactory}.
+	 * <p>Returns {@code true} if the supplied parameter is annotated or
 	 * meta-annotated with {@link Autowired @Autowired},
 	 * {@link Qualifier @Qualifier}, or {@link Value @Value}.
+	 * <p>Note that {@link #resolveDependency} may still be able to resolve the
+	 * dependency for the supplied parameter even if this method returns {@code false}.
 	 * @param parameter the parameter whose dependency should be autowired
-	 * @param parameterIndex the index of the parameter
+	 * @param parameterIndex the index of the parameter in the constructor or method
+	 * that declares the parameter
 	 * @see #resolveDependency
 	 */
 	static boolean isAutowirable(Parameter parameter, int parameterIndex) {
-		if (ApplicationContext.class.isAssignableFrom(parameter.getType())) {
-			return true;
-		}
 		AnnotatedElement annotatedParameter = getEffectiveAnnotatedParameter(parameter, parameterIndex);
 		return (AnnotatedElementUtils.hasAnnotation(annotatedParameter, Autowired.class) ||
 				AnnotatedElementUtils.hasAnnotation(annotatedParameter, Qualifier.class) ||
@@ -85,34 +83,35 @@ abstract class ParameterAutowireUtils {
 
 	/**
 	 * Resolve the dependency for the supplied {@link Parameter} from the
-	 * supplied {@link ApplicationContext}.
+	 * supplied {@link AutowireCapableBeanFactory}.
 	 * <p>Provides comprehensive autowiring support for individual method parameters
 	 * on par with Spring's dependency injection facilities for autowired fields and
 	 * methods, including support for {@link Autowired @Autowired},
 	 * {@link Qualifier @Qualifier}, and {@link Value @Value} with support for property
 	 * placeholders and SpEL expressions in {@code @Value} declarations.
-	 * <p>The dependency is required unless the parameter is annotated with
-	 * {@link Autowired @Autowired} with the {@link Autowired#required required}
+	 * <p>The dependency is required unless the parameter is annotated or meta-annotated
+	 * with {@link Autowired @Autowired} with the {@link Autowired#required required}
 	 * flag set to {@code false}.
 	 * <p>If an explicit <em>qualifier</em> is not declared, the name of the parameter
 	 * will be used as the qualifier for resolving ambiguities.
 	 * @param parameter the parameter whose dependency should be resolved
-	 * @param parameterIndex the index of the parameter
+	 * @param parameterIndex the index of the parameter in the constructor or method
+	 * that declares the parameter
 	 * @param containingClass the concrete class that contains the parameter; this may
 	 * differ from the class that declares the parameter in that it may be a subclass
 	 * thereof, potentially substituting type variables
-	 * @param applicationContext the application context from which to resolve the
-	 * dependency
+	 * @param beanFactory the {@code AutowireCapableBeanFactory} from which to resolve
+	 * the dependency
 	 * @return the resolved object, or {@code null} if none found
 	 * @throws BeansException if dependency resolution failed
 	 * @see #isAutowirable
 	 * @see Autowired#required
-	 * @see SynthesizingMethodParameter#forParameter(Parameter)
+	 * @see SynthesizingMethodParameter#forExecutable(Executable, int)
 	 * @see AutowireCapableBeanFactory#resolveDependency(DependencyDescriptor, String)
 	 */
 	@Nullable
 	static Object resolveDependency(
-			Parameter parameter, int parameterIndex, Class<?> containingClass, ApplicationContext applicationContext) {
+			Parameter parameter, int parameterIndex, Class<?> containingClass, AutowireCapableBeanFactory beanFactory) {
 
 		AnnotatedElement annotatedParameter = getEffectiveAnnotatedParameter(parameter, parameterIndex);
 		Autowired autowired = AnnotatedElementUtils.findMergedAnnotation(annotatedParameter, Autowired.class);
@@ -122,7 +121,7 @@ abstract class ParameterAutowireUtils {
 				parameter.getDeclaringExecutable(), parameterIndex);
 		DependencyDescriptor descriptor = new DependencyDescriptor(methodParameter, required);
 		descriptor.setContainingClass(containingClass);
-		return applicationContext.getAutowireCapableBeanFactory().resolveDependency(descriptor, null);
+		return beanFactory.resolveDependency(descriptor, null);
 	}
 
 	/**

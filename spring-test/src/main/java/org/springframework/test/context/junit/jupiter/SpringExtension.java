@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,8 +143,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * Determine if the value for the {@link Parameter} in the supplied {@link ParameterContext}
 	 * should be autowired from the test's {@link ApplicationContext}.
 	 * <p>Returns {@code true} if the parameter is declared in a {@link Constructor}
-	 * that is annotated with {@link Autowired @Autowired} and otherwise delegates to
-	 * {@link ParameterAutowireUtils#isAutowirable}.
+	 * that is annotated with {@link Autowired @Autowired} or if the parameter is
+	 * of type {@link ApplicationContext} (or a sub-type thereof) and otherwise delegates
+	 * to {@link ParameterAutowireUtils#isAutowirable}.
 	 * <p><strong>WARNING</strong>: If the parameter is declared in a {@code Constructor}
 	 * that is annotated with {@code @Autowired}, Spring will assume the responsibility
 	 * for resolving all parameters in the constructor. Consequently, no other registered
@@ -159,6 +160,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Executable executable = parameter.getDeclaringExecutable();
 		return (executable instanceof Constructor &&
 				AnnotatedElementUtils.hasAnnotation(executable, Autowired.class)) ||
+				ApplicationContext.class.isAssignableFrom(parameter.getType()) ||
 				ParameterAutowireUtils.isAutowirable(parameter, index);
 	}
 
@@ -176,7 +178,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		int index = parameterContext.getIndex();
 		Class<?> testClass = extensionContext.getRequiredTestClass();
 		ApplicationContext applicationContext = getApplicationContext(extensionContext);
-		return ParameterAutowireUtils.resolveDependency(parameter, index, testClass, applicationContext);
+		return ParameterAutowireUtils.resolveDependency(parameter, index, testClass,
+			applicationContext.getAutowireCapableBeanFactory());
 	}
 
 
