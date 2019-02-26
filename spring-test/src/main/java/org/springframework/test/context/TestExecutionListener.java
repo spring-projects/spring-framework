@@ -56,6 +56,8 @@ package org.springframework.test.context;
  * TransactionalTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
  * SqlScriptsTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.event.EventPublishingTestExecutionListener
+ * EventPublishingTestExecutionListener} (not registered by default)</li>
  * </ul>
  *
  * @author Sam Brannen
