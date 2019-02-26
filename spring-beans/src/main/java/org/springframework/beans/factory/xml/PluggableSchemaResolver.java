@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,15 @@ import org.springframework.util.CollectionUtils;
  * {@link EntityResolver} implementation that attempts to resolve schema URLs into
  * local {@link ClassPathResource classpath resources} using a set of mappings files.
  *
- * <p>By default, this class will look for mapping files in the classpath using the pattern:
- * {@code META-INF/spring.schemas} allowing for multiple files to exist on the
- * classpath at any one time.
+ * <p>By default, this class will look for mapping files in the classpath using the
+ * pattern: {@code META-INF/spring.schemas} allowing for multiple files to exist on
+ * the classpath at any one time.
  *
- * The format of {@code META-INF/spring.schemas} is a properties
- * file where each line should be of the form {@code systemId=schema-location}
- * where {@code schema-location} should also be a schema file in the classpath.
- * Since systemId is commonly a URL, one must be careful to escape any ':' characters
- * which are treated as delimiters in properties files.
+ * <p>The format of {@code META-INF/spring.schemas} is a properties file where each line
+ * should be of the form {@code systemId=schema-location} where {@code schema-location}
+ * should also be a schema file in the classpath. Since systemId is commonly a URL,
+ * one must be careful to escape any ':' characters which are treated as delimiters
+ * in properties files.
  *
  * <p>The pattern for the mapping files can be overidden using the
  * {@link #PluggableSchemaResolver(ClassLoader, String)} constructor
@@ -103,6 +103,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 		this.schemaMappingsLocation = schemaMappingsLocation;
 	}
 
+
 	@Override
 	@Nullable
 	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws IOException {
@@ -131,6 +132,8 @@ public class PluggableSchemaResolver implements EntityResolver {
 				}
 			}
 		}
+
+		// Fall back to the parser's default behavior.
 		return null;
 	}
 
@@ -169,7 +172,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 	@Override
 	public String toString() {
-		return "EntityResolver using mappings " + getSchemaMappings();
+		return "EntityResolver using schema mappings " + getSchemaMappings();
 	}
 
 }
