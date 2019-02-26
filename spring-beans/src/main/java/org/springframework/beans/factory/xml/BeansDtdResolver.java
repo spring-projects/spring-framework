@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 /**
- * EntityResolver implementation for the Spring beans DTD,
+ * {@link EntityResolver} implementation for the Spring beans DTD,
  * to load the DTD from the Spring class path (or JAR file).
  *
  * <p>Fetches "spring-beans-2.0.dtd" from the class path resource
@@ -57,6 +57,7 @@ public class BeansDtdResolver implements EntityResolver {
 			logger.trace("Trying to resolve XML entity with public ID [" + publicId +
 					"] and system ID [" + systemId + "]");
 		}
+
 		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
 			int lastPathSeparator = systemId.lastIndexOf('/');
 			int dtdNameStart = systemId.indexOf(DTD_NAME, lastPathSeparator);
@@ -80,11 +81,10 @@ public class BeansDtdResolver implements EntityResolver {
 						logger.debug("Could not resolve beans DTD [" + systemId + "]: not found in classpath", ex);
 					}
 				}
-
 			}
 		}
 
-		// Use the default behavior -> download from website or wherever.
+		// Fall back to the parser's default behavior.
 		return null;
 	}
 
