@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.util.Assert;
  * Generic auto proxy creator that builds AOP proxies for specific beans
  * based on detected Advisors for each bean.
  *
- * <p>Subclasses must implement the abstract {@link #findCandidateAdvisors()}
- * method to return a list of Advisors applying to any object. Subclasses can
+ * <p>Subclasses may override the {@link #findCandidateAdvisors()} method to
+ * return a custom list of Advisors applying to any object. Subclasses can
  * also override the inherited {@link #shouldSkip} method to exclude certain
  * objects from auto-proxying.
  *
@@ -160,7 +160,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * <p>The default implementation is empty.
 	 * <p>Typically used to add Advisors that expose contextual information
 	 * required by some of the later advisors.
-	 * @param candidateAdvisors Advisors that have already been identified as
+	 * @param candidateAdvisors the Advisors that have already been identified as
 	 * applying to a given bean
 	 */
 	protected void extendAdvisors(List<Advisor> candidateAdvisors) {
