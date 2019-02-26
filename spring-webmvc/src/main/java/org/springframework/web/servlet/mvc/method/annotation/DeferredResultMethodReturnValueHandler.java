@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
@@ -93,6 +94,9 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 		DeferredResult<Object> result = new DeferredResult<>();
 		future.handle((BiFunction<Object, Throwable, Object>) (value, ex) -> {
 			if (ex != null) {
+				if (ex instanceof CompletionException) {
+					ex = ex.getCause();
+				}
 				result.setErrorResult(ex);
 			}
 			else {
