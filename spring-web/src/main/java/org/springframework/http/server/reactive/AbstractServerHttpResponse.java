@@ -225,8 +225,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			this.commitActions.add(writeAction);
 		}
 		Flux<Void> commit = Flux.empty();
-		for (Supplier<? extends Mono<Void>> actions : this.commitActions) {
-			commit = commit.concatWith(actions.get());
+		for (Supplier<? extends Mono<Void>> action : this.commitActions) {
+			commit = commit.concatWith(action.get());
 		}
 		return commit.then();
 	}
