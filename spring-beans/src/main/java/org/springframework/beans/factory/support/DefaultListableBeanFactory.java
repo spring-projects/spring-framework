@@ -574,7 +574,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	@Override
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
-			throws NoSuchBeanDefinitionException{
+			throws NoSuchBeanDefinitionException {
 
 		A ann = null;
 		Class<?> beanType = getType(beanName);

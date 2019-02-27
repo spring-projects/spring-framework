@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigu
 	 */
 	protected String resolvePlaceholder(String path, String key, Preferences preferences) {
 		if (path != null) {
-			 // Do not create the node if it does not exist...
+			// Do not create the node if it does not exist...
 			try {
 				if (preferences.nodeExists(path)) {
 					return preferences.node(path).get(key, null);
