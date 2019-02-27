@@ -115,7 +115,7 @@ class TypeHelper {
 			return this.env.getElementUtils().getAllAnnotationMirrors(e);
 		}
 		catch (Exception ex) {
-			// This may fail if one of the annotation is not available
+			// This may fail if one of the annotations is not available.
 			return Collections.emptyList();
 		}
 	}
