@@ -111,83 +111,73 @@ public class RSocketClientToServerIntegrationTests {
 
 	@Test
 	public void echo() {
-
 		Flux<String> result = Flux.range(1, 3).concatMap(i ->
 				requester.route("echo").data("Hello " + i).retrieveMono(String.class));
 
 		StepVerifier.create(result)
-				.expectNext("Hello 1")
-				.expectNext("Hello 2")
-				.expectNext("Hello 3")
+				.expectNext("Hello 1").expectNext("Hello 2").expectNext("Hello 3")
 				.verifyComplete();
 	}
 
 	@Test
 	public void echoAsync() {
-
 		Flux<String> result = Flux.range(1, 3).concatMap(i ->
 				requester.route("echo-async").data("Hello " + i).retrieveMono(String.class));
 
 		StepVerifier.create(result)
-				.expectNext("Hello 1 async")
-				.expectNext("Hello 2 async")
-				.expectNext("Hello 3 async")
+				.expectNext("Hello 1 async").expectNext("Hello 2 async").expectNext("Hello 3 async")
 				.verifyComplete();
 	}
 
 	@Test
 	public void echoStream() {
-
 		Flux<String> result = requester.route("echo-stream").data("Hello").retrieveFlux(String.class);
 
 		StepVerifier.create(result)
-				.expectNext("Hello 0")
-				.expectNextCount(5)
-				.expectNext("Hello 6")
-				.expectNext("Hello 7")
+				.expectNext("Hello 0").expectNextCount(6).expectNext("Hello 7")
 				.thenCancel()
 				.verify();
 	}
 
 	@Test
 	public void echoChannel() {
-
 		Flux<String> result = requester.route("echo-channel")
 				.data(Flux.range(1, 10).map(i -> "Hello " + i), String.class)
 				.retrieveFlux(String.class);
 
 		StepVerifier.create(result)
-				.expectNext("Hello 1 async")
-				.expectNextCount(7)
-				.expectNext("Hello 9 async")
-				.expectNext("Hello 10 async")
+				.expectNext("Hello 1 async").expectNextCount(8).expectNext("Hello 10 async")
 				.verifyComplete();
+	}
+
+	@Test
+	public void voidReturnValue() {
+		Flux<String> result = requester.route("void-return-value").data("Hello").retrieveFlux(String.class);
+		StepVerifier.create(result).verifyComplete();
+	}
+
+	@Test
+	public void voidReturnValueFromExceptionHandler() {
+		Flux<String> result = requester.route("void-return-value").data("bad").retrieveFlux(String.class);
+		StepVerifier.create(result).verifyComplete();
 	}
 
 	@Test
 	public void handleWithThrownException() {
-
 		Mono<String> result = requester.route("thrown-exception").data("a").retrieveMono(String.class);
-
-		StepVerifier.create(result)
-				.expectNext("Invalid input error handled")
-				.verifyComplete();
+		StepVerifier.create(result).expectNext("Invalid input error handled").verifyComplete();
 	}
 
 	@Test
 	public void handleWithErrorSignal() {
-
 		Mono<String> result = requester.route("error-signal").data("a").retrieveMono(String.class);
-
-		StepVerifier.create(result)
-				.expectNext("Invalid input error handled")
-				.verifyComplete();
+		StepVerifier.create(result).expectNext("Invalid input error handled").verifyComplete();
 	}
 
 	@Test
 	public void noMatchingRoute() {
 		Mono<String> result = requester.route("invalid").data("anything").retrieveMono(String.class);
-		StepVerifier.create(result).verifyErrorMessage("RSocket request not handled");
+		StepVerifier.create(result).verifyErrorMessage("No handler for destination 'invalid'");
 	}
 
 
@@ -232,9 +222,21 @@ public class RSocketClientToServerIntegrationTests {
 			return Mono.error(new IllegalArgumentException("Invalid input error"));
 		}
 
+		@MessageMapping("void-return-value")
+		Mono<Void> voidReturnValue(String payload) {
+			return !payload.equals("bad") ?
+					Mono.delay(Duration.ofMillis(10)).then(Mono.empty()) :
+					Mono.error(new IllegalStateException("bad"));
+		}
+
 		@MessageExceptionHandler
 		Mono<String> handleException(IllegalArgumentException ex) {
 			return Mono.delay(Duration.ofMillis(10)).map(aLong -> ex.getMessage() + " handled");
+		}
+
+		@MessageExceptionHandler
+		Mono<Void> handleExceptionWithVoidReturnValue(IllegalStateException ex) {
+			return Mono.delay(Duration.ofMillis(10)).then(Mono.empty());
 		}
 	}
 

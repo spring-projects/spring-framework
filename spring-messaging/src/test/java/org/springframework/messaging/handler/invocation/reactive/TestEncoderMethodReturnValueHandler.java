@@ -60,4 +60,10 @@ public class TestEncoderMethodReturnValueHandler extends AbstractEncoderMethodRe
 		this.encodedContent = encodedContent.cache();
 		return this.encodedContent.then();
 	}
+
+	@Override
+	protected Mono<Void> handleNoContent(MethodParameter returnType, Message<?> message) {
+		this.encodedContent = Flux.empty();
+		return Mono.empty();
+	}
 }

@@ -182,6 +182,7 @@ class InvocableHelper {
 			logger.debug("Invoking " + invocable.getShortLogMessage());
 		}
 		return invocable.invoke(message)
+				.switchIfEmpty(Mono.defer(() -> handleReturnValue(null, invocable, message)))
 				.flatMap(returnValue -> handleReturnValue(returnValue, invocable, message))
 				.onErrorResume(ex -> {
 					InvocableHandlerMethod exHandler = initExceptionHandlerMethod(handlerMethod, ex);
@@ -192,6 +193,7 @@ class InvocableHelper {
 						logger.debug("Invoking " + exHandler.getShortLogMessage());
 					}
 					return exHandler.invoke(message, ex)
+							.switchIfEmpty(Mono.defer(() -> handleReturnValue(null, exHandler, message)))
 							.flatMap(returnValue -> handleReturnValue(returnValue, exHandler, message));
 				});
 	}

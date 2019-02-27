@@ -32,7 +32,6 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
@@ -123,6 +122,7 @@ class MessagingRSocket extends AbstractRSocket {
 	private Mono<Void> handle(Payload payload) {
 		Message<?> message = MessageBuilder.createMessage(
 				Mono.fromCallable(() -> wrapPayloadData(payload)), createHeaders(payload, null));
+
 		return this.handler.apply(message);
 	}
 
@@ -131,10 +131,11 @@ class MessagingRSocket extends AbstractRSocket {
 		Message<?> message = MessageBuilder.createMessage(
 				payloads.map(this::wrapPayloadData).doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release),
 				createHeaders(firstPayload, replyMono));
+
 		return this.handler.apply(message)
 				.thenMany(Flux.defer(() -> replyMono.isTerminated() ?
 						replyMono.flatMapMany(Function.identity()) :
-						Mono.error(new MessageDeliveryException("RSocket request not handled"))));
+						Mono.error(new IllegalStateException("Something went wrong: reply Mono not set"))));
 	}
 
 	private MessageHeaders createHeaders(Payload payload, @Nullable MonoProcessor<?> replyMono) {

@@ -26,6 +26,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.AbstractEncoderMethodReturnValueHandler;
 import org.springframework.util.Assert;
@@ -58,15 +59,28 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 	protected Mono<Void> handleEncodedContent(
 			Flux<DataBuffer> encodedContent, MethodParameter returnType, Message<?> message) {
 
-		Object headerValue = message.getHeaders().get(RESPONSE_HEADER);
-		Assert.notNull(headerValue, "Missing '" + RESPONSE_HEADER + "'");
-		Assert.isInstanceOf(MonoProcessor.class, headerValue, "Expected MonoProcessor");
-
-		MonoProcessor<Flux<Payload>> monoProcessor = (MonoProcessor<Flux<Payload>>) headerValue;
-		monoProcessor.onNext(encodedContent.map(PayloadUtils::createPayload));
-		monoProcessor.onComplete();
-
+		MonoProcessor<Flux<Payload>> replyMono = getReplyMono(message);
+		Assert.notNull(replyMono, "Missing '" + RESPONSE_HEADER + "'");
+		replyMono.onNext(encodedContent.map(PayloadUtils::createPayload));
+		replyMono.onComplete();
 		return Mono.empty();
+	}
+
+	@Override
+	protected Mono<Void> handleNoContent(MethodParameter returnType, Message<?> message) {
+		MonoProcessor<Flux<Payload>> replyMono = getReplyMono(message);
+		if (replyMono != null) {
+			replyMono.onComplete();
+		}
+		return Mono.empty();
+	}
+
+	@Nullable
+	@SuppressWarnings("unchecked")
+	private MonoProcessor<Flux<Payload>> getReplyMono(Message<?> message) {
+		Object headerValue = message.getHeaders().get(RESPONSE_HEADER);
+		Assert.state(headerValue == null || headerValue instanceof MonoProcessor, "Expected MonoProcessor");
+		return (MonoProcessor<Flux<Payload>>) headerValue;
 	}
 
 }

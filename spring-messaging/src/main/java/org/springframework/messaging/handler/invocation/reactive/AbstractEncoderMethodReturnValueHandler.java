@@ -104,6 +104,10 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	public Mono<Void> handleReturnValue(
 			@Nullable Object returnValue, MethodParameter returnType, Message<?> message) {
 
+		if (returnValue == null) {
+			return handleNoContent(returnType, message);
+		}
+
 		DataBufferFactory bufferFactory = (DataBufferFactory) message.getHeaders()
 				.getOrDefault(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, this.defaultBufferFactory);
 
@@ -201,5 +205,14 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	 */
 	protected abstract Mono<Void> handleEncodedContent(
 			Flux<DataBuffer> encodedContent, MethodParameter returnType, Message<?> message);
+
+	/**
+	 * Invoked for a {@code null} return value, which could mean a void method
+	 * or method returning an async type parameterized by void.
+	 * @param returnType return type of the handler method that produced the data
+	 * @param message the input message handled by the handler method
+	 * @return completion {@code Mono<Void>} for the handling
+	 */
+	protected abstract Mono<Void> handleNoContent(MethodParameter returnType, Message<?> message);
 
 }

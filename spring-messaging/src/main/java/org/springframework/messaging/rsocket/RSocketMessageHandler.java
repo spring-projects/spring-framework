@@ -21,9 +21,12 @@ import java.util.List;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.lang.Nullable;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * RSocket-specific extension of {@link MessageMappingMessageHandler}.
@@ -103,6 +106,20 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		handlers.add(new RSocketPayloadReturnValueHandler(this.encoders, getReactiveAdapterRegistry()));
 		handlers.addAll(getReturnValueHandlerConfigurer().getCustomHandlers());
 		return handlers;
+	}
+
+	@Override
+	protected void handleNoMatch(@Nullable String destination, Message<?> message) {
+
+		// MessagingRSocket will raise an error anyway if reply Mono is expected
+		// Here we raise a more helpful message a destination is present
+
+		// It is OK if some messages (ConnectionSetupPayload, metadataPush) are not handled
+		// We need a better way to avoid raising errors for those
+
+		if (StringUtils.hasText(destination)) {
+			throw new MessageDeliveryException("No handler for destination '" + destination + "'");
+		}
 	}
 
 }
