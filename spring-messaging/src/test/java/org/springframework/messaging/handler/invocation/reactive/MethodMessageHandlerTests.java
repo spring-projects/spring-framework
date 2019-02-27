@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -193,11 +194,6 @@ public class MethodMessageHandlerTests {
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
 
-		public TestMethodMessageHandler() {
-			setHandlerPredicate(handlerType -> handlerType.getName().endsWith("Controller"));
-		}
-
-
 		@Override
 		protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
 			return Collections.emptyList();
@@ -206,6 +202,11 @@ public class MethodMessageHandlerTests {
 		@Override
 		protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
 			return Collections.singletonList(this.returnValueHandler);
+		}
+
+		@Override
+		protected Predicate<Class<?>> initHandlerPredicate() {
+			return handlerType -> handlerType.getName().endsWith("Controller");
 		}
 
 		@Nullable

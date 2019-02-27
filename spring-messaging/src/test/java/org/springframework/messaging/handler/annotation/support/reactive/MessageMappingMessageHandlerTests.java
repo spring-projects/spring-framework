@@ -38,7 +38,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.ReactiveSubscribableChannel;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -48,7 +47,6 @@ import org.springframework.stereotype.Controller;
 
 import static java.nio.charset.StandardCharsets.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link MessageMappingMessageHandler}.
@@ -134,9 +132,7 @@ public class MessageMappingMessageHandlerTests {
 		context.registerSingleton("testController", TestController.class);
 		context.refresh();
 
-		ReactiveSubscribableChannel channel = mock(ReactiveSubscribableChannel.class);
-
-		MessageMappingMessageHandler messageHandler = new MessageMappingMessageHandler(channel);
+		MessageMappingMessageHandler messageHandler = new MessageMappingMessageHandler();
 		messageHandler.getReturnValueHandlerConfigurer().addCustomHandler(this.returnValueHandler);
 		messageHandler.setApplicationContext(context);
 		messageHandler.setEmbeddedValueResolver(new EmbeddedValueResolver(context.getBeanFactory()));

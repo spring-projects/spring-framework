@@ -17,7 +17,6 @@ package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.List;
 
 import io.rsocket.Closeable;
 import io.rsocket.RSocket;
@@ -40,10 +39,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.messaging.ReactiveMessageChannel;
-import org.springframework.messaging.ReactiveSubscribableChannel;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.support.DefaultReactiveMessageChannel;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -57,23 +53,15 @@ public class RSocketServerToClientIntegrationTests {
 
 	private static Closeable server;
 
-	private static MessagingAcceptor clientAcceptor;
-
 
 	@BeforeClass
 	@SuppressWarnings("ConstantConditions")
 	public static void setupOnce() {
 
-		context = new AnnotationConfigApplicationContext(ServerConfig.class);
-
-		ReactiveMessageChannel messageChannel = context.getBean("serverChannel", ReactiveMessageChannel.class);
-		RSocketStrategies rsocketStrategies = context.getBean(RSocketStrategies.class);
-
-		clientAcceptor = new MessagingAcceptor(
-				context.getBean("clientChannel", ReactiveMessageChannel.class));
+		context = new AnnotationConfigApplicationContext(RSocketConfig.class);
 
 		server = RSocketFactory.receive()
-				.acceptor(new MessagingAcceptor(messageChannel, rsocketStrategies))
+				.acceptor(context.getBean("serverAcceptor", MessageHandlerAcceptor.class))
 				.transport(TcpServerTransport.create("localhost", 7000))
 				.start()
 				.block();
@@ -116,7 +104,7 @@ public class RSocketServerToClientIntegrationTests {
 			rsocket = RSocketFactory.connect()
 					.setupPayload(DefaultPayload.create("", destination))
 					.dataMimeType("text/plain")
-					.acceptor(clientAcceptor)
+					.acceptor(context.getBean("clientAcceptor", MessageHandlerAcceptor.class))
 					.transport(TcpClientTransport.create("localhost", 7000))
 					.start()
 					.block();
@@ -212,13 +200,13 @@ public class RSocketServerToClientIntegrationTests {
 			Mono.fromRunnable(testEcho)
 					.doOnError(ex -> result.onError(ex))
 					.doOnSuccess(o -> result.onComplete())
-					.subscribeOn(Schedulers.elastic())
+					.subscribeOn(Schedulers.elastic()) // StepVerifier will block
 					.subscribe();
 		}
 	}
 
 
-	private static class ClientController {
+	private static class ClientHandler {
 
 		final ReplayProcessor<String> fireForgetPayloads = ReplayProcessor.create();
 
@@ -251,11 +239,11 @@ public class RSocketServerToClientIntegrationTests {
 
 
 	@Configuration
-	static class ServerConfig {
+	static class RSocketConfig {
 
 		@Bean
-		public ClientController clientController() {
-			return new ClientController();
+		public ClientHandler clientHandler() {
+			return new ClientHandler();
 		}
 
 		@Bean
@@ -264,26 +252,17 @@ public class RSocketServerToClientIntegrationTests {
 		}
 
 		@Bean
-		public ReactiveSubscribableChannel clientChannel() {
-			return new DefaultReactiveMessageChannel();
+		public MessageHandlerAcceptor clientAcceptor() {
+			MessageHandlerAcceptor acceptor = new MessageHandlerAcceptor();
+			acceptor.setHandlers(Collections.singletonList(clientHandler()));
+			acceptor.setAutoDetectDisabled();
+			acceptor.setRSocketStrategies(rsocketStrategies());
+			return acceptor;
 		}
 
 		@Bean
-		public ReactiveSubscribableChannel serverChannel() {
-			return new DefaultReactiveMessageChannel();
-		}
-
-		@Bean
-		public RSocketMessageHandler clientMessageHandler() {
-			List<Object> handlers = Collections.singletonList(clientController());
-			RSocketMessageHandler handler = new RSocketMessageHandler(clientChannel(), handlers);
-			handler.setRSocketStrategies(rsocketStrategies());
-			return handler;
-		}
-
-		@Bean
-		public RSocketMessageHandler serverMessageHandler() {
-			RSocketMessageHandler handler = new RSocketMessageHandler(serverChannel());
+		public MessageHandlerAcceptor serverAcceptor() {
+			MessageHandlerAcceptor handler = new MessageHandlerAcceptor();
 			handler.setRSocketStrategies(rsocketStrategies());
 			return handler;
 		}

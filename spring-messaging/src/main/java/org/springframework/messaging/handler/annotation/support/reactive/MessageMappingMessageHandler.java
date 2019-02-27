@@ -30,14 +30,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.ReactiveSubscribableChannel;
 import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -74,9 +72,11 @@ import org.springframework.validation.Validator;
  * @see AbstractEncoderMethodReturnValueHandler
  */
 public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<CompositeMessageCondition>
-		implements SmartLifecycle, EmbeddedValueResolverAware {
+		implements EmbeddedValueResolverAware {
 
-	private final ReactiveSubscribableChannel inboundChannel;
+	@Nullable
+	private Predicate<Class<?>> handlerPredicate =
+			beanType -> AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
 
 	private final List<Decoder<?>> decoders = new ArrayList<>();
 
@@ -90,19 +90,62 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	@Nullable
 	private StringValueResolver valueResolver;
 
-	private volatile boolean running = false;
 
-	private final Object lifecycleMonitor = new Object();
-
-
-	public MessageMappingMessageHandler(ReactiveSubscribableChannel inboundChannel) {
-		Assert.notNull(inboundChannel, "`inboundChannel` is required");
-		this.inboundChannel = inboundChannel;
+	public MessageMappingMessageHandler() {
 		this.pathMatcher = new AntPathMatcher();
 		((AntPathMatcher) this.pathMatcher).setPathSeparator(".");
-		setHandlerPredicate(beanType -> AnnotatedElementUtils.hasAnnotation(beanType, Controller.class));
 	}
 
+
+	/**
+	 * Manually configure handlers to check for {@code @MessageMapping} methods.
+	 * <p><strong>Note:</strong> the given handlers are not required to be
+	 * annotated with {@code @Controller}. Consider also using
+	 * {@link #setAutoDetectDisabled()} if the intent is to use these handlers
+	 * instead of, and not in addition to {@code @Controller} classes. Or
+	 * alternatively use {@link #setHandlerPredicate(Predicate)} to select a
+	 * different set of beans based on a different criteria.
+	 * @param handlers the handlers to register
+	 * @see #setAutoDetectDisabled()
+	 * @see #setHandlerPredicate(Predicate)
+	 */
+	public void setHandlers(List<Object> handlers) {
+		for (Object handler : handlers) {
+			detectHandlerMethods(handler);
+		}
+		// Disable auto-detection..
+		this.handlerPredicate = null;
+	}
+
+	/**
+	 * Configure the predicate to use for selecting which Spring beans to check
+	 * for {@code @MessageMapping} methods. When set to {@code null},
+	 * auto-detection is turned off which is what
+	 * {@link #setAutoDetectDisabled()} does internally.
+	 * <p>The predicate used by default selects {@code @Controller} classes.
+	 * @see #setHandlers(List)
+	 * @see #setAutoDetectDisabled()
+	 */
+	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
+		this.handlerPredicate = handlerPredicate;
+	}
+
+	/**
+	 * Return the {@link #setHandlerPredicate configured} handler predicate.
+	 */
+	@Nullable
+	public Predicate<Class<?>> getHandlerPredicate() {
+		return this.handlerPredicate;
+	}
+
+	/**
+	 * Disable auto-detection of {@code @MessageMapping} methods, e.g. in
+	 * {@code @Controller}s, by setting {@link #setHandlerPredicate(Predicate)
+	 * setHandlerPredicate(null)}.
+	 */
+	public void setAutoDetectDisabled() {
+		this.handlerPredicate = null;
+	}
 
 	/**
 	 * Configure the decoders to use for incoming payloads.
@@ -203,34 +246,9 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		return Collections.emptyList();
 	}
 
-
 	@Override
-	public final void start() {
-		synchronized (this.lifecycleMonitor) {
-			this.inboundChannel.subscribe(this);
-			this.running = true;
-		}
-	}
-
-	@Override
-	public final void stop() {
-		synchronized (this.lifecycleMonitor) {
-			this.running = false;
-			this.inboundChannel.unsubscribe(this);
-		}
-	}
-
-	@Override
-	public final void stop(Runnable callback) {
-		synchronized (this.lifecycleMonitor) {
-			stop();
-			callback.run();
-		}
-	}
-
-	@Override
-	public final boolean isRunning() {
-		return this.running;
+	protected Predicate<Class<?>> initHandlerPredicate() {
+		return this.handlerPredicate;
 	}
 
 

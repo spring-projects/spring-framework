@@ -34,7 +34,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.ReactiveMessageChannel;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.support.MessageBuilder;
@@ -45,16 +44,16 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Package private implementation of {@link RSocket} that is is hooked into an
- * RSocket client or server via {@link MessagingAcceptor} to accept and handle
- * requests.
+ * Implementation of {@link RSocket} that wraps incoming requests with a
+ * {@link Message}, delegates to a {@link Function} for handling, and then
+ * obtains the response from a "reply" header.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
  */
 class MessagingRSocket extends AbstractRSocket {
 
-	private final ReactiveMessageChannel messageChannel;
+	private final Function<Message<?>, Mono<Void>> handler;
 
 	private final RSocketRequester requester;
 
@@ -64,19 +63,24 @@ class MessagingRSocket extends AbstractRSocket {
 	private final RSocketStrategies strategies;
 
 
-	MessagingRSocket(ReactiveMessageChannel messageChannel,
-			RSocket sendingRSocket, @Nullable MimeType defaultDataMimeType, RSocketStrategies strategies) {
+	MessagingRSocket(Function<Message<?>, Mono<Void>> handler, RSocket sendingRSocket,
+			@Nullable MimeType defaultDataMimeType, RSocketStrategies strategies) {
 
-		Assert.notNull(messageChannel, "'messageChannel' is required");
+		Assert.notNull(handler, "'handler' is required");
 		Assert.notNull(sendingRSocket, "'sendingRSocket' is required");
-		this.messageChannel = messageChannel;
+		this.handler = handler;
 		this.requester = RSocketRequester.create(sendingRSocket, defaultDataMimeType, strategies);
 		this.dataMimeType = defaultDataMimeType;
 		this.strategies = strategies;
 	}
 
 
-
+	/**
+	 * Wrap the {@link ConnectionSetupPayload} with a {@link Message} and
+	 * delegate to {@link #handle(Payload)} for handling.
+	 * @param payload the connection payload
+	 * @return completion handle for success or error
+	 */
 	public Mono<Void> handleConnectionSetupPayload(ConnectionSetupPayload payload) {
 		if (StringUtils.hasText(payload.dataMimeType())) {
 			this.dataMimeType = MimeTypeUtils.parseMimeType(payload.dataMimeType());
@@ -111,32 +115,26 @@ class MessagingRSocket extends AbstractRSocket {
 
 	@Override
 	public Mono<Void> metadataPush(Payload payload) {
-		// This won't be very useful until createHeaders starting doing something more with metadata..
+		// Not very useful until createHeaders does more with metadata
 		return handle(payload);
 	}
 
 
 	private Mono<Void> handle(Payload payload) {
-
 		Message<?> message = MessageBuilder.createMessage(
-				Mono.fromCallable(() -> wrapPayloadData(payload)),
-				createHeaders(payload, null));
-
-		return this.messageChannel.send(message).flatMap(result -> result ?
-				Mono.empty() : Mono.error(new MessageDeliveryException("RSocket request not handled")));
+				Mono.fromCallable(() -> wrapPayloadData(payload)), createHeaders(payload, null));
+		return this.handler.apply(message);
 	}
 
 	private Flux<Payload> handleAndReply(Payload firstPayload, Flux<Payload> payloads) {
-
 		MonoProcessor<Flux<Payload>> replyMono = MonoProcessor.create();
-
 		Message<?> message = MessageBuilder.createMessage(
 				payloads.map(this::wrapPayloadData).doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release),
 				createHeaders(firstPayload, replyMono));
-
-		return this.messageChannel.send(message).flatMapMany(result ->
-				result && replyMono.isTerminated() ? replyMono.flatMapMany(Function.identity()) :
-						Mono.error(new MessageDeliveryException("RSocket request not handled")));
+		return this.handler.apply(message)
+				.thenMany(Flux.defer(() -> replyMono.isTerminated() ?
+						replyMono.flatMapMany(Function.identity()) :
+						Mono.error(new MessageDeliveryException("RSocket request not handled"))));
 	}
 
 	private MessageHeaders createHeaders(Payload payload, @Nullable MonoProcessor<?> replyMono) {
