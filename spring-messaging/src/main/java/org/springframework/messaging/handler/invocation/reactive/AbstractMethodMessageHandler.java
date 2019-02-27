@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
@@ -35,11 +34,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.ReactiveMessageHandler;
 import org.springframework.messaging.handler.HandlerMethod;
@@ -82,20 +79,14 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
+	@Nullable
+	private Predicate<Class<?>> handlerPredicate;
+
 	private ArgumentResolverConfigurer argumentResolverConfigurer = new ArgumentResolverConfigurer();
 
 	private ReturnValueHandlerConfigurer returnValueHandlerConfigurer = new ReturnValueHandlerConfigurer();
 
-	private final HandlerMethodArgumentResolverComposite argumentResolvers =
-			new HandlerMethodArgumentResolverComposite();
-
-	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =
-			new HandlerMethodReturnValueHandlerComposite();
-
-	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-
-	@Nullable
-	private Predicate<Class<?>> handlerPredicate;
+	private final InvocableHelper invocableHelper = new InvocableHelper(this::createExceptionMethodResolverFor);
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -104,12 +95,24 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
 
-	private final Map<Class<?>, AbstractExceptionHandlerMethodResolver> exceptionHandlerCache =
-			new ConcurrentHashMap<>(64);
 
-	private final Map<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
-			new LinkedHashMap<>(64);
+	/**
+	 * Configure a predicate to decide if which beans in the Spring context
+	 * should be checked to see if they have message handling methods.
+	 * <p>By default this is not set and sub-classes should configure it in
+	 * order to enable auto-detection of message handling methods.
+	 */
+	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
+		this.handlerPredicate = handlerPredicate;
+	}
 
+	/**
+	 * Return the {@link #setHandlerPredicate configured} handler predicate.
+	 */
+	@Nullable
+	public Predicate<Class<?>> getHandlerPredicate() {
+		return this.handlerPredicate;
+	}
 
 	/**
 	 * Configure custom resolvers for handler method arguments.
@@ -142,38 +145,19 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Configure a predicate to decide if which beans in the Spring context
-	 * should be checked to see if they have message handling methods.
-	 * <p>By default this is not set and sub-classes should configure it in
-	 * order to enable auto-detection of message handling methods.
-	 */
-	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
-		this.handlerPredicate = handlerPredicate;
-	}
-
-	/**
-	 * Return the {@link #setHandlerPredicate configured} handler predicate.
-	 */
-	@Nullable
-	public Predicate<Class<?>> getHandlerPredicate() {
-		return this.handlerPredicate;
-	}
-
-	/**
 	 * Configure the registry for adapting various reactive types.
 	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
 	 * default settings.
 	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
-		Assert.notNull(registry, "ReactiveAdapterRegistry is required");
-		this.reactiveAdapterRegistry = registry;
+		this.invocableHelper.setReactiveAdapterRegistry(registry);
 	}
 
 	/**
 	 * Return the configured registry for adapting reactive types.
 	 */
 	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
-		return this.reactiveAdapterRegistry;
+		return this.invocableHelper.getReactiveAdapterRegistry();
 	}
 
 	@Override
@@ -193,7 +177,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected void registerExceptionHandlerAdvice(
 			MessagingAdviceBean bean, AbstractExceptionHandlerMethodResolver resolver) {
 
-		this.exceptionHandlerAdviceCache.put(bean, resolver);
+		this.invocableHelper.registerExceptionHandlerAdvice(bean, resolver);
 	}
 
 	/**
@@ -219,13 +203,13 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (resolvers.isEmpty()) {
 			resolvers = new ArrayList<>(this.argumentResolverConfigurer.getCustomResolvers());
 		}
-		this.argumentResolvers.addResolvers(resolvers);
+		this.invocableHelper.addArgumentResolvers(resolvers);
 
 		List<? extends HandlerMethodReturnValueHandler> handlers = initReturnValueHandlers();
 		if (handlers.isEmpty()) {
 			handlers = new ArrayList<>(this.returnValueHandlerConfigurer.getCustomHandlers());
 		}
-		this.returnValueHandlers.addHandlers(handlers);
+		this.invocableHelper.addReturnValueHandlers(handlers);
 
 		initHandlerMethods();
 	}
@@ -379,21 +363,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			return Mono.empty();
 		}
 		HandlerMethod handlerMethod = match.getHandlerMethod().createWithResolvedBean();
-		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
-		invocable.setArgumentResolvers(this.argumentResolvers.getResolvers());
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking " + invocable.getShortLogMessage());
-		}
-		return invocable.invoke(message)
-				.flatMap(value -> {
-					MethodParameter returnType = invocable.getReturnType();
-					return this.returnValueHandlers.handleReturnValue(value, returnType, message);
-				})
-				.onErrorResume(throwable -> {
-					Exception ex = (throwable instanceof Exception) ? (Exception) throwable :
-							new MessageHandlingException(message, "HandlerMethod invocation error", throwable);
-					return processHandlerException(message, handlerMethod, ex);
-				});
+		return this.invocableHelper.handleMessage(handlerMethod, message);
 	}
 
 	@Nullable
@@ -480,68 +450,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	@Nullable
 	protected void handleNoMatch(@Nullable String destination, Message<?> message) {
 		logger.debug("No handlers for destination '" + destination + "'");
-	}
-
-
-	private Mono<Void> processHandlerException(Message<?> message, HandlerMethod handlerMethod, Exception ex) {
-		InvocableHandlerMethod exceptionInvocable = findExceptionHandler(handlerMethod, ex);
-		if (exceptionInvocable == null) {
-			logger.error("Unhandled exception from message handling method", ex);
-			return Mono.error(ex);
-		}
-		exceptionInvocable.setArgumentResolvers(this.argumentResolvers.getResolvers());
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking " + exceptionInvocable.getShortLogMessage());
-		}
-		return exceptionInvocable.invoke(message, ex)
-				.flatMap(value -> {
-					MethodParameter returnType = exceptionInvocable.getReturnType();
-					return this.returnValueHandlers.handleReturnValue(value, returnType, message);
-				});
-	}
-
-	/**
-	 * Find an exception handling method for the given exception.
-	 * <p>The default implementation searches methods in the class hierarchy of
-	 * the HandlerMethod first and if not found, it continues searching for
-	 * additional handling methods registered via
-	 * {@link #registerExceptionHandlerAdvice(MessagingAdviceBean, AbstractExceptionHandlerMethodResolver)}.
-	 * @param handlerMethod the method where the exception was raised
-	 * @param exception the raised exception
-	 * @return a method to handle the exception, or {@code null}
-	 */
-	@Nullable
-	protected InvocableHandlerMethod findExceptionHandler(HandlerMethod handlerMethod, Exception exception) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Searching for methods to handle " + exception.getClass().getSimpleName());
-		}
-		Class<?> beanType = handlerMethod.getBeanType();
-		AbstractExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(beanType);
-		if (resolver == null) {
-			resolver = createExceptionMethodResolverFor(beanType);
-			this.exceptionHandlerCache.put(beanType, resolver);
-		}
-		InvocableHandlerMethod exceptionHandlerMethod = null;
-		Method method = resolver.resolveMethod(exception);
-		if (method != null) {
-			exceptionHandlerMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
-		}
-		else {
-			for (MessagingAdviceBean advice : this.exceptionHandlerAdviceCache.keySet()) {
-				if (advice.isApplicableToBeanType(beanType)) {
-					resolver = this.exceptionHandlerAdviceCache.get(advice);
-					method = resolver.resolveMethod(exception);
-					if (method != null) {
-						exceptionHandlerMethod = new InvocableHandlerMethod(advice.resolveBean(), method);
-						break;
-					}
-				}
-			}
-		}
-		if (exceptionHandlerMethod != null) {
-			exceptionHandlerMethod.setArgumentResolvers(this.argumentResolvers.getResolvers());
-		}
-		return exceptionHandlerMethod;
 	}
 
 	/**
