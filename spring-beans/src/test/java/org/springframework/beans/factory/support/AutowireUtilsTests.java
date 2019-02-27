@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,40 @@
 
 package org.springframework.beans.factory.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.when;
-
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 /**
+ * Unit tests for {@link AutowireUtils}.
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Loïc Ledoyen
  */
 public class AutowireUtilsTests {
+	
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void genericMethodReturnTypes() {
@@ -97,44 +104,94 @@ public class AutowireUtilsTests {
 	}
 
 	@Test
-	public void marked_parameters_are_candidate_for_autowiring() throws NoSuchMethodException {
-		Constructor<AutowirableClass> autowirableConstructor = ReflectionUtils.accessibleConstructor(
-				AutowirableClass.class, String.class, String.class, String.class, String.class);
+	public void isAutowirablePreconditions() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage("Parameter must not be null");
+		AutowireUtils.isAutowirable(null, 0);
+	}
 
-		for (int parameterIndex = 0; parameterIndex < autowirableConstructor.getParameterCount(); parameterIndex++) {
-			Parameter parameter = autowirableConstructor.getParameters()[parameterIndex];
+	@Test
+	public void annotatedParametersInMethodAreCandidatesForAutowiring() throws Exception {
+		Method method = getClass().getDeclaredMethod("autowirableMethod", String.class, String.class, String.class, String.class);
+		assertAutowirableParameters(method);
+	}
+
+	@Test
+	public void annotatedParametersInTopLevelClassConstructorAreCandidatesForAutowiring() throws Exception {
+		Constructor<?> constructor = AutowirableClass.class.getConstructor(String.class, String.class, String.class, String.class);
+		assertAutowirableParameters(constructor);
+	}
+
+	@Test
+	public void annotatedParametersInInnerClassConstructorAreCandidatesForAutowiring() throws Exception {
+		Class<?> innerClass = AutowirableClass.InnerAutowirableClass.class;
+		assertTrue(ClassUtils.isInnerClass(innerClass));
+		Constructor<?> constructor = innerClass.getConstructor(AutowirableClass.class, String.class, String.class);
+		assertAutowirableParameters(constructor);
+	}
+
+	private void assertAutowirableParameters(Executable executable) {
+		int startIndex = (executable instanceof Constructor)
+				&& ClassUtils.isInnerClass(executable.getDeclaringClass()) ? 1 : 0;
+		Parameter[] parameters = executable.getParameters();
+		for (int parameterIndex = startIndex; parameterIndex < parameters.length; parameterIndex++) {
+			Parameter parameter = parameters[parameterIndex];
 			assertTrue("Parameter " + parameter + " must be autowirable", AutowireUtils.isAutowirable(parameter, parameterIndex));
 		}
 	}
 
 	@Test
-	public void not_marked_parameters_are_not_candidate_for_autowiring() throws NoSuchMethodException {
-		Constructor<AutowirableClass> notAutowirableConstructor = ReflectionUtils.accessibleConstructor(AutowirableClass.class, String.class);
+	public void nonAnnotatedParametersInTopLevelClassConstructorAreNotCandidatesForAutowiring() throws Exception {
+		Constructor<?> notAutowirableConstructor = AutowirableClass.class.getConstructor(String.class);
 
-		for (int parameterIndex = 0; parameterIndex < notAutowirableConstructor.getParameterCount(); parameterIndex++) {
-			Parameter parameter = notAutowirableConstructor.getParameters()[parameterIndex];
-			assertFalse("Parameter " + parameter + " must not be autowirable", AutowireUtils.isAutowirable(parameter, 0));
+		Parameter[] parameters = notAutowirableConstructor.getParameters();
+		for (int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
+			Parameter parameter = parameters[parameterIndex];
+			assertFalse("Parameter " + parameter + " must not be autowirable", AutowireUtils.isAutowirable(parameter, parameterIndex));
 		}
 	}
 
 	@Test
-	public void dependency_resolution_for_marked_parameters() throws NoSuchMethodException {
-		Constructor<AutowirableClass> autowirableConstructor = ReflectionUtils.accessibleConstructor(
-				AutowirableClass.class, String.class, String.class, String.class, String.class);
-		AutowireCapableBeanFactory beanFactory = Mockito.mock(AutowireCapableBeanFactory.class);
-		// BeanFactory will return the DependencyDescriptor for convenience and to avoid using an ArgumentCaptor
-		when(beanFactory.resolveDependency(any(), isNull())).thenAnswer(iom -> iom.getArgument(0));
+	public void resolveDependencyPreconditionsForParameter() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage("Parameter must not be null");
+		AutowireUtils.resolveDependency(null, 0, null, mock(AutowireCapableBeanFactory.class));
+	}
 
-		for (int parameterIndex = 0; parameterIndex < autowirableConstructor.getParameterCount(); parameterIndex++) {
-			Parameter parameter = autowirableConstructor.getParameters()[parameterIndex];
+	@Test
+	public void resolveDependencyPreconditionsForBeanFactory() throws Exception {
+		Method method = getClass().getDeclaredMethod("autowirableMethod", String.class, String.class, String.class, String.class);
+		Parameter parameter = method.getParameters()[0];
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage("AutowireCapableBeanFactory must not be null");
+		AutowireUtils.resolveDependency(parameter, 0, null, null);
+	}
+
+	@Test
+	public void resolveDependencyForAnnotatedParametersInTopLevelClassConstructor() throws Exception {
+		Constructor<?> constructor = AutowirableClass.class.getConstructor(String.class, String.class, String.class, String.class);
+
+		AutowireCapableBeanFactory beanFactory = mock(AutowireCapableBeanFactory.class);
+		// Configure the mocked BeanFactory to return the DependencyDescriptor for convenience and
+		// to avoid using an ArgumentCaptor.
+		when(beanFactory.resolveDependency(any(), isNull())).thenAnswer(invocation -> invocation.getArgument(0));
+
+		Parameter[] parameters = constructor.getParameters();
+		for (int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
+			Parameter parameter = parameters[parameterIndex];
 			DependencyDescriptor intermediateDependencyDescriptor = (DependencyDescriptor) AutowireUtils.resolveDependency(
 					parameter, parameterIndex, AutowirableClass.class, beanFactory);
-			assertEquals(intermediateDependencyDescriptor.getAnnotatedElement(), autowirableConstructor);
-			assertEquals(intermediateDependencyDescriptor.getMethodParameter().getParameter(), parameter);
+			assertEquals(constructor, intermediateDependencyDescriptor.getAnnotatedElement());
+			assertEquals(parameter, intermediateDependencyDescriptor.getMethodParameter().getParameter());
 		}
 	}
 
+
 	public interface MyInterfaceType<T> {
+	}
+
+	public class MySimpleInterfaceType implements MyInterfaceType<String> {
 	}
 
 	public static class MyTypeWithMethods<T> {
@@ -229,7 +286,15 @@ public class AutowireUtilsTests {
 		}
 	}
 
+	void autowirableMethod(
+					@Autowired String firstParameter,
+					@Qualifier("someQualifier") String secondParameter,
+					@Value("${someValue}") String thirdParameter,
+					@Autowired(required = false) String fourthParameter) {
+	}
+
 	public static class AutowirableClass {
+
 		public AutowirableClass(@Autowired String firstParameter,
 								@Qualifier("someQualifier") String secondParameter,
 								@Value("${someValue}") String thirdParameter,
@@ -238,8 +303,13 @@ public class AutowireUtilsTests {
 
 		public AutowirableClass(String notAutowirableParameter) {
 		}
+
+		public class InnerAutowirableClass {
+
+			public InnerAutowirableClass(@Autowired String firstParameter,
+					@Qualifier("someQualifier") String secondParameter) {
+			}
+		}
 	}
 
-	public class MySimpleInterfaceType implements MyInterfaceType<String> {
-	}
 }

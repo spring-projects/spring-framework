@@ -300,13 +300,15 @@ public abstract class AutowireUtils {
 	 * {@link Qualifier @Qualifier}, or {@link Value @Value}.
 	 * <p>Note that {@link #resolveDependency} may still be able to resolve the
 	 * dependency for the supplied parameter even if this method returns {@code false}.
-	 * @param parameter the parameter whose dependency should be autowired
+	 * @param parameter the parameter whose dependency should be autowired (must not be
+	 * {@code null})
 	 * @param parameterIndex the index of the parameter in the constructor or method
 	 * that declares the parameter
 	 * @see #resolveDependency
 	 * @since 5.2
 	 */
 	public static boolean isAutowirable(Parameter parameter, int parameterIndex) {
+		Assert.notNull(parameter, "Parameter must not be null");
 		AnnotatedElement annotatedParameter = getEffectiveAnnotatedParameter(parameter, parameterIndex);
 		return (AnnotatedElementUtils.hasAnnotation(annotatedParameter, Autowired.class) ||
 				AnnotatedElementUtils.hasAnnotation(annotatedParameter, Qualifier.class) ||
@@ -326,14 +328,15 @@ public abstract class AutowireUtils {
 	 * flag set to {@code false}.
 	 * <p>If an explicit <em>qualifier</em> is not declared, the name of the parameter
 	 * will be used as the qualifier for resolving ambiguities.
-	 * @param parameter the parameter whose dependency should be resolved
+	 * @param parameter the parameter whose dependency should be resolved (must not be
+	 * {@code null})
 	 * @param parameterIndex the index of the parameter in the constructor or method
 	 * that declares the parameter
 	 * @param containingClass the concrete class that contains the parameter; this may
 	 * differ from the class that declares the parameter in that it may be a subclass
 	 * thereof, potentially substituting type variables
 	 * @param beanFactory the {@code AutowireCapableBeanFactory} from which to resolve
-	 * the dependency
+	 * the dependency (must not be {@code null})
 	 * @return the resolved object, or {@code null} if none found
 	 * @throws BeansException if dependency resolution failed
 	 * @see #isAutowirable
@@ -346,6 +349,9 @@ public abstract class AutowireUtils {
 	public static Object resolveDependency(
 			Parameter parameter, int parameterIndex, Class<?> containingClass, AutowireCapableBeanFactory beanFactory)
 			throws BeansException {
+
+		Assert.notNull(parameter, "Parameter must not be null");
+		Assert.notNull(beanFactory, "AutowireCapableBeanFactory must not be null");
 
 		AnnotatedElement annotatedParameter = getEffectiveAnnotatedParameter(parameter, parameterIndex);
 		Autowired autowired = AnnotatedElementUtils.findMergedAnnotation(annotatedParameter, Autowired.class);
