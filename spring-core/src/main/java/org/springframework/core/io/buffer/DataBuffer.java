@@ -264,13 +264,13 @@ public interface DataBuffer {
 					break;
 				}
 				if (cr.isOverflow()) {
-					writePosition(outBuffer.position());
+					writePosition(writePosition() + outBuffer.position());
 					int maximumSize = (int) (inBuffer.remaining() * charsetEncoder.maxBytesPerChar());
 					ensureCapacity(maximumSize);
 					outBuffer = asByteBuffer(writePosition(), writableByteCount());
 				}
 			}
-			writePosition(outBuffer.position());
+			writePosition(writePosition() + outBuffer.position());
 		}
 		return this;
 	}
