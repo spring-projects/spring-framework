@@ -304,8 +304,8 @@ public abstract class AutowireUtils {
 	 * {@code null})
 	 * @param parameterIndex the index of the parameter in the constructor or method
 	 * that declares the parameter
-	 * @see #resolveDependency
 	 * @since 5.2
+	 * @see #resolveDependency
 	 */
 	public static boolean isAutowirable(Parameter parameter, int parameterIndex) {
 		Assert.notNull(parameter, "Parameter must not be null");
@@ -339,11 +339,11 @@ public abstract class AutowireUtils {
 	 * the dependency (must not be {@code null})
 	 * @return the resolved object, or {@code null} if none found
 	 * @throws BeansException if dependency resolution failed
+	 * @since 5.2
 	 * @see #isAutowirable
 	 * @see Autowired#required
 	 * @see SynthesizingMethodParameter#forExecutable(Executable, int)
 	 * @see AutowireCapableBeanFactory#resolveDependency(DependencyDescriptor, String)
-	 * @since 5.2
 	 */
 	@Nullable
 	public static Object resolveDependency(
