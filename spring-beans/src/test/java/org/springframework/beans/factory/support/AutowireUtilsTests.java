@@ -16,15 +16,27 @@
 
 package org.springframework.beans.factory.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.util.ReflectionUtils;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -40,40 +52,40 @@ public class AutowireUtilsTests {
 
 		Method notParameterizedWithArguments = ReflectionUtils.findMethod(MyTypeWithMethods.class, "notParameterizedWithArguments", Integer.class, Boolean.class);
 		assertEquals(String.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(notParameterizedWithArguments, new Object[] {99, true}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(notParameterizedWithArguments, new Object[]{99, true}, getClass().getClassLoader()));
 
 		Method createProxy = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createProxy", Object.class);
 		assertEquals(String.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createProxy, new Object[] {"foo"}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(createProxy, new Object[]{"foo"}, getClass().getClassLoader()));
 
 		Method createNamedProxyWithDifferentTypes = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedProxy", String.class, Object.class);
 		assertEquals(Long.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDifferentTypes, new Object[] {"enigma", 99L}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDifferentTypes, new Object[]{"enigma", 99L}, getClass().getClassLoader()));
 
 		Method createNamedProxyWithDuplicateTypes = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedProxy", String.class, Object.class);
 		assertEquals(String.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDuplicateTypes, new Object[] {"enigma", "foo"}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedProxyWithDuplicateTypes, new Object[]{"enigma", "foo"}, getClass().getClassLoader()));
 
 		Method createMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createMock", Class.class);
 		assertEquals(Runnable.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createMock, new Object[] {Runnable.class}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(createMock, new Object[]{Runnable.class}, getClass().getClassLoader()));
 		assertEquals(Runnable.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createMock, new Object[] {Runnable.class.getName()}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(createMock, new Object[]{Runnable.class.getName()}, getClass().getClassLoader()));
 
 		Method createNamedMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createNamedMock", String.class, Class.class);
 		assertEquals(Runnable.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedMock, new Object[] {"foo", Runnable.class}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(createNamedMock, new Object[]{"foo", Runnable.class}, getClass().getClassLoader()));
 
 		Method createVMock = ReflectionUtils.findMethod(MyTypeWithMethods.class, "createVMock", Object.class, Class.class);
 		assertEquals(Runnable.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(createVMock, new Object[] {"foo", Runnable.class}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(createVMock, new Object[]{"foo", Runnable.class}, getClass().getClassLoader()));
 
 		// Ideally we would expect String.class instead of Object.class, but
 		// resolveReturnTypeForFactoryMethod() does not currently support this form of
 		// look-up.
 		Method extractValueFrom = ReflectionUtils.findMethod(MyTypeWithMethods.class, "extractValueFrom", MyInterfaceType.class);
 		assertEquals(Object.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(extractValueFrom, new Object[] {new MySimpleInterfaceType()}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(extractValueFrom, new Object[]{new MySimpleInterfaceType()}, getClass().getClassLoader()));
 
 		// Ideally we would expect Boolean.class instead of Object.class, but this
 		// information is not available at run-time due to type erasure.
@@ -81,42 +93,51 @@ public class AutowireUtilsTests {
 		map.put(0, false);
 		map.put(1, true);
 		Method extractMagicValue = ReflectionUtils.findMethod(MyTypeWithMethods.class, "extractMagicValue", Map.class);
-		assertEquals(Object.class, AutowireUtils.resolveReturnTypeForFactoryMethod(extractMagicValue, new Object[] {map}, getClass().getClassLoader()));
+		assertEquals(Object.class, AutowireUtils.resolveReturnTypeForFactoryMethod(extractMagicValue, new Object[]{map}, getClass().getClassLoader()));
 	}
 
+	@Test
+	public void marked_parameters_are_candidate_for_autowiring() throws NoSuchMethodException {
+		Constructor<AutowirableClass> autowirableConstructor = ReflectionUtils.accessibleConstructor(
+				AutowirableClass.class, String.class, String.class, String.class, String.class);
+
+		for (int parameterIndex = 0; parameterIndex < autowirableConstructor.getParameterCount(); parameterIndex++) {
+			Parameter parameter = autowirableConstructor.getParameters()[parameterIndex];
+			assertTrue("Parameter " + parameter + " must be autowirable", AutowireUtils.isAutowirable(parameter, parameterIndex));
+		}
+	}
+
+	@Test
+	public void not_marked_parameters_are_not_candidate_for_autowiring() throws NoSuchMethodException {
+		Constructor<AutowirableClass> notAutowirableConstructor = ReflectionUtils.accessibleConstructor(AutowirableClass.class, String.class);
+
+		for (int parameterIndex = 0; parameterIndex < notAutowirableConstructor.getParameterCount(); parameterIndex++) {
+			Parameter parameter = notAutowirableConstructor.getParameters()[parameterIndex];
+			assertFalse("Parameter " + parameter + " must not be autowirable", AutowireUtils.isAutowirable(parameter, 0));
+		}
+	}
+
+	@Test
+	public void dependency_resolution_for_marked_parameters() throws NoSuchMethodException {
+		Constructor<AutowirableClass> autowirableConstructor = ReflectionUtils.accessibleConstructor(
+				AutowirableClass.class, String.class, String.class, String.class, String.class);
+		AutowireCapableBeanFactory beanFactory = Mockito.mock(AutowireCapableBeanFactory.class);
+		// BeanFactory will return the DependencyDescriptor for convenience and to avoid using an ArgumentCaptor
+		when(beanFactory.resolveDependency(any(), isNull())).thenAnswer(iom -> iom.getArgument(0));
+
+		for (int parameterIndex = 0; parameterIndex < autowirableConstructor.getParameterCount(); parameterIndex++) {
+			Parameter parameter = autowirableConstructor.getParameters()[parameterIndex];
+			DependencyDescriptor intermediateDependencyDescriptor = (DependencyDescriptor) AutowireUtils.resolveDependency(
+					parameter, parameterIndex, AutowirableClass.class, beanFactory);
+			assertEquals(intermediateDependencyDescriptor.getAnnotatedElement(), autowirableConstructor);
+			assertEquals(intermediateDependencyDescriptor.getMethodParameter().getParameter(), parameter);
+		}
+	}
 
 	public interface MyInterfaceType<T> {
 	}
 
-	public class MySimpleInterfaceType implements MyInterfaceType<String> {
-	}
-
 	public static class MyTypeWithMethods<T> {
-
-		public MyInterfaceType<Integer> integer() {
-			return null;
-		}
-
-		public MySimpleInterfaceType string() {
-			return null;
-		}
-
-		public Object object() {
-			return null;
-		}
-
-		@SuppressWarnings("rawtypes")
-		public MyInterfaceType raw() {
-			return null;
-		}
-
-		public String notParameterized() {
-			return null;
-		}
-
-		public String notParameterizedWithArguments(Integer x, Boolean b) {
-			return null;
-		}
 
 		/**
 		 * Simulates a factory method that wraps the supplied object in a proxy of the
@@ -173,6 +194,31 @@ public class AutowireUtilsTests {
 			return null;
 		}
 
+		public MyInterfaceType<Integer> integer() {
+			return null;
+		}
+
+		public MySimpleInterfaceType string() {
+			return null;
+		}
+
+		public Object object() {
+			return null;
+		}
+
+		@SuppressWarnings("rawtypes")
+		public MyInterfaceType raw() {
+			return null;
+		}
+
+		public String notParameterized() {
+			return null;
+		}
+
+		public String notParameterizedWithArguments(Integer x, Boolean b) {
+			return null;
+		}
+
 		public void readIntegerInputMessage(MyInterfaceType<Integer> message) {
 		}
 
@@ -183,4 +229,17 @@ public class AutowireUtilsTests {
 		}
 	}
 
+	public static class AutowirableClass {
+		public AutowirableClass(@Autowired String firstParameter,
+								@Qualifier("someQualifier") String secondParameter,
+								@Value("${someValue}") String thirdParameter,
+								@Autowired(required = false) String fourthParameter) {
+		}
+
+		public AutowirableClass(String notAutowirableParameter) {
+		}
+	}
+
+	public class MySimpleInterfaceType implements MyInterfaceType<String> {
+	}
 }
