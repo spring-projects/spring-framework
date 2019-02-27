@@ -44,12 +44,12 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>The format of {@code META-INF/spring.schemas} is a properties file where each line
  * should be of the form {@code systemId=schema-location} where {@code schema-location}
- * should also be a schema file in the classpath. Since {@code systemId} is commonly a URL,
- * one must be careful to escape any ':' characters which are treated as delimiters
+ * should also be a schema file in the classpath. Since {@code systemId} is commonly a
+ * URL, one must be careful to escape any ':' characters which are treated as delimiters
  * in properties files.
  *
  * <p>The pattern for the mapping files can be overridden using the
- * {@link #PluggableSchemaResolver(ClassLoader, String)} constructor
+ * {@link #PluggableSchemaResolver(ClassLoader, String)} constructor.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

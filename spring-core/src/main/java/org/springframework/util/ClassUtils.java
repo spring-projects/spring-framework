@@ -774,7 +774,7 @@ public abstract class ClassUtils {
 	 */
 	@SuppressWarnings("deprecation")  // on JDK 9
 	public static Class<?> createCompositeInterface(Class<?>[] interfaces, @Nullable ClassLoader classLoader) {
-		Assert.notEmpty(interfaces, "Interfaces must not be empty");
+		Assert.notEmpty(interfaces, "Interface array must not be empty");
 		return Proxy.getProxyClass(classLoader, interfaces);
 	}
 
