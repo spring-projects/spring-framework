@@ -992,6 +992,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					instance = bw.getWrappedInstance();
 				}
 			}
+			catch (UnsatisfiedDependencyException ex) {
+				// Don't swallow, probably misconfiguration...
+				throw ex;
+			}
+			catch (BeanCreationException ex) {
+				// Instantiation failure, maybe too early...
+				if (logger.isDebugEnabled()) {
+					logger.debug("Bean creation exception on singleton FactoryBean type check: " + ex);
+				}
+				onSuppressedException(ex);
+				return null;
+			}
 			finally {
 				// Finished partial creation of this bean.
 				afterSingletonCreation(beanName);
@@ -1019,7 +1031,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return null;
 		}
 
-		Object instance = null;
+		Object instance;
 		try {
 			// Mark this bean as currently in creation, even if just partially.
 			beforePrototypeCreation(beanName);
@@ -1030,8 +1042,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				instance = bw.getWrappedInstance();
 			}
 		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Don't swallow, probably misconfiguration...
+			throw ex;
+		}
 		catch (BeanCreationException ex) {
-			// Can only happen when getting a FactoryBean.
+			// Instantiation failure, maybe too early...
 			if (logger.isDebugEnabled()) {
 				logger.debug("Bean creation exception on non-singleton FactoryBean type check: " + ex);
 			}
