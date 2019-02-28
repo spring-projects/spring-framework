@@ -624,6 +624,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				((ParameterDisposer) psc).cleanupParameters();
 			}
 			String sql = getSql(psc);
+			psc = null;
 			JdbcUtils.closeStatement(ps);
 			ps = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
@@ -649,11 +650,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Query using a prepared statement, allowing for a PreparedStatementCreator
 	 * and a PreparedStatementSetter. Most other query methods use this method,
 	 * but application code will always work with either a creator or a setter.
-	 * @param psc the Callback handler that can create a PreparedStatement given a
-	 * Connection
-	 * @param pss object that knows how to set values on the prepared statement.
-	 * If this is null, the SQL will be assumed to contain no bind parameters.
-	 * @param rse object that will extract results.
+	 * @param psc a callback that creates a PreparedStatement given a Connection
+	 * @param pss a callback that knows how to set values on the prepared statement.
+	 * If this is {@code null}, the SQL will be assumed to contain no bind parameters.
+	 * @param rse a callback that will extract results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
@@ -1099,6 +1099,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				((ParameterDisposer) csc).cleanupParameters();
 			}
 			String sql = getSql(csc);
+			csc = null;
 			JdbcUtils.closeStatement(cs);
 			cs = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
@@ -1149,12 +1150,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				logger.trace("CallableStatement.execute() returned '" + retVal + "'");
 				logger.trace("CallableStatement.getUpdateCount() returned " + updateCount);
 			}
-			Map<String, Object> results = createResultsMap();
+			Map<String, Object> resultsMap = createResultsMap();
 			if (retVal || updateCount != -1) {
-				results.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
+				resultsMap.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
 			}
-			results.putAll(extractOutputParameters(cs, callParameters));
-			return results;
+			resultsMap.putAll(extractOutputParameters(cs, callParameters));
+			return resultsMap;
 		});
 
 		Assert.state(result != null, "No result map");
@@ -1285,8 +1286,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			try {
 				if (param.getRowMapper() != null) {
 					RowMapper<?> rowMapper = param.getRowMapper();
-					Object result = (new RowMapperResultSetExtractor<>(rowMapper)).extractData(rs);
-					return Collections.singletonMap(param.getName(), result);
+					Object data = (new RowMapperResultSetExtractor<>(rowMapper)).extractData(rs);
+					return Collections.singletonMap(param.getName(), data);
 				}
 				else if (param.getRowCallbackHandler() != null) {
 					RowCallbackHandler rch = param.getRowCallbackHandler();
@@ -1295,8 +1296,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							"ResultSet returned from stored procedure was processed");
 				}
 				else if (param.getResultSetExtractor() != null) {
-					Object result = param.getResultSetExtractor().extractData(rs);
-					return Collections.singletonMap(param.getName(), result);
+					Object data = param.getResultSetExtractor().extractData(rs);
+					return Collections.singletonMap(param.getName(), data);
 				}
 			}
 			finally {
@@ -1394,8 +1395,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Throw an SQLWarningException if we're not ignoring warnings,
-	 * else log the warnings (at debug level).
+	 * Throw a SQLWarningException if we're not ignoring warnings,
+	 * otherwise log the warnings at debug level.
 	 * @param stmt the current JDBC statement
 	 * @throws SQLWarningException if not ignoring warnings
 	 * @see org.springframework.jdbc.SQLWarningException
@@ -1417,7 +1418,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Throw an SQLWarningException if encountering an actual warning.
+	 * Throw a SQLWarningException if encountering an actual warning.
 	 * @param warning the warnings object from the current statement.
 	 * May be {@code null}, in which case this method does nothing.
 	 * @throws SQLWarningException in case of an actual warning to be raised
@@ -1445,8 +1446,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Determine SQL from potential provider object.
-	 * @param sqlProvider object that's potentially a SqlProvider
-	 * @return the SQL string, or {@code null}
+	 * @param sqlProvider object which is potentially a SqlProvider
+	 * @return the SQL string, or {@code null} if not known
 	 * @see SqlProvider
 	 */
 	@Nullable
