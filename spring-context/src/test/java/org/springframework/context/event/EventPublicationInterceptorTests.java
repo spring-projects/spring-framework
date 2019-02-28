@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,14 @@ public class EventPublicationInterceptorTests {
 		this.publisher = mock(ApplicationEventPublisher.class);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNoApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
@@ -64,7 +64,7 @@ public class EventPublicationInterceptorTests {
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithAbstractStraightApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
@@ -72,7 +72,7 @@ public class EventPublicationInterceptorTests {
 		interceptor.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithApplicationEventClassThatDoesntExposeAValidCtor() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
@@ -129,7 +129,7 @@ public class EventPublicationInterceptorTests {
 	public static class FactoryBeanTestListener extends TestListener implements FactoryBean<Object> {
 
 		@Override
-		public Object getObject() throws Exception {
+		public Object getObject() {
 			return "test";
 		}
 
