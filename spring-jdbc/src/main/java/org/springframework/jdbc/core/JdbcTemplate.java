@@ -1145,12 +1145,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					logger.debug("CallableStatement.execute() returned '" + retVal + "'");
 					logger.debug("CallableStatement.getUpdateCount() returned " + updateCount);
 				}
-				Map<String, Object> returnedResults = createResultsMap();
+				Map<String, Object> resultsMap = createResultsMap();
 				if (retVal || updateCount != -1) {
-					returnedResults.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
+					resultsMap.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
 				}
-				returnedResults.putAll(extractOutputParameters(cs, callParameters));
-				return returnedResults;
+				resultsMap.putAll(extractOutputParameters(cs, callParameters));
+				return resultsMap;
 			}
 		});
 	}
@@ -1283,8 +1283,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				if (param.getRowMapper() != null) {
 					RowMapper rowMapper = param.getRowMapper();
-					Object result = (new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
-					return Collections.singletonMap(param.getName(), result);
+					Object data = (new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
+					return Collections.singletonMap(param.getName(), data);
 				}
 				else if (param.getRowCallbackHandler() != null) {
 					RowCallbackHandler rch = param.getRowCallbackHandler();
@@ -1293,8 +1293,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							(Object) "ResultSet returned from stored procedure was processed");
 				}
 				else if (param.getResultSetExtractor() != null) {
-					Object result = param.getResultSetExtractor().extractData(rsToUse);
-					return Collections.singletonMap(param.getName(), result);
+					Object data = param.getResultSetExtractor().extractData(rsToUse);
+					return Collections.singletonMap(param.getName(), data);
 				}
 			}
 			finally {
