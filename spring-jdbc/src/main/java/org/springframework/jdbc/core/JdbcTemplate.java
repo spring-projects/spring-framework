@@ -612,6 +612,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				((ParameterDisposer) psc).cleanupParameters();
 			}
 			String sql = getSql(psc);
+			psc = null;
 			JdbcUtils.closeStatement(ps);
 			ps = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
@@ -1053,6 +1054,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				((ParameterDisposer) csc).cleanupParameters();
 			}
 			String sql = getSql(csc);
+			csc = null;
 			JdbcUtils.closeStatement(cs);
 			cs = null;
 			DataSourceUtils.releaseConnection(con, getDataSource());
