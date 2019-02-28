@@ -172,14 +172,14 @@ public interface JdbcOperations {
 	<T> T queryForObject(String sql, Class<T> requiredType) throws DataAccessException;
 
 	/**
-	 * Execute a query for a result Map, given static SQL.
+	 * Execute a query for a result map, given static SQL.
 	 * <p>Uses a JDBC Statement, not a PreparedStatement. If you want to
 	 * execute a static query with a PreparedStatement, use the overloaded
 	 * {@link #queryForMap(String, Object...)} method with {@code null}
 	 * as argument array.
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
-	 * @param sql SQL query to execute
+	 * @param sql the SQL query to execute
 	 * @return the result Map (one entry per column, with column name as key)
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
 	 * return exactly one row
@@ -214,7 +214,7 @@ public interface JdbcOperations {
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * Maps (one entry for each column using the column name as the key).
 	 * Each element in the list will be of the form returned by this interface's
-	 * queryForMap() methods.
+	 * {@code queryForMap} methods.
 	 * @param sql the SQL query to execute
 	 * @return an List that contains a Map per row
 	 * @throws DataAccessException if there is any problem executing the query
@@ -574,8 +574,8 @@ public interface JdbcOperations {
 	<T> T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object... args) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result object.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result object.
 	 * <p>The query is expected to be a single row/single column query; the returned
 	 * result will be directly mapped to the corresponding object type.
 	 * @param sql the SQL query to execute
@@ -595,8 +595,8 @@ public interface JdbcOperations {
 			throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result object.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result object.
 	 * <p>The query is expected to be a single row/single column query; the returned
 	 * result will be directly mapped to the corresponding object type.
 	 * @param sql the SQL query to execute
@@ -615,8 +615,8 @@ public interface JdbcOperations {
 	<T> T queryForObject(String sql, Object[] args, Class<T> requiredType) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result object.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result object.
 	 * <p>The query is expected to be a single row/single column query; the returned
 	 * result will be directly mapped to the corresponding object type.
 	 * @param sql the SQL query to execute
@@ -636,8 +636,8 @@ public interface JdbcOperations {
 	<T> T queryForObject(String sql, Class<T> requiredType, @Nullable Object... args) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result Map.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result map.
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql the SQL query to execute
@@ -655,11 +655,11 @@ public interface JdbcOperations {
 	Map<String, Object> queryForMap(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result Map.
-	 * The queryForMap() methods defined by this interface are appropriate
-	 * when you don't have a domain model. Otherwise, consider using
-	 * one of the queryForObject() methods.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result map.
+	 * <p>The {@code queryForMap} methods defined by this interface are appropriate
+	 * when you don't have a domain model. Otherwise, consider using one of the
+	 * {@code queryForObject} methods.
 	 * <p>The query is expected to be a single row query; the result row will be
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql the SQL query to execute
@@ -678,8 +678,8 @@ public interface JdbcOperations {
 	Map<String, Object> queryForMap(String sql, @Nullable Object... args) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result list.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result list.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * result objects, each of them matching the specified element type.
 	 * @param sql the SQL query to execute
@@ -693,12 +693,12 @@ public interface JdbcOperations {
 	 * @see #queryForList(String, Class)
 	 * @see SingleColumnRowMapper
 	 */
-	<T>List<T> queryForList(String sql, Object[] args, int[] argTypes, Class<T> elementType)
+	<T> List<T> queryForList(String sql, Object[] args, int[] argTypes, Class<T> elementType)
 			throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result list.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result list.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * result objects, each of them matching the specified element type.
 	 * @param sql the SQL query to execute
@@ -716,8 +716,8 @@ public interface JdbcOperations {
 	<T> List<T> queryForList(String sql, Object[] args, Class<T> elementType) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result list.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result list.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * result objects, each of them matching the specified element type.
 	 * @param sql the SQL query to execute
@@ -736,12 +736,12 @@ public interface JdbcOperations {
 	<T> List<T> queryForList(String sql, Class<T> elementType, @Nullable Object... args) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result list.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result list.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * Maps (one entry for each column, using the column name as the key).
-	 * Thus  Each element in the list will be of the form returned by this interface's
-	 * queryForMap() methods.
+	 * Each element in the list will be of the form returned by this interface's
+	 * {@code queryForMap} methods.
 	 * @param sql the SQL query to execute
 	 * @param args arguments to bind to the query
 	 * @param argTypes the SQL types of the arguments
@@ -754,12 +754,12 @@ public interface JdbcOperations {
 	List<Map<String, Object>> queryForList(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a result list.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a result list.
 	 * <p>The results will be mapped to a List (one entry for each row) of
 	 * Maps (one entry for each column, using the column name as the key).
 	 * Each element in the list will be of the form returned by this interface's
-	 * queryForMap() methods.
+	 * {@code queryForMap} methods.
 	 * @param sql the SQL query to execute
 	 * @param args arguments to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
@@ -772,8 +772,8 @@ public interface JdbcOperations {
 	List<Map<String, Object>> queryForList(String sql, @Nullable Object... args) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a SqlRowSet.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
@@ -795,8 +795,8 @@ public interface JdbcOperations {
 	SqlRowSet queryForRowSet(String sql, Object[] args, int[] argTypes) throws DataAccessException;
 
 	/**
-	 * Query given SQL to create a prepared statement from SQL and a
-	 * list of arguments to bind to the query, expecting a SqlRowSet.
+	 * Query given SQL to create a prepared statement from SQL and a list of
+	 * arguments to bind to the query, expecting a SqlRowSet.
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that, for the default implementation, JDBC RowSet support needs to
@@ -818,8 +818,9 @@ public interface JdbcOperations {
 	SqlRowSet queryForRowSet(String sql, @Nullable Object... args) throws DataAccessException;
 
 	/**
-	 * Issue a single SQL update operation (such as an insert, update or delete statement)
-	 * using a PreparedStatementCreator to provide SQL and any required parameters.
+	 * Issue a single SQL update operation (such as an insert, update or delete
+	 * statement) using a PreparedStatementCreator to provide SQL and any
+	 * required parameters.
 	 * <p>A PreparedStatementCreator can either be implemented directly or
 	 * configured through a PreparedStatementCreatorFactory.
 	 * @param psc a callback that provides SQL and any necessary parameters
