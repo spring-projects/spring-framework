@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1150,12 +1149,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				logger.trace("CallableStatement.execute() returned '" + retVal + "'");
 				logger.trace("CallableStatement.getUpdateCount() returned " + updateCount);
 			}
-			Map<String, Object> returnedResults = createResultsMap();
+			Map<String, Object> results = createResultsMap();
 			if (retVal || updateCount != -1) {
-				returnedResults.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
+				results.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
 			}
-			returnedResults.putAll(extractOutputParameters(cs, callParameters));
-			return returnedResults;
+			results.putAll(extractOutputParameters(cs, callParameters));
+			return results;
 		});
 
 		Assert.state(result != null, "No result map");
@@ -1173,7 +1172,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			@Nullable List<SqlParameter> updateCountParameters, @Nullable List<SqlParameter> resultSetParameters,
 			int updateCount) throws SQLException {
 
-		Map<String, Object> returnedResults = new HashMap<>();
+		Map<String, Object> results = new LinkedHashMap<>(4);
 		int rsIndex = 0;
 		int updateIndex = 0;
 		boolean moreResults;
@@ -1182,7 +1181,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				if (updateCount == -1) {
 					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
 						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet) resultSetParameters.get(rsIndex);
-						returnedResults.putAll(processResultSet(cs.getResultSet(), declaredRsParam));
+						results.putAll(processResultSet(cs.getResultSet(), declaredRsParam));
 						rsIndex++;
 					}
 					else {
@@ -1192,7 +1191,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							if (logger.isTraceEnabled()) {
 								logger.trace("Added default SqlReturnResultSet parameter named '" + rsName + "'");
 							}
-							returnedResults.putAll(processResultSet(cs.getResultSet(), undeclaredRsParam));
+							results.putAll(processResultSet(cs.getResultSet(), undeclaredRsParam));
 							rsIndex++;
 						}
 					}
@@ -1201,7 +1200,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					if (updateCountParameters != null && updateCountParameters.size() > updateIndex) {
 						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount) updateCountParameters.get(updateIndex);
 						String declaredUcName = ucParam.getName();
-						returnedResults.put(declaredUcName, updateCount);
+						results.put(declaredUcName, updateCount);
 						updateIndex++;
 					}
 					else {
@@ -1210,7 +1209,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							if (logger.isTraceEnabled()) {
 								logger.trace("Added default SqlReturnUpdateCount parameter named '" + undeclaredName + "'");
 							}
-							returnedResults.put(undeclaredName, updateCount);
+							results.put(undeclaredName, updateCount);
 							updateIndex++;
 						}
 					}
@@ -1223,7 +1222,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			}
 			while (moreResults || updateCount != -1);
 		}
-		return returnedResults;
+		return results;
 	}
 
 	/**
@@ -1235,7 +1234,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	protected Map<String, Object> extractOutputParameters(CallableStatement cs, List<SqlParameter> parameters)
 			throws SQLException {
 
-		Map<String, Object> returnedResults = new HashMap<>();
+		Map<String, Object> results = new LinkedHashMap<>(parameters.size());
 		int sqlColIndex = 1;
 		for (SqlParameter param : parameters) {
 			if (param instanceof SqlOutParameter) {
@@ -1244,25 +1243,25 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				SqlReturnType returnType = outParam.getSqlReturnType();
 				if (returnType != null) {
 					Object out = returnType.getTypeValue(cs, sqlColIndex, outParam.getSqlType(), outParam.getTypeName());
-					returnedResults.put(outParam.getName(), out);
+					results.put(outParam.getName(), out);
 				}
 				else {
 					Object out = cs.getObject(sqlColIndex);
 					if (out instanceof ResultSet) {
 						if (outParam.isResultSetSupported()) {
-							returnedResults.putAll(processResultSet((ResultSet) out, outParam));
+							results.putAll(processResultSet((ResultSet) out, outParam));
 						}
 						else {
 							String rsName = outParam.getName();
 							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, getColumnMapRowMapper());
-							returnedResults.putAll(processResultSet((ResultSet) out, rsParam));
+							results.putAll(processResultSet((ResultSet) out, rsParam));
 							if (logger.isTraceEnabled()) {
 								logger.trace("Added default SqlReturnResultSet parameter named '" + rsName + "'");
 							}
 						}
 					}
 					else {
-						returnedResults.put(outParam.getName(), out);
+						results.put(outParam.getName(), out);
 					}
 				}
 			}
@@ -1270,7 +1269,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				sqlColIndex++;
 			}
 		}
-		return returnedResults;
+		return results;
 	}
 
 	/**
@@ -1282,31 +1281,29 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	protected Map<String, Object> processResultSet(
 			@Nullable ResultSet rs, ResultSetSupportingSqlParameter param) throws SQLException {
 
-		if (rs == null) {
-			return Collections.emptyMap();
-		}
-
-		Map<String, Object> returnedResults = new HashMap<>();
-		try {
-			if (param.getRowMapper() != null) {
-				RowMapper<?> rowMapper = param.getRowMapper();
-				Object result = (new RowMapperResultSetExtractor<>(rowMapper)).extractData(rs);
-				returnedResults.put(param.getName(), result);
+		if (rs != null) {
+			try {
+				if (param.getRowMapper() != null) {
+					RowMapper<?> rowMapper = param.getRowMapper();
+					Object result = (new RowMapperResultSetExtractor<>(rowMapper)).extractData(rs);
+					return Collections.singletonMap(param.getName(), result);
+				}
+				else if (param.getRowCallbackHandler() != null) {
+					RowCallbackHandler rch = param.getRowCallbackHandler();
+					(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rs);
+					return Collections.singletonMap(param.getName(),
+							"ResultSet returned from stored procedure was processed");
+				}
+				else if (param.getResultSetExtractor() != null) {
+					Object result = param.getResultSetExtractor().extractData(rs);
+					return Collections.singletonMap(param.getName(), result);
+				}
 			}
-			else if (param.getRowCallbackHandler() != null) {
-				RowCallbackHandler rch = param.getRowCallbackHandler();
-				(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rs);
-				returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed");
-			}
-			else if (param.getResultSetExtractor() != null) {
-				Object result = param.getResultSetExtractor().extractData(rs);
-				returnedResults.put(param.getName(), result);
+			finally {
+				JdbcUtils.closeResultSet(rs);
 			}
 		}
-		finally {
-			JdbcUtils.closeResultSet(rs);
-		}
-		return returnedResults;
+		return Collections.emptyMap();
 	}
 
 
