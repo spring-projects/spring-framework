@@ -35,10 +35,10 @@ public class PayloadApplicationEventTests {
 
 	@Test
 	public void testEventClassWithInterface() {
-		ApplicationContext ac = new AnnotationConfigApplicationContext(Listener.class);
-		MyEventClass event = new MyEventClass<>(this, "xyz");
+		ApplicationContext ac = new AnnotationConfigApplicationContext(AuditableListener.class);
+		AuditablePayloadEvent event = new AuditablePayloadEvent<>(this, "xyz");
 		ac.publishEvent(event);
-		assertTrue(ac.getBean(Listener.class).events.contains(event));
+		assertTrue(ac.getBean(AuditableListener.class).events.contains(event));
 	}
 
 
@@ -46,20 +46,17 @@ public class PayloadApplicationEventTests {
 	}
 
 
-	public static class MyEventClass<GT> extends PayloadApplicationEvent<GT> implements Auditable {
+	@SuppressWarnings("serial")
+	public static class AuditablePayloadEvent<T> extends PayloadApplicationEvent<T> implements Auditable {
 
-		public MyEventClass(Object source, GT payload) {
+		public AuditablePayloadEvent(Object source, T payload) {
 			super(source, payload);
-		}
-
-		public String toString() {
-			return "Payload: " + getPayload();
 		}
 	}
 
 
 	@Component
-	public static class Listener {
+	public static class AuditableListener {
 
 		public final List<Auditable> events = new ArrayList<>();
 
