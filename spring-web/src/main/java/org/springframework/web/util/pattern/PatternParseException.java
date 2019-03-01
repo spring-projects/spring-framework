@@ -68,6 +68,7 @@ public class PatternParseException extends IllegalArgumentException {
 	public String toDetailedString() {
 		StringBuilder buf = new StringBuilder();
 		buf.append(this.pattern).append('\n');
+		//TODO replace loop with buf.append(" ".repeat(this.position)) after migration to Java 11
 		for (int i = 0; i < this.position; i++) {
 			buf.append(' ');
 		}

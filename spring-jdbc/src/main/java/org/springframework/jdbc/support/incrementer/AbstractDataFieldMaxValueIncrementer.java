@@ -133,6 +133,7 @@ public abstract class AbstractDataFieldMaxValueIncrementer implements DataFieldM
 		String s = Long.toString(getNextKey());
 		int len = s.length();
 		if (len < this.paddingLength) {
+			//TODO replace with s = "0".repeat(this.paddingLength - len) after migration to Java 11
 			StringBuilder sb = new StringBuilder(this.paddingLength);
 			for (int i = 0; i < this.paddingLength - len; i++) {
 				sb.append('0');

@@ -110,6 +110,8 @@ public class OpMultiply extends Operator {
 
 		if (leftOperand instanceof String && rightOperand instanceof Integer) {
 			int repeats = (Integer) rightOperand;
+			//todo after migration to Java 11 loop can be simplified to
+			// String result = ((String) leftOperand).repeat(Math.max(0, repeats));
 			StringBuilder result = new StringBuilder();
 			for (int i = 0; i < repeats; i++) {
 				result.append(leftOperand);

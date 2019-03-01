@@ -87,6 +87,7 @@ public class TypeReference extends SpelNodeImpl {
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder("T(");
 		sb.append(getChild(0).toStringAST());
+		//TODO replace loop with sb.append("[]".repeat(this.dimensions)) after migration to Java 11
 		for (int d = 0; d < this.dimensions; d++) {
 			sb.append("[]");
 		}
