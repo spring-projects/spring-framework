@@ -19,18 +19,19 @@ package org.springframework.test.context.event;
 import org.springframework.test.context.TestContext;
 
 /**
- * {@link TestContextEvent} published by {@link EventPublishingTestExecutionListener} when
- * {@link org.springframework.test.context.TestExecutionListener#afterTestExecution(TestContext)} is called.
+ * {@link TestContextEvent} published by the {@link EventPublishingTestExecutionListener} when
+ * {@link org.springframework.test.context.TestExecutionListener#afterTestExecution(TestContext)}
+ * is invoked.
  *
  * @author Frank Scheffler
  * @since 5.2
- * @see org.springframework.test.context.event.annotation.AfterTestExecution
+ * @see org.springframework.test.context.event.annotation.AfterTestExecution @AfterTestExecution
  */
 @SuppressWarnings("serial")
 public class AfterTestExecutionEvent extends TestContextEvent {
 
-    public AfterTestExecutionEvent(TestContext source) {
-        super(source);
-    }
+	public AfterTestExecutionEvent(TestContext source) {
+		super(source);
+	}
 
 }

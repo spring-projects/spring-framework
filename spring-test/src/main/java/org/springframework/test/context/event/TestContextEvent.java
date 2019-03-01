@@ -20,25 +20,31 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.test.context.TestContext;
 
 /**
- * Base class for events published by {@link EventPublishingTestExecutionListener}.
+ * Base class for events published by the {@link EventPublishingTestExecutionListener}.
  *
  * @author Frank Scheffler
+ * @author Sam Brannen
  * @since 5.2
  */
 @SuppressWarnings("serial")
 public abstract class TestContextEvent extends ApplicationEvent {
 
-    public TestContextEvent(TestContext source) {
-        super(source);
-    }
+	/**
+	 * Create a new {@code TestContextEvent}.
+	 * @param source the {@code TestContext} associated with this event
+	 * (must not be {@code null})
+	 */
+	public TestContextEvent(TestContext source) {
+		super(source);
+	}
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.util.EventObject#getSource()
-     */
-    @Override
-    public TestContext getSource() {
-        return (TestContext) super.getSource();
-    }
+	/**
+	 * Get the {@code TestContext} associated with this event.
+	 * @return the {@code TestContext} associated with this event (never {@code null})
+	 */
+	@Override
+	public TestContext getSource() {
+		return (TestContext) super.getSource();
+	}
+
 }

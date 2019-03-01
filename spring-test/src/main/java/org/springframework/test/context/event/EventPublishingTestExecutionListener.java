@@ -16,72 +16,119 @@
 
 package org.springframework.test.context.event;
 
+import org.springframework.core.Ordered;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * {@link org.springframework.test.context.TestExecutionListener} that may be used to publish test life-cycle event to
- * the Spring test {@link org.springframework.context.ApplicationContext}.
+ * {@link org.springframework.test.context.TestExecutionListener TestExecutionListener}
+ * that publishes test lifecycle events to a Spring test
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}.
  *
- * <p>These events may be consumed for various reasons, such as resetting {@em mock} beans or tracing test
- * execution. Since these events may consumed as part of regular Spring beans, they can be shared among
- * different test classes.
+ * <p>These events may be consumed for various reasons, such as resetting <em>mock</em>
+ * beans or tracing test execution. Since these events may be consumed by regular
+ * Spring beans, they can be shared among different test classes.
+ * 
+ * <h3>Supported Events</h3>
+ * <ul>
+ * <li>{@link BeforeTestClassEvent}</li>
+ * <li>{@link PrepareTestInstanceEvent}</li>
+ * <li>{@link BeforeTestMethodEvent}</li>
+ * <li>{@link BeforeTestExecutionEvent}</li>
+ * <li>{@link AfterTestExecutionEvent}</li>
+ * <li>{@link AfterTestMethodEvent}</li>
+ * <li>{@link AfterTestClassEvent}</li>
+ * </ul>
  *
- * <p>This {@link org.springframework.test.context.TestExecutionListener} is not active by default. Test classes
- * should be annotated using {@link org.springframework.test.context.TestExecutionListeners}, if they want to use it.
- * Alternatively, it may be added to {@code spring.factories}, if needed.
+ * <p>Note that this {@code TestExecutionListener} is not registered by default,
+ * but it may be registered for a given test class via
+ * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners}
+ * or globally via the {@link org.springframework.core.io.support.SpringFactoriesLoader
+ * SpringFactoriesLoader} mechanism (consult the Javadoc and Spring reference manual for
+ * details).
  *
  * @author Frank Scheffler
+ * @author Sam Brannen
  * @since 5.2
- * @see org.springframework.test.context.event.annotation.BeforeTestClass
- * @see org.springframework.test.context.event.annotation.PrepareTestInstance
- * @see org.springframework.test.context.event.annotation.BeforeTestMethod
- * @see org.springframework.test.context.event.annotation.BeforeTestExecution
- * @see org.springframework.test.context.event.annotation.AfterTestExecution
- * @see org.springframework.test.context.event.annotation.AfterTestMethod
- * @see org.springframework.test.context.event.annotation.AfterTestClass
+ * @see org.springframework.test.context.event.annotation.BeforeTestClass @BeforeTestClass
+ * @see org.springframework.test.context.event.annotation.PrepareTestInstance @PrepareTestInstance
+ * @see org.springframework.test.context.event.annotation.BeforeTestMethod @BeforeTestMethod
+ * @see org.springframework.test.context.event.annotation.BeforeTestExecution @BeforeTestExecution
+ * @see org.springframework.test.context.event.annotation.AfterTestExecution @AfterTestExecution
+ * @see org.springframework.test.context.event.annotation.AfterTestMethod @AfterTestMethod
+ * @see org.springframework.test.context.event.annotation.AfterTestClass @AfterTestClass
  */
 public class EventPublishingTestExecutionListener extends AbstractTestExecutionListener {
 
-    @Override
-    public void beforeTestClass(TestContext testContext) {
-        testContext.getApplicationContext().publishEvent(
-                new BeforeTestClassEvent(testContext));
-    }
+	/**
+	 * Returns {@link Ordered#HIGHEST_PRECEDENCE}.
+	 */
+	@Override
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE;
+	}
 
-    @Override
-    public void prepareTestInstance(TestContext testContext) {
-        testContext.getApplicationContext().publishEvent(
-                new PrepareTestInstanceEvent(testContext));
-    }
+	/**
+	 * Publishes a {@link BeforeTestClassEvent} to the {@code ApplicationContext}
+	 * for the supplied {@link TestContext}.
+	 */
+	@Override
+	public void beforeTestClass(TestContext testContext) {
+		testContext.getApplicationContext().publishEvent(new BeforeTestClassEvent(testContext));
+	}
 
-    @Override
-    public void beforeTestMethod(TestContext testContext) {
-        testContext.getApplicationContext().publishEvent(
-                new BeforeTestMethodEvent(testContext));
-    }
+	/**
+	 * Publishes a {@link PrepareTestInstanceEvent} to the {@code ApplicationContext}
+	 * for the supplied {@link TestContext}.
+	 */
+	@Override
+	public void prepareTestInstance(TestContext testContext) {
+		testContext.getApplicationContext().publishEvent(new PrepareTestInstanceEvent(testContext));
+	}
 
-    @Override
-    public void beforeTestExecution(TestContext testContext) {
-        testContext.getApplicationContext().publishEvent(
-                new BeforeTestExecutionEvent(testContext));
-    }
+	/**
+	 * Publishes a {@link BeforeTestMethodEvent} to the {@code ApplicationContext}
+	 * for the supplied {@link TestContext}.
+	 */
+	@Override
+	public void beforeTestMethod(TestContext testContext) {
+		testContext.getApplicationContext().publishEvent(new BeforeTestMethodEvent(testContext));
+	}
 
-    @Override
-    public void afterTestExecution(TestContext testContext) {
-        testContext.getApplicationContext().publishEvent(
-                new AfterTestExecutionEvent(testContext));
-    }
+	/**
+	 * Publishes a {@link BeforeTestExecutionEvent} to the {@code ApplicationContext}
+	 * for the supplied {@link TestContext}.
+	 */
+	@Override
+	public void beforeTestExecution(TestContext testContext) {
+		testContext.getApplicationContext().publishEvent(new BeforeTestExecutionEvent(testContext));
+	}
 
-    @Override
-    public void afterTestMethod(TestContext testContext) {
-        testContext.getApplicationContext().publishEvent(
-                new AfterTestMethodEvent(testContext));
-    }
+	/**
+	 * Publishes an {@link AfterTestExecutionEvent} to the {@code ApplicationContext}
+	 * for the supplied {@link TestContext}.
+	 */
+	@Override
+	public void afterTestExecution(TestContext testContext) {
+		testContext.getApplicationContext().publishEvent(new AfterTestExecutionEvent(testContext));
+	}
 
-    @Override
-    public void afterTestClass(TestContext testContext) {
-        testContext.getApplicationContext().publishEvent(
-                new AfterTestClassEvent(testContext));
-    }
+	/**
+	 * Publishes an {@link AfterTestMethodEvent} to the {@code ApplicationContext}
+	 * for the supplied {@link TestContext}.
+	 */
+	@Override
+	public void afterTestMethod(TestContext testContext) {
+		testContext.getApplicationContext().publishEvent(new AfterTestMethodEvent(testContext));
+	}
+
+	/**
+	 * Publishes an {@link AfterTestClassEvent} to the {@code ApplicationContext}
+	 * for the supplied {@link TestContext}.
+	 */
+	@Override
+	public void afterTestClass(TestContext testContext) {
+		testContext.getApplicationContext().publishEvent(new AfterTestClassEvent(testContext));
+	}
+
 }

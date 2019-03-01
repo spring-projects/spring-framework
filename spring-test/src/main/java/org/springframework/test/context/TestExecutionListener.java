@@ -44,6 +44,8 @@ package org.springframework.test.context;
  * <p>Spring provides the following out-of-the-box implementations (all of
  * which implement {@code Ordered}):
  * <ul>
+ * <li>{@link org.springframework.test.context.event.EventPublishingTestExecutionListener
+ * EventPublishingTestExecutionListener} (not registered by default)</li>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
  * ServletTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
@@ -56,13 +58,12 @@ package org.springframework.test.context;
  * TransactionalTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
  * SqlScriptsTestExecutionListener}</li>
- * <li>{@link org.springframework.test.context.event.EventPublishingTestExecutionListener
- * EventPublishingTestExecutionListener} (not registered by default)</li>
  * </ul>
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
+ * @see TestExecutionListeners @TestExecutionListeners
  * @see TestContextManager
  * @see org.springframework.test.context.support.AbstractTestExecutionListener
  */

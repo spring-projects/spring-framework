@@ -19,18 +19,19 @@ package org.springframework.test.context.event;
 import org.springframework.test.context.TestContext;
 
 /**
- * {@link TestContextEvent} published by {@link EventPublishingTestExecutionListener} when
- * {@link org.springframework.test.context.TestExecutionListener#prepareTestInstance(TestContext)} is called.
+ * {@link TestContextEvent} published by the {@link EventPublishingTestExecutionListener} when
+ * {@link org.springframework.test.context.TestExecutionListener#prepareTestInstance(TestContext)}
+ * is invoked.
  *
  * @author Frank Scheffler
  * @since 5.2
- * @see org.springframework.test.context.event.annotation.PrepareTestInstance
+ * @see org.springframework.test.context.event.annotation.PrepareTestInstance @PrepareTestInstance
  */
 @SuppressWarnings("serial")
 public class PrepareTestInstanceEvent extends TestContextEvent {
 
-    public PrepareTestInstanceEvent(TestContext source) {
-        super(source);
-    }
+	public PrepareTestInstanceEvent(TestContext source) {
+		super(source);
+	}
 
 }

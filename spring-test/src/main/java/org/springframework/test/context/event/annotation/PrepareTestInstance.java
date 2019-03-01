@@ -28,18 +28,22 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link EventListener} annotation used to consume {@link PrepareTestInstanceEvent}s published
- * by {@link org.springframework.test.context.event.EventPublishingTestExecutionListener}.
+ * {@link EventListener @EventListener} annotation used to consume a
+ * {@link PrepareTestInstanceEvent} published by the
+ * {@link org.springframework.test.context.event.EventPublishingTestExecutionListener
+ * EventPublishingTestExecutionListener}.
  *
- * <p>This annotation may be used on {@link EventListener}-compliant methods within the Spring test
- * {@link org.springframework.context.ApplicationContext}, typically within
- * {@link org.springframework.context.annotation.Configuration}s. A method annotated hereby will be
- * called as part of the {@link org.springframework.test.context.TestExecutionListener#prepareTestInstance(org.springframework.test.context.TestContext)}
- * life-cycle method.
+ * <p>This annotation may be used on {@code @EventListener}-compliant methods within
+ * a Spring test {@link org.springframework.context.ApplicationContext ApplicationContext}
+ * &mdash; for example, on methods in a
+ * {@link org.springframework.context.annotation.Configuration @Configuration}
+ * class. A method annotated with this annotation will be invoked as part of the
+ * {@link org.springframework.test.context.TestExecutionListener#prepareTestInstance}
+ * lifecycle.
  *
- * <p>Make sure {@link org.springframework.test.context.event.EventPublishingTestExecutionListener} is enabled,
- * for this annotation to have an effect, e.g. by annotation your test class with
- * {@link org.springframework.test.context.TestExecutionListeners} accordingly.
+ * <p>The {@code EventPublishingTestExecutionListener} must be registered in order
+ * for this annotation to have an effect &mdash; for example, via
+ * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners}.
  *
  * @author Frank Scheffler
  * @since 5.2
@@ -47,7 +51,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Documented
 @Retention(RUNTIME)
-@Target({METHOD, ANNOTATION_TYPE})
+@Target({ METHOD, ANNOTATION_TYPE })
 @EventListener(PrepareTestInstanceEvent.class)
 public @interface PrepareTestInstance {
 }

@@ -31,9 +31,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.only;
 import static org.mockito.BDDMockito.verify;
 
-
 /**
- * Unit test for {@link EventPublishingTestExecutionListener}.
+ * Unit tests for {@link EventPublishingTestExecutionListener}.
  * 
  * @author Frank Scheffler
  * @since 5.2
@@ -41,60 +40,61 @@ import static org.mockito.BDDMockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class EventPublishingTestExecutionListenerTests {
 
-	@Mock(answer=Answers.RETURNS_DEEP_STUBS)
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private TestContext testContext;
-	
+
 	@Captor
 	private ArgumentCaptor<TestContextEvent> testExecutionEvent;
-	
-	
-	private final EventPublishingTestExecutionListener cut = new EventPublishingTestExecutionListener();
-	
-	private <T extends TestContextEvent> void assertEvent(Class<T> eventClass) {
-		verify(testContext.getApplicationContext(), only()).publishEvent(testExecutionEvent.capture());
-		assertThat(testExecutionEvent.getValue(), instanceOf(eventClass));
-		assertThat(testExecutionEvent.getValue().getSource(), equalTo(testContext));
-	}
-	
+
+	private final EventPublishingTestExecutionListener listener = new EventPublishingTestExecutionListener();
+
+
 	@Test
 	public void publishBeforeClassTestExecutionEvent() {
-		cut.beforeTestClass(testContext);
+		listener.beforeTestClass(testContext);
 		assertEvent(BeforeTestClassEvent.class);
 	}
-	
+
 	@Test
 	public void publishPrepareInstanceTestExecutionEvent() {
-		cut.prepareTestInstance(testContext);
+		listener.prepareTestInstance(testContext);
 		assertEvent(PrepareTestInstanceEvent.class);
 	}
 
 	@Test
 	public void publishBeforeMethodTestExecutionEvent() {
-		cut.beforeTestMethod(testContext);
+		listener.beforeTestMethod(testContext);
 		assertEvent(BeforeTestMethodEvent.class);
 	}
 
 	@Test
 	public void publishBeforeExecutionTestExecutionEvent() {
-		cut.beforeTestExecution(testContext);
+		listener.beforeTestExecution(testContext);
 		assertEvent(BeforeTestExecutionEvent.class);
 	}
 
 	@Test
 	public void publishAfterExecutionTestExecutionEvent() {
-		cut.afterTestExecution(testContext);
+		listener.afterTestExecution(testContext);
 		assertEvent(AfterTestExecutionEvent.class);
 	}
 
 	@Test
 	public void publishAfterMethodTestExecutionEvent() {
-		cut.afterTestMethod(testContext);
+		listener.afterTestMethod(testContext);
 		assertEvent(AfterTestMethodEvent.class);
 	}
 
 	@Test
 	public void publishAfterClassTestExecutionEvent() {
-		cut.afterTestClass(testContext);
+		listener.afterTestClass(testContext);
 		assertEvent(AfterTestClassEvent.class);
 	}
+
+	private <T extends TestContextEvent> void assertEvent(Class<T> eventClass) {
+		verify(testContext.getApplicationContext(), only()).publishEvent(testExecutionEvent.capture());
+		assertThat(testExecutionEvent.getValue(), instanceOf(eventClass));
+		assertThat(testExecutionEvent.getValue().getSource(), equalTo(testContext));
+	}
+
 }
