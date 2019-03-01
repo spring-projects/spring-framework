@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,8 @@ import org.springframework.util.ReflectionUtils;
  * TestContext Framework</em>.
  *
  * <p>Specifically, a {@code TestContextManager} is responsible for managing a
- * single {@link TestContext} and signaling events to all registered
- * {@link TestExecutionListener TestExecutionListeners} at the following test
- * execution points:
+ * single {@link TestContext} and signaling events to each registered
+ * {@link TestExecutionListener} at the following test execution points.
  *
  * <ul>
  * <li>{@link #beforeTestClass() before test class execution}: prior to any
@@ -67,10 +66,9 @@ import org.springframework.util.ReflectionUtils;
  * dependency injection of test instances,
  * {@linkplain org.springframework.transaction.annotation.Transactional transactional}
  * execution of test methods, etc. is provided by
- * {@link SmartContextLoader ContextLoaders} and {@link TestExecutionListener
- * TestExecutionListeners}, which are configured via
- * {@link ContextConfiguration @ContextConfiguration} and
- * {@link TestExecutionListeners @TestExecutionListeners}.
+ * {@link SmartContextLoader ContextLoaders} and {@code TestExecutionListeners},
+ * which are configured via {@link ContextConfiguration @ContextConfiguration} and
+ * {@link TestExecutionListeners @TestExecutionListeners}, respectively.
  *
  * <p>Bootstrapping of the {@code TestContext}, the default {@code ContextLoader},
  * default {@code TestExecutionListeners}, and their collaborators is performed

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <h3>Supported Resource Types</h3>
  *
- * <p>
- * Prior to Spring 3.1, only path-based resource locations (typically XML configuration
+ * <p>Prior to Spring 3.1, only path-based resource locations (typically XML configuration
  * files) were supported. As of Spring 3.1, {@linkplain #loader context loaders} may
  * choose to support <em>either</em> path-based <em>or</em> class-based resources. As of
  * Spring 4.0.4, {@linkplain #loader context loaders} may choose to support path-based
@@ -50,8 +49,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <h3>Annotated Classes</h3>
  *
- * <p>
- * The term <em>annotated class</em> can refer to any of the following.
+ * <p>The term <em>annotated class</em> can refer to any of the following.
  *
  * <ul>
  * <li>A class annotated with {@link org.springframework.context.annotation.Configuration @Configuration}</li>
@@ -63,25 +61,24 @@ import org.springframework.core.annotation.AliasFor;
  * <li>Any other class that contains {@link org.springframework.context.annotation.Bean @Bean}-methods</li>
  * </ul>
  *
- * <p>
- * Consult the Javadoc for {@link org.springframework.context.annotation.Configuration @Configuration}
+ * <p>Consult the Javadoc for {@link org.springframework.context.annotation.Configuration @Configuration}
  * and {@link org.springframework.context.annotation.Bean @Bean} for further
  * information regarding the configuration and semantics of <em>annotated classes</em>.
  *
- * <p>
- * As of Spring Framework 4.0, this annotation may be used as a <em>meta-annotation</em>
+ * <p>As of Spring Framework 4.0, this annotation may be used as a <em>meta-annotation</em>
  * to create custom <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 2.5
- * @see ContextHierarchy
- * @see ActiveProfiles
- * @see TestPropertySource
- * @see ContextLoader
+ * @see org.springframework.test.context.junit.jupiter.SpringJUnitConfig @SpringJUnitConfig
+ * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig @SpringJUnitWebConfig
+ * @see ContextHierarchy @ContextHierarchy
+ * @see ActiveProfiles @ActiveProfiles
+ * @see TestPropertySource @TestPropertySource
  * @see SmartContextLoader
  * @see ContextConfigurationAttributes
  * @see MergedContextConfiguration
- * @see org.springframework.context.ApplicationContext
+ * @see org.springframework.context.ApplicationContext ApplicationContext
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
