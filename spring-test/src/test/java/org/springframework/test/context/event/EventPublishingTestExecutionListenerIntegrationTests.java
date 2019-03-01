@@ -35,7 +35,6 @@ import org.springframework.test.context.event.annotation.BeforeTestClass;
 import org.springframework.test.context.event.annotation.BeforeTestExecution;
 import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.test.context.event.annotation.PrepareTestInstance;
-import org.springframework.util.ReflectionUtils;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.only;
@@ -47,27 +46,23 @@ import static org.mockito.Mockito.verify;
  * accompanying {@link TestContextEvent} annotations.
  *
  * @author Frank Scheffler
+ * @author Sam Brannen
  * @since 5.2
  */
 public class EventPublishingTestExecutionListenerIntegrationTests {
 
-	private TestContextManager testContextManager;
-	private TestContext testContext;
-	private TestExecutionListener listener;
-	private Object testInstance;
-	private Method testMethod;
+	private final TestContextManager testContextManager = new TestContextManager(TestCase.class);
+	private final TestContext testContext = testContextManager.getTestContext();
+	private final TestExecutionListener listener = testContext.getApplicationContext().getBean(EventCaptureConfiguration.class).listener();
+	private final Object testInstance = new TestCase();
+	private final Method testMethod = null;
 
 
 	@Before
-	public void initialize() {
-		TestContextExposingTestContextManager tcm = new TestContextExposingTestContextManager();
-		testContextManager = tcm;
-		testContext = tcm.getProtectedTestContext();
-		listener = testContext.getApplicationContext().getBean(EventCaptureConfiguration.class).trigger();
-		// reset because mock is a cached context bean
+	public void resetMock() {
+		// The mocked listener is a bean in the ApplicationContext that is stored
+		// in a static cache by the Spring TestContext Framework.
 		reset(listener);
-		testInstance = new EmptyTestCase();
-		testMethod = ReflectionUtils.findMethod(EmptyTestCase.class, "dummyMethod");
 	}
 
 	@Test
@@ -117,67 +112,56 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 	static class EventCaptureConfiguration {
 
 		@Bean
-		public TestExecutionListener trigger() {
+		public TestExecutionListener listener() {
 			return mock(TestExecutionListener.class);
 		}
 
 		@BeforeTestClass
 		public void beforeTestClass(BeforeTestClassEvent e) throws Exception {
-			trigger().beforeTestClass(e.getSource());
+			listener().beforeTestClass(e.getSource());
 		}
 
 		@PrepareTestInstance
 		public void prepareTestInstance(PrepareTestInstanceEvent e) throws Exception {
-			trigger().prepareTestInstance(e.getSource());
+			listener().prepareTestInstance(e.getSource());
 		}
 
 		@BeforeTestMethod
 		public void beforeTestMethod(BeforeTestMethodEvent e) throws Exception {
-			trigger().beforeTestMethod(e.getSource());
+			listener().beforeTestMethod(e.getSource());
 		}
 
 		@BeforeTestExecution
-		public void beforeTestExecutiob(BeforeTestExecutionEvent e) throws Exception {
-			trigger().beforeTestExecution(e.getSource());
+		public void beforeTestExecution(BeforeTestExecutionEvent e) throws Exception {
+			listener().beforeTestExecution(e.getSource());
 		}
 
 		@AfterTestExecution
 		public void afterTestExecution(AfterTestExecutionEvent e) throws Exception {
-			trigger().afterTestExecution(e.getSource());
+			listener().afterTestExecution(e.getSource());
 		}
 
 		@AfterTestMethod
 		public void afterTestMethod(AfterTestMethodEvent e) throws Exception {
-			trigger().afterTestMethod(e.getSource());
+			listener().afterTestMethod(e.getSource());
 		}
 
 		@AfterTestClass
 		public void afterTestClass(AfterTestClassEvent e) throws Exception {
-			trigger().afterTestClass(e.getSource());
+			listener().afterTestClass(e.getSource());
 		}
 
 	}
 
 	@ContextConfiguration(classes = EventCaptureConfiguration.class)
 	@TestExecutionListeners(EventPublishingTestExecutionListener.class)
-	static class EmptyTestCase {
+	static class TestCase {
 
 		/**
 		 * Serves as dummy test method.
 		 */
 		@SuppressWarnings("PMD.UncommentedEmptyMethodBody")
 		public void dummyTestMethod() {
-		}
-	}
-
-	static class TestContextExposingTestContextManager extends TestContextManager {
-
-		public TestContextExposingTestContextManager() {
-			super(EmptyTestCase.class);
-		}
-
-		public TestContext getProtectedTestContext() {
-			return getTestContext();
 		}
 	}
 

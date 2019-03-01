@@ -23,13 +23,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import org.springframework.test.context.TestContext;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.only;
-import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link EventPublishingTestExecutionListener}.
@@ -40,58 +41,58 @@ import static org.mockito.BDDMockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class EventPublishingTestExecutionListenerTests {
 
+	private final EventPublishingTestExecutionListener listener = new EventPublishingTestExecutionListener();
+
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private TestContext testContext;
 
 	@Captor
 	private ArgumentCaptor<TestContextEvent> testExecutionEvent;
 
-	private final EventPublishingTestExecutionListener listener = new EventPublishingTestExecutionListener();
-
 
 	@Test
-	public void publishBeforeClassTestExecutionEvent() {
+	public void publishBeforeTestClassEvent() {
 		listener.beforeTestClass(testContext);
 		assertEvent(BeforeTestClassEvent.class);
 	}
 
 	@Test
-	public void publishPrepareInstanceTestExecutionEvent() {
+	public void publishPrepareTestInstanceEvent() {
 		listener.prepareTestInstance(testContext);
 		assertEvent(PrepareTestInstanceEvent.class);
 	}
 
 	@Test
-	public void publishBeforeMethodTestExecutionEvent() {
+	public void publishBeforeTestMethodEvent() {
 		listener.beforeTestMethod(testContext);
 		assertEvent(BeforeTestMethodEvent.class);
 	}
 
 	@Test
-	public void publishBeforeExecutionTestExecutionEvent() {
+	public void publishBeforeTestExecutionEvent() {
 		listener.beforeTestExecution(testContext);
 		assertEvent(BeforeTestExecutionEvent.class);
 	}
 
 	@Test
-	public void publishAfterExecutionTestExecutionEvent() {
+	public void publishAfterTestExecutionEvent() {
 		listener.afterTestExecution(testContext);
 		assertEvent(AfterTestExecutionEvent.class);
 	}
 
 	@Test
-	public void publishAfterMethodTestExecutionEvent() {
+	public void publishAfterTestMethodEvent() {
 		listener.afterTestMethod(testContext);
 		assertEvent(AfterTestMethodEvent.class);
 	}
 
 	@Test
-	public void publishAfterClassTestExecutionEvent() {
+	public void publishAfterTestClassEvent() {
 		listener.afterTestClass(testContext);
 		assertEvent(AfterTestClassEvent.class);
 	}
 
-	private <T extends TestContextEvent> void assertEvent(Class<T> eventClass) {
+	private void assertEvent(Class<? extends TestContextEvent> eventClass) {
 		verify(testContext.getApplicationContext(), only()).publishEvent(testExecutionEvent.capture());
 		assertThat(testExecutionEvent.getValue(), instanceOf(eventClass));
 		assertThat(testExecutionEvent.getValue().getSource(), equalTo(testContext));
