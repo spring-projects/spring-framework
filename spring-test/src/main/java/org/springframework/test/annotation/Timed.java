@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Test-specific annotation to indicate that a test method has to finish
+ * Test annotation for use with JUnit 4 to indicate that a test method has to finish
  * execution in a {@linkplain #millis() specified time period}.
  *
  * <p>If the text execution takes longer than the specified time period, then
