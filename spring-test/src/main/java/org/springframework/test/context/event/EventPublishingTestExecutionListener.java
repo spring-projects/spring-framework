@@ -28,7 +28,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * <p>These events may be consumed for various reasons, such as resetting <em>mock</em>
  * beans or tracing test execution. Since these events may be consumed by regular
  * Spring beans, they can be shared among different test classes.
- * 
+ *
  * <h3>Supported Events</h3>
  * <ul>
  * <li>{@link BeforeTestClassEvent}</li>

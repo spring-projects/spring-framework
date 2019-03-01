@@ -16,12 +16,12 @@
 
 package org.springframework.test.context.event.annotation;
 
-import org.springframework.context.event.EventListener;
-import org.springframework.test.context.event.PrepareTestInstanceEvent;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import org.springframework.context.event.EventListener;
+import org.springframework.test.context.event.PrepareTestInstanceEvent;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.METHOD;
