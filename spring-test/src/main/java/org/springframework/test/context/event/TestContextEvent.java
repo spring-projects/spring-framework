@@ -39,12 +39,25 @@ public abstract class TestContextEvent extends ApplicationEvent {
 	}
 
 	/**
-	 * Get the {@code TestContext} associated with this event.
+	 * Get the {@link TestContext} associated with this event.
 	 * @return the {@code TestContext} associated with this event (never {@code null})
+	 * @see #getTestContext()
 	 */
 	@Override
-	public TestContext getSource() {
+	public final TestContext getSource() {
 		return (TestContext) super.getSource();
+	}
+
+	/**
+	 * Alias for {@link #getSource()}.
+	 * <p>This method may be favored over {@code getSource()} to improve readability
+	 * in SpEL expressions for event processing
+	 * {@linkplain org.springframework.context.event.EventListener#condition conditions}.
+	 * @return the {@code TestContext} associated with this event (never {@code null})
+	 * @see #getSource()
+	 */
+	public final TestContext getTestContext() {
+		return getSource();
 	}
 
 }

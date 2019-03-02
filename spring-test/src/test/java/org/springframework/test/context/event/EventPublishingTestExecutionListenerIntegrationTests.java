@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.event;
 
+import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
 
 import org.junit.Before;
@@ -35,8 +36,11 @@ import org.springframework.test.context.event.annotation.BeforeTestClass;
 import org.springframework.test.context.event.annotation.BeforeTestExecution;
 import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.test.context.event.annotation.PrepareTestInstance;
+import org.springframework.util.ReflectionUtils;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -51,11 +55,11 @@ import static org.mockito.Mockito.verify;
  */
 public class EventPublishingTestExecutionListenerIntegrationTests {
 
-	private final TestContextManager testContextManager = new TestContextManager(TestCase.class);
+	private final TestContextManager testContextManager = new TestContextManager(ExampleTestCase.class);
 	private final TestContext testContext = testContextManager.getTestContext();
 	private final TestExecutionListener listener = testContext.getApplicationContext().getBean(EventCaptureConfiguration.class).listener();
-	private final Object testInstance = new TestCase();
-	private final Method testMethod = null;
+	private final Object testInstance = new ExampleTestCase();
+	private final Method testMethod = ReflectionUtils.findMethod(ExampleTestCase.class, "test1");
 
 
 	@Before
@@ -78,9 +82,16 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 	}
 
 	@Test
-	public void beforeTestMethodAnnotation() throws Exception {
+	public void beforeTestMethodAnnotationWithMatchingCondition() throws Exception {
 		testContextManager.beforeTestMethod(testInstance, testMethod);
 		verify(listener, only()).beforeTestMethod(testContext);
+	}
+
+	@Test
+	public void beforeTestMethodAnnotationWithFailingCondition() throws Exception {
+		Method testMethod2 = ReflectionUtils.findMethod(ExampleTestCase.class, "test2");
+		testContextManager.beforeTestMethod(testInstance, testMethod2);
+		verify(listener, never()).beforeTestMethod(testContext);
 	}
 
 	@Test
@@ -116,17 +127,17 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 			return mock(TestExecutionListener.class);
 		}
 
-		@BeforeTestClass
+		@BeforeTestClass("#root.event.source.testClass.name matches '.+TestCase'")
 		public void beforeTestClass(BeforeTestClassEvent e) throws Exception {
 			listener().beforeTestClass(e.getSource());
 		}
 
-		@PrepareTestInstance
+		@PrepareTestInstance("#a0.testContext.testClass.name matches '.+TestCase'")
 		public void prepareTestInstance(PrepareTestInstanceEvent e) throws Exception {
 			listener().prepareTestInstance(e.getSource());
 		}
 
-		@BeforeTestMethod
+		@BeforeTestMethod("#p0.testContext.testMethod.isAnnotationPresent(T(org.springframework.test.context.event.EventPublishingTestExecutionListenerIntegrationTests.Traceable))")
 		public void beforeTestMethod(BeforeTestMethodEvent e) throws Exception {
 			listener().beforeTestMethod(e.getSource());
 		}
@@ -141,27 +152,33 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 			listener().afterTestExecution(e.getSource());
 		}
 
-		@AfterTestMethod
+		@AfterTestMethod("event.testContext.testMethod.isAnnotationPresent(T(org.springframework.test.context.event.EventPublishingTestExecutionListenerIntegrationTests.Traceable))")
 		public void afterTestMethod(AfterTestMethodEvent e) throws Exception {
 			listener().afterTestMethod(e.getSource());
 		}
 
-		@AfterTestClass
-		public void afterTestClass(AfterTestClassEvent e) throws Exception {
-			listener().afterTestClass(e.getSource());
+		@AfterTestClass("#afterTestClassEvent.testContext.testClass.name matches '.+TestCase'")
+		public void afterTestClass(AfterTestClassEvent afterTestClassEvent) throws Exception {
+			listener().afterTestClass(afterTestClassEvent.getSource());
 		}
 
 	}
 
+	@Retention(RUNTIME)
+	@interface Traceable {
+	}
+
 	@ContextConfiguration(classes = EventCaptureConfiguration.class)
 	@TestExecutionListeners(EventPublishingTestExecutionListener.class)
-	static class TestCase {
+	static class ExampleTestCase {
 
-		/**
-		 * Serves as dummy test method.
-		 */
-		@SuppressWarnings("PMD.UncommentedEmptyMethodBody")
-		public void dummyTestMethod() {
+		@Traceable
+		public void test1() {
+			/* no-op */
+		}
+
+		public void test2() {
+			/* no-op */
 		}
 	}
 

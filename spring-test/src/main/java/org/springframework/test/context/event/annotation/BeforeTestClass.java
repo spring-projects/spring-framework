@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.context.event.BeforeTestClassEvent;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
@@ -41,17 +42,29 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@link org.springframework.test.context.TestExecutionListener#beforeTestClass}
  * lifecycle.
  *
+ * <p>Event processing can optionally be made {@linkplain #value conditional} via
+ * a SpEL expression &mdash; for example,
+ * {@code @BeforeTestClass("event.testContext.testClass.name matches '.+IntegrationTests'")}.
+ *
  * <p>The {@code EventPublishingTestExecutionListener} must be registered in order
  * for this annotation to have an effect &mdash; for example, via
  * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners}.
  *
  * @author Frank Scheffler
+ * @author Sam Brannen
  * @since 5.2
  * @see BeforeTestClassEvent
  */
-@Documented
 @Retention(RUNTIME)
 @Target({ METHOD, ANNOTATION_TYPE })
+@Documented
 @EventListener(BeforeTestClassEvent.class)
 public @interface BeforeTestClass {
+
+	/**
+	 * Alias for {@link EventListener#condition}.
+	 */
+	@AliasFor(annotation = EventListener.class, attribute = "condition")
+	String value() default "";
+
 }
