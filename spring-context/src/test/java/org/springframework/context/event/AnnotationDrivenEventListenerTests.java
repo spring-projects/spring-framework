@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,6 +155,7 @@ public class AnnotationDrivenEventListenerTests {
 
 	@Test
 	public void methodSignatureNoEvent() {
+		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext failingContext =
 				new AnnotationConfigApplicationContext();
 		failingContext.register(BasicConfiguration.class,
@@ -172,7 +173,6 @@ public class AnnotationDrivenEventListenerTests {
 		AnotherTestEvent event = new AnotherTestEvent(this, "dummy");
 		ReplyEventListener replyEventListener = this.context.getBean(ReplyEventListener.class);
 		TestEventListener listener = this.context.getBean(TestEventListener.class);
-
 
 		this.eventCollector.assertNoEventReceived(listener);
 		this.eventCollector.assertNoEventReceived(replyEventListener);
@@ -747,7 +747,7 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		@Async
 		public void handleAsync(AnotherTestEvent event) {
-			assertTrue(!Thread.currentThread().getName().equals(event.content));
+			assertNotEquals(event.content, Thread.currentThread().getName());
 			collectEvent(event);
 			this.countDownLatch.countDown();
 		}
@@ -794,7 +794,7 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		@Async
 		public void handleAsync(AnotherTestEvent event) {
-			assertTrue(!Thread.currentThread().getName().equals(event.content));
+			assertNotEquals(event.content, Thread.currentThread().getName());
 			this.eventCollector.addEvent(this, event);
 			this.countDownLatch.countDown();
 		}
@@ -820,7 +820,7 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		@Async
 		public void handleAsync(AnotherTestEvent event) {
-			assertTrue(!Thread.currentThread().getName().equals(event.content));
+			assertNotEquals(event.content, Thread.currentThread().getName());
 			this.eventCollector.addEvent(this, event);
 			this.countDownLatch.countDown();
 		}
