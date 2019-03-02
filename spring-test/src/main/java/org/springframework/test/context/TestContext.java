@@ -67,6 +67,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @return the current test instance (may be {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
+	@Nullable
 	Object getTestInstance();
 
 	/**
@@ -75,6 +76,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @return the current test method (may be {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
+	@Nullable
 	Method getTestMethod();
 
 	/**
