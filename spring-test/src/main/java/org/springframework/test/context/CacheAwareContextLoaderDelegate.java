@@ -46,7 +46,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * {@link org.springframework.test.context.cache.ContextCache#logStatistics()}.
 	 * @param mergedContextConfiguration the merged context configuration to use
 	 * to load the application context; never {@code null}
-	 * @return the application context
+	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving or loading
 	 * the application context
 	 */

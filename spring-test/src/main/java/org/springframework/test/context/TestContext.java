@@ -49,7 +49,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * <p>Implementations of this method are responsible for loading the
 	 * application context if the corresponding context has not already been
 	 * loaded, potentially caching the context as well.
-	 * @return the application context
+	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
 	 */
@@ -72,7 +72,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	/**
 	 * Get the current {@linkplain Method test method} for this test context.
 	 * <p>Note: this is a mutable property.
-	 * @return the current test method
+	 * @return the current test method (may be {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	Method getTestMethod();
@@ -101,6 +101,8 @@ public interface TestContext extends AttributeAccessor, Serializable {
 
 	/**
 	 * Update this test context to reflect the state of the currently executing test.
+	 * <p><strong>WARNING</strong>: this method should only be invoked by the
+	 * {@link TestContextManager}.
 	 * <p>Caution: concurrent invocations of this method might not be thread-safe,
 	 * depending on the underlying implementation.
 	 * @param testInstance the current test instance (may be {@code null})
