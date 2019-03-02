@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Supported by Spring's own FrameworkServlet (through a specific
  * ServletRequestHandledEvent subclass), but can also be raised by any
- * other web component. Used, for example, by Spring's out-of-the-box
- * PerformanceMonitorListener.
+ * other web component.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
