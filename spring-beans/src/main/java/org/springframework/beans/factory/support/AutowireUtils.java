@@ -334,7 +334,7 @@ public abstract class AutowireUtils {
 	 * that declares the parameter
 	 * @param containingClass the concrete class that contains the parameter; this may
 	 * differ from the class that declares the parameter in that it may be a subclass
-	 * thereof, potentially substituting type variables
+	 * thereof, potentially substituting type variables (must not be {@code null})
 	 * @param beanFactory the {@code AutowireCapableBeanFactory} from which to resolve
 	 * the dependency (must not be {@code null})
 	 * @return the resolved object, or {@code null} if none found
@@ -351,6 +351,7 @@ public abstract class AutowireUtils {
 			throws BeansException {
 
 		Assert.notNull(parameter, "Parameter must not be null");
+		Assert.notNull(containingClass, "Containing class must not be null");
 		Assert.notNull(beanFactory, "AutowireCapableBeanFactory must not be null");
 
 		AnnotatedElement annotatedParameter = getEffectiveAnnotatedParameter(parameter, parameterIndex);

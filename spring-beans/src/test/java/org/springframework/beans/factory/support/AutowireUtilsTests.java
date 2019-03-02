@@ -159,15 +159,24 @@ public class AutowireUtilsTests {
 	}
 
 	@Test
-	public void resolveDependencyPreconditionsForBeanFactory() throws Exception {
-		Method method = getClass().getDeclaredMethod("autowirableMethod", String.class, String.class, String.class, String.class);
-		Parameter parameter = method.getParameters()[0];
-
+	public void resolveDependencyPreconditionsForContainingClass() throws Exception {
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("AutowireCapableBeanFactory must not be null");
-		AutowireUtils.resolveDependency(parameter, 0, null, null);
+		exception.expectMessage("Containing class must not be null");
+		AutowireUtils.resolveDependency(getParameter(), 0, null, null);
 	}
 
+	@Test
+	public void resolveDependencyPreconditionsForBeanFactory() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage("AutowireCapableBeanFactory must not be null");
+		AutowireUtils.resolveDependency(getParameter(), 0, getClass(), null);
+	}
+
+	private Parameter getParameter() throws NoSuchMethodException {
+		Method method = getClass().getDeclaredMethod("autowirableMethod", String.class, String.class, String.class, String.class);
+		return method.getParameters()[0];
+	}
+	
 	@Test
 	public void resolveDependencyForAnnotatedParametersInTopLevelClassConstructor() throws Exception {
 		Constructor<?> constructor = AutowirableClass.class.getConstructor(String.class, String.class, String.class, String.class);
