@@ -182,7 +182,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 	}
 
 	@RunWith(SpringRunner.class)
-	@ContextConfiguration(classes = EventCaptureConfiguration.class)
+	@ContextConfiguration(classes = TestEventListenerConfiguration.class)
 	@TestExecutionListeners(listeners = EventPublishingTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
 	public static class ExampleTestCase {
 
@@ -211,7 +211,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 	@Configuration
 	@EnableAsync(proxyTargetClass = true)
-	static class EventCaptureConfiguration extends AsyncConfigurerSupport {
+	static class TestEventListenerConfiguration extends AsyncConfigurerSupport {
 
 		@Override
 		public Executor getAsyncExecutor() {
@@ -231,9 +231,82 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 			return mock(TestExecutionListener.class);
 		}
 
+		/**
+		 * The {@code @Async} test event listener method must reside in a separate
+		 * component since {@code @Async} is not supported on methods in
+		 * {@code @Configuration} classes.
+		 */
 		@Bean
-		EventCaptureBean eventCaptureBean() {
-			return new EventCaptureBean(listener());
+		AsyncTestEventComponent asyncTestEventComponent() {
+			return new AsyncTestEventComponent(listener());
+		}
+
+		@BeforeTestClass("#root.event.source.testClass.name matches '.+TestCase'")
+		public void beforeTestClass(BeforeTestClassEvent e) throws Exception {
+			listener().beforeTestClass(e.getSource());
+		}
+
+		@PrepareTestInstance("#a0.testContext.testClass.name matches '.+TestCase'")
+		public void prepareTestInstance(PrepareTestInstanceEvent e) throws Exception {
+			listener().prepareTestInstance(e.getSource());
+		}
+
+		@BeforeTestMethod("#p0.testContext.testMethod.isAnnotationPresent(T(org.springframework.test.context.event.EventPublishingTestExecutionListenerIntegrationTests.Traceable))")
+		public void beforeTestMethod(BeforeTestMethodEvent e) throws Exception {
+			listener().beforeTestMethod(e.getSource());
+		}
+
+		@BeforeTestMethod("event.testContext.testMethod.name == 'testWithFailingEventListener'")
+		public void beforeTestMethodWithFailure(BeforeTestMethodEvent event) throws Exception {
+			listener().beforeTestMethod(event.getSource());
+			throw new RuntimeException("Boom!");
+		}
+
+		@BeforeTestExecution
+		public void beforeTestExecution(BeforeTestExecutionEvent e) throws Exception {
+			listener().beforeTestExecution(e.getSource());
+		}
+
+		@AfterTestExecution
+		public void afterTestExecution(AfterTestExecutionEvent e) throws Exception {
+			listener().afterTestExecution(e.getSource());
+		}
+
+		@AfterTestMethod("event.testContext.testMethod.isAnnotationPresent(T(org.springframework.test.context.event.EventPublishingTestExecutionListenerIntegrationTests.Traceable))")
+		public void afterTestMethod(AfterTestMethodEvent e) throws Exception {
+			listener().afterTestMethod(e.getSource());
+		}
+
+		@AfterTestClass("#afterTestClassEvent.testContext.testClass.name matches '.+TestCase'")
+		public void afterTestClass(AfterTestClassEvent afterTestClassEvent) throws Exception {
+			listener().afterTestClass(afterTestClassEvent.getSource());
+		}
+
+	}
+
+	/**
+	 * MUST be annotated with {@code @Component} due to a change in Spring 5.1 that
+	 * does not consider beans in a package starting with "org.springframework" to be
+	 * event listeners unless they are also components.
+	 *
+	 * @see org.springframework.context.event.EventListenerMethodProcessor#isSpringContainerClass
+	 */
+	@Component
+	static class AsyncTestEventComponent {
+
+		final TestExecutionListener listener;
+
+
+		AsyncTestEventComponent(TestExecutionListener listener) {
+			this.listener = listener;
+		}
+
+		@BeforeTestMethod("event.testContext.testMethod.name == 'testWithFailingAsyncEventListener'")
+		@Async
+		public void beforeTestMethodWithAsyncFailure(BeforeTestMethodEvent event) throws Exception {
+			this.listener.beforeTestMethod(event.getSource());
+			throw new RuntimeException(String.format("Asynchronous exception for test method [%s] in thread [%s]",
+				event.getTestContext().getTestMethod().getName(), Thread.currentThread().getName()));
 		}
 
 	}
@@ -248,71 +321,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 			asyncException = exception;
 			countDownLatch.countDown();
 		}
-	}
 
-	// MUST be annotated with @Component due to a change in Spring 5.1 that
-	// does not consider beans in a package starting with "org.springframework"
-	// to be event listeners unless they are also components. See
-	// org.springframework.context.event.EventListenerMethodProcessor.isSpringContainerClass(Class<?>)
-	// for details.
-	@Component
-	static class EventCaptureBean {
-
-		final TestExecutionListener listener;
-
-
-		EventCaptureBean(TestExecutionListener listener) {
-			this.listener = listener;
-		}
-
-		@BeforeTestClass("#root.event.source.testClass.name matches '.+TestCase'")
-		public void beforeTestClass(BeforeTestClassEvent e) throws Exception {
-			this.listener.beforeTestClass(e.getSource());
-		}
-
-		@PrepareTestInstance("#a0.testContext.testClass.name matches '.+TestCase'")
-		public void prepareTestInstance(PrepareTestInstanceEvent e) throws Exception {
-			this.listener.prepareTestInstance(e.getSource());
-		}
-
-		@BeforeTestMethod("#p0.testContext.testMethod.isAnnotationPresent(T(org.springframework.test.context.event.EventPublishingTestExecutionListenerIntegrationTests.Traceable))")
-		public void beforeTestMethod(BeforeTestMethodEvent e) throws Exception {
-			this.listener.beforeTestMethod(e.getSource());
-		}
-
-		@BeforeTestMethod("event.testContext.testMethod.name == 'testWithFailingEventListener'")
-		public void beforeTestMethodWithFailure(BeforeTestMethodEvent event) throws Exception {
-			this.listener.beforeTestMethod(event.getSource());
-			throw new RuntimeException("Boom!");
-		}
-
-		@BeforeTestMethod("event.testContext.testMethod.name == 'testWithFailingAsyncEventListener'")
-		@Async
-		public void beforeTestMethodWithAsyncFailure(BeforeTestMethodEvent event) throws Exception {
-			this.listener.beforeTestMethod(event.getSource());
-			throw new RuntimeException(String.format("Asynchronous exception for test method [%s] in thread [%s]",
-				event.getTestContext().getTestMethod().getName(), Thread.currentThread().getName()));
-		}
-
-		@BeforeTestExecution
-		public void beforeTestExecution(BeforeTestExecutionEvent e) throws Exception {
-			this.listener.beforeTestExecution(e.getSource());
-		}
-
-		@AfterTestExecution
-		public void afterTestExecution(AfterTestExecutionEvent e) throws Exception {
-			this.listener.afterTestExecution(e.getSource());
-		}
-
-		@AfterTestMethod("event.testContext.testMethod.isAnnotationPresent(T(org.springframework.test.context.event.EventPublishingTestExecutionListenerIntegrationTests.Traceable))")
-		public void afterTestMethod(AfterTestMethodEvent e) throws Exception {
-			this.listener.afterTestMethod(e.getSource());
-		}
-
-		@AfterTestClass("#afterTestClassEvent.testContext.testClass.name matches '.+TestCase'")
-		public void afterTestClass(AfterTestClassEvent afterTestClassEvent) throws Exception {
-			this.listener.afterTestClass(afterTestClassEvent.getSource());
-		}
 	}
 
 }
