@@ -49,14 +49,10 @@ public class ThreadPoolExecutorFactoryBeanTests {
 	public static class ExecutorConfig {
 
 		@Bean
-		public ThreadPoolExecutorFactoryBean executorFactory() {
+		public ThreadPoolExecutorFactoryBean executor() {
 			return new ThreadPoolExecutorFactoryBean();
 		}
 
-		@Bean
-		public ExecutorService executor() {
-			return executorFactory().getObject();
-		}
 	}
 
 }
