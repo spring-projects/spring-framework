@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 
 import org.junit.Test;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,17 +35,13 @@ public class ThreadPoolExecutorFactoryBeanTests {
 
 	@Test
 	public void defaultExecutor() throws Exception {
-		ApplicationContext context = new AnnotationConfigApplicationContext(ExecutorConfig.class);
-		ExecutorService executor = context.getBean("executor", ExecutorService.class);
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(ExecutorConfig.class);
+		ExecutorService executor = context.getBean(ExecutorService.class);
 
-		FutureTask<String> task = new FutureTask<>(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return "foo";
-			}
-		});
+		FutureTask<String> task = new FutureTask<>(() -> "foo");
 		executor.execute(task);
 		assertEquals("foo", task.get());
+		context.close();
 	}
 
 
