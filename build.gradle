@@ -38,6 +38,7 @@ ext {
 	kotlinVersion        = "1.3.21"
 	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.33.Final"
+	quartzVersion        = "2.3.0"
 	reactorVersion       = "Californium-SR5"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
@@ -181,7 +182,7 @@ configure(allprojects) { project ->
 		"http://tiles.apache.org/framework/apidocs/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/2.10.4",
-		"http://quartz-scheduler.org/api/2.2.1/",
+		"https://www.quartz-scheduler.org/api/${quartzVersion}/package-list?",
 		"http://fasterxml.github.io/jackson-core/javadoc/2.9/",
 		"http://fasterxml.github.io/jackson-databind/javadoc/2.9/",
 		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.9/",
