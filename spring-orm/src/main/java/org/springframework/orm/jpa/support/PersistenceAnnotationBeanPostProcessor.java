@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -472,7 +472,7 @@ public class PersistenceAnnotationBeanPostProcessor
 				unitNameForLookup = this.defaultPersistenceUnitName;
 			}
 			String jndiName = this.persistenceUnits.get(unitNameForLookup);
-			if (jndiName == null && "".equals(unitNameForLookup) && this.persistenceUnits.size() == 1) {
+			if (jndiName == null && unitNameForLookup.isEmpty() && this.persistenceUnits.size() == 1) {
 				jndiName = this.persistenceUnits.values().iterator().next();
 			}
 			if (jndiName != null) {
@@ -505,7 +505,7 @@ public class PersistenceAnnotationBeanPostProcessor
 				unitNameForLookup = this.defaultPersistenceUnitName;
 			}
 			String jndiName = contexts.get(unitNameForLookup);
-			if (jndiName == null && "".equals(unitNameForLookup) && contexts.size() == 1) {
+			if (jndiName == null && unitNameForLookup.isEmpty() && contexts.size() == 1) {
 				jndiName = contexts.values().iterator().next();
 			}
 			if (jndiName != null) {

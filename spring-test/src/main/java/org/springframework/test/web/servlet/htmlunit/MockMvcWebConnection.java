@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * @param contextPath the path to validate
 	 */
 	static void validateContextPath(@Nullable String contextPath) {
-		if (contextPath == null || "".equals(contextPath)) {
+		if (contextPath == null || contextPath.isEmpty()) {
 			return;
 		}
 		Assert.isTrue(contextPath.startsWith("/"), () -> "contextPath '" + contextPath + "' must start with '/'.");
