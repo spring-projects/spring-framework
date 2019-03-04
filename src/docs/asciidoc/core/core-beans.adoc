@@ -8463,6 +8463,10 @@ The following table describes the standard events that Spring provides:
 | A web-specific event telling all beans that an HTTP request has been serviced. This
   event is published after the request is complete. This event is only applicable to
   web applications that use Spring's `DispatcherServlet`.
+
+| `ServletRequestHandledEvent`
+| A subclass of `RequestHandledEvent` that adds Servlet-specific context information.
+
 |===
 
 You can also create and publish your own custom events. The following example shows a
@@ -8552,8 +8556,10 @@ synchronously. This means that the `publishEvent()` method blocks until all list
 finished processing the event. One advantage of this synchronous and single-threaded
 approach is that, when a listener receives an event, it operates inside the transaction
 context of the publisher if a transaction context is available. If another strategy for
-event publication becomes necessary, See the javadoc for Spring's
-{api-spring-framework}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface.
+event publication becomes necessary, see the javadoc for Spring's
+{api-spring-framework}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
+and {api-spring-framework}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`]
+implementation for configuration options.
 
 The following example shows the bean definitions used to register and configure each of
 the classes above:
@@ -8595,7 +8601,7 @@ architectures that build upon the well-known Spring programming model.
 ==== Annotation-based Event Listeners
 
 As of Spring 4.2, you can register an event listener on any public method of a managed
-bean by using the `EventListener` annotation. The `BlackListNotifier` can be rewritten as
+bean by using the `@EventListener` annotation. The `BlackListNotifier` can be rewritten as
 follows:
 
 [source,java,indent=0]
@@ -8661,19 +8667,20 @@ items made available to the context so that you can use them for conditional eve
 | Event
 | root object
 | The actual `ApplicationEvent`.
-| `#root.event`
+| `#root.event` or `event`
 
 | Arguments array
 | root object
-| The arguments (as array) used for invoking the target.
-| `#root.args[0]`
+| The arguments (as an object array) used to invoke the method.
+| `#root.args` or `args`; `args[0]` to access the first argument, etc.
 
 | __Argument name__
 | evaluation context
 | The name of any of the method arguments. If, for some reason, the names are not available
-  (for example, because there is no debug information), the argument names are also available under the `#a<#arg>`
-  where `#arg` stands for the argument index (starting from 0).
-| `#blEvent` or `#a0` (you can also use `#p0` or `#p<#arg>` notation as an alias)
+  (for example, because there is no debug information in the compiled byte code), individual
+  arguments are also available using the `#a<#arg>` syntax where `<#arg>` stands for the
+  argument index (starting from 0).
+| `#blEvent` or `#a0` (you can also use `#p0` or `#p<#arg>` parameter notation as an alias)
 |===
 
 Note that `#root.event` gives you access to the underlying event, even if your method
@@ -8719,11 +8726,12 @@ following example shows how to do so:
 
 Be aware of the following limitations when using asynchronous events:
 
-* If the event listener throws an `Exception`, it is not propagated to the caller
-  See `AsyncUncaughtExceptionHandler` for more details.
-* Such event listener cannot send replies. If you need to send another event as the
-  result of the processing, inject {api-spring-framework}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`ApplicationEventPublisher`] to send the event
-  manually.
+* If an asynchronous event listener throws an `Exception`, it is not propagated to the
+  caller. See `AsyncUncaughtExceptionHandler` for more details.
+* Asynchronous event listener methods cannot publish a subsequent event by returning a
+  value. If you need to publish another event as the result of the processing, inject an
+  {api-spring-framework}/aop/interceptor/AsyncUncaughtExceptionHandler.html[`ApplicationEventPublisher`]
+  to publish the event manually.
 
 
 [[context-functionality-events-order]]
