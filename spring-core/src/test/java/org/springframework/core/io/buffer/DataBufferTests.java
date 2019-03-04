@@ -226,6 +226,27 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	public void writeMultipleUtf8String() {
+
+		DataBuffer buffer = createDataBuffer(1);
+		buffer.write("abc", StandardCharsets.UTF_8);
+		assertEquals(3, buffer.readableByteCount());
+
+		buffer.write("def", StandardCharsets.UTF_8);
+		assertEquals(6, buffer.readableByteCount());
+
+		buffer.write("ghi", StandardCharsets.UTF_8);
+		assertEquals(9, buffer.readableByteCount());
+
+		byte[] result = new byte[9];
+		buffer.read(result);
+
+		assertArrayEquals("abcdefghi".getBytes(), result);
+
+		release(buffer);
+	}
+
+	@Test
 	public void inputStream() throws IOException {
 		DataBuffer buffer = createDataBuffer(4);
 		buffer.write(new byte[]{'a', 'b', 'c', 'd', 'e'});
