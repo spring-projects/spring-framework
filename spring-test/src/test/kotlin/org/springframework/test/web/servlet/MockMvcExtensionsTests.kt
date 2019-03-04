@@ -22,7 +22,7 @@ import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.springframework.http.MediaType.*
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.*
@@ -44,26 +44,26 @@ class MockMvcExtensionsTests {
 	fun request() {
 		mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee") {
 			secure = true
-			accept = MediaType.APPLICATION_JSON
+			accept = APPLICATION_JSON
 			headers {
 				contentLanguage = Locale.FRANCE
 			}
 			principal = Principal { "foo" }
-		} andExpect {
+		}.andExpect {
 			status { isOk }
-			content { contentType("application/json;charset=UTF-8") }
+			content { contentType(APPLICATION_JSON_UTF8) }
 			jsonPath("$.name") { value("Lee") }
 			content { json("""{"someBoolean": false}""", false) }
-		} andDo {
+		}.andDo {
 			print()
 		}
 	}
 
 	@Test
 	fun `request without MockHttpServletRequestDsl`() {
-		mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee") andExpect {
+		mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee").andExpect {
 			status { isOk }
-		} andDo {
+		}.andDo {
 			print()
 		}
 	}
@@ -74,11 +74,11 @@ class MockMvcExtensionsTests {
 		var handlerInvoked = false
 		val matcher = ResultMatcher { matcherInvoked = true }
 		val handler = ResultHandler { handlerInvoked = true }
-		mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee")  andExpect {
+		mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee").andExpect {
 			status { isOk }
-		} andExpect {
+		}.andExpect {
 			match(matcher)
-		} andDo {
+		}.andDo {
 			handle(handler)
 		}
 		Assert.assertTrue(matcherInvoked)
@@ -89,17 +89,17 @@ class MockMvcExtensionsTests {
 	fun get() {
 		mockMvc.get("/person/{name}", "Lee") {
 				secure = true
-				accept = MediaType.APPLICATION_JSON
+				accept = APPLICATION_JSON_UTF8
 				headers {
 					contentLanguage = Locale.FRANCE
 				}
 				principal = Principal { "foo" }
-		} andExpect {
+		}.andExpect {
 			status { isOk }
-			content { contentType("application/json;charset=UTF-8") }
+			content { contentType(APPLICATION_JSON_UTF8) }
 			jsonPath("$.name") { value("Lee") }
 			content { json("""{"someBoolean": false}""", false) }
-		} andDo {
+		}.andDo {
 			print()
 		}
 	}
@@ -109,10 +109,10 @@ class MockMvcExtensionsTests {
 		mockMvc.post("/person") {
 			content = """{ "name": "foo" }"""
 			headers {
-				accept = listOf(MediaType.APPLICATION_JSON)
-				contentType = MediaType.APPLICATION_JSON
+				accept = listOf(APPLICATION_JSON)
+				contentType = APPLICATION_JSON
 			}
-		} andExpect {
+		}.andExpect {
 			status {
 				isCreated
 			}
@@ -123,9 +123,9 @@ class MockMvcExtensionsTests {
 	fun `negative assertion tests to verify the matchers throw errors when expected`() {
 		val name = "Petr"
 		mockMvc.get("/person/$name") {
-			accept = MediaType.APPLICATION_JSON
-		} andExpect {
-			assertThrows<AssertionError> { content { contentType(MediaType.APPLICATION_ATOM_XML) } }
+			accept = APPLICATION_JSON
+		}.andExpect {
+			assertThrows<AssertionError> { content { contentType(APPLICATION_ATOM_XML) } }
 			assertThrows<AssertionError> { content { string("Wrong") } }
 			assertThrows<AssertionError> { jsonPath("name", CoreMatchers.`is`("Wrong")) }
 			assertThrows<AssertionError> { content { json("""{"name":"wrong"}""") } }
@@ -146,11 +146,11 @@ class MockMvcExtensionsTests {
 	@Test
 	fun `negative assertion tests for xpath`() {
 		mockMvc.get("/person/Clint") {
-			accept = MediaType.APPLICATION_XML
-		} andExpect {
+			accept = APPLICATION_XML
+		}.andExpect {
 			status { isOk }
 			assertThrows<AssertionError> { xpath("//wrong") { nodeCount(1) } }
-		} andDo {
+		}.andDo {
 			print()
 		}
 	}

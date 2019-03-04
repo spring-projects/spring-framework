@@ -12,7 +12,7 @@ class ResultActionsDsl(private val actions: ResultActions) {
 	 * Provide access to [MockMvcResultMatchersDsl] Kotlin DSL.
 	 * @see MockMvcResultMatchersDsl.match
 	 */
-	infix fun andExpect(dsl: MockMvcResultMatchersDsl.() -> Unit): ResultActionsDsl {
+	fun andExpect(dsl: MockMvcResultMatchersDsl.() -> Unit): ResultActionsDsl {
 		MockMvcResultMatchersDsl(actions).dsl()
 		return this
 	}
@@ -21,7 +21,7 @@ class ResultActionsDsl(private val actions: ResultActions) {
 	 * Provide access to [MockMvcResultHandlersDsl] Kotlin DSL.
 	 * @see MockMvcResultHandlersDsl.handle
 	 */
-	infix fun andDo(dsl: MockMvcResultHandlersDsl.() -> Unit): ResultActionsDsl {
+	fun andDo(dsl: MockMvcResultHandlersDsl.() -> Unit): ResultActionsDsl {
 		MockMvcResultHandlersDsl(actions).dsl()
 		return this
 	}

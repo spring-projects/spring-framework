@@ -336,17 +336,17 @@ better discoverability (no usage of static methods).
 val mockMvc: MockMvc = ...
 mockMvc.get("/person/{name}", "Lee") {
 	secure = true
-	accept = MediaType.APPLICATION_JSON
+	accept = APPLICATION_JSON
 	headers {
 		contentLanguage = Locale.FRANCE
 	}
 	principal = Principal { "foo" }
-} andExpect {
+}.andExpect {
 	status { isOk }
-	content { contentType("application/json;charset=UTF-8") }
+	content { contentType(APPLICATION_JSON_UTF8) }
 	jsonPath("$.name") { value("Lee") }
 	content { json("""{"someBoolean": false}""", false) }
-} andDo {
+}.andDo {
 	print()
 }
 ----
