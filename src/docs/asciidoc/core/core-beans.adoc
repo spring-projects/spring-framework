@@ -8003,7 +8003,7 @@ context parameters. It can optionally enable a {api-spring-framework}/jndi/JndiP
 See the javadoc for details.
 
 Concretely, when you use the `StandardEnvironment`, the call to `env.containsProperty("my-property")`
-returns true if a `my-property` system property or `my-propertyi` environment variable is present at
+returns true if a `my-property` system property or `my-property` environment variable is present at
 runtime.
 
 [TIP]
