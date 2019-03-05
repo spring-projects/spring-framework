@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -36,9 +35,6 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @since 31.07.2004
  */
 public class FieldRetrievingFactoryBeanTests {
-
-	private static final Resource CONTEXT =
-		qualifiedResource(FieldRetrievingFactoryBeanTests.class, "context.xml");
 
 	@Test
 	public void testStaticField() throws Exception {
@@ -127,7 +123,9 @@ public class FieldRetrievingFactoryBeanTests {
 	@Test
 	public void testBeanNameSyntaxWithBeanFactory() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
+				qualifiedResource(FieldRetrievingFactoryBeanTests.class, "context.xml"));
+
 		TestBean testBean = (TestBean) bf.getBean("testBean");
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), testBean.getSomeIntegerArray()[0]);
 		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), testBean.getSomeIntegerArray()[1]);

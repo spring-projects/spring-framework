@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,10 @@ import org.springframework.web.context.ServletContextAware;
 /**
  * Subclass of {@link GenericApplicationContext}, suitable for web environments.
  *
- * <p>Implements the
- * {@link org.springframework.web.context.ConfigurableWebApplicationContext},
- * but is not intended for declarative setup in {@code web.xml}. Instead,
- * it is designed for programmatic setup, for example for building nested contexts or
- * for use within Spring 3.1 {@link org.springframework.web.WebApplicationInitializer}s.
+ * <p>Implements {@link org.springframework.web.context.ConfigurableWebApplicationContext},
+ * but is not intended for declarative setup in {@code web.xml}. Instead, it is designed
+ * for programmatic setup, for example for building nested contexts or for use within
+ * {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializers}.
  *
  * <p><b>If you intend to implement a WebApplicationContext that reads bean definitions
  * from configuration files, consider deriving from AbstractRefreshableWebApplicationContext,

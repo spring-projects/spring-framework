@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.Resource;
 import org.springframework.util.SerializationTestUtils;
 
 import static org.junit.Assert.*;
@@ -42,25 +41,25 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class ObjectFactoryCreatingFactoryBeanTests {
 
-	private static final Resource CONTEXT =
-		qualifiedResource(ObjectFactoryCreatingFactoryBeanTests.class, "context.xml");
-
 	private DefaultListableBeanFactory beanFactory;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(CONTEXT);
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
+				qualifiedResource(ObjectFactoryCreatingFactoryBeanTests.class, "context.xml"));
 		this.beanFactory.setSerializationId("test");
 	}
 
 	@After
-	public void tearDown() {
+	public void close() {
 		this.beanFactory.setSerializationId(null);
 	}
 
+
 	@Test
-	public void testFactoryOperation() throws Exception {
+	public void testFactoryOperation() {
 		FactoryTestBean testBean = beanFactory.getBean("factoryTestBean", FactoryTestBean.class);
 		ObjectFactory<?> objectFactory = testBean.getObjectFactory();
 
@@ -82,7 +81,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	public void testProviderOperation() throws Exception {
+	public void testProviderOperation() {
 		ProviderTestBean testBean = beanFactory.getBean("providerTestBean", ProviderTestBean.class);
 		Provider<?> provider = testBean.getProvider();
 
@@ -152,7 +151,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	public void testEnsureOFBFBReportsThatItActuallyCreatesObjectFactoryInstances() throws Exception {
+	public void testEnsureOFBFBReportsThatItActuallyCreatesObjectFactoryInstances() {
 		assertEquals("Must be reporting that it creates ObjectFactory instances (as per class contract).",
 			ObjectFactory.class, new ObjectFactoryCreatingFactoryBean().getObjectType());
 	}
