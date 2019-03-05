@@ -15,6 +15,8 @@
  */
 package org.springframework.messaging.rsocket;
 
+import io.netty.buffer.ByteBuf;
+import io.rsocket.Frame;
 import io.rsocket.Payload;
 import io.rsocket.util.ByteBufPayload;
 import io.rsocket.util.DefaultPayload;
@@ -24,6 +26,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.util.Assert;
 
 /**
  * Static utility methods to create {@link Payload} from {@link DataBuffer}s
@@ -35,18 +38,30 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 abstract class PayloadUtils {
 
 	/**
-	 * Return the Payload data wrapped as DataBuffer. If the bufferFactory is
-	 * {@link NettyDataBufferFactory} the payload retained and sliced.
-	 * @param payload the input payload
-	 * @param bufferFactory the BufferFactory to use to wrap
-	 * @return the DataBuffer wrapper
+	 * Use this method to slice, retain and wrap the data portion of the
+	 * {@code Payload}, and also to release the {@code Payload}. This assumes
+	 * the Payload metadata has been read by now and ensures downstream code
+	 * need only be aware of {@code DataBuffer}s.
+	 * @param payload the payload to process
+	 * @param bufferFactory the DataBufferFactory to wrap with
+	 * @return the created {@code DataBuffer} instance
 	 */
-	public static DataBuffer wrapPayloadData(Payload payload, DataBufferFactory bufferFactory) {
-		if (bufferFactory instanceof NettyDataBufferFactory) {
-			return ((NettyDataBufferFactory) bufferFactory).wrap(payload.retain().sliceData());
-		}
-		else {
+	public static DataBuffer retainDataAndReleasePayload(Payload payload, DataBufferFactory bufferFactory) {
+		try {
+			if (bufferFactory instanceof NettyDataBufferFactory) {
+				ByteBuf byteBuf = payload.sliceData().retain();
+				return ((NettyDataBufferFactory) bufferFactory).wrap(byteBuf);
+			}
+
+			Assert.isTrue(!(payload instanceof ByteBufPayload) && !(payload instanceof Frame),
+					"NettyDataBufferFactory expected, actual: " + bufferFactory.getClass().getSimpleName());
+
 			return bufferFactory.wrap(payload.getData());
+		}
+		finally {
+			if (payload.refCnt() > 0) {
+				payload.release();
+			}
 		}
 	}
 

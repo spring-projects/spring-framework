@@ -396,10 +396,10 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (matches.size() > 1) {
 			Match<T> secondBestMatch = matches.get(1);
 			if (comparator.compare(bestMatch, secondBestMatch) == 0) {
-				Method m1 = bestMatch.handlerMethod.getMethod();
-				Method m2 = secondBestMatch.handlerMethod.getMethod();
+				HandlerMethod m1 = bestMatch.handlerMethod;
+				HandlerMethod m2 = secondBestMatch.handlerMethod;
 				throw new IllegalStateException("Ambiguous handler methods mapped for destination '" +
-						destination + "': {" + m1 + ", " + m2 + "}");
+						destination + "': {" + m1.getShortLogMessage() + ", " + m2.getShortLogMessage() + "}");
 			}
 		}
 		return bestMatch;

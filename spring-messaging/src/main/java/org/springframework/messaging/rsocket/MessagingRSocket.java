@@ -15,6 +15,7 @@
  */
 package org.springframework.messaging.rsocket;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import io.rsocket.AbstractRSocket;
@@ -29,7 +30,7 @@ import reactor.core.publisher.MonoProcessor;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
+import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -84,6 +85,9 @@ class MessagingRSocket extends AbstractRSocket {
 		if (StringUtils.hasText(payload.dataMimeType())) {
 			this.dataMimeType = MimeTypeUtils.parseMimeType(payload.dataMimeType());
 		}
+		// frameDecoder does not apply to connectionSetupPayload
+		// so retain here since handle expects it..
+		payload.retain();
 		return handle(payload);
 	}
 
@@ -120,54 +124,72 @@ class MessagingRSocket extends AbstractRSocket {
 
 
 	private Mono<Void> handle(Payload payload) {
-		Message<?> message = MessageBuilder.createMessage(
-				Mono.fromCallable(() -> wrapPayloadData(payload)), createHeaders(payload, null));
+		String destination = getDestination(payload);
+		MessageHeaders headers = createHeaders(destination, null);
+		DataBuffer dataBuffer = retainDataAndReleasePayload(payload);
+		int refCount = refCount(dataBuffer);
+		Message<?> message = MessageBuilder.createMessage(dataBuffer, headers);
+		return Mono.defer(() -> this.handler.apply(message))
+				.doFinally(s -> {
+					if (refCount(dataBuffer) == refCount) {
+						DataBufferUtils.release(dataBuffer);
+					}
+				});
+	}
 
-		return this.handler.apply(message);
+	private int refCount(DataBuffer dataBuffer) {
+		return dataBuffer instanceof NettyDataBuffer ?
+				((NettyDataBuffer) dataBuffer).getNativeBuffer().refCnt() : 1;
 	}
 
 	private Flux<Payload> handleAndReply(Payload firstPayload, Flux<Payload> payloads) {
 		MonoProcessor<Flux<Payload>> replyMono = MonoProcessor.create();
-		Message<?> message = MessageBuilder.createMessage(
-				payloads.map(this::wrapPayloadData).doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release),
-				createHeaders(firstPayload, replyMono));
+		String destination = getDestination(firstPayload);
+		MessageHeaders headers = createHeaders(destination, replyMono);
 
-		return this.handler.apply(message)
+		AtomicBoolean read = new AtomicBoolean();
+		Flux<DataBuffer> buffers = payloads.map(this::retainDataAndReleasePayload).doOnSubscribe(s -> read.set(true));
+		Message<Flux<DataBuffer>> message = MessageBuilder.createMessage(buffers, headers);
+
+		return Mono.defer(() -> this.handler.apply(message))
+				.doFinally(s -> {
+					// Subscription should have happened by now due to ChannelSendOperator
+					if (!read.get()) {
+						buffers.subscribe(DataBufferUtils::release);
+					}
+				})
 				.thenMany(Flux.defer(() -> replyMono.isTerminated() ?
 						replyMono.flatMapMany(Function.identity()) :
 						Mono.error(new IllegalStateException("Something went wrong: reply Mono not set"))));
 	}
 
-	private MessageHeaders createHeaders(Payload payload, @Nullable MonoProcessor<?> replyMono) {
+	private String getDestination(Payload payload) {
 
 		// TODO:
 		// For now treat the metadata as a simple string with routing information.
 		// We'll have to get more sophisticated once the routing extension is completed.
 		// https://github.com/rsocket/rsocket-java/issues/568
 
+		return payload.getMetadataUtf8();
+	}
+
+	private DataBuffer retainDataAndReleasePayload(Payload payload) {
+		return PayloadUtils.retainDataAndReleasePayload(payload, this.strategies.dataBufferFactory());
+	}
+
+	private MessageHeaders createHeaders(String destination, @Nullable MonoProcessor<?> replyMono) {
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
-
-		String destination = payload.getMetadataUtf8();
 		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, destination);
-
 		if (this.dataMimeType != null) {
 			headers.setContentType(this.dataMimeType);
 		}
-
 		headers.setHeader(RSocketRequesterMethodArgumentResolver.RSOCKET_REQUESTER_HEADER, this.requester);
-
 		if (replyMono != null) {
 			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, replyMono);
 		}
-
 		DataBufferFactory bufferFactory = this.strategies.dataBufferFactory();
 		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, bufferFactory);
-
 		return headers.getMessageHeaders();
-	}
-
-	private DataBuffer wrapPayloadData(Payload payload) {
-		return PayloadUtils.wrapPayloadData(payload, this.strategies.dataBufferFactory());
 	}
 
 }

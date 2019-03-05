@@ -18,7 +18,9 @@ package org.springframework.messaging.rsocket;
 import java.time.Duration;
 import java.util.Collections;
 
+import io.netty.buffer.PooledByteBufAllocator;
 import io.rsocket.Closeable;
+import io.rsocket.Frame;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
 import io.rsocket.transport.netty.client.TcpClientTransport;
@@ -39,6 +41,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
@@ -61,6 +64,7 @@ public class RSocketServerToClientIntegrationTests {
 		context = new AnnotationConfigApplicationContext(RSocketConfig.class);
 
 		server = RSocketFactory.receive()
+				.frameDecoder(Frame::retain)  // as per https://github.com/rsocket/rsocket-java#zero-copy
 				.acceptor(context.getBean("serverAcceptor", MessageHandlerAcceptor.class))
 				.transport(TcpServerTransport.create("localhost", 7000))
 				.start()
@@ -104,6 +108,7 @@ public class RSocketServerToClientIntegrationTests {
 			rsocket = RSocketFactory.connect()
 					.setupPayload(DefaultPayload.create("", destination))
 					.dataMimeType("text/plain")
+					.frameDecoder(Frame::retain)  // as per https://github.com/rsocket/rsocket-java#zero-copy
 					.acceptor(context.getBean("clientAcceptor", MessageHandlerAcceptor.class))
 					.transport(TcpClientTransport.create("localhost", 7000))
 					.start()
@@ -272,6 +277,7 @@ public class RSocketServerToClientIntegrationTests {
 			return RSocketStrategies.builder()
 					.decoder(StringDecoder.allMimeTypes())
 					.encoder(CharSequenceEncoder.allMimeTypes())
+					.dataBufferFactory(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT))
 					.build();
 		}
 	}

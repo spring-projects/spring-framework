@@ -244,7 +244,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
 			return (Mono<T>) decoder.decodeToMono(
-					payloadMono.map(this::wrapPayloadData), elementType, dataMimeType, EMPTY_HINTS);
+					payloadMono.map(this::retainDataAndReleasePayload), elementType, dataMimeType, EMPTY_HINTS);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -260,12 +260,12 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
 
-			return payloadFlux.map(this::wrapPayloadData).concatMap(dataBuffer ->
+			return payloadFlux.map(this::retainDataAndReleasePayload).concatMap(dataBuffer ->
 					(Mono<T>) decoder.decodeToMono(Mono.just(dataBuffer), elementType, dataMimeType, EMPTY_HINTS));
 		}
 
-		private DataBuffer wrapPayloadData(Payload payload) {
-			return PayloadUtils.wrapPayloadData(payload, strategies.dataBufferFactory());
+		private DataBuffer retainDataAndReleasePayload(Payload payload) {
+			return PayloadUtils.retainDataAndReleasePayload(payload, strategies.dataBufferFactory());
 		}
 	}
 

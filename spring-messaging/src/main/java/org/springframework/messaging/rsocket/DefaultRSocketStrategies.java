@@ -21,14 +21,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import io.netty.buffer.PooledByteBufAllocator;
-
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Default, package-private {@link RSocketStrategies} implementation.
@@ -88,11 +87,10 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 		private final List<Decoder<?>> decoders = new ArrayList<>();
 
-		@Nullable
-		private ReactiveAdapterRegistry adapterRegistry;
+		private ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 		@Nullable
-		private DataBufferFactory bufferFactory;
+		private DataBufferFactory dataBufferFactory;
 
 
 		@Override
@@ -121,23 +119,21 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 		@Override
 		public Builder reactiveAdapterStrategy(ReactiveAdapterRegistry registry) {
+			Assert.notNull(registry, "ReactiveAdapterRegistry is required");
 			this.adapterRegistry = registry;
 			return this;
 		}
 
 		@Override
 		public Builder dataBufferFactory(DataBufferFactory bufferFactory) {
-			this.bufferFactory = bufferFactory;
+			this.dataBufferFactory = bufferFactory;
 			return this;
 		}
 
 		@Override
 		public RSocketStrategies build() {
-			return new DefaultRSocketStrategies(this.encoders, this.decoders,
-					this.adapterRegistry != null ?
-							this.adapterRegistry : ReactiveAdapterRegistry.getSharedInstance(),
-					this.bufferFactory != null ? this.bufferFactory :
-							new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT));
+			return new DefaultRSocketStrategies(this.encoders, this.decoders, this.adapterRegistry,
+					this.dataBufferFactory != null ? this.dataBufferFactory : new DefaultDataBufferFactory());
 		}
 	}
 

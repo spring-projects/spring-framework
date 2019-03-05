@@ -142,12 +142,23 @@ public interface RSocketStrategies {
 		Builder reactiveAdapterStrategy(ReactiveAdapterRegistry registry);
 
 		/**
-		 * Configure the DataBufferFactory to use for the allocation of buffers
-		 * when creating or responding requests.
-		 * <p>By default this is an instance of
+		 * Configure the DataBufferFactory to use for allocating buffers, for
+		 * example when preparing requests or when responding. The choice here
+		 * must be aligned with the frame decoder configured in
+		 * {@link io.rsocket.RSocketFactory}.
+		 * <p>By default this property is an instance of
+		 * {@link org.springframework.core.io.buffer.DefaultDataBufferFactory
+		 * DefaultDataBufferFactory} matching to the default frame decoder in
+		 * {@link io.rsocket.RSocketFactory} which copies the payload. This
+		 * comes at cost to performance but does not require reference counting
+		 * and eliminates possibility for memory leaks.
+		 * <p>To switch to a zero-copy strategy,
+		 * <a href="https://github.com/rsocket/rsocket-java#zero-copy">configure RSocket</a>
+		 * accordingly, and then configure this property with an instance of
 		 * {@link org.springframework.core.io.buffer.NettyDataBufferFactory
-		 * NettyDataBufferFactory} with {@link PooledByteBufAllocator#DEFAULT}.
-		 * @param bufferFactory the buffer factory to use
+		 * NettyDataBufferFactory} with a pooled allocator such as
+		 * {@link PooledByteBufAllocator#DEFAULT}.
+		 * @param bufferFactory the DataBufferFactory to use
 		 */
 		Builder dataBufferFactory(DataBufferFactory bufferFactory);
 
