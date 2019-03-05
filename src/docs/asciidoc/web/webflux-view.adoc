@@ -1,6 +1,6 @@
 [[webflux-view]]
 = View Technologies
-[.small]#<<web.adoc#mvc-view,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-view, Same as in Spring MVC>>#
 
 The use of view technologies in Spring WebFlux is pluggable. Whether you decide to
 use Thymeleaf, FreeMarker, or some other view technology is primarily a matter of a
@@ -12,7 +12,7 @@ WebFlux. We assume you are already familiar with <<webflux-viewresolution>>.
 
 [[webflux-view-thymeleaf]]
 == Thymeleaf
-[.small]#<<web.adoc#mvc-view-thymeleaf,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-view-thymeleaf, Same as in Spring MVC>>#
 
 Thymeleaf is a modern server-side Java template engine that emphasizes natural HTML
 templates that can be previewed in a browser by double-clicking, which is very
@@ -33,7 +33,7 @@ http://forum.thymeleaf.org/Thymeleaf-3-0-8-JUST-PUBLISHED-td4030687.html[announc
 
 [[webflux-view-freemarker]]
 == FreeMarker
-[.small]#<<web.adoc#mvc-view-freemarker,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-view-freemarker, Same as in Spring MVC>>#
 
 http://www.freemarker.org[Apache FreeMarker] is a template engine for generating any
 kind of text output from HTML to email and others. The Spring Framework has a built-in
@@ -43,7 +43,7 @@ integration for using Spring WebFlux with FreeMarker templates.
 
 [[webflux-view-freemarker-contextconfig]]
 === View Configuration
-[.small]#<<web.adoc#mvc-view-freemarker-contextconfig,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-view-freemarker-contextconfig, Same as in Spring MVC>>#
 
 The following example shows how to configure FreeMarker as a view technology:
 
@@ -81,7 +81,7 @@ shown in the preceding example. Given the preceding configuration, if your contr
 
 [[webflux-views-freemarker]]
 === FreeMarker Configuration
-[.small]#<<web.adoc#mvc-views-freemarker,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-views-freemarker, Same as in Spring MVC>>#
 
 You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
 `Configuration` object (managed by Spring) by setting the appropriate bean properties on
@@ -121,7 +121,7 @@ the `Configuration` object.
 
 [[webflux-view-script]]
 == Script Views
-[.small]#<<web.adoc#mvc-view-script,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-view-script, Same as in Spring MVC>>#
 
 The Spring Framework has a built-in integration for using Spring WebFlux with any
 templating library that can run on top of the
@@ -147,7 +147,7 @@ TIP: The basic rule for integrating any other script engine is that it must impl
 
 [[webflux-view-script-dependencies]]
 === Requirements
-[.small]#<<web.adoc#mvc-view-script-dependencies,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-view-script-dependencies, Same as in Spring MVC>>#
 
 You need to have the script engine on your classpath, the details of which vary by script engine:
 
@@ -167,7 +167,7 @@ through http://www.webjars.org/[WebJars].
 
 [[webflux-view-script-integrate]]
 === Script Templates
-[.small]#<<web.adoc#mvc-view-script-integrate,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-view-script-integrate, Same as in Spring MVC>>#
 
 You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
@@ -286,20 +286,20 @@ for more configuration examples.
 
 [[webflux-view-httpmessagewriter]]
 == JSON and XML
-[.small]#<<web.adoc#mvc-view-jackson,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-view-jackson, Same as in Spring MVC>>#
 
 For <<webflux-multiple-representations>> purposes, it is useful to be able to alternate
 between rendering a model with an HTML template or as other formats (such as JSON or XML),
 depending on the content type requested by the client. To support doing so, Spring WebFlux
 provides the `HttpMessageWriterView`, which you can use to plug in any of the available
-<<webflux-codecs>> from `spring-web`, such as `Jackson2JsonEncoder`,
-`Jackson2SmileEncoder`, or `Jaxb2XmlEncoder`.
+<<webflux-codecs>> from `spring-web`, such as `Jackson2JsonEncoder`, `Jackson2SmileEncoder`,
+or `Jaxb2XmlEncoder`.
 
 Unlike other view technologies, `HttpMessageWriterView` does not require a `ViewResolver`
-but is instead <<webflux-config-view-resolvers,configured>> as a default view. You can
-configure one or more such default views, wrapping different `HttpMessageWriter` instances or
-`Encoder` instances. The one that matches the requested content type is used at runtime.
+but is instead <<webflux-config-view-resolvers, configured>> as a default view. You can
+configure one or more such default views, wrapping different `HttpMessageWriter` instances
+or `Encoder` instances. The one that matches the requested content type is used at runtime.
 
-In most cases, a model contains multiple attributes. To determine which one
-to serialize, you can configure `HttpMessageWriterView` with the name of the model
-attribute to use for rendering. If the model contains only one attribute, that one is used.
+In most cases, a model contains multiple attributes. To determine which one to serialize,
+you can configure `HttpMessageWriterView` with the name of the model attribute to use for
+rendering. If the model contains only one attribute, that one is used.

@@ -71,10 +71,10 @@ You shorter it further still with a full URI template, as the following example 
 = UriBuilder
 [.small]#Spring MVC and Spring WebFlux#
 
-<<web-uricomponents,`UriComponentsBuilder`>> implements `UriBuilder`. You can create a `UriBuilder`, in turn,
-with a `UriBuilderFactory`. Together, `UriBuilderFactory` and `UriBuilder`
-provide a pluggable mechanism to build URIs from URI templates, based on shared
-configuration, such as a base URL, encoding preferences, and other details.
+<<web-uricomponents, `UriComponentsBuilder`>> implements `UriBuilder`. You can create a
+`UriBuilder`, in turn, with a `UriBuilderFactory`. Together, `UriBuilderFactory` and
+`UriBuilder` provide a pluggable mechanism to build URIs from URI templates, based on
+shared configuration, such as a base URL, encoding preferences, and other details.
 
 You can configure `RestTemplate` and `WebClient` with a `UriBuilderFactory`
 to customize the preparation of URIs. `DefaultUriBuilderFactory` is a default

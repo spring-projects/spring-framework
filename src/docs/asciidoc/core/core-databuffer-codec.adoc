@@ -10,7 +10,7 @@ APIs as follows:
 
 * <<databuffers-factory>> abstracts the creation of a data buffer.
 * <<databuffers-buffer>> represents a byte buffer, which may be
-<<databuffers-buffer-pooled,pooled>>.
+<<databuffers-buffer-pooled, pooled>>.
 * <<databuffers-utils>> offers utility methods for data buffers.
 * <<Codecs>> decode or encode streams data buffer streams into higher level objects.
 
@@ -93,7 +93,6 @@ composite buffers, if that's supported by the underlying byte buffer API.
 
 
 
-
 [[codecs]]
 == Codecs
 
@@ -105,7 +104,7 @@ The `org.springframework.core.codec` package provides the following strategy int
 The `spring-core` module provides `byte[]`, `ByteBuffer`, `DataBuffer`, `Resource`, and
 `String` encoder and decoder implementations. The `spring-web` module adds Jackson JSON,
 Jackson Smile, JAXB2, Protocol Buffers and other encoders and decoders. See
-<<web-reactive.adoc#webflux-codecs,Codecs>> in the WebFlux section.
+<<web-reactive.adoc#webflux-codecs, Codecs>> in the WebFlux section.
 
 
 
@@ -114,7 +113,7 @@ Jackson Smile, JAXB2, Protocol Buffers and other encoders and decoders. See
 == Using `DataBuffer`
 
 When working with data buffers, special care must be taken to ensure buffers are released
-since they may be <<databuffers-buffer-pooled,pooled>>. We'll use codecs to illustrate
+since they may be <<databuffers-buffer-pooled, pooled>>. We'll use codecs to illustrate
 how that works but the concepts apply more generally. Let's see what codecs must do
 internally to manage data buffers.
 
