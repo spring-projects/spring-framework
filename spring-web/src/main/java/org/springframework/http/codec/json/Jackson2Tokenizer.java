@@ -48,6 +48,8 @@ final class Jackson2Tokenizer {
 
 	private final JsonParser parser;
 
+	private final DeserializationContext deserializationContext;
+
 	private final boolean tokenizeArrayElements;
 
 	private TokenBuffer tokenBuffer;
@@ -65,6 +67,7 @@ final class Jackson2Tokenizer {
 			JsonParser parser, DeserializationContext deserializationContext, boolean tokenizeArrayElements) {
 
 		this.parser = parser;
+		this.deserializationContext = deserializationContext;
 		this.tokenizeArrayElements = tokenizeArrayElements;
 		this.tokenBuffer = new TokenBuffer(parser, deserializationContext);
 		this.inputFeeder = (ByteArrayFeeder) this.parser.getNonBlockingInputFeeder();
@@ -144,7 +147,7 @@ final class Jackson2Tokenizer {
 
 		if ((token.isStructEnd() || token.isScalarValue()) && this.objectDepth == 0 && this.arrayDepth == 0) {
 			result.add(this.tokenBuffer);
-			this.tokenBuffer = new TokenBuffer(this.parser);
+			this.tokenBuffer = new TokenBuffer(this.parser, this.deserializationContext);
 		}
 
 	}
@@ -157,7 +160,7 @@ final class Jackson2Tokenizer {
 		if (this.objectDepth == 0 && (this.arrayDepth == 0 || this.arrayDepth == 1) &&
 				(token == JsonToken.END_OBJECT || token.isScalarValue())) {
 			result.add(this.tokenBuffer);
-			this.tokenBuffer = new TokenBuffer(this.parser);
+			this.tokenBuffer = new TokenBuffer(this.parser, this.deserializationContext);
 		}
 	}
 
