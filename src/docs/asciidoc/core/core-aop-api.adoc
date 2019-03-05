@@ -1,14 +1,10 @@
 [[aop-api]]
 = Spring AOP APIs
 
-The previous chapter described the Spring's support for AOP with
-@AspectJ and schema-based aspect definitions. In this chapter, we discuss the lower-level
-Spring AOP APIs and the AOP support typically used in Spring 1.2 applications. For new
-applications, we recommend the use of the Spring 2.0 and later AOP support described in
-the previous chapter. However, when you work with existing applications (or when you read books
-and articles), you may come across Spring 1.2-style examples. Spring 5 remains backwards
-compatible with Spring 1.2, and everything described in this chapter is fully supported
-in Spring 5.
+The previous chapter described the Spring's support for AOP with @AspectJ and schema-based
+aspect definitions. In this chapter, we discuss the lower-level Spring AOP APIs. For common
+applications, we recommend the use of Spring AOP with AspectJ pointcuts as described in the
+previous chapter.
 
 
 
@@ -117,7 +113,7 @@ Since 2.0, the most important type of pointcut used by Spring is
 `org.springframework.aop.aspectj.AspectJExpressionPointcut`. This is a pointcut that
 uses an AspectJ-supplied library to parse an AspectJ pointcut expression string.
 
-See the <<aop,previous chapter>> for a discussion of supported AspectJ pointcut primitives.
+See the <<aop, previous chapter>> for a discussion of supported AspectJ pointcut primitives.
 
 
 
@@ -253,8 +249,7 @@ following example shows how to subclass `StaticMethodMatcherPointcut`:
 ====
 
 There are also superclasses for dynamic pointcuts.
-
-You can use custom pointcuts with any advice type in Spring 1.0 RC2 and above.
+You can use custom pointcuts with any advice type.
 
 
 
@@ -1046,8 +1041,7 @@ to consider:
   and included in the spring-core JAR. In other words, CGLIB-based AOP works "`out of
   the box`", as do JDK dynamic proxies.
 
-There is little performance difference between CGLIB proxying and dynamic proxies. As of
-Spring 1.0, dynamic proxies are slightly faster. However, this may change in the future.
+There is little performance difference between CGLIB proxying and dynamic proxies.
 Performance should not be a decisive consideration in this case.
 
 
@@ -1150,7 +1144,7 @@ we override the transaction propagation settings:
 
 Note that in the parent bean example, we explicitly marked the parent bean definition as
 being abstract by setting the `abstract` attribute to `true`, as described
-<<beans-child-bean-definitions,previously>>, so that it may not actually ever be
+<<beans-child-bean-definitions, previously>>, so that it may not actually ever be
 instantiated. Application contexts (but not simple bean factories), by default,
 pre-instantiate all singletons. Therefore, it is important (at least for singleton beans)
 that, if you have a (parent) bean definition that you intend to use only as a template,
@@ -1290,9 +1284,7 @@ Depending on how you created the proxy, you can usually set a `frozen` flag. In 
 case, the `Advised` `isFrozen()` method returns `true`, and any attempts to modify
 advice through addition or removal results in an `AopConfigException`. The ability
 to freeze the state of an advised object is useful in some cases (for example, to
-prevent calling code removing a security interceptor). It may also be used in Spring 1.1
-to allow aggressive optimization if runtime advice modification is known not to be
-required.
+prevent calling code removing a security interceptor).
 
 
 
