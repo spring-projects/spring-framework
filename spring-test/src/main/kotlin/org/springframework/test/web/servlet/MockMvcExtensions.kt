@@ -167,6 +167,30 @@ fun MockMvc.options(uri: URI, dsl: MockHttpServletRequestDsl.() -> Unit = {}): R
 /**
  * [MockMvc] extension providing access to [MockHttpServletRequestDsl] Kotlin DSL.
  *
+ * @see MockMvcRequestBuilders.head
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+fun MockMvc.head(urlTemplate: String, vararg vars: Any?, dsl: MockHttpServletRequestDsl.() -> Unit = {}): ResultActionsDsl {
+	val requestBuilder = MockMvcRequestBuilders.head(urlTemplate, *vars)
+	return MockHttpServletRequestDsl(requestBuilder).apply(dsl).perform(this)
+}
+
+/**
+ * [MockMvc] extension providing access to [MockHttpServletRequestDsl] Kotlin DSL.
+ *
+ * @see MockMvcRequestBuilders.head
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+fun MockMvc.head(uri: URI, dsl: MockHttpServletRequestDsl.() -> Unit = {}): ResultActionsDsl {
+	val requestBuilder = MockMvcRequestBuilders.head(uri)
+	return MockHttpServletRequestDsl(requestBuilder).apply(dsl).perform(this)
+}
+
+/**
+ * [MockMvc] extension providing access to [MockHttpServletRequestDsl] Kotlin DSL.
+ *
  * @see MockMvcRequestBuilders.request
  * @author Sebastien Deleuze
  * @since 5.2

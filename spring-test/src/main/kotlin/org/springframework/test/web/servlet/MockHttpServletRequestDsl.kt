@@ -35,6 +35,7 @@ import javax.servlet.http.Cookie
  * @see MockMvc.patch
  * @see MockMvc.delete
  * @see MockMvc.options
+ * @see MockMvc.head
  * @see MockMvc.request
  * @author Sebastien Deleuze
  * @since 5.2
