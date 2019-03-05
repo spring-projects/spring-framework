@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.aopalliance.aop.Advice;
  *
  * <pre class=code>
  * class DebuggingInterceptor implements MethodInterceptor,
- *     ConstructorInterceptor, FieldInterceptor {
+ *     ConstructorInterceptor {
  *
  *   Object invoke(MethodInvocation i) throws Throwable {
  *     debug(i.getMethod(), i.getThis(), i.getArgs());
@@ -43,16 +43,6 @@ import org.aopalliance.aop.Advice;
  *   Object construct(ConstructorInvocation i) throws Throwable {
  *     debug(i.getConstructor(), i.getThis(), i.getArgs());
  *     return i.proceed();
- *   }
- *
- *   Object get(FieldAccess fa) throws Throwable {
- *     debug(fa.getField(), fa.getThis(), null);
- *     return fa.proceed();
- *   }
- *
- *   Object set(FieldAccess fa) throws Throwable {
- *     debug(fa.getField(), fa.getThis(), fa.getValueToSet());
- *     return fa.proceed();
  *   }
  *
  *   void debug(AccessibleObject ao, Object this, Object value) {

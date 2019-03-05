@@ -337,10 +337,10 @@ interface if that is all you need. The code would be coupled only to the resourc
 interface (which can be considered a utility interface) and not to the whole Spring
 `ApplicationContext` interface.
 
-As of Spring 2.5, you can rely upon autowiring of the `ResourceLoader` as an alternative
-to implementing the `ResourceLoaderAware` interface. The "`traditional`" `constructor` and
-`byType` autowiring modes (as described in <<beans-factory-autowire>>) are now capable of
-providing a dependency of type `ResourceLoader` for either a constructor argument or a
+In application components, you may also rely upon autowiring of the `ResourceLoader` as
+an alternative to implementing the `ResourceLoaderAware` interface. The "`traditional`"
+`constructor` and `byType` autowiring modes (as described in <<beans-factory-autowire>>)
+are capable of providing a `ResourceLoader` for either a constructor argument or a
 setter method parameter, respectively. For more flexibility (including the ability to
 autowire fields and multiple parameter methods), consider using the annotation-based
 autowiring features. In that case, the `ResourceLoader` is autowired into a field,

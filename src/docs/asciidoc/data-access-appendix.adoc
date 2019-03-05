@@ -18,7 +18,7 @@ This part of the appendix lists XML schemas for data access, including the follo
 
 The `tx` tags deal with configuring all of those beans in Spring's comprehensive support
 for transactions. These tags are covered in the chapter entitled
-<<data-access.adoc#transaction,Transaction Management>>.
+<<data-access.adoc#transaction, Transaction Management>>.
 
 TIP: We strongly encourage you to look at the `'spring-tx.xsd'` file that ships with the
 Spring distribution. This file contains the XML Schema for Spring's transaction
@@ -65,8 +65,8 @@ to you.
 
 The `jdbc` elements let you quickly configure an embedded database or initialize an
 existing data source. These elements are documented in
-<<data-access.adoc#jdbc-embedded-database-support,Embedded Database Support>> and
-<<data-access.adoc#jdbc-initializing-datasource,Initializing a DataSource>>, respectively.
+<<data-access.adoc#jdbc-embedded-database-support, Embedded Database Support>> and
+<<data-access.adoc#jdbc-initializing-datasource, Initializing a DataSource>>, respectively.
 
 To use the elements in the `jdbc` schema, you need to have the following preamble at the
 top of your Spring XML configuration file. The text in the following snippet references

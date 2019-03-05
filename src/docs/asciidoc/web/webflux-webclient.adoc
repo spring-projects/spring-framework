@@ -4,7 +4,7 @@
 Spring WebFlux includes a reactive, non-blocking `WebClient` for HTTP requests. The client
 has a functional, fluent API with reactive types for declarative composition, see
 <<web-reactive.adoc#webflux-reactive-libraries>>. WebFlux client and server rely on the
-same non-blocking <<web-reactive.adoc#webflux-codecs,codecs>> to encode and decode request
+same non-blocking <<web-reactive.adoc#webflux-codecs, codecs>> to encode and decode request
 and response content.
 
 Internally `WebClient` delegates to an HTTP client library. By default, it uses
@@ -36,7 +36,7 @@ You can also use `WebClient.builder()` with further options:
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
 
-The following example configures <<web-reactive.adoc#webflux-codecs,HTTP codecs>>:
+The following example configures <<web-reactive.adoc#webflux-codecs, HTTP codecs>>:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]

@@ -1,18 +1,18 @@
 [[mvc-view]]
 = View Technologies
-[.small]#<<web-reactive.adoc#webflux-view,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view, Same as in Spring WebFlux>>#
 
-The use of view technologies in Spring MVC is pluggable, whether you decide to
-use Thymeleaf, Groovy Markup Templates, JSPs, or other technologies, is primarily a matter of a
-configuration change. This chapter covers view technologies integrated with Spring MVC.
-We assume you are already familiar with <<mvc-viewresolver>>.
+The use of view technologies in Spring MVC is pluggable, whether you decide to use
+Thymeleaf, Groovy Markup Templates, JSPs, or other technologies, is primarily a matter
+of a configuration change. This chapter covers view technologies integrated with
+Spring MVC. We assume you are already familiar with <<mvc-viewresolver>>.
 
 
 
 
 [[mvc-view-thymeleaf]]
 == Thymeleaf
-[.small]#<<web-reactive.adoc#webflux-view-thymeleaf,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-thymeleaf, Same as in Spring WebFlux>>#
 
 Thymeleaf is a modern server-side Java template engine that emphasizes natural HTML
 templates that can be previewed in a browser by double-clicking, which is very helpful
@@ -32,7 +32,7 @@ See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more detai
 
 [[mvc-view-freemarker]]
 == FreeMarker
-[.small]#<<web-reactive.adoc#webflux-view-freemarker,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-freemarker, Same as in Spring WebFlux>>#
 
 http://www.freemarker.org[Apache FreeMarker] is a template engine for generating any
 kind of text output from HTML to email and others. The Spring Framework has a built-in
@@ -42,7 +42,7 @@ integration for using Spring MVC with FreeMarker templates.
 
 [[mvc-view-freemarker-contextconfig]]
 === View Configuration
-[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig, Same as in Spring WebFlux>>#
 
 The following example shows how to configure FreeMarker as a view technology:
 
@@ -105,7 +105,7 @@ of `welcome`, the resolver looks for the `/WEB-INF/freemarker/welcome.ftl` templ
 
 [[mvc-views-freemarker]]
 === FreeMarker Configuration
-[.small]#<<web-reactive.adoc#webflux-views-freemarker,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-views-freemarker, Same as in Spring WebFlux>>#
 
 You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
 `Configuration` object (which is managed by Spring) by setting the appropriate bean properties on
@@ -536,7 +536,7 @@ syntax. The following example shows a sample template for an HTML page:
 
 [[mvc-view-script]]
 == Script Views
-[.small]#<<web-reactive.adoc#webflux-view-script,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script, Same as in Spring WebFlux>>#
 
 The Spring Framework has a built-in integration for using Spring MVC with any
 templating library that can run on top of the
@@ -562,7 +562,7 @@ TIP: The basic rule for integrating any other script engine is that it must impl
 
 [[mvc-view-script-dependencies]]
 === Requirements
-[.small]#<<web-reactive.adoc#webflux-view-script-dependencies,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script-dependencies, Same as in Spring WebFlux>>#
 
 You need to have the script engine on your classpath, the details of which vary by script engine:
 
@@ -582,7 +582,7 @@ through http://www.webjars.org/[WebJars].
 
 [[mvc-view-script-integrate]]
 === Script Templates
-[.small]#<<web-reactive.adoc#webflux-script-integrate,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-script-integrate, Same as in Spring WebFlux>>#
 
 You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
@@ -1126,13 +1126,13 @@ but with different values, as the following example shows:
 
 This tag renders multiple HTML `input` elements with the `type` set to `radio`.
 
-As with the <<mvc-view-jsp-formtaglib-checkboxestag,`checkboxes` tag>>, you might want to pass in the available options as
-a runtime variable. For this usage, you can use the `radiobuttons` tag. You pass in an
-`Array`, a `List`, or a `Map` that contains the available options in the `items` property.
-If you use a `Map`, the map entry key is used as the value and the map
-entry's value are used as the label to be displayed. You can also use a custom
-object where you can provide the property names for the value by using `itemValue` and the
-label by using `itemLabel`, as the following example shows:
+As with the <<mvc-view-jsp-formtaglib-checkboxestag, `checkboxes` tag>>, you might want to
+pass in the available options as a runtime variable. For this usage, you can use the
+`radiobuttons` tag. You pass in an `Array`, a `List`, or a `Map` that contains the
+available options in the `items` property. If you use a `Map`, the map entry key is
+used as the value and the map entry's value are used as the label to be displayed.
+You can also use a custom object where you can provide the property names for the value
+by using `itemValue` and the label by using `itemLabel`, as the following example shows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1892,7 +1892,7 @@ an external definition (by name) or as a `View` instance from the handler method
 
 [[mvc-view-jackson]]
 == Jackson
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, Same as in Spring WebFlux>>#
 
 Spring offers support for the Jackson JSON library.
 
@@ -1900,7 +1900,7 @@ Spring offers support for the Jackson JSON library.
 
 [[mvc-view-json-mapping]]
 === Jackson-based JSON MVC Views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, Same as in Spring WebFlux>>#
 
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
@@ -1919,7 +1919,7 @@ serializers and deserializers for specific types.
 
 [[mvc-view-xml-mapping]]
 === Jackson-based XML Views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, Same as in Spring WebFlux>>#
 
 `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`

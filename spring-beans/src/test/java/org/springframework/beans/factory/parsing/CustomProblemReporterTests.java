@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -37,8 +36,6 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class CustomProblemReporterTests {
 
-	private static final Resource CONTEXT = qualifiedResource(CustomProblemReporterTests.class, "context.xml");
-
 	private CollatingProblemReporter problemReporter;
 
 	private DefaultListableBeanFactory beanFactory;
@@ -47,16 +44,17 @@ public class CustomProblemReporterTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.problemReporter = new CollatingProblemReporter();
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
 		this.reader.setProblemReporter(this.problemReporter);
 	}
 
+
 	@Test
 	public void testErrorsAreCollated() {
-		this.reader.loadBeanDefinitions(CONTEXT);
+		this.reader.loadBeanDefinitions(qualifiedResource(CustomProblemReporterTests.class, "context.xml"));
 		assertEquals("Incorrect number of errors collated", 4, this.problemReporter.getErrors().length);
 
 		TestBean bean = (TestBean) this.beanFactory.getBean("validBean");

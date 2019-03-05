@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,8 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class ConcurrentBeanFactoryTests {
 
-	private static final Log logger = LogFactory.getLog(ConcurrentBeanFactoryTests.class);
-	private static final Resource CONTEXT = qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml");
-
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
+
 	private static final Date DATE_1, DATE_2;
 
 	static {
@@ -66,26 +64,31 @@ public class ConcurrentBeanFactoryTests {
 		}
 	}
 
+
+	private static final Log logger = LogFactory.getLog(ConcurrentBeanFactoryTests.class);
+
 	private BeanFactory factory;
 
-	private final Set<TestRun> set = Collections.synchronizedSet(new HashSet<TestRun>());
+	private final Set<TestRun> set = Collections.synchronizedSet(new HashSet<>());
 
-	private Throwable ex = null;
+	private Throwable ex;
+
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
 
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(CONTEXT);
-		factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
-			@Override
-			public void registerCustomEditors(PropertyEditorRegistry registry) {
-				registry.registerCustomEditor(Date.class, new CustomDateEditor((DateFormat) DATE_FORMAT.clone(), false));
-			}
-		});
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
+				qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml"));
+
+		factory.addPropertyEditorRegistrar(
+				registry -> registry.registerCustomEditor(Date.class,
+						new CustomDateEditor((DateFormat) DATE_FORMAT.clone(), false)));
+
 		this.factory = factory;
 	}
+
 
 	@Test
 	public void testSingleThread() {

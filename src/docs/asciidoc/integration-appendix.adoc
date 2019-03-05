@@ -283,8 +283,8 @@ SessionBean with `jee`:
 === The `jms` Schema
 
 The `jms` elements deal with configuring JMS-related beans, such as Spring's
-<<integration.adoc#jms-mdp,Message Listener Containers>>. These elements are detailed in the
-section of the <<integration.adoc#jms,JMS chapter>> entitled <<integration.adoc#jms-namespace,
+<<integration.adoc#jms-mdp, Message Listener Containers>>. These elements are detailed in the
+section of the <<integration.adoc#jms, JMS chapter>> entitled <<integration.adoc#jms-namespace,
 JMS Namespace Support>>. See that chapter for full details on this support
 and the `jms` elements themselves.
 
@@ -322,8 +322,8 @@ This element is detailed in
 
 You can use the `cache` elements to enable support for Spring's `@CacheEvict`, `@CachePut`,
 and `@Caching` annotations. It it also supports declarative XML-based caching. See
-<<integration.adoc#cache-annotation-enable,Enabling Caching Annotations>> and
-<<integration.adoc#cache-declarative-xml,Declarative XML-based Caching>> for details.
+<<integration.adoc#cache-annotation-enable, Enabling Caching Annotations>> and
+<<integration.adoc#cache-declarative-xml, Declarative XML-based Caching>> for details.
 
 To use the elements in the `cache` schema, you need to have the following preamble at the
 top of your Spring XML configuration file. The text in the following snippet references
