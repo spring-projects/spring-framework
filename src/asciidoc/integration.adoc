@@ -1932,10 +1932,9 @@ operations that do not refer to a specific destination.
 
 One of the most common uses of JMS messages in the EJB world is to drive message-driven
 beans (MDBs). Spring offers a solution to create message-driven POJOs (MDPs) in a way
-that does not tie a user to an EJB container. (See <<jms-asynchronousMessageReception>>
-for detailed coverage of Spring's MDP support.) As from Spring Framework 4.1, endpoint
-methods can be simply annotated using `@JmsListener` see <<jms-annotated>> for more
-details.
+that does not tie a user to an EJB container. (See <<jms-receiving-async>> for detailed
+coverage of Spring's MDP support.) As from Spring Framework 4.1, endpoint methods can
+be simply annotated using `@JmsListener` see <<jms-annotated>> for more details.
 
 A message listener container is used to receive messages from a JMS message queue and
 drive the `MessageListener` that is injected into it. The listener container is
@@ -2209,7 +2208,7 @@ potentially be blocked indefinitely. The property `receiveTimeout` specifies how
 the receiver should wait before giving up waiting for a message.
 
 
-[[jms-asynchronousMessageReception]]
+[[jms-receiving-async]]
 ==== Asynchronous reception: Message-Driven POJOs
 
 [NOTE]
