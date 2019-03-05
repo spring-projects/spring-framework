@@ -51,7 +51,7 @@ public interface MockServerConfigurer {
 
 	/**
 	 * Invoked just before the mock server is built. Use this hook to inspect
-	 * and/or modify application-declared filtes and exception handlers,
+	 * and/or modify application-declared filters and exception handlers.
 	 * @param builder the builder for the {@code HttpHandler} that will handle
 	 * requests (i.e. the mock server)
 	 */
