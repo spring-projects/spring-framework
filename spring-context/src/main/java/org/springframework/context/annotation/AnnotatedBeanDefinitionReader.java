@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,6 +195,43 @@ public class AnnotatedBeanDefinitionReader {
 	@SuppressWarnings("unchecked")
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
 		doRegisterBean(annotatedClass, null, name, qualifiers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations, using the given supplier for obtaining a new
+	 * instance (possibly declared as a lambda expression or method reference).
+	 * @param annotatedClass the class of the bean
+	 * @param instanceSupplier a callback for creating an instance of the bean
+	 * (may be {@code null})
+	 * @param qualifiers specific qualifier annotations to consider,
+	 * in addition to qualifiers at the bean class level
+	 * @since 5.2
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> void registerBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier,
+			Class<? extends Annotation>... qualifiers) {
+
+		doRegisterBean(annotatedClass, instanceSupplier, null, qualifiers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations, using the given supplier for obtaining a new
+	 * instance (possibly declared as a lambda expression or method reference).
+	 * @param annotatedClass the class of the bean
+	 * @param name an explicit name for the bean
+	 * @param instanceSupplier a callback for creating an instance of the bean
+	 * (may be {@code null})
+	 * @param qualifiers specific qualifier annotations to consider,
+	 * in addition to qualifiers at the bean class level
+	 * @since 5.2
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> void registerBean(Class<T> annotatedClass, String name, @Nullable Supplier<T> instanceSupplier,
+			Class<? extends Annotation>... qualifiers) {
+
+		doRegisterBean(annotatedClass, instanceSupplier, name, qualifiers);
 	}
 
 	/**
