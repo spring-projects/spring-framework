@@ -262,15 +262,16 @@ for more details and up-to-date information.
 == Web
 
 
+
 === WebFlux Router DSL
 
-Spring Framework comes with a Kotlin router DSL available in 2 flavors:
+Spring Framework comes with a Kotlin router DSL available in two flavors:
 
  - Reactive with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[router { }]
  - <<Coroutines>>
 
-These DSL let you use the <<web-reactive#webflux-fn,WebFlux functional API>> to write clean and idiomatic Kotlin code
-to build a `RouterFunction` instance as the following example shows:
+These DSL let you use the <<web-reactive#webflux-fn, WebFlux functional API>> to write clean
+and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
 
 [source,kotlin,indent=0]
 ----
@@ -293,8 +294,8 @@ to build a `RouterFunction` instance as the following example shows:
 ----
 
 NOTE: This DSL is programmatic, meaning that it allows custom registration logic of beans
-through an `if` expression, a `for` loop, or any other Kotlin constructs. That can be useful when you need to register routes
-depending on dynamic data (for example, from a database).
+through an `if` expression, a `for` loop, or any other Kotlin constructs. That can be useful
+when you need to register routes depending on dynamic data (for example, from a database).
 
 See https://github.com/mixitconf/mixit/tree/dafd5ccc92dfab6d9c306fcb60b28921a1ccbf79/src/main/kotlin/mixit/web/routes[MiXiT project routes]
 for a concrete example.
@@ -308,8 +309,9 @@ is provided via extensions for WebFlux client and server functional API. A dedic
 {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-co-router-function-dsl/[`coRouter { }`]
 router DSL is also available.
 
-Coroutines extensions use `await` prefix or `AndAwait` suffix, and most are using similar names to their Reactive
-counterparts, except `exchange` in `WebClient.RequestHeadersSpec` which translates to `awaitResponse`.
+Coroutines extensions use `await` prefix or `AndAwait` suffix, and most are using similar
+names to their reactive counterparts, except `exchange` in `WebClient.RequestHeadersSpec`
+which translates to `awaitResponse`.
 
 [source,kotlin,indent=0]
 ----
@@ -339,8 +341,8 @@ to understand how to run code concurrently with Coroutines.
 
 === MockMvc DSL
 
-A Kotlin DSL is provided via `MockMvc` Kotlin extensions in order to provide a more idiomatic Kotlin API and to allow
-better discoverability (no usage of static methods).
+A Kotlin DSL is provided via `MockMvc` Kotlin extensions in order to provide a more
+idiomatic Kotlin API and to allow better discoverability (no usage of static methods).
 
 [source,kotlin,indent=0]
 ----
