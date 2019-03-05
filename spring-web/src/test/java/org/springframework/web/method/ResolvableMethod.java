@@ -57,7 +57,9 @@ import org.springframework.util.ReflectionUtils;
 import static java.util.stream.Collectors.*;
 
 /**
- * Convenience class to resolve method parameters from hints.
+ * Convenience class to resolve to a Method and method parameters.
+ *
+ * <p>Note that a replica of this class also exists in spring-messaging.
  *
  * <h1>Background</h1>
  *
