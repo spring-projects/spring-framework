@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
@@ -40,12 +39,11 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class SimpleScopeTests {
 
-	private static final Resource CONTEXT = qualifiedResource(SimpleScopeTests.class, "context.xml");
-
 	private DefaultListableBeanFactory beanFactory;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		beanFactory = new DefaultListableBeanFactory();
 		Scope scope = new NoOpScope() {
 			private int index;
@@ -69,9 +67,10 @@ public class SimpleScopeTests {
 		assertEquals("myScope", scopeNames[0]);
 		assertSame(scope, beanFactory.getRegisteredScope("myScope"));
 
-		XmlBeanDefinitionReader xbdr = new XmlBeanDefinitionReader(beanFactory);
-		xbdr.loadBeanDefinitions(CONTEXT);
+		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
+				qualifiedResource(SimpleScopeTests.class, "context.xml"));
 	}
+
 
 	@Test
 	public void testCanGetScopedObject() {
