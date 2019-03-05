@@ -86,7 +86,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, true);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
+				Flux.from(input), this.jsonFactory, getObjectMapper().getDeserializationContext(), true);
 		return decodeInternal(tokens, elementType, mimeType, hints);
 	}
 
@@ -94,7 +95,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, false);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
+				Flux.from(input), this.jsonFactory, getObjectMapper().getDeserializationContext(), false);
 		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
 	}
 
