@@ -19,10 +19,10 @@ This script has been tested against:
 If you need to download and install Eclipse or STS, please do that now
 by visiting one of the following sites:
 
-- Eclipse downloads: http://download.eclipse.org/eclipse/downloads
-- STS downloads: http://spring.io/tools/sts/all
-- STS nightly builds: http://dist.springsource.com/snapshot/STS/nightly-distributions.html
-- ADJT: http://www.eclipse.org/ajdt/downloads/
+- Eclipse downloads: https://download.eclipse.org/eclipse/downloads
+- STS downloads: https://spring.io/tools/sts/all
+- STS nightly builds: https://dist.springsource.com/snapshot/STS/nightly-distributions.html
+- ADJT: https://www.eclipse.org/ajdt/downloads/
 - Groovy Eclipse: https://github.com/groovy/groovy-eclipse/wiki
 
 Once Eclipse/STS is installed, press enter, and we'll begin.
