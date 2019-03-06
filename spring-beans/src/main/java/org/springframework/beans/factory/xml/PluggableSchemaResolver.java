@@ -106,7 +106,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 	@Override
 	@Nullable
-	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws IOException {
+	public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to resolve XML entity with public id [" + publicId +
 					"] and system id [" + systemId + "]");
@@ -114,6 +114,10 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 		if (systemId != null) {
 			String resourceLocation = getSchemaMappings().get(systemId);
+			if (resourceLocation == null && systemId.startsWith("https:")) {
+				// Retrieve canonical http schema mapping even for https declaration
+				resourceLocation = getSchemaMappings().get("http:" + systemId.substring(6));
+			}
 			if (resourceLocation != null) {
 				Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
 				try {
