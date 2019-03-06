@@ -14,7 +14,7 @@ been tested against STS $STS_TEST_VERSION), but at the minimum you will
 need Eclipse + AJDT.
 
 If you need to download and install STS, please do that now by
-visiting http://springsource.org/downloads/sts
+visiting https://spring.io/projectss/sts
 
 Otherwise, press enter and we'll begin.
 EOM
