@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class ContextNamespaceHandlerTests {
 
 
 	@Test
-	public void propertyPlaceholder() throws Exception {
+	public void propertyPlaceholder() {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-replace.xml", getClass());
 		assertEquals("bar", applicationContext.getBean("string"));
@@ -56,7 +56,7 @@ public class ContextNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyPlaceholderSystemProperties() throws Exception {
+	public void propertyPlaceholderSystemProperties() {
 		String value = System.setProperty("foo", "spam");
 		try {
 			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
@@ -72,7 +72,7 @@ public class ContextNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyPlaceholderEnvironmentProperties() throws Exception {
+	public void propertyPlaceholderEnvironmentProperties() {
 		MockEnvironment env = new MockEnvironment().withProperty("foo", "spam");
 		GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext();
 		applicationContext.setEnvironment(env);
@@ -83,7 +83,7 @@ public class ContextNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyPlaceholderLocation() throws Exception {
+	public void propertyPlaceholderLocation() {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-location.xml", getClass());
 		assertEquals("bar", applicationContext.getBean("foo"));
@@ -92,7 +92,7 @@ public class ContextNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyPlaceholderLocationWithSystemPropertyForOneLocation() throws Exception {
+	public void propertyPlaceholderLocationWithSystemPropertyForOneLocation() {
 		System.setProperty("properties",
 				"classpath*:/org/springframework/context/config/test-*.properties");
 		try {
@@ -108,7 +108,7 @@ public class ContextNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyPlaceholderLocationWithSystemPropertyForMultipleLocations() throws Exception {
+	public void propertyPlaceholderLocationWithSystemPropertyForMultipleLocations() {
 		System.setProperty("properties",
 				"classpath*:/org/springframework/context/config/test-*.properties," +
 				"classpath*:/org/springframework/context/config/empty-*.properties," +
@@ -126,7 +126,7 @@ public class ContextNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyPlaceholderLocationWithSystemPropertyMissing() throws Exception {
+	public void propertyPlaceholderLocationWithSystemPropertyMissing() {
 		try {
 			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 					"contextNamespaceHandlerTests-location-placeholder.xml", getClass());
@@ -140,7 +140,7 @@ public class ContextNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyPlaceholderIgnored() throws Exception {
+	public void propertyPlaceholderIgnored() {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-replace-ignore.xml", getClass());
 		assertEquals("${bar}", applicationContext.getBean("string"));
@@ -148,7 +148,7 @@ public class ContextNamespaceHandlerTests {
 	}
 
 	@Test
-	public void propertyOverride() throws Exception {
+	public void propertyOverride() {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-override.xml", getClass());
 		Date date = (Date) applicationContext.getBean("date");

@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
@@ -52,7 +53,7 @@ public class BeansDtdResolver implements EntityResolver {
 
 	@Override
 	@Nullable
-	public InputSource resolveEntity(String publicId, @Nullable String systemId) throws IOException {
+	public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to resolve XML entity with public ID [" + publicId +
 					"] and system ID [" + systemId + "]");
@@ -76,7 +77,7 @@ public class BeansDtdResolver implements EntityResolver {
 					}
 					return source;
 				}
-				catch (IOException ex) {
+				catch (FileNotFoundException ex) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Could not resolve beans DTD [" + systemId + "]: not found in classpath", ex);
 					}
