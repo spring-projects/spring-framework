@@ -110,6 +110,10 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 		if (systemId != null) {
 			String resourceLocation = getSchemaMappings().get(systemId);
+			if (resourceLocation == null && systemId.startsWith("https:")) {
+				// Retrieve canonical http schema mapping even for https declaration
+				resourceLocation = getSchemaMappings().get("http:" + systemId.substring(6));
+			}
 			if (resourceLocation != null) {
 				Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
 				try {
