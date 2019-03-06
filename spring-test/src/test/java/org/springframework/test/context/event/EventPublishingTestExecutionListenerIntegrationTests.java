@@ -23,7 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -60,9 +60,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
 /**
  * Integration tests for {@link EventPublishingTestExecutionListener} and
@@ -88,11 +86,9 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 	public final ExpectedException exception = ExpectedException.none();
 
 
-	@Before
-	public void resetMock() {
-		// The mocked listener is a bean in the ApplicationContext that is stored
-		// in a static cache by the Spring TestContext Framework.
-		reset(listener);
+	@After
+	public void closeApplicationContext() {
+		this.testContext.markApplicationContextDirty(null);
 	}
 
 	@Test
@@ -113,6 +109,12 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 		verify(listener, only()).beforeTestMethod(testContext);
 	}
 
+	/**
+	 * The {@code @BeforeTestMethod} condition in
+	 * {@link TestEventListenerConfiguration#beforeTestMethod(BeforeTestMethodEvent)}
+	 * only matches if the test method is annotated with {@code @Traceable}, and
+	 * {@link ExampleTestCase#standardTest()} is not.
+	 */
 	@Test
 	public void beforeTestMethodAnnotationWithFailingCondition() throws Exception {
 		Method standardTest = ReflectionUtils.findMethod(ExampleTestCase.class, "standardTest");
@@ -120,6 +122,10 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 		verify(listener, never()).beforeTestMethod(testContext);
 	}
 
+	/**
+	 * An exception thrown from an event listener executed in the current thread
+	 * should fail the test method.
+	 */
 	@Test
 	public void beforeTestMethodAnnotationWithFailingEventListener() throws Exception {
 		Method method = ReflectionUtils.findMethod(ExampleTestCase.class, "testWithFailingEventListener");
@@ -135,6 +141,10 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 		}
 	}
 
+	/**
+	 * An exception thrown from an event listener that is executed asynchronously
+	 * should not fail the test method.
+	 */
 	@Test
 	public void beforeTestMethodAnnotationWithFailingAsyncEventListener() throws Exception {
 		TrackingAsyncUncaughtExceptionHandler.asyncException = null;
@@ -183,7 +193,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 	@RunWith(SpringRunner.class)
 	@ContextConfiguration(classes = TestEventListenerConfiguration.class)
-	@TestExecutionListeners(listeners = EventPublishingTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+	@TestExecutionListeners(EventPublishingTestExecutionListener.class)
 	public static class ExampleTestCase {
 
 		@Traceable
