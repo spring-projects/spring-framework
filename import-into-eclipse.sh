@@ -19,9 +19,9 @@ This script has been tested against:
 If you need to download and install Eclipse or STS, please do that now
 by visiting one of the following sites:
 
-- Eclipse downloads: http://download.eclipse.org/eclipse/downloads
-- STS downloads: http://spring.io/tools/sts/all
-- STS nightly builds: http://dist.springsource.com/snapshot/STS/nightly-distributions.html
+- Eclipse downloads: https://download.eclipse.org/eclipse/downloads
+- STS downloads: https://spring.io/tools/sts/all
+- STS nightly builds: https://dist.springsource.com/snapshot/STS/nightly-distributions.html
 
 If you need to install a recent CI build for AJDT (i.e., so that the
 spring-aspects module properly compiles in Eclipse/STS), click on the
