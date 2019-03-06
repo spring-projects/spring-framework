@@ -20,7 +20,7 @@ dependencies {
 	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 	optional("javax.el:javax.el-api:3.0.1-b04")
 	optional("javax.xml.bind:jaxb-api:2.3.0")
-	optional("org.webjars:webjars-locator-core:0.36")
+	optional("org.webjars:webjars-locator-core:0.37")
 	optional("com.rometools:rome:1.12.0")
 	optional("com.github.librepdf:openpdf:1.0.5")
 	optional("org.apache.poi:poi-ooxml:3.17")
