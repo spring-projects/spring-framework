@@ -114,9 +114,18 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 				if (url.startsWith("http:")) {
 					url = "https:" + url.substring(5);
 				}
-				source = new InputSource(url);
-				source.setPublicId(publicId);
-				return source;
+				try {
+					source = new InputSource(new URL(url).openStream());
+					source.setPublicId(publicId);
+					source.setSystemId(systemId);
+				}
+				catch (IOException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not resolve XML entity [" + systemId + "] through URL [" + url + "]", ex);
+					}
+					// Fall back to the parser's default behavior.
+					source = null;
+				}
 			}
 		}
 
