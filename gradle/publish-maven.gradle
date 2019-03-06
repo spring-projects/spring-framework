@@ -22,10 +22,10 @@ def customizePom(pom, gradleProject) {
 		generatedPom.project {
 			name = gradleProject.description
 			description = gradleProject.description
-			url = "https://github.com/SpringSource/spring-framework"
+			url = "https://github.com/spring-projects/spring-framework"
 			organization {
 				name = "SpringSource"
-				url = "https://projects.spring.io/spring-framework"
+				url = "https://spring.io/projects/spring-framework"
 			}
 			licenses {
 				license {
