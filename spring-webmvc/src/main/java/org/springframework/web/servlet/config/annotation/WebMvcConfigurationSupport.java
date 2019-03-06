@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,8 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.function.support.HandlerFunctionAdapter;
+import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -475,6 +477,27 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Return a {@link RouterFunctionMapping} ordered at 3 to map
+	 * {@linkplain org.springframework.web.servlet.function.RouterFunction router functions}.
+	 * Consider overriding one of these other more fine-grained methods:
+	 * <ul>
+	 * <li>{@link #addInterceptors} for adding handler interceptors.
+	 * <li>{@link #addCorsMappings} to configure cross origin requests processing.
+	 * <li>{@link #configureMessageConverters} for adding custom message converters.
+	 * </ul>
+	 * @since 5.2
+	 */
+	@Bean
+	public RouterFunctionMapping routerFunctionMapping() {
+		RouterFunctionMapping mapping = new RouterFunctionMapping();
+		mapping.setOrder(3);
+		mapping.setInterceptors(getInterceptors());
+		mapping.setCorsConfigurations(getCorsConfigurations());
+		mapping.setMessageConverters(getMessageConverters());
+		return mapping;
+	}
+
+	/**
 	 * Return a handler mapping ordered at Integer.MAX_VALUE-1 with mapped
 	 * resource handlers. To configure resource handling, override
 	 * {@link #addResourceHandlers}.
@@ -591,6 +614,16 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected RequestMappingHandlerAdapter createRequestMappingHandlerAdapter() {
 		return new RequestMappingHandlerAdapter();
+	}
+
+	/**
+	 * Returns a {@link HandlerFunctionAdapter} for processing requests through
+	 * {@linkplain org.springframework.web.servlet.function.HandlerFunction handler functions}.
+	 * @since 5.2
+	 */
+	@Bean
+	public HandlerFunctionAdapter handlerFunctionAdapter() {
+		return new HandlerFunctionAdapter();
 	}
 
 	/**
