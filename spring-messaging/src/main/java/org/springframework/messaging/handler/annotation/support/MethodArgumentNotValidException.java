@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,8 @@ import org.springframework.validation.ObjectError;
 @SuppressWarnings("serial")
 public class MethodArgumentNotValidException extends MethodArgumentResolutionException {
 
-	private BindingResult bindingResult;
+	@Nullable
+	private final BindingResult bindingResult;
 
 
 	/**
@@ -42,6 +43,7 @@ public class MethodArgumentNotValidException extends MethodArgumentResolutionExc
 	 */
 	public MethodArgumentNotValidException(Message<?> message, MethodParameter parameter) {
 		super(message, parameter);
+		this.bindingResult = null;
 	}
 
 	/**

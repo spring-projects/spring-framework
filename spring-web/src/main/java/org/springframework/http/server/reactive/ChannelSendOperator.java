@@ -42,6 +42,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  * @since 5.0
+ * @param <T> the type of element signaled
  */
 public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
@@ -77,7 +78,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 	private enum State {
 
-		/** No emissions from the upstream source yet */
+		/** No emissions from the upstream source yet. */
 		NEW,
 
 		/**
@@ -337,6 +338,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 		private final WriteBarrier writeBarrier;
 
+		@Nullable
 		private Subscription subscription;
 
 
