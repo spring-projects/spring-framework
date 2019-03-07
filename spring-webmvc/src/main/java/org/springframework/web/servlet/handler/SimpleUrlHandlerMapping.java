@@ -27,7 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}
- * interface to map from URLs to request handler beans. Supports both mapping to bean
+ * interface that maps from URLs to request handler beans. Supports both mapping to bean
  * instances and mapping to bean names; the latter is required for non-singleton handlers.
  *
  * <p>The "urlMap" property is suitable for populating the handler map with
@@ -42,8 +42,8 @@ import org.springframework.util.CollectionUtils;
  * The syntax is {@code PATH=HANDLER_BEAN_NAME}.
  * If the path doesn't begin with a slash, one is prepended.
  *
- * <p>Supports direct matches (given "/test" -> registered "/test") and "*"
- * pattern matches (given "/test" -> registered "/t*"). Note that the default
+ * <p>Supports direct matches (given "/test" -&gt; registered "/test") and "*"
+ * pattern matches (given "/test" -&gt; registered "/t*"). Note that the default
  * is to map within the current servlet mapping if applicable; see the
  * {@link #setAlwaysUseFullPath "alwaysUseFullPath"} property. For details on the
  * pattern options, see the {@link org.springframework.util.AntPathMatcher} javadoc.
