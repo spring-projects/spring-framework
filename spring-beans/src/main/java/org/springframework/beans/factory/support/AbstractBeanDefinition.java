@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,7 +433,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Override
 	public boolean isSingleton() {
-		return SCOPE_SINGLETON.equals(scope) || SCOPE_DEFAULT.equals(scope);
+		return SCOPE_SINGLETON.equals(this.scope) || SCOPE_DEFAULT.equals(this.scope);
 	}
 
 	/**
@@ -443,7 +443,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Override
 	public boolean isPrototype() {
-		return SCOPE_PROTOTYPE.equals(scope);
+		return SCOPE_PROTOTYPE.equals(this.scope);
 	}
 
 	/**
@@ -625,7 +625,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return whether this bean has the specified qualifier.
 	 */
 	public boolean hasQualifier(String typeName) {
-		return this.qualifiers.keySet().contains(typeName);
+		return this.qualifiers.containsKey(typeName);
 	}
 
 	/**
@@ -778,15 +778,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return information about methods to be overridden by the IoC
 	 * container. This will be empty if there are no method overrides.
-	 * Never returns {@code null}.
+	 * <p>Never returns {@code null}.
 	 */
 	public MethodOverrides getMethodOverrides() {
 		return this.methodOverrides;
 	}
 
 	/**
-	 * Set the name of the initializer method. The default is {@code null}
-	 * in which case there is no initializer method.
+	 * Set the name of the initializer method.
+	 * <p>The default is {@code null} in which case there is no initializer method.
 	 */
 	public void setInitMethodName(String initMethodName) {
 		this.initMethodName = initMethodName;
@@ -801,7 +801,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether or not the configured init method is the default.
-	 * Default value is {@code false}.
+	 * <p>The default value is {@code false}.
 	 * @see #setInitMethodName
 	 */
 	public void setEnforceInitMethod(boolean enforceInitMethod) {
@@ -817,8 +817,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Set the name of the destroy method. The default is {@code null}
-	 * in which case there is no destroy method.
+	 * Set the name of the destroy method.
+	 * <p>The default is {@code null} in which case there is no destroy method.
 	 */
 	public void setDestroyMethodName(String destroyMethodName) {
 		this.destroyMethodName = destroyMethodName;
@@ -833,7 +833,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether or not the configured destroy method is the default.
-	 * Default value is {@code false}.
+	 * <p>The default value is {@code false}.
 	 * @see #setDestroyMethodName
 	 */
 	public void setEnforceDestroyMethod(boolean enforceDestroyMethod) {

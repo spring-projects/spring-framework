@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -606,7 +606,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Determine the class name for the given object.
-	 * <p>Returns {@code "null"} if {@code obj} is {@code null}.
+	 * <p>Returns a {@code "null"} String if {@code obj} is {@code null}.
 	 * @param obj the object to introspect (may be {@code null})
 	 * @return the corresponding class name
 	 */
@@ -617,7 +617,7 @@ public abstract class ObjectUtils {
 	/**
 	 * Return a String representation of the specified Object.
 	 * <p>Builds a String representation of the contents in case of an array.
-	 * Returns {@code "null"} if {@code obj} is {@code null}.
+	 * Returns a {@code "null"} String if {@code obj} is {@code null}.
 	 * @param obj the object to build a String representation for
 	 * @return a String representation of {@code obj}
 	 */
@@ -663,8 +663,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -694,8 +694,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -726,8 +726,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -757,8 +757,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -788,8 +788,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -820,8 +820,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -852,8 +852,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -883,8 +883,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -914,8 +914,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */

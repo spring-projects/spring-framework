@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
  *
  * @author Sam Brannen
  * @since 2.5
+ * @see TestContextManager
+ * @see TestExecutionListener
  */
 public interface TestContext extends AttributeAccessor, Serializable {
 
@@ -38,7 +40,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * <p>Implementations of this method are responsible for loading the
 	 * application context if the corresponding context has not already been
 	 * loaded, potentially caching the context as well.
-	 * @return the application context
+	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
 	 */
@@ -70,8 +72,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * Get the {@linkplain Throwable exception} that was thrown during execution
 	 * of the {@linkplain #getTestMethod() test method}.
 	 * <p>Note: this is a mutable property.
-	 * @return the exception that was thrown, or {@code null} if no
-	 * exception was thrown
+	 * @return the exception that was thrown, or {@code null} if no exception was thrown
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	Throwable getTestException();
@@ -89,14 +90,13 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	void markApplicationContextDirty(HierarchyMode hierarchyMode);
 
 	/**
-	 * Update this test context to reflect the state of the currently executing
-	 * test.
+	 * Update this test context to reflect the state of the currently executing test.
 	 * <p>Caution: concurrent invocations of this method might not be thread-safe,
 	 * depending on the underlying implementation.
 	 * @param testInstance the current test instance (may be {@code null})
 	 * @param testMethod the current test method (may be {@code null})
-	 * @param testException the exception that was thrown in the test method, or
-	 * {@code null} if no exception was thrown
+	 * @param testException the exception that was thrown in the test method,
+	 * or {@code null} if no exception was thrown
 	 */
 	void updateState(Object testInstance, Method testMethod, Throwable testException);
 

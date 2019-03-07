@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	 * Create an instance wrapping the local user registry.
 	 */
 	public MultiServerUserRegistry(SimpUserRegistry localRegistry) {
-		Assert.notNull(localRegistry, "'localRegistry' is required.");
+		Assert.notNull(localRegistry, "'localRegistry' is required");
 		this.id = generateId();
 		this.localRegistry = localRegistry;
 		this.delegateApplicationEvents = this.localRegistry instanceof SmartApplicationListener;
@@ -274,10 +274,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private String name;
 
-		/* User sessions from "this" registry only (i.e. one server) */
+		// User sessions from "this" registry only (i.e. one server)
 		private Set<TransferSimpSession> sessions;
 
-		/* Cross-server session lookup (e.g. user connected to multiple servers) */
+		// Cross-server session lookup (e.g. user connected to multiple servers)
 		private SessionLookup sessionLookup;
 
 		/**
@@ -518,13 +518,13 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 				return false;
 			}
 			SimpSubscription otherSubscription = (SimpSubscription) other;
-			return (ObjectUtils.nullSafeEquals(getSession(), otherSubscription.getSession()) &&
-					this.id.equals(otherSubscription.getId()));
+			return (getId().equals(otherSubscription.getId()) &&
+					ObjectUtils.nullSafeEquals(getSession(), otherSubscription.getSession()));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.id.hashCode() * 31 + ObjectUtils.nullSafeHashCode(getSession());
+			return getId().hashCode() * 31 + ObjectUtils.nullSafeHashCode(getSession());
 		}
 
 		@Override
