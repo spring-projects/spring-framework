@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,8 +156,7 @@ public abstract class YamlProcessor {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loading from YAML: " + resource);
 			}
-			Reader reader = new UnicodeReader(resource.getInputStream());
-			try {
+			try (Reader reader = new UnicodeReader(resource.getInputStream())) {
 				for (Object object : yaml.loadAll(reader)) {
 					if (object != null && process(asMap(object), callback)) {
 						count++;
@@ -170,9 +169,6 @@ public abstract class YamlProcessor {
 					logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
 							" from YAML resource: " + resource);
 				}
-			}
-			finally {
-				reader.close();
 			}
 		}
 		catch (IOException ex) {

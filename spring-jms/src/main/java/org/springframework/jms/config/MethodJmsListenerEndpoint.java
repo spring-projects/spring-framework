@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,8 +147,11 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 		Assert.state(this.messageHandlerMethodFactory != null,
 				"Could not create message listener - MessageHandlerMethodFactory not set");
 		MessagingMessageListenerAdapter messageListener = createMessageListenerInstance();
+		Object bean = getBean();
+		Method method = getMethod();
+		Assert.state(bean != null && method != null, "No bean+method set on endpoint");
 		InvocableHandlerMethod invocableHandlerMethod =
-				this.messageHandlerMethodFactory.createInvocableHandlerMethod(getBean(), getMethod());
+				this.messageHandlerMethodFactory.createInvocableHandlerMethod(bean, method);
 		messageListener.setHandlerMethod(invocableHandlerMethod);
 		String responseDestination = getDefaultResponseDestination();
 		if (StringUtils.hasText(responseDestination)) {

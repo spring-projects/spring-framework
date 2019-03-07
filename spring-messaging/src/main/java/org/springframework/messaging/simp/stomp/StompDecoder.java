@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,7 +267,7 @@ public class StompDecoder {
 			if (index + 1 >= inString.length()) {
 				throw new StompConversionException("Illegal escape sequence at index " + index + ": " + inString);
 			}
-			Character c = inString.charAt(index + 1);
+			char c = inString.charAt(index + 1);
 			if (c == 'r') {
 				sb.append('\r');
 			}
