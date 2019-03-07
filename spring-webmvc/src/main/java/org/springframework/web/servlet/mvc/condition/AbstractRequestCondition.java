@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public abstract class AbstractRequestCondition<T extends AbstractRequestConditio
 	/**
 	 * Return the discrete items a request condition is composed of.
 	 * <p>For example URL patterns, HTTP request methods, param expressions, etc.
-	 * @return a collection of objects, never {@code null}
+	 * @return a collection of objects (never {@code null})
 	 */
 	protected abstract Collection<?> getContent();
 
