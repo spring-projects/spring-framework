@@ -633,15 +633,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Accept-Charset} header.
 	 */
 	public void setAcceptCharset(List<Charset> acceptableCharsets) {
-		StringBuilder builder = new StringBuilder();
-		for (Iterator<Charset> iterator = acceptableCharsets.iterator(); iterator.hasNext();) {
-			Charset charset = iterator.next();
-			builder.append(charset.name().toLowerCase(Locale.ENGLISH));
-			if (iterator.hasNext()) {
-				builder.append(", ");
-			}
+		StringJoiner joiner = new StringJoiner(", ");
+		for (Charset charset : acceptableCharsets) {
+			joiner.add(charset.name().toLowerCase(Locale.ENGLISH));
 		}
-		set(ACCEPT_CHARSET, builder.toString());
+		set(ACCEPT_CHARSET, joiner.toString());
 	}
 
 	/**
