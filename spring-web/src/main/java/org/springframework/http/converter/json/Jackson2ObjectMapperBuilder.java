@@ -614,8 +614,8 @@ public class Jackson2ObjectMapperBuilder {
 		ObjectMapper mapper;
 		if (this.createXmlMapper) {
 			mapper = (this.defaultUseWrapper != null ?
-					new XmlObjectMapperInitializer().create(this.defaultUseWrapper) :
-					new XmlObjectMapperInitializer().create());
+					new XmlObjectMapperInitializer().create(this.defaultUseWrapper, this.factory) :
+					new XmlObjectMapperInitializer().create(this.factory));
 		}
 		else {
 			mapper = (this.factory != null ? new ObjectMapper(this.factory) : new ObjectMapper());
@@ -839,14 +839,24 @@ public class Jackson2ObjectMapperBuilder {
 
 	private static class XmlObjectMapperInitializer {
 
-		public ObjectMapper create() {
-			return new XmlMapper(StaxUtils.createDefensiveInputFactory());
+		public ObjectMapper create(@Nullable JsonFactory factory) {
+			if (factory != null) {
+				return new XmlMapper((XmlFactory) factory);
+			}
+			else {
+				return new XmlMapper(StaxUtils.createDefensiveInputFactory());
+			}
 		}
 
-		public ObjectMapper create(boolean defaultUseWrapper) {
+		public ObjectMapper create(boolean defaultUseWrapper, @Nullable JsonFactory factory) {
 			JacksonXmlModule module = new JacksonXmlModule();
 			module.setDefaultUseWrapper(defaultUseWrapper);
-			return new XmlMapper(new XmlFactory(StaxUtils.createDefensiveInputFactory()), module);
+			if (factory != null) {
+				return new XmlMapper((XmlFactory) factory, module);
+			}
+			else {
+				return new XmlMapper(new XmlFactory(StaxUtils.createDefensiveInputFactory()), module);
+			}
 		}
 	}
 
