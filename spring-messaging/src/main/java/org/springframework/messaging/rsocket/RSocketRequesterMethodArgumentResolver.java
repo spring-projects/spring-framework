@@ -43,16 +43,15 @@ public class RSocketRequesterMethodArgumentResolver implements HandlerMethodArgu
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> type = parameter.getParameterType();
-		return RSocketRequester.class.equals(type) || RSocket.class.isAssignableFrom(type);
+		return (RSocketRequester.class.equals(type) || RSocket.class.isAssignableFrom(type));
 	}
 
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter parameter, Message<?> message) {
-
 		Object headerValue = message.getHeaders().get(RSOCKET_REQUESTER_HEADER);
 		Assert.notNull(headerValue, "Missing '" + RSOCKET_REQUESTER_HEADER + "'");
-		Assert.isInstanceOf(RSocketRequester.class, headerValue, "Expected header value of type RSocketRequester");
 
+		Assert.isInstanceOf(RSocketRequester.class, headerValue, "Expected header value of type RSocketRequester");
 		RSocketRequester requester = (RSocketRequester) headerValue;
 
 		Class<?> type = parameter.getParameterType();

@@ -39,7 +39,6 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 5.2
- *
  * @see HeadersMethodArgumentResolver
  * @see NativeMessageHeaderAccessor
  */

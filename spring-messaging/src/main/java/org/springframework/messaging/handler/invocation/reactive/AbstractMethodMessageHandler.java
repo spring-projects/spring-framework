@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.handler.invocation.reactive;
 
 import java.lang.reflect.Method;
@@ -102,7 +103,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Configure custom resolvers for handler method arguments.
 	 */
 	public void setArgumentResolverConfigurer(ArgumentResolverConfigurer configurer) {
-		Assert.notNull(configurer, "HandlerMethodArgumentResolver is required.");
+		Assert.notNull(configurer, "HandlerMethodArgumentResolver is required");
 		this.argumentResolverConfigurer = configurer;
 	}
 
@@ -117,7 +118,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Configure custom return value handlers for handler metohds.
 	 */
 	public void setReturnValueHandlerConfigurer(ReturnValueHandlerConfigurer configurer) {
-		Assert.notNull(configurer, "ReturnValueHandlerConfigurer is required.");
+		Assert.notNull(configurer, "ReturnValueHandlerConfigurer is required");
 		this.returnValueHandlerConfigurer = configurer;
 	}
 
@@ -450,7 +451,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param destination the destination
 	 * @param message the message
 	 */
-	@Nullable
 	protected void handleNoMatch(@Nullable String destination, Message<?> message) {
 		logger.debug("No handlers for destination '" + destination + "'");
 	}

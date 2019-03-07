@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.nio.charset.StandardCharsets;
@@ -211,7 +212,6 @@ public class DefaultRSocketRequesterTests {
 		@Nullable private volatile String savedMethodName;
 		@Nullable private volatile Payload savedPayload;
 		@Nullable private volatile Flux<Payload> savedPayloadFlux;
-
 
 		void setPayloadMonoToReturn(Mono<Payload> payloadMonoToReturn) {
 			this.payloadMonoToReturn = payloadMonoToReturn;

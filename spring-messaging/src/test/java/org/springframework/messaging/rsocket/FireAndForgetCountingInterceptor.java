@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.util.List;
@@ -59,11 +60,9 @@ class FireAndForgetCountingInterceptor extends AbstractRSocket implements RSocke
 
 		private final AtomicInteger fireAndForget = new AtomicInteger(0);
 
-
 		CountingDecorator(RSocket delegate) {
 			super(delegate);
 		}
-
 
 		public int getFireAndForgetCount() {
 			return this.fireAndForget.get();

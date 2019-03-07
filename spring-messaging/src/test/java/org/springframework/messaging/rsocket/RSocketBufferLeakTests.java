@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
@@ -85,7 +86,6 @@ public class RSocketBufferLeakTests {
 	@BeforeClass
 	@SuppressWarnings("ConstantConditions")
 	public static void setupOnce() {
-
 		context = new AnnotationConfigApplicationContext(ServerConfig.class);
 
 		server = RSocketFactory.receive()
@@ -246,11 +246,9 @@ public class RSocketBufferLeakTests {
 
 		private final List<DataBufferLeakInfo> created = new ArrayList<>();
 
-
 		LeakAwareNettyDataBufferFactory(ByteBufAllocator byteBufAllocator) {
 			super(byteBufAllocator);
 		}
-
 
 		void checkForLeaks(Duration duration) throws InterruptedException {
 			Instant start = Instant.now();
@@ -316,7 +314,6 @@ public class RSocketBufferLeakTests {
 
 		private final AssertionError error;
 
-
 		DataBufferLeakInfo(DataBuffer dataBuffer, AssertionError error) {
 			this.dataBuffer = dataBuffer;
 			this.error = error;
@@ -339,7 +336,6 @@ public class RSocketBufferLeakTests {
 	private static class PayloadInterceptor extends AbstractRSocket implements RSocketInterceptor {
 
 		private final List<PayloadSavingDecorator> rsockets = new CopyOnWriteArrayList<>();
-
 
 		void checkForLeaks() {
 			this.rsockets.stream().map(PayloadSavingDecorator::getPayloads)
@@ -377,7 +373,6 @@ public class RSocketBufferLeakTests {
 			this.rsockets.forEach(PayloadSavingDecorator::reset);
 		}
 
-
 		@Override
 		public RSocket apply(RSocket rsocket) {
 			PayloadSavingDecorator decorator = new PayloadSavingDecorator(rsocket);
@@ -392,11 +387,9 @@ public class RSocketBufferLeakTests {
 
 			private ReplayProcessor<PayloadLeakInfo> payloads = ReplayProcessor.create();
 
-
 			PayloadSavingDecorator(RSocket delegate) {
 				this.delegate = delegate;
 			}
-
 
 			ReplayProcessor<PayloadLeakInfo> getPayloads() {
 				return this.payloads;
@@ -447,12 +440,10 @@ public class RSocketBufferLeakTests {
 
 		private final ReferenceCounted referenceCounted;
 
-
 		PayloadLeakInfo(io.rsocket.Payload payload) {
 			this.description = payload.toString();
 			this.referenceCounted = payload;
 		}
-
 
 		int getReferenceCount() {
 			return this.referenceCounted.refCnt();
@@ -463,4 +454,5 @@ public class RSocketBufferLeakTests {
 			return this.description;
 		}
 	}
+
 }

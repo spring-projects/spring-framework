@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.handler.annotation.support.reactive;
 
 import java.lang.annotation.Annotation;
@@ -90,7 +91,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	public PayloadMethodArgumentResolver(List<? extends Decoder<?>> decoders, @Nullable Validator validator,
 			@Nullable ReactiveAdapterRegistry registry, boolean useDefaultResolution) {
 
-		Assert.isTrue(!CollectionUtils.isEmpty(decoders), "At least one Decoder is required.");
+		Assert.isTrue(!CollectionUtils.isEmpty(decoders), "At least one Decoder is required");
 		this.decoders = Collections.unmodifiableList(new ArrayList<>(decoders));
 		this.validator = validator;
 		this.adapterRegistry = registry != null ? registry : ReactiveAdapterRegistry.getSharedInstance();

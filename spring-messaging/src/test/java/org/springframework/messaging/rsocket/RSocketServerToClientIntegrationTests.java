@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
@@ -60,7 +61,6 @@ public class RSocketServerToClientIntegrationTests {
 	@BeforeClass
 	@SuppressWarnings("ConstantConditions")
 	public static void setupOnce() {
-
 		context = new AnnotationConfigApplicationContext(RSocketConfig.class);
 
 		server = RSocketFactory.receive()
@@ -214,7 +214,6 @@ public class RSocketServerToClientIntegrationTests {
 	private static class ClientHandler {
 
 		final ReplayProcessor<String> fireForgetPayloads = ReplayProcessor.create();
-
 
 		@MessageMapping("receive")
 		void receive(String payload) {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging;
 
 import reactor.core.publisher.Mono;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
  *
  * @author Rossen Stoyanchev
  * @since 5.2
+ * @see MessageHandler
  */
 @FunctionalInterface
 public interface ReactiveMessageHandler {
