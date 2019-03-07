@@ -663,7 +663,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return whether this bean has the specified qualifier.
 	 */
 	public boolean hasQualifier(String typeName) {
-		return this.qualifiers.keySet().contains(typeName);
+		return this.qualifiers.containsKey(typeName);
 	}
 
 	/**
