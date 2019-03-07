@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 
@@ -74,16 +74,12 @@ public abstract class AbstractRequestCondition<T extends AbstractRequestConditio
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder("[");
-		for (Iterator<?> iterator = getContent().iterator(); iterator.hasNext();) {
-			Object expression = iterator.next();
-			builder.append(expression.toString());
-			if (iterator.hasNext()) {
-				builder.append(getToStringInfix());
-			}
+		String infix = getToStringInfix();
+		StringJoiner joiner = new StringJoiner(infix, "[", "]");
+		for (Object expression : getContent()) {
+			joiner.add(expression.toString());
 		}
-		builder.append("]");
-		return builder.toString();
+		return joiner.toString();
 	}
 
 }

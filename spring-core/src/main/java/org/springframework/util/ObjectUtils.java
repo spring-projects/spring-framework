@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 
@@ -709,18 +710,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(String.valueOf(array[i]));
+		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (Object o : array) {
+			sj.add(String.valueOf(o));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return sj.toString();
 	}
 
 	/**
