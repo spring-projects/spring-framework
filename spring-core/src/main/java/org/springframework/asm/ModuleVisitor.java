@@ -42,7 +42,9 @@ public abstract class ModuleVisitor {
    */
   protected final int api;
 
-  /** The module visitor to which this visitor must delegate method calls. May be null. */
+  /**
+   * The module visitor to which this visitor must delegate method calls. May be {@literal null}.
+   */
   protected ModuleVisitor mv;
 
   /**
@@ -64,8 +66,8 @@ public abstract class ModuleVisitor {
    *     be null.
    */
   public ModuleVisitor(final int api, final ModuleVisitor moduleVisitor) {
-    if (api != Opcodes.ASM6 && api != Opcodes.ASM7) {
-      throw new IllegalArgumentException();
+    if (api != Opcodes.ASM7 && api != Opcodes.ASM6) {
+      throw new IllegalArgumentException("Unsupported api " + api);
     }
     this.api = api;
     this.mv = moduleVisitor;
