@@ -90,8 +90,7 @@ public class ConfigurationClassPostProcessorTests {
 	 * <p>Technically, {@link ConfigurationClassPostProcessor} could fail to enhance the
 	 * registered Configuration classes and many use cases would still work.
 	 * Certain cases, however, like inter-bean singleton references would not.
-	 * We test for such a case below, and in doing so prove that enhancement is
-	 * working.
+	 * We test for such a case below, and in doing so prove that enhancement is working.
 	 */
 	@Test
 	public void enhancementIsPresentBecauseSingletonSemanticsAreRespected() {
@@ -105,6 +104,16 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void enhancementIsNotPresentForProxyBeanMethodsFlagSetToFalse() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(NonEnhancedSingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertNotSame(foo, bar.foo);
+	}
+
+	@Test
 	public void configurationIntrospectionOfInnerClassesWorksWithDotNameSyntax() {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(getClass().getName() + ".SingletonBeanConfig"));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
@@ -115,8 +124,8 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	/**
-	 * Tests the fix for SPR-5655, a special workaround that prefers reflection
-	 * over ASM if a bean class is already loaded.
+	 * Tests the fix for SPR-5655, a special workaround that prefers reflection over ASM
+	 * if a bean class is already loaded.
 	 */
 	@Test
 	public void alreadyLoadedConfigurationClasses() {
@@ -129,8 +138,7 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	/**
-	 * Tests whether a bean definition without a specified bean class is handled
-	 * correctly.
+	 * Tests whether a bean definition without a specified bean class is handled correctly.
 	 */
 	@Test
 	public void postProcessorIntrospectsInheritedDefinitionsCorrectly() {
@@ -1060,6 +1068,18 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	@Order(1)
 	static class SingletonBeanConfig {
+
+		public @Bean Foo foo() {
+			return new Foo();
+		}
+
+		public @Bean Bar bar() {
+			return new Bar(foo());
+		}
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class NonEnhancedSingletonBeanConfig {
 
 		public @Bean Foo foo() {
 			return new Foo();

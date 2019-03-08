@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,10 +112,11 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
-		if (isFullConfigurationCandidate(metadata)) {
+		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
+		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
-		else if (isLiteConfigurationCandidate(metadata)) {
+		else if (config != null || isConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
@@ -135,33 +136,10 @@ abstract class ConfigurationClassUtils {
 	 * Check the given metadata for a configuration class candidate
 	 * (or nested component class declared within a configuration/component class).
 	 * @param metadata the metadata of the annotated class
-	 * @return {@code true} if the given class is to be registered as a
-	 * reflection-detected bean definition; {@code false} otherwise
+	 * @return {@code true} if the given class is to be registered for
+	 * configuration class processing; {@code false} otherwise
 	 */
 	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
-		return (isFullConfigurationCandidate(metadata) || isLiteConfigurationCandidate(metadata));
-	}
-
-	/**
-	 * Check the given metadata for a full configuration class candidate
-	 * (i.e. a class annotated with {@code @Configuration}).
-	 * @param metadata the metadata of the annotated class
-	 * @return {@code true} if the given class is to be processed as a full
-	 * configuration class, including cross-method call interception
-	 */
-	public static boolean isFullConfigurationCandidate(AnnotationMetadata metadata) {
-		return metadata.isAnnotated(Configuration.class.getName());
-	}
-
-	/**
-	 * Check the given metadata for a lite configuration class candidate
-	 * (e.g. a class annotated with {@code @Component} or just having
-	 * {@code @Import} declarations or {@code @Bean methods}).
-	 * @param metadata the metadata of the annotated class
-	 * @return {@code true} if the given class is to be processed as a lite
-	 * configuration class, just registering it and scanning it for {@code @Bean} methods
-	 */
-	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
 		// Do not consider an interface or an annotation...
 		if (metadata.isInterface()) {
 			return false;
