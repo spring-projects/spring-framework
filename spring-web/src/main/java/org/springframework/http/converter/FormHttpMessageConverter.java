@@ -98,9 +98,10 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * The default charset used by the converter.
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+	public static final Charset DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET = StandardCharsets.ISO_8859_1;
 
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
-			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
+			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET);
 
 
 	private List<MediaType> supportedMediaTypes = new ArrayList<>();
@@ -245,8 +246,19 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
-		Charset charset = (contentType != null && contentType.getCharset() != null ?
-				contentType.getCharset() : this.charset);
+		Charset charset;
+		if (contentType == null || contentType.getCharset() == null) {
+			if (contentType != null && MediaType.APPLICATION_FORM_URLENCODED.equalsTypeAndSubtype(contentType)) {
+				charset = DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET;
+			}
+			else {
+				charset = this.charset;
+			}
+		}
+		else {
+			charset = contentType.getCharset();
+		}
+
 		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
 
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
@@ -254,11 +266,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		for (String pair : pairs) {
 			int idx = pair.indexOf('=');
 			if (idx == -1) {
-				result.add(URLDecoder.decode(pair, charset.name()), null);
+				// Note: The World Wide Web Consortium Recommendation states that UTF-8 should be used. Not doing so may introduce incompatibilites.
+				// https://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars
+				result.add(URLDecoder.decode(pair, "UTF-8"), null);
 			}
 			else {
-				String name = URLDecoder.decode(pair.substring(0, idx), charset.name());
-				String value = URLDecoder.decode(pair.substring(idx + 1), charset.name());
+				String name = URLDecoder.decode(pair.substring(0, idx), "UTF-8");
+				String value = URLDecoder.decode(pair.substring(idx + 1), "UTF-8");
 				result.add(name, value);
 			}
 		}
@@ -297,10 +311,14 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			HttpOutputMessage outputMessage) throws IOException {
 
 		contentType = getMediaType(contentType);
-		outputMessage.getHeaders().setContentType(contentType);
-
 		Charset charset = contentType.getCharset();
 		Assert.notNull(charset, "No charset"); // should never occur
+		if (MediaType.APPLICATION_FORM_URLENCODED.equalsTypeAndSubtype(contentType) && charset.equals(DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET) ) {
+			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		}
+		else {
+			outputMessage.getHeaders().setContentType(contentType);
+		}
 
 		final byte[] bytes = serializeForm(formData, charset).getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
@@ -319,7 +337,12 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return DEFAULT_FORM_DATA_MEDIA_TYPE;
 		}
 		else if (mediaType.getCharset() == null) {
-			return new MediaType(mediaType, this.charset);
+			if (MediaType.APPLICATION_FORM_URLENCODED.equalsTypeAndSubtype(mediaType)) {
+				return new MediaType(mediaType, DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET);
+			}
+			else {
+				return new MediaType(mediaType, this.charset);
+			}
 		}
 		else {
 			return mediaType;
@@ -337,7 +360,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 						builder.append(URLEncoder.encode(name, charset.name()));
 						if (value != null) {
 							builder.append('=');
-							builder.append(URLEncoder.encode(String.valueOf(value), charset.name()));
+							// Note: The World Wide Web Consortium Recommendation states that UTF-8 should be used. Not doing so may introduce incompatibilites.
+							// https://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars
+							builder.append(URLEncoder.encode(String.valueOf(value), "UTF-8"));
 						}
 					}
 					catch (UnsupportedEncodingException ex) {

@@ -55,6 +55,7 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 	 * The default charset used by the reader.
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+	public static final Charset DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET = StandardCharsets.ISO_8859_1;
 
 	private static final ResolvableType MULTIVALUE_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
@@ -126,7 +127,12 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 			return mediaType.getCharset();
 		}
 		else {
-			return getDefaultCharset();
+			if (MediaType.APPLICATION_FORM_URLENCODED.equalsTypeAndSubtype(mediaType)) {
+				return DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET;
+			}
+			else {
+				return getDefaultCharset();
+			}
 		}
 	}
 
@@ -137,11 +143,13 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 			for (String pair : pairs) {
 				int idx = pair.indexOf('=');
 				if (idx == -1) {
-					result.add(URLDecoder.decode(pair, charset.name()), null);
+					// Note: The World Wide Web Consortium Recommendation states that UTF-8 should be used. Not doing so may introduce incompatibilites.
+					// https://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars
+					result.add(URLDecoder.decode(pair, "UTF-8"), null);
 				}
 				else {
-					String name = URLDecoder.decode(pair.substring(0, idx),  charset.name());
-					String value = URLDecoder.decode(pair.substring(idx + 1), charset.name());
+					String name = URLDecoder.decode(pair.substring(0, idx),  "UTF-8");
+					String value = URLDecoder.decode(pair.substring(idx + 1), "UTF-8");
 					result.add(name, value);
 				}
 			}

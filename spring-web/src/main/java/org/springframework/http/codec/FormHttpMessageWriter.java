@@ -65,9 +65,10 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 	 * The default charset used by the writer.
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+	public static final Charset DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET = StandardCharsets.ISO_8859_1;
 
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
-			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
+			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET);
 
 	private static final List<MediaType> MEDIA_TYPES =
 			Collections.singletonList(MediaType.APPLICATION_FORM_URLENCODED);
@@ -125,10 +126,15 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 			Map<String, Object> hints) {
 
 		mediaType = getMediaType(mediaType);
-		message.getHeaders().setContentType(mediaType);
 
 		Charset charset = mediaType.getCharset();
 		Assert.notNull(charset, "No charset"); // should never occur
+		if (MediaType.APPLICATION_FORM_URLENCODED.equalsTypeAndSubtype(mediaType) && charset.equals(DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET) ) {
+			message.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		}
+		else {
+			message.getHeaders().setContentType(mediaType);
+		}
 
 		return Mono.from(inputStream).flatMap(form -> {
 			logFormData(form, hints);
@@ -145,7 +151,12 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 			return DEFAULT_FORM_DATA_MEDIA_TYPE;
 		}
 		else if (mediaType.getCharset() == null) {
-			return new MediaType(mediaType, getDefaultCharset());
+			if (MediaType.APPLICATION_FORM_URLENCODED.equalsTypeAndSubtype(mediaType)) {
+				return new MediaType(mediaType, DEFAULT_APPLICATION_FORM_URLENCODED_CHARSET);
+			}
+			else {
+				return new MediaType(mediaType, getDefaultCharset());
+			}
 		}
 		else {
 			return mediaType;
@@ -167,10 +178,12 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 						if (builder.length() != 0) {
 							builder.append('&');
 						}
-						builder.append(URLEncoder.encode(name, charset.name()));
+						// Note: The World Wide Web Consortium Recommendation states that UTF-8 should be used. Not doing so may introduce incompatibilites.
+						// https://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars
+						builder.append(URLEncoder.encode(name, "UTF-8"));
 						if (value != null) {
 							builder.append('=');
-							builder.append(URLEncoder.encode(value, charset.name()));
+							builder.append(URLEncoder.encode(value, "UTF-8"));
 						}
 					}
 					catch (UnsupportedEncodingException ex) {

@@ -76,6 +76,7 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 	@Test
 	public void writeForm() {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+		body.set("smile", "☺");
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
 		body.add("name 2", "value 2+2");
@@ -83,7 +84,29 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 		MockServerHttpResponse response = new MockServerHttpResponse(this.bufferFactory);
 		this.writer.write(Mono.just(body), null, MediaType.APPLICATION_FORM_URLENCODED, response, null).block();
 
-		String expected = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		String expected = "smile=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		StepVerifier.create(response.getBody())
+				.consumeNextWith(stringConsumer(
+						expected))
+				.expectComplete()
+				.verify();
+		HttpHeaders headers = response.getHeaders();
+		assertEquals("application/x-www-form-urlencoded", headers.getContentType().toString());
+		assertEquals(expected.length(), headers.getContentLength());
+	}
+
+	@Test
+	public void writeFormUTF8() {
+		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+		body.set("smile", "☺");
+		body.set("name 1", "value 1");
+		body.add("name 2", "value 2+1");
+		body.add("name 2", "value 2+2");
+		body.add("name 3", null);
+		MockServerHttpResponse response = new MockServerHttpResponse(this.bufferFactory);
+		this.writer.write(Mono.just(body), null, new MediaType(MediaType.APPLICATION_FORM_URLENCODED, StandardCharsets.UTF_8), response, null).block();
+
+		String expected = "smile=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		StepVerifier.create(response.getBody())
 				.consumeNextWith(stringConsumer(
 						expected))

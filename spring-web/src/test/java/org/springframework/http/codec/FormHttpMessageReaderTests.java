@@ -75,11 +75,14 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTestCase {
 
 	@Test
 	public void readFormAsMono() {
-		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
-		MockServerHttpRequest request = request(body);
+		// smile cannot be expressed in ISO-8859-1
+		String body = "smile=notapplicable&smileencoded=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		MockServerHttpRequest request = request(body, MediaType.APPLICATION_FORM_URLENCODED);
 		MultiValueMap<String, String> result = this.reader.readMono(null, request, null).block();
 
-		assertEquals("Invalid result", 3, result.size());
+		assertEquals("Invalid result", 5, result.size());
+		assertEquals("Invalid result", "notapplicable", result.getFirst("smile"));
+		assertEquals("Invalid result", "☺", result.getFirst("smileencoded"));
 		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
 		List<String> values = result.get("name 2");
 		assertEquals("Invalid result", 2, values.size());
@@ -89,9 +92,27 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTestCase {
 	}
 
 	@Test
+	public void readFormAsMonoUTF8() {
+		String body = "smile=☺&smileencoded=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		MockServerHttpRequest request = request(body, new MediaType(MediaType.APPLICATION_FORM_URLENCODED, StandardCharsets.UTF_8));
+		MultiValueMap<String, String> result = this.reader.readMono(null, request, null).block();
+
+		assertEquals("Invalid result", 5, result.size());
+		assertEquals("Invalid result", "☺", result.getFirst("smile"));
+		assertEquals("Invalid result", "☺", result.getFirst("smileencoded"));
+		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
+		List<String> values = result.get("name 2");
+		assertEquals("Invalid result", 2, values.size());
+		assertEquals("Invalid result", "value 2+1", values.get(0));
+		assertEquals("Invalid result", "value 2+2", values.get(1));
+		assertNull("Invalid result", result.getFirst("name 3"));
+	}
+
+
+	@Test
 	public void readFormAsFlux() {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
-		MockServerHttpRequest request = request(body);
+		MockServerHttpRequest request = request(body, MediaType.APPLICATION_FORM_URLENCODED);
 		MultiValueMap<String, String> result = this.reader.read(null, request, null).single().block();
 
 		assertEquals("Invalid result", 3, result.size());
@@ -108,7 +129,7 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTestCase {
 		DataBuffer fooBuffer = stringBuffer("name=value");
 		Flux<DataBuffer> body =
 				Flux.just(fooBuffer).concatWith(Flux.error(new RuntimeException()));
-		MockServerHttpRequest request = request(body);
+		MockServerHttpRequest request = request(body, MediaType.APPLICATION_FORM_URLENCODED);
 
 		Flux<MultiValueMap<String, String>> result = this.reader.read(null, request, null);
 		StepVerifier.create(result)
@@ -117,14 +138,14 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTestCase {
 	}
 
 
-	private MockServerHttpRequest request(String body) {
-		return request(Mono.just(stringBuffer(body)));
+	private MockServerHttpRequest request(String body, MediaType contentType) {
+		return request(Mono.just(stringBuffer(body)), contentType);
 	}
 
-	private MockServerHttpRequest request(Publisher<? extends DataBuffer> body) {
+	private MockServerHttpRequest request(Publisher<? extends DataBuffer> body, MediaType contentType) {
 		return MockServerHttpRequest
 					.method(HttpMethod.GET, "/")
-					.header(HttpHeaders.CONTENT_TYPE,  MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+					.header(HttpHeaders.CONTENT_TYPE,  contentType.toString())
 					.body(body);
 	}
 

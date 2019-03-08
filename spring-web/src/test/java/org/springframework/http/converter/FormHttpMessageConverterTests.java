@@ -86,13 +86,55 @@ public class FormHttpMessageConverterTests {
 
 	@Test
 	public void readForm() throws Exception {
-		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		// smile cannot be expressed in ISO-8859-1
+		String body = "smile=notapplicable&smileencoded=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
 		inputMessage.getHeaders().setContentType(
 				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
 		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
 
-		assertEquals("Invalid result", 3, result.size());
+		assertEquals("Invalid result", 5, result.size());
+		assertEquals("Invalid result", "notapplicable", result.getFirst("smile"));
+		assertEquals("Invalid result", "☺", result.getFirst("smileencoded"));
+		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
+		List<String> values = result.get("name 2");
+		assertEquals("Invalid result", 2, values.size());
+		assertEquals("Invalid result", "value 2+1", values.get(0));
+		assertEquals("Invalid result", "value 2+2", values.get(1));
+		assertNull("Invalid result", result.getFirst("name 3"));
+	}
+
+	@Test
+	public void readFormUTF8() throws Exception {
+		String body = "smile=☺&smileencoded=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.UTF_8));
+		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
+
+		assertEquals("Invalid result", 5, result.size());
+		assertEquals("Invalid result", "☺", result.getFirst("smile"));
+		assertEquals("Invalid result", "☺", result.getFirst("smileencoded"));
+		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
+		List<String> values = result.get("name 2");
+		assertEquals("Invalid result", 2, values.size());
+		assertEquals("Invalid result", "value 2+1", values.get(0));
+		assertEquals("Invalid result", "value 2+2", values.get(1));
+		assertNull("Invalid result", result.getFirst("name 3"));
+	}
+
+	@Test
+	public void readFormDefaultCharset() throws Exception {
+		// smile cannot be expressed in ISO-8859-1
+		String body = "smile=notapplicable&smileencoded=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.ISO_8859_1));
+		inputMessage.getHeaders().setContentType(
+				new MediaType("application", "x-www-form-urlencoded"));
+		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
+
+		assertEquals("Invalid result", 5, result.size());
+		assertEquals("Invalid result", "notapplicable", result.getFirst("smile"));
+		assertEquals("Invalid result", "☺", result.getFirst("smileencoded"));
 		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
 		List<String> values = result.get("name 2");
 		assertEquals("Invalid result", 2, values.size());
@@ -104,6 +146,45 @@ public class FormHttpMessageConverterTests {
 	@Test
 	public void writeForm() throws IOException {
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+		body.set("smile", "☺");
+		body.set("name 1", "value 1");
+		body.add("name 2", "value 2+1");
+		body.add("name 2", "value 2+2");
+		body.add("name 3", null);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(body, new MediaType(MediaType.APPLICATION_FORM_URLENCODED, StandardCharsets.ISO_8859_1), outputMessage);
+
+		assertEquals("Invalid result", "smile=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
+				outputMessage.getBodyAsString(StandardCharsets.ISO_8859_1));
+		assertEquals("Invalid content-type", "application/x-www-form-urlencoded",
+				outputMessage.getHeaders().getContentType().toString());
+		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
+				outputMessage.getHeaders().getContentLength());
+	}
+
+	@Test
+	public void writeFormUTF8() throws IOException {
+		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+		body.set("smile", "☺");
+		body.set("name 1", "value 1");
+		body.add("name 2", "value 2+1");
+		body.add("name 2", "value 2+2");
+		body.add("name 3", null);
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(body, new MediaType(MediaType.APPLICATION_FORM_URLENCODED, StandardCharsets.UTF_8), outputMessage);
+
+		assertEquals("Invalid result", "smile=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
+				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
+		assertEquals("Invalid content-type", "application/x-www-form-urlencoded;charset=UTF-8",
+				outputMessage.getHeaders().getContentType().toString());
+		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
+				outputMessage.getHeaders().getContentLength());
+	}
+
+	@Test
+	public void writeFormDefaultCharset() throws IOException {
+		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+		body.set("smile", "☺");
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
 		body.add("name 2", "value 2+2");
@@ -111,9 +192,9 @@ public class FormHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.write(body, MediaType.APPLICATION_FORM_URLENCODED, outputMessage);
 
-		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
-				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
-		assertEquals("Invalid content-type", "application/x-www-form-urlencoded;charset=UTF-8",
+		assertEquals("Invalid result", "smile=%E2%98%BA&name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
+				outputMessage.getBodyAsString(StandardCharsets.ISO_8859_1));
+		assertEquals("Invalid content-type", "application/x-www-form-urlencoded",
 				outputMessage.getHeaders().getContentType().toString());
 		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
 				outputMessage.getHeaders().getContentLength());
