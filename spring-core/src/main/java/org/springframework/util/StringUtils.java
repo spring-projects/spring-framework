@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -873,6 +873,28 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
+	 * Copy the given {@link Collection} into a {@code String} array.
+	 * <p>The {@code Collection} must contain {@code String} elements only.
+	 * @param collection the {@code Collection} to copy
+	 * (potentially {@code null} or empty)
+	 * @return the resulting {@code String} array
+	 */
+	public static String[] toStringArray(@Nullable Collection<String> collection) {
+		return (collection != null ? collection.toArray(new String[0]) : new String[0]);
+	}
+
+	/**
+	 * Copy the given {@link Enumeration} into a {@code String} array.
+	 * <p>The {@code Enumeration} must contain {@code String} elements only.
+	 * @param enumeration the {@code Enumeration} to copy
+	 * (potentially {@code null} or empty)
+	 * @return the resulting {@code String} array
+	 */
+	public static String[] toStringArray(@Nullable Enumeration<String> enumeration) {
+		return (enumeration != null ? toStringArray(Collections.list(enumeration)) : new String[0]);
+	}
+
+	/**
 	 * Append the given {@code String} to the given {@code String} array,
 	 * returning a new array consisting of the input array contents plus
 	 * the given {@code String}.
@@ -947,37 +969,17 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Turn given source {@code String} array into sorted array.
-	 * @param array the source array
-	 * @return the sorted array (never {@code null})
+	 * Sort the given {@code String} array if necessary.
+	 * @param array the original array (potentially empty)
+	 * @return the array in sorted form (never {@code null})
 	 */
 	public static String[] sortStringArray(String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
-			return new String[0];
+			return array;
 		}
 
 		Arrays.sort(array);
 		return array;
-	}
-
-	/**
-	 * Copy the given {@code Collection} into a {@code String} array.
-	 * <p>The {@code Collection} must contain {@code String} elements only.
-	 * @param collection the {@code Collection} to copy
-	 * @return the {@code String} array
-	 */
-	public static String[] toStringArray(Collection<String> collection) {
-		return collection.toArray(new String[0]);
-	}
-
-	/**
-	 * Copy the given Enumeration into a {@code String} array.
-	 * The Enumeration must contain {@code String} elements only.
-	 * @param enumeration the Enumeration to copy
-	 * @return the {@code String} array
-	 */
-	public static String[] toStringArray(Enumeration<String> enumeration) {
-		return toStringArray(Collections.list(enumeration));
 	}
 
 	/**
