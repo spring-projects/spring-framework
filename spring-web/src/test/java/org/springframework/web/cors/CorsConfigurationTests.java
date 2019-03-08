@@ -16,6 +16,7 @@
 
 package org.springframework.web.cors;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,7 +48,7 @@ public class CorsConfigurationTests {
 		assertNull(config.getExposedHeaders());
 		config.setAllowCredentials(null);
 		assertNull(config.getAllowCredentials());
-		config.setMaxAge(null);
+		config.setMaxAge((Duration)null);
 		assertNull(config.getMaxAge());
 	}
 

@@ -16,6 +16,7 @@
 
 package org.springframework.web.cors;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -81,8 +82,7 @@ public class CorsConfiguration {
 	private Boolean allowCredentials;
 
 	@Nullable
-	private Long maxAge;
-
+	private Duration maxAge;
 
 	/**
 	 * Construct a new {@code CorsConfiguration} instance with no cross-origin
@@ -310,6 +310,20 @@ public class CorsConfiguration {
 	 * <p>By default this is not set.
 	 */
 	public void setMaxAge(@Nullable Long maxAge) {
+		if (maxAge == null) {
+			this.maxAge = null;
+		}
+		else {
+			this.maxAge = Duration.ofSeconds(maxAge);
+		}
+	}
+
+	/**
+	 * Configure how long, in seconds, the response from a pre-flight request
+	 * can be cached by clients.
+	 * <p>By default this is not set.
+	 */
+	public void setMaxAge(@Nullable Duration maxAge) {
 		this.maxAge = maxAge;
 	}
 
@@ -319,7 +333,7 @@ public class CorsConfiguration {
 	 */
 	@Nullable
 	public Long getMaxAge() {
-		return this.maxAge;
+		return this.maxAge != null ? this.maxAge.getSeconds() : null;
 	}
 
 	/**
@@ -353,7 +367,7 @@ public class CorsConfiguration {
 			this.allowedHeaders = DEFAULT_PERMIT_ALL;
 		}
 		if (this.maxAge == null) {
-			this.maxAge = 1800L;
+			this.maxAge = Duration.ofSeconds(1800L);
 		}
 		return this;
 	}
