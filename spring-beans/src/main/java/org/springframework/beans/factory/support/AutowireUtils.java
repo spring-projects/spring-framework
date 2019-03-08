@@ -300,8 +300,8 @@ public abstract class AutowireUtils {
 	 * {@link Qualifier @Qualifier}, or {@link Value @Value}.
 	 * <p>Note that {@link #resolveDependency} may still be able to resolve the
 	 * dependency for the supplied parameter even if this method returns {@code false}.
-	 * @param parameter the parameter whose dependency should be autowired (must not be
-	 * {@code null})
+	 * @param parameter the parameter whose dependency should be autowired
+	 * (must not be {@code null})
 	 * @param parameterIndex the index of the parameter in the constructor or method
 	 * that declares the parameter
 	 * @since 5.2
@@ -397,8 +397,9 @@ public abstract class AutowireUtils {
 		return parameter;
 	}
 
+
 	/**
-	 * Reflective InvocationHandler for lazy access to the current target object.
+	 * Reflective {@link InvocationHandler} for lazy access to the current target object.
 	 */
 	@SuppressWarnings("serial")
 	private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {

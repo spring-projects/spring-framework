@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.util.StringUtils;
 public class CacheControl {
 
 	@Nullable
-	private Duration maxAge = null;
+	private Duration maxAge;
 
 	private boolean noCache = false;
 
@@ -69,13 +69,13 @@ public class CacheControl {
 	private boolean proxyRevalidate = false;
 
 	@Nullable
-	private Duration staleWhileRevalidate = null;
+	private Duration staleWhileRevalidate;
 
 	@Nullable
-	private Duration staleIfError = null;
+	private Duration staleIfError;
 
 	@Nullable
-	private Duration sMaxAge = null;
+	private Duration sMaxAge;
 
 	/**
 	 * Create an empty CacheControl instance.
@@ -107,6 +107,7 @@ public class CacheControl {
 	 * @param maxAge the maximum time the response should be cached
 	 * @param unit the time unit of the {@code maxAge} argument
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #maxAge(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.8">rfc7234 section 5.2.2.8</a>
 	 */
 	public static CacheControl maxAge(long maxAge, TimeUnit unit) {
@@ -124,6 +125,7 @@ public class CacheControl {
 	 * directive should be set ({@link #mustRevalidate()}
 	 * @param maxAge the maximum time the response should be cached
 	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.8">rfc7234 section 5.2.2.8</a>
 	 */
 	public static CacheControl maxAge(Duration maxAge) {
@@ -234,6 +236,7 @@ public class CacheControl {
 	 * @param sMaxAge the maximum time the response should be cached
 	 * @param unit the time unit of the {@code sMaxAge} argument
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #sMaxAge(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.9">rfc7234 section 5.2.2.9</a>
 	 */
 	public CacheControl sMaxAge(long sMaxAge, TimeUnit unit) {
@@ -246,6 +249,7 @@ public class CacheControl {
 	 * by this directive overrides the maximum age specified by other directives.
 	 * @param sMaxAge the maximum time the response should be cached
 	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.9">rfc7234 section 5.2.2.9</a>
 	 */
 	public CacheControl sMaxAge(Duration sMaxAge) {
@@ -263,6 +267,7 @@ public class CacheControl {
 	 * @param staleWhileRevalidate the maximum time the response should be used while being revalidated
 	 * @param unit the time unit of the {@code staleWhileRevalidate} argument
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #staleWhileRevalidate(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-3">rfc5861 section 3</a>
 	 */
 	public CacheControl staleWhileRevalidate(long staleWhileRevalidate, TimeUnit unit) {
@@ -278,6 +283,7 @@ public class CacheControl {
 	 * (i.e. without blocking).
 	 * @param staleWhileRevalidate the maximum time the response should be used while being revalidated
 	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-3">rfc5861 section 3</a>
 	 */
 	public CacheControl staleWhileRevalidate(Duration staleWhileRevalidate) {
@@ -292,6 +298,7 @@ public class CacheControl {
 	 * @param staleIfError the maximum time the response should be used when errors are encountered
 	 * @param unit the time unit of the {@code staleIfError} argument
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #staleIfError(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-4">rfc5861 section 4</a>
 	 */
 	public CacheControl staleIfError(long staleIfError, TimeUnit unit) {
@@ -304,6 +311,7 @@ public class CacheControl {
 	 * MAY be used to satisfy the request, regardless of other freshness information.
 	 * @param staleIfError the maximum time the response should be used when errors are encountered
 	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-4">rfc5861 section 4</a>
 	 */
 	public CacheControl staleIfError(Duration staleIfError) {
