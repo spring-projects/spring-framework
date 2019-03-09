@@ -36,7 +36,7 @@ import javax.annotation.meta.TypeQualifierDefault;
  *
  * @author Sebastien Deleuze
  * @since 5.0
- * @see NonNullFields
+ * @see NonNullApi
  * @see Nullable
  * @see NonNull
  */
