@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,20 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * A simple filter which matches classes with a given annotation,
+ * A simple {@link TypeFilter} which matches classes with a given annotation,
  * checking inherited annotations as well.
  *
- * <p>The matching logic mirrors that of {@link java.lang.Class#isAnnotationPresent(Class)}.
+ * <p>By default, the matching logic mirrors that of
+ * {@link AnnotationUtils#getAnnotation(java.lang.reflect.AnnotatedElement, Class)},
+ * supporting annotations that are <em>present</em> or <em>meta-present</em> for a
+ * single level of meta-annotations. The search for meta-annotations my be disabled.
+ * Similarly, the search for annotations on interfaces may optionally be enabled.
+ * Consult the various constructors in this class for details.
  *
  * @author Mark Fisher
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter {
@@ -44,11 +50,11 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 
 
 	/**
-	 * Create a new AnnotationTypeFilter for the given annotation type.
-	 * This filter will also match meta-annotations. To disable the
+	 * Create a new {@code AnnotationTypeFilter} for the given annotation type.
+	 * <p>The filter will also match meta-annotations. To disable the
 	 * meta-annotation matching, use the constructor that accepts a
-	 * '{@code considerMetaAnnotations}' argument. The filter will
-	 * not match interfaces.
+	 * '{@code considerMetaAnnotations}' argument.
+	 * <p>The filter will not match interfaces.
 	 * @param annotationType the annotation type to match
 	 */
 	public AnnotationTypeFilter(Class<? extends Annotation> annotationType) {
@@ -56,8 +62,8 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	}
 
 	/**
-	 * Create a new AnnotationTypeFilter for the given annotation type.
-	 * The filter will not match interfaces.
+	 * Create a new {@code AnnotationTypeFilter} for the given annotation type.
+	 * <p>The filter will not match interfaces.
 	 * @param annotationType the annotation type to match
 	 * @param considerMetaAnnotations whether to also match on meta-annotations
 	 */
@@ -66,7 +72,7 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	}
 
 	/**
-	 * Create a new {@link AnnotationTypeFilter} for the given annotation type.
+	 * Create a new {@code AnnotationTypeFilter} for the given annotation type.
 	 * @param annotationType the annotation type to match
 	 * @param considerMetaAnnotations whether to also match on meta-annotations
 	 * @param considerInterfaces whether to also match interfaces

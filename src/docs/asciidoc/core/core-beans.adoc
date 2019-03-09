@@ -5499,7 +5499,7 @@ component-scan element. That means that the two components are autodetected and
 wired together -- all without any bean configuration metadata provided in XML.
 
 NOTE: You can disable the registration of `AutowiredAnnotationBeanPostProcessor` and
-`CommonAnnotationBeanPostProcessor` by including the annotation-config attribute
+`CommonAnnotationBeanPostProcessor` by including the `annotation-config` attribute
 with a value of `false`.
 
 
@@ -5507,13 +5507,14 @@ with a value of `false`.
 [[beans-scanning-filters]]
 === Using Filters to Customize Scanning
 
-By default, classes annotated with `@Component`, `@Repository`, `@Service`,
-`@Controller`, or a custom annotation that itself is annotated with `@Component` are the
-only detected candidate components. However, you can modify and extend this behavior
-by applying custom filters. Add them as `includeFilters` or `excludeFilters`
-parameters of the `@ComponentScan` annotation (or as `include-filter` or `exclude-filter`
-child elements of the `component-scan` element). Each filter element requires the `type`
-and `expression` attributes. The following table describes the filtering options:
+By default, classes annotated with `@Component`, `@Repository`, `@Service`, `@Controller`,
+`@Configuration`, or a custom annotation that itself is annotated with `@Component` are
+the only detected candidate components. However, you can modify and extend this behavior
+by applying custom filters. Add them as `includeFilters` or `excludeFilters` attributes of
+the `@ComponentScan` annotation (or as `<context:include-filter />` or
+`<context:exclude-filter />` child elements of the `<context:component-scan>` element in
+XML configuration). Each filter element requires the `type` and `expression` attributes.
+The following table describes the filtering options:
 
 [[beans-scanning-filters-tbl]]
 .Filter Types
@@ -5522,7 +5523,7 @@ and `expression` attributes. The following table describes the filtering options
 
 | annotation (default)
 | `org.example.SomeAnnotation`
-| An annotation to be present at the type level in target components.
+| An annotation to be _present_ or _meta-present_ at the type level in target components.
 
 | assignable
 | `org.example.SomeClass`
@@ -5534,11 +5535,11 @@ and `expression` attributes. The following table describes the filtering options
 
 | regex
 | `org\.example\.Default.*`
-| A regex expression to be matched by the target components class names.
+| A regex expression to be matched by the target components' class names.
 
 | custom
 | `org.example.MyTypeFilter`
-| A custom implementation of the `org.springframework.core.type .TypeFilter` interface.
+| A custom implementation of the `org.springframework.core.type.TypeFilter` interface.
 |===
 
 The following example shows the configuration ignoring all `@Repository` annotations
@@ -5571,10 +5572,11 @@ The following listing shows the equivalent XML:
 	</beans>
 ----
 
-NOTE: You can also disable the default filters by setting `useDefaultFilters=false` on the annotation or
- by providing `use-default-filters="false"` as an attribute of the `<component-scan/>` element. This,
-in effect, disables automatic detection of classes annotated with `@Component`, `@Repository`,
-`@Service`, `@Controller`, or `@Configuration`.
+NOTE: You can also disable the default filters by setting `useDefaultFilters=false` on the
+annotation or by providing `use-default-filters="false"` as an attribute of the
+`<component-scan/>` element. This effectively disables automatic detection of classes
+annotated or meta-annotated with `@Component`, `@Repository`, `@Service`, `@Controller`,
+`@RestController`, or `@Configuration`.
 
 
 
