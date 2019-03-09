@@ -639,6 +639,11 @@ public abstract class StringUtils {
 		}
 		String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
 
+		// Shortcut if there is no work to do
+		if (pathToUse.indexOf('.') == -1) {
+			return pathToUse;
+		}
+
 		// Strip prefix from path to analyze, to not treat it as part of the
 		// first path element. This is necessary to correctly parse paths like
 		// "file:core/../core/io/Resource.class", where the ".." should just
