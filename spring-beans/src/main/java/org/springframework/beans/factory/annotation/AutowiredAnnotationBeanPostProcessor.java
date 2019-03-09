@@ -57,9 +57,11 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -304,7 +306,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						else if (primaryConstructor != null) {
 							continue;
 						}
-						AnnotationAttributes ann = findAutowiredAnnotation(candidate);
+						MergedAnnotation<?> ann = findAutowiredAnnotation(candidate);
 						if (ann == null) {
 							Class<?> userClass = ClassUtils.getUserClass(beanClass);
 							if (userClass != beanClass) {
@@ -453,7 +455,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, field -> {
-				AnnotationAttributes ann = findAutowiredAnnotation(field);
+				MergedAnnotation<?> ann = findAutowiredAnnotation(field);
 				if (ann != null) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						if (logger.isInfoEnabled()) {
@@ -471,7 +473,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
 					return;
 				}
-				AnnotationAttributes ann = findAutowiredAnnotation(bridgedMethod);
+				MergedAnnotation<?> ann = findAutowiredAnnotation(bridgedMethod);
 				if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 					if (Modifier.isStatic(method.getModifiers())) {
 						if (logger.isInfoEnabled()) {
@@ -500,13 +502,12 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Nullable
-	private AnnotationAttributes findAutowiredAnnotation(AccessibleObject ao) {
-		if (ao.getAnnotations().length > 0) {  // autowiring annotations have to be local
-			for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
-				AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
-				if (attributes != null) {
-					return attributes;
-				}
+	private MergedAnnotation<?> findAutowiredAnnotation(AccessibleObject ao) {
+		MergedAnnotations annotations = MergedAnnotations.from(ao, SearchStrategy.INHERITED_ANNOTATIONS);
+		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
+			MergedAnnotation<?> annotation = annotations.get(type);
+			if (annotation.isPresent()) {
+				return annotation;
 			}
 		}
 		return null;
@@ -520,6 +521,21 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
 	 */
+	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
+		return determineRequiredStatus(
+				ann.asMap(mergedAnnotation -> new AnnotationAttributes()));
+	}
+
+	/**
+	 * Determine if the annotated field or method requires its dependency.
+	 * <p>A 'required' dependency means that autowiring should fail when no beans
+	 * are found. Otherwise, the autowiring process will simply bypass the field
+	 * or method when no beans are found.
+	 * @param ann the Autowired annotation
+	 * @return whether the annotation indicates that a dependency is required
+	 * @deprecated since 5.2 in favor of {@link #determineRequiredStatus(MergedAnnotation)}
+	 */
+	@Deprecated
 	protected boolean determineRequiredStatus(AnnotationAttributes ann) {
 		return (!ann.containsKey(this.requiredParameterName) ||
 				this.requiredParameterValue == ann.getBoolean(this.requiredParameterName));
