@@ -72,7 +72,9 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -666,22 +668,33 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Nullable
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
 			throws NoSuchBeanDefinitionException {
+		return findMergedAnnotationOnBean(beanName, annotationType).synthesize(
+				MergedAnnotation::isPresent).orElse(null);
+	}
 
-		A ann = null;
+	private <A extends Annotation> MergedAnnotation<A> findMergedAnnotationOnBean(
+			String beanName, Class<A> annotationType) {
 		Class<?> beanType = getType(beanName);
 		if (beanType != null) {
-			ann = AnnotationUtils.findAnnotation(beanType, annotationType);
+			MergedAnnotation<A> annotation = MergedAnnotations.from(beanType,
+					SearchStrategy.EXHAUSTIVE).get(annotationType);
+			if (annotation.isPresent()) {
+				return annotation;
+			}
 		}
-		if (ann == null && containsBeanDefinition(beanName)) {
+		if (containsBeanDefinition(beanName)) {
 			BeanDefinition bd = getMergedBeanDefinition(beanName);
 			if (bd instanceof AbstractBeanDefinition) {
 				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
 				if (abd.hasBeanClass()) {
-					ann = AnnotationUtils.findAnnotation(abd.getBeanClass(), annotationType);
+					Class<?> beanClass = abd.getBeanClass();
+					if (beanClass != beanType) {
+						return MergedAnnotations.from(beanClass, SearchStrategy.EXHAUSTIVE).get(annotationType);
+					}
 				}
 			}
 		}
-		return ann;
+		return MergedAnnotation.missing();
 	}
 
 
