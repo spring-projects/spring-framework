@@ -140,6 +140,8 @@ class ConfigurationClassParser {
 
 	private final DeferredImportSelectorHandler deferredImportSelectorHandler = new DeferredImportSelectorHandler();
 
+	private final SourceClass objectSourceClass = new SourceClass(Object.class);
+
 
 	/**
 	 * Create a new {@link ConfigurationClassParser} instance that will be used
@@ -639,8 +641,8 @@ class ConfigurationClassParser {
 	 * Factory method to obtain a {@link SourceClass} from a {@link Class}.
 	 */
 	SourceClass asSourceClass(@Nullable Class<?> classType) throws IOException {
-		if (classType == null) {
-			return new SourceClass(Object.class);
+		if (classType == null || classType.getName().startsWith("java.lang.annotation")) {
+			return this.objectSourceClass;
 		}
 		try {
 			// Sanity test that we can reflectively read annotations,
@@ -671,8 +673,8 @@ class ConfigurationClassParser {
 	 * Factory method to obtain a {@link SourceClass} from a class name.
 	 */
 	SourceClass asSourceClass(@Nullable String className) throws IOException {
-		if (className == null) {
-			return new SourceClass(Object.class);
+		if (className == null || className.startsWith("java.lang.annotation")) {
+			return this.objectSourceClass;
 		}
 		if (className.startsWith("java")) {
 			// Never use ASM for core java types
