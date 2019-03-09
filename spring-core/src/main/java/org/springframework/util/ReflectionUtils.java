@@ -230,7 +230,9 @@ public abstract class ReflectionUtils {
 		Assert.notNull(name, "Method name must not be null");
 		Class<?> searchType = clazz;
 		while (searchType != null) {
-			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : getDeclaredMethods(searchType));
+			Method[] methods = searchType.isInterface() ?
+					searchType.getMethods() :
+					getDeclaredMethods(searchType, false);
 			for (Method method : methods) {
 				if (name.equals(method.getName()) &&
 						(paramTypes == null || Arrays.equals(paramTypes, method.getParameterTypes()))) {
@@ -308,7 +310,7 @@ public abstract class ReflectionUtils {
 	 * @see #doWithMethods
 	 */
 	public static void doWithLocalMethods(Class<?> clazz, MethodCallback mc) {
-		Method[] methods = getDeclaredMethods(clazz);
+		Method[] methods = getDeclaredMethods(clazz, false);
 		for (Method method : methods) {
 			try {
 				mc.doWith(method);
@@ -345,7 +347,7 @@ public abstract class ReflectionUtils {
 	 */
 	public static void doWithMethods(Class<?> clazz, MethodCallback mc, @Nullable MethodFilter mf) {
 		// Keep backing up the inheritance hierarchy.
-		Method[] methods = getDeclaredMethods(clazz);
+		Method[] methods = getDeclaredMethods(clazz, false);
 		for (Method method : methods) {
 			if (mf != null && !mf.matches(method)) {
 				continue;
@@ -429,16 +431,22 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * This variant retrieves {@link Class#getDeclaredMethods()} from a local cache
-	 * in order to avoid the JVM's SecurityManager check and defensive array copying.
-	 * In addition, it also includes Java 8 default methods from locally implemented
-	 * interfaces, since those are effectively to be treated just like declared methods.
+	 * Variant of {@link Class#getDeclaredMethods()} that uses a local cache in
+	 * order to avoid the JVM's SecurityManager check and new Method instances.
+	 * In addition, it also includes Java 8 default methods from locally
+	 * implemented interfaces, since those are effectively to be treated just
+	 * like declared methods.
 	 * @param clazz the class to introspect
 	 * @return the cached array of methods
 	 * @throws IllegalStateException if introspection fails
+	 * @since 5.2
 	 * @see Class#getDeclaredMethods()
 	 */
-	private static Method[] getDeclaredMethods(Class<?> clazz) {
+	public static Method[] getDeclaredMethods(Class<?> clazz) {
+		return getDeclaredMethods(clazz, true);
+	}
+
+	private static Method[] getDeclaredMethods(Class<?> clazz, boolean defensive) {
 		Assert.notNull(clazz, "Class must not be null");
 		Method[] result = declaredMethodsCache.get(clazz);
 		if (result == null) {
@@ -464,7 +472,7 @@ public abstract class ReflectionUtils {
 						"] from ClassLoader [" + clazz.getClassLoader() + "]", ex);
 			}
 		}
-		return result;
+		return (result.length == 0 || !defensive) ? result : result.clone();
 	}
 
 	@Nullable
