@@ -66,9 +66,13 @@ public abstract class ReflectionUtils {
 	 */
 	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
 
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
+
 	private static final Method[] EMPTY_METHOD_ARRAY = new Method[0];
 
 	private static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
+
+	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
 
 	/**
@@ -211,7 +215,7 @@ public abstract class ReflectionUtils {
 	 */
 	@Nullable
 	public static Method findMethod(Class<?> clazz, String name) {
-		return findMethod(clazz, name, new Class<?>[0]);
+		return findMethod(clazz, name, EMPTY_CLASS_ARRAY);
 	}
 
 	/**
@@ -255,7 +259,7 @@ public abstract class ReflectionUtils {
 	 */
 	@Nullable
 	public static Object invokeMethod(Method method, @Nullable Object target) {
-		return invokeMethod(method, target, new Object[0]);
+		return invokeMethod(method, target, EMPTY_OBJECT_ARRAY);
 	}
 
 	/**
