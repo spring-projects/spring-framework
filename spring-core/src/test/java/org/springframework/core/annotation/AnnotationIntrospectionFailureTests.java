@@ -70,12 +70,10 @@ public class AnnotationIntrospectionFailureTests {
 		assertThat(AnnotatedElementUtils.getMergedAnnotationAttributes(
 				withExampleMetaAnnotation,
 				exampleMetaAnnotationClass)).isNull();
-		// Ideally hasAnnotation should return false, however, it currently
-		// detects annotations that might ultimately not load
 		assertThat(AnnotatedElementUtils.hasAnnotation(withExampleMetaAnnotation,
-				exampleAnnotationClass)).isTrue();
+				exampleAnnotationClass)).isFalse();
 		assertThat(AnnotatedElementUtils.hasAnnotation(withExampleMetaAnnotation,
-				exampleMetaAnnotationClass)).isTrue();
+				exampleMetaAnnotationClass)).isFalse();
 	}
 
 	@Test
