@@ -145,8 +145,8 @@ abstract class AnnotationsScanner {
 		int remaining = Integer.MAX_VALUE;
 		int aggregateIndex = 0;
 		Class<?> root = source;
-		while (source != null && source != Object.class
-				&& !hasPlainJavaAnnotationsOnly(source) && remaining > 0) {
+		while (source != null && source != Object.class && remaining > 0
+				&& !hasPlainJavaAnnotationsOnly(source)) {
 			R result = processor.doWithAggregate(context, aggregateIndex);
 			if (result != null) {
 				return result;
@@ -524,7 +524,9 @@ abstract class AnnotationsScanner {
 		String name = type.getName();
 		return type.equals(Ordered.class) ||
 				name.startsWith("java") ||
-				name.startsWith("org.springframework.lang.");
+				name.startsWith("org.springframework.lang.") ||
+				name.startsWith("org.springframework.util.") ||
+				(name.startsWith("com.sun") && !name.contains("Proxy"));
 	}
 
 	private static boolean isWithoutHierarchy(AnnotatedElement source) {
