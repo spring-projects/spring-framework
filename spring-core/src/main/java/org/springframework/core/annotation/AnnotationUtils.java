@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -150,6 +151,55 @@ public abstract class AnnotationUtils {
 	@Nullable
 	private static transient Log logger;
 
+
+	/**
+	 * Determine whether the given class is a candidate for carrying one of the specified
+	 * annotations (at type, method or field level).
+	 * @param clazz the class to introspect
+	 * @param annotationTypes the searchable annotation types
+	 * @return {@code false} if the class is known to have no such annotations at any level;
+	 * {@code true} otherwise. Callers will usually perform full method/field introspection
+	 * if {@code true} is being returned here.
+	 * @since 5.2
+	 * @see #isCandidateClass(Class, Class)
+	 */
+	public static boolean isCandidateClass(Class<?> clazz, Collection<Class<? extends Annotation>> annotationTypes) {
+		for (Class<? extends Annotation> annotationType : annotationTypes) {
+			if (isCandidateClass(clazz, annotationType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Determine whether the given class is a candidate for carrying the specified annotation
+	 * (at type, method or field level).
+	 * @param clazz the class to introspect
+	 * @param annotationType the searchable annotation type
+	 * @return {@code false} if the class is known to have no such annotations at any level;
+	 * {@code true} otherwise. Callers will usually perform full method/field introspection
+	 * if {@code true} is being returned here.
+	 * @since 5.2
+	 * @see #isCandidateClass(Class, String)
+	 */
+	public static boolean isCandidateClass(Class<?> clazz, Class<? extends Annotation> annotationType) {
+		return isCandidateClass(clazz, annotationType.getName());
+	}
+
+	/**
+	 * Determine whether the given class is a candidate for carrying the specified annotation
+	 * (at type, method or field level).
+	 * @param clazz the class to introspect
+	 * @param annotationName the fully-qualified name of the searchable annotation type
+	 * @return {@code false} if the class is known to have no such annotations at any level;
+	 * {@code true} otherwise. Callers will usually perform full method/field introspection
+	 * if {@code true} is being returned here.
+	 * @since 5.2
+	 */
+	public static boolean isCandidateClass(Class<?> clazz, String annotationName) {
+		return !clazz.getName().startsWith("java");
+	}
 
 	/**
 	 * Get a single {@link Annotation} of {@code annotationType} from the supplied

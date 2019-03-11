@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class CompositeTransactionAttributeSource implements TransactionAttribute
 	 * Create a new CompositeTransactionAttributeSource for the given sources.
 	 * @param transactionAttributeSources the TransactionAttributeSource instances to combine
 	 */
-	public CompositeTransactionAttributeSource(TransactionAttributeSource[] transactionAttributeSources) {
+	public CompositeTransactionAttributeSource(TransactionAttributeSource... transactionAttributeSources) {
 		Assert.notNull(transactionAttributeSources, "TransactionAttributeSource array must not be null");
 		this.transactionAttributeSources = transactionAttributeSources;
 	}
@@ -54,12 +54,22 @@ public class CompositeTransactionAttributeSource implements TransactionAttribute
 
 
 	@Override
+	public boolean isCandidateClass(Class<?> targetClass) {
+		for (TransactionAttributeSource source : this.transactionAttributeSources) {
+			if (source.isCandidateClass(targetClass)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	@Nullable
 	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
-		for (TransactionAttributeSource tas : this.transactionAttributeSources) {
-			TransactionAttribute ta = tas.getTransactionAttribute(method, targetClass);
-			if (ta != null) {
-				return ta;
+		for (TransactionAttributeSource source : this.transactionAttributeSources) {
+			TransactionAttribute attr = source.getTransactionAttribute(method, targetClass);
+			if (attr != null) {
+				return attr;
 			}
 		}
 		return null;

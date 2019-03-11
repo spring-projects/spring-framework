@@ -64,6 +64,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -149,6 +150,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	@Nullable
 	private static Class<? extends Annotation> ejbRefClass;
 
+	private static Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
+
 	static {
 		try {
 			@SuppressWarnings("unchecked")
@@ -159,6 +162,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		catch (ClassNotFoundException ex) {
 			webServiceRefClass = null;
 		}
+
 		try {
 			@SuppressWarnings("unchecked")
 			Class<? extends Annotation> clazz = (Class<? extends Annotation>)
@@ -167,6 +171,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 		catch (ClassNotFoundException ex) {
 			ejbRefClass = null;
+		}
+
+		resourceAnnotationTypes.add(Resource.class);
+		if (webServiceRefClass != null) {
+			resourceAnnotationTypes.add(webServiceRefClass);
+		}
+		if (ejbRefClass != null) {
+			resourceAnnotationTypes.add(ejbRefClass);
 		}
 	}
 
@@ -356,6 +368,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
+		if (!AnnotationUtils.isCandidateClass(clazz, resourceAnnotationTypes)) {
+			return new InjectionMetadata(clazz, Collections.emptyList());
+		}
+
 		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 

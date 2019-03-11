@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -244,25 +245,33 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		// Let's check for lookup methods here..
 		if (!this.lookupMethodsChecked.contains(beanName)) {
-			try {
-				ReflectionUtils.doWithMethods(beanClass, method -> {
-					Lookup lookup = method.getAnnotation(Lookup.class);
-					if (lookup != null) {
-						Assert.state(this.beanFactory != null, "No BeanFactory available");
-						LookupOverride override = new LookupOverride(method, lookup.value());
-						try {
-							RootBeanDefinition mbd = (RootBeanDefinition) this.beanFactory.getMergedBeanDefinition(beanName);
-							mbd.getMethodOverrides().addOverride(override);
-						}
-						catch (NoSuchBeanDefinitionException ex) {
-							throw new BeanCreationException(beanName,
-									"Cannot apply @Lookup to beans without corresponding bean definition");
-						}
+			if (AnnotationUtils.isCandidateClass(beanClass, Lookup.class)) {
+				try {
+					Class<?> targetClass = beanClass;
+					do {
+						ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+							Lookup lookup = method.getAnnotation(Lookup.class);
+							if (lookup != null) {
+								Assert.state(this.beanFactory != null, "No BeanFactory available");
+								LookupOverride override = new LookupOverride(method, lookup.value());
+								try {
+									RootBeanDefinition mbd = (RootBeanDefinition) this.beanFactory.getMergedBeanDefinition(beanName);
+									mbd.getMethodOverrides().addOverride(override);
+								}
+								catch (NoSuchBeanDefinitionException ex) {
+									throw new BeanCreationException(beanName,
+											"Cannot apply @Lookup to beans without corresponding bean definition");
+								}
+							}
+						});
+						targetClass = targetClass.getSuperclass();
 					}
-				});
-			}
-			catch (IllegalStateException ex) {
-				throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
+					while (targetClass != null && targetClass != Object.class);
+
+				}
+				catch (IllegalStateException ex) {
+					throw new BeanCreationException(beanName, "Lookup method resolution failed", ex);
+				}
 			}
 			this.lookupMethodsChecked.add(beanName);
 		}
@@ -433,6 +442,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
+		if (!AnnotationUtils.isCandidateClass(clazz, this.autowiredAnnotationTypes)) {
+			return new InjectionMetadata(clazz, Collections.emptyList());
+		}
+
 		List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
 		Class<?> targetClass = clazz;
 

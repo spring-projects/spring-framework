@@ -24,9 +24,13 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.context.event.EventListenerFactory;
 import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -96,6 +100,12 @@ abstract class ConfigurationClassUtils {
 			// Check already loaded Class if present...
 			// since we possibly can't even load the class file for this Class.
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
+			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanClass) ||
+					BeanPostProcessor.class.isAssignableFrom(beanClass) ||
+					AopInfrastructureBean.class.isAssignableFrom(beanClass) ||
+					EventListenerFactory.class.isAssignableFrom(beanClass)) {
+				return false;
+			}
 			metadata = new StandardAnnotationMetadata(beanClass, true);
 		}
 		else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
@@ -137,37 +138,41 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	@Override
 	public boolean hasAnnotatedMethods(String annotationName) {
-		try {
-			Method[] methods = getIntrospectedClass().getDeclaredMethods();
-			for (Method method : methods) {
-				if (!method.isBridge() && method.getAnnotations().length > 0 &&
-						AnnotatedElementUtils.isAnnotated(method, annotationName)) {
-					return true;
+		if (AnnotationUtils.isCandidateClass(getIntrospectedClass(), annotationName)) {
+			try {
+				Method[] methods = getIntrospectedClass().getDeclaredMethods();
+				for (Method method : methods) {
+					if (!method.isBridge() && method.getAnnotations().length > 0 &&
+							AnnotatedElementUtils.isAnnotated(method, annotationName)) {
+						return true;
+					}
 				}
 			}
-			return false;
+			catch (Throwable ex) {
+				throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
+			}
 		}
-		catch (Throwable ex) {
-			throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
-		}
+		return false;
 	}
 
 	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
-		try {
-			Method[] methods = getIntrospectedClass().getDeclaredMethods();
-			Set<MethodMetadata> annotatedMethods = new LinkedHashSet<>(4);
-			for (Method method : methods) {
-				if (!method.isBridge() && method.getAnnotations().length > 0 &&
-						AnnotatedElementUtils.isAnnotated(method, annotationName)) {
-					annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<>(4);
+		if (AnnotationUtils.isCandidateClass(getIntrospectedClass(), annotationName)) {
+			try {
+				Method[] methods = getIntrospectedClass().getDeclaredMethods();
+				for (Method method : methods) {
+					if (!method.isBridge() && method.getAnnotations().length > 0 &&
+							AnnotatedElementUtils.isAnnotated(method, annotationName)) {
+						annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+					}
 				}
 			}
-			return annotatedMethods;
+			catch (Throwable ex) {
+				throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
+			}
 		}
-		catch (Throwable ex) {
-			throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
-		}
+		return annotatedMethods;
 	}
 
 }
