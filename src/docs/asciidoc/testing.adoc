@@ -4943,6 +4943,20 @@ instances, as the following example shows:
 Registered filters are invoked through the `MockFilterChain` from `spring-test`, and the
 last filter delegates to the `DispatcherServlet`.
 
+
+[[spring-mvc-test-vs-streaming-response]]
+===== Streaming Responses
+
+There are no options built into Spring MVC Test for container-less testing of streaming
+responses. Applications that make use of
+<<web.adoc#mvc-ann-async-http-streaming,Spring MVC streaming>> options can use the
+<<testing.adoc#webtestclient-stream,WebTestClient>> to perform end-to-end, integration
+tests against a running server. This is also supported in Spring Boot where you can
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server]
+with `WebTestClient`. One extra advantage is the ability to use the `StepVerifier` from
+project Reactor that allows declaring expectations on a stream of data.
+
+
 [[spring-mvc-test-vs-end-to-end-integration-tests]]
 ===== Differences Between Out-of-Container and End-to-End Integration Tests
 

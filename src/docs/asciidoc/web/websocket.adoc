@@ -662,8 +662,8 @@ The following example shows how to do so in Java configuration:
 [subs="verbatim,quotes"]
 ----
 	@Configuration
-	@EnableWebSocket
-	public class WebSocketConfig implements WebSocketConfigurer {
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
