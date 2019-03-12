@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,12 @@ import static org.springframework.beans.factory.support.BeanDefinitionReaderUtil
  *
  * @author Chris Beams
  */
+@SuppressWarnings("deprecation")
 public class PropertyPlaceholderConfigurerTests {
 
 	private static final String P1 = "p1";
 	private static final String P1_LOCAL_PROPS_VAL = "p1LocalPropsVal";
 	private static final String P1_SYSTEM_PROPS_VAL = "p1SystemPropsVal";
-	private static final String P1_SYSTEM_ENV_VAL = "p1SystemEnvVal";
 
 	private DefaultListableBeanFactory bf;
 	private PropertyPlaceholderConfigurer ppc;
@@ -149,7 +149,6 @@ public class PropertyPlaceholderConfigurerTests {
 		String P2 = "p2";
 		String P2_LOCAL_PROPS_VAL = "p2LocalPropsVal";
 		String P2_SYSTEM_PROPS_VAL = "p2SystemPropsVal";
-		String P2_SYSTEM_ENV_VAL = "p2SystemEnvVal";
 
 		AbstractBeanDefinition p2BeanDef = rootBeanDefinition(TestBean.class)
 				.addPropertyValue("name", "${" + P1 + "}")
