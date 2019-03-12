@@ -129,7 +129,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Set the maximum number of rows for this RDBMS operation. This is important
 	 * for processing subsets of large result sets, avoiding to read and hold
 	 * the entire result set in the database or in the JDBC driver.
-	 * <p>Default is 0, indicating to use the driver's default.
+	 * <p>Default is -1, indicating to use the driver's default.
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setMaxRows
 	 */
 	public void setMaxRows(int maxRows) {
@@ -138,7 +138,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Set the query timeout for statements that this RDBMS operation executes.
-	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * <p>Default is -1, indicating to use the JDBC driver's default.
 	 * <p>Note: Any timeout specified here will be overridden by the remaining
 	 * transaction timeout when executing within a transaction that has a
 	 * timeout specified at the transaction level.
