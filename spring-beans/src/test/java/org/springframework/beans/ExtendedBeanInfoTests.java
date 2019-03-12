@@ -754,6 +754,7 @@ public class ExtendedBeanInfoTests {
 		for (PropertyDescriptor pd : ebi.getPropertyDescriptors()) {
 			if (pd.getName().equals("foo")) {
 				found = true;
+				break;
 			}
 		}
 		assertThat(found, is(true));

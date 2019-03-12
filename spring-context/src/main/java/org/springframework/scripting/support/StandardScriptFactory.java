@@ -151,6 +151,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 				if (script instanceof Class ? !requestedIfc.isAssignableFrom((Class<?>) script) :
 						!requestedIfc.isInstance(script)) {
 					adaptationRequired = true;
+					break;
 				}
 			}
 			if (adaptationRequired) {

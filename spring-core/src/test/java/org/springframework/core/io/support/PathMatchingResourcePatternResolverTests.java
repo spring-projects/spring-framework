@@ -89,7 +89,7 @@ public class PathMatchingResourcePatternResolverTests {
 				noCloverResources.add(resource);
 			}
 		}
-		resources = noCloverResources.toArray(new Resource[noCloverResources.size()]);
+		resources = noCloverResources.toArray(new Resource[0]);
 		assertProtocolAndFilenames(resources, "file",
 				StringUtils.concatenateStringArrays(CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT));
 	}
@@ -113,6 +113,7 @@ public class PathMatchingResourcePatternResolverTests {
 		for (Resource resource : resources) {
 			if (resource.getFilename().equals("aspectj_1_5_0.dtd")) {
 				found = true;
+				break;
 			}
 		}
 		assertTrue("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar", found);
