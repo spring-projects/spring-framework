@@ -192,10 +192,10 @@ configure(allprojects) { project ->
 		"https://tiles.apache.org/framework/apidocs/",
 		"http://aopalliance.sourceforge.net/doc/",
 		"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
-		"https://www.ehcache.org/apidocs/",
-		"https://www.quartz-scheduler.org/api/2.2.1/",
-		"https://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
-		"https://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
+		"https://www.ehcache.org/apidocs/${ehcache3Version}/",
+		"https://www.quartz-scheduler.org/api/2.2.3/",
+		"https://fasterxml.github.io/jackson-core/javadoc/2.3.0/",
+		"https://fasterxml.github.io/jackson-databind/javadoc/2.3.0/",
 		"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.3.0/",
 		"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
 	] as String[]
