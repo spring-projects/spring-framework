@@ -130,6 +130,15 @@ public class UriComponentsTests {
 				UriComponentsBuilder.fromUriString("/myurl/?q={{{{").encode().build().toUriString());
 	}
 
+	@Test // gh-22447
+	public void expandWithFragmentOrder() {
+		UriComponents uriComponents = UriComponentsBuilder
+				.fromUriString("http://{host}/{path}#{fragment}").build()
+				.expand("example.com", "foo", "bar");
+
+		assertEquals("http://example.com/foo#bar", uriComponents.toUriString());
+	}
+
 	@Test // SPR-12123
 	public void port() {
 		UriComponents uri1 = fromUriString("http://example.com:8080/bar").build();

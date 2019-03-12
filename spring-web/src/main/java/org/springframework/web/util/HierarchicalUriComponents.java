@@ -420,13 +420,15 @@ final class HierarchicalUriComponents extends UriComponents {
 		Assert.state(!this.encodeState.equals(EncodeState.FULLY_ENCODED),
 				"URI components already encoded, and could not possibly contain '{' or '}'.");
 
+		// Array-based vars rely on the below order..
+
 		String schemeTo = expandUriComponent(getScheme(), uriVariables, this.variableEncoder);
-		String fragmentTo = expandUriComponent(getFragment(), uriVariables, this.variableEncoder);
 		String userInfoTo = expandUriComponent(this.userInfo, uriVariables, this.variableEncoder);
 		String hostTo = expandUriComponent(this.host, uriVariables, this.variableEncoder);
 		String portTo = expandUriComponent(this.port, uriVariables, this.variableEncoder);
 		PathComponent pathTo = this.path.expand(uriVariables, this.variableEncoder);
 		MultiValueMap<String, String> queryParamsTo = expandQueryParams(uriVariables);
+		String fragmentTo = expandUriComponent(getFragment(), uriVariables, this.variableEncoder);
 
 		return new HierarchicalUriComponents(schemeTo, fragmentTo, userInfoTo,
 				hostTo, portTo, pathTo, queryParamsTo, this.encodeState, this.variableEncoder);
