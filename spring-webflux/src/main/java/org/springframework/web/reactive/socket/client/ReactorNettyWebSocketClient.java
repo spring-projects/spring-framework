@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,22 +31,23 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
+import org.springframework.web.reactive.socket.adapter.NettyWebSocketSessionSupport;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
 
 /**
  * {@link WebSocketClient} implementation for use with Reactor Netty.
  *
  * @author Rossen Stoyanchev
- * @author Usman Arshad
  * @since 5.0
  */
 public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyWebSocketClient.class);
 
-	private int maxFramePayloadLength = 65536;
+	private int maxFramePayloadLength = NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
 
 	private final HttpClient httpClient;
+
 
 	/**
 	 * Default constructor.
@@ -72,19 +73,28 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * Return the configured maxFramePayloadLength used by the configured {@link HttpClient}.
-	 * Default value of 65536 if not set.
+	 * Configure the maximum allowable frame payload length. Setting this value
+	 * to your application's requirement may reduce denial of service attacks
+	 * using long data frames.
+	 * <p>Corresponds to the argument with the same name in the constructor of
+	 * {@link io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
+	 * WebSocketServerHandshakerFactory} in Netty.
+	 * <p>By default set to 65536 (64K).
+	 * @param maxFramePayloadLength the max length for frames.
+	 * @since 5.2
+	 */
+	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
+		this.maxFramePayloadLength = maxFramePayloadLength;
+	}
+
+	/**
+	 * Return the configured {@link #setMaxFramePayloadLength(int) maxFramePayloadLength}.
+	 * @since 5.2
 	 */
 	public int getMaxFramePayloadLength() {
 		return maxFramePayloadLength;
 	}
 
-	/**
-	 * Sets the maxFramePayloadLength to be used by the configured {@link HttpClient}.
-	 */
-	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
-		this.maxFramePayloadLength = maxFramePayloadLength;
-	}
 
 	@Override
 	public Mono<Void> execute(URI url, WebSocketHandler handler) {
@@ -93,9 +103,10 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	@Override
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
+		String protocols = StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols());
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
-				.websocket(StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols()), getMaxFramePayloadLength())
+				.websocket(protocols, getMaxFramePayloadLength())
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);
