@@ -33,6 +33,7 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -57,13 +58,12 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-
-import static org.springframework.context.annotation.AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR;
 
 /**
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
@@ -173,11 +173,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * and a variant thereof for imported configuration classes (using unique fully-qualified
 	 * class names instead of standard component overriding).
 	 * <p>Note that this strategy does <em>not</em> apply to {@link Bean} methods.
-	 * <p>This setter is typically only appropriate when configuring the post-processor as
-	 * a standalone bean definition in XML, e.g. not using the dedicated
-	 * {@code AnnotationConfig*} application contexts or the {@code
-	 * <context:annotation-config>} element. Any bean name generator specified against
-	 * the application context will take precedence over any value set here.
+	 * <p>This setter is typically only appropriate when configuring the post-processor as a
+	 * standalone bean definition in XML, e.g. not using the dedicated {@code AnnotationConfig*}
+	 * application contexts or the {@code <context:annotation-config>} element. Any bean name
+	 * generator specified against the application context will take precedence over any set here.
 	 * @since 3.1.1
 	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)
 	 * @see AnnotationConfigUtils#CONFIGURATION_BEAN_NAME_GENERATOR
@@ -264,8 +263,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		for (String beanName : candidateNames) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
-			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef) ||
-					ConfigurationClassUtils.isLiteConfigurationClass(beanDef)) {
+			if (beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE) != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
@@ -292,7 +290,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (registry instanceof SingletonBeanRegistry) {
 			sbr = (SingletonBeanRegistry) registry;
 			if (!this.localBeanNameGeneratorSet) {
-				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
+				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(
+						AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
 				if (generator != null) {
 					this.componentScanBeanNameGenerator = generator;
 					this.importBeanNameGenerator = generator;
@@ -371,7 +370,26 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
-			if (ConfigurationClassUtils.isFullConfigurationClass(beanDef)) {
+			Object configClassAttr = beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
+			MethodMetadata methodMetadata = null;
+			if (beanDef instanceof AnnotatedBeanDefinition) {
+				methodMetadata = ((AnnotatedBeanDefinition) beanDef).getFactoryMethodMetadata();
+			}
+			if ((configClassAttr != null || methodMetadata != null) && beanDef instanceof AbstractBeanDefinition) {
+				// Configuration class (full or lite) or a configuration-derived @Bean method
+				// -> resolve bean class at this point...
+				AbstractBeanDefinition abd = (AbstractBeanDefinition) beanDef;
+				if (!abd.hasBeanClass()) {
+					try {
+						abd.resolveBeanClass(this.beanClassLoader);
+					}
+					catch (Throwable ex) {
+						throw new IllegalStateException(
+								"Cannot load configuration class: " + beanDef.getBeanClassName(), ex);
+					}
+				}
+			}
+			if (ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(configClassAttr)) {
 				if (!(beanDef instanceof AbstractBeanDefinition)) {
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
 							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
@@ -395,22 +413,15 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			AbstractBeanDefinition beanDef = entry.getValue();
 			// If a @Configuration class gets proxied, always proxy the target class
 			beanDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
-			try {
-				// Set enhanced subclass of the user-specified bean class
-				Class<?> configClass = beanDef.resolveBeanClass(this.beanClassLoader);
-				if (configClass != null) {
-					Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
-					if (configClass != enhancedClass) {
-						if (logger.isTraceEnabled()) {
-							logger.trace(String.format("Replacing bean definition '%s' existing class '%s' with " +
-									"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
-						}
-						beanDef.setBeanClass(enhancedClass);
-					}
+			// Set enhanced subclass of the user-specified bean class
+			Class<?> configClass = beanDef.getBeanClass();
+			Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
+			if (configClass != enhancedClass) {
+				if (logger.isTraceEnabled()) {
+					logger.trace(String.format("Replacing bean definition '%s' existing class '%s' with " +
+							"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 				}
-			}
-			catch (Throwable ex) {
-				throw new IllegalStateException("Cannot load configuration class: " + beanDef.getBeanClassName(), ex);
+				beanDef.setBeanClass(enhancedClass);
 			}
 		}
 	}

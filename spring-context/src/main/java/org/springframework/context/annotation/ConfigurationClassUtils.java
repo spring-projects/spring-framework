@@ -51,11 +51,11 @@ import org.springframework.stereotype.Component;
  */
 abstract class ConfigurationClassUtils {
 
-	private static final String CONFIGURATION_CLASS_FULL = "full";
+	public static final String CONFIGURATION_CLASS_FULL = "full";
 
-	private static final String CONFIGURATION_CLASS_LITE = "lite";
+	public static final String CONFIGURATION_CLASS_LITE = "lite";
 
-	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
+	public static final String CONFIGURATION_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
 
 	private static final String ORDER_ATTRIBUTE =
@@ -172,22 +172,6 @@ abstract class ConfigurationClassUtils {
 			}
 			return false;
 		}
-	}
-
-	/**
-	 * Determine whether the given bean definition indicates a full {@code @Configuration}
-	 * class, through checking {@link #checkConfigurationClassCandidate}'s metadata marker.
-	 */
-	public static boolean isFullConfigurationClass(BeanDefinition beanDef) {
-		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
-	}
-
-	/**
-	 * Determine whether the given bean definition indicates a lite {@code @Configuration}
-	 * class, through checking {@link #checkConfigurationClassCandidate}'s metadata marker.
-	 */
-	public static boolean isLiteConfigurationClass(BeanDefinition beanDef) {
-		return CONFIGURATION_CLASS_LITE.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
 	}
 
 	/**

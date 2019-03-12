@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -436,11 +437,22 @@ class ConstructorResolver {
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
 
-			Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
-			List<Method> candidateList = new ArrayList<>();
-			for (Method candidate : rawCandidates) {
-				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
-					candidateList.add(candidate);
+			List<Method> candidateList = null;
+			if (mbd.isFactoryMethodUnique) {
+				if (factoryMethodToUse == null) {
+					factoryMethodToUse = mbd.getResolvedFactoryMethod();
+				}
+				if (factoryMethodToUse != null) {
+					candidateList = Collections.singletonList(factoryMethodToUse);
+				}
+			}
+			if (candidateList == null) {
+				candidateList = new ArrayList<>();
+				Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
+				for (Method candidate : rawCandidates) {
+					if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
+						candidateList.add(candidate);
+					}
 				}
 			}
 

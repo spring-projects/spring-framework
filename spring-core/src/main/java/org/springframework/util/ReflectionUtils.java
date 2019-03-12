@@ -51,13 +51,13 @@ public abstract class ReflectionUtils {
 	 * @since 3.0.5
 	 */
 	public static final MethodFilter USER_DECLARED_METHODS =
-			(method -> (!method.isBridge() && !method.isSynthetic() && method.getDeclaringClass() != Object.class));
+			(method -> !method.isBridge() && !method.isSynthetic());
 
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
 	public static final FieldFilter COPYABLE_FIELDS =
-			field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
+			(field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())));
 
 
 	/**
@@ -536,7 +536,7 @@ public abstract class ReflectionUtils {
 				throw new IllegalStateException("Not allowed to access method '" + method.getName() + "': " + ex);
 			}
 		}
-		if (clazz.getSuperclass() != null) {
+		if (clazz.getSuperclass() != null && (mf != USER_DECLARED_METHODS || clazz.getSuperclass() != Object.class)) {
 			doWithMethods(clazz.getSuperclass(), mc, mf);
 		}
 		else if (clazz.isInterface()) {
@@ -566,6 +566,19 @@ public abstract class ReflectionUtils {
 	 * @throws IllegalStateException if introspection fails
 	 */
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass) {
+		return getUniqueDeclaredMethods(leafClass, null);
+	}
+
+	/**
+	 * Get the unique set of declared methods on the leaf class and all superclasses.
+	 * Leaf class methods are included first and while traversing the superclass hierarchy
+	 * any methods found with signatures matching a method already included are filtered out.
+	 * @param leafClass the class to introspect
+	 * @param mf the filter that determines the methods to take into account
+	 * @throws IllegalStateException if introspection fails
+	 * @since 5.2
+	 */
+	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass, @Nullable MethodFilter mf) {
 		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, method -> {
 			boolean knownSignature = false;
@@ -590,7 +603,7 @@ public abstract class ReflectionUtils {
 			if (!knownSignature && !isCglibRenamedMethod(method)) {
 				methods.add(method);
 			}
-		});
+		}, mf);
 		return methods.toArray(new Method[0]);
 	}
 

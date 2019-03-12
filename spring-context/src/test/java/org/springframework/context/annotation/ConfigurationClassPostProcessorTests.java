@@ -97,6 +97,19 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("config")).hasBeanClass());
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertSame(foo, bar.foo);
+		assertTrue(Arrays.asList(beanFactory.getDependentBeans("foo")).contains("bar"));
+	}
+
+	@Test
+	public void enhancementIsPresentBecauseSingletonSemanticsAreRespectedUsingAsm() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class.getName()));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("config")).hasBeanClass());
 		Foo foo = beanFactory.getBean("foo", Foo.class);
 		Bar bar = beanFactory.getBean("bar", Bar.class);
 		assertSame(foo, bar.foo);
@@ -108,6 +121,44 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(NonEnhancedSingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("config")).hasBeanClass());
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertNotSame(foo, bar.foo);
+	}
+
+	@Test
+	public void enhancementIsNotPresentForProxyBeanMethodsFlagSetToFalseUsingAsm() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(NonEnhancedSingletonBeanConfig.class.getName()));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("config")).hasBeanClass());
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertNotSame(foo, bar.foo);
+	}
+
+	@Test
+	public void enhancementIsNotPresentForStaticMethods() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(StaticSingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("config")).hasBeanClass());
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("foo")).hasBeanClass());
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("bar")).hasBeanClass());
+		Foo foo = beanFactory.getBean("foo", Foo.class);
+		Bar bar = beanFactory.getBean("bar", Bar.class);
+		assertNotSame(foo, bar.foo);
+	}
+
+	@Test
+	public void enhancementIsNotPresentForStaticMethodsUsingAsm() {
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(StaticSingletonBeanConfig.class.getName()));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("config")).hasBeanClass());
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("foo")).hasBeanClass());
+		assertTrue(((RootBeanDefinition) beanFactory.getBeanDefinition("bar")).hasBeanClass());
 		Foo foo = beanFactory.getBean("foo", Foo.class);
 		Bar bar = beanFactory.getBean("bar", Bar.class);
 		assertNotSame(foo, bar.foo);
@@ -1086,6 +1137,18 @@ public class ConfigurationClassPostProcessorTests {
 		}
 
 		public @Bean Bar bar() {
+			return new Bar(foo());
+		}
+	}
+
+	@Configuration
+	static class StaticSingletonBeanConfig {
+
+		public static @Bean Foo foo() {
+			return new Foo();
+		}
+
+		public static @Bean Bar bar() {
 			return new Bar(foo());
 		}
 	}
