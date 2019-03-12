@@ -18,10 +18,10 @@ echo.
 echo If you need to download and install Eclipse or STS, please do that now
 echo by visiting one of the following sites:
 echo.
-echo - Eclipse downloads: http://download.eclipse.org/eclipse/downloads
-echo - STS downloads: http://spring.io/tools/sts/all
-echo - STS nightly builds: http://dist.springsource.com/snapshot/STS/nightly-distributions.html
-echo - ADJT: http://www.eclipse.org/ajdt/downloads/
+echo - Eclipse downloads: https://download.eclipse.org/eclipse/downloads
+echo - STS downloads: https://spring.io/tools/sts/all
+echo - STS nightly builds: https://dist.springsource.com/snapshot/STS/nightly-distributions.html
+echo - ADJT: https://www.eclipse.org/ajdt/downloads/
 echo - Groovy Eclipse: https://github.com/groovy/groovy-eclipse/wiki
 echo.
 echo Otherwise, press enter and we'll begin.
