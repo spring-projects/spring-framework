@@ -186,27 +186,27 @@ configure(allprojects) { project ->
 	}
 
 	ext.javadocLinks = [
-		"http://docs.oracle.com/javase/8/docs/api/",
-		"http://docs.oracle.com/javaee/7/api/",
-		"http://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
-		"http://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
-		"http://glassfish.java.net/nonav/docs/v3/api/",
-		"http://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
-		"http://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
-		"http://commons.apache.org/proper/commons-lang/javadocs/api-2.5/",
-		"http://commons.apache.org/proper/commons-codec/apidocs/",
-		"http://commons.apache.org/proper/commons-dbcp/apidocs/",
-		"http://portals.apache.org/pluto/portlet-2.0-apidocs/",
-		"http://tiles.apache.org/tiles-request/apidocs/",
-		"http://tiles.apache.org/framework/apidocs/",
-		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
-		"http://ehcache.org/apidocs/${ehcacheVersion}",
-		"http://ehcache.org/apidocs/${ehcache3Version}",
-		"http://quartz-scheduler.org/api/2.2.1/",
-		"http://fasterxml.github.io/jackson-core/javadoc/2.8/",
-		"http://fasterxml.github.io/jackson-databind/javadoc/2.8/",
-		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.8/",
-		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
+		"https://docs.oracle.com/javase/8/docs/api/",
+		"https://docs.oracle.com/javaee/7/api/",
+		"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
+		"https://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
+		"https://glassfish.java.net/nonav/docs/v3/api/",
+		"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
+		"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
+		"https://commons.apache.org/proper/commons-lang/javadocs/api-2.5/",
+		"https://commons.apache.org/proper/commons-codec/apidocs/",
+		"https://commons.apache.org/proper/commons-dbcp/apidocs/",
+		"https://portals.apache.org/pluto/portlet-2.0-apidocs/",
+		"https://tiles.apache.org/tiles-request/apidocs/",
+		"https://tiles.apache.org/framework/apidocs/",
+		"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
+		"https://www.ehcache.org/apidocs/${ehcacheVersion}/",
+		"https://www.ehcache.org/apidocs/${ehcache3Version}/",
+		"https://www.quartz-scheduler.org/api/2.2.3/",
+		"https://fasterxml.github.io/jackson-core/javadoc/2.8/",
+		"https://fasterxml.github.io/jackson-databind/javadoc/2.8/",
+		"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.8/",
+		"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
 		"https://junit.org/junit4/javadoc/${junitVersion}/"
 	] as String[]
 }
@@ -1246,7 +1246,7 @@ configure(rootProject) {
 		baseName = "spring-framework"
 		classifier = "docs"
 		description = "Builds -${classifier} archive containing api and reference " +
-			"for deployment at http://static.springframework.org/spring-framework/docs."
+			"for deployment at https://docs.spring.io/spring-framework/docs."
 
 		from("src/dist") {
 			include "changelog.txt"
@@ -1266,7 +1266,7 @@ configure(rootProject) {
 		baseName = "spring-framework"
 		classifier = "schema"
 		description = "Builds -${classifier} archive containing all " +
-			"XSDs for deployment at http://springframework.org/schema."
+			"XSDs for deployment at https://springframework.org/schema."
 		duplicatesStrategy 'exclude'
 		moduleProjects.each { subproject ->
 			def Properties schemas = new Properties();
