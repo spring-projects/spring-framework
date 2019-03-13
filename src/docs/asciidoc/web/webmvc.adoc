@@ -2018,7 +2018,7 @@ The following example shows how to do so:
 		// ...
 
 		@GetMapping
-		public String setupForm(**@RequestParam("petId") int petId**, Model model) { <1>
+		public String setupForm(@RequestParam("petId") int petId, Model model) { <1>
 			Pet pet = this.clinic.loadPet(petId);
 			model.addAttribute("pet", pet);
 			return "petForm";
@@ -2550,8 +2550,8 @@ probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 [subs="verbatim,quotes"]
 ----
 @PostMapping("/")
-public String handle(**@RequestPart("meta-data") MetaData metadata,
-		@RequestPart("file-data") MultipartFile file**) {
+public String handle(@RequestPart("meta-data") MetaData metadata,
+		@RequestPart("file-data") MultipartFile file) {
 	// ...
 }
 ----
@@ -2567,8 +2567,8 @@ as the following example shows:
 [subs="verbatim,quotes"]
 ----
 @PostMapping("/")
-public String handle(**@Valid** @RequestPart("meta-data") MetaData metadata,
-		**BindingResult result**) {
+public String handle(@Valid @RequestPart("meta-data") MetaData metadata,
+		BindingResult result) {
 	// ...
 }
 ----

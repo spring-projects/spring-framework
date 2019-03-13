@@ -400,9 +400,9 @@ does not work:
 ----
 	<lang:groovy id="badMessenger"
 		script-source="classpath:Messenger.groovy">
-		<!-- this next constructor argument will *not* be injected into the GroovyMessenger -->
+		<!-- this next constructor argument will not be injected into the GroovyMessenger -->
 		<!-- in fact, this isn't even allowed according to the schema -->
-		<constructor-arg value="This will *not* work" />
+		<constructor-arg value="This will not work" />
 
 		<!-- only property values are injected into the dynamic-language-backed object -->
 		<lang:property name="anotherMessage" value="Passed straight through to the dynamic-language-backed object" />

@@ -678,7 +678,7 @@ implementation of an `initBinder(..)` method:
 
 		protected void initBinder(HttpServletRequest request,
 				ServletRequestDataBinder binder) throws Exception {
-			**this.customPropertyEditorRegistrar.registerCustomEditors(binder);**
+			this.customPropertyEditorRegistrar.registerCustomEditors(binder);
 		}
 
 		// other methods to do with registering a User

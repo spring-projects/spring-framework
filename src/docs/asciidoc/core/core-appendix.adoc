@@ -810,7 +810,7 @@ use the `NamespaceHandlerSupport` class:
 	public class MyNamespaceHandler extends NamespaceHandlerSupport {
 
 		public void init() {
-			**registerBeanDefinitionParser("dateformat", new SimpleDateFormatBeanDefinitionParser());**
+			registerBeanDefinitionParser("dateformat", new SimpleDateFormatBeanDefinitionParser());
 		}
 
 	}

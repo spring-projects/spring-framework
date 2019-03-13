@@ -1692,14 +1692,14 @@ you can use the `and`, `or`, and `not` keywords in place of `&&`, `||`, and `!`,
 respectively. For example, the previous pointcut can be better written as follows:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
 		<aop:aspect id="myAspect" ref="aBean">
 
 			<aop:pointcut id="businessService"
-				expression="execution(* com.xyz.myapp.service.*.*(..)) **and** this(service)"/>
+				expression="execution(* com.xyz.myapp.service.*.*(..)) and this(service)"/>
 
 			<aop:before pointcut-ref="businessService" method="monitor"/>
 
@@ -3122,7 +3122,7 @@ the following example:
 				class="foo.StubEntitlementCalculationService"/>
 
 		<!-- this switches on the load-time weaving -->
-		**<context:load-time-weaver/>**
+		<context:load-time-weaver/>
 	</beans>
 ----
 
