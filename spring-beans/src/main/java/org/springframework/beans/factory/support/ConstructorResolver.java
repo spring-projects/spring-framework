@@ -562,7 +562,7 @@ class ConstructorResolver {
 				}
 			}
 
-			if (factoryMethodToUse == null) {
+			if (factoryMethodToUse == null || argsToUse == null) {
 				if (causes != null) {
 					UnsatisfiedDependencyException ex = causes.removeLast();
 					for (Exception cause : causes) {
@@ -615,7 +615,6 @@ class ConstructorResolver {
 			}
 		}
 
-		Assert.state(argsToUse != null, "Unresolved factory method arguments");
 		bw.setBeanInstance(instantiate(beanName, mbd, factoryBean, factoryMethodToUse, argsToUse));
 		return bw;
 	}
