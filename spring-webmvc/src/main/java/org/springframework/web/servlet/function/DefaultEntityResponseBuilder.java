@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -39,12 +40,14 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -64,7 +67,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	private final T entity;
 
-	private final BuilderFunction<T> builderFunction;
+	private final Type entityType;
 
 	private int status = HttpStatus.OK.value();
 
@@ -73,9 +76,9 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	private final MultiValueMap<String, Cookie> cookies = new LinkedMultiValueMap<>();
 
 
-	private DefaultEntityResponseBuilder(T entity, BuilderFunction<T> builderFunction) {
+	private DefaultEntityResponseBuilder(T entity, @Nullable Type entityType) {
 		this.entity = entity;
-		this.builderFunction = builderFunction;
+		this.entityType = (entityType != null) ? entityType : entity.getClass();
 	}
 
 	@Override
@@ -185,9 +188,23 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 		return this;
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public EntityResponse<T> build() {
-		return this.builderFunction.build(this.status, this.headers, this.cookies, this.entity);
+		if (this.entity instanceof CompletionStage) {
+			CompletionStage completionStage = (CompletionStage) this.entity;
+			return new CompletionStageEntityResponse(this.status, this.headers, this.cookies,
+					completionStage, this.entityType);
+		}
+		else if (this.entity instanceof Publisher) {
+			Publisher publisher = (Publisher) this.entity;
+			return new PublisherEntityResponse(this.status, this.headers, this.cookies, publisher,
+					this.entityType);
+		}
+		else {
+			return new DefaultEntityResponse<>(this.status, this.headers, this.cookies, this.entity,
+					this.entityType);
+		}
 	}
 
 
@@ -195,41 +212,15 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	 * Return a new {@link EntityResponse.Builder} from the given object.
 	 */
 	public static <T> EntityResponse.Builder<T> fromObject(T t) {
-		return new DefaultEntityResponseBuilder<>(t, DefaultEntityResponse::new);
+		return new DefaultEntityResponseBuilder<>(t, null);
 	}
 
 	/**
-	 * Return a new {@link EntityResponse.Builder} from the given completion stage.
+	 * Return a new {@link EntityResponse.Builder} from the given object and type reference.
 	 */
-	public static <T> EntityResponse.Builder<CompletionStage<T>> fromCompletionStage(
-			CompletionStage<T> completionStage) {
-		return new DefaultEntityResponseBuilder<>(completionStage,
-				CompletionStageEntityResponse::new);
+	public static <T> EntityResponse.Builder<T> fromObject(T t, ParameterizedTypeReference<?> bodyType) {
+		return new DefaultEntityResponseBuilder<>(t, bodyType.getType());
 	}
-
-	/**
-	 * Return a new {@link EntityResponse.Builder} from the given Reactive Streams publisher.
-	 */
-	public static <T> EntityResponse.Builder<Publisher<T>> fromPublisher(Publisher<T> publisher) {
-		return new DefaultEntityResponseBuilder<>(publisher, PublisherEntityResponse::new);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> HttpMessageConverter<T> cast(HttpMessageConverter<?> messageConverter) {
-		return (HttpMessageConverter<T>) messageConverter;
-	}
-
-
-	/**
-	 * Defines contract for building {@link EntityResponse} instances.
-	 */
-	private interface BuilderFunction<T> {
-
-		EntityResponse<T> build(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, T entity);
-
-	}
-
 
 	/**
 	 * Default {@link EntityResponse} implementation for synchronous bodies.
@@ -240,12 +231,15 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 		private final T entity;
 
+		private final Type entityType;
+
 
 		public DefaultEntityResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, T entity) {
+				MultiValueMap<String, Cookie> cookies, T entity, Type entityType) {
 
 			super(statusCode, headers, cookies);
 			this.entity = entity;
+			this.entityType = entityType;
 		}
 
 		@Override
@@ -258,11 +252,12 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 				HttpServletResponse servletResponse, Context context)
 				throws ServletException, IOException {
 
-			writeEntityWithMessageConverters(this.entity, servletRequest, servletResponse, context);
+			writeEntityWithMessageConverters(this.entity, servletRequest,servletResponse, context);
 
 			return null;
 		}
 
+		@SuppressWarnings("unchecked")
 		protected void writeEntityWithMessageConverters(Object entity,
 				HttpServletRequest request, HttpServletResponse response,
 				ServerResponse.Context context)
@@ -271,30 +266,39 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 			ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
 
 			MediaType contentType = getContentType(response);
-			Class<?> entityType = entity.getClass();
+			Class<?> entityClass = entity.getClass();
 
-			HttpMessageConverter<Object> messageConverter = context.messageConverters().stream()
-					.filter(converter -> converter.canWrite(entityType, contentType))
-					.findFirst()
-					.map(DefaultEntityResponseBuilder::cast)
-					.orElseThrow(() -> new HttpMediaTypeNotAcceptableException(
-							producibleMediaTypes(context.messageConverters(), entityType)));
+			for (HttpMessageConverter<?> messageConverter : context.messageConverters()) {
+				if (messageConverter instanceof GenericHttpMessageConverter<?>) {
+					GenericHttpMessageConverter<Object> genericMessageConverter =
+							(GenericHttpMessageConverter<Object>) messageConverter;
+					if (genericMessageConverter.canWrite(this.entityType, entityClass, contentType)) {
+						genericMessageConverter.write(entity, this.entityType, contentType, serverResponse);
+						return;
+					}
+				}
+				if (messageConverter.canWrite(entityClass, contentType)) {
+					((HttpMessageConverter<Object>)messageConverter).write(entity, contentType, serverResponse);
+					return;
+				}
+			}
 
-			messageConverter.write(entity, contentType, serverResponse);
+			List<MediaType> producibleMediaTypes = producibleMediaTypes(context.messageConverters(), entityClass);
+			throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
 		}
 
 		@Nullable
-		private MediaType getContentType(HttpServletResponse response) {
+		private static MediaType getContentType(HttpServletResponse response) {
 			try {
-				return MediaType.parseMediaType(response.getContentType());
+				return MediaType.parseMediaType(response.getContentType()).removeQualityValue();
 			}
 			catch (InvalidMediaTypeException ex) {
 				return null;
 			}
 		}
 
-		protected final void tryWriteEntityWithMessageConverters(Object entity,
-						HttpServletRequest request, HttpServletResponse response,
+		protected void tryWriteEntityWithMessageConverters(Object entity,
+				HttpServletRequest request, HttpServletResponse response,
 						ServerResponse.Context context) {
 			try {
 				writeEntityWithMessageConverters(entity, request, response, context);
@@ -323,10 +327,10 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	private static class CompletionStageEntityResponse<T>
 			extends DefaultEntityResponse<CompletionStage<T>> {
 
-		public CompletionStageEntityResponse(int statusCode,
-				HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, CompletionStage<T> entity) {
-			super(statusCode, headers, cookies, entity);
+		public CompletionStageEntityResponse(int statusCode, HttpHeaders headers,
+				MultiValueMap<String, Cookie> cookies, CompletionStage<T> entity,
+				Type entityType) {
+			super(statusCode, headers, cookies, entity, entityType);
 		}
 
 		@Override
@@ -338,6 +342,7 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 			entity().whenComplete((entity, throwable) -> {
 				try {
 					if (entity != null) {
+
 						tryWriteEntityWithMessageConverters(entity,
 								(HttpServletRequest) asyncContext.getRequest(),
 								(HttpServletResponse) asyncContext.getResponse(),
@@ -358,8 +363,9 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	private static class PublisherEntityResponse<T> extends DefaultEntityResponse<Publisher<T>> {
 
 		public PublisherEntityResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, Publisher<T> entity) {
-			super(statusCode, headers, cookies, entity);
+				MultiValueMap<String, Cookie> cookies, Publisher<T> entity,
+				Type entityType) {
+			super(statusCode, headers, cookies, entity, entityType);
 		}
 
 		@Override
@@ -425,6 +431,8 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 						(HttpServletRequest) this.asyncContext.getRequest(),
 						(HttpServletResponse) this.asyncContext.getResponse(),
 						this.context);
+
+				this.asyncContext.complete();
 			}
 
 			@Override

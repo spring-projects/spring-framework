@@ -29,7 +29,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -38,8 +37,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.reactivestreams.Publisher;
-
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -196,16 +194,8 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public ServerResponse asyncBody(CompletionStage<?> asyncBody) {
-		return DefaultEntityResponseBuilder.fromCompletionStage(asyncBody)
-				.headers(this.headers)
-				.status(this.statusCode)
-				.build();
-	}
-
-	@Override
-	public ServerResponse asyncBody(Publisher<?> futureBody) {
-		return DefaultEntityResponseBuilder.fromPublisher(futureBody)
+	public <T> ServerResponse body(T body, ParameterizedTypeReference<T> bodyType) {
+		return DefaultEntityResponseBuilder.fromObject(body, bodyType)
 				.headers(this.headers)
 				.status(this.statusCode)
 				.build();

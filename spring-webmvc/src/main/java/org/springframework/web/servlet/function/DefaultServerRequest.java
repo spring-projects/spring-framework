@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -48,7 +49,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -152,35 +152,42 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public <T> T body(ParameterizedTypeReference<T> bodyType) throws IOException, ServletException {
 		Type type = bodyType.getType();
-		Class<?> contextClass = null;
+		return bodyInternal(type, bodyClass(type));
+	}
+
+	static Class<?> bodyClass(Type type) {
 		if (type instanceof Class) {
-			contextClass = (Class<?>) type;
+			return (Class<?>) type;
 		}
-		return bodyInternal(type, contextClass);
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			if (parameterizedType.getRawType() instanceof Class) {
+				return (Class<?>) parameterizedType.getRawType();
+			}
+		}
+		return Object.class;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T bodyInternal(Type type, @Nullable Class<?> contextClass)
+	private <T> T bodyInternal(Type bodyType, Class<?> bodyClass)
 			throws ServletException, IOException {
 
 		MediaType contentType =
 				this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-			if (messageConverter instanceof GenericHttpMessageConverter<?>) {
+			if (messageConverter instanceof GenericHttpMessageConverter) {
 				GenericHttpMessageConverter<T> genericMessageConverter =
 						(GenericHttpMessageConverter<T>) messageConverter;
-				if (genericMessageConverter.canRead(type, contextClass, contentType)) {
-					return genericMessageConverter.read(type, contextClass, this.serverHttpRequest);
+				if (genericMessageConverter.canRead(bodyType, bodyClass, contentType)) {
+					return genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
 				}
 			}
-			else {
-				if (messageConverter.canRead(contextClass, contentType)) {
-					HttpMessageConverter<T> theConverter =
-							(HttpMessageConverter<T>) messageConverter;
-					Class<? extends T> clazz = (Class<? extends T>) contextClass;
-					return theConverter.read(clazz, this.serverHttpRequest);
-				}
+			if (messageConverter.canRead(bodyClass, contentType)) {
+				HttpMessageConverter<T> theConverter =
+						(HttpMessageConverter<T>) messageConverter;
+				Class<? extends T> clazz = (Class<? extends T>) bodyClass;
+				return theConverter.read(clazz, this.serverHttpRequest);
 			}
 		}
 		throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
@@ -194,6 +201,11 @@ class DefaultServerRequest implements ServerRequest {
 	@Override
 	public Map<String, Object> attributes() {
 		return this.attributes;
+	}
+
+	@Override
+	public Optional<String> param(String name) {
+		return Optional.ofNullable(servletRequest().getParameter(name));
 	}
 
 	@Override

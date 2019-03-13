@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -362,26 +363,23 @@ public interface ServerResponse {
 
 		/**
 		 * Set the body of the response to the given {@code Object} and return it.
+		 *
+		 * <p>Asynchronous response bodies are supported by providing a {@link CompletionStage} or
+		 * {@link Publisher} as body.
 		 * @param body the body of the response
 		 * @return the built response
 		 */
 		ServerResponse body(Object body);
 
 		/**
-		 * Set the asynchronous body of the response to the given {@link CompletionStage} and
-		 * return it.
-		 * @param asyncBody the body of the response
+		 * Set the body of the response to the given {@code Object} and return it. The parameter
+		 * {@code bodyType} is used to capture the generic type.
+		 *
+		 * @param body the body of the response
+		 * @param bodyType the type of the body, used to capture the generic type
 		 * @return the built response
 		 */
-		ServerResponse asyncBody(CompletionStage<?> asyncBody);
-
-		/**
-		 * Set the asynchronous body of the response to the given {@link Publisher} and
-		 * return it.
-		 * @param asyncBody the body of the response
-		 * @return the built response
-		 */
-		ServerResponse asyncBody(Publisher<?> asyncBody);
+		<T> ServerResponse body(T body, ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.

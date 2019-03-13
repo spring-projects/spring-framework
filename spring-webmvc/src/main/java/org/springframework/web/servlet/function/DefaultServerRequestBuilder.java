@@ -46,7 +46,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -239,35 +238,29 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		@Override
 		public <T> T body(ParameterizedTypeReference<T> bodyType) throws IOException, ServletException {
 			Type type = bodyType.getType();
-			Class<?> contextClass = null;
-			if (type instanceof Class) {
-				contextClass = (Class<?>) type;
-			}
-			return bodyInternal(type, contextClass);
+			return bodyInternal(type, DefaultServerRequest.bodyClass(type));
 		}
 
 		@SuppressWarnings("unchecked")
-		private <T> T bodyInternal(Type type, @Nullable Class<?> contextClass)
+		private <T> T bodyInternal(Type bodyType, Class<?> bodyClass)
 				throws ServletException, IOException {
 
 			HttpInputMessage inputMessage = new BuiltInputMessage();
 			MediaType contentType = headers().contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter<?>) {
+				if (messageConverter instanceof GenericHttpMessageConverter) {
 					GenericHttpMessageConverter<T> genericMessageConverter =
 							(GenericHttpMessageConverter<T>) messageConverter;
-					if (genericMessageConverter.canRead(type, contextClass, contentType)) {
-						return genericMessageConverter.read(type, contextClass, inputMessage);
+					if (genericMessageConverter.canRead(bodyType, bodyClass, contentType)) {
+						return genericMessageConverter.read(bodyType, bodyClass, inputMessage);
 					}
 				}
-				else {
-					if (messageConverter.canRead(contextClass, contentType)) {
-						HttpMessageConverter<T> theConverter =
-								(HttpMessageConverter<T>) messageConverter;
-						Class<? extends T> clazz = (Class<? extends T>) contextClass;
-						return theConverter.read(clazz, inputMessage);
-					}
+				if (messageConverter.canRead(bodyClass, contentType)) {
+					HttpMessageConverter<T> theConverter =
+							(HttpMessageConverter<T>) messageConverter;
+					Class<? extends T> clazz = (Class<? extends T>) bodyClass;
+					return theConverter.read(clazz, inputMessage);
 				}
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType, Collections.emptyList());

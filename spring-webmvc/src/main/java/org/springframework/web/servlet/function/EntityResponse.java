@@ -20,12 +20,10 @@ import java.net.URI;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Set;
-import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import javax.servlet.http.Cookie;
 
-import org.reactivestreams.Publisher;
-
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -61,24 +59,16 @@ public interface EntityResponse<T> extends ServerResponse {
 	}
 
 	/**
-	 * Create a builder for an asynchronous body supplied by the given {@link CompletionStage}.
-	 * @param completionStage the supplier of the response body
-	 * @param <T> the type of the elements contained in the publisher
+	 * Create a builder with the given object and type reference.
+	 * @param t the object that represents the body of the response
+	 * @param entityType the type of the entity, used to capture the generic type
+	 * @param <T> the type of element contained in the publisher
 	 * @return the created builder
 	 */
-	static <T> Builder<CompletionStage<T>> fromCompletionStage(CompletionStage<T> completionStage) {
-		return DefaultEntityResponseBuilder.fromCompletionStage(completionStage);
+	static <T> Builder<T> fromObject(T t, ParameterizedTypeReference<T> entityType) {
+		return DefaultEntityResponseBuilder.fromObject(t, entityType);
 	}
 
-	/**
-	 * Create a builder for an asynchronous body supplied by the given {@link Publisher}.
-	 * @param publisher the supplier of the response body
-	 * @param <T> the type of the elements contained in the publisher
-	 * @return the created builder
-	 */
-	static <T> Builder<Publisher<T>> fromPublisher(Publisher<T> publisher) {
-		return DefaultEntityResponseBuilder.fromPublisher(publisher);
-	}
 
 	/**
 	 * Defines a builder for {@code EntityResponse}.

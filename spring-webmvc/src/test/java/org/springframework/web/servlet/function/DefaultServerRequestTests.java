@@ -36,6 +36,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.util.LinkedMultiValueMap;
@@ -240,14 +241,16 @@ public class DefaultServerRequestTests {
 	@Test
 	public void bodyParameterizedTypeReference() throws Exception {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
-		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
-		servletRequest.setContent("foo".getBytes(UTF_8));
+		servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		servletRequest.setContent("[\"foo\",\"bar\"]".getBytes(UTF_8));
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
-				this.messageConverters);
+				Collections.singletonList(new MappingJackson2HttpMessageConverter()));
 
-		String result = request.body(new ParameterizedTypeReference<String>() {});
-		assertEquals("foo", result);
+		List<String> result = request.body(new ParameterizedTypeReference<List<String>>() {});
+		assertEquals(2, result.size());
+		assertEquals("foo", result.get(0));
+		assertEquals("bar", result.get(1));
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)

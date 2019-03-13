@@ -29,6 +29,7 @@ import javax.servlet.http.Cookie;
 
 import org.junit.Test;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -60,6 +61,16 @@ public class DefaultEntityResponseBuilderTests {
 	public void fromObject() {
 		String body = "foo";
 		EntityResponse<String> response = EntityResponse.fromObject(body).build();
+		assertSame(body, response.entity());
+	}
+
+	@Test
+	public void fromObjectTypeReference() {
+		String body = "foo";
+		EntityResponse<String> response = EntityResponse.fromObject(body,
+				new ParameterizedTypeReference<String>() {})
+				.build();
+
 		assertSame(body, response.entity());
 	}
 

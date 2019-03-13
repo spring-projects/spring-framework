@@ -20,6 +20,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.LinkedMultiValueMap;
@@ -288,10 +291,27 @@ public class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	public void asyncBodyCompletionStage() throws Exception {
+	public void bodyWithParameterizedTypeReference() throws Exception {
+		List<String> body = new ArrayList<>();
+		body.add("foo");
+		body.add("bar");
+		ServerResponse response = ServerResponse.ok().body(body, new ParameterizedTypeReference<List<String>>() {});
+
+		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "http://example.com");
+		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+		ServerResponse.Context context = () -> Collections.singletonList(new MappingJackson2HttpMessageConverter());
+
+		ModelAndView mav = response.writeTo(mockRequest, mockResponse, context);
+		assertNull(mav);
+
+		assertEquals("[\"foo\",\"bar\"]", mockResponse.getContentAsString());
+	}
+
+	@Test
+	public void bodyCompletionStage() throws Exception {
 		String body = "foo";
 		CompletionStage<String> completionStage = CompletableFuture.completedFuture(body);
-		ServerResponse response = ServerResponse.ok().asyncBody(completionStage);
+		ServerResponse response = ServerResponse.ok().body(completionStage);
 
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "http://example.com");
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
@@ -307,10 +327,10 @@ public class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	public void asyncBodyPublisher() throws Exception {
+	public void bodyPublisher() throws Exception {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
-		ServerResponse response = ServerResponse.ok().asyncBody(publisher);
+		ServerResponse response = ServerResponse.ok().body(publisher);
 
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "http://example.com");
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
