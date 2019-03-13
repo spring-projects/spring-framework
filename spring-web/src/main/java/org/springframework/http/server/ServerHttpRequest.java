@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.security.Principal;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpRequest;
+import org.springframework.lang.Nullable;
 
 /**
  * Represents a server-side HTTP request.
@@ -33,9 +34,10 @@ public interface ServerHttpRequest extends HttpRequest, HttpInputMessage {
 
 	/**
 	 * Return a {@link java.security.Principal} instance containing the name of the
-	 * authenticated user. If the user has not been authenticated, the method returns
-	 * <code>null</code>.
+	 * authenticated user.
+	 * <p>If the user has not been authenticated, the method returns <code>null</code>.
 	 */
+	@Nullable
 	Principal getPrincipal();
 
 	/**

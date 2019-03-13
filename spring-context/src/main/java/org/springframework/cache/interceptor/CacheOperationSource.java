@@ -51,8 +51,8 @@ public interface CacheOperationSource {
 	}
 
 	/**
-	 * Return the collection of cache operations for this method, or {@code null}
-	 * if the method contains no <em>cacheable</em> annotations.
+	 * Return the collection of cache operations for this method,
+	 * or {@code null} if the method contains no <em>cacheable</em> annotations.
 	 * @param method the method to introspect
 	 * @param targetClass the target class (may be {@code null}, in which case
 	 * the declaring class of the method must be used)
