@@ -92,7 +92,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	 * @since 5.2
 	 */
 	public int getMaxFramePayloadLength() {
-		return maxFramePayloadLength;
+		return this.maxFramePayloadLength;
 	}
 
 
