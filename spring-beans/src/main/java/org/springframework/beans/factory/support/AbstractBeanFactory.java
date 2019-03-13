@@ -931,6 +931,23 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
+	public void addBeanPostProcessors(List<BeanPostProcessor> beanPostProcessors) {
+		this.beanPostProcessors.removeAll(beanPostProcessors);
+
+		for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
+			Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
+			// Track whether it is instantiation/destruction aware
+			if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+				this.hasInstantiationAwareBeanPostProcessors = true;
+			}
+			if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
+				this.hasDestructionAwareBeanPostProcessors = true;
+			}
+		}
+		this.beanPostProcessors.addAll(beanPostProcessors);
+	}
+
+	@Override
 	public int getBeanPostProcessorCount() {
 		return this.beanPostProcessors.size();
 	}

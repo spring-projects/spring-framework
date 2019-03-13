@@ -18,6 +18,7 @@ package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
 import java.security.AccessControlContext;
+import java.util.List;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
@@ -243,6 +244,20 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @param beanPostProcessor the post-processor to register
 	 */
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+
+	/**
+	 * Add new BeanPostProcessors that will get applied to beans created
+	 * by this factory. To be invoked during factory configuration.
+	 * <p>Note: Post-processors submitted here will be applied in the order of
+	 * registration; any ordering semantics expressed through implementing the
+	 * {@link org.springframework.core.Ordered} interface will be ignored. Note
+	 * that autodetected post-processors (e.g. as beans in an ApplicationContext)
+	 * will always be applied after programmatically registered ones.
+	 * @param beanPostProcessors the post-processors to register
+	 */
+	default void addBeanPostProcessors(List<BeanPostProcessor> beanPostProcessors) {
+		beanPostProcessors.forEach(this::addBeanPostProcessor);
+	}
 
 	/**
 	 * Return the current number of registered BeanPostProcessors, if any.
