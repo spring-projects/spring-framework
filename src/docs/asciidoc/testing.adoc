@@ -3801,7 +3801,7 @@ See the <<integration-testing-annotations, annotation support>> section for furt
 information and configuration examples. <<testcontext-executing-sql-declaratively-tx,
 Transaction management for `@Sql`>> contains an additional example that uses `@Sql` for
 declarative SQL script execution with default transaction rollback semantics. The
-following example shows the relevant annotations in bold:
+following example shows the relevant annotations:
 
 ====
 [source,java,indent=0]
