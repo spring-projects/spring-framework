@@ -2806,7 +2806,7 @@ to do so:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	**@RequestScope**
+	@RequestScope
 	@Component
 	public class LoginAction {
 		// ...
@@ -2846,7 +2846,7 @@ When using annotation-driven components or Java configuration, you can use the
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	**@SessionScope**
+	@SessionScope
 	@Component
 	public class UserPreferences {
 		// ...
@@ -2885,7 +2885,7 @@ following example shows how to do so:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	**@ApplicationScope**
+	@ApplicationScope
 	@Component
 	public class AppPreferences {
 		// ...
@@ -4893,7 +4893,7 @@ primary `MovieCatalog`:
 	public class MovieConfiguration {
 
 		@Bean
-		**@Primary**
+		@Primary
 		public MovieCatalog firstMovieCatalog() { ... }
 
 		@Bean
@@ -4938,7 +4938,7 @@ The corresponding bean definitions follow:
 
 		<context:annotation-config/>
 
-		<bean class="example.SimpleMovieCatalog" **primary="true"**>
+		<bean class="example.SimpleMovieCatalog" primary="true">
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
@@ -4971,7 +4971,7 @@ shown in the following example:
 	public class MovieRecommender {
 
 		@Autowired
-		**@Qualifier("main")**
+		@Qualifier("main")
 		private MovieCatalog movieCatalog;
 
 		// ...
@@ -4993,7 +4993,7 @@ method parameters, as shown in the following example:
 		private CustomerPreferenceDao customerPreferenceDao;
 
 		@Autowired
-		public void prepare(**@Qualifier("main")**MovieCatalog movieCatalog,
+		public void prepare(@Qualifier("main") MovieCatalog movieCatalog,
 				CustomerPreferenceDao customerPreferenceDao) {
 			this.movieCatalog = movieCatalog;
 			this.customerPreferenceDao = customerPreferenceDao;
@@ -5113,7 +5113,7 @@ provide the `@Qualifier` annotation within your definition, as the following exa
 ----
 	@Target({ElementType.FIELD, ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
-	**@Qualifier**
+	@Qualifier
 	public @interface Genre {
 
 		String value();
@@ -5131,13 +5131,13 @@ following example shows:
 	public class MovieRecommender {
 
 		@Autowired
-		**@Genre("Action")**
+		@Genre("Action")
 		private MovieCatalog actionCatalog;
 
 		private MovieCatalog comedyCatalog;
 
 		@Autowired
-		public void setComedyCatalog(**@Genre("Comedy")** MovieCatalog comedyCatalog) {
+		public void setComedyCatalog(@Genre("Comedy") MovieCatalog comedyCatalog) {
 			this.comedyCatalog = comedyCatalog;
 		}
 
@@ -5169,12 +5169,12 @@ demonstrates both approaches:
 		<context:annotation-config/>
 
 		<bean class="example.SimpleMovieCatalog">
-			**<qualifier type="Genre" value="Action"/>**
+			<qualifier type="Genre" value="Action"/>
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
 		<bean class="example.SimpleMovieCatalog">
-			**<qualifier type="example.Genre" value="Comedy"/>**
+			<qualifier type="example.Genre" value="Comedy"/>
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
@@ -5496,7 +5496,7 @@ named `movieFinder` injected into its setter method:
 
 		private MovieFinder movieFinder;
 
-		**@Resource**
+		@Resource
 		public void setMovieFinder(MovieFinder movieFinder) {
 			this.movieFinder = movieFinder;
 		}
@@ -5705,7 +5705,7 @@ You can then use `@SessionScope` without declaring the `proxyMode` as follows:
 [subs="verbatim,quotes"]
 ----
 	@Service
-	**@SessionScope**
+	@SessionScope
 	public class SessionScopedService {
 		// ...
 	}
@@ -5719,7 +5719,7 @@ You can also override the value for the `proxyMode`, as the following example sh
 [subs="verbatim,quotes"]
 ----
 	@Service
-	**@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)**
+	@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)
 	public class SessionScopedUserService implements UserService {
 		// ...
 	}
@@ -6248,7 +6248,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Qualifier("Action")**
+	@Qualifier("Action")
 	public class ActionMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -6258,7 +6258,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Genre("Action")**
+	@Genre("Action")
 	public class ActionMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -6268,7 +6268,7 @@ technique:
 [subs="verbatim,quotes"]
 ----
 	@Component
-	**@Offline**
+	@Offline
 	public class CachingMovieCatalog implements MovieCatalog {
 		// ...
 	}
@@ -7189,7 +7189,7 @@ as the following example shows:
 	public class MyConfiguration {
 
 		@Bean
-		**@Scope("prototype")**
+		@Scope("prototype")
 		public Encryptor encryptor() {
 			// ...
 		}
@@ -7217,7 +7217,7 @@ it resembles the following:
 ----
 	// an HTTP Session-scoped bean exposed as a proxy
 	@Bean
-	**@SessionScope**
+	@SessionScope
 	public UserPreferences userPreferences() {
 		return new UserPreferences();
 	}
@@ -7298,7 +7298,7 @@ annotation, as the following example shows:
 	public class AppConfig {
 
 		@Bean
-		**@Description("Provides a basic example of a bean")**
+		@Description("Provides a basic example of a bean")
 		public Thing thing() {
 			return new Thing();
 		}
@@ -8127,7 +8127,7 @@ can rewrite the `dataSource` configuration as follows:
 [subs="verbatim,quotes"]
 ----
 	@Configuration
-	**@Profile("development")**
+	@Profile("development")
 	public class StandaloneDataConfig {
 
 		@Bean
@@ -8145,7 +8145,7 @@ can rewrite the `dataSource` configuration as follows:
 [subs="verbatim,quotes"]
 ----
 	@Configuration
-	**@Profile("production")**
+	@Profile("production")
 	public class JndiDataConfig {
 
 		@Bean(destroyMethod="")
@@ -8186,7 +8186,7 @@ of creating a custom composed annotation. The following example defines a custom
 ----
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	**@Profile("production")**
+	@Profile("production")
 	public @interface Production {
 	}
 ----
@@ -8423,7 +8423,7 @@ following example:
 [subs="verbatim,quotes"]
 ----
 	@Configuration
-	**@Profile("default")**
+	@Profile("default")
 	public class DefaultDataConfig {
 
 		@Bean
@@ -8540,7 +8540,7 @@ a call to `testBean.getName()` returns `myTestBean`:
 [subs="verbatim,quotes"]
 ----
    @Configuration
-   **@PropertySource("classpath:/com/myco/app.properties")**
+   @PropertySource("classpath:/com/myco/app.properties")
    public class AppConfig {
 
 	   @Autowired

@@ -1078,7 +1078,7 @@ Consider the following class definition:
 [subs="verbatim,quotes"]
 ----
 	// the service class that we want to make transactional
-	**@Transactional**
+	@Transactional
 	public class DefaultFooService implements FooService {
 
 		Foo getFoo(String fooName);
@@ -1553,7 +1553,7 @@ The following code shows the simple profiling aspect discussed earlier:
 			this.order = order;
 		}
 
-		// this method *is* the around advice
+		// this method is the around advice
 		public Object profile(ProceedingJoinPoint call) throws Throwable {
 			Object returnValue;
 			StopWatch clock = new StopWatch(getClass().getName());
@@ -1817,7 +1817,7 @@ with an anonymous class, as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	transactionTemplate.execute(new **TransactionCallbackWithoutResult**() {
+	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 		protected void doInTransactionWithoutResult(TransactionStatus status) {
 			updateOperation1();
 			updateOperation2();
@@ -1840,7 +1840,7 @@ Code within the callback can roll the transaction back by calling the
 				updateOperation1();
 				updateOperation2();
 			} catch (SomeBusinessException ex) {
-				**status.setRollbackOnly();**
+				status.setRollbackOnly();
 			}
 		}
 	});
@@ -2606,7 +2606,7 @@ the setter for the `DataSource`. This leads to DAOs that resemble the following:
 		private JdbcTemplate jdbcTemplate;
 
 		public void setDataSource(DataSource dataSource) {
-			**this.jdbcTemplate = new JdbcTemplate(dataSource);**
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
 		}
 
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
@@ -5044,7 +5044,7 @@ errors in the SQL it executes from the scripts, as the following example shows:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<jdbc:initialize-database data-source="dataSource" **ignore-failures="DROPS"**>
+	<jdbc:initialize-database data-source="dataSource" ignore-failures="DROPS">
 		<jdbc:script location="..."/>
 	</jdbc:initialize-database>
 ----

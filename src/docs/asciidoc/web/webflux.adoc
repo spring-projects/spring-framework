@@ -1339,7 +1339,7 @@ as the following example shows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping(path = "/pets", **consumes = "application/json"**)
+	@PostMapping(path = "/pets", consumes = "application/json")
 	public void addPet(@RequestBody Pet pet) {
 		// ...
 	}
@@ -1368,7 +1368,7 @@ content types that a controller method produces, as the following example shows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping(path = "/pets/{petId}", **produces = "application/json;charset=UTF-8"**)
+	@GetMapping(path = "/pets/{petId}", produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public Pet getPet(@PathVariable String petId) {
 		// ...
@@ -2023,7 +2023,7 @@ You can automatically apply validation after data binding by adding the
 [subs="verbatim,quotes"]
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(**@Valid @ModelAttribute("pet") Pet pet**, BindingResult result) { <1>
+	public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult result) { <1>
 		if (result.hasErrors()) {
 			return "petForm";
 		}

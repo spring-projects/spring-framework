@@ -47,12 +47,12 @@ The following example shows how to use JNDI to look up a data source without the
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="**dataSource**" class="org.springframework.jndi.JndiObjectFactoryBean">
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		<property name="jndiName" value="jdbc/MyDataSource"/>
 	</bean>
 	<bean id="userDao" class="com.foo.JdbcUserDao">
 		<!-- Spring will do the cast automatically (as usual) -->
-		<property name="dataSource" ref="**dataSource**"/>
+		<property name="dataSource" ref="dataSource"/>
 	</bean>
 ----
 ====
@@ -64,11 +64,11 @@ schema:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<jee:jndi-lookup id="**dataSource**" jndi-name="jdbc/MyDataSource"/>
+	<jee:jndi-lookup id="dataSource" jndi-name="jdbc/MyDataSource"/>
 
 	<bean id="userDao" class="com.foo.JdbcUserDao">
 		<!-- Spring will do the cast automatically (as usual) -->
-		<property name="dataSource" ref="**dataSource**"/>
+		<property name="dataSource" ref="dataSource"/>
 	</bean>
 ----
 ====

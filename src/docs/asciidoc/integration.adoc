@@ -2119,7 +2119,7 @@ containers that ships with Spring (in this case, `DefaultMessageListenerContaine
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="connectionFactory"/>
 		<property name="destination" ref="destination"/>
-		**<property name="messageListener" ref="messageListener"/>**
+		<property name="messageListener" ref="messageListener"/>
 	</bean>
 ----
 ====
@@ -2219,17 +2219,17 @@ POJO that we can make into an MDP through the following configuration:
 [subs="verbatim,quotes"]
 ----
 	<!-- this is the Message Driven POJO (MDP) -->
-	**<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+	<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
 		<constructor-arg>
 			<bean class="jmsexample.DefaultMessageDelegate"/>
 		</constructor-arg>
-	</bean>**
+	</bean>
 
 	<!-- and this is the message listener container... -->
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="connectionFactory"/>
 		<property name="destination" ref="destination"/>
-		**<property name="messageListener" ref="messageListener"/>**
+		<property name="messageListener" ref="messageListener"/>
 	</bean>
 ----
 ====
@@ -2346,7 +2346,7 @@ Consider the following bean definition:
 		<property name="connectionFactory" ref="connectionFactory"/>
 		<property name="destination" ref="destination"/>
 		<property name="messageListener" ref="messageListener"/>
-		**<property name="sessionTransacted" value="true"/>**
+		<property name="sessionTransacted" value="true"/>
 	</bean>
 ----
 ====
@@ -2818,7 +2818,7 @@ namespace elements, you need to reference the JMS schema, as the following examp
 			xmlns:jms="http://www.springframework.org/schema/jms" <1>
 			xsi:schemaLocation="
 				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-				**http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd**">
+				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
 
 		<!-- bean definitions here -->
 
@@ -7323,13 +7323,13 @@ do yourself a favor and read <<core.adoc#expressions, Spring Expression Language
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="books", **key="#isbn"**)
+	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
-	@Cacheable(cacheNames="books", **key="#isbn.rawNumber"**)
+	@Cacheable(cacheNames="books", key="#isbn.rawNumber")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
-	@Cacheable(cacheNames="books", **key="T(someType).hash(#isbn)"**)
+	@Cacheable(cacheNames="books", key="T(someType).hash(#isbn)")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 ====
@@ -7345,7 +7345,7 @@ so, specify the name of the `KeyGenerator` bean implementation to use, as the fo
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="books", **keyGenerator="myKeyGenerator"**)
+	@Cacheable(cacheNames="books", keyGenerator="myKeyGenerator")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 ====
@@ -7481,7 +7481,7 @@ supported wrapper, so the previous example can be rewritten as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="book", condition="#name.length() < 32", **unless="#result?.hardback"**)
+	@Cacheable(cacheNames="book", condition="#name.length() < 32", unless="#result?.hardback")
 	public Optional<Book> findBook(String name)
 ----
 ====
@@ -7977,11 +7977,11 @@ Spring's abstraction and the other using JCache:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames="books", **key="#isbn"**)
+	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 	@CacheResult(cacheName="books")
-	public Book findBook(**@CacheKey** ISBN isbn, boolean checkWarehouse, boolean includeUsed)
+	public Book findBook(@CacheKey ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 ====
 
@@ -8000,8 +8000,8 @@ invoking the method again:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@CacheResult(cacheName="books", **exceptionCacheName="failures"**
-				**cachedExceptions = InvalidIsbnNotFoundException.class**)
+	@CacheResult(cacheName="books", exceptionCacheName="failures"
+				cachedExceptions = InvalidIsbnNotFoundException.class)
 	public Book findBook(ISBN isbn)
 ----
 ====

@@ -475,7 +475,7 @@ through the `syncBody` method, as the following example shows:
 
 	Mono<Void> result = client.post()
 			.uri("/path", id)
-			.syncBody(**builder.build()**)
+			.syncBody(builder.build())
 			.retrieve()
 			.bodyToMono(Void.class);
 ----

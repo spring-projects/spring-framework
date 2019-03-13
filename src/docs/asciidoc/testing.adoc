@@ -3346,11 +3346,11 @@ The first code listing shows a JUnit 4 based implementation of the test class th
 ----
 	@RunWith(SpringRunner.class)
 	// specifies the Spring configuration to load for this test fixture
-	**@ContextConfiguration("repository-config.xml")**
+	@ContextConfiguration("repository-config.xml")
 	public class HibernateTitleRepositoryTests {
 
 		// this instance will be dependency injected by type
-		**@Autowired**
+		@Autowired
 		private HibernateTitleRepository titleRepository;
 
 		@Test
@@ -3371,13 +3371,13 @@ follows:
 ----
 	@RunWith(SpringRunner.class)
 	// specifies the Spring configuration to load for this test fixture
-	**@ContextConfiguration("repository-config.xml")**
+	@ContextConfiguration("repository-config.xml")
 	public class HibernateTitleRepositoryTests {
 
 		// this instance will be dependency injected by type
 		private HibernateTitleRepository titleRepository;
 
-		**@Autowired**
+		@Autowired
 		public void setTitleRepository(HibernateTitleRepository titleRepository) {
 			this.titleRepository = titleRepository;
 		}
@@ -3406,7 +3406,7 @@ shows this configuration:
 			http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<!-- this bean will be injected into the HibernateTitleRepositoryTests class -->
-		<bean id="**titleRepository**" class="**com.foo.repository.hibernate.HibernateTitleRepository**">
+		<bean id="titleRepository" class="com.foo.repository.hibernate.HibernateTitleRepository">
 			<property name="sessionFactory" ref="sessionFactory"/>
 		</bean>
 
@@ -3435,8 +3435,8 @@ method in the superclass as well):
 
 		@Autowired
 		@Override
-		public void setDataSource(**@Qualifier("myDataSource")** DataSource dataSource) {
-			**super**.setDataSource(dataSource);
+		public void setDataSource(@Qualifier("myDataSource") DataSource dataSource) {
+			super.setDataSource(dataSource);
 		}
 
 	// ...
@@ -3809,11 +3809,11 @@ following example shows the relevant annotations in bold:
 ----
 	@RunWith(SpringRunner.class)
 	@ContextConfiguration
-	**@Transactional(transactionManager = "txMgr")**
-	**@Commit**
+	@Transactional(transactionManager = "txMgr")
+	@Commit
 	public class FictitiousTransactionalTest {
 
-		**@BeforeTransaction**
+		@BeforeTransaction
 		void verifyInitialDatabaseState() {
 			// logic to verify the initial state before a transaction is started
 		}
@@ -3825,7 +3825,7 @@ following example shows the relevant annotations in bold:
 
 		@Test
 		// overrides the class-level @Commit setting
-		**@Rollback**
+		@Rollback
 		public void modifyDatabaseWithinTransaction() {
 			// logic which uses the test data and modifies database state
 		}
@@ -3835,7 +3835,7 @@ following example shows the relevant annotations in bold:
 			// execute "tear down" logic within the transaction
 		}
 
-		**@AfterTransaction**
+		@AfterTransaction
 		void verifyFinalDatabaseState() {
 			// logic to verify the final state after transaction has rolled back
 		}
