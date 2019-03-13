@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
 /**
  * {@link org.springframework.scripting.ScriptFactory} implementation based
  * on the JSR-223 script engine abstraction (as included in Java 6+).
- * Supports JavaScript, Groovy, JRuby and other JSR-223 compliant engines.
+ * Supports JavaScript, Groovy, JRuby, and other JSR-223 compliant engines.
  *
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
@@ -151,6 +151,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 				if (script instanceof Class ? !requestedIfc.isAssignableFrom((Class<?>) script) :
 						!requestedIfc.isInstance(script)) {
 					adaptationRequired = true;
+					break;
 				}
 			}
 			if (adaptationRequired) {

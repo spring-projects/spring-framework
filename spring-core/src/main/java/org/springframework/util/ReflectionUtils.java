@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,13 +61,13 @@ public abstract class ReflectionUtils {
 	 * @since 3.0.5
 	 */
 	public static final MethodFilter USER_DECLARED_METHODS =
-			(method -> (!method.isBridge() && !method.isSynthetic() && method.getDeclaringClass() != Object.class));
+			(method -> !method.isBridge() && !method.isSynthetic() && method.getDeclaringClass() != Object.class);
 
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
 	public static final FieldFilter COPYABLE_FIELDS =
-			field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
+			(field -> !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())));
 
 
 	/**
@@ -76,9 +76,9 @@ public abstract class ReflectionUtils {
 	 */
 	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
 
-	private static final Method[] NO_METHODS = {};
+	private static final Method[] EMPTY_METHOD_ARRAY = new Method[0];
 
-	private static final Field[] NO_FIELDS = {};
+	private static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
 
 
 	/**
@@ -93,87 +93,123 @@ public abstract class ReflectionUtils {
 	private static final Map<Class<?>, Field[]> declaredFieldsCache = new ConcurrentReferenceHashMap<>(256);
 
 
+	// Exception handling
+
 	/**
-	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
-	 * supplied {@code name}. Searches all superclasses up to {@link Object}.
-	 * @param clazz the class to introspect
-	 * @param name the name of the field
-	 * @return the corresponding Field object, or {@code null} if not found
+	 * Handle the given reflection exception. Should only be called if no
+	 * checked exception is expected to be thrown by the target method.
+	 * <p>Throws the underlying RuntimeException or Error in case of an
+	 * InvocationTargetException with such a root cause. Throws an
+	 * IllegalStateException with an appropriate message or
+	 * UndeclaredThrowableException otherwise.
+	 * @param ex the reflection exception to handle
 	 */
-	@Nullable
-	public static Field findField(Class<?> clazz, String name) {
-		return findField(clazz, name, null);
+	public static void handleReflectionException(Exception ex) {
+		if (ex instanceof NoSuchMethodException) {
+			throw new IllegalStateException("Method not found: " + ex.getMessage());
+		}
+		if (ex instanceof IllegalAccessException) {
+			throw new IllegalStateException("Could not access method: " + ex.getMessage());
+		}
+		if (ex instanceof InvocationTargetException) {
+			handleInvocationTargetException((InvocationTargetException) ex);
+		}
+		if (ex instanceof RuntimeException) {
+			throw (RuntimeException) ex;
+		}
+		throw new UndeclaredThrowableException(ex);
 	}
 
 	/**
-	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
-	 * supplied {@code name} and/or {@link Class type}. Searches all superclasses
-	 * up to {@link Object}.
-	 * @param clazz the class to introspect
-	 * @param name the name of the field (may be {@code null} if type is specified)
-	 * @param type the type of the field (may be {@code null} if name is specified)
-	 * @return the corresponding Field object, or {@code null} if not found
+	 * Handle the given invocation target exception. Should only be called if no
+	 * checked exception is expected to be thrown by the target method.
+	 * <p>Throws the underlying RuntimeException or Error in case of such a root
+	 * cause. Throws an UndeclaredThrowableException otherwise.
+	 * @param ex the invocation target exception to handle
 	 */
-	@Nullable
-	public static Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
-		Assert.notNull(clazz, "Class must not be null");
-		Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
-		Class<?> searchType = clazz;
-		while (Object.class != searchType && searchType != null) {
-			Field[] fields = getDeclaredFields(searchType);
-			for (Field field : fields) {
-				if ((name == null || name.equals(field.getName())) &&
-						(type == null || type.equals(field.getType()))) {
-					return field;
-				}
-			}
-			searchType = searchType.getSuperclass();
-		}
-		return null;
+	public static void handleInvocationTargetException(InvocationTargetException ex) {
+		rethrowRuntimeException(ex.getTargetException());
 	}
 
 	/**
-	 * Set the field represented by the supplied {@link Field field object} on the
-	 * specified {@link Object target object} to the specified {@code value}.
-	 * In accordance with {@link Field#set(Object, Object)} semantics, the new value
-	 * is automatically unwrapped if the underlying field has a primitive type.
-	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
-	 * @param field the field to set
-	 * @param target the target object on which to set the field
-	 * @param value the value to set (may be {@code null})
+	 * Rethrow the given {@link Throwable exception}, which is presumably the
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown
+	 * by the target method.
+	 * <p>Rethrows the underlying exception cast to a {@link RuntimeException} or
+	 * {@link Error} if appropriate; otherwise, throws an
+	 * {@link UndeclaredThrowableException}.
+	 * @param ex the exception to rethrow
+	 * @throws RuntimeException the rethrown exception
 	 */
-	public static void setField(Field field, @Nullable Object target, @Nullable Object value) {
-		try {
-			field.set(target, value);
+	public static void rethrowRuntimeException(Throwable ex) {
+		if (ex instanceof RuntimeException) {
+			throw (RuntimeException) ex;
 		}
-		catch (IllegalAccessException ex) {
-			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		if (ex instanceof Error) {
+			throw (Error) ex;
 		}
+		throw new UndeclaredThrowableException(ex);
 	}
 
 	/**
-	 * Get the field represented by the supplied {@link Field field object} on the
-	 * specified {@link Object target object}. In accordance with {@link Field#get(Object)}
-	 * semantics, the returned value is automatically wrapped if the underlying field
-	 * has a primitive type.
-	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
-	 * @param field the field to get
-	 * @param target the target object from which to get the field
-	 * @return the field's current value
+	 * Rethrow the given {@link Throwable exception}, which is presumably the
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown
+	 * by the target method.
+	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
+	 * {@link Error} if appropriate; otherwise, throws an
+	 * {@link UndeclaredThrowableException}.
+	 * @param ex the exception to rethrow
+	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */
-	@Nullable
-	public static Object getField(Field field, @Nullable Object target) {
-		try {
-			return field.get(target);
+	public static void rethrowException(Throwable ex) throws Exception {
+		if (ex instanceof Exception) {
+			throw (Exception) ex;
 		}
-		catch (IllegalAccessException ex) {
-			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		if (ex instanceof Error) {
+			throw (Error) ex;
+		}
+		throw new UndeclaredThrowableException(ex);
+	}
+
+
+	// Constructor handling
+
+	/**
+	 * Obtain an accessible constructor for the given class and parameters.
+	 * @param clazz the clazz to check
+	 * @param parameterTypes the parameter types of the desired constructor
+	 * @return the constructor reference
+	 * @throws NoSuchMethodException if no such constructor exists
+	 * @since 5.0
+	 */
+	public static <T> Constructor<T> accessibleConstructor(Class<T> clazz, Class<?>... parameterTypes)
+			throws NoSuchMethodException {
+
+		Constructor<T> ctor = clazz.getDeclaredConstructor(parameterTypes);
+		makeAccessible(ctor);
+		return ctor;
+	}
+
+	/**
+	 * Make the given constructor accessible, explicitly setting it accessible
+	 * if necessary. The {@code setAccessible(true)} method is only called
+	 * when actually necessary, to avoid unnecessary conflicts with a JVM
+	 * SecurityManager (if active).
+	 * @param ctor the constructor to make accessible
+	 * @see java.lang.reflect.Constructor#setAccessible
+	 */
+	@SuppressWarnings("deprecation")  // on JDK 9
+	public static void makeAccessible(Constructor<?> ctor) {
+		if ((!Modifier.isPublic(ctor.getModifiers()) ||
+				!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) && !ctor.isAccessible()) {
+			ctor.setAccessible(true);
 		}
 	}
+
+
+	// Method handling
 
 	/**
 	 * Attempt to find a {@link Method} on the supplied class with the supplied name
@@ -298,84 +334,6 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Handle the given reflection exception. Should only be called if no
-	 * checked exception is expected to be thrown by the target method.
-	 * <p>Throws the underlying RuntimeException or Error in case of an
-	 * InvocationTargetException with such a root cause. Throws an
-	 * IllegalStateException with an appropriate message or
-	 * UndeclaredThrowableException otherwise.
-	 * @param ex the reflection exception to handle
-	 */
-	public static void handleReflectionException(Exception ex) {
-		if (ex instanceof NoSuchMethodException) {
-			throw new IllegalStateException("Method not found: " + ex.getMessage());
-		}
-		if (ex instanceof IllegalAccessException) {
-			throw new IllegalStateException("Could not access method: " + ex.getMessage());
-		}
-		if (ex instanceof InvocationTargetException) {
-			handleInvocationTargetException((InvocationTargetException) ex);
-		}
-		if (ex instanceof RuntimeException) {
-			throw (RuntimeException) ex;
-		}
-		throw new UndeclaredThrowableException(ex);
-	}
-
-	/**
-	 * Handle the given invocation target exception. Should only be called if no
-	 * checked exception is expected to be thrown by the target method.
-	 * <p>Throws the underlying RuntimeException or Error in case of such a root
-	 * cause. Throws an UndeclaredThrowableException otherwise.
-	 * @param ex the invocation target exception to handle
-	 */
-	public static void handleInvocationTargetException(InvocationTargetException ex) {
-		rethrowRuntimeException(ex.getTargetException());
-	}
-
-	/**
-	 * Rethrow the given {@link Throwable exception}, which is presumably the
-	 * <em>target exception</em> of an {@link InvocationTargetException}.
-	 * Should only be called if no checked exception is expected to be thrown
-	 * by the target method.
-	 * <p>Rethrows the underlying exception cast to a {@link RuntimeException} or
-	 * {@link Error} if appropriate; otherwise, throws an
-	 * {@link UndeclaredThrowableException}.
-	 * @param ex the exception to rethrow
-	 * @throws RuntimeException the rethrown exception
-	 */
-	public static void rethrowRuntimeException(Throwable ex) {
-		if (ex instanceof RuntimeException) {
-			throw (RuntimeException) ex;
-		}
-		if (ex instanceof Error) {
-			throw (Error) ex;
-		}
-		throw new UndeclaredThrowableException(ex);
-	}
-
-	/**
-	 * Rethrow the given {@link Throwable exception}, which is presumably the
-	 * <em>target exception</em> of an {@link InvocationTargetException}.
-	 * Should only be called if no checked exception is expected to be thrown
-	 * by the target method.
-	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
-	 * {@link Error} if appropriate; otherwise, throws an
-	 * {@link UndeclaredThrowableException}.
-	 * @param ex the exception to rethrow
-	 * @throws Exception the rethrown exception (in case of a checked exception)
-	 */
-	public static void rethrowException(Throwable ex) throws Exception {
-		if (ex instanceof Exception) {
-			throw (Exception) ex;
-		}
-		if (ex instanceof Error) {
-			throw (Error) ex;
-		}
-		throw new UndeclaredThrowableException(ex);
-	}
-
-	/**
 	 * Determine whether the given method explicitly declares the given
 	 * exception or one of its superclasses, which means that an exception
 	 * of that type can be propagated as-is within a reflective invocation.
@@ -393,143 +351,6 @@ public abstract class ReflectionUtils {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Determine whether the given field is a "public static final" constant.
-	 * @param field the field to check
-	 */
-	public static boolean isPublicStaticFinal(Field field) {
-		int modifiers = field.getModifiers();
-		return (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers));
-	}
-
-	/**
-	 * Determine whether the given method is an "equals" method.
-	 * @see java.lang.Object#equals(Object)
-	 */
-	public static boolean isEqualsMethod(@Nullable Method method) {
-		if (method == null || !method.getName().equals("equals")) {
-			return false;
-		}
-		Class<?>[] paramTypes = method.getParameterTypes();
-		return (paramTypes.length == 1 && paramTypes[0] == Object.class);
-	}
-
-	/**
-	 * Determine whether the given method is a "hashCode" method.
-	 * @see java.lang.Object#hashCode()
-	 */
-	public static boolean isHashCodeMethod(@Nullable Method method) {
-		return (method != null && method.getName().equals("hashCode") && method.getParameterCount() == 0);
-	}
-
-	/**
-	 * Determine whether the given method is a "toString" method.
-	 * @see java.lang.Object#toString()
-	 */
-	public static boolean isToStringMethod(@Nullable Method method) {
-		return (method != null && method.getName().equals("toString") && method.getParameterCount() == 0);
-	}
-
-	/**
-	 * Determine whether the given method is originally declared by {@link java.lang.Object}.
-	 */
-	public static boolean isObjectMethod(@Nullable Method method) {
-		if (method == null) {
-			return false;
-		}
-		try {
-			Object.class.getDeclaredMethod(method.getName(), method.getParameterTypes());
-			return true;
-		}
-		catch (Exception ex) {
-			return false;
-		}
-	}
-
-	/**
-	 * Determine whether the given method is a CGLIB 'renamed' method,
-	 * following the pattern "CGLIB$methodName$0".
-	 * @param renamedMethod the method to check
-	 * @see org.springframework.cglib.proxy.Enhancer#rename
-	 */
-	public static boolean isCglibRenamedMethod(Method renamedMethod) {
-		String name = renamedMethod.getName();
-		if (name.startsWith(CGLIB_RENAMED_METHOD_PREFIX)) {
-			int i = name.length() - 1;
-			while (i >= 0 && Character.isDigit(name.charAt(i))) {
-				i--;
-			}
-			return ((i > CGLIB_RENAMED_METHOD_PREFIX.length()) &&
-						(i < name.length() - 1) && name.charAt(i) == '$');
-		}
-		return false;
-	}
-
-	/**
-	 * Make the given field accessible, explicitly setting it accessible if
-	 * necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
-	 * @param field the field to make accessible
-	 * @see java.lang.reflect.Field#setAccessible
-	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
-	public static void makeAccessible(Field field) {
-		if ((!Modifier.isPublic(field.getModifiers()) ||
-				!Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
-				Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
-			field.setAccessible(true);
-		}
-	}
-
-	/**
-	 * Make the given method accessible, explicitly setting it accessible if
-	 * necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
-	 * @param method the method to make accessible
-	 * @see java.lang.reflect.Method#setAccessible
-	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
-	public static void makeAccessible(Method method) {
-		if ((!Modifier.isPublic(method.getModifiers()) ||
-				!Modifier.isPublic(method.getDeclaringClass().getModifiers())) && !method.isAccessible()) {
-			method.setAccessible(true);
-		}
-	}
-
-	/**
-	 * Make the given constructor accessible, explicitly setting it accessible
-	 * if necessary. The {@code setAccessible(true)} method is only called
-	 * when actually necessary, to avoid unnecessary conflicts with a JVM
-	 * SecurityManager (if active).
-	 * @param ctor the constructor to make accessible
-	 * @see java.lang.reflect.Constructor#setAccessible
-	 */
-	@SuppressWarnings("deprecation")  // on JDK 9
-	public static void makeAccessible(Constructor<?> ctor) {
-		if ((!Modifier.isPublic(ctor.getModifiers()) ||
-				!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) && !ctor.isAccessible()) {
-			ctor.setAccessible(true);
-		}
-	}
-
-	/**
-	 * Obtain an accessible constructor for the given class and parameters.
-	 * @param clazz the clazz to check
-	 * @param parameterTypes the parameter types of the desired constructor
-	 * @return the constructor reference
-	 * @throws NoSuchMethodException if no such constructor exists
-	 * @since 5.0
-	 */
-	public static <T> Constructor<T> accessibleConstructor(Class<T> clazz, Class<?>... parameterTypes)
-			throws NoSuchMethodException {
-
-		Constructor<T> ctor = clazz.getDeclaredConstructor(parameterTypes);
-		makeAccessible(ctor);
-		return ctor;
 	}
 
 	/**
@@ -611,7 +432,7 @@ public abstract class ReflectionUtils {
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) {
 		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, methods::add);
-		return methods.toArray(new Method[0]);
+		return methods.toArray(EMPTY_METHOD_ARRAY);
 	}
 
 	/**
@@ -647,7 +468,7 @@ public abstract class ReflectionUtils {
 				methods.add(method);
 			}
 		});
-		return methods.toArray(new Method[0]);
+		return methods.toArray(EMPTY_METHOD_ARRAY);
 	}
 
 	/**
@@ -679,7 +500,7 @@ public abstract class ReflectionUtils {
 				else {
 					result = declaredMethods;
 				}
-				declaredMethodsCache.put(clazz, (result.length == 0 ? NO_METHODS : result));
+				declaredMethodsCache.put(clazz, (result.length == 0 ? EMPTY_METHOD_ARRAY : result));
 			}
 			catch (Throwable ex) {
 				throw new IllegalStateException("Failed to introspect Class [" + clazz.getName() +
@@ -703,6 +524,168 @@ public abstract class ReflectionUtils {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Determine whether the given method is an "equals" method.
+	 * @see java.lang.Object#equals(Object)
+	 */
+	public static boolean isEqualsMethod(@Nullable Method method) {
+		if (method == null || !method.getName().equals("equals")) {
+			return false;
+		}
+		Class<?>[] paramTypes = method.getParameterTypes();
+		return (paramTypes.length == 1 && paramTypes[0] == Object.class);
+	}
+
+	/**
+	 * Determine whether the given method is a "hashCode" method.
+	 * @see java.lang.Object#hashCode()
+	 */
+	public static boolean isHashCodeMethod(@Nullable Method method) {
+		return (method != null && method.getName().equals("hashCode") && method.getParameterCount() == 0);
+	}
+
+	/**
+	 * Determine whether the given method is a "toString" method.
+	 * @see java.lang.Object#toString()
+	 */
+	public static boolean isToStringMethod(@Nullable Method method) {
+		return (method != null && method.getName().equals("toString") && method.getParameterCount() == 0);
+	}
+
+	/**
+	 * Determine whether the given method is originally declared by {@link java.lang.Object}.
+	 */
+	public static boolean isObjectMethod(@Nullable Method method) {
+		if (method == null) {
+			return false;
+		}
+		try {
+			Object.class.getDeclaredMethod(method.getName(), method.getParameterTypes());
+			return true;
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * Determine whether the given method is a CGLIB 'renamed' method,
+	 * following the pattern "CGLIB$methodName$0".
+	 * @param renamedMethod the method to check
+	 */
+	public static boolean isCglibRenamedMethod(Method renamedMethod) {
+		String name = renamedMethod.getName();
+		if (name.startsWith(CGLIB_RENAMED_METHOD_PREFIX)) {
+			int i = name.length() - 1;
+			while (i >= 0 && Character.isDigit(name.charAt(i))) {
+				i--;
+			}
+			return (i > CGLIB_RENAMED_METHOD_PREFIX.length() && (i < name.length() - 1) && name.charAt(i) == '$');
+		}
+		return false;
+	}
+
+	/**
+	 * Make the given method accessible, explicitly setting it accessible if
+	 * necessary. The {@code setAccessible(true)} method is only called
+	 * when actually necessary, to avoid unnecessary conflicts with a JVM
+	 * SecurityManager (if active).
+	 * @param method the method to make accessible
+	 * @see java.lang.reflect.Method#setAccessible
+	 */
+	@SuppressWarnings("deprecation")  // on JDK 9
+	public static void makeAccessible(Method method) {
+		if ((!Modifier.isPublic(method.getModifiers()) ||
+				!Modifier.isPublic(method.getDeclaringClass().getModifiers())) && !method.isAccessible()) {
+			method.setAccessible(true);
+		}
+	}
+
+
+	// Field handling
+
+	/**
+	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
+	 * supplied {@code name}. Searches all superclasses up to {@link Object}.
+	 * @param clazz the class to introspect
+	 * @param name the name of the field
+	 * @return the corresponding Field object, or {@code null} if not found
+	 */
+	@Nullable
+	public static Field findField(Class<?> clazz, String name) {
+		return findField(clazz, name, null);
+	}
+
+	/**
+	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
+	 * supplied {@code name} and/or {@link Class type}. Searches all superclasses
+	 * up to {@link Object}.
+	 * @param clazz the class to introspect
+	 * @param name the name of the field (may be {@code null} if type is specified)
+	 * @param type the type of the field (may be {@code null} if name is specified)
+	 * @return the corresponding Field object, or {@code null} if not found
+	 */
+	@Nullable
+	public static Field findField(Class<?> clazz, @Nullable String name, @Nullable Class<?> type) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
+		Class<?> searchType = clazz;
+		while (Object.class != searchType && searchType != null) {
+			Field[] fields = getDeclaredFields(searchType);
+			for (Field field : fields) {
+				if ((name == null || name.equals(field.getName())) &&
+						(type == null || type.equals(field.getType()))) {
+					return field;
+				}
+			}
+			searchType = searchType.getSuperclass();
+		}
+		return null;
+	}
+
+	/**
+	 * Set the field represented by the supplied {@link Field field object} on the
+	 * specified {@link Object target object} to the specified {@code value}.
+	 * In accordance with {@link Field#set(Object, Object)} semantics, the new value
+	 * is automatically unwrapped if the underlying field has a primitive type.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
+	 * @param field the field to set
+	 * @param target the target object on which to set the field
+	 * @param value the value to set (may be {@code null})
+	 */
+	public static void setField(Field field, @Nullable Object target, @Nullable Object value) {
+		try {
+			field.set(target, value);
+		}
+		catch (IllegalAccessException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+	}
+
+	/**
+	 * Get the field represented by the supplied {@link Field field object} on the
+	 * specified {@link Object target object}. In accordance with {@link Field#get(Object)}
+	 * semantics, the returned value is automatically wrapped if the underlying field
+	 * has a primitive type.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
+	 * @param field the field to get
+	 * @param target the target object from which to get the field
+	 * @return the field's current value
+	 */
+	@Nullable
+	public static Object getField(Field field, @Nullable Object target) {
+		try {
+			return field.get(target);
+		}
+		catch (IllegalAccessException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
 	}
 
 	/**
@@ -778,7 +761,7 @@ public abstract class ReflectionUtils {
 		if (result == null) {
 			try {
 				result = clazz.getDeclaredFields();
-				declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
+				declaredFieldsCache.put(clazz, (result.length == 0 ? EMPTY_FIELD_ARRAY : result));
 			}
 			catch (Throwable ex) {
 				throw new IllegalStateException("Failed to introspect Class [" + clazz.getName() +
@@ -807,6 +790,35 @@ public abstract class ReflectionUtils {
 			field.set(dest, srcValue);
 		}, COPYABLE_FIELDS);
 	}
+
+	/**
+	 * Determine whether the given field is a "public static final" constant.
+	 * @param field the field to check
+	 */
+	public static boolean isPublicStaticFinal(Field field) {
+		int modifiers = field.getModifiers();
+		return (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers));
+	}
+
+	/**
+	 * Make the given field accessible, explicitly setting it accessible if
+	 * necessary. The {@code setAccessible(true)} method is only called
+	 * when actually necessary, to avoid unnecessary conflicts with a JVM
+	 * SecurityManager (if active).
+	 * @param field the field to make accessible
+	 * @see java.lang.reflect.Field#setAccessible
+	 */
+	@SuppressWarnings("deprecation")  // on JDK 9
+	public static void makeAccessible(Field field) {
+		if ((!Modifier.isPublic(field.getModifiers()) ||
+				!Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
+				Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
+			field.setAccessible(true);
+		}
+	}
+
+
+	// Cache handling
 
 	/**
 	 * Clear the internal method/field cache.
