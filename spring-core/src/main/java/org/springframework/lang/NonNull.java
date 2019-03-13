@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierNickname;
 
 /**
  * A common Spring annotation to declare that annotated elements cannot be {@code null}.
- * Leverages JSR 305 meta-annotations to indicate nullability in Java to common tools with
- * JSR 305 support and used by Kotlin to infer nullability of Spring API.
+ *
+ * <p>Leverages JSR-305 meta-annotations to indicate nullability in Java to common
+ * tools with JSR-305 support and used by Kotlin to infer nullability of Spring API.
  *
  * <p>Should be used at parameter, return value, and field level. Method overrides should
  * repeat parent {@code @NonNull} annotations unless they behave differently.

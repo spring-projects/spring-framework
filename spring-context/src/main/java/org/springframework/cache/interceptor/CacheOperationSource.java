@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,14 @@ import org.springframework.lang.Nullable;
  * source level, or elsewhere.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public interface CacheOperationSource {
 
 	/**
-	 * Return the collection of cache operations for this method, or {@code null}
-	 * if the method contains no <em>cacheable</em> annotations.
+	 * Return the collection of cache operations for this method,
+	 * or {@code null} if the method contains no <em>cacheable</em> annotations.
 	 * @param method the method to introspect
 	 * @param targetClass the target class (may be {@code null}, in which case
 	 * the declaring class of the method must be used)
