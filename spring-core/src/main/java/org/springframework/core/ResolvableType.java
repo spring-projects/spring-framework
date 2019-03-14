@@ -965,13 +965,10 @@ public class ResolvableType implements Serializable {
 				return "?";
 			}
 		}
-		StringBuilder result = new StringBuilder(this.resolved.getName());
 		if (hasGenerics()) {
-			result.append('<');
-			result.append(StringUtils.arrayToDelimitedString(getGenerics(), ", "));
-			result.append('>');
+			return this.resolved.getName() + '<' + StringUtils.arrayToDelimitedString(getGenerics(), ", ") + '>';
 		}
-		return result.toString();
+		return this.resolved.getName();
 	}
 
 

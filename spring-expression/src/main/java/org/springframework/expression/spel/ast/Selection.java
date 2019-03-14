@@ -205,19 +205,16 @@ public class Selection extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
+		return prefix() + getChild(0).toStringAST() + "]";
+	}
+
+	private String prefix() {
 		switch (this.variant) {
-			case ALL:
-				sb.append("?[");
-				break;
-			case FIRST:
-				sb.append("^[");
-				break;
-			case LAST:
-				sb.append("$[");
-				break;
+			case ALL:   return "?[";
+			case FIRST: return "^[";
+			case LAST:  return "$[";
 		}
-		return sb.append(getChild(0).toStringAST()).append("]").toString();
+		return "";
 	}
 
 }
