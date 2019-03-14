@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -400,7 +400,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	protected long getJUnitTimeout(FrameworkMethod frameworkMethod) {
 		Test test = frameworkMethod.getAnnotation(Test.class);
-		return (test != null && test.timeout() > 0 ? test.timeout() : 0);
+		return (test == null ? 0 : Math.max(0, test.timeout()));
 	}
 
 	/**

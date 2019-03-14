@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		// Check for Windows-style path
 		int winSep = filename.lastIndexOf('\\');
 		// Cut off at latest possible point
-		int pos = (winSep > unixSep ? winSep : unixSep);
+		int pos = Math.max(winSep, unixSep);
 		if (pos != -1)  {
 			// Any sort of path separator found...
 			return filename.substring(pos + 1);
