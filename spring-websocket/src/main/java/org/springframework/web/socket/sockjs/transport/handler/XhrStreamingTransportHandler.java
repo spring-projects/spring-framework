@@ -17,6 +17,7 @@
 package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
@@ -41,9 +42,7 @@ public class XhrStreamingTransportHandler extends AbstractHttpSendingTransportHa
 	private static final byte[] PRELUDE = new byte[2049];
 
 	static {
-		for (int i = 0; i < 2048; i++) {
-			PRELUDE[i] = 'h';
-		}
+		Arrays.fill(PRELUDE, (byte) 'h');
 		PRELUDE[2048] = '\n';
 	}
 
