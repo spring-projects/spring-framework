@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Delegates to {@link #processEvent(ApplicationEvent)} to give sub-classes
  * a chance to deviate from the default. Unwraps the content of a
- * {@link PayloadApplicationEvent} if necessary to allow method declaration
+ * {@link PayloadApplicationEvent} if necessary to allow a method declaration
  * to define any arbitrary event type. If a condition is defined, it is
  * evaluated prior to invoking the underlying method.
  *
@@ -171,7 +171,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	/**
 	 * Process the specified {@link ApplicationEvent}, checking if the condition
-	 * match and handling non-null result, if any.
+	 * matches and handling a non-null result, if any.
 	 */
 	public void processEvent(ApplicationEvent event) {
 		Object[] args = resolveArguments(event);
@@ -204,7 +204,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		Class<?> declaredEventClass = declaredEventType.toClass();
 		if (!ApplicationEvent.class.isAssignableFrom(declaredEventClass) &&
 				event instanceof PayloadApplicationEvent) {
-			Object payload = ((PayloadApplicationEvent) event).getPayload();
+			Object payload = ((PayloadApplicationEvent<?>) event).getPayload();
 			if (declaredEventClass.isInstance(payload)) {
 				return new Object[] {payload};
 			}

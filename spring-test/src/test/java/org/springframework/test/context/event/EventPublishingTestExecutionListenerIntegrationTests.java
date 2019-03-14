@@ -272,12 +272,12 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 			throw new RuntimeException("Boom!");
 		}
 
-		@BeforeTestExecution
+		@BeforeTestExecution("'yes'")
 		public void beforeTestExecution(BeforeTestExecutionEvent e) throws Exception {
 			listener().beforeTestExecution(e.getSource());
 		}
 
-		@AfterTestExecution
+		@AfterTestExecution("'1'")
 		public void afterTestExecution(AfterTestExecutionEvent e) throws Exception {
 			listener().afterTestExecution(e.getSource());
 		}

@@ -50,8 +50,8 @@ public abstract class TestContextEvent extends ApplicationEvent {
 
 	/**
 	 * Alias for {@link #getSource()}.
-	 * <p>This method may be favored over {@code getSource()} to improve readability
-	 * in SpEL expressions for event processing
+	 * <p>This method may be favored over {@code getSource()} &mdash; for example,
+	 * to improve readability in SpEL expressions for event processing
 	 * {@linkplain org.springframework.context.event.EventListener#condition conditions}.
 	 * @return the {@code TestContext} associated with this event (never {@code null})
 	 * @see #getSource()
