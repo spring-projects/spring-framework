@@ -92,12 +92,10 @@ abstract class AbstractMediaTypeExpression implements MediaTypeExpression, Compa
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
 		if (this.isNegated) {
-			builder.append('!');
+			return '!' + this.mediaType.toString();
 		}
-		builder.append(this.mediaType.toString());
-		return builder.toString();
+		return this.mediaType.toString();
 	}
 
 }

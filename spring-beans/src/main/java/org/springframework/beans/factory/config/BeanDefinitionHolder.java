@@ -150,9 +150,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @see #getBeanDefinition()
 	 */
 	public String getLongDescription() {
-		StringBuilder sb = new StringBuilder(getShortDescription());
-		sb.append(": ").append(this.beanDefinition);
-		return sb.toString();
+		return getShortDescription() + ": " + this.beanDefinition;
 	}
 
 	/**
