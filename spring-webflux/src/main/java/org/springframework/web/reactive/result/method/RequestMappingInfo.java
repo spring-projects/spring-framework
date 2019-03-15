@@ -218,15 +218,20 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(exchange);
 		ParamsRequestCondition params = this.paramsCondition.getMatchingCondition(exchange);
 		HeadersRequestCondition headers = this.headersCondition.getMatchingCondition(exchange);
-		ConsumesRequestCondition consumes = this.consumesCondition.getMatchingCondition(exchange);
-		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(exchange);
 
-		if (methods == null || params == null || headers == null || consumes == null || produces == null) {
+		if (methods == null || params == null || headers == null) {
 			return null;
 		}
 
 		PatternsRequestCondition patterns = this.patternsCondition.getMatchingCondition(exchange);
 		if (patterns == null) {
+			return null;
+		}
+
+		ConsumesRequestCondition consumes = this.consumesCondition.getMatchingCondition(exchange);
+		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(exchange);
+
+		if (consumes == null || produces == null) {
 			return null;
 		}
 
