@@ -117,7 +117,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Started session '" + session.getId() + "' for " + url);
 					}
-					return handler.handle(session);
+					return handler.handle(session).checkpoint(url + " [ReactorNettyWebSocketClient]");
 				})
 				.doOnRequest(n -> {
 					if (logger.isDebugEnabled()) {

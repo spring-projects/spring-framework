@@ -70,7 +70,7 @@ public class DefaultClientResponseTests {
 	public void createMocks() {
 		mockResponse = mock(ClientHttpResponse.class);
 		mockExchangeStrategies = mock(ExchangeStrategies.class);
-		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies, "");
+		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies, "", "");
 	}
 
 

@@ -63,11 +63,16 @@ public class WebClientResponseException extends WebClientException {
 	 * Constructor with response data only, and a default message.
 	 * @since 5.1.4
 	 */
-	public WebClientResponseException(int statusCode, String statusText,
+	public WebClientResponseException(int status, String reasonPhrase,
 			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset,
 			@Nullable HttpRequest request) {
 
-		this(statusCode + " " + statusText, statusCode, statusText, headers, body, charset, request);
+		this(initMessage(status, reasonPhrase, request), status, reasonPhrase, headers, body, charset, request);
+	}
+
+	private static String initMessage(int status, String reasonPhrase, @Nullable HttpRequest request) {
+		return status + " " + reasonPhrase +
+				(request != null ? " from " + request.getMethodValue() + " " + request.getURI() : "");
 	}
 
 	/**
