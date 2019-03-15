@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -190,6 +191,9 @@ class ControllerMethodResolver {
 		result.add(new RequestAttributeMethodArgumentResolver(beanFactory, reactiveRegistry));
 
 		// Type-based...
+		if (KotlinDetector.isKotlinPresent()) {
+			result.add(new ContinuationHandlerMethodArgumentResolver());
+		}
 		if (!readers.isEmpty()) {
 			result.add(new HttpEntityArgumentResolver(readers, reactiveRegistry));
 		}

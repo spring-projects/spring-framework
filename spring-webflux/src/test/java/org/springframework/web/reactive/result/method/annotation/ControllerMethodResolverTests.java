@@ -105,6 +105,7 @@ public class ControllerMethodResolverTests {
 		assertEquals(SessionAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 
+		assertEquals(ContinuationHandlerMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(HttpEntityArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ModelArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ErrorsMethodArgumentResolver.class, next(resolvers, index).getClass());
@@ -143,6 +144,7 @@ public class ControllerMethodResolverTests {
 		assertEquals(SessionAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 
+		assertEquals(ContinuationHandlerMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ModelArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ErrorsMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ServerWebExchangeArgumentResolver.class, next(resolvers, index).getClass());
@@ -209,6 +211,7 @@ public class ControllerMethodResolverTests {
 		assertEquals(SessionAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(RequestAttributeMethodArgumentResolver.class, next(resolvers, index).getClass());
 
+		assertEquals(ContinuationHandlerMethodArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ModelArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(ServerWebExchangeArgumentResolver.class, next(resolvers, index).getClass());
 		assertEquals(PrincipalArgumentResolver.class, next(resolvers, index).getClass());

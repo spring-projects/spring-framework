@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.result.method;
 
+import static org.springframework.web.reactive.result.method.InvocableHandlerMethodKt.*;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -27,6 +29,7 @@ import java.util.stream.Stream;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
@@ -48,6 +51,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -136,7 +140,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			Object value;
 			try {
 				ReflectionUtils.makeAccessible(getBridgedMethod());
-				value = getBridgedMethod().invoke(getBean(), args);
+				Method method = getBridgedMethod();
+				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+					value = invokeHandlerMethod(method, getBean(), args);
+				}
+				else {
+					value = method.invoke(getBean(), args);
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				assertTargetBean(getBridgedMethod(), getBean(), args);
