@@ -42,8 +42,6 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.springframework.web.reactive.result.method.InvocableHandlerMethodKt.invokeHandlerMethod;
-
 /**
  * Extension of {@link HandlerMethod} that invokes the underlying method with
  * argument values resolved from the current HTTP request through a list of
@@ -142,7 +140,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				ReflectionUtils.makeAccessible(getBridgedMethod());
 				Method method = getBridgedMethod();
 				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
-					value = invokeHandlerMethod(method, getBean(), args);
+					value = InvocableHandlerMethodKt.invokeHandlerMethod(method, getBean(), args);
 				}
 				else {
 					value = method.invoke(getBean(), args);
