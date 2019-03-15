@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.method;
 
-import static org.springframework.web.reactive.result.method.InvocableHandlerMethodKt.*;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -43,6 +41,8 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
+
+import static org.springframework.web.reactive.result.method.InvocableHandlerMethodKt.invokeHandlerMethod;
 
 /**
  * Extension of {@link HandlerMethod} that invokes the underlying method with
