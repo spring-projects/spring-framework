@@ -78,6 +78,8 @@ dependencies {
 	optional("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 	optional("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
 	optional("io.netty:netty-buffer")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${coroutinesVersion}")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
