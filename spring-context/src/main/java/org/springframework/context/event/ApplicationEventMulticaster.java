@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,16 @@ import org.springframework.lang.Nullable;
 
 /**
  * Interface to be implemented by objects that can manage a number of
- * {@link ApplicationListener} objects, and publish events to them.
+ * {@link ApplicationListener} objects and publish events to them.
  *
  * <p>An {@link org.springframework.context.ApplicationEventPublisher}, typically
  * a Spring {@link org.springframework.context.ApplicationContext}, can use an
- * ApplicationEventMulticaster as a delegate for actually publishing events.
+ * {@code ApplicationEventMulticaster} as a delegate for actually publishing events.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @see ApplicationListener
  */
 public interface ApplicationEventMulticaster {
 
@@ -55,21 +56,21 @@ public interface ApplicationEventMulticaster {
 
 	/**
 	 * Remove a listener bean from the notification list.
-	 * @param listenerBeanName the name of the listener bean to add
+	 * @param listenerBeanName the name of the listener bean to remove
 	 */
 	void removeApplicationListenerBean(String listenerBeanName);
 
 	/**
 	 * Remove all listeners registered with this multicaster.
 	 * <p>After a remove call, the multicaster will perform no action
-	 * on event notification until new listeners are being registered.
+	 * on event notification until new listeners are registered.
 	 */
 	void removeAllListeners();
 
 	/**
 	 * Multicast the given application event to appropriate listeners.
 	 * <p>Consider using {@link #multicastEvent(ApplicationEvent, ResolvableType)}
-	 * if possible as it provides a better support for generics-based events.
+	 * if possible as it provides better support for generics-based events.
 	 * @param event the event to multicast
 	 */
 	void multicastEvent(ApplicationEvent event);
@@ -79,7 +80,7 @@ public interface ApplicationEventMulticaster {
 	 * <p>If the {@code eventType} is {@code null}, a default type is built
 	 * based on the {@code event} instance.
 	 * @param event the event to multicast
-	 * @param eventType the type of event (can be null)
+	 * @param eventType the type of event (can be {@code null})
 	 * @since 4.2
 	 */
 	void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType);
