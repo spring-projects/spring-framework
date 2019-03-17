@@ -68,6 +68,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Fast access cache for Views, returning already cached instances without a global lock. */
 	private final Map<Object, View> viewAccessCache = new ConcurrentHashMap<>(DEFAULT_CACHE_LIMIT);
 
+	/** Filter function which determines if view should be cached. */
+	private ViewCacheFilter viewCacheFilter = (viewName, view, locale) -> true;
+
 	/** Map from view key to View instance, synchronized for View creation. */
 	@SuppressWarnings("serial")
 	private final Map<Object, View> viewCreationCache =
@@ -135,6 +138,21 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	/**
+	 * Filter function which determines if view should be cached.
+	 * Default behaviour is to cache all views.
+	 */
+	public void setViewCacheFilter(ViewCacheFilter cacheFilter) {
+		this.viewCacheFilter = cacheFilter;
+	}
+
+	/**
+	 * Return filter function which determines if view should be cached.
+	 */
+	public ViewCacheFilter getViewCacheFilter() {
+		return this.viewCacheFilter;
+	}
+
+	/**
 	 * Return if caching of unresolved views is enabled.
 	 */
 	public boolean isCacheUnresolved() {
@@ -160,7 +178,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 						if (view == null && this.cacheUnresolved) {
 							view = UNRESOLVED_VIEW;
 						}
-						if (view != null) {
+						if (view != null && this.viewCacheFilter.filter(viewName, view, locale)) {
 							this.viewAccessCache.put(cacheKey, view);
 							this.viewCreationCache.put(cacheKey, view);
 						}
