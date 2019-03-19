@@ -102,7 +102,7 @@ public class InterceptorRegistration {
 
 	/**
 	 * Specify an order position to be used. Default is 0.
-	 * @since 4.23
+	 * @since 4.3.23
 	 */
 	public InterceptorRegistration order(int order){
 		this.order = order;
