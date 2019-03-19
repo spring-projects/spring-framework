@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				return null;
 			}
 			if (this.indexLookupPath != null && url.startsWith(this.prefixLookupPath)) {
-				int suffixIndex = getQueryParamsIndex(url);
+				int suffixIndex = getEndPathIndex(url);
 				String suffix = url.substring(suffixIndex);
 				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
 				lookupPath = this.resourceUrlProvider.getForLookupPath(lookupPath);
@@ -122,9 +122,16 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 			return null;
 		}
 
-		private int getQueryParamsIndex(String url) {
-			int index = url.indexOf('?');
-			return (index > 0 ? index : url.length());
+		private int getEndPathIndex(String path) {
+			int end = path.indexOf('?');
+			int fragmentIndex = path.indexOf('#');
+			if (fragmentIndex != -1 && (end == -1 || fragmentIndex < end)) {
+				end = fragmentIndex;
+			}
+			if (end == -1) {
+				end = path.length();
+			}
+			return end;
 		}
 	}
 
