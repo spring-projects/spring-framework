@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.CodecConfigurer;
@@ -41,6 +40,7 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageReader;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -76,7 +76,7 @@ public class CodecConfigurerTests {
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
-		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(ResourceHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
 		assertEquals(ProtobufDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
@@ -128,7 +128,7 @@ public class CodecConfigurerTests {
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
-		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(ResourceHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(StringDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ProtobufDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
