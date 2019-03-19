@@ -727,6 +727,7 @@ project("spring-web") {
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:2.8.11")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.8.11")
 		testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:2.8.11.1")
+		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.11")
     	testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 	}
