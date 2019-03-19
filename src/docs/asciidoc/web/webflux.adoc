@@ -3216,11 +3216,12 @@ Note that, when using both `EncodedResourceResolver` (for example, Gzip, Brotli 
 `VersionedResourceResolver`, they must be registered in that order, to ensure content-based
 versions are always computed reliably based on the unencoded file.
 
-http://www.webjars.org/documentation[WebJars] is also supported through `WebJarsResourceResolver`
-and is automatically registered when `org.webjars:webjars-locator` is present on the
-classpath. The resolver can re-write URLs to include the version of the jar and can also
-match to incoming URLs without versions (for example, `/jquery/jquery.min.js` to
-`/jquery/1.2.0/jquery.min.js`).
+http://www.webjars.org/documentation[WebJars] are also supported through the
+`WebJarsResourceResolver` which is automatically registered when the
+`org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
+re-write URLs to include the version of the jar and can also match against incoming URLs
+without versions -- for example, from `/jquery/jquery.min.js` to
+`/jquery/1.2.0/jquery.min.js`.
 
 
 
