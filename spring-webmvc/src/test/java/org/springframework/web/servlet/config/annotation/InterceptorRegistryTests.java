@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import org.springframework.core.Ordered;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
@@ -150,6 +151,30 @@ public class InterceptorRegistryTests {
 		assertEquals(Collections.emptyList(), getInterceptorsForPath("/path1/secret"));
 	}
 
+	@Test
+	public void orderedInterceptors() {
+		this.registry.addInterceptor(this.interceptor1).order(Ordered.LOWEST_PRECEDENCE);
+		this.registry.addInterceptor(this.interceptor2).order(Ordered.HIGHEST_PRECEDENCE);
+
+		List<Object> interceptors = this.registry.getInterceptors();
+		assertEquals(2, interceptors.size());
+
+		assertSame(this.interceptor2, interceptors.get(0));
+		assertSame(this.interceptor1, interceptors.get(1));
+	}
+
+	@Test
+	public void nonOrderedInterceptors() {
+		this.registry.addInterceptor(this.interceptor1).order(0);
+		this.registry.addInterceptor(this.interceptor2).order(0);
+
+		List<Object> interceptors = this.registry.getInterceptors();
+		assertEquals(2, interceptors.size());
+
+		assertSame(this.interceptor1, interceptors.get(0));
+		assertSame(this.interceptor2, interceptors.get(1));
+	}
+
 
 	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
 		PathMatcher pathMatcher = new AntPathMatcher();
@@ -176,6 +201,7 @@ public class InterceptorRegistryTests {
 		interceptor.preHandle(this.request, this.response, null);
 		assertTrue(webInterceptor.preHandleInvoked);
 	}
+
 
 	private static class TestWebRequestInterceptor implements WebRequestInterceptor {
 
