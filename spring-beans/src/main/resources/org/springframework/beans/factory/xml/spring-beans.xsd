@@ -4,7 +4,7 @@
 		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 		targetNamespace="http://www.springframework.org/schema/beans">
 
-	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+	<xsd:import namespace="https://www.w3.org/XML/1998/namespace"/>
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[

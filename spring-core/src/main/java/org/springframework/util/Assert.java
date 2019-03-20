@@ -46,7 +46,7 @@ import org.springframework.lang.Nullable;
  * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
  *
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
+ * <a href="https://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
  * for a more comprehensive suite of {@code String} utilities.
  *
  * @author Keith Donald

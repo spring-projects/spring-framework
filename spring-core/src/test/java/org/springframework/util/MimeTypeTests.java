@@ -90,12 +90,12 @@ public class MimeTypeTests {
 
 	@Test
 	public void parseQuotedSeparator() {
-		String s = "application/xop+xml;charset=utf-8;type=\"application/soap+xml;action=\\\"http://x.y.z\\\"\"";
+		String s = "application/xop+xml;charset=utf-8;type=\"application/soap+xml;action=\\\"https://x.y.z\\\"\"";
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "application", mimeType.getType());
 		assertEquals("Invalid subtype", "xop+xml", mimeType.getSubtype());
 		assertEquals("Invalid charset", StandardCharsets.UTF_8, mimeType.getCharset());
-		assertEquals("\"application/soap+xml;action=\\\"http://x.y.z\\\"\"", mimeType.getParameter("type"));
+		assertEquals("\"application/soap+xml;action=\\\"https://x.y.z\\\"\"", mimeType.getParameter("type"));
 	}
 
 	@Test

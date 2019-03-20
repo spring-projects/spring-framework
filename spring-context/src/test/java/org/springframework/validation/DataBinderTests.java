@@ -275,7 +275,7 @@ public class DataBinderTests {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("class.classLoader.URLs[0]", "http://myserver");
+		pvs.add("class.classLoader.URLs[0]", "https://myserver");
 		binder.setIgnoreUnknownFields(false);
 
 		try {

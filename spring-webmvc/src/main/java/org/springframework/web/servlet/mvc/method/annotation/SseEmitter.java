@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * A specialization of {@link ResponseBodyEmitter} for sending
- * <a href="http://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
+ * <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller

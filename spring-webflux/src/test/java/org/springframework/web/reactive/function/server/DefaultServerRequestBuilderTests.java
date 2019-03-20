@@ -42,7 +42,7 @@ public class DefaultServerRequestBuilderTests {
 
 	@Test
 	public void from() {
-		MockServerHttpRequest request = MockServerHttpRequest.post("http://example.com")
+		MockServerHttpRequest request = MockServerHttpRequest.post("https://example.com")
 				.header("foo", "bar")
 				.build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);

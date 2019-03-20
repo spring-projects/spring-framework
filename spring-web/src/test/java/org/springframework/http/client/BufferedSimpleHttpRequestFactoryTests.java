@@ -49,7 +49,7 @@ public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFa
 
 	@Test
 	public void prepareConnectionWithRequestBody() throws Exception {
-		URL uri = new URL("http://example.com");
+		URL uri = new URL("https://example.com");
 		testRequestBodyAllowed(uri, "GET", false);
 		testRequestBodyAllowed(uri, "HEAD", false);
 		testRequestBodyAllowed(uri, "OPTIONS", false);
@@ -61,7 +61,7 @@ public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFa
 
 	@Test
 	public void deleteWithoutBodyDoesNotRaiseException() throws Exception {
-		HttpURLConnection connection = new TestHttpURLConnection(new URL("http://example.com"));
+		HttpURLConnection connection = new TestHttpURLConnection(new URL("https://example.com"));
 		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, "DELETE");
 		SimpleBufferingClientHttpRequest request = new SimpleBufferingClientHttpRequest(connection, false);
 		request.execute();

@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  * {@link AbstractGenericContextLoader} are able to <em>customize</em> the
  * newly created {@code ApplicationContext}. Specifically, this test
  * addresses the issues raised in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4008"
+ * href="https://opensource.atlassian.com/projects/spring/browse/SPR-4008"
  * target="_blank">SPR-4008</a>: <em>Supply an opportunity to customize context
  * before calling refresh in ContextLoaders</em>.
  *

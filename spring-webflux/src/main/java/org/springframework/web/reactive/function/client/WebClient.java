@@ -160,29 +160,29 @@ public interface WebClient {
 		/**
 		 * Configure a base URL for requests performed through the client.
 		 *
-		 * <p>For example given base URL "http://abc.com/v1":
+		 * <p>For example given base URL "https://abc.go.com/v1":
 		 * <p><pre class="code">
 		 * Mono&#060;Account&#062; result = client.get().uri("/accounts/{id}", 43)
 		 *         .retrieve()
 		 *         .bodyToMono(Account.class);
 		 *
-		 * // Result: http://abc.com/v1/accounts/43
+		 * // Result: https://abc.go.com/v1/accounts/43
 		 *
 		 * Flux&#060;Account&#062; result = client.get()
 		 *         .uri(builder -> builder.path("/accounts").queryParam("q", "12").build())
 		 *         .retrieve()
 		 *         .bodyToFlux(Account.class);
 		 *
-		 * // Result: http://abc.com/v1/accounts?q=12
+		 * // Result: https://abc.go.com/v1/accounts?q=12
 		 * </pre>
 		 *
 		 * <p>The base URL can be overridden with an absolute URI:
 		 * <pre class="code">
-		 * Mono&#060;Account&#062; result = client.get().uri("http://xyz.com/path")
+		 * Mono&#060;Account&#062; result = client.get().uri("https://xyz.com/path")
 		 *         .retrieve()
 		 *         .bodyToMono(Account.class);
 		 *
-		 * // Result: http://xyz.com/path
+		 * // Result: https://xyz.com/path
 		 * </pre>
 		 *
 		 * <p>Or partially overridden with a {@code UriBuilder}:
@@ -192,7 +192,7 @@ public interface WebClient {
 		 *         .retrieve()
 		 *         .bodyToFlux(Account.class);
 		 *
-		 * // Result: http://abc.com/v2/accounts?q=12
+		 * // Result: https://abc.com/v2/accounts?q=12
 		 * </pre>
 		 *
 		 * @see #defaultUriVariables(Map)

@@ -109,12 +109,12 @@ abstract class AbstractXMLReader implements XMLReader {
 
 	/**
 	 * This implementation throws a {@code SAXNotRecognizedException} exception
-	 * for any feature outside of the "http://xml.org/sax/features/" namespace
+	 * for any feature outside of the "http://www.xml.org/sax/features/" namespace
 	 * and returns {@code false} for any feature within.
 	 */
 	@Override
 	public boolean getFeature(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
-		if (name.startsWith("http://xml.org/sax/features/")) {
+		if (name.startsWith("http://www.xml.org/sax/features/")) {
 			return false;
 		}
 		else {
@@ -124,12 +124,12 @@ abstract class AbstractXMLReader implements XMLReader {
 
 	/**
 	 * This implementation throws a {@code SAXNotRecognizedException} exception
-	 * for any feature outside of the "http://xml.org/sax/features/" namespace
+	 * for any feature outside of the "http://www.xml.org/sax/features/" namespace
 	 * and accepts a {@code false} value for any feature within.
 	 */
 	@Override
 	public void setFeature(String name, boolean value) throws SAXNotRecognizedException, SAXNotSupportedException {
-		if (name.startsWith("http://xml.org/sax/features/")) {
+		if (name.startsWith("http://www.xml.org/sax/features/")) {
 			if (value) {
 				throw new SAXNotSupportedException(name);
 			}
@@ -141,12 +141,12 @@ abstract class AbstractXMLReader implements XMLReader {
 
 	/**
 	 * Throws a {@code SAXNotRecognizedException} exception when the given property does not signify a lexical
-	 * handler. The property name for a lexical handler is {@code http://xml.org/sax/properties/lexical-handler}.
+	 * handler. The property name for a lexical handler is {@code http://www.xml.org/sax/properties/lexical-handler}.
 	 */
 	@Override
 	@Nullable
 	public Object getProperty(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
-		if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
+		if ("http://www.xml.org/sax/properties/lexical-handler".equals(name)) {
 			return this.lexicalHandler;
 		}
 		else {
@@ -156,11 +156,11 @@ abstract class AbstractXMLReader implements XMLReader {
 
 	/**
 	 * Throws a {@code SAXNotRecognizedException} exception when the given property does not signify a lexical
-	 * handler. The property name for a lexical handler is {@code http://xml.org/sax/properties/lexical-handler}.
+	 * handler. The property name for a lexical handler is {@code http://www.xml.org/sax/properties/lexical-handler}.
 	 */
 	@Override
 	public void setProperty(String name, Object value) throws SAXNotRecognizedException, SAXNotSupportedException {
-		if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
+		if ("http://www.xml.org/sax/properties/lexical-handler".equals(name)) {
 			this.lexicalHandler = (LexicalHandler) value;
 		}
 		else {

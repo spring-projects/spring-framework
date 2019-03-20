@@ -138,7 +138,7 @@ public class WebContentInterceptorTests {
 		mappings.setProperty("*/*.cache.html", "10"); // was **/*.cache.html
 		interceptor.setCacheMappings(mappings);
 
-		// request.setRequestURI("http://example.org/foo/page.html");
+		// request.setRequestURI("https://example.org/foo/page.html");
 		request.setRequestURI("foo/page.html");
 		interceptor.preHandle(request, response, null);
 
@@ -149,7 +149,7 @@ public class WebContentInterceptorTests {
 		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
 		assertThat(pragmaHeaders, Matchers.contains("no-cache"));
 
-		// request.setRequestURI("http://example.org/page.cache.html");
+		// request.setRequestURI("https://example.org/page.cache.html");
 		request = new MockHttpServletRequest("GET", "foo/page.cache.html");
 		response = new MockHttpServletResponse();
 		interceptor.preHandle(request, response, null);

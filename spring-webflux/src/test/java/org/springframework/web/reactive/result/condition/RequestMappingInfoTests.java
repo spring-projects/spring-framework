@@ -283,7 +283,7 @@ public class RequestMappingInfoTests {
 	@Ignore
 	public void preFlightRequest() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("/foo")
-				.header("Origin", "http://domain.com")
+				.header("Origin", "https://domain.com")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "POST")
 				);
 

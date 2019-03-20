@@ -188,7 +188,7 @@ public class ContentRequestMatchers {
 
 	/**
 	 * Parse the request content as {@link DOMSource} and apply the given {@link Matcher}.
-	 * @see <a href="http://code.google.com/p/xml-matchers/">http://code.google.com/p/xml-matchers/</a>
+	 * @see <a href="https://code.google.com/p/xml-matchers/">https://code.google.com/p/xml-matchers/</a>
 	 */
 	public RequestMatcher source(final Matcher<? super Source> matcher) {
 		return new AbstractXmlRequestMatcher() {
@@ -205,7 +205,7 @@ public class ContentRequestMatchers {
 	 * regardless of formatting with a lenient checking (extensible, and non-strict array
 	 * ordering).
 	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param expectedJsonContent the expected JSON content
 	 * @since 5.0.5
 	 */
@@ -223,7 +223,7 @@ public class ContentRequestMatchers {
 	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
 	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param expectedJsonContent the expected JSON content
 	 * @param strict enables strict checking
 	 * @since 5.0.5

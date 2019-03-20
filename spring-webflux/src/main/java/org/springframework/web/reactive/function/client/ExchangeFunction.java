@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
  * <p>For example:
  * <pre class="code">
  * ExchangeFunction exchangeFunction = ExchangeFunctions.create(new ReactorClientHttpConnector());
- * ClientRequest&lt;Void&gt; request = ClientRequest.method(HttpMethod.GET, "http://example.com/resource").build();
+ * ClientRequest&lt;Void&gt; request = ClientRequest.method(HttpMethod.GET, "https://example.com/resource").build();
  *
  * Mono&lt;String&gt; result = exchangeFunction
  *     .exchange(request)

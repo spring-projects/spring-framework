@@ -29,11 +29,11 @@ import org.springframework.util.ObjectUtils;
  * HttpHeaders headers = new HttpHeaders();
  * headers.setContentType(MediaType.TEXT_PLAIN);
  * HttpEntity&lt;String&gt; entity = new HttpEntity&lt;String&gt;(helloWorld, headers);
- * URI location = template.postForLocation("http://example.com", entity);
+ * URI location = template.postForLocation("https://example.com", entity);
  * </pre>
  * or
  * <pre class="code">
- * HttpEntity&lt;String&gt; entity = template.getForEntity("http://example.com", String.class);
+ * HttpEntity&lt;String&gt; entity = template.getForEntity("https://example.com", String.class);
  * String body = entity.getBody();
  * MediaType contentType = entity.getHeaders().getContentType();
  * </pre>

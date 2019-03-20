@@ -43,7 +43,7 @@ import javax.xml.namespace.QName;
  */
 public class StandardClasses {
 
-	private static final QName NAME = new QName("http://springframework.org/oxm-test", "standard-classes");
+	private static final QName NAME = new QName("https://springframework.org/oxm-test", "standard-classes");
 
 	private DatatypeFactory factory;
 
@@ -90,7 +90,7 @@ public class StandardClasses {
 	}
 
 	public JAXBElement<URI> standardClassURI() {
-		return new JAXBElement<>(NAME, URI.class, URI.create("http://springframework.org"));
+		return new JAXBElement<>(NAME, URI.class, URI.create("https://springframework.org"));
 	}
 
 	public JAXBElement<XMLGregorianCalendar> standardClassXMLGregorianCalendar() throws DatatypeConfigurationException {

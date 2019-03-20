@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Date sequence generator for a
- * <a href="http://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
+ * <a href="https://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
  * allowing clients to specify a pattern that the sequence matches.
  *
  * <p>The pattern is a list of six single space-separated fields: representing

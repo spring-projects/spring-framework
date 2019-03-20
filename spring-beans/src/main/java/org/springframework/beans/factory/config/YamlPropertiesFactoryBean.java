@@ -42,19 +42,19 @@ import org.springframework.lang.Nullable;
  * <pre class="code">
  * environments:
  *   dev:
- *     url: http://dev.bar.com
+ *     url: https://dev.bar.com
  *     name: Developer Setup
  *   prod:
- *     url: http://foo.bar.com
+ *     url: https://foo.bar.com
  *     name: My Cool App
  * </pre>
  *
  * is transformed into these properties:
  *
  * <pre class="code">
- * environments.dev.url=http://dev.bar.com
+ * environments.dev.url=https://dev.bar.com
  * environments.dev.name=Developer Setup
- * environments.prod.url=http://foo.bar.com
+ * environments.prod.url=https://foo.bar.com
  * environments.prod.name=My Cool App
  * </pre>
  *

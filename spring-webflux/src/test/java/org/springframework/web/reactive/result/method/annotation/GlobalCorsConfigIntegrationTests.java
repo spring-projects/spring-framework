@@ -149,11 +149,11 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 
 	@Test
 	public void preFlightRequestWithCorsRestricted() throws Exception {
-		this.headers.set(HttpHeaders.ORIGIN, "http://foo");
+		this.headers.set(HttpHeaders.ORIGIN, "https://foo");
 		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		ResponseEntity<String> entity = performOptions("/cors-restricted", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals("http://foo", entity.getHeaders().getAccessControlAllowOrigin());
+		assertEquals("https://foo", entity.getHeaders().getAccessControlAllowOrigin());
 		assertThat(entity.getHeaders().getAccessControlAllowMethods(), contains(HttpMethod.GET, HttpMethod.POST));
 	}
 
@@ -178,7 +178,7 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 		@Override
 		protected void addCorsMappings(CorsRegistry registry) {
 			registry.addMapping("/cors-restricted")
-					.allowedOrigins("http://foo")
+					.allowedOrigins("https://foo")
 					.allowedMethods("GET", "POST");
 			registry.addMapping("/cors");
 			registry.addMapping("/ambiguous")

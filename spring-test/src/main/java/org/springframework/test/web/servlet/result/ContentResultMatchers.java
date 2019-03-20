@@ -175,7 +175,7 @@ public class ContentResultMatchers {
 	/**
 	 * Parse the response content as {@link DOMSource} and apply the given
 	 * Hamcrest {@link Matcher}.
-	 * @see <a href="http://code.google.com/p/xml-matchers/">xml-matchers</a>
+	 * @see <a href="https://code.google.com/p/xml-matchers/">xml-matchers</a>
 	 */
 	public ResultMatcher source(final Matcher<? super Source> matcher) {
 		return result -> {
@@ -205,7 +205,7 @@ public class ContentResultMatchers {
 	 * <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
 	 * </ul>
 	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
+	 * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
 	 * @param jsonContent the expected JSON content
 	 * @param strict enables strict checking
 	 * @since 4.2

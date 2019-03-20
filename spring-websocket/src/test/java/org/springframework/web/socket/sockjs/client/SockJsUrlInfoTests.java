@@ -36,14 +36,14 @@ public class SockJsUrlInfoTests {
 
 	@Test
 	public void serverId() throws Exception {
-		SockJsUrlInfo info = new SockJsUrlInfo(new URI("http://example.com"));
+		SockJsUrlInfo info = new SockJsUrlInfo(new URI("https://example.com"));
 		int serverId = Integer.valueOf(info.getServerId());
 		assertTrue("Invalid serverId: " + serverId, serverId >= 0 && serverId < 1000);
 	}
 
 	@Test
 	public void sessionId() throws Exception {
-		SockJsUrlInfo info = new SockJsUrlInfo(new URI("http://example.com"));
+		SockJsUrlInfo info = new SockJsUrlInfo(new URI("https://example.com"));
 		assertEquals("Invalid sessionId: " + info.getSessionId(), 32, info.getSessionId().length());
 	}
 

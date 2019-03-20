@@ -853,7 +853,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		 * close the connection pro-actively. However, if the DISCONNECT has a
 		 * receipt header we leave the connection open and expect the server will
 		 * respond with a RECEIPT and then close the connection.
-		 * @see <a href="http://stomp.github.io/stomp-specification-1.2.html#DISCONNECT">
+		 * @see <a href="https://stomp.github.io/stomp-specification-1.2.html#DISCONNECT">
 		 *     STOMP Specification 1.2 DISCONNECT</a>
 		 */
 		private void afterDisconnectSent(StompHeaderAccessor accessor) {

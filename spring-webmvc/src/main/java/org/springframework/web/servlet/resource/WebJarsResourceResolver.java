@@ -41,7 +41,7 @@ import org.springframework.lang.Nullable;
  * @author Brian Clozel
  * @since 4.2
  * @see org.springframework.web.servlet.config.annotation.ResourceChainRegistration
- * @see <a href="http://www.webjars.org">webjars.org</a>
+ * @see <a href="https://www.webjars.org">webjars.org</a>
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 

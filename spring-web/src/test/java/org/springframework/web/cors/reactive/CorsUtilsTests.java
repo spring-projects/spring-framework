@@ -39,7 +39,7 @@ public class CorsUtilsTests {
 
 	@Test
 	public void isCorsRequest() {
-		ServerHttpRequest request = get("/").header(HttpHeaders.ORIGIN, "http://domain.com").build();
+		ServerHttpRequest request = get("/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
 		assertTrue(CorsUtils.isCorsRequest(request));
 	}
 
@@ -52,7 +52,7 @@ public class CorsUtilsTests {
 	@Test
 	public void isPreFlightRequest() {
 		ServerHttpRequest request = options("/")
-				.header(HttpHeaders.ORIGIN, "http://domain.com")
+				.header(HttpHeaders.ORIGIN, "https://domain.com")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
 				.build();
 		assertTrue(CorsUtils.isPreFlightRequest(request));
@@ -63,7 +63,7 @@ public class CorsUtilsTests {
 		ServerHttpRequest request = get("/").build();
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 
-		request = options("/").header(HttpHeaders.ORIGIN, "http://domain.com").build();
+		request = options("/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 
 		request = options("/").header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET").build();
@@ -95,7 +95,7 @@ public class CorsUtilsTests {
 	@Test  // SPR-16362
 	public void isSameOriginWithDifferentSchemes() {
 		MockServerHttpRequest request = MockServerHttpRequest
-				.get("http://mydomain1.com")
+				.get("https://mydomain1.com")
 				.header(HttpHeaders.ORIGIN, "https://mydomain1.com")
 				.build();
 		assertFalse(CorsUtils.isSameOrigin(request));

@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write <a href="http://cbor.io/">CBOR</a> data format using
+ * that can read and write <a href="https://cbor.io/">CBOR</a> data format using
  * <a href="https://github.com/FasterXML/jackson-dataformats-binary/tree/master/cbor">
  * the dedicated Jackson 2.x extension</a>.
  *

@@ -220,7 +220,7 @@ public abstract class BeanUtils {
 	 * classes, this simply returns {@code null}.
 	 * @param clazz the class to check
 	 * @since 5.0
-	 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
+	 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
@@ -732,8 +732,8 @@ public abstract class BeanUtils {
 		/**
 		 * Retrieve the Java constructor corresponding to the Kotlin primary constructor, if any.
 		 * @param clazz the {@link Class} of the Kotlin class
-		 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">
-		 * http://kotlinlang.org/docs/reference/classes.html#constructors</a>
+		 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">
+		 * https://kotlinlang.org/docs/reference/classes.html#constructors</a>
 		 */
 		@Nullable
 		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {

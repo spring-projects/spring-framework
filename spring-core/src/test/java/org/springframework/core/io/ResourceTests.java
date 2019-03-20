@@ -231,7 +231,7 @@ public class ResourceTests {
 
 	@Ignore @Test // this test is quite slow. TODO: re-enable with JUnit categories
 	public void testNonFileResourceExists() throws Exception {
-		Resource resource = new UrlResource("http://www.springframework.org");
+		Resource resource = new UrlResource("https://www.springframework.org");
 		assertTrue(resource.exists());
 	}
 

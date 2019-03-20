@@ -41,7 +41,7 @@ public class DefaultServerRequestBuilderTests {
 
 	@Test
 	public void from() throws ServletException, IOException {
-		MockHttpServletRequest request = new MockHttpServletRequest("POST", "http://example.com");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://example.com");
 		request.addHeader("foo", "bar");
 
 		ServerRequest other = ServerRequest.create(request, messageConverters);

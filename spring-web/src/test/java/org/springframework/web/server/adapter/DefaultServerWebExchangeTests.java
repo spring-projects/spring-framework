@@ -58,7 +58,7 @@ public class DefaultServerWebExchangeTests {
 
 
 	private DefaultServerWebExchange createExchange() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com").build();
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com").build();
 		return createExchange(request);
 	}
 

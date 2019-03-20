@@ -266,7 +266,7 @@ public class BodyInsertersTests {
 		BodyInserter<MultiValueMap<String, String>, ClientHttpRequest>
 				inserter = BodyInserters.fromFormData(body);
 
-		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("http://example.com"));
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("https://example.com"));
 		Mono<Void> result = inserter.insert(request, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 
@@ -291,7 +291,7 @@ public class BodyInsertersTests {
 				.with("name 2", "value 2+2")
 				.with("name 3", null);
 
-		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("http://example.com"));
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("https://example.com"));
 		Mono<Void> result = inserter.insert(request, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 
@@ -318,7 +318,7 @@ public class BodyInsertersTests {
 						.withPublisher("name 2", Flux.just("foo", "bar", "baz"), String.class)
 						.with(map);
 
-		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("http://example.com"));
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("https://example.com"));
 		Mono<Void> result = inserter.insert(request, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 
@@ -330,7 +330,7 @@ public class BodyInsertersTests {
 		map.put("name", Arrays.asList("value1", "value2"));
 		BodyInserters.FormInserter<Object> inserter = BodyInserters.fromMultipartData(map);
 
-		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("http://example.com"));
+		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("https://example.com"));
 		Mono<Void> result = inserter.insert(request, this.context);
 		StepVerifier.create(result).expectComplete().verify();
 

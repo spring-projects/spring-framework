@@ -580,7 +580,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		Assert.hasLength(schemaLanguage, "No schema language provided");
 		Source[] schemaSources = new Source[resources.length];
 		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespace-prefixes", true);
 		for (int i = 0; i < resources.length; i++) {
 			Resource resource = resources[i];
 			Assert.isTrue(resource != null && resource.exists(), () -> "Resource does not exist: " + resource);
@@ -860,8 +860,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			if (xmlReader == null) {
 				xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 			}
-			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-			String name = "http://xml.org/sax/features/external-general-entities";
+			xmlReader.setFeature("https://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			String name = "http://www.xml.org/sax/features/external-general-entities";
 			xmlReader.setFeature(name, isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {
 				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);

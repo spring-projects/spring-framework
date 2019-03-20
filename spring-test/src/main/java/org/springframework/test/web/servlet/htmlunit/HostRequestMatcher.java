@@ -43,7 +43,7 @@ import com.gargoylesoftware.htmlunit.WebRequest;
  *
  * <pre class="code">WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com:80");</pre>
  *
- * <p>The above {@code cdnMatcher} would match {@code "http://code.jquery.com/jquery.js"}
+ * <p>The above {@code cdnMatcher} would match {@code "https://code.jquery.com/jquery.js"}
  * which has a default port of {@code 80} and {@code "http://code.jquery.com:80/jquery.js"}.
  * However, it would not match {@code "https://code.jquery.com/jquery.js"}
  * which has a default port of {@code 443}.

@@ -42,7 +42,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @since 5.0
- * @see <a href="http://www.webjars.org">webjars.org</a>
+ * @see <a href="https://www.webjars.org">webjars.org</a>
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 
