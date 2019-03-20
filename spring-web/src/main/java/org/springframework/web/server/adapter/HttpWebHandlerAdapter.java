@@ -69,17 +69,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
 			"org.springframework.web.server.DisconnectedClient";
 
-	/**
-	 * Tomcat: ClientAbortException or EOFException
-	 * Jetty: EofException
-	 * WildFly, GlassFish: java.io.IOException "Broken pipe" (already covered)
-	 * <p>TODO:
-	 * This definition is currently duplicated between HttpWebHandlerAdapter
-	 * and AbstractSockJsSession. It is a candidate for a common utility class.
-	 * @see #isDisconnectedClientError(Throwable)
-	 */
-	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
-			new HashSet<>(Arrays.asList("ClientAbortException", "EOFException", "EofException"));
+	 // Similar declaration exists in AbstractSockJsSession..
+	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS = new HashSet<>(
+			Arrays.asList("AbortedException", "ClientAbortException", "EOFException", "EofException"));
 
 
 	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
@@ -299,8 +291,11 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private boolean isDisconnectedClientError(Throwable ex) {
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
-		if (message != null && message.toLowerCase().contains("broken pipe")) {
-			return true;
+		if (message != null) {
+			String text = message.toLowerCase();
+			if (text.contains("broken pipe") || text.contains("connection reset by peer")) {
+				return true;
+			}
 		}
 		return DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName());
 	}
