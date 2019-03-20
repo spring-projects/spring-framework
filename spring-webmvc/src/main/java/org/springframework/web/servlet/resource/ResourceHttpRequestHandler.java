@@ -151,7 +151,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * String-based location values, with support for {@link UrlResource}'s
 	 * (e.g. files or HTTP URLs) with a special prefix to indicate the charset
 	 * to use when appending relative paths. For example
-	 * {@code "[charset=Windows-31J]http://example.org/path"}.
+	 * {@code "[charset=Windows-31J]https://example.org/path"}.
 	 * @since 4.3.13
 	 */
 	public void setLocationValues(List<String> locationValues) {

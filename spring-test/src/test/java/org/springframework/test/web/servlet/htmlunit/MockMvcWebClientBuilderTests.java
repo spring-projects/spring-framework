@@ -91,7 +91,7 @@ public class MockMvcWebClientBuilderTests {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed(client, "http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "http://example.com/"));
+		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://example.com/"));
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class MockMvcWebClientBuilderTests {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherClient).build();
 
 		assertMockMvcUsed(client, "http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "http://example.com/"));
+		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://example.com/"));
 	}
 
 	@Test // SPR-14066

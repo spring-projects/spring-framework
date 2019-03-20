@@ -225,7 +225,7 @@ public class HandlersBeanDefinitionParserTests {
 		assertThat(interceptors, contains(instanceOf(OriginHandshakeInterceptor.class)));
 		assertTrue(transportService.shouldSuppressCors());
 		assertTrue(transportService.getAllowedOrigins().contains("https://mydomain1.com"));
-		assertTrue(transportService.getAllowedOrigins().contains("https://mydomain2.com"));
+		assertTrue(transportService.getAllowedOrigins().contains("/QTifZ/"));
 	}
 
 

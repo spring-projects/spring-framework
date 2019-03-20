@@ -46,7 +46,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 	private static final String COMPLEX_XML =
 			"<?xml version='1.0' encoding='UTF-8'?>" +
-					"<!DOCTYPE beans PUBLIC \"-//SPRING//DTD BEAN 2.0//EN\" \"http://www.springframework.org/dtd/spring-beans-2.0.dtd\">" +
+					"<!DOCTYPE beans PUBLIC \"-//SPRING//DTD BEAN 2.0//EN\" \"https://www.springframework.org/dtd/spring-beans-2.0.dtd\">" +
 					"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2' prefix:attr='value'>characters <![CDATA[cdata]]></prefix:child>" +
 					"<!-- comment -->" +
 					"</root>";
@@ -76,10 +76,10 @@ public abstract class AbstractStaxHandlerTestCase {
 		StringWriter stringWriter = new StringWriter();
 		AbstractStaxHandler handler = createStaxHandler(new StreamResult(stringWriter));
 		xmlReader.setContentHandler(handler);
-		xmlReader.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
+		xmlReader.setProperty("http://www.xml.org/sax/properties/lexical-handler", handler);
 
-		xmlReader.setFeature("http://xml.org/sax/features/namespaces", true);
-		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespaces", true);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespace-prefixes", false);
 
 		xmlReader.parse(new InputSource(new StringReader(COMPLEX_XML)));
 
@@ -103,10 +103,10 @@ public abstract class AbstractStaxHandlerTestCase {
 		StringWriter stringWriter = new StringWriter();
 		AbstractStaxHandler handler = createStaxHandler(new StreamResult(stringWriter));
 		xmlReader.setContentHandler(handler);
-		xmlReader.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
+		xmlReader.setProperty("http://www.xml.org/sax/properties/lexical-handler", handler);
 
-		xmlReader.setFeature("http://xml.org/sax/features/namespaces", true);
-		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespaces", true);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespace-prefixes", true);
 
 		xmlReader.parse(new InputSource(new StringReader(COMPLEX_XML)));
 
@@ -124,10 +124,10 @@ public abstract class AbstractStaxHandlerTestCase {
 		Document result = documentBuilder.newDocument();
 		AbstractStaxHandler handler = createStaxHandler(new DOMResult(result));
 		xmlReader.setContentHandler(handler);
-		xmlReader.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
+		xmlReader.setProperty("http://www.xml.org/sax/properties/lexical-handler", handler);
 
-		xmlReader.setFeature("http://xml.org/sax/features/namespaces", true);
-		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespaces", true);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespace-prefixes", false);
 
 		xmlReader.parse(new InputSource(new StringReader(SIMPLE_XML)));
 
@@ -145,10 +145,10 @@ public abstract class AbstractStaxHandlerTestCase {
 		Document result = documentBuilder.newDocument();
 		AbstractStaxHandler handler = createStaxHandler(new DOMResult(result));
 		xmlReader.setContentHandler(handler);
-		xmlReader.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
+		xmlReader.setProperty("http://www.xml.org/sax/properties/lexical-handler", handler);
 
-		xmlReader.setFeature("http://xml.org/sax/features/namespaces", true);
-		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespaces", true);
+		xmlReader.setFeature("http://www.xml.org/sax/features/namespace-prefixes", true);
 
 		xmlReader.parse(new InputSource(new StringReader(SIMPLE_XML)));
 

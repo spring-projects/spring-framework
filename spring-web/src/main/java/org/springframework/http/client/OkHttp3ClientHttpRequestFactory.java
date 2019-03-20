@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses
- * <a href="http://square.github.io/okhttp/">OkHttp</a> 3.x to create requests.
+ * <a href="https://square.github.io/okhttp/">OkHttp</a> 3.x to create requests.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma

@@ -87,7 +87,7 @@ public class MockServletContextTests {
 
 	/**
 	 * Introduced to dispel claims in a thread on Stack Overflow:
-	 * <a href="http://stackoverflow.com/questions/22986109/testing-spring-managed-servlet">Testing Spring managed servlet</a>
+	 * <a href="https://stackoverflow.com/questions/22986109/testing-spring-managed-servlet">Testing Spring managed servlet</a>
 	 */
 	@Test
 	public void getMimeTypeWithCustomConfiguredType() {

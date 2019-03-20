@@ -69,7 +69,7 @@ public class JaxWsSupportTests {
 		GenericBeanDefinition clientDef = new GenericBeanDefinition();
 		clientDef.setBeanClass(JaxWsPortProxyFactoryBean.class);
 		clientDef.getPropertyValues().add("wsdlDocumentUrl", "http://localhost:9999/OrderService?wsdl");
-		clientDef.getPropertyValues().add("namespaceUri", "http://jaxws.remoting.springframework.org/");
+		clientDef.getPropertyValues().add("namespaceUri", "https://jaxws.remoting.springframework.org/");
 		clientDef.getPropertyValues().add("username", "juergen");
 		clientDef.getPropertyValues().add("password", "hoeller");
 		clientDef.getPropertyValues().add("serviceName", "OrderService");
@@ -83,7 +83,7 @@ public class JaxWsSupportTests {
 		GenericBeanDefinition serviceFactoryDef = new GenericBeanDefinition();
 		serviceFactoryDef.setBeanClass(LocalJaxWsServiceFactoryBean.class);
 		serviceFactoryDef.getPropertyValues().add("wsdlDocumentUrl", "http://localhost:9999/OrderService?wsdl");
-		serviceFactoryDef.getPropertyValues().add("namespaceUri", "http://jaxws.remoting.springframework.org/");
+		serviceFactoryDef.getPropertyValues().add("namespaceUri", "https://jaxws.remoting.springframework.org/");
 		serviceFactoryDef.getPropertyValues().add("serviceName", "OrderService");
 		ac.registerBeanDefinition("orderService", serviceFactoryDef);
 
@@ -152,12 +152,12 @@ public class JaxWsSupportTests {
 	}
 
 
-	@WebServiceClient(targetNamespace = "http://jaxws.remoting.springframework.org/", name="OrderService")
+	@WebServiceClient(targetNamespace = "https://jaxws.remoting.springframework.org/", name="OrderService")
 	public static class OrderServiceService extends Service {
 
 		public OrderServiceService() throws MalformedURLException {
 			super(new URL("http://localhost:9999/OrderService?wsdl"),
-					new QName("http://jaxws.remoting.springframework.org/", "OrderService"));
+					new QName("https://jaxws.remoting.springframework.org/", "OrderService"));
 		}
 
 		public OrderServiceService(URL wsdlDocumentLocation, QName serviceName) {

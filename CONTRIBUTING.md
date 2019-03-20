@@ -80,13 +80,13 @@ otherwise using succinct, lower-case, dash (-) delimited names, such as `fix-war
 
 1. Choose the granularity of your commits consciously and squash commits that represent
 multiple edits or corrections of the same logical change. See
-[Rewriting History section of Pro Git](http://git-scm.com/book/en/Git-Tools-Rewriting-History)
+[Rewriting History section of Pro Git](https://git-scm.com/book/en/Git-Tools-Rewriting-History)
 for an overview of streamlining commit history.
 
 1. Format commit messages using 55 characters for the subject line, 72 lines for the
 description, followed by the issue fixed, e.g. `Fixes #22276`.
 See the
-[Commit Guidelines section of Pro Git](http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
+[Commit Guidelines section of Pro Git](https://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
 for best practices around commit messages and use `git log` to see some examples.
 
 1. List the GitHub issue number in the PR description.
@@ -115,14 +115,14 @@ defines the source file coding standards we use along with some IDEA editor sett
 ### Reference Docs
 
 The reference documentation is in the [src/docs/asciidoc](src/docs/asciidoc) directory and, in
-[Asciidoctor](http://asciidoctor.org/) format. For trivial changes, you may be able to browse,
+[Asciidoctor](https://asciidoctor.org/) format. For trivial changes, you may be able to browse,
 edit source files, and submit directly from GitHub.
 
 When making changes locally, use `./gradlew asciidoctor` and then browse the result under
 `build/asciidoc/html5/index.html`.
 
 Asciidoctor also supports live editing. For more details read
-[Editing AsciiDoc with Live Preview](http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/).
+[Editing AsciiDoc with Live Preview](https://asciidoctor.org/docs/editing-asciidoc-with-live-preview/).
 Note that if you choose the
-[System Monitor](http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/#using-a-system-monitor)
+[System Monitor](https://asciidoctor.org/docs/editing-asciidoc-with-live-preview/#using-a-system-monitor)
 option, you can find a Guardfile under `src/docs/asciidoc`.

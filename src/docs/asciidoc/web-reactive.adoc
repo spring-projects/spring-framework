@@ -8,7 +8,7 @@
 :docinfo1:
 
 This part of the documentation covers support for reactive-stack web applications built
-on a http://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
+on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
 servers, such as Netty, Undertow, and Servlet 3.1+ containers. Individual chapters cover
 the <<webflux, Spring WebFlux>> framework,
 the reactive <<webflux-client, `WebClient`>>, support for <<webflux-test, testing>>,

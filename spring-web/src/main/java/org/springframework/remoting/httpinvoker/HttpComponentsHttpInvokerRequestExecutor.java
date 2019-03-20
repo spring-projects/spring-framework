@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.remoting.httpinvoker.HttpInvokerRequestExecutor} implementation that uses
- * <a href="http://hc.apache.org/httpcomponents-client-ga/httpclient/">Apache HttpComponents HttpClient</a>
+ * <a href="https://hc.apache.org/httpcomponents-client-ga/httpclient/">Apache HttpComponents HttpClient</a>
  * to execute POST requests.
  *
  * <p>Allows to use a pre-configured {@link org.apache.http.client.HttpClient}

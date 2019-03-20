@@ -572,7 +572,7 @@ public class ExtendedBeanInfoTests {
 	 * IntrospectionException regarding a "type mismatch between indexed and non-indexed
 	 * methods" intermittently (approximately one out of every four times) under JDK 7
 	 * due to non-deterministic results from {@link Class#getDeclaredMethods()}.
-	 * See http://bugs.sun.com/view_bug.do?bug_id=7023180
+	 * See https://bugs.java.com/view_bug.do?bug_id=7023180
 	 * @see #cornerSpr9702()
 	 */
 	@Test

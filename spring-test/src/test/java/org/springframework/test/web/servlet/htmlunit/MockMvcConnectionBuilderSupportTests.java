@@ -91,7 +91,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = this.builder.createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcNotUsed(conn, "http://example.com/");
+		assertMockMvcNotUsed(conn, "https://example.com/");
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = new MockMvcWebConnectionBuilderSupport(mockMvc) {}.createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcNotUsed(conn, "http://example.com/");
+		assertMockMvcNotUsed(conn, "https://example.com/");
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = this.builder.useMockMvcForHosts("example.com").createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcUsed(conn, "http://example.com/");
+		assertMockMvcUsed(conn, "https://example.com/");
 		assertMockMvcNotUsed(conn, "http://other.com/");
 	}
 

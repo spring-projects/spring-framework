@@ -450,11 +450,11 @@ public class UrlTagTests extends AbstractTagTests {
 
 	@Test
 	public void createUrlRemoteServer() throws JspException {
-		tag.setValue("http://www.springframework.org/");
+		tag.setValue("https://www.springframework.org/");
 		tag.doStartTag();
 
 		String uri = tag.createUrl();
-		assertEquals("http://www.springframework.org/", uri);
+		assertEquals("https://www.springframework.org/", uri);
 	}
 
 	@Test

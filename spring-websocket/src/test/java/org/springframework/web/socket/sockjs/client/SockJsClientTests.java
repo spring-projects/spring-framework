@@ -52,7 +52,7 @@ import static org.mockito.BDDMockito.when;
  */
 public class SockJsClientTests {
 
-	private static final String URL = "http://example.com";
+	private static final String URL = "https://example.com";
 
 	private static final WebSocketHandler handler = mock(WebSocketHandler.class);
 

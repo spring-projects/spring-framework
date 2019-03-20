@@ -73,10 +73,10 @@ public class DefaultUriTemplateHandlerTests {
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("hotel", "1");
 		vars.put("publicpath", "pics/logo.png");
-		String template = "http://example.com/hotels/{hotel}/pic/{publicpath}";
+		String template = "https://example.com/hotels/{hotel}/pic/{publicpath}";
 		URI actual = this.handler.expand(template, vars);
 
-		assertEquals("http://example.com/hotels/1/pic/pics/logo.png", actual.toString());
+		assertEquals("https://example.com/hotels/1/pic/pics/logo.png", actual.toString());
 	}
 
 	@Test
@@ -86,10 +86,10 @@ public class DefaultUriTemplateHandlerTests {
 		vars.put("hotel", "1");
 		vars.put("publicpath", "pics/logo.png");
 		vars.put("scale", "150x150");
-		String template = "http://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
+		String template = "https://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
 		URI actual = this.handler.expand(template, vars);
 
-		assertEquals("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150", actual.toString());
+		assertEquals("https://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150", actual.toString());
 	}
 
 	@Test
@@ -97,19 +97,19 @@ public class DefaultUriTemplateHandlerTests {
 		this.handler.setStrictEncoding(false);
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("userId", "john;doe");
-		String template = "http://www.example.com/user/{userId}/dashboard";
+		String template = "https://www.example.com/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, vars);
 
-		assertEquals("http://www.example.com/user/john;doe/dashboard", actual.toString());
+		assertEquals("https://www.example.com/user/john;doe/dashboard", actual.toString());
 	}
 
 	@Test
 	public void strictEncodingOffWithArray() throws Exception {
 		this.handler.setStrictEncoding(false);
-		String template = "http://www.example.com/user/{userId}/dashboard";
+		String template = "https://www.example.com/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, "john;doe");
 
-		assertEquals("http://www.example.com/user/john;doe/dashboard", actual.toString());
+		assertEquals("https://www.example.com/user/john;doe/dashboard", actual.toString());
 	}
 
 	@Test
@@ -117,19 +117,19 @@ public class DefaultUriTemplateHandlerTests {
 		this.handler.setStrictEncoding(true);
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("userId", "john;doe");
-		String template = "http://www.example.com/user/{userId}/dashboard";
+		String template = "https://www.example.com/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, vars);
 
-		assertEquals("http://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
+		assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
 	}
 
 	@Test
 	public void strictEncodingOnWithArray() throws Exception {
 		this.handler.setStrictEncoding(true);
-		String template = "http://www.example.com/user/{userId}/dashboard";
+		String template = "https://www.example.com/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, "john;doe");
 
-		assertEquals("http://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
+		assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
 	}
 
 	@Test	// SPR-14147
@@ -145,7 +145,7 @@ public class DefaultUriTemplateHandlerTests {
 		String template = "http://{host}/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, vars);
 
-		assertEquals("http://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
+		assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
 	}
 
 }

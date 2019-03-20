@@ -184,7 +184,7 @@ public class DefaultEntityResponseBuilderTests {
 				.eTag(etag)
 				.build();
 
-		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "http://example.com");
+		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "https://example.com");
 		mockRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
 
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
@@ -205,7 +205,7 @@ public class DefaultEntityResponseBuilderTests {
 				.lastModified(oneMinuteBeforeNow)
 				.build();
 
-		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "http://example.com");
+		MockHttpServletRequest mockRequest = new MockHttpServletRequest("GET", "https://example.com");
 		mockRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, DateTimeFormatter.RFC_1123_DATE_TIME.format(now));
 
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();

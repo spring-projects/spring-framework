@@ -228,7 +228,7 @@ Alternatively, if you want to assert there is no response content, you can use c
 
 When you use `expectBody()`, the response is consumed as a `byte[]`. This is useful for
 raw content assertions. For example, you can use
-http://jsonassert.skyscreamer.org[JSONAssert] to verify JSON content, as follows:
+https://jsonassert.skyscreamer.org[JSONAssert] to verify JSON content, as follows:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]

@@ -192,7 +192,7 @@ public class MarshallingSource extends SAXSource {
 		@Override
 		@Nullable
 		public Object getProperty(String name) throws SAXNotRecognizedException {
-			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
+			if ("http://www.xml.org/sax/properties/lexical-handler".equals(name)) {
 				return this.lexicalHandler;
 			}
 			else {
@@ -202,7 +202,7 @@ public class MarshallingSource extends SAXSource {
 
 		@Override
 		public void setProperty(String name, Object value) throws SAXNotRecognizedException {
-			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
+			if ("http://www.xml.org/sax/properties/lexical-handler".equals(name)) {
 				this.lexicalHandler = (LexicalHandler) value;
 			}
 			else {

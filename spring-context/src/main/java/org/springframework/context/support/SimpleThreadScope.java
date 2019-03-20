@@ -42,7 +42,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>For an implementation of a thread-based {@code Scope} with support for destruction
  * callbacks, refer to
- * <a href="http://www.springbyexample.org/examples/custom-thread-scope-module.html">Spring by Example</a>.
+ * <a href="https://www.springbyexample.org/examples/custom-thread-scope-module.html">Spring by Example</a>.
  *
  * <p>Thanks to Eugene Kuleshov for submitting the original prototype for a thread scope!
  *

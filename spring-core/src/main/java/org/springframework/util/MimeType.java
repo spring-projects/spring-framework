@@ -194,7 +194,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * Checks the given token string for illegal characters, as defined in RFC 2616,
 	 * section 2.2.
 	 * @throws IllegalArgumentException in case of illegal characters
-	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
 	private void checkToken(String token) {
 		for (int i = 0; i < token.length(); i++ ) {

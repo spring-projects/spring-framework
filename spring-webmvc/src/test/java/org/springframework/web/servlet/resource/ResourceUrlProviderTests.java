@@ -80,9 +80,9 @@ public class ResourceUrlProviderTests {
 		request.setContextPath("/");
 		request.setRequestURI("/");
 
-		String url = "/resources/foo.css?foo=bar&url=http://example.org";
+		String url = "/resources/foo.css?foo=bar&url=https://example.org";
 		String resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
-		assertEquals("/resources/foo.css?foo=bar&url=http://example.org", resolvedUrl);
+		assertEquals("/resources/foo.css?foo=bar&url=https://example.org", resolvedUrl);
 
 		url = "/resources/foo.css#hash";
 		resolvedUrl = this.urlProvider.getForRequestUrl(request, url);

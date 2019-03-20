@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Brian Clozel
  * @since 4.1.5
- * @see <a href="http://tools.ietf.org/html/rfc7230#section-3.3.3">RFC 7230 Section 3.3.3</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3.3">RFC 7230 Section 3.3.3</a>
  */
 class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 

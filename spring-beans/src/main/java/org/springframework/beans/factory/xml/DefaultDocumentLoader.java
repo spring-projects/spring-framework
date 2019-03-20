@@ -50,7 +50,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	/**
 	 * JAXP attribute used to configure the schema language for validation.
 	 */
-	private static final String SCHEMA_LANGUAGE_ATTRIBUTE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+	private static final String SCHEMA_LANGUAGE_ATTRIBUTE = "https://java.sun.com/xml/jaxp/properties/schemaLanguage";
 
 	/**
 	 * JAXP attribute value indicating the XSD schema language.

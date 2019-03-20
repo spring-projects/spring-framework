@@ -1853,7 +1853,7 @@ public class DefaultListableBeanFactoryTests {
 	/**
 	 * Verifies that a dependency on a {@link FactoryBean} can be autowired
 	 * <em>by type</em>, specifically addressing the JIRA issue raised in <a
-	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4040"
+	 * href="https://opensource.atlassian.com/projects/spring/browse/SPR-4040"
 	 * target="_blank">SPR-4040</a>.
 	 */
 	@Test

@@ -87,7 +87,7 @@ public class ContextLoaderTests {
 
 	/**
 	 * Addresses the issues raised in <a
-	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4008"
+	 * href="https://opensource.atlassian.com/projects/spring/browse/SPR-4008"
 	 * target="_blank">SPR-4008</a>: <em>Supply an opportunity to customize
 	 * context before calling refresh in ContextLoaders</em>.
 	 */

@@ -45,11 +45,11 @@ import org.springframework.util.StringUtils;
  */
 abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
-	private static final String NAMESPACES_FEATURE_NAME = "http://xml.org/sax/features/namespaces";
+	private static final String NAMESPACES_FEATURE_NAME = "http://www.xml.org/sax/features/namespaces";
 
-	private static final String NAMESPACE_PREFIXES_FEATURE_NAME = "http://xml.org/sax/features/namespace-prefixes";
+	private static final String NAMESPACE_PREFIXES_FEATURE_NAME = "http://www.xml.org/sax/features/namespace-prefixes";
 
-	private static final String IS_STANDALONE_FEATURE_NAME = "http://xml.org/sax/features/is-standalone";
+	private static final String IS_STANDALONE_FEATURE_NAME = "http://www.xml.org/sax/features/is-standalone";
 
 
 	private boolean namespacesFeature = true;
@@ -101,14 +101,14 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	}
 
 	/**
-	 * Indicates whether the SAX feature {@code http://xml.org/sax/features/namespaces} is turned on.
+	 * Indicates whether the SAX feature {@code http://www.xml.org/sax/features/namespaces} is turned on.
 	 */
 	protected boolean hasNamespacesFeature() {
 		return this.namespacesFeature;
 	}
 
 	/**
-	 * Indicates whether the SAX feature {@code http://xml.org/sax/features/namespaces-prefixes} is turned on.
+	 * Indicates whether the SAX feature {@code http://www.xml.org/sax/features/namespaces-prefixes} is turned on.
 	 */
 	protected boolean hasNamespacePrefixesFeature() {
 		return this.namespacePrefixesFeature;
