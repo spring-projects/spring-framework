@@ -220,7 +220,8 @@ class DefaultServerRequest implements ServerRequest {
 				.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 		if (pathVariables != null) {
 			return pathVariables;
-		} else {
+		}
+		else {
 			return Collections.emptyMap();
 		}
 	}
@@ -235,7 +236,9 @@ class DefaultServerRequest implements ServerRequest {
 		return Optional.ofNullable(this.serverHttpRequest.getPrincipal());
 	}
 
-
+	/**
+	 * Default implementation of {@link Headers}.
+	 */
 	static class DefaultRequestHeaders implements Headers {
 
 		private final HttpHeaders delegate;
@@ -298,7 +301,7 @@ class DefaultServerRequest implements ServerRequest {
 		}
 	}
 
-	private static class ServletParametersMap extends AbstractMap<String, List<String>> {
+	private static final class ServletParametersMap extends AbstractMap<String, List<String>> {
 
 		private final HttpServletRequest servletRequest;
 
@@ -353,7 +356,7 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 
-	private static class ServletAttributesMap extends AbstractMap<String, Object> {
+	private static final class ServletAttributesMap extends AbstractMap<String, Object> {
 
 		private final HttpServletRequest servletRequest;
 

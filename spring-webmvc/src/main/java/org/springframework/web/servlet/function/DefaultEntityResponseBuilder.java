@@ -62,8 +62,9 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Arjen Poutsma
  * @since 5.2
+ * @param <T> the entity type
  */
-class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
+final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	private final T entity;
 

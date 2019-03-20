@@ -223,7 +223,7 @@ public interface ServerRequest {
 	// Static methods
 
 	/**
-	 * Create a new {@code ServerRequest} based on the given {@code {@link HttpServletRequest} and
+	 * Create a new {@code ServerRequest} based on the given {@code HttpServletRequest} and
 	 * message converters.
 	 * @param servletRequest the request
 	 * @param messageReaders the message readers

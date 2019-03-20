@@ -283,7 +283,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 					.get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 			if (pathVariables != null) {
 				return pathVariables;
-			} else {
+			}
+			else {
 				return Collections.emptyMap();
 			}
 		}

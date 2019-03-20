@@ -72,6 +72,7 @@ public interface EntityResponse<T> extends ServerResponse {
 
 	/**
 	 * Defines a builder for {@code EntityResponse}.
+	 * @param <T> the entity type
 	 */
 	interface Builder<T> {
 

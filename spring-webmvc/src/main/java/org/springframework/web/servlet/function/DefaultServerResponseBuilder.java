@@ -286,8 +286,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				else {
 					return writeToInternal(request, response, context);
 				}
-			} catch (Throwable t) {
-				return handleError(t, request, response, context);
+			}
+			catch (Throwable throwable) {
+				return handleError(throwable, request, response, context);
 			}
 		}
 

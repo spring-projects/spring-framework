@@ -71,7 +71,8 @@ public interface ServerResponse {
 	MultiValueMap<String, Cookie> cookies();
 
 	/**
-	 * Write this response to the servlet response (and return {@code null}, or return a
+	 * Write this response to the servlet response (and return {@code null}, or return a model and
+	 * view.
 	 * @param request the current request
 	 * @param response the response to write to
 	 * @param context the context to use when writing

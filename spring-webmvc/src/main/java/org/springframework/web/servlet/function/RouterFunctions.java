@@ -830,10 +830,11 @@ public abstract class RouterFunctions {
 													"Nested predicate \"%s\" matches against \"%s\"",
 													this.predicate, serverRequest));
 								}
-								Optional<HandlerFunction<T>> result = this.routerFunction.route(nestedRequest);
+								Optional<HandlerFunction<T>> result =
+										this.routerFunction.route(nestedRequest);
 								if (result.isPresent() && nestedRequest != serverRequest) {
-									 serverRequest.attributes().clear();
-									 serverRequest.attributes().putAll(nestedRequest.attributes());
+									serverRequest.attributes().clear();
+									serverRequest.attributes().putAll(nestedRequest.attributes());
 								}
 								return result;
 							}
