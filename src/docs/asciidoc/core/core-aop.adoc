@@ -450,9 +450,8 @@ it is natural and straightforward to identify specific beans by name.
 [[aop-pointcuts-combining]]
 ==== Combining Pointcut Expressions
 
-You can combine pointcut expressions can be combined by using `&&,` `||` and `!`. You can also
-refer to pointcut expressions by name. The following example shows three pointcut
-expressions:
+You can combine pointcut expressions by using `&&,` `||` and `!`. You can also refer to
+pointcut expressions by name. The following example shows three pointcut expressions:
 
 [source,java,indent=0]
 [subs="verbatim"]
@@ -1234,7 +1233,7 @@ following strategy to determine parameter names:
 ----
 +
 If the first parameter is of the `JoinPoint`, `ProceedingJoinPoint`, or
-`JoinPoint.StaticPart` type, you ca leave out the name of the parameter from the value
+`JoinPoint.StaticPart` type, you can leave out the name of the parameter from the value
 of the `argNames` attribute. For example, if you modify the preceding advice to receive
 the join point object, the `argNames` attribute need not include it:
 +
