@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,6 +152,11 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		MediaType contentType = request.getHeaders().getContentType();
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 		Object[] hints = extractValidationHints(bodyParam);
+
+		if (mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
+			return Mono.error(new IllegalStateException(
+					"In a WebFlux application, form data is accessed via ServerWebExchange.getFormData()."));
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(exchange.getLogPrefix() + (contentType != null ?
