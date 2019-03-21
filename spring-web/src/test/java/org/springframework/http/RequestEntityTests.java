@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class RequestEntityTests {
 
 		assertEquals("text/plain", responseHeaders.getFirst("Accept"));
 		assertEquals("utf-8", responseHeaders.getFirst("Accept-Charset"));
-		assertEquals("Thu, 1 Jan 1970 00:00:12 GMT", responseHeaders.getFirst("If-Modified-Since"));
+		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT", responseHeaders.getFirst("If-Modified-Since"));
 		assertEquals(ifNoneMatch, responseHeaders.getFirst("If-None-Match"));
 		assertEquals(String.valueOf(contentLength), responseHeaders.getFirst("Content-Length"));
 		assertEquals(contentType.toString(), responseHeaders.getFirst("Content-Type"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ public class MockHttpServletResponseTests {
 		response.addCookie(cookie);
 
 		assertEquals("foo=bar; Path=/path; Domain=example.com; " +
-				"Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT; " +
+				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
 				"Secure; HttpOnly", response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 
@@ -349,7 +349,7 @@ public class MockHttpServletResponseTests {
 		response.addCookie(mockCookie);
 
 		assertEquals("SESSION=123; Path=/; Domain=example.com; Max-Age=0; " +
-				"Expires=Thu, 1 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax",
+				"Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax",
 				response.getHeader(HttpHeaders.SET_COOKIE));
 	}
 
