@@ -69,7 +69,7 @@ public class RssChannelHttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(new MediaType("application", "rss+xml", StandardCharsets.UTF_8));
 		Channel result = converter.read(Channel.class, inputMessage);
 		assertEquals("title", result.getTitle());
-		assertEquals("http://example.com", result.getLink());
+		assertEquals("https://example.com", result.getLink());
 		assertEquals("description", result.getDescription());
 
 		List<?> items = result.getItems();
