@@ -1259,7 +1259,7 @@ directly to the response body versus view resolution and rendering with an HTML 
 [[mvc-ann-requestmapping-proxying]]
 ==== AOP Proxies
 
-In some cases, you many need to decorate a controller with an AOP proxy at runtime.
+In some cases, you may need to decorate a controller with an AOP proxy at runtime.
 One example is if you choose to have `@Transactional` annotations directly on the
 controller. When this is the case, for controllers specifically, we recommend
 using class-based proxying. This is typically the default choice with controllers.
