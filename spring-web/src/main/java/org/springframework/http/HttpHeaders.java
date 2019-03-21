@@ -394,12 +394,18 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	private static final ZoneId GMT = ZoneId.of("GMT");
 
 	/**
-	 * Date formats with time zone as specified in the HTTP RFC.
+	 * Date formats with time zone as specified in the HTTP RFC to use for formatting.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
-	private static final DateTimeFormatter[] DATE_FORMATTERS = new DateTimeFormatter[] {
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US).withZone(GMT);
+
+	/**
+	 * Date formats with time zone as specified in the HTTP RFC to use for parsing.
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
+	private static final DateTimeFormatter[] DATE_PARSERS = new DateTimeFormatter[] {
 			DateTimeFormatter.RFC_1123_DATE_TIME,
-			DateTimeFormatter.ofPattern("EEEE, dd-MMM-yy HH:mm:ss zz", Locale.US),
+			DateTimeFormatter.ofPattern("EEEE, dd-MMM-yy HH:mm:ss zzz", Locale.US),
 			DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy", Locale.US).withZone(GMT)
 	};
 
@@ -1322,7 +1328,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.0
 	 */
 	public void setZonedDateTime(String headerName, ZonedDateTime date) {
-		set(headerName, DATE_FORMATTERS[0].format(date));
+		set(headerName, DATE_FORMATTER.format(date));
 	}
 
 	/**
@@ -1417,7 +1423,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 				headerValue = headerValue.substring(0, parametersIndex);
 			}
 
-			for (DateTimeFormatter dateFormatter : DATE_FORMATTERS) {
+			for (DateTimeFormatter dateFormatter : DATE_PARSERS) {
 				try {
 					return ZonedDateTime.parse(headerValue, dateFormatter);
 				}
@@ -1733,7 +1739,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	static String formatDate(long date) {
 		Instant instant = Instant.ofEpochMilli(date);
 		ZonedDateTime time = ZonedDateTime.ofInstant(instant, GMT);
-		return DATE_FORMATTERS[0].format(time);
+		return DATE_FORMATTER.format(time);
 	}
 
 }

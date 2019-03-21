@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,10 +59,10 @@ public class ResponseCookieTests {
 
 	@Test
 	public void maxAge0() {
-		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT",
+		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
 				ResponseCookie.from("id", "1fWa").maxAge(Duration.ofSeconds(0)).build().toString());
 
-		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT",
+		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
 				ResponseCookie.from("id", "1fWa").maxAge(0).build().toString());
 	}
 
