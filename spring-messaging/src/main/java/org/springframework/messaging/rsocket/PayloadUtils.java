@@ -17,7 +17,6 @@
 package org.springframework.messaging.rsocket;
 
 import io.netty.buffer.ByteBuf;
-import io.rsocket.Frame;
 import io.rsocket.Payload;
 import io.rsocket.util.ByteBufPayload;
 import io.rsocket.util.DefaultPayload;
@@ -27,7 +26,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.util.Assert;
 
 /**
  * Static utility methods to create {@link Payload} from {@link DataBuffer}s
@@ -53,11 +51,9 @@ abstract class PayloadUtils {
 				ByteBuf byteBuf = payload.sliceData().retain();
 				return ((NettyDataBufferFactory) bufferFactory).wrap(byteBuf);
 			}
-
-			Assert.isTrue(!(payload instanceof ByteBufPayload) && !(payload instanceof Frame),
-					"NettyDataBufferFactory expected, actual: " + bufferFactory.getClass().getSimpleName());
-
-			return bufferFactory.wrap(payload.getData());
+			else {
+				return bufferFactory.wrap(payload.getData());
+			}
 		}
 		finally {
 			if (payload.refCnt() > 0) {

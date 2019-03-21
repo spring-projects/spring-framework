@@ -19,9 +19,9 @@ package org.springframework.messaging.rsocket;
 import java.time.Duration;
 
 import io.netty.buffer.PooledByteBufAllocator;
-import io.rsocket.Frame;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
+import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
@@ -71,7 +71,7 @@ public class RSocketClientToServerIntegrationTests {
 
 		server = RSocketFactory.receive()
 				.addServerPlugin(interceptor)
-				.frameDecoder(Frame::retain)  // as per https://github.com/rsocket/rsocket-java#zero-copy
+				.frameDecoder(PayloadDecoder.ZERO_COPY)
 				.acceptor(context.getBean(MessageHandlerAcceptor.class))
 				.transport(TcpServerTransport.create("localhost", 7000))
 				.start()
@@ -79,7 +79,7 @@ public class RSocketClientToServerIntegrationTests {
 
 		client = RSocketFactory.connect()
 				.dataMimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
-				.frameDecoder(Frame::retain)  // as per https://github.com/rsocket/rsocket-java#zero-copy
+				.frameDecoder(PayloadDecoder.ZERO_COPY)
 				.transport(TcpClientTransport.create("localhost", 7000))
 				.start()
 				.block();
@@ -105,6 +105,7 @@ public class RSocketClientToServerIntegrationTests {
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
+				.thenAwait(Duration.ofMillis(50))
 				.thenCancel()
 				.verify(Duration.ofSeconds(5));
 

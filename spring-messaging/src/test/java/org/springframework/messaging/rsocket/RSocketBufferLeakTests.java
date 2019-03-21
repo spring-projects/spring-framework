@@ -28,9 +28,9 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.util.ReferenceCounted;
 import io.rsocket.AbstractRSocket;
-import io.rsocket.Frame;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
+import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.plugins.RSocketInterceptor;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.server.CloseableChannel;
@@ -89,7 +89,7 @@ public class RSocketBufferLeakTests {
 		context = new AnnotationConfigApplicationContext(ServerConfig.class);
 
 		server = RSocketFactory.receive()
-				.frameDecoder(Frame::retain) // zero copy
+				.frameDecoder(PayloadDecoder.ZERO_COPY)
 				.addServerPlugin(payloadInterceptor) // intercept responding
 				.acceptor(context.getBean(MessageHandlerAcceptor.class))
 				.transport(TcpServerTransport.create("localhost", 7000))
@@ -97,7 +97,7 @@ public class RSocketBufferLeakTests {
 				.block();
 
 		client = RSocketFactory.connect()
-				.frameDecoder(Frame::retain) // zero copy
+				.frameDecoder(PayloadDecoder.ZERO_COPY)
 				.addClientPlugin(payloadInterceptor) // intercept outgoing requests
 				.dataMimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
 				.transport(TcpClientTransport.create("localhost", 7000))
