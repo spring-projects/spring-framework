@@ -723,6 +723,51 @@ public abstract class BeanUtils {
 		}
 	}
 
+	 /**
+     * copy the special properties from src to target
+     *
+     * @param src
+     * @param target
+     * @param copyProperties
+     * @throws IntrospectionException
+     */
+    public static void copyProperties(Object src, Object target, String... copyProperties) throws
+            IntrospectionException {
+        if (Objects.nonNull(copyProperties) && copyProperties.length > 0) {
+            List<PropertyDescriptor> targetPds = new ArrayList<>();
+            for (String property : copyProperties) {
+                PropertyDescriptor descriptor = new PropertyDescriptor(property, target.getClass());
+                targetPds.add(descriptor);
+            }
+            targetPds.stream().parallel().forEach(targetPd -> {
+                Method writeMethod = targetPd.getWriteMethod();
+                PropertyDescriptor sourcePd = BeanUtils.getPropertyDescriptor(src.getClass(),
+                        targetPd.getName());
+                if (sourcePd != null) {
+                    Method readMethod = sourcePd.getReadMethod();
+                    if (readMethod != null &&
+                            ClassUtils.isAssignable(writeMethod.getParameterTypes()[0],
+                                    readMethod.getReturnType())) {
+                        try {
+                            if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+                                readMethod.setAccessible(true);
+                            }
+                            Object value = readMethod.invoke(src);
+                            if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers()
+                            )) {
+                                writeMethod.setAccessible(true);
+                            }
+                            writeMethod.invoke(target, value);
+                        } catch (Throwable ex) {
+                            throw new FatalBeanException(
+                                    "Could not copy property '" + targetPd.getName() + "' from " +
+                                            "source to target", ex);
+                        }
+                    }
+                }
+            });
+        }
+    }
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.
