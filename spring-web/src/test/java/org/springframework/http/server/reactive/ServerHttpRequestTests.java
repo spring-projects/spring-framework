@@ -96,7 +96,7 @@ public class ServerHttpRequestTests {
 		request = createHttpRequest("/").mutate().method(HttpMethod.DELETE).build();
 		assertEquals(HttpMethod.DELETE, request.getMethod());
 
-		String baseUri = "https://www.aaa.org/articles/";
+		String baseUri = "https://aaa.org:8080/a";
 
 		request = createHttpRequest(baseUri).mutate().uri(URI.create("https://bbb.org:9090/b")).build();
 		assertEquals("https://bbb.org:9090/b", request.getURI().toString());

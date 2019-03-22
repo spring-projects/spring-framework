@@ -92,41 +92,41 @@ public class WebUtilsTests {
 	@Test
 	public void isValidOrigin() {
 		List<String> allowed = Collections.emptyList();
-		assertTrue(checkValidOrigin("mydomain1.com", -1, "https://mydomain1.com", allowed));
-		assertFalse(checkValidOrigin("mydomain1.com", -1, "/QTifZ/", allowed));
+		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain1.com", allowed));
+		assertFalse(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
 
 		allowed = Collections.singletonList("*");
-		assertTrue(checkValidOrigin("mydomain1.com", -1, "/QTifZ/", allowed));
+		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
 
-		allowed = Collections.singletonList("https://mydomain1.com");
-		assertTrue(checkValidOrigin("mydomain2.com", -1, "https://mydomain1.com", allowed));
+		allowed = Collections.singletonList("http://mydomain1.com");
+		assertTrue(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com", allowed));
 		assertFalse(checkValidOrigin("mydomain2.com", -1, "http://mydomain3.com", allowed));
 	}
 
 	@Test
 	public void isSameOrigin() {
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "https://mydomain1.com"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "https://www.mydomain1.com/"));
+		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com"));
+		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80"));
 		assertTrue(checkSameOrigin("https", "mydomain1.com", 443, "https://mydomain1.com"));
 		assertTrue(checkSameOrigin("https", "mydomain1.com", 443, "https://mydomain1.com:443"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", 123, "https://mydomain1.com:123"));
+		assertTrue(checkSameOrigin("http", "mydomain1.com", 123, "http://mydomain1.com:123"));
 		assertTrue(checkSameOrigin("ws", "mydomain1.com", -1, "ws://mydomain1.com"));
 		assertTrue(checkSameOrigin("wss", "mydomain1.com", 443, "wss://mydomain1.com"));
 
-		assertFalse(checkSameOrigin("http", "mydomain1.com", -1, "/QTifZ/"));
+		assertFalse(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain2.com"));
 		assertFalse(checkSameOrigin("http", "mydomain1.com", -1, "https://mydomain1.com"));
 		assertFalse(checkSameOrigin("http", "mydomain1.com", -1, "invalid-origin"));
-		assertFalse(checkSameOrigin("https", "mydomain1.com", -1, "https://mydomain1.com"));
+		assertFalse(checkSameOrigin("https", "mydomain1.com", -1, "http://mydomain1.com"));
 
 		// Handling of invalid origins as described in SPR-13478
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "https://mydomain1.com/"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "https://www.mydomain1.com/"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "https://mydomain1.com/path"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "https://www.mydomain1.com/path"));
-		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "https://mydomain1.com/"));
-		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "https://www.mydomain1.com/"));
-		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "https://mydomain1.com/path"));
-		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "https://www.mydomain1.com/path"));
+		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com/"));
+		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80/"));
+		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com/path"));
+		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80/path"));
+		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com/"));
+		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com:80/"));
+		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com/path"));
+		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com:80/path"));
 
 		// Handling of IPv6 hosts as described in SPR-13525
 		assertTrue(checkSameOrigin("http", "[::1]", -1, "http://[::1]"));

@@ -339,8 +339,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		SAXSource result = sourceCaptor.getValue();
-		assertEquals(true, result.getXMLReader().getFeature("https://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(false, result.getXMLReader().getFeature("http://www.xml.org/sax/features/external-general-entities"));
+		assertEquals(true, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
+		assertEquals(false, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 
 		// 2. external-general-entities and dtd support enabled
 
@@ -352,8 +352,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		result = sourceCaptor.getValue();
-		assertEquals(false, result.getXMLReader().getFeature("https://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(true, result.getXMLReader().getFeature("http://www.xml.org/sax/features/external-general-entities"));
+		assertEquals(false, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
+		assertEquals(true, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 
 	@Test  // SPR-10806
@@ -373,8 +373,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		SAXSource result = sourceCaptor.getValue();
-		assertEquals(true, result.getXMLReader().getFeature("https://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(false, result.getXMLReader().getFeature("http://www.xml.org/sax/features/external-general-entities"));
+		assertEquals(true, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
+		assertEquals(false, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 
 		// 2. external-general-entities and dtd support enabled
 
@@ -386,8 +386,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		result = sourceCaptor.getValue();
-		assertEquals(false, result.getXMLReader().getFeature("https://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(true, result.getXMLReader().getFeature("http://www.xml.org/sax/features/external-general-entities"));
+		assertEquals(false, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
+		assertEquals(true, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 
 

@@ -95,7 +95,7 @@ public class CorsUtilsTests {
 	@Test  // SPR-16362
 	public void isSameOriginWithDifferentSchemes() {
 		MockServerHttpRequest request = MockServerHttpRequest
-				.get("https://mydomain1.com")
+				.get("http://mydomain1.com")
 				.header(HttpHeaders.ORIGIN, "https://mydomain1.com")
 				.build();
 		assertFalse(CorsUtils.isSameOrigin(request));

@@ -111,7 +111,7 @@ public class AppCacheManifestTransformerTests {
 				containsString("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js"));
 
 		assertThat("should not rewrite external resources", content, containsString("//example.org/style.css"));
-		assertThat("should not rewrite external resources", content, containsString("https://example.org/image.png"));
+		assertThat("should not rewrite external resources", content, containsString("http://example.org/image.png"));
 
 		assertThat("should generate fingerprint", content,
 				containsString("# Hash: 4bf0338bcbeb0a5b3a4ec9ed8864107d"));

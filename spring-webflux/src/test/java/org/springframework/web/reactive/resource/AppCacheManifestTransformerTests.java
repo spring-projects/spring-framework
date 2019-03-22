@@ -109,7 +109,7 @@ public class AppCacheManifestTransformerTests {
 				containsString("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js"));
 
 		assertThat("should not rewrite external resources", content, containsString("//example.org/style.css"));
-		assertThat("should not rewrite external resources", content, containsString("https://example.org/image.png"));
+		assertThat("should not rewrite external resources", content, containsString("http://example.org/image.png"));
 
 		// Not the same hash as Spring MVC
 		// Hash is computed from links, and not from the linked content

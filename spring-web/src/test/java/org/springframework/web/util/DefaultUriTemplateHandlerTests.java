@@ -142,7 +142,7 @@ public class DefaultUriTemplateHandlerTests {
 		Map<String, Object> vars = new HashMap<>(1);
 		vars.put("userId", "john;doe");
 
-		String template = "http://{host}/user/{userId}/dashboard";
+		String template = "https://{host}/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, vars);
 
 		assertEquals("https://www.example.com/user/john%3Bdoe/dashboard", actual.toString());

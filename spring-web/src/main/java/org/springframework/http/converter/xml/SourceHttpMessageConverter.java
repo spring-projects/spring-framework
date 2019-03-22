@@ -169,9 +169,9 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			documentBuilderFactory.setNamespaceAware(true);
 			documentBuilderFactory.setFeature(
-					"https://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+					"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 			documentBuilderFactory.setFeature(
-					"http://www.xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+					"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 			if (!isProcessExternalEntities()) {
 				documentBuilder.setEntityResolver(NO_OP_ENTITY_RESOLVER);
@@ -200,8 +200,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	private SAXSource readSAXSource(InputStream body, HttpInputMessage inputMessage) throws IOException {
 		try {
 			XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-			xmlReader.setFeature("https://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-			xmlReader.setFeature("http://www.xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {
 				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 			}

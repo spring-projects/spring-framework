@@ -141,6 +141,7 @@ public class MvcUriComponentsBuilderTests {
 
 	@Test
 	public void usesForwardedHostAsHostIfHeaderIsSet() throws Exception {
+		this.request.setScheme("https");
 		this.request.addHeader("X-Forwarded-Host", "somethingDifferent");
 		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
@@ -150,6 +151,7 @@ public class MvcUriComponentsBuilderTests {
 
 	@Test
 	public void usesForwardedHostAndPortFromHeader() throws Exception {
+		this.request.setScheme("https");
 		request.addHeader("X-Forwarded-Host", "foobar:8088");
 		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
@@ -159,6 +161,7 @@ public class MvcUriComponentsBuilderTests {
 
 	@Test
 	public void usesFirstHostOfXForwardedHost() throws Exception {
+		this.request.setScheme("https");
 		this.request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
 		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
@@ -420,6 +423,7 @@ public class MvcUriComponentsBuilderTests {
 
 		initWebApplicationContext(PathPrefixWebConfig.class);
 
+		this.request.setScheme("https");
 		this.request.setServerName("example.org");
 		this.request.setServerPort(9999);
 		this.request.setContextPath("/base");
@@ -433,6 +437,7 @@ public class MvcUriComponentsBuilderTests {
 
 		initWebApplicationContext(PathPrefixWebConfig.class);
 
+		this.request.setScheme("https");
 		this.request.setServerName("example.org");
 		this.request.setServerPort(9999);
 		this.request.setContextPath("/base");

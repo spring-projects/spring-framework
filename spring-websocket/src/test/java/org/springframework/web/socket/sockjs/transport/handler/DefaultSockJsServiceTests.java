@@ -149,7 +149,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	public void handleTransportRequestXhrAllowedOriginsMatch() throws Exception {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
-		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "/QTifZ/"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "https://mydomain2.com"));
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.com");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
@@ -160,7 +160,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	public void handleTransportRequestXhrAllowedOriginsNoMatch() throws Exception {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
-		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "/QTifZ/"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "https://mydomain2.com"));
 		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain3.com");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
@@ -172,7 +172,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		String sockJsPath = sessionUrlPrefix + "xhr";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "/QTifZ/");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.com");
 		this.servletRequest.setServerName("mydomain2.com");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
@@ -184,7 +184,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		String sockJsPath = sessionUrlPrefix + "invalid";
 		setRequest("POST", sockJsPrefix + sockJsPath);
 		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "/QTifZ/");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.com");
 		this.servletRequest.setServerName("mydomain2.com");
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
@@ -280,7 +280,7 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 		resetRequestAndResponse();
 		setRequest("GET", sockJsPrefix + sockJsPath);
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "/QTifZ/");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.com");
 		wsService.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 		assertEquals(403, this.servletResponse.getStatus());
 	}

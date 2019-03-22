@@ -72,7 +72,7 @@ public class DomContentHandlerTests {
 
 	@Test
 	public void contentHandlerDocumentNamespacePrefixes() throws Exception {
-		xmlReader.setFeature("http://www.xml.org/sax/features/namespace-prefixes", true);
+		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		handler = new DomContentHandler(result);
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
 		xmlReader.setContentHandler(handler);

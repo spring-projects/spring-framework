@@ -71,7 +71,7 @@ import org.springframework.util.StringUtils;
  * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
  * &lt;connector xmlns="http://java.sun.com/xml/ns/j2ee"
  *		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- *		 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee https://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
+ *		 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
  *		 version="1.5"&gt;
  *	 &lt;vendor-name&gt;Spring Framework&lt;/vendor-name&gt;
  *	 &lt;eis-type&gt;Spring Connector&lt;/eis-type&gt;

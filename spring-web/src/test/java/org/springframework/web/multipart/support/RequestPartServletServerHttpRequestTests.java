@@ -57,6 +57,7 @@ public class RequestPartServletServerHttpRequestTests {
 		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
 
 		URI uri = new URI("https://example.com/path?query");
+		this.mockRequest.setScheme(uri.getScheme());
 		this.mockRequest.setServerName(uri.getHost());
 		this.mockRequest.setServerPort(uri.getPort());
 		this.mockRequest.setRequestURI(uri.getPath());

@@ -160,8 +160,8 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
 		factory.setNamespaceAware(true);
-		factory.setFeature("https://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-		factory.setFeature("http://www.xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+		factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+		factory.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 		return factory;
 	}
 
@@ -191,8 +191,8 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	@SuppressWarnings("deprecation")  // on JDK 9
 	protected XMLReader createXmlReader() throws SAXException {
 		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-		xmlReader.setFeature("https://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-		xmlReader.setFeature("http://www.xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+		xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+		xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 		if (!isProcessExternalEntities()) {
 			xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 		}

@@ -83,7 +83,7 @@ public class SimpMessagingTemplateTests {
 				MessageHeaderAccessor.getAccessor(messages.get(0), SimpMessageHeaderAccessor.class);
 
 		assertNotNull(headerAccessor);
-		assertEquals("/user/http:%2F%2Fjoe.openid.example.org%2F/queue/foo", headerAccessor.getDestination());
+		assertEquals("/user/https:%2F%2Fjoe.openid.example.org%2F/queue/foo", headerAccessor.getDestination());
 	}
 
 	@Test

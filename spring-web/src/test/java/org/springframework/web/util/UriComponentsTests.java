@@ -133,7 +133,7 @@ public class UriComponentsTests {
 	@Test // gh-22447
 	public void expandWithFragmentOrder() {
 		UriComponents uriComponents = UriComponentsBuilder
-				.fromUriString("http://{host}/{path}#{fragment}").build()
+				.fromUriString("https://{host}/{path}#{fragment}").build()
 				.expand("example.com", "foo", "bar");
 
 		assertEquals("https://example.com/foo#bar", uriComponents.toUriString());

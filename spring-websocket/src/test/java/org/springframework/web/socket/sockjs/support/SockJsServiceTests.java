@@ -114,7 +114,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	@Test  // SPR-12226 and SPR-12660
 	public void handleInfoGetWithOrigin() throws IOException {
 		this.servletRequest.setServerName("mydomain2.com");
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "/QTifZ/");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		assertEquals("application/json;charset=UTF-8", this.servletResponse.getContentType());
@@ -125,17 +125,17 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}",
 				body.substring(body.indexOf(',')));
 
-		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
-		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "/QTifZ/", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		this.service.setAllowedOrigins(Collections.singletonList("*"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		this.servletRequest.setServerName("mydomain3.com");
-		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
 	}
 
@@ -176,17 +176,17 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	@Test  // SPR-12226 and SPR-12660
 	public void handleInfoOptionsWithAllowedOrigin() {
 		this.servletRequest.setServerName("mydomain2.com");
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "/QTifZ/");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Last-Modified");
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
-		this.service.setAllowedOrigins(Collections.singletonList("https://mydomain1.com"));
+		this.service.setAllowedOrigins(Collections.singletonList("http://mydomain1.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
-		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "/QTifZ/", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
@@ -198,7 +198,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 	@Test  // SPR-16304
 	public void handleInfoOptionsWithForbiddenOrigin() {
 		this.servletRequest.setServerName("mydomain3.com");
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "/QTifZ/");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.com");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.servletRequest.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Last-Modified");
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
@@ -213,7 +213,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test  // SPR-12283
 	public void handleInfoOptionsWithOriginAndCorsHeadersDisabled() {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "/QTifZ/");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.com");
 		this.service.setAllowedOrigins(Collections.singletonList("*"));
 		this.service.setSuppressCors(true);
 
@@ -225,7 +225,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
 		assertNull(this.service.getCorsConfiguration(this.servletRequest));
 
-		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "/QTifZ/", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "https://mydomain2.com", "http://mydomain3.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNull(this.service.getCorsConfiguration(this.servletRequest));
 	}
