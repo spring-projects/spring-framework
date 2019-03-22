@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  * @see HandlerMethodArgumentResolver
  * @see HandlerMethodReturnValueHandler
@@ -562,30 +563,34 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		List<Object> requestResponseBodyAdviceBeans = new ArrayList<Object>();
 
 		for (ControllerAdviceBean bean : beans) {
-			Set<Method> attrMethods = MethodIntrospector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
+			Class<?> beanType = bean.getBeanType();
+
+			Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 			if (!attrMethods.isEmpty()) {
 				this.modelAttributeAdviceCache.put(bean, attrMethods);
 				if (logger.isInfoEnabled()) {
 					logger.info("Detected @ModelAttribute methods in " + bean);
 				}
 			}
-			Set<Method> binderMethods = MethodIntrospector.selectMethods(bean.getBeanType(), INIT_BINDER_METHODS);
+			Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 			if (!binderMethods.isEmpty()) {
 				this.initBinderAdviceCache.put(bean, binderMethods);
 				if (logger.isInfoEnabled()) {
 					logger.info("Detected @InitBinder methods in " + bean);
 				}
 			}
-			if (RequestBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
+
+			boolean isRequestBodyAdvice = RequestBodyAdvice.class.isAssignableFrom(beanType);
+			boolean isResponseBodyAdvice = ResponseBodyAdvice.class.isAssignableFrom(beanType);
+			if (isRequestBodyAdvice || isResponseBodyAdvice) {
 				requestResponseBodyAdviceBeans.add(bean);
 				if (logger.isInfoEnabled()) {
-					logger.info("Detected RequestBodyAdvice bean in " + bean);
-				}
-			}
-			if (ResponseBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
-				requestResponseBodyAdviceBeans.add(bean);
-				if (logger.isInfoEnabled()) {
-					logger.info("Detected ResponseBodyAdvice bean in " + bean);
+					if (isRequestBodyAdvice) {
+						logger.info("Detected RequestBodyAdvice bean in " + bean);
+					}
+					else {
+						logger.info("Detected ResponseBodyAdvice bean in " + bean);
+					}
 				}
 			}
 		}
