@@ -1403,7 +1403,7 @@ sorted last. Also, prefix patterns (such as `/public/{asterisk}{asterisk}`) are 
 specific than other pattern that do not have double wildcards.
 
 For the full details, see {api-spring-framework}/util/AntPathMatcher.AntPatternComparator.html[`AntPatternComparator`]
-in {api-spring-framework}/util/AntPathMatcher.html[`AntPathMatcher`] and also keep mind that
+in {api-spring-framework}/util/AntPathMatcher.html[`AntPathMatcher`] and also keep in mind that
 you can customize the {api-spring-framework}/util/PathMatcher.html[`PathMatcher`] implementation.
 See <<mvc-config-path-matching>> in the configuration section.
 
