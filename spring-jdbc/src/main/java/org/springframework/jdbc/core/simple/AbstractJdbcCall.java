@@ -314,9 +314,7 @@ public abstract class AbstractJdbcCall {
 		this.callMetaDataContext.initializeMetaData(dataSource);
 
 		// Iterate over the declared RowMappers and register the corresponding SqlParameter
-		this.declaredRowMappers.forEach((key, value) -> {
-			this.declaredParameters.add(this.callMetaDataContext.createReturnResultSetParameter(key, value));
-		});
+		this.declaredRowMappers.forEach((key, value) -> this.declaredParameters.add(this.callMetaDataContext.createReturnResultSetParameter(key, value)));
 		this.callMetaDataContext.processParameters(this.declaredParameters);
 
 		this.callString = this.callMetaDataContext.createCallString();

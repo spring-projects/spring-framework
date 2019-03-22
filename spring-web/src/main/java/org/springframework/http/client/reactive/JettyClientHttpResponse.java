@@ -66,7 +66,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		List<String> cookieHeader = getHeaders().get(HttpHeaders.SET_COOKIE);
 		if (cookieHeader != null) {
-			cookieHeader.forEach(header -> {
+			cookieHeader.forEach(header ->
 				HttpCookie.parse(header)
 						.forEach(cookie -> result.add(cookie.getName(),
 								ResponseCookie.from(cookie.getName(), cookie.getValue())
@@ -75,8 +75,8 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 						.maxAge(cookie.getMaxAge())
 						.secure(cookie.getSecure())
 						.httpOnly(cookie.isHttpOnly())
-						.build()));
-			});
+						.build()))
+			);
 		}
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}

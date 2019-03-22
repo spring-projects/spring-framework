@@ -94,12 +94,12 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 
 		return this.partReader.read(elementType, inputMessage, allHints)
 				.collectMultimap(Part::name)
-				.doOnNext(map -> {
+				.doOnNext(map ->
 					LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Parsed " +
 							(isEnableLoggingRequestDetails() ?
 									LogFormatUtils.formatValue(map, !traceOn) :
-									"parts " + map.keySet() + " (content masked)"));
-				})
+									"parts " + map.keySet() + " (content masked)"))
+				)
 				.map(this::toMultiValueMap);
 	}
 
