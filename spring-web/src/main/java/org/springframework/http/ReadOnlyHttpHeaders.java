@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,14 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	@Nullable
 	private MediaType cachedContentType;
 
+	@Nullable
+	private List<MediaType> cachedAccept;
+
+
 	ReadOnlyHttpHeaders(HttpHeaders headers) {
 		super(headers.headers);
 	}
+
 
 	@Override
 	public MediaType getContentType() {
@@ -53,6 +58,18 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 			MediaType contentType = super.getContentType();
 			this.cachedContentType = contentType;
 			return contentType;
+		}
+	}
+
+	@Override
+	public List<MediaType> getAccept() {
+		if (this.cachedAccept != null) {
+			return this.cachedAccept;
+		}
+		else {
+			List<MediaType> accept = super.getAccept();
+			this.cachedAccept = accept;
+			return accept;
 		}
 	}
 

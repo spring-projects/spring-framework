@@ -47,8 +47,6 @@ import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.Hea
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
-	private static final ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
-
 	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
 
 	private static final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
@@ -187,11 +185,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	@Override
 	@Nullable
 	public ProducesRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (CorsUtils.isPreFlightRequest(request)) {
-			return PRE_FLIGHT_MATCH;
-		}
-		if (isEmpty()) {
-			return this;
+		if (isEmpty() || CorsUtils.isPreFlightRequest(request)) {
+			return EMPTY_CONDITION;
 		}
 
 		List<MediaType> acceptedMediaTypes;

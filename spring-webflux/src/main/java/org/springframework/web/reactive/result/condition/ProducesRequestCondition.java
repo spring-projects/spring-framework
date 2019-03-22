@@ -47,8 +47,6 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
-	private static final ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
-
 	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
 
 
@@ -187,11 +185,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	@Override
 	@Nullable
 	public ProducesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
-			return PRE_FLIGHT_MATCH;
-		}
-		if (isEmpty()) {
-			return this;
+		if (isEmpty() || CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			return EMPTY_CONDITION;
 		}
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
 		result.removeIf(expression -> !expression.match(exchange));
