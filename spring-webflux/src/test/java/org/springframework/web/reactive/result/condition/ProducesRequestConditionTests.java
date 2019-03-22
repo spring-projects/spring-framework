@@ -117,7 +117,8 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition xml = new ProducesRequestCondition("application/xml");
 		ProducesRequestCondition none = new ProducesRequestCondition();
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "application/xml, text/html"));
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
+				.header("Accept", "application/xml, text/html"));
 
 		assertTrue(html.compareTo(xml, exchange) > 0);
 		assertTrue(xml.compareTo(html, exchange) < 0);
@@ -135,8 +136,8 @@ public class ProducesRequestConditionTests {
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "application/pdf"));
 
-		assertTrue(html.compareTo(xml, exchange) == 0);
-		assertTrue(xml.compareTo(html, exchange) == 0);
+		assertEquals(0, html.compareTo(xml, exchange));
+		assertEquals(0, xml.compareTo(html, exchange));
 
 		// See SPR-7000
 		exchange = MockServerWebExchange.from(
