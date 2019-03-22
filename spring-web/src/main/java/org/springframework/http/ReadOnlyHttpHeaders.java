@@ -40,6 +40,9 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	@Nullable
 	private MediaType cachedContentType;
 
+	@Nullable
+	private MediaType cachedAccept;
+
 	ReadOnlyHttpHeaders(HttpHeaders headers) {
 		super(headers.headers);
 	}
@@ -53,6 +56,18 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 			MediaType contentType = super.getContentType();
 			this.cachedContentType = contentType;
 			return contentType;
+		}
+	}
+
+	@Override
+	public List<MediaType> getAccept() {
+		if (this.cachedAccept != null) {
+			return this.cachedAccept;
+		}
+		else {
+			List<MediaType> accept = super.getAccept();
+			this.cachedAccept = accept;
+			return accept;
 		}
 	}
 
