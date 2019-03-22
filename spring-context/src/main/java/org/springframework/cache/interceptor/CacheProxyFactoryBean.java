@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,7 +35,7 @@ import org.springframework.cache.CacheManager;
  * target implements. Exists primarily for third-party framework integration.
  * <strong>Users should favor the {@code cache:} XML namespace
  * {@link org.springframework.cache.annotation.Cacheable @Cacheable} annotation.</strong>
- * See the <a href="http://bit.ly/p9rIvx">declarative annotation-based caching</a> section
+ * See the <a href="https://bit.ly/p9rIvx">declarative annotation-based caching</a> section
  * of the Spring reference documentation for more information.
  *
  * @author Costin Leau

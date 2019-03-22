@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,7 +49,7 @@ public class URLEditorTests {
 	@Test
 	public void testStandardURL() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
-		urlEditor.setAsText("http://www.springframework.org");
+		urlEditor.setAsText("https://www.springframework.org");
 		Object value = urlEditor.getValue();
 		assertTrue(value instanceof URL);
 		URL url = (URL) value;

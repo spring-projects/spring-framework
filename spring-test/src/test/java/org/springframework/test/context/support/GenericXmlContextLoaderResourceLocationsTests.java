@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
  * {@code resource locations} by a {@link GenericXmlContextLoader}
  * configured via {@link ContextConfiguration @ContextConfiguration}.
  * Specifically, this test addresses the issues raised in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3949"
+ * href="https://opensource.atlassian.com/projects/spring/browse/SPR-3949"
  * target="_blank">SPR-3949</a>:
  * <em>ContextConfiguration annotation should accept not only classpath resources</em>.
  *
@@ -77,12 +77,12 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 		class ExplicitFileLocationsTestCase {
 		}
 
-		@ContextConfiguration("http://example.com/context.xml")
+		@ContextConfiguration("https://example.com/context.xml")
 		class ExplicitUrlLocationsTestCase {
 		}
 
 		@ContextConfiguration({ "context1.xml", "classpath:context2.xml", "/context3.xml",
-			"file:/testing/directory/context.xml", "http://example.com/context.xml" })
+			"file:/testing/directory/context.xml", "https://example.com/context.xml" })
 		class ExplicitMixedPathTypesLocationsTestCase {
 		}
 
@@ -103,13 +103,13 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 
 			{ ExplicitFileLocationsTestCase.class.getSimpleName(), new String[] { "file:/testing/directory/context.xml" } },
 
-			{ ExplicitUrlLocationsTestCase.class.getSimpleName(), new String[] { "http://example.com/context.xml" } },
+			{ ExplicitUrlLocationsTestCase.class.getSimpleName(), new String[] { "https://example.com/context.xml" } },
 
 			{
 				ExplicitMixedPathTypesLocationsTestCase.class.getSimpleName(),
 				new String[] { "classpath:/org/springframework/test/context/support/context1.xml",
 					"classpath:context2.xml", "classpath:/context3.xml", "file:/testing/directory/context.xml",
-					"http://example.com/context.xml" } }
+					"https://example.com/context.xml" } }
 
 		});
 	}

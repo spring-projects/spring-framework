@@ -202,7 +202,7 @@ implementation detail actually means.
 
 @AspectJ refers to a style of declaring aspects as regular Java classes annotated with
 annotations. The @AspectJ style was introduced by the
-http://www.eclipse.org/aspectj[AspectJ project] as part of the AspectJ 5 release. Spring
+https://www.eclipse.org/aspectj[AspectJ project] as part of the AspectJ 5 release. Spring
 interprets the same annotations as AspectJ 5, using a library supplied by AspectJ
 for pointcut parsing and matching. The AOP runtime is still pure Spring AOP, though, and
 there is no dependency on the AspectJ compiler or weaver.
@@ -342,9 +342,9 @@ matches the execution of any method named `transfer`:
 
 The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
 AspectJ 5 pointcut expression. For a full discussion of AspectJ's pointcut language, see
-the http://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
+the https://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
 Programming Guide] (and, for extensions, the
-http://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
+https://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
 Developer's Notebook]) or one of the books on AspectJ (such as _Eclipse AspectJ_, by Colyer
 et. al., or _AspectJ in Action_, by Ramnivas Laddad).
 
@@ -600,7 +600,7 @@ method that takes no parameters, whereas `(..)` matches any number (zero or more
 The `({asterisk})` pattern matches a method that takes one parameter of any type.
 `(*,String)` matches a method that takes two parameters. The first can be of any type, while the
 second must be a `String`. Consult the
-http://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html[Language
+https://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html[Language
 Semantics] section of the AspectJ Programming Guide for more information.
 
 The following examples show some common pointcut expressions:
@@ -2022,8 +2022,8 @@ preceding advice for a particular join point:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- this is the object that will be proxied by Spring's AOP infrastructure -->
 		<bean id="personService" class="x.y.service.DefaultPersonService"/>
@@ -2346,7 +2346,7 @@ simple method executions (for example, field get or set join points and so on).
 When you use AspectJ, you have the choice of the AspectJ language syntax (also known as
 the "`code style`") or the @AspectJ annotation style. Clearly, if you do not use Java
 5+, the choice has been made for you: Use the code style. If aspects play a large
-role in your design, and you are able to use the http://www.eclipse.org/ajdt/[AspectJ
+role in your design, and you are able to use the https://www.eclipse.org/ajdt/[AspectJ
 Development Tools (AJDT)] plugin for Eclipse, the AspectJ language syntax is the
 preferred option. It is cleaner and simpler because the language was purposefully
 designed for writing aspects. If you do not use Eclipse or have only a few aspects
@@ -2754,7 +2754,7 @@ using Spring in accordance with the properties of the annotation`". In this cont
 "`initialization`" refers to newly instantiated objects (for example, objects instantiated
 with the `new` operator) as well as to `Serializable` objects that are undergoing
 deserialization (for example, through
-http://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html[readResolve()]).
+https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html[readResolve()]).
 
 [NOTE]
 =====
@@ -2775,14 +2775,14 @@ available for use in the body of the constructors, you need to define this on th
 
 You can find more information about the language semantics of the various pointcut
 types in AspectJ
-http://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
-appendix] of the http://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
+https://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
+appendix] of the https://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
 Programming Guide].
 =====
 
 For this to work, the annotated types must be woven with the AspectJ weaver. You can
 either use a build-time Ant or Maven task to do this (see, for example, the
-http://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html[AspectJ Development
+https://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html[AspectJ Development
 Environment Guide]) or load-time weaving (see <<aop-aj-ltw>>). The
 `AnnotationBeanConfigurerAspect` itself needs to be configured by Spring (in order to obtain
 a reference to the bean factory that is to be used to configure new objects). If you
@@ -2997,7 +2997,7 @@ The focus of this section is on configuring and using LTW in the specific contex
 Spring Framework. This section is not a general introduction to LTW. For full details on
 the specifics of LTW and configuring LTW with only AspectJ (with Spring not being
 involved at all), see the
-http://www.eclipse.org/aspectj/doc/released/devguide/ltw.html[LTW section of the AspectJ
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw.html[LTW section of the AspectJ
 Development Environment Guide].
 
 The value that the Spring Framework brings to AspectJ LTW is in enabling much
@@ -3079,7 +3079,7 @@ standard AspectJ. The following example shows the `aop.xml` file:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 	<aspectj>
 
 		<weaver>
@@ -3112,9 +3112,9 @@ the following example:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<!-- a service object; we will be profiling its methods -->
 		<bean id="entitlementCalculationService"
@@ -3162,7 +3162,7 @@ java -javaagent:C:/projects/foo/lib/global/spring-instrument.jar foo.Main
 ----
 
 The `-javaagent` is a flag for specifying and enabling
-http://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html[agents
+https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html[agents
 to instrument programs that run on the JVM]. The Spring Framework ships with such an
 agent, the `InstrumentationSavingAgent`, which is packaged in the
 `spring-instrument.jar` that was supplied as the value of the `-javaagent` argument in
@@ -3241,7 +3241,7 @@ The AspectJ LTW infrastructure is configured by using one or more `META-INF/aop.
 files that are on the Java classpath (either directly or, more typically, in jar files).
 
 The structure and contents of this file is detailed in the LTW part of the
-http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
 documentation]. Because the `aop.xml` file is 100% AspectJ, we do not describe it further here.
 
 
@@ -3305,9 +3305,9 @@ Alternatively, if you prefer XML-based configuration, use the
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:load-time-weaver/>
 
@@ -3326,20 +3326,20 @@ The following table summarizes various `LoadTimeWeaver` implementations:
 |===
 | Runtime Environment| `LoadTimeWeaver` implementation
 
-| Running in http://tomcat.apache.org/[Apache Tomcat]
+| Running in https://tomcat.apache.org/[Apache Tomcat]
 | `TomcatLoadTimeWeaver`
 
-| Running in http://glassfish.dev.java.net/[GlassFish] (limited to EAR deployments)
+| Running in https://glassfish.dev.java.net/[GlassFish] (limited to EAR deployments)
 | `GlassFishLoadTimeWeaver`
 
-| Running in Red Hat's http://www.jboss.org/jbossas/[JBoss AS] or http://www.wildfly.org/[WildFly]
+| Running in Red Hat's https://www.jboss.org/jbossas/[JBoss AS] or https://www.wildfly.org/[WildFly]
 | `JBossLoadTimeWeaver`
 
-| Running in IBM's http://www-01.ibm.com/software/webservers/appserv/was/[WebSphere]
+| Running in IBM's https://www-01.ibm.com/software/webservers/appserv/was/[WebSphere]
 | `WebSphereLoadTimeWeaver`
 
 | Running in Oracle's
-  http://www.oracle.com/technetwork/middleware/weblogic/overview/index-085209.html[WebLogic]
+  https://www.oracle.com/technetwork/middleware/weblogic/overview/index-085209.html[WebLogic]
 | `WebLogicLoadTimeWeaver`
 
 | JVM started with Spring `InstrumentationSavingAgent`
@@ -3386,9 +3386,9 @@ element. Again, the following example specifies a `ReflectiveLoadTimeWeaver`:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:load-time-weaver
 				weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/>
@@ -3487,7 +3487,7 @@ Spring Boot applications, you typically control the entire JVM setup in any case
 [[aop-resources]]
 == Further Resources
 
-More information on AspectJ can be found on the http://www.eclipse.org/aspectj[AspectJ website].
+More information on AspectJ can be found on the https://www.eclipse.org/aspectj[AspectJ website].
 
 _Eclipse AspectJ_ by Adrian Colyer et. al. (Addison-Wesley, 2005) provides a
 comprehensive introduction and reference for the AspectJ language.

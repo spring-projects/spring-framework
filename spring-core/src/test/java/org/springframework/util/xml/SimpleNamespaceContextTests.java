@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,10 +34,10 @@ public class SimpleNamespaceContextTests {
 
 	private final String unboundPrefix = "unbound";
 	private final String prefix = "prefix";
-	private final String namespaceUri = "http://Namespace-name-URI";
-	private final String additionalNamespaceUri = "http://Additional-namespace-name-URI";
-	private final String unboundNamespaceUri = "http://Unbound-namespace-name-URI";
-	private final String defaultNamespaceUri = "http://Default-namespace-name-URI";
+	private final String namespaceUri = "https://Namespace-name-URI";
+	private final String additionalNamespaceUri = "https://Additional-namespace-name-URI";
+	private final String unboundNamespaceUri = "https://Unbound-namespace-name-URI";
+	private final String defaultNamespaceUri = "https://Default-namespace-name-URI";
 
 	private final SimpleNamespaceContext context = new SimpleNamespaceContext();
 
@@ -50,10 +50,10 @@ public class SimpleNamespaceContextTests {
 	@Test
 	public void getNamespaceURI() {
 		context.bindNamespaceUri(XMLConstants.XMLNS_ATTRIBUTE, additionalNamespaceUri);
-		assertThat("Always returns \"http://www.w3.org/2000/xmlns/\" for \"xmlns\"",
+		assertThat("Always returns \"https://www.w3.org/2000/xmlns/\" for \"xmlns\"",
 				context.getNamespaceURI(XMLConstants.XMLNS_ATTRIBUTE), is(XMLConstants.XMLNS_ATTRIBUTE_NS_URI));
 		context.bindNamespaceUri(XMLConstants.XML_NS_PREFIX, additionalNamespaceUri);
-		assertThat("Always returns \"http://www.w3.org/XML/1998/namespace\" for \"xml\"",
+		assertThat("Always returns \"https://www.w3.org/XML/1998/namespace\" for \"xml\"",
 				context.getNamespaceURI(XMLConstants.XML_NS_PREFIX), is(XMLConstants.XML_NS_URI));
 
 		assertThat("Returns \"\" for an unbound prefix", context.getNamespaceURI(unboundPrefix),
@@ -76,9 +76,9 @@ public class SimpleNamespaceContextTests {
 
 	@Test
 	public void getPrefix() {
-		assertThat("Always returns \"xmlns\" for \"http://www.w3.org/2000/xmlns/\"",
+		assertThat("Always returns \"xmlns\" for \"https://www.w3.org/2000/xmlns/\"",
 				context.getPrefix(XMLConstants.XMLNS_ATTRIBUTE_NS_URI), is(XMLConstants.XMLNS_ATTRIBUTE));
-		assertThat("Always returns \"xml\" for \"http://www.w3.org/XML/1998/namespace\"",
+		assertThat("Always returns \"xml\" for \"https://www.w3.org/XML/1998/namespace\"",
 				context.getPrefix(XMLConstants.XML_NS_URI), is(XMLConstants.XML_NS_PREFIX));
 
 		assertThat("Returns null for an unbound namespace URI", context.getPrefix(unboundNamespaceUri),
@@ -103,10 +103,10 @@ public class SimpleNamespaceContextTests {
 
 	@Test
 	public void getPrefixes() {
-		assertThat("Returns only \"xmlns\" for \"http://www.w3.org/2000/xmlns/\"",
+		assertThat("Returns only \"xmlns\" for \"https://www.w3.org/2000/xmlns/\"",
 				getItemSet(context.getPrefixes(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)),
 				is(makeSet(XMLConstants.XMLNS_ATTRIBUTE)));
-		assertThat("Returns only \"xml\" for \"http://www.w3.org/XML/1998/namespace\"",
+		assertThat("Returns only \"xml\" for \"https://www.w3.org/XML/1998/namespace\"",
 				getItemSet(context.getPrefixes(XMLConstants.XML_NS_URI)), is(makeSet(XMLConstants.XML_NS_PREFIX)));
 
 		assertThat("Returns empty iterator for unbound prefix", context.getPrefixes("unbound Namespace URI").hasNext(),

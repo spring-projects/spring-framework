@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * {@link JndiLocatorDelegate#setResourceRef(boolean) "resourceRef"} property set to
  * {@code true}, meaning that names looked up will automatically be prefixed with
  * "java:comp/env/" in alignment with published
- * <a href="http://download.oracle.com/javase/jndi/tutorial/beyond/misc/policy.html">JNDI
+ * <a href="https://download.oracle.com/javase/jndi/tutorial/beyond/misc/policy.html">JNDI
  * naming conventions</a>. To override this setting or to change the prefix, manually
  * configure a {@code JndiLocatorDelegate} and provide it to one of the constructors here
  * that accepts it. The same applies when providing custom JNDI properties. These should

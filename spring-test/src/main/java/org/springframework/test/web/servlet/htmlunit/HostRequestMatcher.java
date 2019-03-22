@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,7 +43,7 @@ import com.gargoylesoftware.htmlunit.WebRequest;
  *
  * <pre class="code">WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com:80");</pre>
  *
- * <p>The above {@code cdnMatcher} would match {@code "http://code.jquery.com/jquery.js"}
+ * <p>The above {@code cdnMatcher} would match {@code "https://code.jquery.com/jquery.js"}
  * which has a default port of {@code 80} and {@code "http://code.jquery.com:80/jquery.js"}.
  * However, it would not match {@code "https://code.jquery.com/jquery.js"}
  * which has a default port of {@code 443}.

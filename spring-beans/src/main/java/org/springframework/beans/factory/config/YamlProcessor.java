@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,11 +67,11 @@ public abstract class YamlProcessor {
 	 * to properties before the match is made. E.g.
 	 * <pre class="code">
 	 * environment: dev
-	 * url: http://dev.bar.com
+	 * url: https://dev.bar.com
 	 * name: Developer Setup
 	 * ---
 	 * environment: prod
-	 * url:http://foo.bar.com
+	 * url:https://foo.bar.com
 	 * name: My Cool App
 	 * </pre>
 	 * when mapped with
@@ -82,7 +82,7 @@ public abstract class YamlProcessor {
 	 * would end up as
 	 * <pre class="code">
 	 * environment=prod
-	 * url=http://foo.bar.com
+	 * url=https://foo.bar.com
 	 * name=My Cool App
 	 * </pre>
 	 */

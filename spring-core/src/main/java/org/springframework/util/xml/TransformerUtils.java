@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,7 +67,7 @@ public abstract class TransformerUtils {
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		try {
 			// Xalan-specific, but this is the most common XSLT engine in any case
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(indentAmount));
+			transformer.setOutputProperty("{https://xml.apache.org/xslt}indent-amount", String.valueOf(indentAmount));
 		}
 		catch (IllegalArgumentException ignored) {
 		}
