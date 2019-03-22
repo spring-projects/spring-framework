@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,16 +228,16 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (headers == null) {
 			return null;
 		}
-		PatternsRequestCondition patterns = this.patternsCondition.getMatchingCondition(request);
-		if (patterns == null) {
-			return null;
-		}
 		ConsumesRequestCondition consumes = this.consumesCondition.getMatchingCondition(request);
 		if (consumes == null) {
 			return null;
 		}
 		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(request);
 		if (produces == null) {
+			return null;
+		}
+		PatternsRequestCondition patterns = this.patternsCondition.getMatchingCondition(request);
+		if (patterns == null) {
 			return null;
 		}
 		RequestConditionHolder custom = this.customConditionHolder.getMatchingCondition(request);
