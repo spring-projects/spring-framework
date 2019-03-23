@@ -124,7 +124,13 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	}
 
 	private long getValueMatchCount(Set<ParamExpression> expressions) {
-		return expressions.stream().filter(e -> e.getValue() != null && !e.isNegated()).count();
+		long count = 0;
+		for (ParamExpression e : expressions) {
+			if (e.getValue() != null && !e.isNegated()) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 
