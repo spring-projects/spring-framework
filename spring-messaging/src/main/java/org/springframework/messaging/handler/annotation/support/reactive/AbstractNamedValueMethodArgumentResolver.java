@@ -45,7 +45,7 @@ import org.springframework.util.ClassUtils;
  * Expression Language {@code #{...}} expressions which will be resolved if a
  * {@link ConfigurableBeanFactory} is supplied to the class constructor.
  *
- * <p>A {@link ConversionService} is used to convert resolved String argument
+ * <p>A {@link ConversionService} is used to convert a resolved String argument
  * value to the expected target method parameter type.
  *
  * @author Rossen Stoyanchev
