@@ -47,28 +47,16 @@ import static org.junit.Assert.*;
  */
 public class BeanUtilsTests {
 
-	@Test
-	public void testInstantiateClass() {
-		// give proper class
+	@Test(expected = FatalBeanException.class)
+	public void testInstantiateClassGivenInterface() {
 		BeanUtils.instantiateClass(ArrayList.class);
+		BeanUtils.instantiateClass(List.class);
+	}
 
-		try {
-			// give interface
-			BeanUtils.instantiateClass(List.class);
-			fail("Should have thrown FatalBeanException");
-		}
-		catch (FatalBeanException ex) {
-			// expected
-		}
-
-		try {
-			// give class without default constructor
-			BeanUtils.instantiateClass(CustomDateEditor.class);
-			fail("Should have thrown FatalBeanException");
-		}
-		catch (FatalBeanException ex) {
-			// expected
-		}
+	@Test(expected = FatalBeanException.class)
+	public void testInstantiateClassGivenClassWithoutDefaultConstructor() {
+		BeanUtils.instantiateClass(ArrayList.class);
+		BeanUtils.instantiateClass(CustomDateEditor.class);
 	}
 
 	@Test  // gh-22531
@@ -233,23 +221,14 @@ public class BeanUtilsTests {
 		assertSignatureEquals(desiredMethod, "doSomething()");
 	}
 
-	@Test
-	public void testResolveInvalidSignature() throws Exception {
-		try {
-			BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class);
-			fail("Should not be able to parse with opening but no closing paren.");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void testResolveInvalidSignatureEndParen() {
+		BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class);
+	}
 
-		try {
-			BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class);
-			fail("Should not be able to parse with closing but no opening paren.");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void testResolveInvalidSignatureStartParen() {
+		BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class);
 	}
 
 	@Test
