@@ -123,7 +123,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * realized through adding the {@code @PersistJobDataAfterExecution} and
 	 * {@code @DisallowConcurrentExecution} markers.
 	 * More information on stateful versus stateless jobs can be found
-	 * <a href="https://www.quartz-scheduler.org/documentation/quartz-2.1.x/tutorials/tutorial-lesson-03">here</a>.
+	 * <a href="https://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/tutorial-lesson-03.html">here</a>.
 	 * <p>The default setting is to run jobs concurrently.
 	 */
 	public void setConcurrent(boolean concurrent) {

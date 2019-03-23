@@ -15,7 +15,7 @@ https://sourceforge.net/projects/javadiff
 
 To use the Ant task on your own project, see example.xml. More examples
 of using JDiff to compare the public APIs of J2SE1.3 and J2SE1.4 can
-be seen at /VQYNZ/
+be seen at http://javadiff.sourceforge.net/
 
 For an example with the source distribution, run "ant" and
 look at the HTML output in ./build/reports/example/changes.html 

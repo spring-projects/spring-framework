@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,9 @@ import org.springframework.cache.CacheManager;
  * target implements. Exists primarily for third-party framework integration.
  * <strong>Users should favor the {@code cache:} XML namespace
  * {@link org.springframework.cache.annotation.Cacheable @Cacheable} annotation.</strong>
- * See the <a href="https://bit.ly/p9rIvx">declarative annotation-based caching</a> section
- * of the Spring reference documentation for more information.
+ * See the
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/integration.html#cache-annotations">declarative annotation-based caching</a>
+ * section of the Spring reference documentation for more information.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
