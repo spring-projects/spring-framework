@@ -18,7 +18,7 @@ from evil.com should not be able to make AJAX requests to your bank API with you
 credentials -- for example withdrawing money from your account!
 
 Cross-Origin Resource Sharing (CORS) is a http://www.w3.org/TR/cors/[W3C specification]
-implemented by http://caniuse.com/#feat=cors[most browsers] that lets you specify
+implemented by https://caniuse.com/#feat=cors[most browsers] that lets you specify
 what kind of cross-domain requests are authorized, rather than using less secure and less
 powerful workarounds based on IFRAME or JSONP.
 
@@ -121,7 +121,7 @@ as the following example shows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@CrossOrigin(origins = "http://domain2.com", maxAge = 3600)
+@CrossOrigin(origins = "https://domain2.com", maxAge = 3600)
 @RestController
 @RequestMapping("/account")
 public class AccountController {
@@ -149,7 +149,7 @@ as the following example shows:
 @RequestMapping("/account")
 public class AccountController {
 
-	@CrossOrigin("http://domain2.com")
+	@CrossOrigin("https://domain2.com")
 	@GetMapping("/{id}")
 	public Account retrieve(@PathVariable Long id) {
 		// ...
@@ -207,7 +207,7 @@ public class WebConfig implements WebMvcConfigurer {
 	public void addCorsMappings(CorsRegistry registry) {
 
 		registry.addMapping("/api/**")
-			.allowedOrigins("http://domain2.com")
+			.allowedOrigins("https://domain2.com")
 			.allowedMethods("PUT", "DELETE")
 			.allowedHeaders("header1", "header2", "header3")
 			.exposedHeaders("header1", "header2")
@@ -232,14 +232,14 @@ as the following example shows:
 <mvc:cors>
 
 	<mvc:mapping path="/api/**"
-		allowed-origins="http://domain1.com, http://domain2.com"
+		allowed-origins="https://domain1.com, https://domain2.com"
 		allowed-methods="GET, PUT"
 		allowed-headers="header1, header2, header3"
 		exposed-headers="header1, header2" allow-credentials="true"
 		max-age="123" />
 
 	<mvc:mapping path="/resources/**"
-		allowed-origins="http://domain1.com" />
+		allowed-origins="https://domain1.com" />
 
 </mvc:cors>
 ----
@@ -271,7 +271,7 @@ CorsConfiguration config = new CorsConfiguration();
 // config.applyPermitDefaultValues()
 
 config.setAllowCredentials(true);
-config.addAllowedOrigin("http://domain1.com");
+config.addAllowedOrigin("https://domain1.com");
 config.addAllowedHeader("*");
 config.addAllowedMethod("*");
 

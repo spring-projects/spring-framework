@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -191,12 +191,12 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 * requestURI}. This method must be invoked before any calls to {@link #path(String)}
 	 * or {@link #pathSegment(String...)}.
 	 * <pre>
-	 * GET http://foo.com/rest/books/6.json
+	 * GET http://www.foo.com/rest/books/6.json
 	 *
 	 * ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromRequestUri(this.request);
 	 * String ext = builder.removePathExtension();
 	 * String uri = builder.path("/pages/1.{ext}").buildAndExpand(ext).toUriString();
-	 * assertEquals("http://foo.com/rest/books/6/pages/1.json", result);
+	 * assertEquals("http://www.foo.com/rest/books/6/pages/1.json", result);
 	 * </pre>
 	 * @return the removed path extension for possible re-use, or {@code null}
 	 * @since 4.0

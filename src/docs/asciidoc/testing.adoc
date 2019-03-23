@@ -90,7 +90,7 @@ and configuration in testing scenarios without modification.
 The `org.springframework.mock.web` package contains a comprehensive set of Servlet API
 mock objects that are useful for testing web contexts, controllers, and filters. These
 mock objects are targeted at usage with Spring's Web MVC framework and are generally more
-convenient to use than dynamic mock objects (such as http://www.easymock.org[EasyMock])
+convenient to use than dynamic mock objects (such as http://easymock.org/[EasyMock])
 or alternative Servlet API mock objects (such as http://www.mockobjects.com[MockObjects]).
 
 TIP: Since Spring Framework 5.0, the mock objects in `org.springframework.mock.web` are
@@ -2989,7 +2989,7 @@ suite. This can be achieved by executing all tests as a group within an IDE. Sim
 when executing tests with a build framework such as Ant, Maven, or Gradle, it is
 important to make sure that the build framework does not fork between tests. For example,
 if the
-http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode[`forkMode`]
+https://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode[`forkMode`]
 for the Maven Surefire plug-in is set to `always` or `pertest`, the TestContext framework
 cannot cache application contexts between test classes, and the build process runs
 significantly more slowly as a result.
@@ -3287,7 +3287,7 @@ shows this configuration:
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<!-- this bean will be injected into the HibernateTitleRepositoryTests class -->
 		<bean id="titleRepository" class="com.foo.repository.hibernate.HibernateTitleRepository">
@@ -4269,7 +4269,7 @@ TestNG:
 
 * Dependency injection for test constructors, test methods, and test lifecycle callback
   methods. See <<testcontext-junit-jupiter-di>> for further details.
-* Powerful support for link:http://junit.org/junit5/docs/current/user-guide/#extensions-conditions[conditional
+* Powerful support for link:https://junit.org/junit5/docs/current/user-guide/#extensions-conditions[conditional
   test execution] based on SpEL expressions, environment variables, system properties,
   and so on. See the documentation for `@EnabledIf` and `@DisabledIf` in
   <<integration-testing-annotations-junit-jupiter>> for further details and examples.
@@ -4343,7 +4343,7 @@ See the documentation for `@SpringJUnitConfig` and `@SpringJUnitWebConfig` in
 ===== Dependency Injection with `SpringExtension`
 
 `SpringExtension` implements the
-link:http://junit.org/junit5/docs/current/user-guide/#extensions-parameter-resolution[`ParameterResolver`]
+link:https://junit.org/junit5/docs/current/user-guide/#extensions-parameter-resolution[`ParameterResolver`]
 extension API from JUnit Jupiter, which lets Spring provide dependency injection for test
 constructors, test methods, and test lifecycle callback methods.
 
@@ -5023,7 +5023,7 @@ when using HTML-based views. This integration lets you:
 
 * Easily test HTML pages by using tools such as
   http://htmlunit.sourceforge.net/[HtmlUnit],
-  http://seleniumhq.org/projects/webdriver/[WebDriver], and
+  https://www.seleniumhq.org[WebDriver], and
   http://www.gebish.org/manual/current/#spock-junit-testng[Geb] without the need to
   deploy to a Servlet container.
 * Test JavaScript within pages.
@@ -5246,7 +5246,7 @@ to create a message, as the following example shows:
 ----
 
 Finally, we can verify that a new message was created successfully. The following
-assertions use the http://joel-costigliola.github.io/assertj/[AssertJ] library:
+assertions use the https://joel-costigliola.github.io/assertj/[AssertJ] library:
 
 [source,java,indent=0]
 ----
@@ -5345,7 +5345,7 @@ TIP: For additional information on creating a `MockMvc` instance, see
 
 In the previous sections, we have seen how to use MockMvc in conjunction with the raw
 HtmlUnit APIs. In this section, we use additional abstractions within the Selenium
-http://docs.seleniumhq.org/projects/webdriver/[WebDriver] to make things even easier.
+https://docs.seleniumhq.org/projects/webdriver/[WebDriver] to make things even easier.
 
 [[spring-mvc-test-server-htmlunit-webdriver-why]]
 ====== Why WebDriver and MockMvc?
@@ -5354,7 +5354,7 @@ We can already use HtmlUnit and MockMvc, so why would we want to use WebDriver? 
 Selenium WebDriver provides a very elegant API that lets us easily organize our code. To
 better show how it works, we explore an example in this section.
 
-NOTE: Despite being a part of http://docs.seleniumhq.org/[Selenium], WebDriver does not
+NOTE: Despite being a part of https://docs.seleniumhq.org/[Selenium], WebDriver does not
 require a Selenium Server to run your tests.
 
 Suppose we need to ensure that a message is created properly. The tests involve finding
@@ -5546,7 +5546,7 @@ annotation to look up our submit button with a `css` selector (*input[type=submi
 
 
 Finally, we can verify that a new message was created successfully. The following
-assertions use the http://joel-costigliola.github.io/assertj/[AssertJ] assertion library:
+assertions use the https://joel-costigliola.github.io/assertj/[AssertJ] assertion library:
 
 [source,java,indent=0]
 ----
@@ -5889,23 +5889,23 @@ include::testing-webtestclient.adoc[leveloffset=+2]
 == Further Resources
 See the following resources for more information about testing:
 
-* http://www.junit.org/[JUnit]: "`A programmer-oriented testing framework for Java`".
+* https://www.junit.org/[JUnit]: "`A programmer-oriented testing framework for Java`".
   Used by the Spring Framework in its test suite.
-* http://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
+* https://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
   for annotations, test groups, data-driven testing, distributed testing, and other features.
-* http://joel-costigliola.github.io/assertj/[AssertJ]: "`Fluent assertions for Java`",
+* https://joel-costigliola.github.io/assertj/[AssertJ]: "`Fluent assertions for Java`",
   including support for Java 8 lambdas, streams, and other features.
-* http://en.wikipedia.org/wiki/Mock_Object[Mock Objects]: Article in Wikipedia.
+* https://en.wikipedia.org/wiki/Mock_Object[Mock Objects]: Article in Wikipedia.
 * http://www.mockobjects.com/[MockObjects.com]: Web site dedicated to mock objects, a
   technique for improving the design of code within test-driven development.
-* http://mockito.org/[Mockito]: Java mock library based on the
+* https://mockito.github.io[Mockito]: Java mock library based on the
   http://xunitpatterns.com/Test%20Spy.html[Test Spy] pattern.
-* http://www.easymock.org/[EasyMock]: Java library "`that provides Mock Objects for
+* https://easymock.org/[EasyMock]: Java library "`that provides Mock Objects for
   interfaces (and objects through the class extension) by generating them on the fly
   using Java's proxy mechanism.`" Used by the Spring Framework in its test suite.
-* http://www.jmock.org/[JMock]: Library that supports test-driven development of Java
+* https://jmock.org/[JMock]: Library that supports test-driven development of Java
   code with mock objects.
 * http://dbunit.sourceforge.net/[DbUnit]: JUnit extension (also usable with Ant and
   Maven) that is targeted at database-driven projects and, among other things, puts your
   database into a known state between test runs.
-* http://grinder.sourceforge.net/[The Grinder]: Java load testing framework.
+* https://sourceforge.net/projects/grinder/[The Grinder]: Java load testing framework.

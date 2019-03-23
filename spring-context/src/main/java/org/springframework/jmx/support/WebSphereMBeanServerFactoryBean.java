@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,8 +35,8 @@ import org.springframework.lang.Nullable;
  * which uses standard JMX 1.2 API to access the platform's MBeanServer.
  *
  * <p>See the javadocs for WebSphere's
- * <a href="http://bit.ly/UzccDt">{@code AdminServiceFactory}</a>
- * and <a href="http://bit.ly/TRlX2r">{@code MBeanFactory}</a>.
+ * <a href="https://bit.ly/UzccDt">{@code AdminServiceFactory}</a>
+ * and <a href="https://bit.ly/TRlX2r">{@code MBeanFactory}</a>.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop

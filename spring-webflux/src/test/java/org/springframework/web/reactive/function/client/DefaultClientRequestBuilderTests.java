@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,14 +48,14 @@ public class DefaultClientRequestBuilderTests {
 
 	@Test
 	public void from() throws URISyntaxException {
-		ClientRequest other = ClientRequest.create(GET, URI.create("http://example.com"))
+		ClientRequest other = ClientRequest.create(GET, URI.create("https://example.com"))
 				.header("foo", "bar")
 				.cookie("baz", "qux").build();
 		ClientRequest result = ClientRequest.from(other)
 				.headers(httpHeaders -> httpHeaders.set("foo", "baar"))
 				.cookies(cookies -> cookies.set("baz", "quux"))
 		.build();
-		assertEquals(new URI("http://example.com"), result.url());
+		assertEquals(new URI("https://example.com"), result.url());
 		assertEquals(GET, result.method());
 		assertEquals(1, result.headers().size());
 		assertEquals("baar", result.headers().getFirst("foo"));
@@ -65,7 +65,7 @@ public class DefaultClientRequestBuilderTests {
 
 	@Test
 	public void method() throws URISyntaxException {
-		URI url = new URI("http://example.com");
+		URI url = new URI("https://example.com");
 		ClientRequest.Builder builder = ClientRequest.create(DELETE, url);
 		assertEquals(DELETE, builder.build().method());
 
@@ -75,8 +75,8 @@ public class DefaultClientRequestBuilderTests {
 
 	@Test
 	public void url() throws URISyntaxException {
-		URI url1 = new URI("http://example.com/foo");
-		URI url2 = new URI("http://example.com/bar");
+		URI url1 = new URI("https://example.com/foo");
+		URI url2 = new URI("https://example.com/bar");
 		ClientRequest.Builder builder = ClientRequest.create(DELETE, url1);
 		assertEquals(url1, builder.build().url());
 
@@ -86,14 +86,14 @@ public class DefaultClientRequestBuilderTests {
 
 	@Test
 	public void cookie() {
-		ClientRequest result = ClientRequest.create(GET, URI.create("http://example.com"))
+		ClientRequest result = ClientRequest.create(GET, URI.create("https://example.com"))
 				.cookie("foo", "bar").build();
 		assertEquals("bar", result.cookies().getFirst("foo"));
 	}
 
 	@Test
 	public void build() {
-		ClientRequest result = ClientRequest.create(GET, URI.create("http://example.com"))
+		ClientRequest result = ClientRequest.create(GET, URI.create("https://example.com"))
 				.header("MyKey", "MyValue")
 				.cookie("foo", "bar")
 				.build();
@@ -119,7 +119,7 @@ public class DefaultClientRequestBuilderTests {
 					return response.writeWith(Mono.just(buffer));
 				};
 
-		ClientRequest result = ClientRequest.create(POST, URI.create("http://example.com"))
+		ClientRequest result = ClientRequest.create(POST, URI.create("https://example.com"))
 				.body(inserter).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
@@ -141,7 +141,7 @@ public class DefaultClientRequestBuilderTests {
 	public void bodyClass() {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
-		ClientRequest result = ClientRequest.create(POST, URI.create("http://example.com"))
+		ClientRequest result = ClientRequest.create(POST, URI.create("https://example.com"))
 				.body(publisher, String.class).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
@@ -164,7 +164,7 @@ public class DefaultClientRequestBuilderTests {
 		String body = "foo";
 		Publisher<String> publisher = Mono.just(body);
 		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
-		ClientRequest result = ClientRequest.create(POST, URI.create("http://example.com"))
+		ClientRequest result = ClientRequest.create(POST, URI.create("https://example.com"))
 				.body(publisher, typeReference).build();
 
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();

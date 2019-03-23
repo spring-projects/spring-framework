@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -158,7 +158,7 @@ public class DefaultRenderingResponseTests {
 				.header(HttpHeaders.ETAG, etag)
 				.build();
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "http://example.com");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "https://example.com");
 		request.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -177,7 +177,7 @@ public class DefaultRenderingResponseTests {
 				.header(HttpHeaders.LAST_MODIFIED, DateTimeFormatter.RFC_1123_DATE_TIME.format(oneMinuteBeforeNow))
 				.build();
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "http://example.com");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "https://example.com");
 		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE,DateTimeFormatter.RFC_1123_DATE_TIME.format(now));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 

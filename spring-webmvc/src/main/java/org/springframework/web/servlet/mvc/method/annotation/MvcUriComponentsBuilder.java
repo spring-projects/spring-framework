@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -82,7 +82,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * </ul>
  *
  * <p><strong>Note:</strong> This class uses values from "Forwarded"
- * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+ * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
  * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
  * if present, in order to reflect the client-originated protocol and address.
  * Consider using the {@code ForwardedHeaderFilter} in order to choose from a

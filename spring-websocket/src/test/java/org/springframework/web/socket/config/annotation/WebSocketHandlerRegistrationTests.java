@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -126,7 +126,7 @@ public class WebSocketHandlerRegistrationTests {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
-		this.registration.addHandler(handler, "/foo").addInterceptors(interceptor).setAllowedOrigins("http://mydomain1.com");
+		this.registration.addHandler(handler, "/foo").addInterceptors(interceptor).setAllowedOrigins("https://mydomain1.com");
 
 		List<Mapping> mappings = this.registration.getMappings();
 		assertEquals(1, mappings.size());
@@ -147,7 +147,7 @@ public class WebSocketHandlerRegistrationTests {
 
 		this.registration.addHandler(handler, "/foo")
 				.addInterceptors(interceptor)
-				.setAllowedOrigins("http://mydomain1.com")
+				.setAllowedOrigins("https://mydomain1.com")
 				.withSockJS();
 
 		this.registration.getSockJsServiceRegistration().setTaskScheduler(this.taskScheduler);
@@ -159,7 +159,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertEquals(handler, mapping.webSocketHandler);
 		assertEquals("/foo/**", mapping.path);
 		assertNotNull(mapping.sockJsService);
-		assertTrue(mapping.sockJsService.getAllowedOrigins().contains("http://mydomain1.com"));
+		assertTrue(mapping.sockJsService.getAllowedOrigins().contains("https://mydomain1.com"));
 		List<HandshakeInterceptor> interceptors = mapping.sockJsService.getHandshakeInterceptors();
 		assertEquals(interceptor, interceptors.get(0));
 		assertEquals(OriginHandshakeInterceptor.class, interceptors.get(1).getClass());

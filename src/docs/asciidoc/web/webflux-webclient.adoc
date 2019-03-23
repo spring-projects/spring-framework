@@ -234,7 +234,7 @@ The following example shows how to do so:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-	WebClient client = WebClient.create("http://example.org");
+	WebClient client = WebClient.create("https://example.org");
 
 	Mono<Person> result = client.get()
 			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
@@ -513,7 +513,7 @@ WebClient client = WebClient.builder()
 		})
 		.build();
 
-client.get().uri("http://example.org/")
+client.get().uri("https://example.org/")
 		.attribute("myAttribute", "...")
 		.retrieve()
 		.bodyToMono(Void.class);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 
 /**
  * Asynchronous extension of the {@link HttpComponentsClientHttpRequestFactory}. Uses
- * <a href="http://hc.apache.org/httpcomponents-asyncclient-dev/">Apache HttpComponents
+ * <a href="https://hc.apache.org/httpcomponents-asyncclient-dev/">Apache HttpComponents
  * HttpAsyncClient 4.0</a> to create requests.
  *
  * @author Arjen Poutsma

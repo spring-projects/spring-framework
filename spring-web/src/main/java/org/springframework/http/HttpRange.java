@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 4.2
- * @see <a href="http://tools.ietf.org/html/rfc7233">HTTP/1.1: Range Requests</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7233">HTTP/1.1: Range Requests</a>
  * @see HttpHeaders#setRange(List)
  * @see HttpHeaders#getRange()
  */
@@ -99,7 +99,7 @@ public abstract class HttpRange {
 	 * Create an {@code HttpRange} from the given position to the end.
 	 * @param firstBytePos the first byte position
 	 * @return a byte range that ranges from {@code firstPos} till the end
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
 	 */
 	public static HttpRange createByteRange(long firstBytePos) {
 		return new ByteRange(firstBytePos, null);
@@ -110,7 +110,7 @@ public abstract class HttpRange {
 	 * @param firstBytePos the first byte position
 	 * @param lastBytePos the last byte position
 	 * @return a byte range that ranges from {@code firstPos} till {@code lastPos}
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
 	 */
 	public static HttpRange createByteRange(long firstBytePos, long lastBytePos) {
 		return new ByteRange(firstBytePos, lastBytePos);
@@ -120,7 +120,7 @@ public abstract class HttpRange {
 	 * Create an {@code HttpRange} that ranges over the last given number of bytes.
 	 * @param suffixLength the number of bytes for the range
 	 * @return a byte range that ranges over the last {@code suffixLength} number of bytes
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
 	 */
 	public static HttpRange createSuffixRange(long suffixLength) {
 		return new SuffixByteRange(suffixLength);
@@ -224,7 +224,7 @@ public abstract class HttpRange {
 
 	/**
 	 * Represents an HTTP/1.1 byte range, with a first and optional last position.
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
 	 * @see HttpRange#createByteRange(long)
 	 * @see HttpRange#createByteRange(long, long)
 	 */
@@ -300,7 +300,7 @@ public abstract class HttpRange {
 
 	/**
 	 * Represents an HTTP/1.1 suffix byte range, with a number of suffix bytes.
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.1">Byte Ranges</a>
 	 * @see HttpRange#createSuffixRange(long)
 	 */
 	private static class SuffixByteRange extends HttpRange {

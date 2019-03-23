@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import static org.testng.Assert.*;
 /**
  * <p>
  * TestNG based integration test to assess the claim in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3880"
+ * href="https://opensource.atlassian.com/projects/spring/browse/SPR-3880"
  * target="_blank">SPR-3880</a> that a &quot;context marked dirty using
  * {@link DirtiesContext &#064;DirtiesContext} in [a] TestNG based test is not
  * reloaded in subsequent tests&quot;.

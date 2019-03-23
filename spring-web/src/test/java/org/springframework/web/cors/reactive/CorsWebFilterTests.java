@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,7 +54,7 @@ public class CorsWebFilterTests {
 
 	@Before
 	public void setup() throws Exception {
-		config.setAllowedOrigins(Arrays.asList("http://domain1.com", "http://domain2.com"));
+		config.setAllowedOrigins(Arrays.asList("https://domain1.com", "https://domain2.com"));
 		config.setAllowedMethods(Arrays.asList("GET", "POST"));
 		config.setAllowedHeaders(Arrays.asList("header1", "header2"));
 		config.setExposedHeaders(Arrays.asList("header3", "header4"));
@@ -68,7 +68,7 @@ public class CorsWebFilterTests {
 		WebFilterChain filterChain = (filterExchange) -> {
 			try {
 				HttpHeaders headers = filterExchange.getResponse().getHeaders();
-				assertEquals("http://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+				assertEquals("https://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 				assertEquals("header3, header4", headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
 			} catch (AssertionError ex) {
 				return Mono.error(ex);
@@ -78,9 +78,9 @@ public class CorsWebFilterTests {
 		};
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest
-						.get("http://domain1.com/test.html")
+						.get("https://domain1.com/test.html")
 						.header(HOST, "domain1.com")
-						.header(ORIGIN, "http://domain2.com")
+						.header(ORIGIN, "https://domain2.com")
 						.header("header2", "foo"));
 		this.filter.filter(exchange, filterChain);
 	}
@@ -89,9 +89,9 @@ public class CorsWebFilterTests {
 	public void invalidActualRequest() throws ServletException, IOException {
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest
-						.delete("http://domain1.com/test.html")
+						.delete("https://domain1.com/test.html")
 						.header(HOST, "domain1.com")
-						.header(ORIGIN, "http://domain2.com")
+						.header(ORIGIN, "https://domain2.com")
 						.header("header2", "foo"));
 
 		WebFilterChain filterChain = (filterExchange) -> Mono.error(
@@ -106,9 +106,9 @@ public class CorsWebFilterTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest
-						.options("http://domain1.com/test.html")
+						.options("https://domain1.com/test.html")
 						.header(HOST, "domain1.com")
-						.header(ORIGIN, "http://domain2.com")
+						.header(ORIGIN, "https://domain2.com")
 						.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET.name())
 						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2")
 		);
@@ -118,7 +118,7 @@ public class CorsWebFilterTests {
 		filter.filter(exchange, filterChain);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();
-		assertEquals("http://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("https://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals("header1, header2", headers.getFirst(ACCESS_CONTROL_ALLOW_HEADERS));
 		assertEquals("header3, header4", headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
 		assertEquals(123L, Long.parseLong(headers.getFirst(ACCESS_CONTROL_MAX_AGE)));
@@ -129,9 +129,9 @@ public class CorsWebFilterTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest
-						.options("http://domain1.com/test.html")
+						.options("https://domain1.com/test.html")
 						.header(HOST, "domain1.com")
-						.header(ORIGIN, "http://domain2.com")
+						.header(ORIGIN, "https://domain2.com")
 						.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.DELETE.name())
 						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2"));
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -405,12 +405,12 @@ public class StandardEnvironmentTests {
 		SecurityManager securityManager = new SecurityManager() {
 			@Override
 			public void checkPropertiesAccess() {
-				// see http://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getProperties()
+				// see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getProperties()
 				throw new AccessControlException("Accessing the system properties is disallowed");
 			}
 			@Override
 			public void checkPropertyAccess(String key) {
-				// see http://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getProperty(java.lang.String)
+				// see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getProperty(java.lang.String)
 				if (DISALLOWED_PROPERTY_NAME.equals(key)) {
 					throw new AccessControlException(
 							String.format("Accessing the system property [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
@@ -472,11 +472,11 @@ public class StandardEnvironmentTests {
 		SecurityManager securityManager = new SecurityManager() {
 			@Override
 			public void checkPermission(Permission perm) {
-				//see http://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getenv()
+				//see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getenv()
 				if ("getenv.*".equals(perm.getName())) {
 					throw new AccessControlException("Accessing the system environment is disallowed");
 				}
-				//see http://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getenv(java.lang.String)
+				//see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getenv(java.lang.String)
 				if (("getenv."+DISALLOWED_PROPERTY_NAME).equals(perm.getName())) {
 					throw new AccessControlException(
 							String.format("Accessing the system environment variable [%s] is disallowed", DISALLOWED_PROPERTY_NAME));

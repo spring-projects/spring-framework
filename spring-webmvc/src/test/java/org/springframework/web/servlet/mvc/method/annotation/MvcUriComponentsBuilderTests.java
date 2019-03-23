@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -122,48 +122,51 @@ public class MvcUriComponentsBuilderTests {
 
 	@Test
 	public void fromControllerWithCustomBaseUrlViaStaticCall() {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		UriComponents uriComponents = fromController(builder, PersonControllerImpl.class).build();
 
-		assertEquals("http://example.org:9090/base/people", uriComponents.toString());
-		assertEquals("http://example.org:9090/base", builder.toUriString());
+		assertEquals("https://example.org:9090/base/people", uriComponents.toString());
+		assertEquals("https://example.org:9090/base", builder.toUriString());
 	}
 
 	@Test
 	public void fromControllerWithCustomBaseUrlViaInstance() {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		MvcUriComponentsBuilder mvcBuilder = relativeTo(builder);
 		UriComponents uriComponents = mvcBuilder.withController(PersonControllerImpl.class).build();
 
-		assertEquals("http://example.org:9090/base/people", uriComponents.toString());
-		assertEquals("http://example.org:9090/base", builder.toUriString());
+		assertEquals("https://example.org:9090/base/people", uriComponents.toString());
+		assertEquals("https://example.org:9090/base", builder.toUriString());
 	}
 
 	@Test
 	public void usesForwardedHostAsHostIfHeaderIsSet() throws Exception {
+		this.request.setScheme("https");
 		this.request.addHeader("X-Forwarded-Host", "somethingDifferent");
 		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
 
-		assertThat(uriComponents.toUriString(), startsWith("http://somethingDifferent"));
+		assertThat(uriComponents.toUriString(), startsWith("https://somethingDifferent"));
 	}
 
 	@Test
 	public void usesForwardedHostAndPortFromHeader() throws Exception {
+		this.request.setScheme("https");
 		request.addHeader("X-Forwarded-Host", "foobar:8088");
 		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
 
-		assertThat(uriComponents.toUriString(), startsWith("http://foobar:8088"));
+		assertThat(uriComponents.toUriString(), startsWith("https://foobar:8088"));
 	}
 
 	@Test
 	public void usesFirstHostOfXForwardedHost() throws Exception {
+		this.request.setScheme("https");
 		this.request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
 		adaptRequestFromForwardedHeaders();
 		UriComponents uriComponents = fromController(PersonControllerImpl.class).build();
 
-		assertThat(uriComponents.toUriString(), startsWith("http://barfoo:8888"));
+		assertThat(uriComponents.toUriString(), startsWith("https://barfoo:8888"));
 	}
 
 	// SPR-16668
@@ -234,23 +237,23 @@ public class MvcUriComponentsBuilderTests {
 
 	@Test
 	public void fromMethodNameWithCustomBaseUrlViaStaticCall() {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		UriComponents uriComponents = fromMethodName(builder, ControllerWithMethods.class,
 				"methodWithPathVariable", "1").build();
 
-		assertEquals("http://example.org:9090/base/something/1/foo", uriComponents.toString());
-		assertEquals("http://example.org:9090/base", builder.toUriString());
+		assertEquals("https://example.org:9090/base/something/1/foo", uriComponents.toString());
+		assertEquals("https://example.org:9090/base", builder.toUriString());
 	}
 
 	@Test
 	public void fromMethodNameWithCustomBaseUrlViaInstance() {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		MvcUriComponentsBuilder mvcBuilder = relativeTo(builder);
 		UriComponents uriComponents = mvcBuilder.withMethodName(ControllerWithMethods.class,
 				"methodWithPathVariable", "1").build();
 
-		assertEquals("http://example.org:9090/base/something/1/foo", uriComponents.toString());
-		assertEquals("http://example.org:9090/base", builder.toUriString());
+		assertEquals("https://example.org:9090/base/something/1/foo", uriComponents.toString());
+		assertEquals("https://example.org:9090/base", builder.toUriString());
 	}
 
 	@Test  // SPR-14405
@@ -327,21 +330,21 @@ public class MvcUriComponentsBuilderTests {
 
 	@Test
 	public void fromMethodCallWithCustomBaseUrlViaStaticCall() {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		UriComponents uriComponents = fromMethodCall(builder, on(ControllerWithMethods.class).myMethod(null)).build();
 
-		assertEquals("http://example.org:9090/base/something/else", uriComponents.toString());
-		assertEquals("http://example.org:9090/base", builder.toUriString());
+		assertEquals("https://example.org:9090/base/something/else", uriComponents.toString());
+		assertEquals("https://example.org:9090/base", builder.toUriString());
 	}
 
 	@Test
 	public void fromMethodCallWithCustomBaseUrlViaInstance() {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.org:9090/base");
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("https://example.org:9090/base");
 		MvcUriComponentsBuilder mvcBuilder = relativeTo(builder);
 		UriComponents result = mvcBuilder.withMethodCall(on(ControllerWithMethods.class).myMethod(null)).build();
 
-		assertEquals("http://example.org:9090/base/something/else", result.toString());
-		assertEquals("http://example.org:9090/base", builder.toUriString());
+		assertEquals("https://example.org:9090/base/something/else", result.toString());
+		assertEquals("https://example.org:9090/base", builder.toUriString());
 	}
 
 	@Test  // SPR-16710
@@ -395,10 +398,10 @@ public class MvcUriComponentsBuilderTests {
 
 		initWebApplicationContext(WebConfig.class);
 
-		UriComponentsBuilder baseUrl = UriComponentsBuilder.fromUriString("http://example.org:9999/base");
+		UriComponentsBuilder baseUrl = UriComponentsBuilder.fromUriString("https://example.org:9999/base");
 		MvcUriComponentsBuilder mvcBuilder = relativeTo(baseUrl);
 		String url = mvcBuilder.withMappingName("PAC#getAddressesForCountry").arg(0, "DE").buildAndExpand(123);
-		assertEquals("http://example.org:9999/base/people/123/addresses/DE", url);
+		assertEquals("https://example.org:9999/base/people/123/addresses/DE", url);
 	}
 
 	@Test // SPR-17027
@@ -420,11 +423,12 @@ public class MvcUriComponentsBuilderTests {
 
 		initWebApplicationContext(PathPrefixWebConfig.class);
 
+		this.request.setScheme("https");
 		this.request.setServerName("example.org");
 		this.request.setServerPort(9999);
 		this.request.setContextPath("/base");
 
-		assertEquals("http://example.org:9999/base/api/people/123/addresses",
+		assertEquals("https://example.org:9999/base/api/people/123/addresses",
 				fromController(PersonsAddressesController.class).buildAndExpand("123").toString());
 	}
 
@@ -433,11 +437,12 @@ public class MvcUriComponentsBuilderTests {
 
 		initWebApplicationContext(PathPrefixWebConfig.class);
 
+		this.request.setScheme("https");
 		this.request.setServerName("example.org");
 		this.request.setServerPort(9999);
 		this.request.setContextPath("/base");
 
-		assertEquals("http://example.org:9999/base/api/people/123/addresses/DE",
+		assertEquals("https://example.org:9999/base/api/people/123/addresses/DE",
 				fromMethodCall(on(PersonsAddressesController.class).getAddressesForCountry("DE"))
 						.buildAndExpand("123").toString());
 	}
