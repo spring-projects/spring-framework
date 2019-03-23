@@ -28,11 +28,13 @@ correct schema so that the tags in the `util` namespace are available to you):
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:util="http://www.springframework.org/schema/util"__ xsi:schemaLocation="
+		xmlns:util="http://www.springframework.org/schema/util"
+		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"__>
+			http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
 			<!-- bean definitions here -->
+
 	</beans>
 ----
 
@@ -517,11 +519,13 @@ are available to you):
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:aop="http://www.springframework.org/schema/aop"__ xsi:schemaLocation="
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"__>
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- bean definitions here -->
+
 	</beans>
 ----
 
@@ -542,11 +546,13 @@ available to you:
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:context="http://www.springframework.org/schema/context"__ xsi:schemaLocation="
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"__>
+			http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<!-- bean definitions here -->
+
 	</beans>
 ----
 
