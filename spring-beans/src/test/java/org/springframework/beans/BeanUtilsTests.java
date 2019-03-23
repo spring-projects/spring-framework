@@ -20,7 +20,6 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -49,13 +48,11 @@ public class BeanUtilsTests {
 
 	@Test(expected = FatalBeanException.class)
 	public void testInstantiateClassGivenInterface() {
-		BeanUtils.instantiateClass(ArrayList.class);
 		BeanUtils.instantiateClass(List.class);
 	}
 
 	@Test(expected = FatalBeanException.class)
 	public void testInstantiateClassGivenClassWithoutDefaultConstructor() {
-		BeanUtils.instantiateClass(ArrayList.class);
 		BeanUtils.instantiateClass(CustomDateEditor.class);
 	}
 
@@ -452,19 +449,6 @@ public class BeanUtilsTests {
 		}
 	}
 
-	private static class BeanWithSingleNonDefaultConstructor {
-
-		private final String name;
-
-		public BeanWithSingleNonDefaultConstructor(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
-
 	private static class BeanWithNullableTypes {
 
 		private Integer counter;
@@ -473,6 +457,7 @@ public class BeanUtilsTests {
 
 		private String value;
 
+		@SuppressWarnings("unused")
 		public BeanWithNullableTypes(@Nullable Integer counter, @Nullable Boolean flag, String value) {
 			this.counter = counter;
 			this.flag = flag;
@@ -502,6 +487,7 @@ public class BeanUtilsTests {
 
 		private String value;
 
+		@SuppressWarnings("unused")
 		public BeanWithPrimitiveTypes(int counter, boolean flag, String value) {
 			this.counter = counter;
 			this.flag = flag;
