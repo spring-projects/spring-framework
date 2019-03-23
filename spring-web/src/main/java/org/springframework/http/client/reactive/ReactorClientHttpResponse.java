@@ -66,13 +66,12 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 						throw new IllegalStateException("The client response body can only be consumed once.");
 					}
 				})
-				.doOnCancel(() -> {
+				.doOnCancel(() ->
 					// https://github.com/reactor/reactor-netty/issues/503
 					// FluxReceive rejects multiple subscribers, but not after a cancel().
 					// Subsequent subscribers after cancel() will not be rejected, but will hang instead.
 					// So we need to intercept and reject them in that case.
-					this.rejectSubscribers.set(true);
-				})
+					this.rejectSubscribers.set(true))
 				.map(byteBuf -> {
 					byteBuf.retain();
 					return this.bufferFactory.wrap(byteBuf);
