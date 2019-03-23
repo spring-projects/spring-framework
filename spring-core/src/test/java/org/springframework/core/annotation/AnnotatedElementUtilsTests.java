@@ -701,16 +701,11 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	public void javaLangAnnotationTypeViaFindMergedAnnotation() throws Exception {
-		Constructor<?> deprecatedCtor = Date.class.getConstructor(String.class);
-		assertEquals(deprecatedCtor.getAnnotation(Deprecated.class), findMergedAnnotation(deprecatedCtor, Deprecated.class));
-		assertEquals(Date.class.getAnnotation(Deprecated.class), findMergedAnnotation(Date.class, Deprecated.class));
-	}
-
-	@Test
 	public void javaxAnnotationTypeViaFindMergedAnnotation() throws Exception {
-		assertEquals(ResourceHolder.class.getAnnotation(Resource.class), findMergedAnnotation(ResourceHolder.class, Resource.class));
-		assertEquals(SpringAppConfigClass.class.getAnnotation(Resource.class), findMergedAnnotation(SpringAppConfigClass.class, Resource.class));
+		assertEquals(ResourceHolder.class.getAnnotation(Resource.class),
+				findMergedAnnotation(ResourceHolder.class, Resource.class));
+		assertEquals(SpringAppConfigClass.class.getAnnotation(Resource.class),
+				findMergedAnnotation(SpringAppConfigClass.class, Resource.class));
 	}
 
 	@Test

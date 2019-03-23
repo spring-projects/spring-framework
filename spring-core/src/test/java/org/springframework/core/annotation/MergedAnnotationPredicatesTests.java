@@ -16,20 +16,17 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link MergedAnnotationPredicates}.
@@ -55,34 +52,17 @@ public class MergedAnnotationPredicatesTests {
 	}
 
 	@Test
-	public void typeInStringArrayWhenStringArraysIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.typeIn((String[]) null)).withMessage(
-						"TypeNames must not be null");
-	}
-
-	@Test
 	public void typeInClassArrayWhenNameMatchesAccepts() {
-		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
-				WithTestAnnotation.class).get(TestAnnotation.class);
-		assertThat(MergedAnnotationPredicates.typeIn(TestAnnotation.class)).accepts(
-				annotation);
+		MergedAnnotation<TestAnnotation> annotation =
+				MergedAnnotations.from(WithTestAnnotation.class).get(TestAnnotation.class);
+		assertThat(MergedAnnotationPredicates.typeIn(TestAnnotation.class)).accepts(annotation);
 	}
 
 	@Test
 	public void typeInClassArrayWhenNameDoesNotMatchRejects() {
-		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
-				WithTestAnnotation.class).get(TestAnnotation.class);
-		assertThat(MergedAnnotationPredicates.typeIn(MissingAnnotation.class)).rejects(
-				annotation);
-	}
-
-	@Test
-	public void typeInClassArrayWhenClassArraysIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.typeIn(
-						(Class<Annotation>[]) null)).withMessage(
-								"Types must not be null");
+		MergedAnnotation<TestAnnotation> annotation =
+				MergedAnnotations.from(WithTestAnnotation.class).get(TestAnnotation.class);
+		assertThat(MergedAnnotationPredicates.typeIn(MissingAnnotation.class)).rejects(annotation);
 	}
 
 	@Test
@@ -90,8 +70,7 @@ public class MergedAnnotationPredicatesTests {
 		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
 				WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(
-				Collections.singleton(TestAnnotation.class.getName()))).accepts(
-						annotation);
+				Collections.singleton(TestAnnotation.class.getName()))).accepts(annotation);
 	}
 
 	@Test
@@ -107,15 +86,7 @@ public class MergedAnnotationPredicatesTests {
 		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
 				WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(Arrays.asList(
-				MissingAnnotation.class.getName(), MissingAnnotation.class))).rejects(
-						annotation);
-	}
-
-	@Test
-	public void typeInCollectionWhenCollectionIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.typeIn(
-						(Collection<?>) null)).withMessage("Types must not be null");
+				MissingAnnotation.class.getName(), MissingAnnotation.class))).rejects(annotation);
 	}
 
 	@Test
@@ -125,15 +96,13 @@ public class MergedAnnotationPredicatesTests {
 						MergedAnnotationPredicates.firstRunOf(
 								this::firstCharOfValue)).collect(Collectors.toList());
 		assertThat(filtered.stream().map(
-				annotation -> annotation.getString("value"))).containsExactly("a1", "a2",
-						"a3");
+				annotation -> annotation.getString("value"))).containsExactly("a1", "a2", "a3");
 	}
 
 	@Test
 	public void firstRunOfWhenValueExtractorIsNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.firstRunOf(null)).withMessage(
-						"ValueExtractor must not be null");
+				() -> MergedAnnotationPredicates.firstRunOf(null));
 	}
 
 	@Test
@@ -143,42 +112,38 @@ public class MergedAnnotationPredicatesTests {
 						MergedAnnotationPredicates.unique(
 								this::firstCharOfValue)).collect(Collectors.toList());
 		assertThat(filtered.stream().map(
-				annotation -> annotation.getString("value"))).containsExactly("a1", "b1",
-						"c1");
+				annotation -> annotation.getString("value"))).containsExactly("a1", "b1", "c1");
 	}
 
 	@Test
 	public void uniqueWhenKeyExtractorIsNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.unique(null)).withMessage(
-						"KeyExtractor must not be null");
+				() -> MergedAnnotationPredicates.unique(null));
 	}
 
 	private char firstCharOfValue(MergedAnnotation<TestAnnotation> annotation) {
 		return annotation.getString("value").charAt(0);
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(TestAnnotations.class)
-	static @interface TestAnnotation {
+	@interface TestAnnotation {
 
 		String value() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestAnnotations {
+	@interface TestAnnotations {
 
 		TestAnnotation[] value();
-
 	}
 
-	static @interface MissingAnnotation {
-
+	@interface MissingAnnotation {
 	}
 
 	@TestAnnotation("test")
 	static class WithTestAnnotation {
-
 	}
 
 	@TestAnnotation("a1")
@@ -191,7 +156,6 @@ public class MergedAnnotationPredicatesTests {
 	@TestAnnotation("c2")
 	@TestAnnotation("c3")
 	static class WithMultipleTestAnnotation {
-
 	}
 
 }

@@ -35,8 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.ConcurrentReferenceHashMap.Reference;
-import org.springframework.util.ConcurrentReferenceHashMap.Restructure;
 
 /**
  * A {@link ConcurrentHashMap} that uses {@link ReferenceType#SOFT soft} or
@@ -579,7 +577,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			}
 		}
 
-		private void restructure(boolean allowResize, Reference<K, V> ref) {
+		private void restructure(boolean allowResize, @Nullable Reference<K, V> ref) {
 			boolean needsResize;
 			lock();
 			try {

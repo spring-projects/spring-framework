@@ -68,14 +68,12 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 		return findOrderFromAnnotation(obj);
 	}
 
+	@Nullable
 	private Integer findOrderFromAnnotation(Object obj) {
-		AnnotatedElement element = obj instanceof AnnotatedElement
-				? (AnnotatedElement) obj
-				: obj.getClass();
-		MergedAnnotations annotations = MergedAnnotations.from(element,
-				SearchStrategy.EXHAUSTIVE);
+		AnnotatedElement element = (obj instanceof AnnotatedElement ? (AnnotatedElement) obj : obj.getClass());
+		MergedAnnotations annotations = MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE);
 		Integer order = OrderUtils.getOrderFromAnnotations(element, annotations);
-		if (order == null  && obj instanceof DecoratingProxy) {
+		if (order == null && obj instanceof DecoratingProxy) {
 			return findOrderFromAnnotation(((DecoratingProxy) obj).getDecoratedClass());
 		}
 		return order;

@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @since 5.2
  */
-class PackagesAnnotationFilter implements AnnotationFilter {
+final class PackagesAnnotationFilter implements AnnotationFilter {
 
 	private final String[] prefixes;
 
@@ -40,8 +40,9 @@ class PackagesAnnotationFilter implements AnnotationFilter {
 		Assert.notNull(packages, "Packages must not be null");
 		this.prefixes = new String[packages.length];
 		for (int i = 0; i < packages.length; i++) {
-			Assert.hasText(packages[i], "Package must not have empty elements");
-			this.prefixes[i] = packages[i] + ".";
+			String pkg = packages[i];
+			Assert.hasText(pkg, "Package must not have empty elements");
+			this.prefixes[i] = pkg + ".";
 		}
 		Arrays.sort(this.prefixes);
 		this.hashCode = Arrays.hashCode(this.prefixes);
@@ -49,27 +50,25 @@ class PackagesAnnotationFilter implements AnnotationFilter {
 
 
 	@Override
-	public boolean matches(@Nullable String annotationType) {
-		if (annotationType != null) {
-			for (String prefix : this.prefixes) {
-				if (annotationType.startsWith(prefix)) {
-					return true;
-				}
+	public boolean matches(String annotationType) {
+		for (String prefix : this.prefixes) {
+			if (annotationType.startsWith(prefix)) {
+				return true;
 			}
 		}
 		return false;
 	}
 
+
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (this == obj) {
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj == null || getClass() != obj.getClass()) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		PackagesAnnotationFilter other = (PackagesAnnotationFilter) obj;
-		return Arrays.equals(this.prefixes, other.prefixes);
+		return Arrays.equals(this.prefixes, ((PackagesAnnotationFilter) other).prefixes);
 	}
 
 	@Override

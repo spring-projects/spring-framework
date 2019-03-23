@@ -133,7 +133,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationType the annotation type to check
 	 * @return {@code true} if the annotation is present
 	 */
-	<A extends Annotation> boolean isPresent(@Nullable Class<A> annotationType);
+	<A extends Annotation> boolean isPresent(Class<A> annotationType);
 
 	/**
 	 * Return if the specified annotation is directly present. Equivalent to
@@ -141,7 +141,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationType the annotation type to check
 	 * @return {@code true} if the annotation is present
 	 */
-	boolean isPresent(@Nullable String annotationType);
+	boolean isPresent(String annotationType);
 
 	/**
 	 * Return if the specified annotation is directly present. Equivalent to
@@ -149,7 +149,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationType the annotation type to check
 	 * @return {@code true} if the annotation is present
 	 */
-	<A extends Annotation> boolean isDirectlyPresent(@Nullable Class<A> annotationType);
+	<A extends Annotation> boolean isDirectlyPresent(Class<A> annotationType);
 
 	/**
 	 * Return if the specified annotation is either directly present, or
@@ -158,7 +158,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationType the annotation type to check
 	 * @return {@code true} if the annotation is present
 	 */
-	boolean isDirectlyPresent(@Nullable String annotationType);
+	boolean isDirectlyPresent(String annotationType);
 
 	/**
 	 * Return the {@link MergedAnnotationSelectors#nearest() nearest} matching
@@ -167,7 +167,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationType the annotation type to get
 	 * @return a {@link MergedAnnotation} instance
 	 */
-	<A extends Annotation> MergedAnnotation<A> get(@Nullable Class<A> annotationType);
+	<A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType);
 
 	/**
 	 * Return the {@link MergedAnnotationSelectors#nearest() nearest} matching
@@ -179,7 +179,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotation} instance
 	 * @see MergedAnnotationPredicates
 	 */
-	<A extends Annotation> MergedAnnotation<A> get(@Nullable Class<A> annotationType,
+	<A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType,
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate);
 
 	/**
@@ -195,7 +195,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @see MergedAnnotationPredicates
 	 * @see MergedAnnotationSelectors
 	 */
-	<A extends Annotation> MergedAnnotation<A> get(@Nullable Class<A> annotationType,
+	<A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType,
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate,
 			@Nullable MergedAnnotationSelector<A> selector);
 
@@ -206,7 +206,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationType the annotation type to get
 	 * @return a {@link MergedAnnotation} instance
 	 */
-	<A extends Annotation> MergedAnnotation<A> get(@Nullable String annotationType);
+	<A extends Annotation> MergedAnnotation<A> get(String annotationType);
 
 	/**
 	 * Return the {@link MergedAnnotationSelectors#nearest() nearest} matching
@@ -218,7 +218,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotation} instance
 	 * @see MergedAnnotationPredicates
 	 */
-	<A extends Annotation> MergedAnnotation<A> get(@Nullable String annotationType,
+	<A extends Annotation> MergedAnnotation<A> get(String annotationType,
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate);
 
 	/**
@@ -234,7 +234,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @see MergedAnnotationPredicates
 	 * @see MergedAnnotationSelectors
 	 */
-	<A extends Annotation> MergedAnnotation<A> get(@Nullable String annotationType,
+	<A extends Annotation> MergedAnnotation<A> get(String annotationType,
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate,
 			@Nullable MergedAnnotationSelector<A> selector);
 
@@ -245,8 +245,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationType the annotation type to match
 	 * @return a stream of matching annotations
 	 */
-	<A extends Annotation> Stream<MergedAnnotation<A>> stream(
-			@Nullable Class<A> annotationType);
+	<A extends Annotation> Stream<MergedAnnotation<A>> stream(Class<A> annotationType);
 
 	/**
 	 * Stream all annotations and meta-annotations that match the specified
@@ -255,8 +254,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationType the annotation type to match
 	 * @return a stream of matching annotations
 	 */
-	<A extends Annotation> Stream<MergedAnnotation<A>> stream(
-			@Nullable String annotationType);
+	<A extends Annotation> Stream<MergedAnnotation<A>> stream(String annotationType);
 
 	/**
 	 * Stream all contained annotations and meta-annotations contained in this
@@ -269,6 +267,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 */
 	Stream<MergedAnnotation<Annotation>> stream();
 
+
 	/**
 	 * Create a new {@link MergedAnnotations} instance containing all
 	 * annotations and meta-annotations from the specified element. The
@@ -280,7 +279,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the element
 	 * annotations
 	 */
-	static MergedAnnotations from(@Nullable AnnotatedElement element) {
+	static MergedAnnotations from(AnnotatedElement element) {
 		return from(element, SearchStrategy.DIRECT);
 	}
 
@@ -293,10 +292,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the merged
 	 * element annotations
 	 */
-	static MergedAnnotations from(@Nullable AnnotatedElement element,
-			SearchStrategy searchStrategy) {
-		return from(element, searchStrategy, RepeatableContainers.standardRepeatables(),
-				AnnotationFilter.PLAIN);
+	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
+		return from(element, searchStrategy, RepeatableContainers.standardRepeatables(), AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -312,11 +309,10 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the merged
 	 * element annotations
 	 */
-	static MergedAnnotations from(@Nullable AnnotatedElement element,
-			SearchStrategy searchStrategy, RepeatableContainers repeatableContainers,
-			AnnotationFilter annotationFilter) {
-		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers,
-				annotationFilter);
+	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
+			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
+
+		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, annotationFilter);
 	}
 
 	/**
@@ -342,8 +338,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @see #from(AnnotatedElement)
 	 */
 	static MergedAnnotations from(@Nullable Object source, Annotation... annotations) {
-		return from(source, annotations, RepeatableContainers.standardRepeatables(),
-				AnnotationFilter.PLAIN);
+		return from(source, annotations, RepeatableContainers.standardRepeatables(), AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -360,10 +355,9 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the annotations
 	 */
 	static MergedAnnotations from(@Nullable Object source, Annotation[] annotations,
-			RepeatableContainers repeatableContainers,
-			AnnotationFilter annotationFilter) {
-		return TypeMappedAnnotations.from(source, annotations, repeatableContainers,
-				annotationFilter);
+			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
+
+		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, annotationFilter);
 	}
 
 
@@ -406,7 +400,6 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		 * not need to be meta-annotated with {@link Inherited @Inherited}.
 		 */
 		EXHAUSTIVE
-
 	}
 
 }

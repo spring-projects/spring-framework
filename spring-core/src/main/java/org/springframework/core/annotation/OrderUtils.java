@@ -92,8 +92,8 @@ public abstract class OrderUtils {
 	 * @param annotations the annotation to consider
 	 * @return the order value, or {@code null} if none can be found
 	 */
-	static Integer getOrderFromAnnotations(AnnotatedElement element,
-			MergedAnnotations annotations) {
+	@Nullable
+	static Integer getOrderFromAnnotations(AnnotatedElement element, MergedAnnotations annotations) {
 		if (!(element instanceof Class)) {
 			return findOrder(annotations);
 		}
@@ -106,6 +106,7 @@ public abstract class OrderUtils {
 		return result;
 	}
 
+	@Nullable
 	private static Integer findOrder(MergedAnnotations annotations) {
 		MergedAnnotation<Order> orderAnnotation = annotations.get(Order.class);
 		if (orderAnnotation.isPresent()) {

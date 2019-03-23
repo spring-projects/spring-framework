@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -37,31 +36,27 @@ public interface AnnotationFilter {
 	 * {@code java.lang.*} or in the
 	 * {@code org.springframework.lang.*} package.
 	 */
-	static final AnnotationFilter PLAIN = packages("java.lang",
-			"org.springframework.lang");
+	AnnotationFilter PLAIN = packages("java.lang", "org.springframework.lang");
 
 	/**
 	 * {@link AnnotationFilter} that matches annotations in the
 	 * {@code java.lang.*} package.
 	 */
-	static final AnnotationFilter JAVA = packages("java.lang");
+	AnnotationFilter JAVA = packages("java.lang");
 
 	/**
 	 * {@link AnnotationFilter} that never matches and can be used when no
 	 * filtering is needed.
 	 */
-	static final AnnotationFilter NONE = new AnnotationFilter() {
-
+	AnnotationFilter NONE = new AnnotationFilter() {
 		@Override
-		public boolean matches(@Nullable String typeName) {
+		public boolean matches(String typeName) {
 			return false;
 		}
-
 		@Override
 		public String toString() {
 			return "No annotation filtering";
 		}
-
 	};
 
 
@@ -70,8 +65,8 @@ public interface AnnotationFilter {
 	 * @param annotation the annotation to test
 	 * @return {@code true} if the annotation matches
 	 */
-	default boolean matches(@Nullable Annotation annotation) {
-		return matches(annotation != null ? annotation.annotationType() : null);
+	default boolean matches(Annotation annotation) {
+		return matches(annotation.annotationType());
 	}
 
 	/**
@@ -79,8 +74,8 @@ public interface AnnotationFilter {
 	 * @param type the annotation type to test
 	 * @return {@code true} if the annotation matches
 	 */
-	default boolean matches(@Nullable Class<?> type) {
-		return matches(type != null ? type.getName() : null);
+	default boolean matches(Class<?> type) {
+		return matches(type.getName());
 	}
 
 	/**
@@ -88,7 +83,8 @@ public interface AnnotationFilter {
 	 * @param typeName the annotation type to test
 	 * @return {@code true} if the annotation matches
 	 */
-	boolean matches(@Nullable String typeName);
+	boolean matches(String typeName);
+
 
 	/**
 	 * Return a new {@link AnnotationFilter} that matches annotations in the
@@ -107,8 +103,8 @@ public interface AnnotationFilter {
 	 * @param annotationType the annotation type to check
 	 * @return the most appropriate annotation filter
 	 */
-	static AnnotationFilter mostAppropriateFor(@Nullable Class<?> annotationType) {
-		return PLAIN.matches(annotationType) ? NONE : PLAIN;
+	static AnnotationFilter mostAppropriateFor(Class<?> annotationType) {
+		return (PLAIN.matches(annotationType) ? NONE : PLAIN);
 	}
 
 	/**
@@ -119,30 +115,6 @@ public interface AnnotationFilter {
 	 * @return the most appropriate annotation filter
 	 */
 	static AnnotationFilter mostAppropriateFor(Class<?>... annotationTypes) {
-		Assert.notNull(annotationTypes, "AnnotationTypes must not be null");
-		return mostAppropriateFor(Arrays.asList(annotationTypes));
-	}
-
-	/**
-	 * Return an {@link AnnotationFilter} that is the most appropriate for, and
-	 * will always match all the given annotation type. Whenever possible,
-	 * {@link AnnotationFilter#PLAIN} will be returned.
-	 * @param annotationType the annotation type to check
-	 * @return the most appropriate annotation filter
-	 */
-	static AnnotationFilter mostAppropriateFor(@Nullable String annotationType) {
-		return PLAIN.matches(annotationType) ? NONE : PLAIN;
-	}
-
-	/**
-	 * Return an {@link AnnotationFilter} that is the most appropriate for, and
-	 * will always match all the given annotation types. Whenever possible,
-	 * {@link AnnotationFilter#PLAIN} will be returned.
-	 * @param annotationTypes the annotation types to check
-	 * @return the most appropriate annotation filter
-	 */
-	static AnnotationFilter mostAppropriateFor(String... annotationTypes) {
-		Assert.notNull(annotationTypes, "AnnotationTypes must not be null");
 		return mostAppropriateFor(Arrays.asList(annotationTypes));
 	}
 
@@ -156,20 +128,16 @@ public interface AnnotationFilter {
 	 */
 	@SuppressWarnings("unchecked")
 	static AnnotationFilter mostAppropriateFor(Collection<?> annotationTypes) {
-		Assert.notNull(annotationTypes, "AnnotationTypes must not be null");
 		for (Object annotationType : annotationTypes) {
 			if (annotationType == null) {
 				continue;
 			}
-			Assert.isTrue(
-					annotationType instanceof Class || annotationType instanceof String,
+			Assert.isTrue(annotationType instanceof Class || annotationType instanceof String,
 					"AnnotationType must be a Class or String");
-			if (annotationType instanceof Class
-					&& PLAIN.matches((Class<Annotation>) annotationType)) {
+			if (annotationType instanceof Class && PLAIN.matches((Class<Annotation>) annotationType)) {
 				return NONE;
 			}
-			if (annotationType instanceof String
-					&& PLAIN.matches((String) annotationType)) {
+			if (annotationType instanceof String && PLAIN.matches((String) annotationType)) {
 				return NONE;
 			}
 		}

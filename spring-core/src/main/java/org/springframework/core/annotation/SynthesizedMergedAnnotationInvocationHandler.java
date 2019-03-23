@@ -33,8 +33,8 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link InvocationHandler} for an {@link Annotation} that Spring has
- * <em>synthesized</em> (i.e., wrapped in a dynamic proxy) with additional
- * functionality.
+ * <em>synthesized</em> (i.e. wrapped in a dynamic proxy) with additional
+ * functionality such as attribute alias handling.
  *
  * @author Sam Brannen
  * @author Phillip Webb
@@ -44,8 +44,7 @@ import org.springframework.util.ReflectionUtils;
  * @see AnnotationAttributeExtractor
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
  */
-class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation>
-		implements InvocationHandler {
+final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> implements InvocationHandler {
 
 	private final MergedAnnotation<?> annotation;
 
@@ -57,10 +56,8 @@ class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation>
 	private volatile Integer hashCode;
 
 
-	private SynthesizedMergedAnnotationInvocationHandler(MergedAnnotation<A> annotation,
-			Class<A> type) {
-
-		Assert.notNull(annotation, "Annotation must not be null");
+	private SynthesizedMergedAnnotationInvocationHandler(MergedAnnotation<A> annotation, Class<A> type) {
+		Assert.notNull(annotation, "MergedAnnotation must not be null");
 		Assert.notNull(type, "Type must not be null");
 		Assert.isTrue(type.isAnnotation(), "Type must be an annotation");
 		this.annotation = annotation;
@@ -90,18 +87,15 @@ class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation>
 			return getAttributeValue(method);
 		}
 		throw new AnnotationConfigurationException(String.format(
-				"Method [%s] is unsupported for synthesized annotation type [%s]", method,
-				this.type));
+				"Method [%s] is unsupported for synthesized annotation type [%s]", method, this.type));
 	}
 
 	private boolean isAnnotationTypeMethod(Method method) {
-		return Objects.equals(method.getName(), "annotationType")
-				&& method.getParameterCount() == 0;
+		return (Objects.equals(method.getName(), "annotationType") && method.getParameterCount() == 0);
 	}
 
 	/**
-	 * See {@link Annotation#equals(Object)} for a definition of the required
-	 * algorithm.
+	 * See {@link Annotation#equals(Object)} for a definition of the required algorithm.
 	 * @param other the other object to compare against
 	 */
 	private boolean annotationEquals(Object other) {
@@ -123,8 +117,7 @@ class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation>
 	}
 
 	/**
-	 * See {@link Annotation#hashCode()} for a definition of the required
-	 * algorithm.
+	 * See {@link Annotation#hashCode()} for a definition of the required algorithm.
 	 */
 	private int annotationHashCode() {
 		Integer hashCode = this.hashCode;
@@ -182,26 +175,22 @@ class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation>
 		String name = method.getName();
 		Class<?> type = ClassUtils.resolvePrimitiveIfNecessary(method.getReturnType());
 		return this.annotation.getValue(name, type).orElseThrow(
-				() -> new NoSuchElementException("No value found for attribute named '"
-						+ name + "' in merged annotation " + this.annotation.getType()));
+				() -> new NoSuchElementException("No value found for attribute named '" + name +
+						"' in merged annotation " + this.annotation.getType()));
 	}
 
 	@SuppressWarnings("unchecked")
-	static <A extends Annotation> A createProxy(MergedAnnotation<A> annotation,
-			Class<A> type) {
+	static <A extends Annotation> A createProxy(MergedAnnotation<A> annotation, Class<A> type) {
 		ClassLoader classLoader = type.getClassLoader();
-		InvocationHandler handler = new SynthesizedMergedAnnotationInvocationHandler<>(
-				annotation, type);
-		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class)
-				? new Class<?>[] { type, SynthesizedAnnotation.class }
-				: new Class<?>[] { type };
+		InvocationHandler handler = new SynthesizedMergedAnnotationInvocationHandler<>(annotation, type);
+		Class<?>[] interfaces = isVisible(classLoader, SynthesizedAnnotation.class) ?
+				new Class<?>[] {type, SynthesizedAnnotation.class} : new Class<?>[] {type};
 		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
 	}
 
 	private static boolean isVisible(ClassLoader classLoader, Class<?> interfaceClass) {
 		try {
-			return Class.forName(interfaceClass.getName(), false,
-					classLoader) == interfaceClass;
+			return Class.forName(interfaceClass.getName(), false, classLoader) == interfaceClass;
 		}
 		catch (ClassNotFoundException ex) {
 			return false;

@@ -23,7 +23,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.junit.Test;
@@ -31,8 +30,7 @@ import org.junit.Test;
 import org.springframework.core.annotation.MergedAnnotation.MapValues;
 import org.springframework.util.MultiValueMap;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link MergedAnnotationCollectors}.
@@ -93,18 +91,10 @@ public class MergedAnnotationCollectorsTests {
 		assertThat(map.get("finished")).containsExactly(true);
 	}
 
-	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void toFinishedMultiValueMapWhenFinisherIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() -> stream().collect(
-				MergedAnnotationCollectors.toMultiValueMap((Function) null))).withMessage(
-						"Finisher must not be null");
+	private Stream<MergedAnnotation<TestAnnotation>> stream() {
+		return MergedAnnotations.from(WithTestAnnotations.class).stream(TestAnnotation.class);
 	}
 
-	private Stream<MergedAnnotation<TestAnnotation>> stream() {
-		return MergedAnnotations.from(WithTestAnnotations.class).stream(
-				TestAnnotation.class);
-	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(TestAnnotations.class)
@@ -124,14 +114,12 @@ public class MergedAnnotationCollectorsTests {
 	@interface TestAnnotations {
 
 		TestAnnotation[] value();
-
 	}
 
 	@TestAnnotation("a")
 	@TestAnnotation(name = "b", extra = String.class)
 	@TestAnnotation(name = "c", extra = Integer.class)
 	static class WithTestAnnotations {
-
 	}
 
 }

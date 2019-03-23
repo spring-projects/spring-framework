@@ -70,8 +70,9 @@ public abstract class MergedAnnotationSelectors {
 		}
 
 		@Override
-		public MergedAnnotation<Annotation> select(MergedAnnotation<Annotation> existing,
-				MergedAnnotation<Annotation> candidate) {
+		public MergedAnnotation<Annotation> select(
+				MergedAnnotation<Annotation> existing, MergedAnnotation<Annotation> candidate) {
+
 			if (candidate.getDepth() < existing.getDepth()) {
 				return candidate;
 			}
@@ -93,8 +94,9 @@ public abstract class MergedAnnotationSelectors {
 		}
 
 		@Override
-		public MergedAnnotation<Annotation> select(MergedAnnotation<Annotation> existing,
-				MergedAnnotation<Annotation> candidate) {
+		public MergedAnnotation<Annotation> select(
+				MergedAnnotation<Annotation> existing, MergedAnnotation<Annotation> candidate) {
+
 			if (existing.getDepth() > 0 && candidate.getDepth() == 0) {
 				return candidate;
 			}

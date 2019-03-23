@@ -48,6 +48,7 @@ final class AttributeMethods {
 		return m1 != null ? -1 : 1;
 	};
 
+
 	@Nullable
 	private final Class<? extends Annotation> annotationType;
 
@@ -60,8 +61,7 @@ final class AttributeMethods {
 	private final boolean hasNestedAnnotation;
 
 
-	private AttributeMethods(@Nullable Class<? extends Annotation> annotationType,
-			Method[] attributeMethods) {
+	private AttributeMethods(@Nullable Class<? extends Annotation> annotationType, Method[] attributeMethods) {
 		this.annotationType = annotationType;
 		this.attributeMethods = attributeMethods;
 		this.canThrowTypeNotPresentException = new boolean[attributeMethods.length];
@@ -94,8 +94,8 @@ final class AttributeMethods {
 	 * @return {@code true} if this is only a value attribute
 	 */
 	boolean isOnlyValueAttribute() {
-		return this.attributeMethods.length == 1 &&
-				MergedAnnotation.VALUE.equals(this.attributeMethods[0].getName());
+		return (this.attributeMethods.length == 1 &&
+				MergedAnnotation.VALUE.equals(this.attributeMethods[0].getName()));
 	}
 
 
@@ -104,7 +104,7 @@ final class AttributeMethods {
 	 * accessed without causing any {@link TypeNotPresentException
 	 * TypeNotPresentExceptions}.
 	 * @param annotation the annotation to check
-	 * @return {@true} if all values are present
+	 * @return {@code true} if all values are present
 	 * @see #validate(Annotation)
 	 */
 	boolean isValid(Annotation annotation) {
@@ -123,14 +123,13 @@ final class AttributeMethods {
 	}
 
 	/**
-	 * Checks if values from the given annotation can be safely accessed without
-	 * causing any {@link TypeNotPresentException TypeNotPresentExceptions}. In
-	 * particular, this method is designed to cover Google App Engine's late
-	 * arrival of such exceptions for {@code Class} values (instead of the more
-	 * typical early {@code Class.getAnnotations() failure}.
+	 * Checks if values from the given annotation can be safely accessed without causing
+	 * any {@link TypeNotPresentException TypeNotPresentExceptions}. In particular,
+	 * this method is designed to cover Google App Engine's late arrival of such
+	 * exceptions for {@code Class} values (instead of the more typical early
+	 * {@code Class.getAnnotations() failure}.
 	 * @param annotation the annotation to validate
-	 * @throws IllegalStateException if a declared {@code Class} attribute could
-	 * not be read
+	 * @throws IllegalStateException if a declared {@code Class} attribute could not be read
 	 * @see #isValid(Annotation)
 	 */
 	void validate(Annotation annotation) {
@@ -141,11 +140,8 @@ final class AttributeMethods {
 					get(i).invoke(annotation);
 				}
 				catch (Throwable ex) {
-					throw new IllegalStateException(
-							"Could not obtain annotation attribute value for "
-									+ get(i).getName() + " declared on "
-									+ annotation.annotationType(),
-							ex);
+					throw new IllegalStateException("Could not obtain annotation attribute value for " +
+							get(i).getName() + " declared on " + annotation.annotationType(), ex);
 				}
 			}
 		}
@@ -246,14 +242,13 @@ final class AttributeMethods {
 		return this.hasNestedAnnotation;
 	}
 
+
 	/**
 	 * Return the attribute methods for the given annotation type.
 	 * @param annotationType the annotation type
 	 * @return the attribute methods for the annotation
 	 */
-	static AttributeMethods forAnnotationType(
-			@Nullable Class<? extends Annotation> annotationType) {
-
+	static AttributeMethods forAnnotationType(@Nullable Class<? extends Annotation> annotationType) {
 		if (annotationType == null) {
 			return NONE;
 		}
@@ -279,7 +274,7 @@ final class AttributeMethods {
 	}
 
 	private static boolean isAttributeMethod(Method method) {
-		return method.getParameterCount() == 0 && method.getReturnType() != void.class;
+		return (method.getParameterCount() == 0 && method.getReturnType() != void.class);
 	}
 
 	/**
@@ -302,14 +297,11 @@ final class AttributeMethods {
 	 * @param attributeName the attribute name
 	 * @return a description of the attribute
 	 */
-	static String describe(@Nullable Class<?> annotationType,
-			@Nullable String attributeName) {
+	static String describe(@Nullable Class<?> annotationType, @Nullable String attributeName) {
 		if (attributeName == null) {
 			return "(none)";
 		}
-		String in = annotationType != null ?
-				" in annotation [" + annotationType.getName() + "]" :
-				"";
+		String in = (annotationType != null ? " in annotation [" + annotationType.getName() + "]" : "");
 		return "attribute '" + attributeName + "'" + in;
 	}
 

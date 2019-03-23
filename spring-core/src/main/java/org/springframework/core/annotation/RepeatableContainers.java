@@ -73,22 +73,23 @@ public abstract class RepeatableContainers {
 		return this.parent.findRepeatedAnnotations(annotation);
 	}
 
+
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		if (obj == this) {
+	public boolean equals(@Nullable Object other) {
+		if (other == this) {
 			return true;
 		}
-		if (obj == null || getClass() != obj.getClass()) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		RepeatableContainers other = (RepeatableContainers) obj;
-		return Objects.equals(this.parent, other.parent);
+		return Objects.equals(this.parent, ((RepeatableContainers) other).parent);
 	}
 
 	@Override
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(this.parent);
 	}
+
 
 	/**
 	 * Return a {@link RepeatableContainers} instance that searches using Java's
@@ -198,10 +199,8 @@ public abstract class RepeatableContainers {
 
 		private final Method valueMethod;
 
-
 		ExplicitRepeatableContainer(@Nullable RepeatableContainers parent,
-				Class<? extends Annotation> repeatable,
-				@Nullable Class<? extends Annotation> container) {
+				Class<? extends Annotation> repeatable, @Nullable Class<? extends Annotation> container) {
 
 			super(parent);
 			Assert.notNull(repeatable, "Repeatable must not be null");
@@ -235,11 +234,9 @@ public abstract class RepeatableContainers {
 			this.valueMethod = valueMethod;
 		}
 
-		private Class<? extends Annotation> deduceContainer(
-				Class<? extends Annotation> repeatable) {
-
+		private Class<? extends Annotation> deduceContainer(Class<? extends Annotation> repeatable) {
 			Repeatable annotation = repeatable.getAnnotation(Repeatable.class);
-			Assert.notNull(annotation, "Annotation type must be a repeatable annotation: " +
+			Assert.notNull(annotation, () -> "Annotation type must be a repeatable annotation: " +
 						"failed to resolve container type for " + repeatable.getName());
 			return annotation.value();
 		}
@@ -254,13 +251,12 @@ public abstract class RepeatableContainers {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object obj) {
-			if (super.equals(obj)) {
-				ExplicitRepeatableContainer other = (ExplicitRepeatableContainer) obj;
-				return this.container.equals(other.container) &&
-						this.repeatable.equals(other.repeatable);
+		public boolean equals(@Nullable Object other) {
+			if (!super.equals(other)) {
+				return false;
 			}
-			return false;
+			ExplicitRepeatableContainer otherErc = (ExplicitRepeatableContainer) other;
+			return (this.container.equals(otherErc.container) && this.repeatable.equals(otherErc.repeatable));
 		}
 
 		@Override
@@ -270,7 +266,6 @@ public abstract class RepeatableContainers {
 			hashCode = 31 * hashCode + this.repeatable.hashCode();
 			return hashCode;
 		}
-
 	}
 
 
@@ -284,7 +279,6 @@ public abstract class RepeatableContainers {
 		NoRepeatableContainers() {
 			super(null);
 		}
-
 	}
 
 }

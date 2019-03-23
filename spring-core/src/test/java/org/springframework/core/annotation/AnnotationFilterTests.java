@@ -16,19 +16,16 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
-import java.util.Collection;
 
 import org.junit.Test;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link AnnotationFilter}.
@@ -37,33 +34,20 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 public class AnnotationFilterTests {
 
-	private static final AnnotationFilter FILTER = annotationType -> ObjectUtils.nullSafeEquals(
-			annotationType, TestAnnotation.class.getName());
+	private static final AnnotationFilter FILTER = annotationType ->
+			ObjectUtils.nullSafeEquals(annotationType, TestAnnotation.class.getName());
 
-	@Test
-	public void matchesAnnotationWhenAnnotationIsNullReturnsFalse() {
-		TestAnnotation annotation = null;
-		assertThat(FILTER.matches(annotation)).isFalse();
-	}
 
 	@Test
 	public void matchesAnnotationWhenMatchReturnsTrue() {
-		TestAnnotation annotation = WithTestAnnotation.class.getDeclaredAnnotation(
-				TestAnnotation.class);
+		TestAnnotation annotation = WithTestAnnotation.class.getDeclaredAnnotation(TestAnnotation.class);
 		assertThat(FILTER.matches(annotation)).isTrue();
 	}
 
 	@Test
 	public void matchesAnnotationWhenNoMatchReturnsFalse() {
-		OtherAnnotation annotation = WithOtherAnnotation.class.getDeclaredAnnotation(
-				OtherAnnotation.class);
+		OtherAnnotation annotation = WithOtherAnnotation.class.getDeclaredAnnotation(OtherAnnotation.class);
 		assertThat(FILTER.matches(annotation)).isFalse();
-	}
-
-	@Test
-	public void matchesAnnotationClassWhenAnnotationClassIsNullReturnsFalse() {
-		Class<Annotation> annotationType = null;
-		assertThat(FILTER.matches(annotationType)).isFalse();
 	}
 
 	@Test
@@ -109,27 +93,15 @@ public class AnnotationFilterTests {
 	}
 
 	@Test
-	public void noneWhenNonNullReturnsFalse() {
+	public void noneReturnsFalse() {
 		assertThat(AnnotationFilter.NONE.matches(Retention.class)).isFalse();
 		assertThat(AnnotationFilter.NONE.matches(Nullable.class)).isFalse();
 		assertThat(AnnotationFilter.NONE.matches(TestAnnotation.class)).isFalse();
-		assertThat(AnnotationFilter.NONE.matches((Annotation) null)).isFalse();
-		assertThat(AnnotationFilter.NONE.matches((Class<Annotation>) null)).isFalse();
-		assertThat(AnnotationFilter.NONE.matches((String) null)).isFalse();
 	}
 
 	@Test
 	public void pacakgesReturnsPackagesAnnotationFilter() {
-		assertThat(AnnotationFilter.packages("com.example")).isInstanceOf(
-				PackagesAnnotationFilter.class);
-	}
-
-	@Test
-	public void mostAppropriateForCollectionWhenAnnotationTypesIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> AnnotationFilter.mostAppropriateFor(
-						(Collection<Class<? extends Annotation>>) null)).withMessage(
-								"AnnotationTypes must not be null");
+		assertThat(AnnotationFilter.packages("com.example")).isInstanceOf(PackagesAnnotationFilter.class);
 	}
 
 	@Test
@@ -147,14 +119,6 @@ public class AnnotationFilterTests {
 	}
 
 	@Test
-	public void mostAppropriateForArrayWhenAnnotationTypesIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> AnnotationFilter.mostAppropriateFor(
-						(Class<? extends Annotation>[]) null)).withMessage(
-								"AnnotationTypes must not be null");
-	}
-
-	@Test
 	public void mostAppropriateForArrayReturnsPlainWhenPossible() {
 		AnnotationFilter filter = AnnotationFilter.mostAppropriateFor(
 				TestAnnotation.class, OtherAnnotation.class);
@@ -168,24 +132,21 @@ public class AnnotationFilterTests {
 		assertThat(filter).isSameAs(AnnotationFilter.NONE);
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestAnnotation {
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TestAnnotation {
 	}
 
 	@TestAnnotation
 	static class WithTestAnnotation {
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface OtherAnnotation {
-
+	@interface OtherAnnotation {
 	}
 
 	@OtherAnnotation
 	static class WithOtherAnnotation {
-
 	}
 
 }

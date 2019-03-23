@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -75,11 +74,9 @@ final class AnnotationTypeMappings {
 		}
 	}
 
-	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue,
-			AnnotationTypeMapping parent) {
-
-		Annotation[] metaAnnotations = AnnotationsScanner.getDeclaredAnnotations(
-				parent.getAnnotationType(), false);
+	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping parent) {
+		Annotation[] metaAnnotations =
+				AnnotationsScanner.getDeclaredAnnotations(parent.getAnnotationType(), false);
 		for (Annotation metaAnnotation : metaAnnotations) {
 			if (!isMappable(parent, metaAnnotation)) {
 				continue;
@@ -125,19 +122,17 @@ final class AnnotationTypeMappings {
 		}
 	}
 
-	private boolean isMappable(AnnotationTypeMapping parent, Annotation metaAnnotation) {
-		return !this.filter.matches(metaAnnotation) &&
+	private boolean isMappable(AnnotationTypeMapping parent, @Nullable Annotation metaAnnotation) {
+		return (metaAnnotation != null && !this.filter.matches(metaAnnotation) &&
 				!AnnotationFilter.PLAIN.matches(parent.getAnnotationType()) &&
-				!isAlreadyMapped(parent, metaAnnotation);
+				!isAlreadyMapped(parent, metaAnnotation));
 	}
 
-	private boolean isAlreadyMapped(AnnotationTypeMapping parent,
-			Annotation metaAnnotation) {
-
+	private boolean isAlreadyMapped(AnnotationTypeMapping parent, Annotation metaAnnotation) {
 		Class<? extends Annotation> annotationType = metaAnnotation.annotationType();
 		AnnotationTypeMapping mapping = parent;
 		while (mapping != null) {
-			if (mapping.getAnnotationType().equals(annotationType)) {
+			if (mapping.getAnnotationType() == annotationType) {
 				return true;
 			}
 			mapping = mapping.getParent();
@@ -171,11 +166,8 @@ final class AnnotationTypeMappings {
 	 * @param annotationType the source annotation type
 	 * @return type mappings for the annotation type
 	 */
-	static AnnotationTypeMappings forAnnotationType(
-			Class<? extends Annotation> annotationType) {
-
-		return forAnnotationType(annotationType,
-				AnnotationFilter.mostAppropriateFor(annotationType));
+	static AnnotationTypeMappings forAnnotationType(Class<? extends Annotation> annotationType) {
+		return forAnnotationType(annotationType, AnnotationFilter.mostAppropriateFor(annotationType));
 	}
 
 	/**
@@ -186,11 +178,8 @@ final class AnnotationTypeMappings {
 	 * @return type mappings for the annotation type
 	 */
 	static AnnotationTypeMappings forAnnotationType(
-			Class<? extends Annotation> annotationType,
-			AnnotationFilter annotationFilter) {
+			Class<? extends Annotation> annotationType, AnnotationFilter annotationFilter) {
 
-		Assert.notNull(annotationType, "AnnotationType must not be null");
-		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
 		return cache.computeIfAbsent(annotationFilter, Cache::new).get(annotationType);
 	}
 

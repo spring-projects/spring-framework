@@ -47,7 +47,6 @@ public interface MergedAnnotationSelector<A extends Annotation> {
 	 * @return the most appropriate annotation from the {@code existing} or
 	 * {@code candidate}
 	 */
-	MergedAnnotation<A> select(MergedAnnotation<A> existing,
-			MergedAnnotation<A> candidate);
+	MergedAnnotation<A> select(MergedAnnotation<A> existing, MergedAnnotation<A> candidate);
 
 }

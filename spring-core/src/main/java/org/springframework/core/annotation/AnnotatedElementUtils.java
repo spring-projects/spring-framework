@@ -828,13 +828,13 @@ public abstract class AnnotatedElementUtils {
 	}
 
 	@Nullable
-	private static AnnotationAttributes getAnnotationAttributes(
-			MergedAnnotation<?> annotation, boolean classValuesAsString,
-			boolean nestedAnnotationsAsMap) {
+	private static AnnotationAttributes getAnnotationAttributes(MergedAnnotation<?> annotation,
+			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
 		if (!annotation.isPresent()) {
 			return null;
 		}
-		return annotation.asMap((mergedAnnotation) -> new AnnotationAttributes(),
+		return annotation.asMap(mergedAnnotation -> new AnnotationAttributes(),
 				MapValues.of(classValuesAsString, nestedAnnotationsAsMap));
 	}
 

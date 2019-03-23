@@ -49,10 +49,7 @@ public abstract class MergedAnnotationPredicates {
 	 * @param typeNames the names that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
-	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(
-			String... typeNames) {
-
-		Assert.notNull(typeNames, "TypeNames must not be null");
+	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(String... typeNames) {
 		return annotation -> ObjectUtils.containsElement(typeNames, annotation.getType());
 	}
 
@@ -64,12 +61,8 @@ public abstract class MergedAnnotationPredicates {
 	 * @param types the types that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
-	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(
-			Class<?>... types) {
-
-		Assert.notNull(types, "Types must not be null");
-		return annotation -> Arrays.stream(types)
-				.anyMatch(type -> type.getName().equals(annotation.getType()));
+	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(Class<?>... types) {
+		return annotation -> Arrays.stream(types).anyMatch(type -> type.getName().equals(annotation.getType()));
 	}
 
 	/**
@@ -80,10 +73,7 @@ public abstract class MergedAnnotationPredicates {
 	 * @param types the type names or classes that should be matched
 	 * @return a {@link Predicate} to test the annotation type
 	 */
-	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(
-			Collection<?> types) {
-
-		Assert.notNull(types, "Types must not be null");
+	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(Collection<?> types) {
 		return annotation -> types.stream()
 				.map(type -> type instanceof Class ? ((Class<?>) type).getName() : type.toString())
 				.anyMatch(typeName -> typeName.equals(annotation.getType()));
@@ -103,7 +93,6 @@ public abstract class MergedAnnotationPredicates {
 	public static <A extends Annotation> Predicate<MergedAnnotation<A>> firstRunOf(
 			Function<? super MergedAnnotation<A>, ?> valueExtractor) {
 
-		Assert.notNull(valueExtractor, "ValueExtractor must not be null");
 		return new FirstRunOfPredicate<>(valueExtractor);
 	}
 
@@ -120,7 +109,6 @@ public abstract class MergedAnnotationPredicates {
 	public static <A extends Annotation, K> Predicate<MergedAnnotation<A>> unique(
 			Function<? super MergedAnnotation<A>, K> keyExtractor) {
 
-		Assert.notNull(keyExtractor, "KeyExtractor must not be null");
 		return new UniquePredicate<>(keyExtractor);
 	}
 
@@ -129,8 +117,7 @@ public abstract class MergedAnnotationPredicates {
 	 * {@link Predicate} implementation used for
 	 * {@link MergedAnnotationPredicates#firstRunOf(Function)}.
 	 */
-	private static class FirstRunOfPredicate<A extends Annotation>
-			implements Predicate<MergedAnnotation<A>> {
+	private static class FirstRunOfPredicate<A extends Annotation> implements Predicate<MergedAnnotation<A>> {
 
 		private final Function<? super MergedAnnotation<A>, ?> valueExtractor;
 
@@ -139,12 +126,10 @@ public abstract class MergedAnnotationPredicates {
 		@Nullable
 		private Object lastValue;
 
-
-		FirstRunOfPredicate(
-				Function<? super MergedAnnotation<A>, ?> valueExtractor) {
+		FirstRunOfPredicate(Function<? super MergedAnnotation<A>, ?> valueExtractor) {
+			Assert.notNull(valueExtractor, "Value extractor must not be null");
 			this.valueExtractor = valueExtractor;
 		}
-
 
 		@Override
 		public boolean test(@Nullable MergedAnnotation<A> annotation) {
@@ -164,18 +149,16 @@ public abstract class MergedAnnotationPredicates {
 	 * {@link Predicate} implementation used for
 	 * {@link MergedAnnotationPredicates#unique(Function)}.
 	 */
-	private static class UniquePredicate<A extends Annotation, K>
-			implements Predicate<MergedAnnotation<A>> {
+	private static class UniquePredicate<A extends Annotation, K> implements Predicate<MergedAnnotation<A>> {
 
 		private final Function<? super MergedAnnotation<A>, K> keyExtractor;
 
 		private final Set<K> seen = new HashSet<>();
 
-
 		UniquePredicate(Function<? super MergedAnnotation<A>, K> keyExtractor) {
+			Assert.notNull(keyExtractor, "Key extractor must not be null");
 			this.keyExtractor = keyExtractor;
 		}
-
 
 		@Override
 		public boolean test(@Nullable MergedAnnotation<A> annotation) {

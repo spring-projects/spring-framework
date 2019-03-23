@@ -511,6 +511,7 @@ public class AnnotationsScannerTests {
 		assertThat(result).isEqualTo("OK");
 	}
 
+
 	private Method methodFrom(Class<?> type) {
 		return ReflectionUtils.findMethod(type, "method");
 	}
@@ -532,81 +533,68 @@ public class AnnotationsScannerTests {
 		return result.stream();
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestAnnotation1 {
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TestAnnotation1 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestAnnotation2 {
-
+	@interface TestAnnotation2 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestAnnotation3 {
-
+	@interface TestAnnotation3 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestAnnotation4 {
-
+	@interface TestAnnotation4 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestAnnotation5 {
-
+	@interface TestAnnotation5 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface TestAnnotation6 {
-
+	@interface TestAnnotation6 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
-	static @interface TestInheritedAnnotation1 {
-
+	@interface TestInheritedAnnotation1 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
-	static @interface TestInheritedAnnotation2 {
-
+	@interface TestInheritedAnnotation2 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
-	static @interface TestInheritedAnnotation3 {
-
+	@interface TestInheritedAnnotation3 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
-	static @interface TestInheritedAnnotation4 {
-
+	@interface TestInheritedAnnotation4 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
-	static @interface TestInheritedAnnotation5 {
-
+	@interface TestInheritedAnnotation5 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface OnSuperClass {
-
+	@interface OnSuperClass {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface OnInterface {
-
+	@interface OnInterface {
 	}
 
 	static class WithNoAnnotations {
 
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation1
@@ -615,7 +603,6 @@ public class AnnotationsScannerTests {
 		@TestAnnotation1
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation1
@@ -626,7 +613,6 @@ public class AnnotationsScannerTests {
 		@TestAnnotation2
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation2
@@ -637,7 +623,6 @@ public class AnnotationsScannerTests {
 		@TestInheritedAnnotation2
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation1
@@ -646,7 +631,6 @@ public class AnnotationsScannerTests {
 		@TestAnnotation1
 		public void method() {
 		}
-
 	}
 
 	@TestInheritedAnnotation2
@@ -655,7 +639,6 @@ public class AnnotationsScannerTests {
 		@TestAnnotation1
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation1
@@ -664,17 +647,15 @@ public class AnnotationsScannerTests {
 		@TestAnnotation1
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation2
 	@TestInheritedAnnotation2
-	static interface SingleInterface {
+	interface SingleInterface {
 
 		@TestAnnotation2
 		@TestInheritedAnnotation2
-		public void method();
-
+		void method();
 	}
 
 	@TestAnnotation1
@@ -683,7 +664,6 @@ public class AnnotationsScannerTests {
 		@TestAnnotation1
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation2
@@ -694,7 +674,6 @@ public class AnnotationsScannerTests {
 		@TestInheritedAnnotation2
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation3
@@ -703,33 +682,29 @@ public class AnnotationsScannerTests {
 		@TestAnnotation3
 		public void method() {
 		}
-
 	}
 
 	@TestAnnotation4
-	static interface HierarchySuperSuperclassInterface {
+	interface HierarchySuperSuperclassInterface {
 
 		@TestAnnotation4
-		public void method();
-
+		void method();
 	}
 
 	@TestAnnotation5
 	@TestInheritedAnnotation5
-	static interface HierarchyInterface extends HierarchyInterfaceInterface {
+	interface HierarchyInterface extends HierarchyInterfaceInterface {
 
 		@TestAnnotation5
 		@TestInheritedAnnotation5
-		public void method();
-
+		void method();
 	}
 
 	@TestAnnotation6
-	static interface HierarchyInterfaceInterface {
+	interface HierarchyInterfaceInterface {
 
 		@TestAnnotation6
-		public void method();
-
+		void method();
 	}
 
 	static class BridgedMethod implements BridgeMethod<String> {
@@ -738,37 +713,32 @@ public class AnnotationsScannerTests {
 		@TestAnnotation1
 		public void method(String arg) {
 		}
-
 	}
 
-	static interface BridgeMethod<T> {
+	interface BridgeMethod<T> {
 
 		@TestAnnotation2
 		void method(T arg);
-
 	}
 
-	static class Ignoreable implements IgnoreableOverrideInterface1,
-			IgnoreableOverrideInterface2, Serializable {
+	@SuppressWarnings("serial")
+	static class Ignoreable implements IgnoreableOverrideInterface1, IgnoreableOverrideInterface2, Serializable {
 
 		@TestAnnotation1
 		public void method() {
 		}
-
 	}
 
-	static interface IgnoreableOverrideInterface1 {
+	interface IgnoreableOverrideInterface1 {
 
 		@Nullable
-		public void method();
-
+		void method();
 	}
 
-	static interface IgnoreableOverrideInterface2 {
+	interface IgnoreableOverrideInterface2 {
 
 		@Nullable
-		public void method();
-
+		void method();
 	}
 
 	static abstract class MultipleMethods implements MultipleMethodsInterface {
@@ -776,7 +746,6 @@ public class AnnotationsScannerTests {
 		@TestAnnotation1
 		public void method() {
 		}
-
 	}
 
 	interface MultipleMethodsInterface {
@@ -786,23 +755,19 @@ public class AnnotationsScannerTests {
 
 		@TestAnnotation2
 		void method1();
-
 	}
 
 	static class GenericOverride implements GenericOverrideInterface<String> {
 
 		@TestAnnotation1
 		public void method(String argument) {
-
 		}
-
 	}
 
-	static interface GenericOverrideInterface<T extends CharSequence> {
+	interface GenericOverrideInterface<T extends CharSequence> {
 
 		@TestAnnotation2
 		void method(T argument);
-
 	}
 
 	static abstract class GenericNonOverride
@@ -810,16 +775,13 @@ public class AnnotationsScannerTests {
 
 		@TestAnnotation1
 		public void method(StringBuilder argument) {
-
 		}
-
 	}
 
-	static interface GenericNonOverrideInterface<T extends CharSequence> {
+	interface GenericNonOverrideInterface<T extends CharSequence> {
 
 		@TestAnnotation2
 		void method(T argument);
-
 	}
 
 }

@@ -34,8 +34,7 @@ import org.springframework.lang.Nullable;
  * @since 5.2
  * @param <A> the annotation type
  */
-final class MissingMergedAnnotation<A extends Annotation>
-		extends AbstractMergedAnnotation<A> {
+final class MissingMergedAnnotation<A extends Annotation> extends AbstractMergedAnnotation<A> {
 
 	private static final MissingMergedAnnotation<?> INSTANCE = new MissingMergedAnnotation<>();
 
@@ -152,6 +151,7 @@ final class MissingMergedAnnotation<A extends Annotation>
 	protected A createSynthesized() {
 		throw new NoSuchElementException("Unable to synthesize missing annotation");
 	}
+
 
 	@SuppressWarnings("unchecked")
 	static <A extends Annotation> MergedAnnotation<A> getInstance() {

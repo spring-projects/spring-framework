@@ -477,8 +477,10 @@ public abstract class AnnotationUtils {
 	 * @see #getAnnotation(Method, Class)
 	 */
 	@Nullable
-	public static <A extends Annotation> A findAnnotation(Method method,
-			@Nullable Class<A> annotationType) {
+	public static <A extends Annotation> A findAnnotation(Method method, @Nullable Class<A> annotationType) {
+		if (annotationType == null) {
+			return null;
+		}
 
 		AnnotationFilter annotationFilter = AnnotationFilter.mostAppropriateFor(annotationType);
 		return MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE,
@@ -510,9 +512,7 @@ public abstract class AnnotationUtils {
 	 * @return the first matching annotation, or {@code null} if not found
 	 */
 	@Nullable
-	public static <A extends Annotation> A findAnnotation(Class<?> clazz,
-			Class<A> annotationType) {
-
+	public static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType) {
 		AnnotationFilter annotationFilter = AnnotationFilter.mostAppropriateFor(annotationType);
 		return MergedAnnotations.from(clazz, SearchStrategy.EXHAUSTIVE,
 						RepeatableContainers.none(), annotationFilter)
@@ -535,8 +535,8 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the annotation type to look for
 	 * @param clazz the class to check for the annotation on (may be {@code null})
 	 * @return the first {@link Class} in the inheritance hierarchy that
-	 * declares an annotation of the specified {@code annotationType}, or
-	 * {@code null} if not found
+	 * declares an annotation of the specified {@code annotationType},
+	 * or {@code null} if not found
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
 	 * @see #findAnnotationDeclaringClassForTypes(List, Class)
@@ -545,6 +545,10 @@ public abstract class AnnotationUtils {
 	@Nullable
 	public static Class<?> findAnnotationDeclaringClass(
 			Class<? extends Annotation> annotationType, @Nullable Class<?> clazz) {
+
+		if (clazz == null) {
+			return null;
+		}
 
 		AnnotationFilter annotationFilter = AnnotationFilter.mostAppropriateFor(annotationType);
 		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPER_CLASS,
@@ -567,7 +571,7 @@ public abstract class AnnotationUtils {
 	 * one of several candidate {@linkplain Annotation annotations}, so we
 	 * need to handle this explicitly.
 	 * @param annotationTypes the annotation types to look for
-	 * @param clazz the class to check for the annotations on, or {@code null}
+	 * @param clazz the class to check for the annotation on (may be {@code null})
 	 * @return the first {@link Class} in the inheritance hierarchy that
 	 * declares an annotation of at least one of the specified
 	 * {@code annotationTypes}, or {@code null} if not found
@@ -580,6 +584,10 @@ public abstract class AnnotationUtils {
 	@Nullable
 	public static Class<?> findAnnotationDeclaringClassForTypes(
 			List<Class<? extends Annotation>> annotationTypes, @Nullable Class<?> clazz) {
+
+		if (clazz == null) {
+			return null;
+		}
 
 		AnnotationFilter annotationFilter = AnnotationFilter.mostAppropriateFor(annotationTypes);
 		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPER_CLASS,
@@ -608,9 +616,7 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.Class#getDeclaredAnnotation(Class)
 	 * @see #isAnnotationInherited(Class, Class)
 	 */
-	public static boolean isAnnotationDeclaredLocally(
-			Class<? extends Annotation> annotationType, Class<?> clazz) {
-
+	public static boolean isAnnotationDeclaredLocally(Class<? extends Annotation> annotationType, Class<?> clazz) {
 		return MergedAnnotations.from(clazz).get(annotationType).isDirectlyPresent();
 	}
 
@@ -633,9 +639,7 @@ public abstract class AnnotationUtils {
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
 	 */
-	public static boolean isAnnotationInherited(
-			Class<? extends Annotation> annotationType, Class<?> clazz) {
-
+	public static boolean isAnnotationInherited(Class<? extends Annotation> annotationType, Class<?> clazz) {
 		return MergedAnnotations.from(clazz, SearchStrategy.INHERITED_ANNOTATIONS)
 				.stream(annotationType)
 				.filter(MergedAnnotation::isDirectlyPresent)
@@ -651,12 +655,10 @@ public abstract class AnnotationUtils {
 	 * @return {@code true} if such an annotation is meta-present
 	 * @since 4.2.1
 	 */
-	public static boolean isAnnotationMetaPresent(
-			Class<? extends Annotation> annotationType,
+	public static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,
 			@Nullable Class<? extends Annotation> metaAnnotationType) {
 
-		return MergedAnnotations.from(annotationType, SearchStrategy.EXHAUSTIVE)
-				.isPresent(annotationType);
+		return MergedAnnotations.from(annotationType, SearchStrategy.EXHAUSTIVE).isPresent(annotationType);
 	}
 
 	/**
@@ -666,7 +668,7 @@ public abstract class AnnotationUtils {
 	 * @return {@code true} if the annotation is in the {@code java.lang.annotation} package
 	 */
 	public static boolean isInJavaLangAnnotationPackage(@Nullable Annotation annotation) {
-		return JAVA_LANG_ANNOTATION_FILTER.matches(annotation);
+		return (annotation != null && JAVA_LANG_ANNOTATION_FILTER.matches(annotation));
 	}
 
 	/**
@@ -677,7 +679,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	public static boolean isInJavaLangAnnotationPackage(@Nullable String annotationType) {
-		return JAVA_LANG_ANNOTATION_FILTER.matches(annotationType);
+		return (annotationType != null && JAVA_LANG_ANNOTATION_FILTER.matches(annotationType));
 	}
 
 	/**
@@ -693,8 +695,7 @@ public abstract class AnnotationUtils {
 	 * @see #getAnnotationAttributes(Annotation)
 	 */
 	public static void validateAnnotation(Annotation annotation) {
-		AttributeMethods.forAnnotationType(annotation.annotationType())
-				.validate(annotation);
+		AttributeMethods.forAnnotationType(annotation.annotationType()).validate(annotation);
 	}
 
 	/**
@@ -889,13 +890,15 @@ public abstract class AnnotationUtils {
 	public static void postProcessAnnotationAttributes(@Nullable Object annotatedElement,
 			@Nullable AnnotationAttributes attributes, boolean classValuesAsString) {
 
-		if (attributes == null || attributes.annotationType() == null) {
+		if (attributes == null) {
 			return;
 		}
 		if (!attributes.validated) {
 			Class<? extends Annotation> annotationType = attributes.annotationType();
-			AnnotationTypeMapping mapping = AnnotationTypeMappings
-					.forAnnotationType(annotationType).get(0);
+			if (annotationType == null) {
+				return;
+			}
+			AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
 			for (int i = 0; i < mapping.getMirrorSets().size(); i++) {
 				MirrorSet mirrorSet = mapping.getMirrorSets().get(i);
 				int resolved = mirrorSet.resolve(attributes.displayName, attributes,

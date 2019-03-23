@@ -24,19 +24,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.annotation.Resource;
 
 import org.junit.Test;
@@ -74,44 +71,41 @@ public class MergedAnnotationsTests {
 
 	@Test
 	public void streamWhenFromNonAnnotatedClass() {
-		assertThat(MergedAnnotations.from(NonAnnotatedClass.class).stream(
-				TransactionalComponent.class)).isEmpty();
+		assertThat(MergedAnnotations.from(NonAnnotatedClass.class).
+				stream(TransactionalComponent.class)).isEmpty();
 	}
 
 	@Test
 	public void streamWhenFromClassWithMetaDepth1() {
-		Stream<String> names = MergedAnnotations.from(
-				TransactionalComponent.class).stream().map(MergedAnnotation::getType);
+		Stream<String> names = MergedAnnotations.from(TransactionalComponent.class)
+				.stream().map(MergedAnnotation::getType);
 		assertThat(names).containsExactly(Transactional.class.getName(),
 				Component.class.getName(), Indexed.class.getName());
 	}
 
 	@Test
 	public void streamWhenFromClassWithMetaDepth2() {
-		Stream<String> names = MergedAnnotations.from(
-				ComposedTransactionalComponent.class).stream().map(
-						MergedAnnotation::getType);
+		Stream<String> names = MergedAnnotations.from(ComposedTransactionalComponent.class)
+				.stream().map(MergedAnnotation::getType);
 		assertThat(names).containsExactly(TransactionalComponent.class.getName(),
-				Transactional.class.getName(), Component.class.getName(),
-				Indexed.class.getName());
+				Transactional.class.getName(), Component.class.getName(), Indexed.class.getName());
 	}
 
 	@Test
 	public void isPresentWhenFromNonAnnotatedClass() {
-		assertThat(MergedAnnotations.from(NonAnnotatedClass.class).isPresent(
-				Transactional.class)).isFalse();
+		assertThat(MergedAnnotations.from(NonAnnotatedClass.class).
+				isPresent(Transactional.class)).isFalse();
 	}
 
 	@Test
 	public void isPresentWhenFromAnnotationClassWithMetaDepth0() {
-		assertThat(MergedAnnotations.from(TransactionalComponent.class).isPresent(
-				TransactionalComponent.class)).isFalse();
+		assertThat(MergedAnnotations.from(TransactionalComponent.class).
+				isPresent(TransactionalComponent.class)).isFalse();
 	}
 
 	@Test
 	public void isPresentWhenFromAnnotationClassWithMetaDepth1() {
-		MergedAnnotations annotations = MergedAnnotations.from(
-				TransactionalComponent.class);
+		MergedAnnotations annotations = MergedAnnotations.from(TransactionalComponent.class);
 		assertThat(annotations.isPresent(Transactional.class)).isTrue();
 		assertThat(annotations.isPresent(Component.class)).isTrue();
 	}
@@ -204,8 +198,6 @@ public class MergedAnnotationsTests {
 	 * type within the class hierarchy. Such undesirable behavior would cause
 	 * the logic in
 	 * {@link org.springframework.context.annotation.ProfileCondition} to fail.
-	 *
-	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
 	 */
 	@Test
 	public void collectMultiValueMapFromClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
@@ -218,8 +210,6 @@ public class MergedAnnotationsTests {
 	/**
 	 * Note: this functionality is required by
 	 * {@link org.springframework.context.annotation.ProfileCondition}.
-	 *
-	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests
 	 */
 	@Test
 	public void collectMultiValueMapFromClassWithMultipleComposedAnnotations() {
@@ -629,36 +619,24 @@ public class MergedAnnotationsTests {
 	}
 
 	@Test
-	public void getWithExhaustiveOnMethodWithSingleElementOverridingAnArrayViaConvention()
-			throws Exception {
+	public void getWithExhaustiveOnMethodWithSingleElementOverridingAnArrayViaConvention() throws Exception {
 		testGetWithExhaustiveWebMapping(
 				WebController.class.getMethod("postMappedWithPathAttribute"));
 	}
 
 	@Test
-	public void getWithExhaustiveOnMethodWithSingleElementOverridingAnArrayViaAliasFor()
-			throws Exception {
+	public void getWithExhaustiveOnMethodWithSingleElementOverridingAnArrayViaAliasFor() throws Exception {
 		testGetWithExhaustiveWebMapping(
 				WebController.class.getMethod("getMappedWithValueAttribute"));
 		testGetWithExhaustiveWebMapping(
 				WebController.class.getMethod("getMappedWithPathAttribute"));
 	}
 
-	private void testGetWithExhaustiveWebMapping(AnnotatedElement element)
-			throws ArrayComparisonFailure {
+	private void testGetWithExhaustiveWebMapping(AnnotatedElement element) throws ArrayComparisonFailure {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(element,
 				SearchStrategy.EXHAUSTIVE).get(RequestMapping.class);
 		assertThat(annotation.getStringArray("value")).containsExactly("/test");
 		assertThat(annotation.getStringArray("path")).containsExactly("/test");
-	}
-
-	@Test
-	public void getDirectWithJavaLangAnnotationType() throws Exception {
-		Constructor<?> deprecatedConstructor = Date.class.getConstructor(String.class);
-		MergedAnnotation<?> annotation = MergedAnnotations.from(deprecatedConstructor,
-				SearchStrategy.DIRECT, RepeatableContainers.standardRepeatables(),
-				AnnotationFilter.NONE).get(Deprecated.class);
-		assertThat(annotation.isPresent()).isTrue();
 	}
 
 	@Test
@@ -1268,14 +1246,6 @@ public class MergedAnnotationsTests {
 	}
 
 	@Test
-	public void getRepeatableOnComposedAnnotation() {
-		MergedAnnotation<?> annotation = MergedAnnotations.from(MyRepeatableMeta1.class,
-				SearchStrategy.EXHAUSTIVE, RepeatableContainers.none(),
-				AnnotationFilter.NONE).get(Repeatable.class);
-		assertThat(annotation.getClass("value")).isEqualTo(MyRepeatableContainer.class);
-	}
-
-	@Test
 	public void getRepeatableDeclaredOnMethod() throws Exception {
 		Method method = InterfaceWithRepeated.class.getMethod("foo");
 		Stream<MergedAnnotation<MyRepeatable>> annotations = MergedAnnotations.from(
@@ -1286,8 +1256,7 @@ public class MergedAnnotationsTests {
 	}
 
 	@Test
-	public void getRepeatableDeclaredOnClassWithMissingAttributeAliasDeclaration()
-			throws Exception {
+	public void getRepeatableDeclaredOnClassWithMissingAttributeAliasDeclaration() {
 		RepeatableContainers containers = RepeatableContainers.of(
 				BrokenContextConfiguration.class, BrokenHierarchy.class);
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(

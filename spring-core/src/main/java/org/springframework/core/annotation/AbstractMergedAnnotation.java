@@ -33,8 +33,7 @@ import org.springframework.util.Assert;
  * @since 5.2
  * @param <A> the annotation type
  */
-abstract class AbstractMergedAnnotation<A extends Annotation>
-		implements MergedAnnotation<A> {
+abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedAnnotation<A> {
 
 	@Nullable
 	private volatile A synthesizedAnnotation;

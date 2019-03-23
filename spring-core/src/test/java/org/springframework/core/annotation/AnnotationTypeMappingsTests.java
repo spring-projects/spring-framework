@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Nullable;
 
 import org.junit.Test;
@@ -48,34 +47,23 @@ import static org.assertj.core.api.Assertions.*;
 public class AnnotationTypeMappingsTests {
 
 	@Test
-	public void forAnnotationTypeWhenAnnotationIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> AnnotationTypeMappings.forAnnotationType(null)).withMessage(
-						"AnnotationType must not be null");
-	}
-
-	@Test
 	public void forAnnotationTypeWhenNoMetaAnnotationsReturnsMappings() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-				SimpleAnnotation.class);
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(SimpleAnnotation.class);
 		assertThat(mappings.size()).isEqualTo(1);
 		assertThat(mappings.get(0).getAnnotationType()).isEqualTo(SimpleAnnotation.class);
 		assertThat(getAll(mappings)).flatExtracting(
-				AnnotationTypeMapping::getAnnotationType).containsExactly(
-						SimpleAnnotation.class);
+				AnnotationTypeMapping::getAnnotationType).containsExactly(SimpleAnnotation.class);
 	}
 
 	@Test
 	public void forAnnotationWhenHasSpringAnnotationReturnsFilteredMappings() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-				WithSpringLangAnnotation.class);
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithSpringLangAnnotation.class);
 		assertThat(mappings.size()).isEqualTo(1);
 	}
 
 	@Test
 	public void forAnnotationTypeWhenMetaAnnotationsReturnsMappings() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-				MetaAnnotated.class);
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(MetaAnnotated.class);
 		assertThat(mappings.size()).isEqualTo(6);
 		assertThat(getAll(mappings)).flatExtracting(
 				AnnotationTypeMapping::getAnnotationType).containsExactly(
@@ -85,33 +73,27 @@ public class AnnotationTypeMappingsTests {
 
 	@Test
 	public void forAnnotationTypeWhenHasRepeatingMetaAnnotationReturnsMapping() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-				WithRepeatedMetaAnnotations.class);
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithRepeatedMetaAnnotations.class);
 		assertThat(mappings.size()).isEqualTo(3);
 		assertThat(getAll(mappings)).flatExtracting(
 				AnnotationTypeMapping::getAnnotationType).containsExactly(
-						WithRepeatedMetaAnnotations.class, Repeating.class,
-						Repeating.class);
+						WithRepeatedMetaAnnotations.class, Repeating.class, Repeating.class);
 	}
 
 	@Test
 	public void forAnnotationTypeWhenSelfAnnotatedReturnsMapping() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-				SelfAnnotated.class);
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(SelfAnnotated.class);
 		assertThat(mappings.size()).isEqualTo(1);
 		assertThat(getAll(mappings)).flatExtracting(
-				AnnotationTypeMapping::getAnnotationType).containsExactly(
-						SelfAnnotated.class);
+				AnnotationTypeMapping::getAnnotationType).containsExactly(SelfAnnotated.class);
 	}
 
 	@Test
 	public void forAnnotationTypeWhenFormsLoopReturnsMapping() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-				LoopA.class);
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(LoopA.class);
 		assertThat(mappings.size()).isEqualTo(2);
 		assertThat(getAll(mappings)).flatExtracting(
-				AnnotationTypeMapping::getAnnotationType).containsExactly(LoopA.class,
-						LoopB.class);
+				AnnotationTypeMapping::getAnnotationType).containsExactly(LoopA.class, LoopB.class);
 	}
 
 	@Test

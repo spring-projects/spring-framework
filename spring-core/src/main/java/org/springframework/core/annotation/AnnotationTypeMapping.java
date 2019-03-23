@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @since 5.2
  * @see AnnotationTypeMappings
  */
-class AnnotationTypeMapping {
+final class AnnotationTypeMapping {
 
 	@Nullable
 	private final AnnotationTypeMapping parent;

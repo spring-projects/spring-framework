@@ -190,13 +190,12 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T extends Annotation> MergedAnnotation<T> getAnnotation(String attributeName,
-			Class<T> type) throws NoSuchElementException {
+	public <T extends Annotation> MergedAnnotation<T> getAnnotation(String attributeName, Class<T> type)
+			throws NoSuchElementException {
 
-		Assert.notNull(attributeName, "AttributeName must not be null");
-		Assert.notNull(type, "Type must not be null");
 		int attributeIndex = getAttributeIndex(attributeName, true);
 		Method attribute = this.mapping.getAttributes().get(attributeIndex);
+		Assert.notNull(type, "Type must not be null");
 		Assert.isAssignable(type, attribute.getReturnType(),
 				"Attribute " + attributeName + " type mismatch:");
 		return (MergedAnnotation<T>) getRequiredValue(attributeIndex, Object.class);
@@ -207,13 +206,12 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	public <T extends Annotation> MergedAnnotation<T>[] getAnnotationArray(
 			String attributeName, Class<T> type) throws NoSuchElementException {
 
-		Assert.notNull(attributeName, "AttributeName must not be null");
-		Assert.notNull(type, "Type must not be null");
 		int attributeIndex = getAttributeIndex(attributeName, true);
 		Method attribute = this.mapping.getAttributes().get(attributeIndex);
 		Class<?> componentType = attribute.getReturnType().getComponentType();
+		Assert.notNull(type, "Type must not be null");
 		Assert.notNull(componentType, () -> "Attribute " + attributeName + " is not an array");
-		Assert.isAssignable(type, componentType, "Attribute " + attributeName + " component type mismatch:");
+		Assert.isAssignable(type, componentType, () -> "Attribute " + attributeName + " component type mismatch:");
 		return (MergedAnnotation<T>[]) getRequiredValue(attributeIndex, Object.class);
 	}
 
@@ -229,7 +227,6 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@Override
 	public MergedAnnotation<A> filterAttributes(Predicate<String> predicate) {
-		Assert.notNull(predicate, "Predicate must not be null");
 		if (this.attributeFilter != null) {
 			predicate = this.attributeFilter.and(predicate);
 		}
@@ -250,9 +247,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	public <T extends Map<String, Object>> T asMap(
 			@Nullable Function<MergedAnnotation<?>, T> factory, MapValues... options) {
 
-		T map = factory != null ? factory.apply(this) : (T) new LinkedHashMap<String, Object>();
-		Assert.state(map != null,
-				"Factory used to create MergedAnnotation Map must not return null;");
+		T map = (factory != null ? factory.apply(this) : (T) new LinkedHashMap<String, Object>());
+		Assert.state(map != null, "Factory used to create MergedAnnotation Map must not return null");
 		AttributeMethods attributes = this.mapping.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
 			Method attribute = attributes.get(i);
@@ -361,14 +357,13 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Nullable
 	protected <T> T getAttributeValue(String attributeName, Class<T> type) {
 		int attributeIndex = getAttributeIndex(attributeName, false);
-		return attributeIndex != -1 ? getValue(attributeIndex, type) : null;
+		return (attributeIndex != -1 ? getValue(attributeIndex, type) : null);
 	}
 
 	protected final <T> T getRequiredValue(int attributeIndex, Class<T> type) {
 		T value = getValue(attributeIndex, type);
 		if (value == null) {
-			throw new NoSuchElementException(
-					"No element at attribute index " + attributeIndex);
+			throw new NoSuchElementException("No element at attribute index " + attributeIndex);
 		}
 		return value;
 	}
@@ -457,8 +452,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			MergedAnnotation<?> annotation = (MergedAnnotation<?>) value;
 			value = annotation.synthesize();
 		}
-		else if (value instanceof MergedAnnotation[] && type.isArray()
-				&& type.getComponentType().isAnnotation()) {
+		else if (value instanceof MergedAnnotation[] && type.isArray() && type.getComponentType().isAnnotation()) {
 			MergedAnnotation<?>[] annotations = (MergedAnnotation<?>[]) value;
 			Object array = Array.newInstance(type.getComponentType(), annotations.length);
 			for (int i = 0; i < annotations.length; i++) {
@@ -484,8 +478,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		if (attributeType.isAnnotation()) {
 			return adaptToMergedAnnotation(value,(Class<? extends Annotation>) attributeType);
 		}
-		if (attributeType.isArray() &&
-				attributeType.getComponentType().isAnnotation() &&
+		if (attributeType.isArray() && attributeType.getComponentType().isAnnotation() &&
 				value.getClass().isArray()) {
 			MergedAnnotation<?>[] result = new MergedAnnotation<?>[Array.getLength(value)];
 			for (int i = 0; i < result.length; i++) {
@@ -539,10 +532,9 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	private int getAttributeIndex(String attributeName, boolean required) {
-		Assert.hasText(attributeName, "AttributeName must not be null");
-		int attributeIndex = isFiltered(attributeName) ?
-				-1 :
-				this.mapping.getAttributes().indexOf(attributeName);
+		Assert.hasText(attributeName, "Attribute name must not be null");
+		int attributeIndex = (isFiltered(attributeName) ? -1 :
+				this.mapping.getAttributes().indexOf(attributeName));
 		if (attributeIndex == -1 && required) {
 			throw new NoSuchElementException("No attribute named '" + attributeName +
 					"' present in merged annotation " + getType());
@@ -562,20 +554,16 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return (Class<A>) this.mapping.getAnnotationType();
 	}
 
-	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source,
-			A annotation) {
-
+	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source, A annotation) {
 		Assert.notNull(annotation, "Annotation must not be null");
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-				annotation.annotationType());
-		return new TypeMappedAnnotation<>(mappings.get(0), source, annotation,
-				ReflectionUtils::invokeMethod, 0);
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotation.annotationType());
+		return new TypeMappedAnnotation<>(mappings.get(0), source, annotation, ReflectionUtils::invokeMethod, 0);
 	}
 
 	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source,
 			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
 
-		Assert.notNull(annotationType, "AnnotationType must not be null");
+		Assert.notNull(annotationType, "Annotation type must not be null");
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotationType);
 		return new TypeMappedAnnotation<>(mappings.get(0), source, attributes,
 				TypeMappedAnnotation::extractFromMap, 0);
@@ -596,9 +584,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			}
 			if (logger.isEnabled()) {
 				String type = mapping.getAnnotationType().getName();
-				String item = mapping.getDepth() == 0 ?
-						"annotation " + type :
-						"meta-annotation " + type + " from " + mapping.getRoot().getAnnotationType().getName();
+				String item = (mapping.getDepth() == 0 ? "annotation " + type :
+						"meta-annotation " + type + " from " + mapping.getRoot().getAnnotationType().getName());
 				logger.log("Failed to introspect " + item, source, ex);
 			}
 			return null;
@@ -608,7 +595,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@SuppressWarnings("unchecked")
 	@Nullable
 	private static Object extractFromMap(Method attribute, @Nullable Object map) {
-		return map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null;
+		return (map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null);
 	}
 
 }

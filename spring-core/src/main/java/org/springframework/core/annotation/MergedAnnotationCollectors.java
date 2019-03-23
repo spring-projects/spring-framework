@@ -27,7 +27,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collector.Characteristics;
 
 import org.springframework.core.annotation.MergedAnnotation.MapValues;
-import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -42,8 +41,7 @@ public abstract class MergedAnnotationCollectors {
 
 	private static final Characteristics[] NO_CHARACTERISTICS = {};
 
-	private static final Characteristics[] IDENTITY_FINISH_CHARACTERISTICS = {
-		Characteristics.IDENTITY_FINISH };
+	private static final Characteristics[] IDENTITY_FINISH_CHARACTERISTICS = {Characteristics.IDENTITY_FINISH};
 
 
 	private MergedAnnotationCollectors() {
@@ -128,14 +126,13 @@ public abstract class MergedAnnotationCollectors {
 			Function<MultiValueMap<String, Object>, MultiValueMap<String, Object>> finisher,
 			MapValues... options) {
 
-		Assert.notNull(finisher, "Finisher must not be null");
-		Characteristics[] characteristics = isSameInstance(finisher, Function.identity()) ?
-				IDENTITY_FINISH_CHARACTERISTICS :
-				NO_CHARACTERISTICS;
+		Characteristics[] characteristics = (isSameInstance(finisher, Function.identity()) ?
+				IDENTITY_FINISH_CHARACTERISTICS : NO_CHARACTERISTICS);
 		return Collector.of(LinkedMultiValueMap::new,
 				(map, annotation) -> annotation.asMap(options).forEach(map::add),
 				MergedAnnotationCollectors::merge, finisher, characteristics);
 	}
+
 
 	private static boolean isSameInstance(Object instance, Object candidate) {
 		return instance == candidate;

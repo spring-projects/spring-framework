@@ -541,13 +541,6 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void findRepeatableAnnotationOnComposedAnnotation() {
-		Repeatable repeatable = findAnnotation(MyRepeatableMeta1.class, Repeatable.class);
-		assertNotNull(repeatable);
-		assertEquals(MyRepeatableContainer.class, repeatable.value());
-	}
-
-	@Test
 	public void getRepeatableAnnotationsDeclaredOnMethod() throws Exception {
 		Method method = InterfaceWithRepeated.class.getMethod("foo");
 		Set<MyRepeatable> annotations = getRepeatableAnnotations(method, MyRepeatable.class, MyRepeatableContainer.class);

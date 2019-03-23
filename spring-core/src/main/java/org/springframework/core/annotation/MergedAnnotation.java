@@ -40,8 +40,8 @@ import org.springframework.lang.Nullable;
  * For example, to access an {@code int} attribute the {@link #getInt(String)}
  * method would be used.
  *
- * <p>Note that attribute values are <b>not</b> converted when accessed. For
- * example, it is not possible to call {@link #getString(String)} if the
+ * <p>Note that attribute values are <b>not</b> converted when accessed.
+ * For example, it is not possible to call {@link #getString(String)} if the
  * underlying attribute is an {@code int}. The only exception to this rule is
  * {@code Class} and {@code Class[]} values which may be accessed as
  * {@code String} and {@code String[]} respectively to prevent potential early
@@ -62,6 +62,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * The attribute name for annotations with a single element.
 	 */
 	String VALUE = "value";
+
 
 	/**
 	 * Return the class name of the actual annotation type.
@@ -342,8 +343,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @return the value as a {@link MergedAnnotation}
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
-	<T extends Annotation> MergedAnnotation<T> getAnnotation(String attributeName,
-			Class<T> type) throws NoSuchElementException;
+	<T extends Annotation> MergedAnnotation<T> getAnnotation(String attributeName, Class<T> type)
+			throws NoSuchElementException;
 
 	/**
 	 * Return a required annotation array attribute value from the annotation.
@@ -413,10 +414,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	MergedAnnotation<A> filterAttributes(Predicate<String> predicate);
 
 	/**
-	 * Return a new view of the annotation that exposes non-merged attribute
-	 * values. Methods from this view will return attribute values with only
-	 * alias mirroring rules applied. Aliases to parent attributes will not be
-	 * applied.
+	 * Return a new view of the annotation that exposes non-merged attribute values.
+	 * Methods from this view will return attribute values with only alias mirroring
+	 * rules applied. Aliases to parent attributes will not be applied.
 	 * @return a non-merged view of the annotation
 	 */
 	MergedAnnotation<A> withNonMergedAttributes();
@@ -431,9 +431,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	Map<String, Object> asMap(MapValues... options);
 
 	/**
-	 * Return a {@link Map} of the supplied type that contains all the
-	 * annotation attributes. The {@link MapValues} options may be used to
-	 * change the way that values are added.
+	 * Return a {@link Map} of the supplied type that contains all the annotation
+	 * attributes. The {@link MapValues} options may be used to change the way
+	 * that values are added.
 	 * @param factory a map factory or {@code null} to return an immutable map.
 	 * @param options map value options
 	 * @return a map containing the attributes and values
@@ -443,28 +443,26 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * Return a type-safe synthesized version of this annotation that can be
-	 * used directly in code. The result is synthesized using a JDK
-	 * {@link Proxy} and as a result may incur a computational cost when first
-	 * invoked.
-	 * @return a sythesized version of the annotation.
+	 * used directly in code. The result is synthesized using a JDK {@link Proxy}
+	 * and as a result may incur a computational cost when first invoked.
+	 * @return a synthesized version of the annotation.
 	 * @throws NoSuchElementException on a missing annotation
 	 */
 	A synthesize() throws NoSuchElementException;
 
 	/**
 	 * Optionally return type-safe synthesized version of this annotation based
-	 * on a condition predicate. The result is synthesized using a JDK
-	 * {@link Proxy} and as a result may incur a computational cost when first
-	 * invoked.
-	 * @param condition the test to determine if the annotation can be
-	 * sythesized
-	 * @return a optional containing the sythesized version of the annotation or
+	 * on a condition predicate. The result is synthesized using a JDK {@link Proxy}
+	 * and as a result may incur a computational cost when first invoked.
+	 * @param condition the test to determine if the annotation can be synthesized
+	 * @return a optional containing the synthesized version of the annotation or
 	 * an empty optional if the condition doesn't match
 	 * @throws NoSuchElementException on a missing annotation
 	 * @see MergedAnnotationPredicates
 	 */
 	Optional<A> synthesize(@Nullable Predicate<? super MergedAnnotation<A>> condition)
 			throws NoSuchElementException;
+
 
 	/**
 	 * Return an {@link MergedAnnotation} that represents a missing annotation
@@ -494,8 +492,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @param annotation the annotation to include
 	 * @return a {@link MergedAnnotation} instance for the annotation
 	 */
-	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source,
-			A annotation) {
+	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source, A annotation) {
 		return TypeMappedAnnotation.from(source, annotation);
 	}
 
@@ -520,8 +517,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * attributes
 	 * @see #from(AnnotatedElement, Class, Map)
 	 */
-	static <A extends Annotation> MergedAnnotation<A> from(Class<A> annotationType,
-			@Nullable Map<String, ?> attributes) {
+	static <A extends Annotation> MergedAnnotation<A> from(
+			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
+
 		return from(null, annotationType, attributes);
 	}
 
@@ -538,8 +536,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * attributes
 	 */
 	static <A extends Annotation> MergedAnnotation<A> from(
-			@Nullable AnnotatedElement source, Class<A> annotationType,
-			@Nullable Map<String, ?> attributes) {
+			@Nullable AnnotatedElement source, Class<A> annotationType, @Nullable Map<String, ?> attributes) {
+
 		return TypeMappedAnnotation.from(source, annotationType, attributes);
 	}
 
@@ -561,7 +559,6 @@ public interface MergedAnnotation<A extends Annotation> {
 		 */
 		ANNOTATION_TO_MAP;
 
-
 		protected final boolean isIn(MapValues... options) {
 			for (MapValues candidate : options) {
 				if (candidate == this) {
@@ -572,11 +569,9 @@ public interface MergedAnnotation<A extends Annotation> {
 		}
 
 		/**
-		 * Factory method to create a {@link MapValues} array from a set of
-		 * boolean flags.
+		 * Factory method to create a {@link MapValues} array from a set of boolean flags.
 		 * @param classToString if {@link MapValues#CLASS_TO_STRING} is included
-		 * @param annotationsToMap if {@link MapValues#ANNOTATION_TO_MAP} is
-		 * included
+		 * @param annotationsToMap if {@link MapValues#ANNOTATION_TO_MAP} is included
 		 * @return a new {@link MapValues} array
 		 */
 		public static MapValues[] of(boolean classToString, boolean annotationsToMap) {
@@ -591,7 +586,6 @@ public interface MergedAnnotation<A extends Annotation> {
 				result.add(value);
 			}
 		}
-
 	}
 
 }
