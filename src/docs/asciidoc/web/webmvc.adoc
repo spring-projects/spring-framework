@@ -3709,7 +3709,7 @@ suitable under load. If you plan to stream with a reactive type, you should use 
 
 The Servlet API does not provide any notification when a remote client goes away.
 Therefore, while streaming to the response, whether through <<mvc-ann-async-sse, SseEmitter>>
-or <<mvc-ann-async-reactive-types, reactive types>, it is important to send data periodically,
+or <<mvc-ann-async-reactive-types, reactive types>>, it is important to send data periodically,
 since the write fails if the client has disconnected. The send could take the form of an
 empty (comment-only) SSE event or any other data that the other side would have to interpret
 as a heartbeat and ignore.
