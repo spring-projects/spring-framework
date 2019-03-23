@@ -5891,7 +5891,7 @@ See the following resources for more information about testing:
 
 * https://www.junit.org/[JUnit]: "`A programmer-oriented testing framework for Java`".
   Used by the Spring Framework in its test suite.
-* http://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
+* https://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
   for annotations, test groups, data-driven testing, distributed testing, and other features.
 * https://joel-costigliola.github.io/assertj/[AssertJ]: "`Fluent assertions for Java`",
   including support for Java 8 lambdas, streams, and other features.
@@ -5900,12 +5900,12 @@ See the following resources for more information about testing:
   technique for improving the design of code within test-driven development.
 * https://mockito.github.io[Mockito]: Java mock library based on the
   http://xunitpatterns.com/Test%20Spy.html[Test Spy] pattern.
-* http://easymock.org/[EasyMock]: Java library "`that provides Mock Objects for
+* https://easymock.org/[EasyMock]: Java library "`that provides Mock Objects for
   interfaces (and objects through the class extension) by generating them on the fly
   using Java's proxy mechanism.`" Used by the Spring Framework in its test suite.
-* http://jmock.org/[JMock]: Library that supports test-driven development of Java
+* https://jmock.org/[JMock]: Library that supports test-driven development of Java
   code with mock objects.
 * http://dbunit.sourceforge.net/[DbUnit]: JUnit extension (also usable with Ant and
   Maven) that is targeted at database-driven projects and, among other things, puts your
   database into a known state between test runs.
-* http://grinder.sourceforge.net/[The Grinder]: Java load testing framework.
+* https://sourceforge.net/projects/grinder/[The Grinder]: Java load testing framework.
