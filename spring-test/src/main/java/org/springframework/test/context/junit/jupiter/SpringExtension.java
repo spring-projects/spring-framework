@@ -35,7 +35,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.AutowireUtils;
+import org.springframework.beans.factory.annotation.ParameterResolutionDelegate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -146,31 +146,30 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * <p>Returns {@code true} if the parameter is declared in a {@link Constructor}
 	 * that is annotated with {@link Autowired @Autowired} or if the parameter is
 	 * of type {@link ApplicationContext} (or a sub-type thereof) and otherwise delegates
-	 * to {@link AutowireUtils#isAutowirable}.
+	 * to {@link ParameterResolutionDelegate#isAutowirable}.
 	 * <p><strong>WARNING</strong>: If the parameter is declared in a {@code Constructor}
 	 * that is annotated with {@code @Autowired}, Spring will assume the responsibility
 	 * for resolving all parameters in the constructor. Consequently, no other registered
 	 * {@link ParameterResolver} will be able to resolve parameters.
 	 * @see #resolveParameter
-	 * @see AutowireUtils#isAutowirable
+	 * @see ParameterResolutionDelegate#isAutowirable
 	 */
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
 		int index = parameterContext.getIndex();
-		Executable executable = parameter.getDeclaringExecutable();
-		return (executable instanceof Constructor &&
-				AnnotatedElementUtils.hasAnnotation(executable, Autowired.class)) ||
+		Executable exec = parameter.getDeclaringExecutable();
+		return ((exec instanceof Constructor && AnnotatedElementUtils.hasAnnotation(exec, Autowired.class)) ||
 				ApplicationContext.class.isAssignableFrom(parameter.getType()) ||
-				AutowireUtils.isAutowirable(parameter, index);
+				ParameterResolutionDelegate.isAutowirable(parameter, index));
 	}
 
 	/**
 	 * Resolve a value for the {@link Parameter} in the supplied {@link ParameterContext} by
 	 * retrieving the corresponding dependency from the test's {@link ApplicationContext}.
-	 * <p>Delegates to {@link AutowireUtils#resolveDependency}.
+	 * <p>Delegates to {@link ParameterResolutionDelegate#resolveDependency}.
 	 * @see #supportsParameter
-	 * @see AutowireUtils#resolveDependency
+	 * @see ParameterResolutionDelegate#resolveDependency
 	 */
 	@Override
 	@Nullable
@@ -179,8 +178,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		int index = parameterContext.getIndex();
 		Class<?> testClass = extensionContext.getRequiredTestClass();
 		ApplicationContext applicationContext = getApplicationContext(extensionContext);
-		return AutowireUtils.resolveDependency(parameter, index, testClass,
-			applicationContext.getAutowireCapableBeanFactory());
+		return ParameterResolutionDelegate.resolveDependency(parameter, index, testClass,
+				applicationContext.getAutowireCapableBeanFactory());
 	}
 
 
