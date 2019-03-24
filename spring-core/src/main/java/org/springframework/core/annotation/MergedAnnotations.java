@@ -26,8 +26,8 @@ import java.util.stream.Stream;
 import org.springframework.lang.Nullable;
 
 /**
- * Provides access to a collection of merged annotations, usually obtained from
- * a from a source such as a {@link Class} or {@link Method}. Each merged
+ * Provides access to a collection of merged annotations, usually obtained
+ * from a source such as a {@link Class} or {@link Method}. Each merged
  * annotation represent a view where the attribute values may be "merged" from
  * different source values, typically:
  *
