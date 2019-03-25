@@ -1483,7 +1483,6 @@ as the following example shows:
 ----
 <1> Using a `consumes` attribute to narrow the mapping by the content type.
 
-
 The `consumes` attribute also supports negation expressions -- for example, `!text/plain` means any
 content type other than `text/plain`.
 
@@ -1512,7 +1511,6 @@ content types that a controller method produces, as the following example shows:
 	}
 ----
 <1> Using a `produces` attribute to narrow the mapping by the content type.
-
 
 The media type can specify a character set. Negated expressions are supported -- for example,
 `!text/plain` means any content type other than "text/plain".
@@ -1548,7 +1546,6 @@ specific value (`myParam=myValue`). The following example shows how to test for 
 ----
 <1> Testing whether `myParam` equals `myValue`.
 
-
 You can also use the same with request header conditions, as the following example shows:
 
 [source,java,indent=0]
@@ -1560,7 +1557,6 @@ You can also use the same with request header conditions, as the following examp
 	}
 ----
 <1> Testing whether `myHeader` equals `myValue`.
-
 
 TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is better to use
 <<mvc-ann-requestmapping-consumes, consumes>> and <<mvc-ann-requestmapping-produces, produces>>
@@ -1647,7 +1643,6 @@ public class MyConfig {
 <2> Prepare the request mapping meta data.
 <3> Get the handler method.
 <4> Add the registration.
-
 
 
 
@@ -2030,7 +2025,6 @@ The following example shows how to do so:
 ----
 <1> Using `@RequestParam` to bind `petId`.
 
-
 By default, method parameters that use this annotation are required, but you can specify that
 a method parameter is optional by setting the `@RequestParam` annotation's `required` flag to
 `false` or by declaring the argument with an `java.util.Optional` wrapper.
@@ -2086,7 +2080,6 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 ----
 <1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
-
 
 If the target method parameter type is not
 `String`, type conversion is automatically applied. See <<mvc-ann-typeconversion>>.
@@ -2151,7 +2144,6 @@ converting individual query parameters and form fields. The following example sh
 ----
 <1> Bind an instance of `Pet`.
 
-
 The `Pet` instance above is resolved as follows:
 
 * From the model if already added by using <<mvc-ann-modelattrib-methods>>.
@@ -2201,7 +2193,6 @@ to the `@ModelAttribute`, as the following example shows:
 ----
 <1> Adding a `BindingResult` next to the `@ModelAttribute`.
 
-
 In some cases, you may want access to a model attribute without data binding. For such
 cases, you can inject the `Model` into the controller and access it directly or,
 alternatively, set `@ModelAttribute(binding=false)`, as the following example shows:
@@ -2227,7 +2218,6 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 ----
 <1> Setting `@ModelAttribute(binding=false)`.
 
-
 You can automatically apply validation after data binding by adding the
 `javax.validation.Valid` annotation or Spring's `@Validated` annotation (
 <<core.adoc#validation-beanvalidation, Bean Validation>> and
@@ -2245,7 +2235,6 @@ You can automatically apply validation after data binding by adding the
 	}
 ----
 <1> Validate the `Pet` instance.
-
 
 Note that using `@ModelAttribute` is optional (for example, to set its attributes).
 By default, any argument that is not a simple value type (as determined by
@@ -2277,7 +2266,6 @@ The following example uses the `@SessionAttributes` annotation:
 ----
 <1> Using the `@SessionAttributes` annotation.
 
-
 On the first request, when a model attribute with the name, `pet`, is added to the model,
 it is automatically promoted to and saved in the HTTP Servlet session. It remains there
 until another controller method uses a `SessionStatus` method argument to clear the
@@ -2307,7 +2295,6 @@ storage, as the following example shows:
 <2> Clearing the `Pet` value from the Servlet session.
 
 
-
 [[mvc-ann-sessionattribute]]
 ==== `@SessionAttribute`
 [.small]#<<web-reactive.adoc#webflux-ann-sessionattribute, Same as in Spring WebFlux>>#
@@ -2326,7 +2313,6 @@ as the following example shows:
 	}
 ----
 <1> Using a `@SessionAttribute` annotation.
-
 
 For use cases that require adding or removing session attributes, consider injecting
 `org.springframework.web.context.request.WebRequest` or
@@ -2354,7 +2340,6 @@ or `HandlerInterceptor`):
 	}
 ----
 <1> Using the `@RequestAttribute` annotation.
-
 
 
 [[mvc-redirecting-passing-data]]
@@ -2872,7 +2857,6 @@ The following listing shows an example:
 ----
 <1> Defining an `@InitBinder` method.
 
-
 Alternatively, when you use a `Formatter`-based setup through a shared
 `FormattingConversionService`, you can re-use the same approach and register
 controller-specific `Formatter` implementations, as the following example shows:
@@ -2892,7 +2876,6 @@ controller-specific `Formatter` implementations, as the following example shows:
 	}
 ----
 <1> Defining an `@InitBinder` method on a custom formatter.
-
 
 
 
@@ -3900,7 +3883,6 @@ as the following example shows:
 <1> Application-specific calculation.
 <2> The response has been set to 304 (NOT_MODIFIED) -- no further processing.
 <3> Continue with the request processing.
-
 
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
 values, or both. For conditional `GET` and `HEAD` requests, you can set the response to

@@ -471,7 +471,6 @@ of any public method.
 <3> `tradingOperation` matches if a method execution represents any public method in the
 trading module.
 
-
 It is a best practice to build more complex pointcut expressions out of smaller named
 components, as shown earlier. When referring to pointcuts by name, normal Java visibility
 rules apply (you can see private pointcuts in the same type, protected pointcuts in the
