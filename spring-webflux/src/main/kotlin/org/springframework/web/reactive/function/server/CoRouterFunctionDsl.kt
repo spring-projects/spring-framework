@@ -395,6 +395,9 @@ open class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit
         }
     }
 
+	/**
+	 * Return a composed routing function created from all the registered routes.
+	 */
     override fun invoke(): RouterFunction<ServerResponse> {
         init()
         return builder.build()
@@ -475,6 +478,9 @@ open class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit
 
 }
 
+/**
+ * Equivalent to [RouterFunction.and].
+ */
 operator fun <T: ServerResponse> RouterFunction<T>.plus(other: RouterFunction<T>) =
         this.and(other)
 
