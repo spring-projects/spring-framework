@@ -25,7 +25,7 @@ ext {
 	linkScmDevConnection = "scm:git:ssh://git@github.com:spring-projects/spring-framework.git"
 
 	moduleProjects = subprojects.findAll {
-		!it.name.equals("spring-build-src") && !it.name.equals("spring-framework-bom")
+		!it.name.equals("spring-build-src") && !it.name.equals("spring-framework-bom") && !it.name.equals("spring-core-coroutines")
 	}
 
 	aspectjVersion       = "1.9.2"

@@ -25,6 +25,8 @@ import java.util.function.Function;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
+import kotlinx.coroutines.CompletableDeferredKt;
+import kotlinx.coroutines.Deferred;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -93,7 +95,7 @@ public class ReactiveAdapterRegistry {
 
 		// Coroutines
 		if (ClassUtils.isPresent("kotlinx.coroutines.Deferred", classLoader)) {
-			CoroutinesRegistrarKt.registerAdapter(this);
+			new CoroutinesRegistrar().registerAdapters(this);
 		}
 	}
 
@@ -322,6 +324,18 @@ public class ReactiveAdapterRegistry {
 			Publisher<T> publisher = super.toPublisher(source);
 			return (isMultiValue() ? Flux.from(publisher) : Mono.from(publisher));
 		}
+	}
+
+	private static class CoroutinesRegistrar {
+
+		@SuppressWarnings("KotlinInternalInJava")
+		void registerAdapters(ReactiveAdapterRegistry registry) {
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.singleOptionalValue(Deferred.class, () -> CompletableDeferredKt.CompletableDeferred(null)),
+					source -> CoroutinesUtils.deferredToMono((Deferred<?>) source),
+					source -> CoroutinesUtils.monoToDeferred(Mono.from(source)));
+		}
+
 	}
 
 }
