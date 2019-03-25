@@ -20,6 +20,7 @@ import java.beans.PropertyEditor;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
@@ -223,6 +224,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 				return;
 			}
 			builder.queryParam(name);
+		}
+		else if (value instanceof Optional && !((Optional) value).isPresent()) {
+			return;
 		}
 		else if (value instanceof Collection) {
 			for (Object element : (Collection<?>) value) {
