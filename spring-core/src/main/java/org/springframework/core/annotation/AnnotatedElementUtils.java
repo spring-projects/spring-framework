@@ -864,12 +864,12 @@ public abstract class AnnotatedElementUtils {
 
 		@Override
 		public Annotation[] getAnnotations() {
-			return this.annotations;
+			return this.annotations.clone();
 		}
 
 		@Override
 		public Annotation[] getDeclaredAnnotations() {
-			return this.annotations;
+			return this.annotations.clone();
 		}
 
 	};
