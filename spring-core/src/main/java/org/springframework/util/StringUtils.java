@@ -773,7 +773,9 @@ public abstract class StringUtils {
 		String[] tokens = tokenizeLocaleSource(localeValue);
 		if (tokens.length == 1) {
 			Locale resolved = Locale.forLanguageTag(localeValue);
-			return (resolved.getLanguage().length() > 0 ? resolved : null);
+			if (resolved.getLanguage().length() > 0) {
+				return resolved;
+			}
 		}
 		return parseLocaleTokens(localeValue, tokens);
 	}
@@ -820,7 +822,7 @@ public abstract class StringUtils {
 			}
 		}
 
-		if ("".equals(variant) && country.startsWith("#")) {
+		if (variant.isEmpty() && country.startsWith("#")) {
 			variant = country;
 			country = "";
 		}
@@ -1193,7 +1195,7 @@ public abstract class StringUtils {
 		}
 
 		List<String> result = new ArrayList<>();
-		if ("".equals(delimiter)) {
+		if (delimiter.isEmpty()) {
 			for (int i = 0; i < str.length(); i++) {
 				result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
 			}

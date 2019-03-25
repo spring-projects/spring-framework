@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -763,6 +763,22 @@ public class StringUtilsTests {
 				assertEquals(parsedLocale.toLanguageTag(), locale.toLanguageTag());
 			}
 		}
+	}
+
+	@Test
+	public void testInvalidLocaleWithLocaleString() {
+		assertEquals(new Locale("invalid"), StringUtils.parseLocaleString("invalid"));
+		assertEquals(new Locale("invalidvalue"), StringUtils.parseLocaleString("invalidvalue"));
+		assertEquals(new Locale("invalidvalue", "foo"), StringUtils.parseLocaleString("invalidvalue_foo"));
+		assertNull(StringUtils.parseLocaleString(""));
+	}
+
+	@Test
+	public void testInvalidLocaleWithLanguageTag() {
+		assertEquals(new Locale("invalid"), StringUtils.parseLocale("invalid"));
+		assertEquals(new Locale("invalidvalue"), StringUtils.parseLocale("invalidvalue"));
+		assertEquals(new Locale("invalidvalue", "foo"), StringUtils.parseLocale("invalidvalue_foo"));
+		assertNull(StringUtils.parseLocale(""));
 	}
 
 }
