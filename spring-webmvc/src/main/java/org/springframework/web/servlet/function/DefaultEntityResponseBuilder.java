@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,6 +52,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -66,6 +67,8 @@ import org.springframework.web.servlet.ModelAndView;
  */
 final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
+	private static final boolean reactiveStreamsPresent;
+
 	private final T entity;
 
 	private final Type entityType;
@@ -75,6 +78,11 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final MultiValueMap<String, Cookie> cookies = new LinkedMultiValueMap<>();
+
+	static {
+		ClassLoader classLoader = DefaultEntityResponseBuilder.class.getClassLoader();
+		reactiveStreamsPresent = ClassUtils.isPresent("org.reactivestreams.Publisher", classLoader);
+	}
 
 
 	private DefaultEntityResponseBuilder(T entity, @Nullable Type entityType) {
@@ -197,7 +205,8 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return new CompletionStageEntityResponse(this.status, this.headers, this.cookies,
 					completionStage, this.entityType);
 		}
-		else if (this.entity instanceof Publisher) {
+		else if (reactiveStreamsPresent &&
+				PublisherEntityResponse.isPublisher(this.entity)) {
 			Publisher publisher = (Publisher) this.entity;
 			return new PublisherEntityResponse(this.status, this.headers, this.cookies, publisher,
 					this.entityType);
@@ -380,6 +389,11 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 			return null;
 		}
+
+		public static boolean isPublisher(Object o) {
+			return (o instanceof Publisher);
+		}
+
 
 		@SuppressWarnings("SubscriberImplementation")
 		private class ProducingSubscriber implements Subscriber<T> {
