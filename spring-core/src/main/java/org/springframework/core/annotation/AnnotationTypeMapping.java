@@ -67,6 +67,10 @@ final class AnnotationTypeMapping {
 
 	private final int[] conventionMappings;
 
+	private final int[] annotationValueMappings;
+
+	private final AnnotationTypeMapping[] annotationValueSource;
+
 	private final Map<Method, List<Method>> aliasedBy;
 
 	private final Set<Method> claimedAliases = new HashSet<>();
@@ -92,9 +96,12 @@ final class AnnotationTypeMapping {
 		this.mirrorSets = new MirrorSets();
 		this.aliasMappings = filledIntArray(this.attributes.size(), -1);
 		this.conventionMappings = filledIntArray(this.attributes.size(), -1);
+		this.annotationValueMappings = filledIntArray(this.attributes.size(), -1);
+		this.annotationValueSource = new AnnotationTypeMapping[this.attributes.size()];
 		this.aliasedBy = resolveAliasedForTargets();
 		processAliases();
 		addConventionMappings();
+		addConventionAnnotationValues();
 	}
 
 
@@ -200,7 +207,7 @@ final class AnnotationTypeMapping {
 			aliases.add(this.attributes.get(i));
 			collectAliases(aliases);
 			if (aliases.size() > 1) {
-				processAliases(aliases);
+				processAliases(i, aliases);
 			}
 		}
 	}
@@ -219,7 +226,7 @@ final class AnnotationTypeMapping {
 		}
 	}
 
-	private void processAliases(List<Method> aliases) {
+	private void processAliases(int attributeIndex, List<Method> aliases) {
 		int rootAttributeIndex = getFirstRootAttributeIndex(aliases);
 		AnnotationTypeMapping mapping = this;
 		while (mapping != null) {
@@ -232,6 +239,16 @@ final class AnnotationTypeMapping {
 			}
 			mapping.mirrorSets.updateFrom(aliases);
 			mapping.claimedAliases.addAll(aliases);
+			if (mapping.annotation != null) {
+				int[] resolvedMirrors = mapping.mirrorSets.resolve(null,
+						mapping.annotation, ReflectionUtils::invokeMethod);
+				for (int i = 0; i < mapping.attributes.size(); i++) {
+					if (aliases.contains(mapping.attributes.get(i))) {
+						this.annotationValueMappings[attributeIndex] = resolvedMirrors[i];
+						this.annotationValueSource[attributeIndex] = mapping;
+					}
+				}
+			}
 			mapping = mapping.parent;
 		}
 	}
@@ -263,6 +280,22 @@ final class AnnotationTypeMapping {
 						mappings[mirrors.getAttributeIndex(j)] = mapped;
 					}
 				}
+			}
+		}
+	}
+
+	private void addConventionAnnotationValues() {
+		for (int i = 0; i < this.attributes.size(); i++) {
+			Method attribute = this.attributes.get(i);
+			AnnotationTypeMapping mapping = this;
+			while (mapping.depth > 0) {
+				int mapped = mapping.getAttributes().indexOf(attribute.getName());
+				if (mapped != -1 && (this.annotationValueMappings[i] == -1
+						|| this.annotationValueSource[i].depth > mapping.depth)) {
+					this.annotationValueMappings[i] = mapped;
+					this.annotationValueSource[i] = mapping;
+				}
+				mapping = mapping.parent;
 			}
 		}
 	}
@@ -387,6 +420,26 @@ final class AnnotationTypeMapping {
 	 */
 	int getConventionMapping(int attributeIndex) {
 		return this.conventionMappings[attributeIndex];
+	}
+
+	/**
+	 * Return a mapped attribute value from the most suitable
+	 * {@link #getAnnotation() meta-annotation}. The resulting value is obtained
+	 * from the closest meta-annotation, taking into consideration both
+	 * convention and alias based mapping rules. For root mappings, this method
+	 * will always return {@code null}.
+	 * @param attributeIndex the attribute index of the source attribute
+	 * @return the mapped annotation value, or {@code null}
+	 */
+	@Nullable
+	Object getMappedAnnotationValue(int attributeIndex) {
+		int mapped = this.annotationValueMappings[attributeIndex];
+		if (mapped == -1) {
+			return null;
+		}
+		AnnotationTypeMapping source = this.annotationValueSource[attributeIndex];
+		return ReflectionUtils.invokeMethod(source.attributes.get(mapped),
+				source.annotation);
 	}
 
 	/**
@@ -615,5 +668,4 @@ final class AnnotationTypeMapping {
 		}
 
 	}
-
 }

@@ -2036,6 +2036,25 @@ public class MergedAnnotationsTests {
 		assertThat(annotation.getString("text")).isEqualTo("metameta");
 	}
 
+	@Test // gh-22654
+	public void getValueWhenHasDefaultOverrideWithImplicitAlias() {
+		MergedAnnotation<?> annotation1 = MergedAnnotations.from(
+				DefaultOverrideImplicitAliasMetaClass1.class).get(DefaultOverrideRoot.class);
+		assertThat(annotation1.getString("text")).isEqualTo("alias-meta-1");
+		MergedAnnotation<?> annotation2 = MergedAnnotations.from(
+				DefaultOverrideImplicitAliasMetaClass2.class).get(DefaultOverrideRoot.class);
+		assertThat(annotation2.getString("text")).isEqualTo("alias-meta-2");
+	}
+
+	@Test // gh-22654
+	public void getValueWhenHasDefaultOverrideWithExplicitAlias() {
+		MergedAnnotation<?> annotation = MergedAnnotations.from(
+				DefaultOverrideExplicitAliasRootMetaMetaClass.class).get(
+						DefaultOverrideExplicitAliasRoot.class);
+		assertThat(annotation.getString("text")).isEqualTo("meta");
+		assertThat(annotation.getString("value")).isEqualTo("meta");
+	}
+
 	// @formatter:off
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -3356,6 +3375,68 @@ public class MergedAnnotationsTests {
 
 	@DefaultOverrideMetaMetaMeta
 	static class DefaultOverrideClass {
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@DefaultOverrideRoot
+	@interface DefaultOverrideImplicitAlias {
+
+		@AliasFor(annotation=DefaultOverrideRoot.class, attribute="text")
+		String text1() default "alias";
+
+		@AliasFor(annotation=DefaultOverrideRoot.class, attribute="text")
+		String text2() default "alias";
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@DefaultOverrideImplicitAlias(text1="alias-meta-1")
+	@interface DefaultOverrideAliasImplicitMeta1 {
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@DefaultOverrideImplicitAlias(text2="alias-meta-2")
+	@interface DefaultOverrideImplicitAliasMeta2 {
+
+	}
+
+	@DefaultOverrideAliasImplicitMeta1
+	static class DefaultOverrideImplicitAliasMetaClass1 {
+
+	}
+
+	@DefaultOverrideImplicitAliasMeta2
+	static class DefaultOverrideImplicitAliasMetaClass2 {
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface DefaultOverrideExplicitAliasRoot {
+
+		@AliasFor("value")
+		String text() default "";
+
+		@AliasFor("text")
+		String value() default "";
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@DefaultOverrideExplicitAliasRoot("meta")
+	@interface DefaultOverrideExplicitAliasRootMeta {
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@DefaultOverrideExplicitAliasRootMeta
+	@interface DefaultOverrideExplicitAliasRootMetaMeta {
+
+	}
+
+	@DefaultOverrideExplicitAliasRootMetaMeta
+	static class DefaultOverrideExplicitAliasRootMetaMetaClass {
 
 	}
 
