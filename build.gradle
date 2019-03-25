@@ -46,7 +46,7 @@ ext {
 	rxjava2Version       = "2.2.7"
 	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.16"
+	tomcatVersion        = "9.0.17"
 	undertowVersion      = "2.0.19.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
