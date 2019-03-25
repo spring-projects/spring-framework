@@ -97,6 +97,7 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new IdToEntityConverter((ConversionService) converterRegistry));
 		converterRegistry.addConverter(new FallbackObjectToStringConverter());
 		converterRegistry.addConverter(new ObjectToOptionalConverter((ConversionService) converterRegistry));
+		converterRegistry.addConverter(new OptionalUnwrappingConverter((ConversionService) converterRegistry));
 	}
 
 	/**
