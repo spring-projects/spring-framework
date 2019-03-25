@@ -774,7 +774,9 @@ public abstract class StringUtils {
 		if (tokens.length == 1) {
 			validateLocalePart(localeValue);
 			Locale resolved = Locale.forLanguageTag(localeValue);
-			return (resolved.getLanguage().length() > 0 ? resolved : null);
+			if (resolved.getLanguage().length() > 0) {
+				return resolved;
+			}
 		}
 		return parseLocaleTokens(localeValue, tokens);
 	}
