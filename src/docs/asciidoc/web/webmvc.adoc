@@ -711,7 +711,7 @@ redirect is needed. The rest of the view name is the redirect URL.
 The net effect is the same as if the controller had returned a `RedirectView`, but now
 the controller itself can operate in terms of logical view names. A logical view
 name (such as `redirect:/myapp/some/resource`) redirects relative to the current
-Servlet context, while a name such as `redirect:http://myhost.com/some/arbitrary/path`
+Servlet context, while a name such as `redirect:https://myhost.com/some/arbitrary/path`
 redirects to an absolute URL.
 
 Note that, if a controller method is annotated with the `@ResponseStatus`, the annotation
@@ -1297,7 +1297,7 @@ directly to the response body versus view resolution and rendering with an HTML 
 [[mvc-ann-requestmapping-proxying]]
 ==== AOP Proxies
 
-In some cases, you many need to decorate a controller with an AOP proxy at runtime.
+In some cases, you may need to decorate a controller with an AOP proxy at runtime.
 One example is if you choose to have `@Transactional` annotations directly on the
 controller. When this is the case, for controllers specifically, we recommend
 using class-based proxying. This is typically the default choice with controllers.
@@ -1449,7 +1449,7 @@ sorted last. Also, prefix patterns (such as `/public/{asterisk}{asterisk}`) are 
 specific than other pattern that do not have double wildcards.
 
 For the full details, see {api-spring-framework}/util/AntPathMatcher.AntPatternComparator.html[`AntPatternComparator`]
-in {api-spring-framework}/util/AntPathMatcher.html[`AntPathMatcher`] and also keep mind that
+in {api-spring-framework}/util/AntPathMatcher.html[`AntPathMatcher`] and also keep in mind that
 you can customize the {api-spring-framework}/util/PathMatcher.html[`PathMatcher`] implementation.
 See <<mvc-config-path-matching>> in the configuration section.
 
@@ -1508,7 +1508,7 @@ Many common path extensions are whitelisted by default. Applications with custom
 negotiation to avoid having a `Content-Disposition` header added for those extensions.
 See <<mvc-config-content-negotiation>>.
 
-See http://pivotal.io/security/cve-2015-5211[CVE-2015-5211] for additional
+See https://pivotal.io/security/cve-2015-5211[CVE-2015-5211] for additional
 recommendations related to RFD.
 
 
@@ -1965,9 +1965,9 @@ See <<core.adoc#format, Spring Field Formatting>>.
 ==== Matrix Variables
 [.small]#<<web-reactive.adoc#webflux-ann-matrix-variables, Same as in Spring WebFlux>>#
 
-http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring MVC, we refer to those as "`matrix variables`" based on an
-http://www.w3.org/DesignIssues/MatrixURIs.html["`old post`"] by Tim Berners-Lee, but they
+https://www.w3.org/DesignIssues/MatrixURIs.html["`old post`"] by Tim Berners-Lee, but they
 can be also be referred to as URI path parameters.
 
 Matrix variables can appear in any path segment, with each variable separated by a semicolon and
@@ -3853,7 +3853,7 @@ suitable under load. If you plan to stream with a reactive type, you should use 
 
 The Servlet API does not provide any notification when a remote client goes away.
 Therefore, while streaming to the response, whether through <<mvc-ann-async-sse, SseEmitter>>
-or <<mvc-ann-async-reactive-types, reactive types>, it is important to send data periodically,
+or <<mvc-ann-async-reactive-types, reactive types>>, it is important to send data periodically,
 since the write fails if the client has disconnected. The send could take the form of an
 empty (comment-only) SSE event or any other data that the other side would have to interpret
 as a heartbeat and ignore.

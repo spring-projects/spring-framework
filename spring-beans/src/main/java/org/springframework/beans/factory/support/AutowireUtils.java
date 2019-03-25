@@ -272,7 +272,7 @@ abstract class AutowireUtils {
 
 
 	/**
-	 * Reflective InvocationHandler for lazy access to the current target object.
+	 * Reflective {@link InvocationHandler} for lazy access to the current target object.
 	 */
 	@SuppressWarnings("serial")
 	private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {
