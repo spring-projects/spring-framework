@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter xml:id="jms"
-    xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xl="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="https://www.w3.org/1999/xlink"
+    xmlns:xi="https://www.w3.org/2001/XInclude"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        https://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        https://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>JMS (Java Message Service)</title>
 
   <section xml:id="jms-introduction">
@@ -918,12 +918,12 @@ public interface SessionAwareMessageListener {
     reference the JMS schema:</para>
 
     <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       <emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis>
+&lt;beans xmlns="https://www.springframework.org/schema/beans"
+       xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+       <emphasis role="bold">xmlns:jms="https://www.springframework.org/schema/jms"</emphasis>
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-<emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"</emphasis>&gt;
+https://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+<emphasis role="bold">https://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd"</emphasis>&gt;
 
 <lineannotation>&lt;!-- &lt;bean/&gt; definitions here --&gt;</lineannotation>
 

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter xml:id="portlet"
-    xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xl="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="https://www.w3.org/1999/xlink"
+    xmlns:xi="https://www.w3.org/2001/XInclude"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        https://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        https://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Portlet MVC Framework</title>
 
   <section xml:id="portlet-introduction">
@@ -971,7 +971,7 @@ public class SampleController extends AbstractController {
     in the <literal>org.springframework.web.portlet.multipart</literal>
     package. Spring provides a <interfacename>PortletMultipartResolver</interfacename>
     for use with
-    <link xl:href="http://jakarta.apache.org/commons/fileupload">Commons FileUpload</link>.
+    <link xl:href="https://jakarta.apache.org/commons/fileupload">Commons FileUpload</link>.
     How uploading files is supported will be described in the rest of this section.</para>
 
     <para>By default, no multipart handling will be done by Spring Portlet
@@ -1292,10 +1292,10 @@ public class FileUploadBean {
       - provided that you intend to use <interfacename>@RequestMapping</interfacename>.</para>
 
       <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+&lt;beans xmlns="https://www.springframework.org/schema/beans"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     &lt;bean class="org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping"/&gt;
 
@@ -1341,15 +1341,15 @@ public class FileUploadBean {
       XML snippet:</para>
 
       <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:p="http://www.springframework.org/schema/p"
-    xmlns:context="http://www.springframework.org/schema/context"
+&lt;beans xmlns="https://www.springframework.org/schema/beans"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="https://www.springframework.org/schema/p"
+    xmlns:context="https://www.springframework.org/schema/context"
     xsi:schemaLocation="
-        http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+        https://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;context:component-scan base-package="org.springframework.samples.petportal.portlet"/&gt;
 

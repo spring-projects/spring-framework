@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section xml:id="beans-factory-nature"
-    xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:xl="http://www.w3.org/1999/xlink"
+    xmlns="https://docbook.org/ns/docbook" version="5.0"
+    xmlns:xlink="https://www.w3.org/1999/xlink"
+    xmlns:xi="https://www.w3.org/2001/XInclude"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xl="https://www.w3.org/1999/xlink"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        https://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        https://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Customizing the nature of a bean</title>
 
   <section xml:id="beans-factory-lifecycle">

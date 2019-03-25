@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0"
-         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd"
-         xml:id="testing" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-         xmlns:xl="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:ns2="http://www.w3.org/1998/Math/MathML"
-         xmlns:ns="http://docbook.org/ns/docbook">
+         xsi:schemaLocation="https://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd https://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd"
+         xml:id="testing" xmlns="https://docbook.org/ns/docbook"
+         xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="https://www.w3.org/2001/XMLSchema"
+         xmlns:xl="https://www.w3.org/1999/xlink"
+         xmlns:xi="https://www.w3.org/2001/XInclude"
+         xmlns:ns2="https://www.w3.org/1998/Math/MathML"
+         xmlns:ns="https://docbook.org/ns/docbook">
   <title>Testing</title>
 
   <section xml:id="testing-introduction">
@@ -83,7 +83,7 @@
         usage with Spring's Web MVC framework, which are useful for testing web
         contexts and controllers. These mock objects are generally more
         convenient to use than dynamic mock objects such as <link
-        xl:href="http://www.easymock.org">EasyMock</link> or existing Servlet
+        xl:href="http://easymock.org/">EasyMock</link> or existing Servlet
         API mock objects such as <link
         xl:href="http://www.mockobjects.com">MockObjects</link>.</para>
       </section>
@@ -1728,10 +1728,10 @@ public class ExtendedTest extends BaseTest {
           <interfacename>@Configuration</interfacename> classes.</para>
 
           <programlisting language="xml">&lt;!-- app-config.xml --&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-    xmlns:jee="http://www.springframework.org/schema/jee"
+&lt;beans xmlns="https://www.springframework.org/schema/beans"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jdbc="https://www.springframework.org/schema/jdbc"
+    xmlns:jee="https://www.springframework.org/schema/jee"
     xsi:schemaLocation="..."&gt;
 
     &lt;bean id="transferService"
@@ -2187,7 +2187,7 @@ public class WacTests {
             executing tests with a build framework such as Ant, Maven, or Gradle
             it is important to make sure that the build framework does not
             <emphasis>fork</emphasis> between tests. For example, if the <link
-            xl:href="http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode">forkMode</link>
+            xl:href="https://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode">forkMode</link>
             for the Maven Surefire plug-in is set to <literal>always</literal>
             or <literal>pertest</literal>, the TestContext framework will not be
             able to cache application contexts between test classes and the
@@ -2518,10 +2518,10 @@ public class HibernateTitleRepositoryTests {
         looks like this:</para>
 
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+&lt;beans xmlns="https://www.springframework.org/schema/beans"
+       xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="https://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     <lineannotation>&lt;!-- this bean will be injected into the HibernateTitleRepositoryTests class --&gt;</lineannotation>
     &lt;bean id="<emphasis role="bold">titleRepository</emphasis>" class="<emphasis
@@ -3472,15 +3472,15 @@ mockMvc.perform(post("/persons"))
           HATEOAS</link>, the resulting links can be verified:</para>
 
           <programlisting language="java">mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
-  .andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));</programlisting>
+  .andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("https://localhost:8080/people"));</programlisting>
 
           <para>When XML response content contains hypermedia links created with
           <link xl:href="https://github.com/SpringSource/spring-hateoas">Spring
           HATEOAS</link>, the resulting links can be verified:</para>
 
-          <programlisting language="java">Map&lt;String, String&gt; ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
+          <programlisting language="java">Map&lt;String, String&gt; ns = Collections.singletonMap("ns", "https://www.w3.org/2005/Atom");
 mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
-  .andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));</programlisting>
+  .andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("https://localhost:8080/people"));</programlisting>
         </section>
 
         <section xml:id="spring-mvc-test-server-filters">
@@ -3708,13 +3708,13 @@ public class HibernateClinicTests extends AbstractClinicTests { }
 
     <itemizedlist>
       <listitem>
-        <para><link xl:href="http://www.junit.org/">JUnit</link>: <quote>
+        <para><link xl:href="https://www.junit.org/">JUnit</link>: <quote>
         <emphasis>A programmer-oriented testing framework for Java</emphasis>
         </quote>. Used by the Spring Framework in its test suite.</para>
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://testng.org/">TestNG</link>: A testing
+        <para><link xl:href="https://testng.org/">TestNG</link>: A testing
         framework inspired by JUnit with added support for Java 5 annotations,
         test groups, data-driven testing, distributed testing, etc.</para>
       </listitem>
@@ -3727,12 +3727,12 @@ public class HibernateClinicTests extends AbstractClinicTests { }
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://en.wikipedia.org/wiki/Mock_Object">"Mock
+        <para><link xl:href="https://en.wikipedia.org/wiki/Mock_Object">"Mock
         Objects"</link>: Article in Wikipedia.</para>
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://www.easymock.org/">EasyMock</link>: Java
+        <para><link xl:href="http://easymock.org/">EasyMock</link>: Java
         library <quote> <emphasis>that provides Mock Objects for interfaces (and
         objects through the class extension) by generating them on the fly using
         Java's proxy mechanism.</emphasis> </quote> Used by the Spring Framework
@@ -3740,12 +3740,12 @@ public class HibernateClinicTests extends AbstractClinicTests { }
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://www.jmock.org/">JMock</link>: Library that
+        <para><link xl:href="http://jmock.org/">JMock</link>: Library that
         supports test-driven development of Java code with mock objects.</para>
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://mockito.org/">Mockito</link>: Java mock
+        <para><link xl:href="https://mockito.github.io">Mockito</link>: Java mock
         library based on the <link
         xl:href="http://xunitpatterns.com/Test%20Spy.html">test spy</link>
         pattern.</para>

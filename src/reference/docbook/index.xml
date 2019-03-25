@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <book xml:id="spring-framework-reference"
-    xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xl="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="https://www.w3.org/1999/xlink"
+    xmlns:xi="https://www.w3.org/2001/XInclude"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        https://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        https://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
 
   <info>
     <title>Spring Framework Reference Documentation</title>
@@ -203,18 +203,18 @@
       <para>This document is a reference guide to Spring Framework features.
       If you have any requests, comments, or questions on this document,
       please post them on the user mailing list or on the support forums at
-      <link xl:href="http://forum.springsource.org/"></link>.<!-- Missing link above. PDF shows it as http://forum.springsource.org/ --></para>
+      <link xl:href="https://forum.spring.io/"></link>.<!-- Missing link above. PDF shows it as https://forum.spring.io/ --></para>
     </partintro>
 
-    <xi:include href="overview.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="overview.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
   </part>
 
   <part xml:id="spring-whats-new">
     <title>What's New in Spring 3</title>
 
-    <xi:include href="new-in-3.0.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-    <xi:include href="new-in-3.1.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-    <xi:include href="new-in-3.2.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="new-in-3.0.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
+    <xi:include href="new-in-3.1.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
+    <xi:include href="new-in-3.2.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
   </part>
 
   <part xml:id="spring-core">
@@ -279,22 +279,22 @@
       </itemizedlist>
     </partintro>
 
-    <xi:include href="beans.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="beans.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="resources.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="validation.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="expressions.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="aop.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="aop.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="aop-api.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="aop-api.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="testing.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="testing.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
   </part>
 
   <part xml:id="spring-data-tier">
@@ -334,15 +334,15 @@
     </partintro>
 
     <xi:include href="transaction.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="dao.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="dao.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="jdbc.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="jdbc.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="orm.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="orm.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="oxm.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="oxm.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
   </part>
 
   <part xml:id="spring-web">
@@ -383,14 +383,14 @@
       </itemizedlist>
     </partintro>
 
-    <xi:include href="mvc.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="mvc.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="view.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="view.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="web-integration.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="portlet.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="portlet.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
   </part>
 
   <part xml:id="spring-integration">
@@ -440,53 +440,53 @@
       </itemizedlist>
     </partintro>
 
-    <xi:include href="remoting.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="remoting.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="ejb.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="ejb.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="jms.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="jms.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="jmx.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="jmx.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="cci.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="cci.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
-    <xi:include href="mail.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="mail.xml" xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="scheduling.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="dynamic-languages.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="cache.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
   </part>
 
   <part xml:id="spring-appendices">
     <title>Appendices</title>
 
     <xi:include href="classic-spring.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="classic-aop-spring.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="migration-3.1.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="migration-3.2.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="xsd-configuration.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="xml-custom.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="spring.tld.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
 
     <xi:include href="spring-form.tld.xml"
-                xmlns:xi="http://www.w3.org/2001/XInclude" />
+                xmlns:xi="https://www.w3.org/2001/XInclude" />
   </part>
 </book>

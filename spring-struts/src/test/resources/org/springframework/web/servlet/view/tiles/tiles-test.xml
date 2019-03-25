@@ -2,7 +2,7 @@
 
 <!DOCTYPE tiles-definitions PUBLIC
        "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
-       "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
+       "https://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
 
 <tiles-definitions>
 

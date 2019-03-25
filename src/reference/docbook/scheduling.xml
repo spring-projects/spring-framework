@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter xml:id="scheduling"
-    xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xl="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="https://www.w3.org/1999/xlink"
+    xmlns:xi="https://www.w3.org/2001/XInclude"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        https://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        https://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Task Execution and Scheduling</title>
 
   <section xml:id="scheduling-introduction">
@@ -25,7 +25,7 @@
     <para>Spring also features integration classes for supporting scheduling
     with the <classname>Timer</classname>, part of the JDK since 1.3, and the
     Quartz Scheduler (<link
-    xl:href="http://quartz-scheduler.org"></link>). Both of those
+    xl:href="https://www.quartz-scheduler.org/"></link>). Both of those
     schedulers are set up using a <interfacename>FactoryBean</interfacename>
     with optional references to <classname>Timer</classname> or
     <classname>Trigger</classname> instances, respectively. Furthermore, a
@@ -612,7 +612,7 @@ void doSomething(String s) {
       be considered in light of the executor's queue capacity. For the full
       description of the relationship between pool size and queue capacity,
       consult the documentation for <link
-      xl:href="http://java.sun.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</link>.
+      xl:href="https://java.sun.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</link>.
       The main idea is that when a task is submitted, the executor will first
       try to use a free thread if the number of active threads is currently
       less than the core size. If the core size has been reached, then the
@@ -710,7 +710,7 @@ void doSomething(String s) {
     <classname>Job</classname> and <classname>JobDetail</classname> objects to
     realize scheduling of all kinds of jobs. For the basic concepts behind
     Quartz, have a look at <link
-    xl:href="http://quartz-scheduler.org"></link>. For convenience
+    xl:href="https://www.quartz-scheduler.org/"></link>. For convenience
     purposes, Spring offers a couple of classes that simplify the usage of
     Quartz within Spring-based applications.</para>
 
@@ -884,7 +884,7 @@ public class ExampleJob extends QuartzJobBean {
       <classname>SchedulerFactoryBean</classname> for you to set, such as the
       calendars used by the job details, properties to customize Quartz with,
       etc. Have a look at the <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
       Javadoc</link> for more information.</para>
     </section>
   </section>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <appendix xml:id="extensible-xml"
-    xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xl="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="https://www.w3.org/1999/xlink"
+    xmlns:xi="https://www.w3.org/2001/XInclude"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        https://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        https://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
     <title>Extensible XML authoring</title>
     <section xml:id="extensible-xml-introduction">
         <title>Introduction</title>
@@ -62,13 +62,13 @@
 
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns="http://www.mycompany.com/schema/myns"
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:xsd="https://www.w3.org/2001/XMLSchema"
+    xmlns:beans="https://www.springframework.org/schema/beans"
     targetNamespace="http://www.mycompany.com/schema/myns"
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
 
-   <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+   <xsd:import namespace="https://www.springframework.org/schema/beans"/>
 
    <xsd:element name="dateformat">
       <xsd:complexType>
@@ -266,11 +266,11 @@ public class SimpleDateFormatBeanDefinitionParser extends AbstractSingleBeanDefi
         an example of using the custom <literal>&lt;dateformat/&gt;</literal> element developed in the
         previous steps in a Spring XML configuration file.</para>
         <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="https://www.springframework.org/schema/beans"
+      xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
       xmlns:myns="http://www.mycompany.com/schema/myns"
       xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+https://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.xsd">
 
    ]]><lineannotation>&lt;!-- as a top-level bean --&gt;</lineannotation><![CDATA[
@@ -293,11 +293,11 @@ http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.x
             <para>This example illustrates how you might go about writing the various artifacts
             required to satisfy a target of the following configuration:</para>
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="https://www.springframework.org/schema/beans"
+      xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
       xmlns:foo="http://www.foo.com/schema/component"
       xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+https://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.foo.com/schema/component http://www.foo.com/schema/component/component.xsd">
 
    ]]><lineannotation><![CDATA[<foo:component id="bionic-family" name="Bionic-1">
@@ -389,7 +389,7 @@ public class ComponentFactoryBean implements FactoryBean<Component> {
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.foo.com/schema/component"
-         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:xsd="https://www.w3.org/2001/XMLSchema"
          targetNamespace="http://www.foo.com/schema/component"
          elementFormDefault="qualified"
          attributeFormDefault="unqualified">
@@ -482,7 +482,7 @@ http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd]]></pro
             to the existing bean definition element.</para>
             <para>By way of another example, let's say that the service class that you are defining a bean
             definition for a service object that will (unknown to it) be accessing a clustered
-            <link xl:href="http://jcp.org/en/jsr/detail?id=107">JCache</link>, and you want to ensure that
+            <link xl:href="https://jcp.org/en/jsr/detail?id=107">JCache</link>, and you want to ensure that
             the named JCache instance is eagerly started within the surrounding cluster:</para>
             <programlisting language="xml"><![CDATA[<bean id="checkingAccountService" class="com.foo.DefaultCheckingAccountService"
       ]]><lineannotation>jcache:cache-name="checking.account"&gt;</lineannotation><![CDATA[
@@ -513,7 +513,7 @@ public class JCacheInitializer {
             <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.foo.com/schema/jcache"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsd="https://www.w3.org/2001/XMLSchema"
             targetNamespace="http://www.foo.com/schema/jcache"
             elementFormDefault="qualified">
 
@@ -600,10 +600,10 @@ http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd]]></programlisti
         described in this chapter.</para>
         <itemizedlist>
             <listitem>
-                <para>The <link xl:href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/">XML Schema Part 1: Structures Second Edition</link></para>
+                <para>The <link xl:href="https://www.w3.org/TR/2004/REC-xmlschema-1-20041028/">XML Schema Part 1: Structures Second Edition</link></para>
             </listitem>
             <listitem>
-                <para>The <link xl:href="http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/">XML Schema Part 2: Datatypes Second Edition</link></para>
+                <para>The <link xl:href="https://www.w3.org/TR/2004/REC-xmlschema-2-20041028/">XML Schema Part 2: Datatypes Second Edition</link></para>
             </listitem>
         </itemizedlist>
     </section>

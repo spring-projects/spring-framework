@@ -1,4 +1,4 @@
-<tns:flights xmlns:tns="http://samples.springframework.org/flight">
+<tns:flights xmlns:tns="https://samples.springframework.org/flight">
     <tns:flight>
         <tns:number>42</tns:number>
     </tns:flight>

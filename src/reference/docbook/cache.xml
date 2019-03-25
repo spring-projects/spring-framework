@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter xml:id="cache"
-    xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xl="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="https://www.w3.org/1999/xlink"
+    xmlns:xi="https://www.w3.org/2001/XInclude"
+    xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        https://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        https://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
     <title>Cache Abstraction</title>
 
     <section xml:id="cache-introduction">
@@ -32,7 +32,7 @@
     performance but does that by allowing the same data to be read multiple times in a fast fashion.</para>
 
     <para>A further explanation of the differences between two can be found
-    <link xl:href="http://en.wikipedia.org/wiki/Cache#The_difference_between_buffer_and_cache">here</link>.</para>
+    <link xl:href="https://en.wikipedia.org/wiki/Cache#The_difference_between_buffer_and_cache">here</link>.</para>
     </sidebar>
 
     <para>At its core, the abstraction applies caching to Java methods, reducing thus the number of executions based on the
@@ -57,7 +57,7 @@
     <para>Note that just like other services in Spring Framework, the caching service is an abstraction (not a cache implementation) and requires
     the use of an actual storage to store the cache data - that is, the abstraction frees the developer from having to write the caching
     logic but does not provide the actual stores. There are two integrations available out of the box, for JDK <literal>java.util.concurrent.ConcurrentMap</literal>
-    and <link xl:href="http://ehcache.org/">EhCache</link> - see <xref linkend="cache-plug"/> for more information on plugging in other cache stores/providers.</para>
+    and <link xl:href="https://www.ehcache.org/">EhCache</link> - see <xref linkend="cache-plug"/> for more information on plugging in other cache stores/providers.</para>
     </section>
 
     <section xml:id="cache-annotations">
@@ -303,10 +303,10 @@ public class AppConfig {
 
         <para>Alternatively for XML configuration use the <literal>cache:annotation-driven</literal> element:</para>
 
-        <programlisting language="xml"><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"]]>
-    <emphasis role="bold">xmlns:cache="http://www.springframework.org/schema/cache"</emphasis><![CDATA[
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd]]>
-        <emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd</emphasis><![CDATA[">]]>
+        <programlisting language="xml"><![CDATA[<beans xmlns="https://www.springframework.org/schema/beans" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"]]>
+    <emphasis role="bold">xmlns:cache="https://www.springframework.org/schema/cache"</emphasis><![CDATA[
+    xsi:schemaLocation="https://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd]]>
+        <emphasis role="bold">https://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd</emphasis><![CDATA[">]]>
     <emphasis role="bold"><![CDATA[<cache:annotation-driven />]]></emphasis>
 <![CDATA[</beans>]]></programlisting>
 
@@ -577,7 +577,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 
         <para>GemFire is a memory-oriented/disk-backed, elastically scalable, continuously available, active (with built-in pattern-based subscription notifications),
         globally replicated database and provides fully-featured edge caching. For further information on how to use GemFire as a CacheManager (and more), please refer
-        to the <link xl:href="http://static.springsource.org/spring-gemfire/docs/1.0.0.RELEASE/reference/html/">Spring GemFire reference documentation</link>.</para>
+        to the <link xl:href="https://docs.spring.io/spring-gemfire/docs/1.0.0.RELEASE/reference/html/">Spring GemFire reference documentation</link>.</para>
     </section>
 
     <section xml:id="cache-store-configuration-noop">
@@ -607,7 +607,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 
     <para>Clearly there are plenty of caching products out there that can be used as a backing store. To plug them in, one needs to provide a <interfacename>CacheManager</interfacename> and
     <interfacename>Cache</interfacename> implementation since unfortunately there is no available standard that we can use instead. This may sound harder then it is since in practice,
-    the classes tend to be simple <link xl:href="http://en.wikipedia.org/wiki/Adapter_pattern">adapter</link>s that map the caching abstraction framework on top of the storage API as the <literal>ehcache</literal> classes can show.
+    the classes tend to be simple <link xl:href="https://en.wikipedia.org/wiki/Adapter_pattern">adapter</link>s that map the caching abstraction framework on top of the storage API as the <literal>ehcache</literal> classes can show.
     Most <interfacename>CacheManager</interfacename> classes can use the classes in <literal>org.springframework.cache.support</literal> package, such as <classname>AbstractCacheManager</classname>
     which takes care of the boiler-plate code leaving only the actual <emphasis>mapping</emphasis> to be completed. We hope that in time, the libraries that provide integration with Spring
     can fill in this small configuration gap.</para>
