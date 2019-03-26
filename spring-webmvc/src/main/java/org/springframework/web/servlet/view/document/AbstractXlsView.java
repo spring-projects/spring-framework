@@ -32,7 +32,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * Compatible with Apache POI 3.5 and higher.
  *
  * <p>For working with the workbook in the subclass, see
- * <a href="http://poi.apache.org">Apache's POI site</a>
+ * <a href="https://poi.apache.org">Apache's POI site</a>
  *
  * @author Juergen Hoeller
  * @since 4.2

@@ -143,8 +143,8 @@ public class ResourceUrlEncodingFilterTests {
 
 		this.filter.doFilter(request, response, (req, res) -> {
 			req.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.urlProvider);
-			String result = ((HttpServletResponse) res).encodeURL("/resources/bar.css?foo=bar&url=http://example.org");
-			assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org", result);
+			String result = ((HttpServletResponse) res).encodeURL("/resources/bar.css?foo=bar&url=https://example.org");
+			assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=https://example.org", result);
 		});
 	}
 

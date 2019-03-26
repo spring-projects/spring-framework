@@ -74,7 +74,7 @@ public class SimpMessagingTemplateTests {
 
 	@Test
 	public void convertAndSendToUserWithEncoding() {
-		this.messagingTemplate.convertAndSendToUser("http://joe.openid.example.org/", "/queue/foo", "data");
+		this.messagingTemplate.convertAndSendToUser("https://joe.openid.example.org/", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
 		assertEquals(1, messages.size());

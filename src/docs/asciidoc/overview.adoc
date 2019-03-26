@@ -143,13 +143,13 @@ top-level project page.
 == Getting Started
 
 If you are just getting started with Spring, you may want to begin using the Spring
-Framework by creating a http://projects.spring.io/spring-boot/[Spring Boot]-based
+Framework by creating a https://projects.spring.io/spring-boot/[Spring Boot]-based
 application. Spring Boot provides a quick (and opinionated) way to create a
 production-ready Spring-based application. It is based on the Spring Framework, favors
 convention over configuration, and is designed to get you up and running as quickly
 as possible.
 
-You can use http://start.spring.io/[start.spring.io] to generate a basic project or follow
+You can use https://start.spring.io/[start.spring.io] to generate a basic project or follow
 one of the https://spring.io/guides["Getting Started" guides], such as
 https://spring.io/guides/gs/rest-service/[Getting Started Building a RESTful Web Service].
 As well as being easier to digest, these guides are very task focused, and most of them

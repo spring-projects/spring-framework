@@ -117,7 +117,7 @@ public class CssLinkResourceTransformerTests {
 		Resource externalCss = new ClassPathResource("test/external.css", getClass());
 		StepVerifier.create(transformerChain.transform(exchange, externalCss).cast(TransformedResource.class))
 				.consumeNextWith(resource -> {
-					String expected = "@import url(\"http://example.org/fonts/css\");\n" +
+					String expected = "@import url(\"https://example.org/fonts/css\");\n" +
 							"body { background: url(\"file:///home/spring/image.png\") }\n" +
 							"figure { background: url(\"//example.org/style.css\")}";
 					String result = new String(resource.getByteArray(), StandardCharsets.UTF_8);
@@ -126,7 +126,7 @@ public class CssLinkResourceTransformerTests {
 				}).expectComplete().verify();
 
 		Mockito.verify(resolverChain, Mockito.never())
-				.resolveUrlPath("http://example.org/fonts/css", Collections.singletonList(externalCss));
+				.resolveUrlPath("https://example.org/fonts/css", Collections.singletonList(externalCss));
 		Mockito.verify(resolverChain, Mockito.never())
 				.resolveUrlPath("file:///home/spring/image.png", Collections.singletonList(externalCss));
 		Mockito.verify(resolverChain, Mockito.never())

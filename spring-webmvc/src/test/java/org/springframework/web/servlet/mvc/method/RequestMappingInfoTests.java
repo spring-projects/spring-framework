@@ -267,7 +267,7 @@ public class RequestMappingInfoTests {
 	@Test
 	public void preFlightRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain.com");
 		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST");
 
 		RequestMappingInfo info = paths("/foo").methods(RequestMethod.POST).build();

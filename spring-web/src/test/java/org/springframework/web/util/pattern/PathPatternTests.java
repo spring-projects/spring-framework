@@ -484,7 +484,7 @@ public class PathPatternTests {
 		// test exact matching
 		checkMatches("test", "test");
 		checkMatches("/test", "/test");
-		checkMatches("http://example.org", "http://example.org");
+		checkMatches("https://example.org", "https://example.org");
 		checkNoMatch("/test.jpg", "test.jpg");
 		checkNoMatch("test", "/test");
 		checkNoMatch("/test", "test");

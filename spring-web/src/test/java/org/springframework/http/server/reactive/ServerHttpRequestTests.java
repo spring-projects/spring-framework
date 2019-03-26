@@ -96,16 +96,16 @@ public class ServerHttpRequestTests {
 		request = createHttpRequest("/").mutate().method(HttpMethod.DELETE).build();
 		assertEquals(HttpMethod.DELETE, request.getMethod());
 
-		String baseUri = "http://aaa.org:8080/a";
+		String baseUri = "https://www.aaa.org/articles/";
 
-		request = createHttpRequest(baseUri).mutate().uri(URI.create("http://bbb.org:9090/b")).build();
-		assertEquals("http://bbb.org:9090/b", request.getURI().toString());
+		request = createHttpRequest(baseUri).mutate().uri(URI.create("https://bbb.org:9090/b")).build();
+		assertEquals("https://bbb.org:9090/b", request.getURI().toString());
 
 		request = createHttpRequest(baseUri).mutate().path("/b/c/d").build();
-		assertEquals("http://aaa.org:8080/b/c/d", request.getURI().toString());
+		assertEquals("https://www.aaa.org/b/c/d", request.getURI().toString());
 
 		request = createHttpRequest(baseUri).mutate().path("/app/b/c/d").contextPath("/app").build();
-		assertEquals("http://aaa.org:8080/app/b/c/d", request.getURI().toString());
+		assertEquals("https://www.aaa.org/app/b/c/d", request.getURI().toString());
 		assertEquals("/app", request.getPath().contextPath().value());
 	}
 

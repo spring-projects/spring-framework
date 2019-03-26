@@ -351,7 +351,7 @@ public interface AsyncRestOperations {
 	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
 	 *
 	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
-	 *     template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 *     template.exchange(&quot;https://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -375,7 +375,7 @@ public interface AsyncRestOperations {
 	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
 	 *
 	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
-	 *     template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 *     template.exchange(&quot;https://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -399,7 +399,7 @@ public interface AsyncRestOperations {
 	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
 	 *
 	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
-	 *     template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 *     template.exchange(&quot;https://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)

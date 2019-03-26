@@ -194,7 +194,7 @@ public class DefaultRenderingResponseTests {
 				.build()
 				.block();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com")
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com")
 				.header(HttpHeaders.IF_NONE_MATCH, etag)
 				.build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
@@ -218,7 +218,7 @@ public class DefaultRenderingResponseTests {
 				.build()
 				.block();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com")
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com")
 				.header(HttpHeaders.IF_MODIFIED_SINCE,
 						DateTimeFormatter.RFC_1123_DATE_TIME.format(now))
 				.build();

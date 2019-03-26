@@ -123,8 +123,8 @@ XML Schema-based configuration>>.
 	<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:lang="http://www.springframework.org/schema/lang"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang.xsd">
 
 		<!-- this is the bean definition for the Groovy-backed Messenger implementation -->
 		<lang:groovy id="messenger" script-source="classpath:Messenger.groovy">
@@ -850,8 +850,8 @@ a <<core.adoc#beans-factory-scopes-prototype,prototype>>.
 	<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:lang="http://www.springframework.org/schema/lang"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang.xsd">
 
 		<lang:groovy id="messenger" script-source="classpath:Messenger.groovy" scope="prototype">
 			<lang:property name="message" value="I Can Do The RoboCop" />
@@ -892,8 +892,8 @@ are available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:lang="http://www.springframework.org/schema/lang"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -907,6 +907,6 @@ are available to you.
 Find below links to further resources about the various dynamic languages described in
 this chapter.
 
-* The http://jruby.org/[JRuby] homepage
+* The https://www.jruby.org[JRuby] homepage
 * The http://www.groovy-lang.org/[Groovy] homepage
 * The http://www.beanshell.org/[BeanShell] homepage
