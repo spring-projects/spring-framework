@@ -70,6 +70,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		this.statusCode = (other instanceof AbstractServerResponse ?
 				((AbstractServerResponse) other).statusCode : other.statusCode().value());
 		this.headers.addAll(other.headers());
+		this.cookies.addAll(other.cookies());
 	}
 
 	public DefaultServerResponseBuilder(HttpStatus status) {

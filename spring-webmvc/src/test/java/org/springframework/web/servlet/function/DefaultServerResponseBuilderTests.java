@@ -71,10 +71,15 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void from() {
-		ServerResponse other = ServerResponse.ok().header("foo", "bar").build();
+		Cookie cookie = new Cookie("foo", "bar");
+		ServerResponse other = ServerResponse.ok()
+				.header("foo", "bar")
+				.cookie(cookie)
+				.build();
 		ServerResponse result = ServerResponse.from(other).build();
 		assertEquals(HttpStatus.OK, result.statusCode());
 		assertEquals("bar", result.headers().getFirst("foo"));
+		assertEquals(cookie, result.cookies().getFirst("foo"));
 	}
 
 
