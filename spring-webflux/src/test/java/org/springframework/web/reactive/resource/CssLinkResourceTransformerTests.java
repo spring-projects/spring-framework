@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,9 @@ import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link CssLinkResourceTransformer}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class CssLinkResourceTransformerTests {
 
@@ -158,6 +160,30 @@ public class CssLinkResourceTransformerTests {
 		Files.deleteIfExists(copy);
 		Files.copy(original, copy);
 		copy.toFile().deleteOnExit();
+	}
+
+	@Test // https://github.com/spring-projects/spring-framework/issues/22602
+	public void transformEmptyUrlFunction() throws Exception {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/static/empty_url_function.css"));
+		Resource css = getResource("empty_url_function.css");
+		String expected =
+				".fooStyle {\n" +
+				"\tbackground: transparent url() no-repeat left top;\n" +
+				"}";
+
+		StepVerifier.create(this.transformerChain.transform(exchange, css)
+				.cast(TransformedResource.class))
+				.consumeNextWith(transformedResource -> {
+					String result = new String(transformedResource.getByteArray(), StandardCharsets.UTF_8);
+					result = StringUtils.deleteAny(result, "\r");
+					assertEquals(expected, result);
+				})
+				.expectComplete()
+				.verify();
+	}
+
+	private Resource getResource(String filePath) {
+		return new ClassPathResource("test/" + filePath, getClass());
 	}
 
 }
