@@ -1354,7 +1354,7 @@ The default mapping pattern `/{asterisk}{asterisk}` is excluded from scoring and
 sorted last. Also prefix patterns such as `/public/{asterisk}{asterisk}` are considered less
 specific than other pattern that don't have double wildcards.
 
-For the full details see `AntPatternComparator` in `AntPathMatcher` and also keep mind that
+For the full details see `AntPatternComparator` in `AntPathMatcher` and also keep in mind that
 the `PathMatcher` implementation used can be customized. See <<mvc-config-path-matching>>
 in the configuration section.
 

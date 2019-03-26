@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,9 @@ class HtmlCharacterEntityDecoder {
 					this.originalMessage.indexOf('&', this.nextPotentialReferencePosition);
 
 			if (this.nextSemicolonPosition != -1 &&
-					this.nextSemicolonPosition < this.nextPotentialReferencePosition)
+					this.nextSemicolonPosition < this.nextPotentialReferencePosition) {
 				this.nextSemicolonPosition = this.originalMessage.indexOf(';', this.nextPotentialReferencePosition + 1);
+			}
 
 			boolean isPotentialReference = (this.nextPotentialReferencePosition != -1 &&
 					this.nextSemicolonPosition != -1 &&
@@ -94,12 +95,13 @@ class HtmlCharacterEntityDecoder {
 			int skipUntilIndex = (this.nextPotentialReferencePosition != -1 ?
 					this.nextPotentialReferencePosition : this.originalMessage.length());
 			if (skipUntilIndex - this.currentPosition > 3) {
-				this.decodedMessage.append(this.originalMessage.substring(this.currentPosition, skipUntilIndex));
+				this.decodedMessage.append(this.originalMessage, this.currentPosition, skipUntilIndex);
 				this.currentPosition = skipUntilIndex;
 			}
 			else {
-				while (this.currentPosition < skipUntilIndex)
+				while (this.currentPosition < skipUntilIndex) {
 					this.decodedMessage.append(this.originalMessage.charAt(this.currentPosition++));
+				}
 			}
 		}
 	}
