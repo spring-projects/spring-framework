@@ -138,8 +138,8 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 	}
 
 	@Override
-	public RenderingResponse.Builder headers(HttpHeaders headers) {
-		this.headers.putAll(headers);
+	public RenderingResponse.Builder headers(Consumer<HttpHeaders> headersConsumer) {
+		headersConsumer.accept(this.headers);
 		return this;
 	}
 

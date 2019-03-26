@@ -189,24 +189,27 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public ServerResponse body(Object body) {
 		return DefaultEntityResponseBuilder.fromObject(body)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(headers -> headers.putAll(this.headers))
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.build();
 	}
 
 	@Override
 	public <T> ServerResponse body(T body, ParameterizedTypeReference<T> bodyType) {
 		return DefaultEntityResponseBuilder.fromObject(body, bodyType)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(headers -> headers.putAll(this.headers))
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.build();
 	}
 
 	@Override
 	public ServerResponse render(String name, Object... modelAttributes) {
 		return new DefaultRenderingResponseBuilder(name)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(headers -> headers.putAll(this.headers))
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(modelAttributes)
 				.build();
 	}
@@ -214,8 +217,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public ServerResponse render(String name, Map<String, ?> model) {
 		return new DefaultRenderingResponseBuilder(name)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(headers -> headers.putAll(this.headers))
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(model)
 				.build();
 	}

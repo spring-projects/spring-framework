@@ -86,12 +86,15 @@ public interface EntityResponse<T> extends ServerResponse {
 		Builder<T> header(String headerName, String... headerValues);
 
 		/**
-		 * Copy the given headers into the entity's headers map.
-		 * @param headers the existing HttpHeaders to copy from
+		 * Manipulate this response's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
-		 * @see HttpHeaders#add(String, String)
 		 */
-		Builder<T> headers(HttpHeaders headers);
+		Builder<T> headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
 		 * Set the HTTP status.

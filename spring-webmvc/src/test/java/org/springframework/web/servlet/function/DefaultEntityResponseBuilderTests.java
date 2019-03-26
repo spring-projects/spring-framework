@@ -154,7 +154,9 @@ public class DefaultEntityResponseBuilderTests {
 		String body = "foo";
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", "bar");
-		EntityResponse<String> result = EntityResponse.fromObject(body).headers(headers).build();
+		EntityResponse<String> result = EntityResponse.fromObject(body)
+				.headers(h -> h.addAll(headers))
+				.build();
 		assertEquals(headers, result.headers());
 	}
 

@@ -126,8 +126,8 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	}
 
 	@Override
-	public EntityResponse.Builder<T> headers(HttpHeaders headers) {
-		this.headers.putAll(headers);
+	public EntityResponse.Builder<T> headers(Consumer<HttpHeaders> headersConsumer) {
+		headersConsumer.accept(this.headers);
 		return this;
 	}
 

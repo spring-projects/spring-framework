@@ -78,7 +78,9 @@ public class DefaultRenderingResponseTests {
 	public void headers() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", "bar");
-		RenderingResponse result = RenderingResponse.create("foo").headers(headers).build();
+		RenderingResponse result = RenderingResponse.create("foo")
+				.headers(h -> h.addAll(headers))
+				.build();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
