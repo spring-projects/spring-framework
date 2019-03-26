@@ -40,8 +40,8 @@ import org.springframework.util.Assert;
  * for seamless switching to and from a local DataSource bean like this class.
  *
  * <p>If you need a "real" connection pool outside of a J2EE container, consider
- * <a href="http://jakarta.apache.org/commons/dbcp">Apache's Jakarta Commons DBCP</a>
- * or <a href="http://sourceforge.net/projects/c3p0">C3P0</a>.
+ * <a href="https://jakarta.apache.org/commons/dbcp">Apache's Jakarta Commons DBCP</a>
+ * or <a href="https://sourceforge.net/projects/c3p0">C3P0</a>.
  * Commons DBCP's BasicDataSource and C3P0's ComboPooledDataSource are full
  * connection pool beans, supporting the same basic properties as this class
  * plus specific settings (such as minimal/maximal pool size etc).

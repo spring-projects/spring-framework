@@ -28,7 +28,7 @@ import org.springframework.test.web.client.RequestMatcher;
 
 /**
  * Factory methods for request content {@code RequestMatcher}'s using a
- * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression.
+ * <a href="https://goessner.net/articles/JsonPath/">JSONPath</a> expression.
  * An instance of this class is typically accessed via
  * {@code RequestMatchers.jsonPath(..)}.
  *

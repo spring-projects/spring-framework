@@ -108,53 +108,53 @@ public class UriUtilsTests {
 	@Test
 	@Deprecated
 	public void encodeUri() throws UnsupportedEncodingException {
-		assertEquals("Invalid encoded URI", "http://www.ietf.org/rfc/rfc3986.txt",
-				UriUtils.encodeUri("http://www.ietf.org/rfc/rfc3986.txt", ENC));
 		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeUri("https://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded URI", "http://www.google.com/?q=Z%C3%BCrich",
-				UriUtils.encodeUri("http://www.google.com/?q=Z\u00fcrich", ENC));
+		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
+				UriUtils.encodeUri("https://www.ietf.org/rfc/rfc3986.txt", ENC));
+		assertEquals("Invalid encoded URI", "https://www.google.com/?q=Z%C3%BCrich",
+				UriUtils.encodeUri("https://www.google.com/?q=Z\u00fcrich", ENC));
 		assertEquals("Invalid encoded URI",
-				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
+				"https://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
 				UriUtils.encodeUri(
-						"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
+						"https://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
 						ENC));
-		assertEquals("Invalid encoded URI", "http://java.sun.com/j2se/1.3/",
-				UriUtils.encodeUri("http://java.sun.com/j2se/1.3/", ENC));
+		assertEquals("Invalid encoded URI", "https://java.sun.com/j2se/1.3/",
+				UriUtils.encodeUri("https://java.sun.com/j2se/1.3/", ENC));
 		assertEquals("Invalid encoded URI", "docs/guide/collections/designfaq.html#28",
 				UriUtils.encodeUri("docs/guide/collections/designfaq.html#28", ENC));
 		assertEquals("Invalid encoded URI", "../../../demo/jfc/SwingSet2/src/SwingSet2.java",
 				UriUtils.encodeUri("../../../demo/jfc/SwingSet2/src/SwingSet2.java", ENC));
 		assertEquals("Invalid encoded URI", "file:///~/calendar", UriUtils.encodeUri("file:///~/calendar", ENC));
-		assertEquals("Invalid encoded URI", "http://example.com/query=foo@bar",
-				UriUtils.encodeUri("http://example.com/query=foo@bar", ENC));
+		assertEquals("Invalid encoded URI", "https://example.com/query=foo@bar",
+				UriUtils.encodeUri("https://example.com/query=foo@bar", ENC));
 
 		// SPR-8974
-		assertEquals("http://example.org?format=json&url=http://another.com?foo=bar",
-				UriUtils.encodeUri("http://example.org?format=json&url=http://another.com?foo=bar", ENC));
+		assertEquals("https://example.org?format=json&url=http://another.com?foo=bar",
+				UriUtils.encodeUri("https://example.org?format=json&url=http://another.com?foo=bar", ENC));
 	}
 
 	@Test
 	@Deprecated
 	public void encodeHttpUrl() throws UnsupportedEncodingException {
-		assertEquals("Invalid encoded HTTP URL", "http://www.ietf.org/rfc/rfc3986.txt",
-				UriUtils.encodeHttpUrl("http://www.ietf.org/rfc/rfc3986.txt", ENC));
+		assertEquals("Invalid encoded HTTP URL", "https://www.ietf.org/rfc/rfc3986.txt",
+				UriUtils.encodeHttpUrl("https://www.ietf.org/rfc/rfc3986.txt", ENC));
 		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeHttpUrl("https://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://www.google.com/?q=Z%C3%BCrich",
-				UriUtils.encodeHttpUrl("http://www.google.com/?q=Z\u00fcrich", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://ws.geonames.org/searchJSON?q=T%C5%8Dky%C5%8D&style=FULL&maxRows=300",
-				UriUtils.encodeHttpUrl("http://ws.geonames.org/searchJSON?q=T\u014dky\u014d&style=FULL&maxRows=300", ENC));
+		assertEquals("Invalid encoded HTTP URL", "https://www.google.com/?q=Z%C3%BCrich",
+				UriUtils.encodeHttpUrl("https://www.google.com/?q=Z\u00fcrich", ENC));
+		assertEquals("Invalid encoded HTTP URL", "https://ws.geonames.org/searchJSON?q=T%C5%8Dky%C5%8D&style=FULL&maxRows=300",
+				UriUtils.encodeHttpUrl("https://ws.geonames.org/searchJSON?q=T\u014dky\u014d&style=FULL&maxRows=300", ENC));
 		assertEquals("Invalid encoded HTTP URL",
-				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar",
+				"https://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar",
 				UriUtils.encodeHttpUrl(
-						"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://search.twitter.com/search.atom?q=%23avatar",
-				UriUtils.encodeHttpUrl("http://search.twitter.com/search.atom?q=#avatar", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://java.sun.com/j2se/1.3/",
-				UriUtils.encodeHttpUrl("http://java.sun.com/j2se/1.3/", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://example.com/query=foo@bar",
-				UriUtils.encodeHttpUrl("http://example.com/query=foo@bar", ENC));
+						"https://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar", ENC));
+		assertEquals("Invalid encoded HTTP URL", "https://search.twitter.com/search.atom?q=%23avatar",
+				UriUtils.encodeHttpUrl("https://search.twitter.com/search.atom?q=#avatar", ENC));
+		assertEquals("Invalid encoded HTTP URL", "https://java.sun.com/j2se/1.3/",
+				UriUtils.encodeHttpUrl("https://java.sun.com/j2se/1.3/", ENC));
+		assertEquals("Invalid encoded HTTP URL", "https://example.com/query=foo@bar",
+				UriUtils.encodeHttpUrl("https://example.com/query=foo@bar", ENC));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

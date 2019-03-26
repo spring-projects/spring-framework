@@ -24,7 +24,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Factory bean for
- * <a href="http://jakarta.apache.org/commons/logging.html">commons-logging</a>
+ * <a href="https://jakarta.apache.org/commons/logging.html">commons-logging</a>
  * {@link org.apache.commons.logging.Log} instances.
  *
  * <p>Useful for sharing Log instances among multiple beans instead of using

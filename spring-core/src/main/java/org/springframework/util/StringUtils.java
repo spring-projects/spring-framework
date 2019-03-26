@@ -34,7 +34,7 @@ import java.util.TreeSet;
  * Miscellaneous {@link String} utility methods.
  *
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://jakarta.apache.org/commons/lang/">Jakarta's Commons Lang</a>
+ * <a href="https://jakarta.apache.org/commons/lang/">Jakarta's Commons Lang</a>
  * for a more comprehensive suite of String utilities.
  *
  * <p>This class delivers some simple functionality that should really

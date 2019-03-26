@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link HttpInvokerRequestExecutor} implementation that uses
- * <a href="http://jakarta.apache.org/commons/httpclient">Jakarta Commons HttpClient</a>
+ * <a href="https://jakarta.apache.org/commons/httpclient">Jakarta Commons HttpClient</a>
  * to execute POST requests. Requires Commons HttpClient 3.0 or higher.
  *
  * <p>Allows to use a pre-configured {@link org.apache.commons.httpclient.HttpClient}

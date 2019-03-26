@@ -42,7 +42,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Examples of defining expectations on JSON request content with
- * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expressions.
+ * <a href="https://goessner.net/articles/JsonPath/">JSONPath</a> expressions.
  *
  * @author Rossen Stoyanchev
  */

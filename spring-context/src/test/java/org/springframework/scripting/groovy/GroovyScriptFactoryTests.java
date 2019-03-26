@@ -315,7 +315,7 @@ public class GroovyScriptFactoryTests {
 	}
 
 	@Ignore
-	// see http://build.springframework.org/browse/SPR-TRUNKQUICK-908
+	// see https://build.springframework.org/browse/SPR-TRUNKQUICK-908
 	@Test
 	public void testResourceScriptFromTag() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());

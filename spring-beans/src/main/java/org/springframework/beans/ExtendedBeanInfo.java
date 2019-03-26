@@ -65,7 +65,7 @@ import static org.springframework.beans.PropertyDescriptorUtils.*;
  * used within Spring {@code <beans>} XML. {@link #getPropertyDescriptors()} returns all
  * existing property descriptors from the wrapped {@code BeanInfo} as well any added for
  * non-void returning setters. Both standard ("non-indexed") and
- * <a href="http://docs.oracle.com/javase/tutorial/javabeans/writing/properties.html">
+ * <a href="https://docs.oracle.com/javase/tutorial/javabeans/writing/properties.html">
  * indexed properties</a> are fully supported.
  *
  * @author Chris Beams
@@ -138,7 +138,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 		// Sort non-void returning write methods to guard against the ill effects of
 		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
-		// under JDK 7. See http://bugs.sun.com/view_bug.do?bug_id=7023180
+		// under JDK 7. See https://bugs.java.com/view_bug.do?bug_id=7023180
 		Collections.sort(matches, new Comparator<Method>() {
 			public int compare(Method m1, Method m2) {
 				return m2.toString().compareTo(m1.toString());

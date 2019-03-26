@@ -61,7 +61,7 @@ public class RssFeedViewTests {
 		view.render(model, request, response);
 		assertEquals("Invalid content-type", "application/rss+xml", response.getContentType());
 		String expected = "<rss version=\"2.0\">" +
-				"<channel><title>Test Feed</title><link>http://example.com</link><description>Test feed description</description>" +
+				"<channel><title>Test Feed</title><link>https://example.com</link><description>Test feed description</description>" +
 				"<item><title>2</title><description>This is entry 2</description></item>" +
 				"<item><title>1</title><description>This is entry 1</description></item>" + "</channel></rss>";
 		assertXMLEqual(expected, response.getContentAsString());
@@ -74,7 +74,7 @@ public class RssFeedViewTests {
 		protected void buildFeedMetadata(Map model, Channel channel, HttpServletRequest request) {
 			channel.setTitle("Test Feed");
 			channel.setDescription("Test feed description");
-			channel.setLink("http://example.com");
+			channel.setLink("https://example.com");
 		}
 
 		@Override

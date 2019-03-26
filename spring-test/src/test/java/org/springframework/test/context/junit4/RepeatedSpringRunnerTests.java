@@ -149,7 +149,7 @@ public class RepeatedSpringRunnerTests {
 
 	/**
 	 * Unit tests for claims raised in <a
-	 * href="http://jira.springframework.org/browse/SPR-6011"
+	 * href="https://jira.springframework.org/browse/SPR-6011"
 	 * target="_blank">SPR-6011</a>.
 	 */
 	@Ignore("TestCase classes are run manually by the enclosing test class")

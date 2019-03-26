@@ -39,7 +39,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @since 1.1.5
  * @see org.springframework.orm.ibatis.SqlMapClientFactoryBean#setLobHandler
  * @deprecated as of Spring 3.2, in favor of the native Spring support
- * in the Mybatis follow-up project (http://code.google.com/p/mybatis/)
+ * in the Mybatis follow-up project (https://code.google.com/p/mybatis/)
  */
 @Deprecated
 public class ClobStringTypeHandler extends AbstractLobTypeHandler {

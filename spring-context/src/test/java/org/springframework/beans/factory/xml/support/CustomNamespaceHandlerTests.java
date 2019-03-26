@@ -151,7 +151,7 @@ public class CustomNamespaceHandlerTests {
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2728
 	 */
 	@Test
 	public void testCustomElementNestedWithinUtilList() throws Exception {
@@ -161,7 +161,7 @@ public class CustomNamespaceHandlerTests {
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2728
 	 */
 	@Test
 	public void testCustomElementNestedWithinUtilSet() throws Exception {
@@ -171,7 +171,7 @@ public class CustomNamespaceHandlerTests {
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2728
 	 */
 	@Test
 	public void testCustomElementNestedWithinUtilMap() throws Exception {

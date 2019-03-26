@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  * run only if {@link TestGroup#JMXMP} is enabled. If you wish to run these tests, follow
  * the instructions in the TestGroup class to enable JMXMP tests. If you run into the
  * <em>"Unsupported protocol: jmxmp"</em> error, you will need to download the
- * <a href="http://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">
+ * <a href="https://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">
  * JMX Remote API 1.0.1_04 Reference Implementation</a> from Oracle and extract
  * {@code jmxremote_optional.jar} into your classpath, for example in the {@code lib/ext}
  * folder of your JVM.

@@ -81,7 +81,7 @@ import org.springframework.web.context.WebApplicationContext;
  * {@link DelegatingTilesRequestProcessor}.
  *
  * <p>Note: The idea of delegating to Spring-managed Struts Actions originated in
- * Don Brown's <a href="http://struts.sourceforge.net/struts-spring">Spring Struts Plugin</a>.
+ * Don Brown's <a href="http://struts.sourceforge.net/struts-spring/">Spring Struts Plugin</a>.
  * {@code ContextLoaderPlugIn} and {@code DelegatingActionProxy}
  * constitute a clean-room implementation of the same idea, essentially
  * superseding the original plugin. Many thanks to Don Brown and Matt Raible

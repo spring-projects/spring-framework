@@ -36,7 +36,7 @@ import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * {@link PortletMultipartResolver} implementation for
- * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
+ * <a href="https://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
  * 1.2 or above.
  *
  * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as

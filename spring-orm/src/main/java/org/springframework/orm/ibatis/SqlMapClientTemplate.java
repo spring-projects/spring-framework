@@ -81,7 +81,7 @@ import org.springframework.util.Assert;
  * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource
  * @see com.ibatis.sqlmap.client.SqlMapExecutor
  * @deprecated as of Spring 3.2, in favor of the native Spring support
- * in the Mybatis follow-up project (http://code.google.com/p/mybatis/)
+ * in the Mybatis follow-up project (https://code.google.com/p/mybatis/)
  */
 @Deprecated
 public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOperations {

@@ -2,7 +2,7 @@
 /**
  *
  * Package providing integration of
- * <a href="http://groovy.codehaus.org">Groovy</a>
+ * <a href="https://groovy.codehaus.org">Groovy</a>
  * into Spring's scripting infrastructure.
  *
  */

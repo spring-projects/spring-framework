@@ -2,7 +2,7 @@
 /**
  *
  * Support classes for setting up
- * <a href="http://www.freemarker.org">FreeMarker</a>
+ * <a href="https://freemarker.apache.org/">FreeMarker</a>
  * within a Spring application context.
  *
  */

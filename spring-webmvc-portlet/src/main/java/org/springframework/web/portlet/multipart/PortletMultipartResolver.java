@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartException;
 
 /**
  * Portlet version of Spring's multipart resolution strategy for file uploads
- * as defined in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.
+ * as defined in <a href="https://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.
  *
  * <p>Implementations are typically usable both within any application context
  * and standalone.

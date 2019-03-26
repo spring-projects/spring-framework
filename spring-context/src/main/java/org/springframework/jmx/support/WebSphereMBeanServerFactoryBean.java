@@ -34,8 +34,8 @@ import org.springframework.jmx.MBeanServerNotFoundException;
  * This FactoryBean is a direct alternative to {@link MBeanServerFactoryBean},
  * which uses standard JMX 1.2 API to access the platform's MBeanServer.
  *
- * <p>See Javadoc for WebSphere's <a href="http://bit.ly/UzccDt">{@code
- * AdminServiceFactory}</a> and <a href="http://bit.ly/TRlX2r">{@code MBeanFactory}</a>.
+ * <p>See Javadoc for WebSphere's <a href="https://bit.ly/UzccDt">{@code
+ * AdminServiceFactory}</a> and <a href="https://bit.ly/TRlX2r">{@code MBeanFactory}</a>.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop

@@ -58,7 +58,7 @@ public class XmlExpectationsHelper {
 
 	/**
 	 * Parse the content as {@link DOMSource} and apply a {@link Matcher}.
-	 * @see <a href="http://code.google.com/p/xml-matchers/">xml-matchers</a>
+	 * @see <a href="https://code.google.com/p/xml-matchers/">xml-matchers</a>
 	 */
 	public void assertSource(String content, Matcher<? super Source> matcher) throws Exception {
 		Document document = parseXmlString(content);

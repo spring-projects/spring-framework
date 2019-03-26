@@ -58,7 +58,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class XpathAssertionTests {
 
 	private static final Map<String, String> NS =
-		Collections.singletonMap("ns", "http://example.org/music/people");
+		Collections.singletonMap("ns", "https://example.org/music/people");
 
 	private MockMvc mockMvc;
 
@@ -174,7 +174,7 @@ public class XpathAssertionTests {
 	}
 
 	@SuppressWarnings("unused")
-	@XmlRootElement(name="people", namespace="http://example.org/music/people")
+	@XmlRootElement(name="people", namespace="https://example.org/music/people")
 	@XmlAccessorType(XmlAccessType.FIELD)
 	private static class PeopleWrapper {
 

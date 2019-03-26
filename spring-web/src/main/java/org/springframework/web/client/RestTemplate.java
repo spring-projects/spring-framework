@@ -81,27 +81,27 @@ import org.springframework.web.util.UriTemplate;
  * in that URL using either a {@code String} variable arguments array, or a {@code Map<String, String>}.
  * The string varargs variant expands the given template variables in order, so that
  * <pre class="code">
- * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42",
+ * String result = restTemplate.getForObject("https://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42",
  * "21");
  * </pre>
- * will perform a GET on {@code http://example.com/hotels/42/bookings/21}. The map variant expands the template based
+ * will perform a GET on {@code https://example.com/hotels/42/bookings/21}. The map variant expands the template based
  * on variable name, and is therefore more useful when using many variables, or when a single variable is used multiple
  * times. For example:
  * <pre class="code">
  * Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", "42");
- * String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
+ * String result = restTemplate.getForObject("https://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
  * </pre>
- * will perform a GET on {@code http://example.com/hotels/42/rooms/42}. Alternatively, there are {@link URI} variant
+ * will perform a GET on {@code https://example.com/hotels/42/rooms/42}. Alternatively, there are {@link URI} variant
  * methods ({@link #getForObject(URI, Class)}), which do not allow for URI templates, but allow you to reuse a single,
  * expanded URI multiple times.
  *
  * <p>Furthermore, the {@code String}-argument methods assume that the URL String is unencoded. This means that
  * <pre class="code">
- * restTemplate.getForObject("http://example.com/hotel list");
+ * restTemplate.getForObject("https://example.com/hotel list");
  * </pre>
- * will perform a GET on {@code http://example.com/hotel%20list}. As a result, any URL passed that is already encoded
- * will be encoded twice (i.e. {@code http://example.com/hotel%20list} will become {@code
- * http://example.com/hotel%2520list}). If this behavior is undesirable, use the {@code URI}-argument methods, which
+ * will perform a GET on {@code https://example.com/hotel%20list}. As a result, any URL passed that is already encoded
+ * will be encoded twice (i.e. {@code https://example.com/hotel%20list} will become {@code
+ * https://example.com/hotel%2520list}). If this behavior is undesirable, use the {@code URI}-argument methods, which
  * will not perform any URL encoding.
  *
  * <p>Objects passed to and returned from these methods are converted to and from HTTP messages by

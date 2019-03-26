@@ -155,7 +155,7 @@ public class UrlPathHelperTests {
 
 	//
 	// Suite of tests root requests for default servlets (SRV 11.2) on WebSphere vs Tomcat and other containers
-	// See: http://jira.springframework.org/browse/SPR-7064
+	// See: https://jira.springframework.org/browse/SPR-7064
 	//
 
 	//

@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that uses
- * <a href="http://jakarta.apache.org/commons/httpclient">Jakarta Commons HttpClient</a> to create requests.
+ * <a href="https://jakarta.apache.org/commons/httpclient">Jakarta Commons HttpClient</a> to create requests.
  *
  * <p>Allows to use a pre-configured {@link HttpClient} instance -
  * potentially with authentication, HTTP connection pooling, etc.

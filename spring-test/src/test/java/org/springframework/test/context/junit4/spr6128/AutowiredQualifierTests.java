@@ -28,7 +28,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Integration tests to verify claims made in <a
- * href="http://jira.springframework.org/browse/SPR-6128"
+ * href="https://jira.springframework.org/browse/SPR-6128"
  * target="_blank">SPR-6128</a>.
  *
  * @author Sam Brannen
