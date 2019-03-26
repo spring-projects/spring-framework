@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setCorsProcessor
  */
 public interface CorsProcessor {

@@ -146,7 +146,7 @@ public class WebContentInterceptorTests {
 		mappings.setProperty("**/*.cache.html", "10");
 		interceptor.setCacheMappings(mappings);
 
-		request.setRequestURI("http://example.org/foo/page.html");
+		request.setRequestURI("https://example.org/foo/page.html");
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> expiresHeaders = response.getHeaders("Expires");
@@ -157,7 +157,7 @@ public class WebContentInterceptorTests {
 		assertThat(pragmaHeaders, Matchers.contains("no-cache"));
 
 		response = new MockHttpServletResponse();
-		request.setRequestURI("http://example.org/page.cache.html");
+		request.setRequestURI("https://example.org/page.cache.html");
 		interceptor.preHandle(request, response, null);
 
 		expiresHeaders = response.getHeaders("Expires");

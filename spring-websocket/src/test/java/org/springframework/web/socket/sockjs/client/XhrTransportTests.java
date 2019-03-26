@@ -46,14 +46,14 @@ public class XhrTransportTests {
 	public void infoResponse() throws Exception {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.infoResponseToReturn = new ResponseEntity<>("body", HttpStatus.OK);
-		assertEquals("body", transport.executeInfoRequest(new URI("http://example.com/info"), null));
+		assertEquals("body", transport.executeInfoRequest(new URI("https://example.com/info"), null));
 	}
 
 	@Test(expected = HttpServerErrorException.class)
 	public void infoResponseError() throws Exception {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.infoResponseToReturn = new ResponseEntity<>("body", HttpStatus.BAD_REQUEST);
-		assertEquals("body", transport.executeInfoRequest(new URI("http://example.com/info"), null));
+		assertEquals("body", transport.executeInfoRequest(new URI("https://example.com/info"), null));
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class XhrTransportTests {
 		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.sendMessageResponseToReturn = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		URI url = new URI("http://example.com");
+		URI url = new URI("https://example.com");
 		transport.executeSendRequest(url, requestHeaders, new TextMessage("payload"));
 		assertEquals(2, transport.actualSendRequestHeaders.size());
 		assertEquals("bar", transport.actualSendRequestHeaders.getFirst("foo"));
@@ -74,7 +74,7 @@ public class XhrTransportTests {
 	public void sendMessageError() throws Exception {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.sendMessageResponseToReturn = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		URI url = new URI("http://example.com");
+		URI url = new URI("https://example.com");
 		transport.executeSendRequest(url, null, new TextMessage("payload"));
 	}
 
@@ -85,7 +85,7 @@ public class XhrTransportTests {
 		handshakeHeaders.setOrigin("foo");
 
 		TransportRequest request = mock(TransportRequest.class);
-		given(request.getSockJsUrlInfo()).willReturn(new SockJsUrlInfo(new URI("http://example.com")));
+		given(request.getSockJsUrlInfo()).willReturn(new SockJsUrlInfo(new URI("https://example.com")));
 		given(request.getHandshakeHeaders()).willReturn(handshakeHeaders);
 
 		HttpHeaders requestHeaders = new HttpHeaders();

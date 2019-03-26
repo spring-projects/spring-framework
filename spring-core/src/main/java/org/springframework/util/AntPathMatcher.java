@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 /**
  * {@link PathMatcher} implementation for Ant-style path patterns.
  *
- * <p>Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache Ant</a>.
+ * <p>Part of this mapping code has been kindly borrowed from <a href="https://ant.apache.org">Apache Ant</a>.
  *
  * <p>The mapping matches URLs using the following rules:<br>
  * <ul>

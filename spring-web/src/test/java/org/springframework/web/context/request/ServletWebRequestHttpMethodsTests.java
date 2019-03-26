@@ -73,7 +73,7 @@ public class ServletWebRequestHttpMethodsTests {
 		currentDate = new Date();
 		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		servletRequest = new MockHttpServletRequest(method, "http://example.org");
+		servletRequest = new MockHttpServletRequest(method, "https://example.org");
 		servletResponse = new MockHttpServletResponse();
 		request = new ServletWebRequest(servletRequest, servletResponse);
 	}

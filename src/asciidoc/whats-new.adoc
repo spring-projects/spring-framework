@@ -48,7 +48,7 @@ version 4.0. If you are upgrading from a previous release of Spring, you should 
 that you have fixed any deprecated calls that you were making to outdated APIs.
 
 For a complete set of changes, check out the
-http://docs.spring.io/spring-framework/docs/3.2.4.RELEASE_to_4.0.0.RELEASE/[API
+https://docs.spring.io/spring-framework/docs/3.2.4.RELEASE_to_4.0.0.RELEASE/[API
 Differences Report].
 
 Note that optional third-party dependencies have been raised to a 2010/2011 minimum
@@ -64,7 +64,7 @@ retained for the time being where Spring 3.2 had it; now just in deprecated form
 
 Spring Framework 4.0 provides support for several Java 8 features. You can make use of
 __lambda expressions__ and __method references__ with Spring's callback interfaces. There
-is first-class support for `java.time` (http://jcp.org/en/jsr/detail?id=310[JSR-310]),
+is first-class support for `java.time` (https://jcp.org/en/jsr/detail?id=310[JSR-310]),
 and several existing annotations have been retrofitted as `@Repeatable`. You can also
 use Java 8's parameter name discovery (based on the `-parameters` compiler flag) as an
 alternative to compiling your code with debug information enabled.
@@ -170,7 +170,7 @@ There have been several general improvements to the core container:
   been added via the `@Conditional` annotation. This is similar to `@Profile` support but
   allows for user-defined strategies to be developed programmatically.
 * <<aop-pfb-proxy-types,CGLIB-based proxy classes>> no longer require a default
-  constructor. Support is provided via the http://code.google.com/p/objenesis/[objenesis]
+  constructor. Support is provided via the https://code.google.com/p/objenesis/[objenesis]
   library which is repackaged __inline__ and distributed as part of the Spring Framework.
   With this strategy, no constructor at all is being invoked for proxy instances anymore.
 * There is managed time zone support across the framework now, e.g. on `LocaleContext`.
@@ -201,7 +201,7 @@ have been made to Spring's Web modules:
 
 A new `spring-websocket` module provides comprehensive support for WebSocket-based,
 two-way communication between client and server in web applications. It is compatible with
-http://jcp.org/en/jsr/detail?id=356[JSR-356], the Java WebSocket API, and in addition
+https://jcp.org/en/jsr/detail?id=356[JSR-356], the Java WebSocket API, and in addition
 provides SockJS-based fallback options (i.e. WebSocket emulation) for use in browsers
 that don't yet support the WebSocket protocol (e.g. Internet Explorer < 10).
 
@@ -211,7 +211,7 @@ processing STOMP messages from WebSocket clients. As a result an `@Controller`
 can now contain both `@RequestMapping` and `@MessageMapping` methods for handling
 HTTP requests and messages from WebSocket-connected clients. The new `spring-messaging`
 module also contains key abstractions formerly from the
-http://projects.spring.io/spring-integration/[Spring Integration] project such as
+https://projects.spring.io/spring-integration/[Spring Integration] project such as
 `Message`, `MessageChannel`, `MessageHandler`, and others to serve as a foundation
 for messaging-based applications.
 
@@ -365,7 +365,7 @@ method has been added.
    https://jira.spring.io/browse/SPR-11543?focusedCommentId=100308&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-100308[listed here].
 ** Path matching customizations are frequently used and now built-in.
    See <<mvc-config-path-matching>>.
-* http://groovy-lang.org/docs/groovy-2.3.6/html/documentation/markup-template-engine.html[Groovy markup template]
+* http://groovy-lang.org/404.html[Groovy markup template]
   support (based on Groovy 2.3). See the `GroovyMarkupConfigurer` and respecitve
   `ViewResolver` and `View' implementations.
 
@@ -592,7 +592,7 @@ public @interface MyTestConfig {
 * `UriTemplateHandler` extension point in the `RestTemplate`.
 ** `DefaultUriTemplateHandler` exposes `baseUrl` property and path segment encoding options.
 ** the extension point can also be used to plug in any URI template library.
-* http://square.github.io/okhttp/[OkHTTP] integration with the `RestTemplate`.
+* https://square.github.io/okhttp/[OkHTTP] integration with the `RestTemplate`.
 * Custom `baseUrl` alternative for methods in `MvcUriComponentsBuilder`.
 * Serialization/deserialization exception messages are now logged at WARN level.
 * Default JSON prefix has been changed from "{} && " to the safer ")]}', " one.

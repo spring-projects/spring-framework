@@ -2102,7 +2102,7 @@ following change.
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-			"http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+			"https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 	<beans>
 
@@ -2120,7 +2120,7 @@ The equivalent file in the XML Schema-style would be...
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<!-- bean definitions here -->
 
@@ -2165,8 +2165,8 @@ correct schema so that the tags in the `util` namespace are available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:util="http://www.springframework.org/schema/util"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -2659,8 +2659,8 @@ correct schema so that the tags in the `jee` namespace are available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:jee="http://www.springframework.org/schema/jee"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jee https://www.springframework.org/schema/jee/spring-jee.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -2912,8 +2912,8 @@ are available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:lang="http://www.springframework.org/schema/lang"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -2940,8 +2940,8 @@ are available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:jms="http://www.springframework.org/schema/jms"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -2978,9 +2978,9 @@ are available to you.
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xmlns:aop="http://www.springframework.org/schema/aop"
 			__xmlns:tx="http://www.springframework.org/schema/tx"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 			__http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd__
-			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"> <!-- bean definitions here -->
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -3014,8 +3014,8 @@ are available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:aop="http://www.springframework.org/schema/aop"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -3038,8 +3038,8 @@ available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:context="http://www.springframework.org/schema/context"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -3138,8 +3138,8 @@ correct schema so that the tags in the `jdbc` namespace are available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:jdbc="http://www.springframework.org/schema/jdbc"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -3164,8 +3164,8 @@ the correct schema so that the tags in the `cache` namespace are available to yo
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:cache="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -3198,7 +3198,7 @@ as-is).
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="foo" class="x.y.Foo">
 			__<meta key="cacheName" value="foo"/>__
@@ -3522,7 +3522,7 @@ in a Spring XML configuration file.
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:myns="http://www.mycompany.com/schema/myns"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.xsd">
 
 		<!-- as a top-level bean -->
@@ -3560,7 +3560,7 @@ to satisfy a target of the following configuration:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:foo="http://www.foo.com/schema/component"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.foo.com/schema/component http://www.foo.com/schema/component/component.xsd">
 
 		<foo:component id="bionic-family" name="Bionic-1">
@@ -3788,7 +3788,7 @@ additional attribute to the existing bean definition element.
 
 By way of another example, let's say that the service class that you are defining a bean
 definition for a service object that will (unknown to it) be accessing a clustered
-http://jcp.org/en/jsr/detail?id=107[JCache], and you want to ensure that the named
+https://jcp.org/en/jsr/detail?id=107[JCache], and you want to ensure that the named
 JCache instance is eagerly started within the surrounding cluster:
 
 [source,xml,indent=0]
@@ -3946,9 +3946,9 @@ http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd
 Find below links to further resources concerning XML Schema and the extensible XML
 support described in this chapter.
 
-* The http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/[XML Schema Part 1: Structures
+* The https://www.w3.org/TR/2004/REC-xmlschema-1-20041028/[XML Schema Part 1: Structures
   Second Edition]
-* The http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/[XML Schema Part 2: Datatypes
+* The https://www.w3.org/TR/2004/REC-xmlschema-2-20041028/[XML Schema Part 2: Datatypes
   Second Edition]
 
 

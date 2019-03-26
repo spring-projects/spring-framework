@@ -748,7 +748,7 @@ applications, just like Web MVC does. The design for the multipart support is do
 pluggable `PortletMultipartResolver` objects, defined in the
 `org.springframework.web.portlet.multipart` package. Spring provides a
 `PortletMultipartResolver` for use with
-http://jakarta.apache.org/commons/fileupload[Commons FileUpload]. How uploading files is
+https://jakarta.apache.org/commons/fileupload[Commons FileUpload]. How uploading files is
 supported will be described in the rest of this section.
 
 By default, no multipart handling will be done by Spring Portlet MVC, as some developers
@@ -1049,7 +1049,7 @@ need to make sure that a corresponding custom `DefaultAnnotationHandlerMapping` 
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean class="org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 
@@ -1097,9 +1097,9 @@ schema as shown in the following XML snippet:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:component-scan base-package="org.springframework.samples.petportal.portlet"/>
 

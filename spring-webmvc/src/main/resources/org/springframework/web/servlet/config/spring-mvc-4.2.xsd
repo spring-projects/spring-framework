@@ -8,8 +8,8 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.2.xsd"/>
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.2.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans-4.2.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="https://www.springframework.org/schema/tool/spring-tool-4.2.xsd"/>
 
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
@@ -1330,7 +1330,7 @@
 						<xsd:attribute name="allowed-origins" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Comma-separated list of origins to allow, e.g. "http://domain1.com, http://domain2.com".
+	Comma-separated list of origins to allow, e.g. "https://domain1.com, https://domain2.com".
 	The special value "*" allows all domains (default).
 								]]></xsd:documentation>
 							</xsd:annotation>

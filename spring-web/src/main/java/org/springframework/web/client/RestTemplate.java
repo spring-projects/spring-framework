@@ -90,11 +90,11 @@ import org.springframework.web.util.UriTemplateHandler;
  * <p>For each HTTP method there are three variants: two accept a URI template string
  * and URI variables (array or map) while a third accepts a {@link URI}.
  * Note that for URI templates it is assumed encoding is necessary, e.g.
- * {@code restTemplate.getForObject("http://example.com/hotel list")} becomes
- * {@code "http://example.com/hotel%20list"}. This also means if the URI template
+ * {@code restTemplate.getForObject("https://example.com/hotel list")} becomes
+ * {@code "https://example.com/hotel%20list"}. This also means if the URI template
  * or URI variables are already encoded, double encoding will occur, e.g.
- * {@code http://example.com/hotel%20list} becomes
- * {@code http://example.com/hotel%2520list}). To avoid that use a {@code URI} method
+ * {@code https://example.com/hotel%20list} becomes
+ * {@code https://example.com/hotel%2520list}). To avoid that use a {@code URI} method
  * variant to provide (or re-use) a previously encoded URI. To prepare such an URI
  * with full control over encoding, consider using
  * {@link org.springframework.web.util.UriComponentsBuilder}.

@@ -7,7 +7,7 @@
 			elementFormDefault="qualified"
 			attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans.xsd"/>
 
 	<xsd:complexType name="mapping">
 		<xsd:annotation>

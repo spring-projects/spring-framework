@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public class CorsConfiguration {
 
@@ -103,11 +103,11 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
+	 * Set the origins to allow, e.g. {@code "https://domain1.com"}.
 	 * <p>The special value {@code "*"} allows all domains.
 	 * <p>By default this is not set.
 	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
-	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
 	 * if present, in order to reflect the client-originated address.
 	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
