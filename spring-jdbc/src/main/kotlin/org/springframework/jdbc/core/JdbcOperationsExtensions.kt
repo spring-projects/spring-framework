@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors
+ * Copyright 2002-2019 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ inline fun <reified T : Any> JdbcOperations.queryForObject(sql: String): T? =
  * @author Mario Arias
  * @since 5.0
  */
-fun <T : Any> JdbcOperations.queryForObject(sql: String, vararg args: Any, function: (ResultSet, Int) -> T): T? =
+fun <T : Any?> JdbcOperations.queryForObject(sql: String, vararg args: Any, function: (ResultSet, Int) -> T): T? =
 		queryForObject(sql, RowMapper { resultSet, i -> function(resultSet, i) }, *args)
 
 /**
@@ -96,7 +96,7 @@ inline fun <reified T : Any> JdbcOperations.queryForList(sql: String, args: Arra
  * @author Mario Arias
  * @since 5.0
  */
-inline fun <reified T : Any> JdbcOperations.query(sql: String, vararg args: Any,
+inline fun <reified T : Any?> JdbcOperations.query(sql: String, vararg args: Any,
 		crossinline function: (ResultSet) -> T): T? =
 		query(sql, ResultSetExtractor { function(it) }, *args)
 
