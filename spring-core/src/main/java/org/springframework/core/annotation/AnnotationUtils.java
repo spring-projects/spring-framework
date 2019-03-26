@@ -48,9 +48,9 @@ import org.springframework.util.StringUtils;
  * <p>Note that most of the features of this class are not provided by the
  * JDK's introspection facilities themselves.
  *
- * <p>As a general rule for runtime-retained annotations (e.g. for transaction
- * control, authorization, or service exposure), always use the lookup methods
- * on this class (e.g., {@link #findAnnotation(Method, Class)} and
+ * <p>As a general rule for runtime-retained application annotations (e.g. for
+ * transaction control, authorization, or service exposure), always use the
+ * lookup methods on this class (e.g. {@link #findAnnotation(Method, Class)} or
  * {@link #getAnnotation(Method, Class)}) instead of the plain annotation lookup
  * methods in the JDK. You can still explicitly choose between a <em>get</em>
  * lookup on the given class level only ({@link #getAnnotation(Method, Class)})
@@ -1055,8 +1055,7 @@ public abstract class AnnotationUtils {
 		}
 		catch (InvocationTargetException ex) {
 			rethrowAnnotationConfigurationException(ex.getTargetException());
-			throw new IllegalStateException(
-					"Could not obtain value for annotation attribute '" +
+			throw new IllegalStateException("Could not obtain value for annotation attribute '" +
 					attributeName + "' in " + annotation, ex);
 		}
 		catch (Throwable ex) {
