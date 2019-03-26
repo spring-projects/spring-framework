@@ -81,7 +81,7 @@ public class ResourceUrlProviderTests {
 	public void getStaticResourceUrlRequestWithQueryOrHash() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
-		String url = "/resources/foo.css?foo=bar&url=http://example.org";
+		String url = "/resources/foo.css?foo=bar&url=https://example.org";
 		String resolvedUrl = this.urlProvider.getForUriString(url, exchange).block(Duration.ofSeconds(5));
 		assertEquals(url, resolvedUrl);
 

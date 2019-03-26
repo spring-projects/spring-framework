@@ -59,7 +59,7 @@ public class CorsUrlHandlerMappingTests {
 
 	@Test
 	public void actualRequestWithoutCorsConfigurationProvider() throws Exception {
-		String origin = "http://domain2.com";
+		String origin = "https://domain2.com";
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
@@ -69,7 +69,7 @@ public class CorsUrlHandlerMappingTests {
 
 	@Test
 	public void preflightRequestWithoutCorsConfigurationProvider() throws Exception {
-		String origin = "http://domain2.com";
+		String origin = "https://domain2.com";
 		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
@@ -80,7 +80,7 @@ public class CorsUrlHandlerMappingTests {
 
 	@Test
 	public void actualRequestWithCorsAwareHandler() throws Exception {
-		String origin = "http://domain2.com";
+		String origin = "https://domain2.com";
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/cors.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
@@ -91,7 +91,7 @@ public class CorsUrlHandlerMappingTests {
 
 	@Test
 	public void preFlightWithCorsAwareHandler() throws Exception {
-		String origin = "http://domain2.com";
+		String origin = "https://domain2.com";
 		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/cors.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
@@ -106,7 +106,7 @@ public class CorsUrlHandlerMappingTests {
 		mappedConfig.addAllowedOrigin("*");
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/welcome.html", mappedConfig));
 
-		String origin = "http://domain2.com";
+		String origin = "https://domain2.com";
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
@@ -121,7 +121,7 @@ public class CorsUrlHandlerMappingTests {
 		mappedConfig.addAllowedOrigin("*");
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/welcome.html", mappedConfig));
 
-		String origin = "http://domain2.com";
+		String origin = "https://domain2.com";
 		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin);
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 

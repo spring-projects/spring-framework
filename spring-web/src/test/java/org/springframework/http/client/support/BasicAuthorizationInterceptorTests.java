@@ -66,7 +66,7 @@ public class BasicAuthorizationInterceptorTests {
 	@Test
 	public void interceptShouldAddHeader() throws Exception {
 		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-		ClientHttpRequest request = requestFactory.createRequest(new URI("http://example.com"), HttpMethod.GET);
+		ClientHttpRequest request = requestFactory.createRequest(new URI("https://example.com"), HttpMethod.GET);
 		ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
 		byte[] body = new byte[] {};
 		new BasicAuthorizationInterceptor("spring", "boot").intercept(request, body,

@@ -35,7 +35,7 @@ import org.springframework.lang.Nullable;
  * <p>Fetches "spring-beans.dtd" from the class path resource
  * "/org/springframework/beans/factory/xml/spring-beans.dtd",
  * no matter whether specified as some local URL that includes "spring-beans"
- * in the DTD name or as "http://www.springframework.org/dtd/spring-beans-2.0.dtd".
+ * in the DTD name or as "https://www.springframework.org/dtd/spring-beans-2.0.dtd".
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu

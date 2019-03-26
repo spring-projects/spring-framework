@@ -84,7 +84,7 @@ public interface ServerRequest {
 	/**
 	 * Get a {@code UriBuilderComponents}  from the URI associated with this
 	 * {@code ServerRequest}, while also overlaying with values from the headers
-	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * "Forwarded" (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
 	 * "Forwarded" is not found.
 	 * @return a URI builder

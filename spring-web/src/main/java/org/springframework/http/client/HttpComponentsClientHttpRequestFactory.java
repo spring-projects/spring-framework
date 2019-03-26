@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
- * uses <a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HttpComponents
+ * uses <a href="https://hc.apache.org/httpcomponents-client-ga/">Apache HttpComponents
  * HttpClient</a> to create requests.
  *
  * <p>Allows to use a pre-configured {@link HttpClient} instance -

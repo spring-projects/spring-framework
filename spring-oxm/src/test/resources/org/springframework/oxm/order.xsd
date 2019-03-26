@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-        targetNamespace="http://samples.springframework.org/order"
-        xmlns:tns="http://samples.springframework.org/order">
+        targetNamespace="https://samples.springframework.org/order"
+        xmlns:tns="https://samples.springframework.org/order">
     <element name="order">
         <complexType>
             <sequence>

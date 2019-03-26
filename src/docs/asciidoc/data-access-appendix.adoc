@@ -40,9 +40,9 @@ are available to you.
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xmlns:aop="http://www.springframework.org/schema/aop"
 			__xmlns:tx="http://www.springframework.org/schema/tx"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 			__http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd__
-			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"> <!-- bean definitions here -->
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"> <!-- bean definitions here -->
 
 	</beans>
 ----
@@ -76,8 +76,8 @@ correct schema so that the tags in the `jdbc` namespace are available to you.
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:jdbc="http://www.springframework.org/schema/jdbc"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd"__> <!-- bean definitions here -->
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----

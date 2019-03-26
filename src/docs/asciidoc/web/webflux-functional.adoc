@@ -77,7 +77,7 @@ Most applications will run through the WebFlux Java config, see <<webflux-fn-run
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK-8 friendly
 access to the HTTP request and response with
-http://www.reactive-streams.org[Reactive Streams] back pressure against the request
+https://www.reactive-streams.org[Reactive Streams] back pressure against the request
 and response body stream. The request body is represented with a Reactor `Flux` or `Mono`.
 The response body is represented with any Reactive Streams `Publisher`, including `Flux`
 and `Mono`. For more on that see

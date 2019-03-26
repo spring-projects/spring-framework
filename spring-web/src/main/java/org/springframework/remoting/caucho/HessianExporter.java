@@ -46,7 +46,7 @@ import org.springframework.util.CommonsLogWriter;
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
- * <a href="http://www.caucho.com/hessian">Hessian website</a>.
+ * <a href="http://hessian.caucho.com">Hessian website</a>.
  * <b>Note: As of Spring 4.0, this exporter requires Hessian 4.0 or above.</b>
  *
  * @author Juergen Hoeller

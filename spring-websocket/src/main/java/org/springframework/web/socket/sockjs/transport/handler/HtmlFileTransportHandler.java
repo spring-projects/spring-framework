@@ -41,8 +41,8 @@ import org.springframework.web.util.JavaScriptUtils;
 
 /**
  * An HTTP {@link TransportHandler} that uses a famous browser document.domain technique:
- * <a href="http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
- * http://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
+ * <a href="https://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
+ * https://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -52,7 +52,7 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	private static final String PARTIAL_HTML_CONTENT;
 
 	// Safari needs at least 1024 bytes to parse the website.
-	// http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
+	// https://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
 	private static final int MINIMUM_PARTIAL_HTML_CONTENT_LENGTH = 1024;
 
 

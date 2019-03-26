@@ -99,8 +99,8 @@ public abstract class StompClientSupport {
 	 * that default and for example set it to "0,0" if they require a
 	 * TaskScheduler to be configured first.
 	 * @param heartbeat the value for the CONNECT "heart-beat" header
-	 * @see <a href="http://stomp.github.io/stomp-specification-1.2.html#Heart-beating">
-	 * http://stomp.github.io/stomp-specification-1.2.html#Heart-beating</a>
+	 * @see <a href="https://stomp.github.io/stomp-specification-1.2.html#Heart-beating">
+	 * https://stomp.github.io/stomp-specification-1.2.html#Heart-beating</a>
 	 */
 	public void setDefaultHeartbeat(long[] heartbeat) {
 		if (heartbeat.length != 2 || heartbeat[0] < 0 || heartbeat[1] < 0) {
