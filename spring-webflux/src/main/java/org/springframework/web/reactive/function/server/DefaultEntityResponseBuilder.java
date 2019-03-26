@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,16 +202,14 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
-		private final Map<String, Object> hints;
 
 		public DefaultEntityResponse(int statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies, T entity,
 				BodyInserter<T, ? super ServerHttpResponse> inserter, Map<String, Object> hints) {
 
-			super(statusCode, headers, cookies);
+			super(statusCode, headers, cookies, hints);
 			this.entity = entity;
 			this.inserter = inserter;
-			this.hints = hints;
 		}
 
 		@Override
