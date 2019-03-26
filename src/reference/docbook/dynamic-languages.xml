@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Dynamic language support</title>
 
   <section xml:id="dynamic-language-introduction">
@@ -23,7 +23,7 @@
         There is nothing stopping the inclusion of further languages though. If you want
         to see support for &lt;<emphasis>insert your favourite dynamic language here</emphasis>&gt;,
         you can always raise an issue on Spring's
-        <link xl:href="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</link>
+        <link xl:href="https://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA</link>
         page (or implement such support yourself).
       </para>
     </sidebar>
@@ -130,8 +130,8 @@ class GroovyMessenger implements Messenger {
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang.xsd">
 
     ]]><lineannotation>&lt;!-- this is the bean definition for the Groovy-backed Messenger implementation --&gt;</lineannotation><![CDATA[
     <lang:groovy id="messenger" script-source="classpath:Messenger.groovy">
@@ -1041,8 +1041,8 @@ class TestBeanValidator implements Validator {
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang.xsd">
 
     <lang:groovy id="messenger" script-source="classpath:Messenger.groovy" ]]><lineannotation>scope="prototype"</lineannotation><![CDATA[>
         <lang:property name="message" value="I Can Do The RoboCop" />
@@ -1068,10 +1068,10 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
     </para>
     <itemizedlist>
       <listitem>
-        <para>The <link xl:href="http://jruby.codehaus.org/">JRuby</link> homepage</para>
+        <para>The <link xl:href="https://jruby.codehaus.org/">JRuby</link> homepage</para>
       </listitem>
       <listitem>
-        <para>The <link xl:href="http://groovy.codehaus.org/">Groovy</link> homepage</para>
+        <para>The <link xl:href="https://groovy.codehaus.org/">Groovy</link> homepage</para>
       </listitem>
       <listitem>
         <para>The <link xl:href="http://www.beanshell.org/">BeanShell</link> homepage</para>

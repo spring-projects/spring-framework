@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Resources</title>
 
   <section xml:id="resources-introduction">
@@ -293,7 +293,7 @@
 
     <programlisting language="java">Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt");</programlisting>
 
-    <programlisting language="java">Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");</programlisting>
+    <programlisting language="java">Resource template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt");</programlisting>
 
     <para>The following table summarizes the strategy for converting
     <classname>String</classname>s to
@@ -341,7 +341,7 @@
           <row>
             <entry><para>http:</para></entry>
 
-            <entry><para> <literal>http://myserver/logo.png</literal>
+            <entry><para> <literal>https://myserver/logo.png</literal>
             </para></entry>
 
             <entry><para>Loaded as a

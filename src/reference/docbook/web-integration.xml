@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Integrating with other web frameworks</title>
 
   <section xml:id="intro">
@@ -14,10 +14,10 @@
 
     <para>This chapter details Spring's integration with third party web
     frameworks such as <link
-    xl:href="http://java.sun.com/javaee/javaserverfaces/">JSF</link>, <link
-    xl:href="http://struts.apache.org/">Struts</link>, <link
-    xl:href="http://www.opensymphony.com/webwork/">WebWork</link>, and <link
-    xl:href="http://tapestry.apache.org/">Tapestry</link>.</para>
+    xl:href="https://java.sun.com/javaee/javaserverfaces/">JSF</link>, <link
+    xl:href="https://struts.apache.org/">Struts</link>, <link
+    xl:href="https://www.opensymphony.com/webwork/">WebWork</link>, and <link
+    xl:href="https://tapestry.apache.org/">Tapestry</link>.</para>
 
     <!-- insert some content about Spring Web Flow here -->
 
@@ -88,7 +88,7 @@
     contains all of the 'business beans' in one's application.</para>
 
     <para>On to specifics: all that one need do is to declare a <link
-    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></link>
+    xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></link>
     in the standard Java EE servlet <literal>web.xml</literal> file of one's web
     application, and add a <literal>contextConfigLocation</literal>
     &lt;context-param/&gt; section (in the same file) that defines which set
@@ -111,7 +111,7 @@
     context parameter, the <classname>ContextLoaderListener</classname> will
     look for a file called <literal>/WEB-INF/applicationContext.xml</literal>
     to load. Once the context files are loaded, Spring creates a <link
-    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></link>
+    xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></link>
     object based on the bean definitions and stores it in the
     <interfacename>ServletContext</interfacename> of the web application.</para>
 
@@ -123,7 +123,7 @@
     <programlisting language="java">WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);</programlisting>
 
     <para>The <link
-    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></link>
+    xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></link>
     class is for convenience, so you don't have to remember the name of the
     <interfacename>ServletContext</interfacename> attribute. Its
     <emphasis>getWebApplicationContext()</emphasis> method will return
@@ -155,10 +155,10 @@
     official part of the Java EE umbrella.</para>
 
     <para>For a popular JSF runtime as well as for popular JSF component
-    libraries, check out the <link xl:href="http://myfaces.apache.org/">Apache
+    libraries, check out the <link xl:href="https://myfaces.apache.org/">Apache
     MyFaces project</link>. The MyFaces project also provides common JSF
     extensions such as <link
-    xl:href="http://myfaces.apache.org/orchestra/">MyFaces Orchestra</link>: a
+    xl:href="https://myfaces.apache.org/orchestra/">MyFaces Orchestra</link>: a
     Spring-based JSF extension that provides rich conversation scope
     support.</para>
 
@@ -167,7 +167,7 @@
       established Spring Faces module, both for JSF-centric usage (as
       described in this section) and for Spring-centric usage (using JSF views
       within a Spring MVC dispatcher). Check out the <link
-      xl:href="http://www.springframework.org/webflow">Spring Web Flow
+      xl:href="https://www.springframework.org/webflow">Spring Web Flow
       website</link> for details!</para>
     </note>
 
@@ -181,7 +181,7 @@
 
       <para>The easiest way to integrate one's Spring middle-tier with one's
       JSF web layer is to use the <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html">
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html">
       <classname>DelegatingVariableResolver</classname></link> class. To
       configure this variable resolver in one's application, one will need to
       edit one's <emphasis>faces-context.xml</emphasis> file. After the
@@ -279,7 +279,7 @@
       well when mapping one's properties to beans in
       <emphasis>faces-config.xml</emphasis>, but at times one may need to grab
       a bean explicitly. The <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/FacesContextUtils.html">
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/FacesContextUtils.html">
       <classname>FacesContextUtils</classname></link> class makes this easy.
       It is similar to <classname>WebApplicationContextUtils</classname>,
       except that it takes a <classname>FacesContext</classname> parameter
@@ -292,7 +292,7 @@
   <section xml:id="struts">
     <title>Apache Struts 1.x and 2.x</title>
 
-    <para><link xl:href="http://struts.apache.org">Struts</link> used to be the
+    <para><link xl:href="https://struts.apache.org">Struts</link> used to be the
     <emphasis>de facto</emphasis> web framework for Java applications, mainly
     because it was one of the first to be released (June 2001). It has now been renamed to <emphasis>Struts 1</emphasis>
     (as opposed to Struts 2). Many applications still use it.
@@ -311,7 +311,7 @@
       <para>Struts 2 is effectively a different product - a successor of
       WebWork 2.2 (as discussed in <xref linkend="webwork" />), carrying the
       Struts brand now. Check out the Struts 2 <link
-      xl:href="http://struts.apache.org/2.x/docs/spring-plugin.html">Spring
+      xl:href="https://struts.apache.org/2.x/docs/spring-plugin.html">Spring
       Plugin</link> for the built-in Spring integration shipped with Struts
       2. In general, Struts 2 is closer to WebWork 2.2 than to Struts 1 in
       terms of its Spring integration implications.</para>
@@ -338,7 +338,7 @@
       <title>ContextLoaderPlugin</title>
 
       <para>The <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ContextLoaderPlugIn.html"><classname>ContextLoaderPlugin</classname></link>
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ContextLoaderPlugIn.html"><classname>ContextLoaderPlugin</classname></link>
       is a Struts 1.1+ plug-in that loads a Spring context file for the Struts
       <classname>ActionServlet</classname>. This context refers to the root
       <classname>WebApplicationContext</classname> (loaded by the
@@ -368,7 +368,7 @@
       StrutsTestCase's <classname>MockStrutsTestCase</classname> won't
       initialize Listeners on startup so putting all your context files in the
       plugin is a workaround. (A <link
-      xl:href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1088866&amp;group_id=39190&amp;atid=424562">
+      xl:href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=1088866&amp;group_id=39190&amp;atid=424562">
       bug has been filed</link> for this issue, but has been closed as 'Wont
       Fix').</para>
 
@@ -409,7 +409,7 @@
         <title>DelegatingRequestProcessor</title>
 
         <para>To configure the <link
-        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingRequestProcessor.html">
+        xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingRequestProcessor.html">
         <literal>DelegatingRequestProcessor</literal></link> in your
         <emphasis>struts-config.xml</emphasis> file, override the
         "processorClass" property in the &lt;controller&gt; element. These
@@ -437,7 +437,7 @@
         <note>
           <para>If you are using Tiles in your Struts application, you must
           configure your &lt;controller&gt; with the <link
-          xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html"><classname>DelegatingTilesRequestProcessor</classname></link>
+          xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html"><classname>DelegatingTilesRequestProcessor</classname></link>
           instead.</para>
         </note>
       </section>
@@ -449,7 +449,7 @@
         can't use the <classname>DelegatingRequestProcessor</classname> or
         <classname>DelegatingTilesRequestProcessor</classname> approaches, you
         can use the <link
-        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingActionProxy.html">
+        xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingActionProxy.html">
         <classname>DelegatingActionProxy</classname></link> as the type in
         your action-mapping.</para>
 
@@ -487,7 +487,7 @@
       is to extend Spring's <classname>Action</classname> classes for Struts.
       For example, instead of subclassing Struts'
       <classname>Action</classname> class, you can subclass Spring's <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html">
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html">
       <classname>ActionSupport</classname></link> class.</para>
 
       <para>The <classname>ActionSupport</classname> class provides additional
@@ -516,23 +516,23 @@
       to the name: <itemizedlist spacing="compact">
           <listitem>
             <para><link
-            xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html"><classname>ActionSupport</classname></link>,</para>
+            xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html"><classname>ActionSupport</classname></link>,</para>
           </listitem>
 
           <listitem>
             <para><link
-            xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DispatchActionSupport.html"><literal>DispatchActionSupport</literal></link>,</para>
+            xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DispatchActionSupport.html"><literal>DispatchActionSupport</literal></link>,</para>
           </listitem>
 
           <listitem>
             <para><link
-            xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/LookupDispatchActionSupport.html"><literal>LookupDispatchActionSupport</literal></link>
+            xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/LookupDispatchActionSupport.html"><literal>LookupDispatchActionSupport</literal></link>
             and</para>
           </listitem>
 
           <listitem>
             <para><link
-            xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/MappingDispatchActionSupport.html"><literal>MappingDispatchActionSupport</literal></link>.</para>
+            xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/MappingDispatchActionSupport.html"><literal>MappingDispatchActionSupport</literal></link>.</para>
           </listitem>
         </itemizedlist></para>
 
@@ -548,7 +548,7 @@
   <section xml:id="webwork">
     <title>WebWork 2.x</title>
 
-    <para>From the <link xl:href="http://www.opensymphony.com/webwork/">WebWork
+    <para>From the <link xl:href="https://www.opensymphony.com/webwork/">WebWork
     homepage</link>:</para>
 
     <para>
@@ -567,7 +567,7 @@
     nicely decoupled validation.</para>
 
     <para>One of the key enablers in WebWork's technology stack is <link
-    xl:href="http://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an
+    xl:href="https://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an
     IoC container</link> to manage Webwork Actions, handle the "wiring" of
     business objects, etc. Prior to WebWork version 2.2, WebWork used its own
     proprietary IoC container (and provided integration points so that one
@@ -582,9 +582,9 @@
     principle, it would be foolish to document the Spring-WebWork integration
     in light of the fact that the WebWork team have already written such a
     writeup. Please consult the <link
-    xl:href="http://www.opensymphony.com/webwork/wikidocs/Spring.html">Spring-WebWork
+    xl:href="https://www.opensymphony.com/webwork/wikidocs/Spring.html">Spring-WebWork
     integration page</link> on the <link
-    xl:href="http://wiki.opensymphony.com/display/WW/WebWork">WebWork wiki</link>
+    xl:href="https://wiki.opensymphony.com/display/WW/WebWork">WebWork wiki</link>
     for the full lowdown.</para>
 
     <para>Note that the Spring-WebWork integration code was developed (and
@@ -592,14 +592,14 @@
     themselves. So please refer first to the WebWork site and forums if you are
     having issues with the integration. But feel free to
     post comments and queries regarding the Spring-WebWork integration on the
-    <link xl:href="http://forum.springframework.org/forumdisplay.php?f=25">Spring
+    <link xl:href="https://forum.springframework.org/forumdisplay.php?f=25">Spring
     support forums</link>, too.</para>
   </section>
 
   <section xml:id="tapestry">
     <title>Tapestry 3.x and 4.x</title>
 
-    <para>From the <link xl:href="http://tapestry.apache.org/">Tapestry
+    <para>From the <link xl:href="https://tapestry.apache.org/">Tapestry
     homepage</link>:</para>
 
     <para>
@@ -662,8 +662,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        <emphasis role="bold">xmlns:jee="http://www.springframework.org/schema/jee"</emphasis>
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-<emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"</emphasis>&gt;
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+<emphasis role="bold">http://www.springframework.org/schema/jee https://www.springframework.org/schema/jee/spring-jee.xsd"</emphasis>&gt;
 
 &lt;beans&gt;
     &lt;!-- the DataSource --&gt;
@@ -813,7 +813,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE application PUBLIC
     "-//Apache Software Foundation//Tapestry Specification 3.0//EN"
-    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+    "https://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
 &lt;application
     name="Whatever xPortal"
     engine-class="com.whatever.web.xportal.MyEngine"&gt;
@@ -844,7 +844,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE page-specification PUBLIC
     "-//Apache Software Foundation//Tapestry Specification 3.0//EN"
-    "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
+    "https://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
 
 &lt;page-specification class="com.whatever.web.xportal.pages.Login"&gt;
 
@@ -1112,23 +1112,23 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
     <itemizedlist>
       <listitem>
         <para>The <link
-        xl:href="http://java.sun.com/javaee/javaserverfaces/">JSF</link>
+        xl:href="https://java.sun.com/javaee/javaserverfaces/">JSF</link>
         homepage</para>
       </listitem>
 
       <listitem>
-        <para>The <link xl:href="http://struts.apache.org/">Struts</link>
+        <para>The <link xl:href="https://struts.apache.org/">Struts</link>
         homepage</para>
       </listitem>
 
       <listitem>
         <para>The <link
-        xl:href="http://www.opensymphony.com/webwork/">WebWork</link>
+        xl:href="https://www.opensymphony.com/webwork/">WebWork</link>
         homepage</para>
       </listitem>
 
       <listitem>
-        <para>The <link xl:href="http://tapestry.apache.org/">Tapestry</link>
+        <para>The <link xl:href="https://tapestry.apache.org/">Tapestry</link>
         homepage</para>
       </listitem>
     </itemizedlist>

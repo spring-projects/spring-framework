@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Introduction to Spring Framework</title>
 
   <para>Spring Framework is a Java platform that provides comprehensive
@@ -56,7 +56,7 @@
       <firstterm>Dependency Injection</firstterm>.</para>
 
       <para>For insight into IoC and DI, refer to Fowler's article at <link
-      xl:href="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</link>.</para>
+      xl:href="https://martinfowler.com/articles/injection.html">https://martinfowler.com/articles/injection.html</link>.</para>
     </sidebar>
 
     <para>Java applications -- a loose term that runs the gamut from
@@ -362,7 +362,7 @@ TR: OK. Added to diagram.--></para>
       places:<itemizedlist>
           <listitem>
             <para>On the community download site <link
-            xl:href="http://www.springsource.org/download/community">http://www.springsource.org/download/community</link>.
+            xl:href="https://www.springsource.org/download/community">https://www.springsource.org/download/community</link>.
             Here you find all the Spring jars bundled together into a zip file
             for easy download. The names of the jars here since version 3.0
             are in the form
@@ -393,7 +393,7 @@ TR: OK. Added to diagram.--></para>
             dependencies are also in this "long" form, with external libraries
             (not from SpringSource) having the prefix
             <code>com.springsource</code>. See the <link
-            xl:href="http://www.springsource.com/repository/app/faq">FAQ</link>
+            xl:href="https://www.springsource.com/repository/app/faq">FAQ</link>
             for more information.</para>
           </listitem>
 
@@ -529,7 +529,7 @@ TR: OK. Added to diagram.--></para>
                 <entry>Various</entry>
 
                 <entry><link
-                xl:href="http://www.springsource.com/repository">http://www.springsource.com/repository</link></entry>
+                xl:href="https://www.springsource.com/repository">https://www.springsource.com/repository</link></entry>
               </row>
 
               <row>
@@ -596,7 +596,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting language="xml">&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.release&lt;/id&gt;
-      &lt;url&gt;http://repo.springsource.org/release/&lt;/url&gt;
+      &lt;url&gt;https://repo.springsource.org/release/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;false&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
@@ -606,7 +606,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting language="xml">&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.milestone&lt;/id&gt;
-      &lt;url&gt;http://repo.springsource.org/milestone/&lt;/url&gt;
+      &lt;url&gt;https://repo.springsource.org/milestone/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;false&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
@@ -616,7 +616,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting language="xml">&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.snapshot&lt;/id&gt;
-      &lt;url&gt;http://repo.springsource.org/snapshot/&lt;/url&gt;
+      &lt;url&gt;https://repo.springsource.org/snapshot/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;true&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
@@ -640,14 +640,14 @@ TR: OK. Added to diagram.--></para>
         <programlisting language="xml">&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.bundles.release&lt;/id&gt;
-      &lt;url&gt;http://repository.springsource.com/maven/bundles/release/&lt;/url&gt;
+      &lt;url&gt;https://repository.springsource.com/maven/bundles/release/&lt;/url&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
 
         <para>If you are managing your dependencies by hand, the URL in the
         repository declaration above is not browsable, but there is a user
         interface at <link
-        xl:href="http://www.springsource.com/repository">http://www.springsource.com/repository</link>
+        xl:href="https://www.springsource.com/repository">https://www.springsource.com/repository</link>
         that can be used to search for and download dependencies. It also has
         handy snippets of Maven and Ivy configuration that you can copy and
         paste if you are using those tools.</para>
@@ -657,7 +657,7 @@ TR: OK. Added to diagram.--></para>
         <title>Ivy Dependency Management</title>
 
         <para>If you prefer to use <link
-        xl:href="http://ant.apache.org/ivy">Ivy</link> to manage dependencies
+        xl:href="https://ant.apache.org/ivy">Ivy</link> to manage dependencies
         then there are similar names and configuration options. </para>
 
         <para>To configure Ivy to point to the SpringSource EBR add the
@@ -668,18 +668,18 @@ TR: OK. Added to diagram.--></para>
 
   &lt;url name="com.springsource.repository.bundles.release"&gt;
 
-    &lt;ivy pattern="http://repository.springsource.com/ivy/bundles/release/
+    &lt;ivy pattern="https://repository.springsource.com/ivy/bundles/release/
       [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
-    &lt;artifact pattern="http://repository.springsource.com/ivy/bundles/release/
+    &lt;artifact pattern="https://repository.springsource.com/ivy/bundles/release/
       [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
 
   &lt;/url&gt;
 
   &lt;url name="com.springsource.repository.bundles.external"&gt;
 
-    &lt;ivy pattern="http://repository.springsource.com/ivy/bundles/external/
+    &lt;ivy pattern="https://repository.springsource.com/ivy/bundles/external/
        [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
-    &lt;artifact pattern="http://repository.springsource.com/ivy/bundles/external/
+    &lt;artifact pattern="https://repository.springsource.com/ivy/bundles/external/
        [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
 
   &lt;/url&gt;
@@ -746,7 +746,7 @@ TR: OK. Added to diagram.--></para>
         problematic. If we could turn back the clock and start Spring now
         as a new project it would use a different logging dependency. The
         first choice would probably be the Simple Logging Facade for Java (<link
-        xl:href="http://www.slf4j.org">SLF4J</link>), which is also used by a lot
+        xl:href="https://www.slf4j.org">SLF4J</link>), which is also used by a lot
         of other tools that people use with Spring inside their
         applications.</para>
 
@@ -851,7 +851,7 @@ TR: OK. Added to diagram.--></para>
 
           <para>A more common choice amongst SLF4J users, which uses fewer steps
           and generates fewer dependencies, is to bind directly to <link
-          xl:href="http://logback.qos.ch">Logback</link>. This removes the extra
+          xl:href="https://logback.qos.ch">Logback</link>. This removes the extra
           binding step because Logback implements SLF4J directly, so you only need
           to depend on two libraries not four (<code>jcl-over-slf4j</code> and
           <code>logback</code>). If you do that you might also need to exclude the
@@ -863,7 +863,7 @@ TR: OK. Added to diagram.--></para>
         <title>Using Log4J</title>
 
         <para>Many people use <link
-        xl:href="http://logging.apache.org/log4j">Log4j</link> as a logging
+        xl:href="https://logging.apache.org/log4j">Log4j</link> as a logging
         framework for configuration and management purposes. It's efficient
         and well-established, and in fact it's what we use at runtime when we
         build and test Spring. Spring also provides some utilities for

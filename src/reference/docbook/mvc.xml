@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Web MVC framework</title>
 
   <section xml:id="mvc-introduction">
@@ -749,9 +749,9 @@ public class HelloWorldController {
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+        https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;context:component-scan base-package="org.springframework.samples.petclinic.web"/&gt;
 
@@ -958,13 +958,13 @@ public class ClinicController {
         <para>A URI Template is a URI-like string, containing one or more
         variable names. When you substitute values for these variables, the
         template becomes a URI. The <link
-        xl:href="http://bitworking.org/projects/URI-Templates/">proposed
+        xl:href="https://bitworking.org/projects/URI-Templates/">proposed
         RFC</link> for URI Templates defines how a URI is parameterized. For
         example, the URI Template
-        <code>http://www.example.com/users/{userId}</code> contains the
+        <code>https://www.example.com/users/{userId}</code> contains the
         variable <emphasis>userId</emphasis>. Assigning the value
         <emphasis>fred</emphasis> to the variable yields
-        <code>http://www.example.com/users/fred</code>.</para>
+        <code>https://www.example.com/users/fred</code>.</para>
 
         <para>In Spring MVC you can use the
         <interfacename>@PathVariable</interfacename> annotation on a method
@@ -1096,11 +1096,11 @@ public class RelativePathUriTemplateController {
         <title>Matrix Variables</title>
 
         <para>The URI specification
-        <link xl:href="http://tools.ietf.org/html/rfc3986#section-3.3">RFC 3986</link>
+        <link xl:href="https://tools.ietf.org/html/rfc3986#section-3.3">RFC 3986</link>
         defines the possibility of including name-value pairs within path segments.
         There is no specific term used in the spec.
         The general "URI path parameters" could be applied although the more unique
-        <link xl:href="http://www.w3.org/DesignIssues/MatrixURIs.html">"Matrix URIs"</link>,
+        <link xl:href="https://www.w3.org/DesignIssues/MatrixURIs.html">"Matrix URIs"</link>,
         originating from an old post by Tim Berners-Lee, is also frequently used
         and fairly well known. Within Spring MVC these are referred to
         as matrix variables.</para>
@@ -2514,7 +2514,7 @@ deferredResult.setResult(data);
 
       <para>Explaining the motivation for async request processing and when or why to use it
       are beyond the scope of this document. For further information you may wish to read
-      <link xl:href="http://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/">this blog post series</link>.
+      <link xl:href="https://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/">this blog post series</link>.
       </para>
 
       <section xml:id="mvc-ann-async-exceptions">
@@ -2598,7 +2598,7 @@ deferredResult.setResult(data);
 
           <programlisting language="xml">&lt;web-app xmlns="http://java.sun.com/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee https://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
     version="3.0"&gt;
 
     ...
@@ -2835,7 +2835,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         if (openingTime &lt;= hour &amp;&amp; hour &lt; closingTime) {
             return true;
         } else {
-            response.sendRedirect("http://host.com/outsideOfficeHours.html");
+            response.sendRedirect("https://host.com/outsideOfficeHours.html");
             return false;
         }
     }
@@ -3219,7 +3219,7 @@ public String upload(...) {
         simply operate in terms of logical view names. A logical view name
         such as <literal>redirect:/myapp/some/resource</literal> will redirect
         relative to the current Servlet context, while a name such as
-        <literal>redirect:http://myhost.com/some/arbitrary/path</literal> will
+        <literal>redirect:https://myhost.com/some/arbitrary/path</literal> will
         redirect to an absolute URL.</para>
       </section>
 
@@ -3260,9 +3260,9 @@ public String upload(...) {
         <listitem>
           <para>Use a distinct URI for each resource, typically by using a
           different file extension in the URI. For example, the URI<literal>
-          http://www.example.com/users/fred.pdf</literal> requests a PDF
+          https://www.example.com/users/fred.pdf</literal> requests a PDF
           representation of the user fred, and
-          <literal>http://www.example.com/users/fred.xml</literal> requests an
+          <literal>https://www.example.com/users/fred.xml</literal> requests an
           XML representation.</para>
         </listitem>
       </itemizedlist>
@@ -3271,15 +3271,15 @@ public String upload(...) {
         <listitem>
           <para>Use the same URI for the client to locate the resource, but
           set the <literal>Accept</literal> HTTP request header to list the
-          <link xl:href="http://en.wikipedia.org/wiki/Internet_media_type">media
+          <link xl:href="https://en.wikipedia.org/wiki/Internet_media_type">media
           types</link> that it understands. For example, an HTTP request for
-          <literal>http://www.example.com/users/fred</literal> with an
+          <literal>https://www.example.com/users/fred</literal> with an
           <literal>Accept</literal> header set to <literal>application/pdf
           </literal>requests a PDF representation of the user fred, while
-          <literal>http://www.example.com/users/fred</literal> with an
+          <literal>https://www.example.com/users/fred</literal> with an
           <literal>Accept</literal> header set to <literal>text/xml</literal>
           requests an XML representation. This strategy is known as <link
-          xl:href="http://en.wikipedia.org/wiki/Content_negotiation">content
+          xl:href="https://en.wikipedia.org/wiki/Content_negotiation">content
           negotiation</link>.</para>
         </listitem>
       </itemizedlist>
@@ -3492,7 +3492,7 @@ public class ContentController {
     <para>For example you can expand and encode a URI template string:</para>
 
 <programlisting language="java">UriComponents uriComponents =
-        UriComponentsBuilder.fromUriString("http://example.com/hotels/{hotel}/bookings/{booking}").build();
+        UriComponentsBuilder.fromUriString("https://example.com/hotels/{hotel}/bookings/{booking}").build();
 
 URI uri = uriComponents.expand("42", "21").encode().toUri();
 </programlisting>
@@ -3680,7 +3680,7 @@ ServletUriComponentsBuilder ucb =
       <literal>*.view</literal> resources containing a parameter named
       <literal>siteLanguage</literal> will now change the locale. So, for
       example, a request for the following URL,
-      <literal>http://www.sf.net/home.view?siteLanguage=nl</literal> will
+      <literal>https://www.sf.net/home.view?siteLanguage=nl</literal> will
       change the site language to Dutch.</para>
 
       <programlisting language="xml">&lt;bean id="localeChangeInterceptor"
@@ -3847,7 +3847,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <literal>org.springframework.web.multipart</literal> package. Spring
       provides one <interfacename>MultipartResolver</interfacename>
       implementation for use with <link
-      xl:href="http://jakarta.apache.org/commons/fileupload"> <emphasis>Commons
+      xl:href="https://jakarta.apache.org/commons/fileupload"> <emphasis>Commons
       FileUpload</emphasis></link> and another for use with Servlet 3.0
       multipart request parsing.</para>
 
@@ -4627,7 +4627,7 @@ public class ErrorController {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+        https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     <lineannotation>&lt;!-- this bean with the well known name generates view names for us --&gt;</lineannotation>
     &lt;bean id="viewNameTranslator"
@@ -4686,7 +4686,7 @@ public class ErrorController {
   <section xml:id="mvc-etag">
     <title>ETag support</title>
 
-    <para>An <link xl:href="http://en.wikipedia.org/wiki/HTTP_ETag">ETag</link>
+    <para>An <link xl:href="https://en.wikipedia.org/wiki/HTTP_ETag">ETag</link>
     (entity tag) is an HTTP response header returned by an HTTP/1.1 compliant
     web server used to determine change in content at a given URL. It can be
     considered to be the more sophisticated successor to the
@@ -4879,9 +4879,9 @@ public class WebConfig {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd"&gt;
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd"&gt;
 
     &lt;mvc:annotation-driven /&gt;
 
@@ -5025,7 +5025,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         <para>To customize the default configuration of
         <literal>&lt;mvc:annotation-driven /&gt;</literal> check what
         attributes and sub-elements it supports. You can view the
-        <link xl:href="http://static.springsource.org/schema/mvc/spring-mvc.xsd">Spring MVC XML schema</link>
+        <link xl:href="https://schema.spring.io/mvc/spring-mvc.xsd">Spring MVC XML schema</link>
         or use the code completion feature of your IDE to discover
         what attributes and sub-elements are available.
         The sample below shows a subset of what is available:</para>
@@ -5412,7 +5412,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         <listitem>
           <para>There are many excellent articles and tutorials that show how to
           build web applications with Spring MVC. Read them at the <link
-          xl:href="http://www.springsource.org/documentation">Spring
+          xl:href="https://www.springsource.org/documentation">Spring
           Documentation</link> page.</para>
         </listitem>
 

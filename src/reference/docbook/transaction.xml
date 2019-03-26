@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Transaction Management</title>
 
   <section xml:id="transaction-intro">
@@ -188,7 +188,7 @@ TR: OK AS IS - I think it's fine as is - the concepts apply to both programmatic
         resources, which is not a requirement for many applications. Many
         high-end applications use a single, highly scalable database (such as
         Oracle RAC) instead. Standalone transaction managers such as <link
-        xl:href="http://www.atomikos.com/">Atomikos Transactions</link> and
+        xl:href="https://www.atomikos.com/">Atomikos Transactions</link> and
         <link xl:href="http://jotm.objectweb.org/">JOTM</link> are other
         options. Of course, you may need other application server capabilities
         such as Java Message Service (JMS) and J2EE Connector Architecture
@@ -380,9 +380,9 @@ TR:REVISED, PLS REVIEW-->
      xmlns:jee="http://www.springframework.org/schema/jee"
      xsi:schemaLocation="
      http://www.springframework.org/schema/beans
-     http://www.springframework.org/schema/beans/spring-beans.xsd
+     https://www.springframework.org/schema/beans/spring-beans.xsd
      http://www.springframework.org/schema/jee
-     http://www.springframework.org/schema/jee/spring-jee.xsd"&gt;
+     https://www.springframework.org/schema/jee/spring-jee.xsd"&gt;
 
   &lt;jee:jndi-lookup id="dataSource" jndi-name="jdbc/jpetstore"/&gt;
 
@@ -800,11 +800,11 @@ public class DefaultFooService implements FooService {
      <lineannotation>xmlns:tx="http://www.springframework.org/schema/tx"</lineannotation>
      xsi:schemaLocation="
      http://www.springframework.org/schema/beans
-     http://www.springframework.org/schema/beans/spring-beans.xsd
+     https://www.springframework.org/schema/beans/spring-beans.xsd
      <lineannotation>http://www.springframework.org/schema/tx
-     http://www.springframework.org/schema/tx/spring-tx.xsd</lineannotation>
+     https://www.springframework.org/schema/tx/spring-tx.xsd</lineannotation>
      http://www.springframework.org/schema/aop
-     http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+     https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   <lineannotation>&lt;!-- this is the service object that we want to make transactional --&gt;</lineannotation>
   &lt;bean id="fooService" class="x.y.service.DefaultFooService"/&gt;
@@ -1084,11 +1084,11 @@ if the underlying application server infrastructure throws an Error the transact
   xmlns:tx="http://www.springframework.org/schema/tx"
   xsi:schemaLocation="
   http://www.springframework.org/schema/beans
-  http://www.springframework.org/schema/beans/spring-beans.xsd
+  https://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/tx
-  http://www.springframework.org/schema/tx/spring-tx.xsd
+  https://www.springframework.org/schema/tx/spring-tx.xsd
   http://www.springframework.org/schema/aop
-  http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+  https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;aop:config&gt;
 
@@ -1128,11 +1128,11 @@ if the underlying application server infrastructure throws an Error the transact
   xmlns:tx="http://www.springframework.org/schema/tx"
   xsi:schemaLocation="
   http://www.springframework.org/schema/beans
-  http://www.springframework.org/schema/beans/spring-beans.xsd
+  https://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/tx
-  http://www.springframework.org/schema/tx/spring-tx.xsd
+  https://www.springframework.org/schema/tx/spring-tx.xsd
   http://www.springframework.org/schema/aop
-  http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+  https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;aop:config&gt;
 
@@ -1361,11 +1361,11 @@ public class DefaultFooService implements FooService {
      xmlns:tx="http://www.springframework.org/schema/tx"
      xsi:schemaLocation="
      http://www.springframework.org/schema/beans
-     http://www.springframework.org/schema/beans/spring-beans.xsd
+     https://www.springframework.org/schema/beans/spring-beans.xsd
      http://www.springframework.org/schema/tx
-     http://www.springframework.org/schema/tx/spring-tx.xsd
+     https://www.springframework.org/schema/tx/spring-tx.xsd
      http://www.springframework.org/schema/aop
-     http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+     https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   <lineannotation>&lt;!-- this is the service object that we want to make transactional --&gt;</lineannotation>
   &lt;bean id="fooService" class="x.y.service.DefaultFooService"/&gt;
@@ -2026,11 +2026,11 @@ public class SimpleProfiler implements Ordered {
      xmlns:tx="http://www.springframework.org/schema/tx"
      xsi:schemaLocation="
    http://www.springframework.org/schema/beans
-   http://www.springframework.org/schema/beans/spring-beans.xsd
+   https://www.springframework.org/schema/beans/spring-beans.xsd
    http://www.springframework.org/schema/tx
-   http://www.springframework.org/schema/tx/spring-tx.xsd
+   https://www.springframework.org/schema/tx/spring-tx.xsd
    http://www.springframework.org/schema/aop
-   http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+   https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;bean id="fooService" class="x.y.service.DefaultFooService"/&gt;
 
@@ -2081,11 +2081,11 @@ TR: REVISED, PLS REVIEW. changed to 'desired'; seems clear that the desired orde
      xmlns:tx="http://www.springframework.org/schema/tx"
      xsi:schemaLocation="
    http://www.springframework.org/schema/beans
-   http://www.springframework.org/schema/beans/spring-beans.xsd
+   https://www.springframework.org/schema/beans/spring-beans.xsd
    http://www.springframework.org/schema/tx
-   http://www.springframework.org/schema/tx/spring-tx.xsd
+   https://www.springframework.org/schema/tx/spring-tx.xsd
    http://www.springframework.org/schema/aop
-   http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+   https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;bean id="fooService" class="x.y.service.DefaultFooService"/&gt;
 
@@ -2191,7 +2191,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); </progr
       <para>To weave your applications with the
       <classname>AnnotationTransactionAspect</classname> you must either build
       your application with AspectJ (see the <link
-      xl:href="http://www.eclipse.org/aspectj/doc/released/devguide/index.html">AspectJ
+      xl:href="https://www.eclipse.org/aspectj/doc/released/devguide/index.html">AspectJ
       Development Guide</link>) or use load-time weaving. See <xref
       linkend="aop-aj-ltw" /> for a discussion of load-time weaving with
       AspectJ.</para>
@@ -2523,7 +2523,7 @@ txManager.commit(status);</programlisting>
     <itemizedlist>
       <listitem>
         <para><link
-        xl:href="http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html">Distributed
+        xl:href="https://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html">Distributed
         transactions in Spring, with and without XA</link> is a JavaWorld
         presentation in which SpringSource's David Syer guides you through
         seven patterns for distributed transactions in Spring applications,
@@ -2531,9 +2531,9 @@ txManager.commit(status);</programlisting>
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://www.infoq.com/minibooks/JTDS">Java
+        <para><link xl:href="https://www.infoq.com/minibooks/JTDS">Java
         Transaction Design Strategies</link> is a book available from <link
-        xl:href="http://www.infoq.com/">InfoQ</link> that provides a well-paced
+        xl:href="https://www.infoq.com/">InfoQ</link> that provides a well-paced
         introduction to transactions in Java. It also includes side-by-side
         examples of how to configure and use transactions with both the Spring
         Framework and EJB3.</para>

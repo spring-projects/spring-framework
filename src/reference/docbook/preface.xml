@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Preface</title>
 
   <para>Developing software applications is hard enough even with good tools
@@ -37,6 +37,6 @@
 
   <para>This document provides a reference guide to Spring's features. If you
   have any requests or comments, please add an issue at
-  <link xl:href="http://jira.springsource.org/SPR" />.
+  <link xl:href="https://jira.springsource.org/SPR" />.
   </para>
 </preface>

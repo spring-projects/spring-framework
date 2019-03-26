@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>The IoC container</title>
 
   <section xml:id="beans-introduction">
@@ -33,11 +33,11 @@ The footnote should x-ref to first section in that chapter but I can't find the 
     <para>The <literal>org.springframework.beans</literal> and
       <literal>org.springframework.context</literal> packages are the basis for
       Spring Framework's IoC container. The <interfacename><link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html"
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html"
       >BeanFactory</link></interfacename> interface provides an advanced
       configuration mechanism capable of managing any type of object.
       <literal><link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"
       >ApplicationContext</link></literal> is a sub-interface of
       <interfacename>BeanFactory.</interfacename> It adds easier integration
       with Spring's AOP features; message resource handling (for use in
@@ -84,9 +84,9 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       <classname>ApplicationContext</classname> interface are supplied
       out-of-the-box with Spring. In standalone applications it is common to
       create an instance of <link
-      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
+      xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
       ><classname>ClassPathXmlApplicationContext</classname></link> or <link
-      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
+      xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
       ><classname>FileSystemXmlApplicationContext</classname></link>.
       <!-- MLP: Beverly to review --> While XML has been the traditional format
       for defining configuration metadata you can instruct the container to use
@@ -99,9 +99,9 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       in a web application scenario, a simple eight (or so) lines of boilerplate
       J2EE web descriptor XML in the <literal>web.xml</literal> file of the
       application will typically suffice (see <xref linkend="context-create"/>).
-      If you are using the <link xl:href="http://www.springsource.com/produts/sts"
+      If you are using the <link xl:href="https://www.springsource.com/produts/sts"
       >SpringSource Tool Suite</link> Eclipse-powered development environment
-      or <link xl:href="http://www.springsource.org/roo">Spring Roo</link> this
+      or <link xl:href="https://www.springsource.org/roo">Spring Roo</link> this
       boilerplate configuration can be easily created with few mouse clicks or
       keystrokes.</para>
 
@@ -151,7 +151,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
         <listitem>
           <para><link linkend="beans-java">Java-based configuration</link>:
             Starting with Spring 3.0, many features provided by the <link
-            xl:href="http://www.springsource.org/javaconfig">Spring JavaConfig
+            xl:href="https://www.springsource.org/javaconfig">Spring JavaConfig
             project</link> became part of the core Spring Framework. Thus you
             can define beans external to your application classes by using Java
             rather than XML files. To use these new features, see the
@@ -187,7 +187,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+           https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean id="..." class="..."&gt;
     &lt;!-- collaborators and configuration for this bean go here --&gt;
@@ -241,7 +241,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+           https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;!-- services --&gt;
 
@@ -264,7 +264,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+           https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean id="accountDao"
       class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao"&gt;
@@ -282,7 +282,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       <para>In the preceding example, the service layer consists of the class
         <classname>PetStoreServiceImpl</classname>, and two data access objects
         of the type <classname>SqlMapAccountDao</classname> and SqlMapItemDao
-        are based on the <link xl:href="http://ibatis.apache.org/">iBatis</link>
+        are based on the <link xl:href="https://ibatis.apache.org/">iBatis</link>
         Object/Relational mapping framework. The <literal>property
         name</literal> element refers to the name of the JavaBean property, and
         the <literal>ref</literal> element refers to the name of another bean
@@ -1177,10 +1177,10 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         a single ApplicationContext as a parent to WebApplicationContexts across
         WAR files. In this case you should look into using the utility class
         <link
-        xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
+        xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
         ><classname>ContextSingletonBeanFactoryLocator</classname></link>
         locator that is described in this <link
-        xl:href="http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/"
+        xl:href="https://spring.io/blog/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/"
         >SpringSource team blog entry</link>.</para>
     </section>
   </section>

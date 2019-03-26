@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
 
   <info>
     <title>Spring Framework Reference Documentation</title>
@@ -203,7 +203,7 @@
       <para>This document is a reference guide to Spring Framework features.
       If you have any requests, comments, or questions on this document,
       please post them on the user mailing list or on the support forums at
-      <link xl:href="http://forum.springsource.org/"></link>.<!-- Missing link above. PDF shows it as http://forum.springsource.org/ --></para>
+      <link xl:href="https://forum.spring.io/"></link>.<!-- Missing link above. PDF shows it as https://forum.spring.io/ --></para>
     </partintro>
 
     <xi:include href="overview.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />

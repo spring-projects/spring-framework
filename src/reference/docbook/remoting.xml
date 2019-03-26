@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Remoting and web services using Spring</title>
 
   <section xml:id="remoting-introduction">
@@ -217,7 +217,7 @@ public class AccountServiceImpl implements AccountService {
 
     <para>Hessian offers a binary HTTP-based remoting protocol. It is
     developed by Caucho and more information about Hessian itself can be found
-    at <link xl:href="http://www.caucho.com"></link>.</para>
+    at <link xl:href="https://www.caucho.com/"></link>.</para>
 
     <section xml:id="remoting-caucho-protocols-hessian">
       <title>Wiring up the <classname>DispatcherServlet</classname> for
@@ -372,7 +372,7 @@ public class AccountServiceImpl implements AccountService {
         <para>Of course, this example doesn't show a flexible kind of security
         infrastructure. For more options as far as security is concerned, have
         a look at the Spring Security project at <link
-          xl:href="http://static.springsource.org/spring-security/site/"></link>.</para>
+          xl:href="https://docs.spring.io/spring-security/site/"></link>.</para>
       </note>
     </section>
   </section>
@@ -392,7 +392,7 @@ public class AccountServiceImpl implements AccountService {
     by J2SE to perform HTTP calls or Commons
     <classname>HttpClient</classname>. Use the latter if you need more
     advanced and easy-to-use functionality. Refer to <link
-    xl:href="http://jakarta.apache.org/commons/httpclient">jakarta.apache.org/commons/httpclient</link>
+    xl:href="https://jakarta.apache.org/commons/httpclient">jakarta.apache.org/commons/httpclient</link>
     for more info.</para>
 
     <section xml:id="remoting-httpinvoker-server">
@@ -1042,7 +1042,7 @@ public class SimpleCheckingAccountService implements CheckingAccountService {
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+        https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     &lt;bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory"&gt;
         &lt;property name="brokerURL" value="tcp://ep-t43:61616"/&gt;
@@ -1064,7 +1064,7 @@ public class SimpleCheckingAccountService implements CheckingAccountService {
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
-         http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+         https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     &lt;bean id="checkingAccountService"
           class="org.springframework.jms.remoting.JmsInvokerServiceExporter"&gt;
@@ -1109,7 +1109,7 @@ public class Server {
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+        https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     &lt;bean id="checkingAccountService"
           class="org.springframework.jms.remoting.JmsInvokerProxyFactoryBean"&gt;
@@ -1136,7 +1136,7 @@ public class Client {
 }</programlisting>
 
     <para>You may also wish to investigate the support provided by the <link
-    xl:href="http://lingo.codehaus.org/">Lingo</link> project, which (to quote
+    xl:href="https://lingo.codehaus.org/">Lingo</link> project, which (to quote
     the homepage blurb) <quote>
         <emphasis>... is a lightweight POJO based remoting and messaging
         library based on the Spring Framework's remoting libraries which
@@ -1244,7 +1244,7 @@ public class Client {
       common REST operations this approach is too low level as shown
       below.</para>
 
-      <programlisting>String uri = "http://example.com/hotels/1/bookings";
+      <programlisting>String uri = "https://example.com/hotels/1/bookings";
 
 PostMethod post = new PostMethod(uri);
 String request = // create booking request content
@@ -1279,28 +1279,28 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>DELETE</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)">delete</link></entry>
+              xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)">delete</link></entry>
             </row>
 
             <row>
               <entry>GET</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)">getForObject</link></entry>
+              xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)">getForObject</link></entry>
             </row>
 
             <row>
               <entry></entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)">getForEntity</link></entry>
+              xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)">getForEntity</link></entry>
             </row>
 
             <row>
               <entry>HEAD</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)">headForHeaders(String
+              xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)">headForHeaders(String
               url, String… urlVariables)</link></entry>
             </row>
 
@@ -1308,7 +1308,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>OPTIONS</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)">optionsForAllow(String
+              xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)">optionsForAllow(String
               url, String… urlVariables)</link></entry>
             </row>
 
@@ -1316,7 +1316,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>POST</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)">postForLocation(String
+              xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)">postForLocation(String
               url, Object request, String… urlVariables)</link></entry>
             </row>
 
@@ -1324,7 +1324,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry></entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)">postForObject(String
+              xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)">postForObject(String
                   url, Object request, Class&lt;T&gt; responseType, String…
                   uriVariables)</link></entry>
             </row>
@@ -1333,7 +1333,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
               <entry>PUT</entry>
 
               <entry><link
-              xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)">put(String
+              xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)">put(String
               url, Object request, String…urlVariables)</link></entry>
             </row>
           </tbody>
@@ -1373,7 +1373,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       <literal>String</literal> variable length argument or a
       <literal>Map&lt;String,String&gt;</literal>. For example,</para>
 
-      <programlisting language="java">String result = restTemplate.getForObject("http://example.com/hotels/{hotel}/bookings/{booking}",
+      <programlisting language="java">String result = restTemplate.getForObject("https://example.com/hotels/{hotel}/bookings/{booking}",
                                           String.class,"42", "21");
 </programlisting>
 
@@ -1381,7 +1381,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
 
       <programlisting language="java">Map&lt;String, String&gt; vars = Collections.singletonMap("hotel", "42");
 String result =
-  restTemplate.getForObject("http://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
+  restTemplate.getForObject("https://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
 </programlisting>
 
       <para>using a <literal>Map&lt;String,String&gt;</literal>.</para>
@@ -1411,7 +1411,7 @@ String result =
       <classname>HttpClient</classname> directly rewritten to use the
       <classname>RestTemplate</classname> is shown below</para>
 
-      <programlisting>uri = "http://example.com/hotels/{id}/bookings";
+      <programlisting>uri = "https://example.com/hotels/{id}/bookings";
 
 RestTemplate template = new RestTemplate();
 
@@ -1459,12 +1459,12 @@ URI location = template.postForLocation(uri, booking, "1");
         For example the following:
         </para>
 
-        <programlisting language="java">restTemplate.getForObject("http://example.com/hotel list", String.class);</programlisting>
+        <programlisting language="java">restTemplate.getForObject("https://example.com/hotel list", String.class);</programlisting>
 
-        <para>will perform a GET on <filename>http://example.com/hotel%20list</filename>.
+        <para>will perform a GET on <filename>https://example.com/hotel%20list</filename>.
         That means if the input URL String is already encoded, it will be encoded twice --
-        i.e. <filename>http://example.com/hotel%20list</filename> will become
-        <filename>http://example.com/hotel%2520list</filename>.
+        i.e. <filename>https://example.com/hotel%20list</filename> will become
+        <filename>https://example.com/hotel%2520list</filename>.
         If this is not the intended effect, use the
         <classname>java.net.URI</classname> method variant, which assumes
         the URL is already encoded is also generally useful if you want
@@ -1477,7 +1477,7 @@ URI location = template.postForLocation(uri, booking, "1");
         </para>
 
         <programlisting language="java">UriComponents uriComponents =
-        UriComponentsBuilder.fromUriString("http://example.com/hotels/{hotel}/bookings/{booking}").build()
+        UriComponentsBuilder.fromUriString("https://example.com/hotels/{hotel}/bookings/{booking}").build()
             .expand("42", "21")
             .encode();
 
@@ -1511,7 +1511,7 @@ URI uri = uriComponents.toUri();</programlisting>
 requestHeaders.set("MyRequestHeader", "MyValue");
 HttpEntity&lt;?&gt; requestEntity = new HttpEntity(requestHeaders);
 
-HttpEntity&lt;String&gt; response = template.exchange("http://example.com/hotels/{hotel}",
+HttpEntity&lt;String&gt; response = template.exchange("https://example.com/hotels/{hotel}",
   HttpMethod.GET, requestEntity, String.class, "42");
 
 String responseHeader = response.getHeaders().getFirst("MyResponseHeader");

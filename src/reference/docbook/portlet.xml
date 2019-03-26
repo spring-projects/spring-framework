@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Portlet MVC Framework</title>
 
   <section xml:id="portlet-introduction">
@@ -971,7 +971,7 @@ public class SampleController extends AbstractController {
     in the <literal>org.springframework.web.portlet.multipart</literal>
     package. Spring provides a <interfacename>PortletMultipartResolver</interfacename>
     for use with
-    <link xl:href="http://jakarta.apache.org/commons/fileupload">Commons FileUpload</link>.
+    <link xl:href="https://jakarta.apache.org/commons/fileupload">Commons FileUpload</link>.
     How uploading files is supported will be described in the rest of this section.</para>
 
     <para>By default, no multipart handling will be done by Spring Portlet
@@ -1295,7 +1295,7 @@ public class FileUploadBean {
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+        https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     &lt;bean class="org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping"/&gt;
 
@@ -1347,9 +1347,9 @@ public class FileUploadBean {
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+        https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;context:component-scan base-package="org.springframework.samples.petportal.portlet"/&gt;
 

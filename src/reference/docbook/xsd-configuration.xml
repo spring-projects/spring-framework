@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
     <title>XML Schema-based configuration</title>
     <section xml:id="xsd-config-introduction">
         <title>Introduction</title>
@@ -59,7 +59,7 @@
             <programlisting language="xml">
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+    "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -72,7 +72,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -110,8 +110,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:util="http://www.springframework.org/schema/util"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -144,7 +144,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <section xml:id="xsd-config-body-schemas-util-frfb">
                     <title>Setting a bean property or constructor arg from a field value</title>
                     <para>
-                        <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></link>
+                        <link xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></link>
                         is a <interfacename>FactoryBean</interfacename> which retrieves a
                         <literal>static</literal> or non-static field value. It is typically
                         used for retrieving <literal>public</literal> <literal>static</literal>
@@ -153,7 +153,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                     </para>
                     <para>
                         Find below an example which shows how a <literal>static</literal> field is exposed, by
-                        using the <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)"><literal>staticField</literal></link>
+                        using the <link xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)"><literal>staticField</literal></link>
                         property:
                     </para>
                     <programlisting language="xml"><![CDATA[<bean id="myField"
@@ -180,7 +180,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                     <para>
                         It is also possible to access a non-static (instance) field of another bean,
                         as described in the API documentation for the
-                        <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></link>
+                        <link xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></link>
                         class.
                     </para>
                     <para>
@@ -481,8 +481,8 @@ public class Client {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jee="http://www.springframework.org/schema/jee"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jee https://www.springframework.org/schema/jee/spring-jee.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -640,8 +640,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:lang="http://www.springframework.org/schema/lang"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/lang https://www.springframework.org/schema/lang/spring-lang.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -665,8 +665,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -698,9 +698,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:aop="http://www.springframework.org/schema/aop"
        ]]><emphasis role="bold">xmlns:tx="http://www.springframework.org/schema/tx"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd</emphasis><![CDATA[
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd</emphasis><![CDATA[
+http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -728,8 +728,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:aop="http://www.springframework.org/schema/aop"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -748,8 +748,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:context="http://www.springframework.org/schema/context"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -833,8 +833,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jdbc="http://www.springframework.org/schema/jdbc"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -858,8 +858,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jdbc="http://www.springframework.org/schema/cache"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/jdbc/spring-cache.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/cache https://www.springframework.org/schema/jdbc/spring-cache.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -886,7 +886,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="foo" class="x.y.Foo">
         ]]><emphasis role="bold"><![CDATA[<meta key="cacheName" value="foo"/>]]></emphasis><![CDATA[
@@ -906,14 +906,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         popular Java IDEs to effect the easier editing of Spring's XML Schema-based
         configuration files. If your favourite Java IDE or editor is not included in the
         list of documented IDEs, then please do
-        <link xl:href="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">raise an issue</link>
+        <link xl:href="https://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">raise an issue</link>
         and an example with your favorite IDE/editor <emphasis>may</emphasis> be included
         in the next release.</para>
         <section xml:id="xsd-config-setup-eclipse">
         <title>Setting up Eclipse</title>
         <procedure>
             <para>The following steps illustrate setting up
-            <link xl:href="http://www.eclipse.org/">Eclipse</link> to be XSD-aware.
+            <link xl:href="https://www.eclipse.org/">Eclipse</link> to be XSD-aware.
             The assumption in the following steps is that you already have an Eclipse
             project open (either a brand new project or an already existing one).</para>
             <note>
@@ -931,8 +931,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
 </beans>]]></programlisting>
                 <para>
@@ -969,7 +969,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                                     <para>The Eclipse Web Tools Platform (WTP)</para>
                                 </entry>
                                 <entry>
-                                    <link xl:href="http://www.eclipse.org/webtools/"/>
+                                    <link xl:href="https://www.eclipse.org/webtools/"/>
                                 </entry>
                             </row>
                             <row>
@@ -977,7 +977,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                                     <para>A list of Eclipse XML plugins</para>
                                 </entry>
                                 <entry>
-                                    <link xl:href="http://eclipse-plugins.2y.net/eclipse/plugins.jsp?category=XML"/>
+                                    <link xl:href="https://eclipse-plugins.2y.net/eclipse/plugins.jsp?category=XML"/>
                                 </entry>
                             </row>
                         </tbody>
@@ -988,7 +988,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                     <para>Patches showing how to configure an Eclipse XML editor are
                     welcomed. Any such contributions are best submitted as patches via
                     the Spring Framework
-                    <link xl:href="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA Issue Tracker</link>
+                    <link xl:href="https://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA Issue Tracker</link>
                     and <emphasis>may</emphasis> be featured in the next release.</para>
                 </sidebar>
                 <para>Unfortunately, precisely because there is no standard XML editor for Eclipse,
@@ -1001,11 +1001,11 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <step>
                 <title>Spring IDE</title>
                 <para>There is a dedicated Spring Framework plugin for Eclipse called
-                <link xl:href="http://springide.org/blog/">Spring IDE</link> and it is pretty darn cool. (There's a
+                <link xl:href="https://springide.org/blog/">Spring IDE</link> and it is pretty darn cool. (There's a
                 considered and non-biased opinion for you!) This plugin makes using Spring even easier, and it has more
                 than just support for the core Spring Framework... Spring Web Flow is supported too. Details of how to
                 install Spring IDE can be found on the
-                <link xl:href="http://springide.org/project/wiki/SpringideInstall">Spring IDE installation page</link>.</para>
+                <link xl:href="https://springide.org/project/wiki/SpringideInstall">Spring IDE installation page</link>.</para>
                 <para>
                     <mediaobject>
                         <imageobject role="fo">
@@ -1040,7 +1040,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <title>Setting up IntelliJ IDEA</title>
         <procedure>
             <para>The following steps illustrate setting up the
-            <link xl:href="http://www.jetbrains.com/idea/">IntelliJ IDEA</link> IDE to be XSD-aware.
+            <link xl:href="https://www.jetbrains.com/idea/">IntelliJ IDEA</link> IDE to be XSD-aware.
             The assumption in the following steps is that you already have an IDEA project
             open (either a brand new project or an already existing one).</para>
             <step>
@@ -1053,8 +1053,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+       http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
 </beans>]]></programlisting>
                 <para>
