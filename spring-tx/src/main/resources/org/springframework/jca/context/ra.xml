@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <connector xmlns="http://java.sun.com/xml/ns/j2ee"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
+		xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee https://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
 		version="1.5">
 	<vendor-name>Spring Framework</vendor-name>
 	<eis-type>Spring Connector</eis-type>
