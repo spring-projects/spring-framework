@@ -166,6 +166,12 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
+	public ServerResponse.BodyBuilder hints(Consumer<Map<String, Object>> hintsConsumer) {
+		hintsConsumer.accept(this.hints);
+		return this;
+	}
+
+	@Override
 	public ServerResponse.BodyBuilder lastModified(ZonedDateTime lastModified) {
 		this.headers.setLastModified(lastModified);
 		return this;
@@ -222,8 +228,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		return new DefaultEntityResponseBuilder<>(publisher,
 				BodyInserters.fromPublisher(publisher, elementClass))
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(this.headers)
+				.cookies(cookies -> cookies.addAll(this.cookies))
+				.hints(hints -> hints.putAll(this.hints))
 				.build()
 				.map(entityResponse -> entityResponse);
 	}
@@ -237,8 +245,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		return new DefaultEntityResponseBuilder<>(publisher,
 				BodyInserters.fromPublisher(publisher, typeReference))
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(this.headers)
+				.cookies(cookies -> cookies.addAll(this.cookies))
+				.hints(hints -> hints.putAll(this.hints))
 				.build()
 				.map(entityResponse -> entityResponse);
 	}
@@ -251,8 +261,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		return new DefaultEntityResponseBuilder<>(body,
 				BodyInserters.fromObject(body))
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(this.headers)
+				.cookies(cookies -> cookies.addAll(this.cookies))
+				.hints(hints -> hints.putAll(this.hints))
 				.build()
 				.map(entityResponse -> entityResponse);
 	}
@@ -266,8 +278,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public Mono<ServerResponse> render(String name, Object... modelAttributes) {
 		return new DefaultRenderingResponseBuilder(name)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(this.headers)
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(modelAttributes)
 				.build()
 				.map(renderingResponse -> renderingResponse);
@@ -276,8 +289,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public Mono<ServerResponse> render(String name, Map<String, ?> model) {
 		return new DefaultRenderingResponseBuilder(name)
-				.headers(this.headers)
 				.status(this.statusCode)
+				.headers(this.headers)
+				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(model)
 				.build()
 				.map(renderingResponse -> renderingResponse);

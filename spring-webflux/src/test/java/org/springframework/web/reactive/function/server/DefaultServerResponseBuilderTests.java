@@ -41,6 +41,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 import static org.junit.Assert.*;
@@ -301,6 +302,23 @@ public class DefaultServerResponseBuilderTests {
 				.expectComplete()
 				.verify();
 	}
+
+	@Test
+	public void copyCookies() {
+		Mono<ServerResponse> serverResponse = ServerResponse.ok()
+				.cookie(ResponseCookie.from("foo", "bar").build())
+				.syncBody("body");
+
+		assertFalse(serverResponse.block().cookies().isEmpty());
+
+		serverResponse = ServerResponse.ok()
+				.cookie(ResponseCookie.from("foo", "bar").build())
+				.body(BodyInserters.fromObject("body"));
+
+
+		assertFalse(serverResponse.block().cookies().isEmpty());
+	}
+
 
 	@Test
 	public void build() {
