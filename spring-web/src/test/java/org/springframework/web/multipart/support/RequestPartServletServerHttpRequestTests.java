@@ -57,7 +57,7 @@ public class RequestPartServletServerHttpRequestTests {
 
 	@Test
 	public void getURI() throws Exception {
-		URI uri = new URI("http://example.com/path?query");
+		URI uri = new URI("https://example.com/path?query");
 		mockRequest.setServerName(uri.getHost());
 		mockRequest.setServerPort(uri.getPort());
 		mockRequest.setRequestURI(uri.getPath());

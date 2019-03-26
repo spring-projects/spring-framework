@@ -30,7 +30,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * <li>Proper registering of {@link TestExecutionListener listeners} in
  * conjunction with a {@link TestContextManager}</li>
  * <li><em>Inherited</em> functionality proposed in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3896"
+ * href="https://opensource.atlassian.com/projects/spring/browse/SPR-3896"
  * target="_blank">SPR-3896</a></li>
  * </ul>
  *

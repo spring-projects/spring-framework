@@ -34,7 +34,7 @@
 	XML documents that conform to this DTD should declare the following doctype:
 
 	<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
-		"http://www.springframework.org/dtd/spring-beans.dtd">
+		"https://www.springframework.org/dtd/spring-beans.dtd">
 -->
 
 

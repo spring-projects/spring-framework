@@ -22,7 +22,7 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Abstract JUnit 3.8 based unit test which verifies new functionality requested
- * in <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3550"
+ * in <a href="https://opensource.atlassian.com/projects/spring/browse/SPR-3550"
  * target="_blank">SPR-3350</a>.
  *
  * @author Sam Brannen

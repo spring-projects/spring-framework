@@ -150,7 +150,7 @@ public class UrlFilenameViewControllerTests extends TestCase {
 
 	/**
 	 * This is the expected behavior, and it now has a test to prove it.
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2789
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2789
 	 */
 	public void testNestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();

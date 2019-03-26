@@ -44,7 +44,7 @@ import org.springframework.test.context.transaction.BeforeTransaction;
  * {@link BeforeTransaction @BeforeTransaction} and
  * {@link AfterTransaction @AfterTransaction} methods can fail a test in a JUnit
  * 3.8 environment, as requested in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3960"
+ * href="https://opensource.atlassian.com/projects/spring/browse/SPR-3960"
  * target="_blank">SPR-3960</a>.
  * </p>
  *

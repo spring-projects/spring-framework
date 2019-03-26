@@ -434,14 +434,14 @@ public class UrlTagTests extends AbstractTagTests {
 	}
 
 	public void testCreateUrlRemoteServer() throws JspException {
-		tag.setValue("http://www.springframework.org/");
+		tag.setValue("https://www.springframework.org/");
 
 		tag.doStartTag();
 
 		// String uri = tag.createUrl();
 		String uri = invokeCreateUrl(tag);
 
-		assertEquals("http://www.springframework.org/", uri);
+		assertEquals("https://www.springframework.org/", uri);
 	}
 
 	public void testCreateUrlRelative() throws JspException {

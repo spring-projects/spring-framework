@@ -19,7 +19,7 @@ package org.springframework.scripting.jruby;
 import java.util.Map;
 
 /**
- * http://opensource.atlassian.com/projects/spring/browse/SPR-3038
+ * https://opensource.atlassian.com/projects/spring/browse/SPR-3038
  *
  * @author Rick Evans
  */

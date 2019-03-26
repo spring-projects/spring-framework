@@ -26,7 +26,7 @@ import javax.xml.namespace.QName;
  */
 public class Primitives {
 
-	private static final QName NAME = new QName("http://springframework.org/oxm-test", "primitives");
+	private static final QName NAME = new QName("https://springframework.org/oxm-test", "primitives");
 
 	// following methods are used to test support for primitives
 	public JAXBElement<Boolean> primitiveBoolean() {

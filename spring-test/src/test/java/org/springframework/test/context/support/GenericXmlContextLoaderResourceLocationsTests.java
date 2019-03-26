@@ -38,7 +38,7 @@ import org.springframework.util.ObjectUtils;
  * {@code resource locations} by a {@link GenericXmlContextLoader}
  * configured via {@link ContextConfiguration @ContextConfiguration}.
  * Specifically, this test addresses the issues raised in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3949"
+ * href="https://opensource.atlassian.com/projects/spring/browse/SPR-3949"
  * target="_blank">SPR-3949</a>:
  * <em>ContextConfiguration annotation should accept not only classpath resources</em>.
  *
@@ -81,12 +81,12 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 		class ExplicitFileLocationsTestCase {
 		}
 
-		@ContextConfiguration("http://example.com/context.xml")
+		@ContextConfiguration("https://example.com/context.xml")
 		class ExplicitUrlLocationsTestCase {
 		}
 
 		@ContextConfiguration({ "context1.xml", "classpath:context2.xml", "/context3.xml",
-			"file:/testing/directory/context.xml", "http://example.com/context.xml" })
+			"file:/testing/directory/context.xml", "https://example.com/context.xml" })
 		class ExplicitMixedPathTypesLocationsTestCase {
 		}
 
@@ -107,13 +107,13 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 
 			{ ExplicitFileLocationsTestCase.class, new String[] { "file:/testing/directory/context.xml" } },
 
-			{ ExplicitUrlLocationsTestCase.class, new String[] { "http://example.com/context.xml" } },
+			{ ExplicitUrlLocationsTestCase.class, new String[] { "https://example.com/context.xml" } },
 
 			{
 				ExplicitMixedPathTypesLocationsTestCase.class,
 				new String[] { "classpath:/org/springframework/test/context/support/context1.xml",
 					"classpath:context2.xml", "classpath:/context3.xml", "file:/testing/directory/context.xml",
-					"http://example.com/context.xml" } }
+					"https://example.com/context.xml" } }
 
 		});
 	}

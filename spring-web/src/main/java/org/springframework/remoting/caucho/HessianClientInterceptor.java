@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
- * <a href="http://www.caucho.com/hessian">Hessian website</a>
+ * <a href="http://hessian.caucho.com">Hessian website</a>
  *
  * <p>Note: There is no requirement for services accessed with this proxy factory
  * to have been exported using Spring's {@link HessianServiceExporter}, as there is

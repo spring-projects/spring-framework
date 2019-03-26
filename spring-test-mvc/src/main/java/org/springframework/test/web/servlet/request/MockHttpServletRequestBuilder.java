@@ -320,7 +320,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * the requestURI. This is because most applications don't actually depend
 	 * on the name under which they're deployed. If specified here, the context
 	 * path must start with a "/" and must not end with a "/".
-	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getContextPath%28%29">HttpServletRequest.getContextPath()</a>
+	 * @see <a href="https://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getContextPath%28%29">HttpServletRequest.getContextPath()</a>
 	 */
 	public MockHttpServletRequestBuilder contextPath(String contextPath) {
 		if (StringUtils.hasText(contextPath)) {
@@ -342,7 +342,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * {@code "/accounts/1"} as opposed to {@code "/main/accounts/1"}.
 	 * If specified here, the servletPath must start with a "/" and must not
 	 * end with a "/".
-	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getServletPath%28%29">HttpServletRequest.getServletPath()</a>
+	 * @see <a href="https://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getServletPath%28%29">HttpServletRequest.getServletPath()</a>
 	 */
 	public MockHttpServletRequestBuilder servletPath(String servletPath) {
 		if (StringUtils.hasText(servletPath)) {
@@ -360,7 +360,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * requestURI and using any remaining part. If specified here, the pathInfo
 	 * must start with a "/".
 	 * <p>If specified, the pathInfo will be used as is.
-	 * @see <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getPathInfo%28%29">HttpServletRequest.getServletPath()</a>
+	 * @see <a href="https://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html#getPathInfo%28%29">HttpServletRequest.getServletPath()</a>
 	 */
 	public MockHttpServletRequestBuilder pathInfo(String pathInfo) {
 		if (StringUtils.hasText(pathInfo)) {

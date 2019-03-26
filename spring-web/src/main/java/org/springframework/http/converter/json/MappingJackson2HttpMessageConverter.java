@@ -40,7 +40,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson 2's</a> {@link ObjectMapper}.
+ * that can read and write JSON using <a href="https://jackson.codehaus.org/">Jackson 2's</a> {@link ObjectMapper}.
  *
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *

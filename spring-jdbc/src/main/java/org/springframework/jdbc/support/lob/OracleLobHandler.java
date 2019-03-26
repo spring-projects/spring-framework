@@ -134,7 +134,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 * <p>A common choice is {@code SimpleNativeJdbcExtractor}, whose Connection unwrapping
 	 * (which is what OracleLobHandler needs) will work with many connection pools.
 	 * See {@code SimpleNativeJdbcExtractor} and
-	 * <a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/jdbc/OracleConnection.html">
+	 * <a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/jdbc/OracleConnection.html">
 	 * oracle.jdbc.OracleConnection</a> javadoc for details.
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor#getNativeConnectionFromStatement
 	 * @see org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor
@@ -150,8 +150,8 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 * <p>Default is {@code true}.
 	 * <p><strong>See Also:</strong>
 	 * <ul>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#createTemporary()">oracle.sql.BLOB.createTemporary</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#createTemporary()">oracle.sql.CLOB.createTemporary</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#createTemporary()">oracle.sql.BLOB.createTemporary</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#createTemporary()">oracle.sql.CLOB.createTemporary</a></li>
 	 * </ul>
 	 */
 	public void setCache(boolean cache) {
@@ -168,12 +168,12 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 * <p>Default is {@code false}.
 	 * <p><strong>See Also:</strong>
 	 * <ul>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#freeTemporary()">oracle.sql.BLOB.freeTemporary</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#freeTemporary()">oracle.sql.CLOB.freeTemporary</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#open()">oracle.sql.BLOB.open</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#open()">oracle.sql.CLOB.open</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#open()">oracle.sql.BLOB.close</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#open()">oracle.sql.CLOB.close</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#freeTemporary()">oracle.sql.BLOB.freeTemporary</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#freeTemporary()">oracle.sql.CLOB.freeTemporary</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#open()">oracle.sql.BLOB.open</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#open()">oracle.sql.CLOB.open</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#open()">oracle.sql.BLOB.close</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#open()">oracle.sql.CLOB.close</a></li>
 	 * </ul>
 	 */
 	public void setReleaseResourcesAfterRead(boolean releaseResources) {
@@ -187,12 +187,12 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 * DURATION_SESSION, MODE_READWRITE and MODE_READONLY constants defined there.
 	 * <p><strong>See Also:</strong>
 	 * <ul>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#DURATION_SESSION">oracle.sql.BLOB.DURATION_SESSION</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#MODE_READWRITE">oracle.sql.BLOB.MODE_READWRITE</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#MODE_READONLY">oracle.sql.BLOB.MODE_READONLY</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#DURATION_SESSION">oracle.sql.CLOB.DURATION_SESSION</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#MODE_READWRITE">oracle.sql.CLOB.MODE_READWRITE</a></li>
-	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#MODE_READONLY">oracle.sql.CLOB.MODE_READONLY</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#DURATION_SESSION">oracle.sql.BLOB.DURATION_SESSION</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#MODE_READWRITE">oracle.sql.BLOB.MODE_READWRITE</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#MODE_READONLY">oracle.sql.BLOB.MODE_READONLY</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#DURATION_SESSION">oracle.sql.CLOB.DURATION_SESSION</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#MODE_READWRITE">oracle.sql.CLOB.MODE_READWRITE</a></li>
+	 * <li><a href="https://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/CLOB.html#MODE_READONLY">oracle.sql.CLOB.MODE_READONLY</a></li>
 	 * </ul>
 	 * @param con the Oracle Connection, for using the exact same class loader
 	 * that the Oracle driver was loaded with

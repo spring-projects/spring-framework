@@ -56,7 +56,7 @@ import org.springframework.web.client.RestTemplate;
 public class XpathRequestMatcherTests {
 
 	private static final Map<String, String> NS =
-			Collections.singletonMap("ns", "http://example.org/music/people");
+			Collections.singletonMap("ns", "https://example.org/music/people");
 
 	private MockRestServiceServer mockServer;
 
@@ -200,7 +200,7 @@ public class XpathRequestMatcherTests {
 
 
 	@SuppressWarnings("unused")
-	@XmlRootElement(name="people", namespace="http://example.org/music/people")
+	@XmlRootElement(name="people", namespace="https://example.org/music/people")
 	@XmlAccessorType(XmlAccessType.FIELD)
 	private static class PeopleWrapper {
 

@@ -1,6 +1,6 @@
 SPRING FRAMEWORK CHANGELOG
 ===========================
-http://www.spring.io
+https://www.spring.io
 
 Changes in version 3.2.18 (2016-12-21)
 -------------------------------------
@@ -70,7 +70,7 @@ improved fix cron trigger example in reference documentation (SPR-10474)
 Changes in version 3.2.15 (2015-10-15)
 -------------------------------------
 
-protect against RFD exploits, see http://pivotal.io/security/cve-2015-5211 (SPR-13548)
+protect against RFD exploits, see https://pivotal.io/security/cve-2015-5211 (SPR-13548)
 fixed whether HttpInputMessage.getBody() is allowed to return null (SPR-13563)
 fixed JCacheCache doesn't recognize null values in other JVMs (SPR-13553)
 fixed AbstractEmbeddedDatabaseConfigurer.shutdown does not close JDBC resources (SPR-13474)

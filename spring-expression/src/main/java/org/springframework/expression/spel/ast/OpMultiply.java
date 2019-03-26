@@ -25,7 +25,7 @@ import org.springframework.expression.spel.ExpressionState;
  * Implements the {@code multiply} operator.
  *
  * <p>Conversions and promotions are handled as defined in
- * <a href="http://java.sun.com/docs/books/jls/third_edition/html/conversions.html">Section 5.6.2
+ * <a href="https://java.sun.com/docs/books/jls/third_edition/html/conversions.html">Section 5.6.2
  * of the Java Language Specification</a>:
  *
  * <p>If any of the operands is of a reference type, unboxing conversion (Section 5.1.8) is performed. Then:<br>

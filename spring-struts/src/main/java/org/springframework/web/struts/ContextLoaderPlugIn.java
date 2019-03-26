@@ -82,7 +82,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * Struts module, specifying appropriate "contextConfigLocation" parameters.
  *
  * <p>Note: The idea of delegating to Spring-managed Struts Actions originated in
- * Don Brown's <a href="http://struts.sourceforge.net/struts-spring">Spring Struts Plugin</a>.
+ * Don Brown's <a href="http://struts.sourceforge.net/struts-spring/">Spring Struts Plugin</a>.
  * ContextLoaderPlugIn and DelegatingActionProxy constitute a clean-room
  * implementation of the same idea, essentially superseding the original plugin.
  * Many thanks to Don Brown and Matt Raible for the original work and for the

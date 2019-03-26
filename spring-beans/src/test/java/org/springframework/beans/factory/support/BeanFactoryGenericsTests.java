@@ -649,7 +649,7 @@ public class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		UrlSet us = (UrlSet) bf.getBean("setBean");
 		assertEquals(1, us.size());
-		assertEquals(new URL("http://www.springframework.org"), us.iterator().next());
+		assertEquals(new URL("https://www.springframework.org"), us.iterator().next());
 	}
 
 	/**

@@ -190,7 +190,7 @@ public class ContentResultMatchers {
 	 * Parse the response content as {@link DOMSource} and apply the given
 	 * Hamcrest {@link Matcher}.
 	 *
-	 * @see <a href="http://code.google.com/p/xml-matchers/">xml-matchers</a>
+	 * @see <a href="https://code.google.com/p/xml-matchers/">xml-matchers</a>
 	 */
 	public ResultMatcher source(final Matcher<? super Source> matcher) {
 		return new ResultMatcher() {

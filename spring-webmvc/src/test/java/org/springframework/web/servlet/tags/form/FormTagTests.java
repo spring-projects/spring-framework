@@ -221,7 +221,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	/*
-	 * See http://opensource.atlassian.com/projects/spring/browse/SPR-2645
+	 * See https://opensource.atlassian.com/projects/spring/browse/SPR-2645
 	 */
 	public void testXSSScriptingExploitWhenActionIsResolvedFromQueryString() throws Exception {
 		String xssQueryString = QUERY_STRING + "&stuff=\"><script>alert('XSS!')</script>";

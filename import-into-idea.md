@@ -13,7 +13,7 @@ _Within your locally cloned spring-framework working directory:_
 ## Known issues
 
 1. `spring-aspects` does not compile out of the box due to references to aspect types unknown to IDEA.
-See http://youtrack.jetbrains.com/issue/IDEA-64446 for details. In the meantime, the 'spring-aspects'
+See https://youtrack.jetbrains.com/issue/IDEA-64446 for details. In the meantime, the 'spring-aspects'
 module has been excluded from the overall project to avoid compilation errors.
 2. While all JUnit tests pass from the command line with Gradle, many will fail when run from IDEA.
 Resolving this is a work in progress. If attempting to run all JUnit tests from within IDEA, you will
@@ -27,6 +27,6 @@ You'll notice these files are already intentionally in .gitignore. The same poli
 
 ## FAQ
 
-Q. What about IDEA's own [Gradle support](http://confluence.jetbrains.net/display/IDEADEV/Gradle+integration)?
+Q. What about IDEA's own [Gradle support](https://confluence.jetbrains.net/display/IDEADEV/Gradle+integration)?
 
-A. Keep an eye on http://youtrack.jetbrains.com/issue/IDEA-53476
+A. Keep an eye on https://youtrack.jetbrains.com/issue/IDEA-53476

@@ -339,7 +339,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2788
 	 */
 	public void testAsBodyTagWithErrorsAndExistingMessagesAttributeInNonPageScopeAreNotClobbered() throws Exception {
 		String existingAttribute = "something";
@@ -362,35 +362,35 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2788
 	 */
 	public void testAsBodyTagWithNoErrorsAndExistingMessagesAttributeInApplicationScopeAreNotClobbered() throws Exception {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.APPLICATION_SCOPE);
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2788
 	 */
 	public void testAsBodyTagWithNoErrorsAndExistingMessagesAttributeInSessionScopeAreNotClobbered() throws Exception {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.SESSION_SCOPE);
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2788
 	 */
 	public void testAsBodyTagWithNoErrorsAndExistingMessagesAttributeInPageScopeAreNotClobbered() throws Exception {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.PAGE_SCOPE);
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2788
 	 */
 	public void testAsBodyTagWithNoErrorsAndExistingMessagesAttributeInRequestScopeAreNotClobbered() throws Exception {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.REQUEST_SCOPE);
 	}
 
 	/**
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-4005
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-4005
 	 */
 	public void testOmittedPathMatchesObjectErrorsOnly() throws Exception {
 		this.tag.setPath(null);

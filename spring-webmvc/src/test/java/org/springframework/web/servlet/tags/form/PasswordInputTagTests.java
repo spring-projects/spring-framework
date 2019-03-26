@@ -29,7 +29,7 @@ import javax.servlet.jsp.tagext.Tag;
 public class PasswordInputTagTests extends InputTagTests {
 
 	/*
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2866
 	 */
 	public void testPasswordValueIsNotRenderedByDefault() throws Exception {
 		this.getTag().setPath("name");
@@ -45,7 +45,7 @@ public class PasswordInputTagTests extends InputTagTests {
 	}
 
 	/*
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2866
 	 */
 	public void testPasswordValueIsRenderedIfShowPasswordAttributeIsSetToTrue() throws Exception {
 		this.getTag().setPath("name");
@@ -62,7 +62,7 @@ public class PasswordInputTagTests extends InputTagTests {
 	}
 
 	/*
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2866
 	 */
 	public void testPasswordValueIsNotRenderedIfShowPasswordAttributeIsSetToFalse() throws Exception {
 		this.getTag().setPath("name");

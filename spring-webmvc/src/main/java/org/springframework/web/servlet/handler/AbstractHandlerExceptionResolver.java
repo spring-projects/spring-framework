@@ -213,7 +213,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	/**
 	 * Prevents the response from being cached, through setting corresponding
-	 * HTTP headers. See {@code http://www.mnot.net/cache_docs}.
+	 * HTTP headers. See {@code https://www.mnot.net/cache_docs}.
 	 * @param response current HTTP response
 	 */
 	protected void preventCaching(HttpServletResponse response) {

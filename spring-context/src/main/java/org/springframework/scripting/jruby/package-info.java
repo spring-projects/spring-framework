@@ -2,7 +2,7 @@
 /**
  *
  * Package providing integration of
- * <a href="http://jruby.sourceforge.net">JRuby</a>
+ * <a href="https://www.jruby.org/">JRuby</a>
  * into Spring's scripting infrastructure.
  *
  */

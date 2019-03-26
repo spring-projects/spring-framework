@@ -28,7 +28,7 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Helper class to configure Tiles 1.x for the Spring Framework. See
- * <a href="http://struts.apache.org">http://struts.apache.org</a>
+ * <a href="https://struts.apache.org">https://struts.apache.org</a>
  * for more information about Struts Tiles, which basically is a templating
  * mechanism for JSP-based web applications.
  *

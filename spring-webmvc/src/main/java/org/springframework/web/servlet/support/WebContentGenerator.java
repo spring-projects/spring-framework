@@ -287,7 +287,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Prevent the response from being cached.
-	 * See {@code http://www.mnot.net/cache_docs}.
+	 * See {@code https://www.mnot.net/cache_docs}.
 	 */
 	protected final void preventCaching(HttpServletResponse response) {
 		response.setHeader(HEADER_PRAGMA, "no-cache");

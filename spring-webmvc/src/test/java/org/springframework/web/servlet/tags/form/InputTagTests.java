@@ -310,7 +310,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * See SPR-3127 (http://opensource.atlassian.com/projects/spring/browse/SPR-3127)
+	 * See SPR-3127 (https://opensource.atlassian.com/projects/spring/browse/SPR-3127)
 	 */
 	public void testReadOnlyAttributeRenderingWhenReadonlyIsTrue() throws Exception {
 		this.tag.setPath("name");
@@ -328,7 +328,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	/**
-	 * See SPR-3127 (http://opensource.atlassian.com/projects/spring/browse/SPR-3127)
+	 * See SPR-3127 (https://opensource.atlassian.com/projects/spring/browse/SPR-3127)
 	 */
 	public void testReadOnlyAttributeRenderingWhenReadonlyIsFalse() throws Exception {
 		this.tag.setPath("name");
