@@ -7,7 +7,7 @@ recent version of Eclipse or STS. As a bare minimum you will need Eclipse with f
 
 The following instructions have been tested against
 [Spring Tool Suite](https://spring.io/tools) (_STS_) 3.9.4 and 4.0.0.M11 with
-[Eclipse Buildship](http://projects.eclipse.org/projects/tools.buildship) (Eclipse
+[Eclipse Buildship](https://projects.eclipse.org/projects/tools.buildship) (Eclipse
 Plug-ins for Gradle). The instructions should work with the latest Eclipse distribution
 as long as you install
 [Buildship](https://marketplace.eclipse.org/content/buildship-gradle-integration). Note

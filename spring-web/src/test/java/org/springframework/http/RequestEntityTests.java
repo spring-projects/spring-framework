@@ -42,7 +42,7 @@ public class RequestEntityTests {
 	public void normal() throws URISyntaxException {
 		String headerName = "My-Custom-Header";
 		String headerValue = "HeaderValue";
-		URI url = new URI("http://example.com");
+		URI url = new URI("https://example.com");
 		Integer entity = 42;
 
 		RequestEntity<Object> requestEntity =
@@ -58,13 +58,13 @@ public class RequestEntityTests {
 
 	@Test
 	public void uriVariablesExpansion() throws URISyntaxException {
-		URI uri = new UriTemplate("http://example.com/{foo}").expand("bar");
+		URI uri = new UriTemplate("https://example.com/{foo}").expand("bar");
 		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
 		String url = "http://www.{host}.com/{path}";
 		String host = "example";
 		String path = "foo/bar";
-		URI expected = new URI("http://www.example.com/foo/bar");
+		URI expected = new URI("https://www.example.com/foo/bar");
 
 		uri = new UriTemplate(url).expand(host, path);
 		RequestEntity<?> entity = RequestEntity.get(uri).build();
@@ -81,7 +81,7 @@ public class RequestEntityTests {
 
 	@Test
 	public void get() {
-		RequestEntity<Void> requestEntity = RequestEntity.get(URI.create("http://example.com")).accept(
+		RequestEntity<Void> requestEntity = RequestEntity.get(URI.create("https://example.com")).accept(
 				MediaType.IMAGE_GIF, MediaType.IMAGE_JPEG, MediaType.IMAGE_PNG).build();
 
 		assertNotNull(requestEntity);
@@ -99,7 +99,7 @@ public class RequestEntityTests {
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
-		RequestEntity<Void> responseEntity = RequestEntity.post(new URI("http://example.com")).
+		RequestEntity<Void> responseEntity = RequestEntity.post(new URI("https://example.com")).
 				accept(accept).
 				acceptCharset(StandardCharsets.UTF_8).
 				ifModifiedSince(ifModifiedSince).
@@ -110,7 +110,7 @@ public class RequestEntityTests {
 
 		assertNotNull(responseEntity);
 		assertEquals(HttpMethod.POST, responseEntity.getMethod());
-		assertEquals(new URI("http://example.com"), responseEntity.getUrl());
+		assertEquals(new URI("https://example.com"), responseEntity.getUrl());
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 
 		assertEquals("text/plain", responseHeaders.getFirst("Accept"));
@@ -125,7 +125,7 @@ public class RequestEntityTests {
 
 	@Test
 	public void methods() throws URISyntaxException {
-		URI url = new URI("http://example.com");
+		URI url = new URI("https://example.com");
 
 		RequestEntity<?> entity = RequestEntity.get(url).build();
 		assertEquals(HttpMethod.GET, entity.getMethod());
@@ -152,7 +152,7 @@ public class RequestEntityTests {
 
 	@Test  // SPR-13154
 	public void types() throws URISyntaxException {
-		URI url = new URI("http://example.com");
+		URI url = new URI("https://example.com");
 		List<String> body = Arrays.asList("foo", "bar");
 		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<String>>() {};
 

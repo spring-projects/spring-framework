@@ -39,7 +39,7 @@ import org.springframework.web.server.WebFilterChain;
  *
  * @author Sebastien Deleuze
  * @since 5.0
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public class CorsWebFilter implements WebFilter {
 

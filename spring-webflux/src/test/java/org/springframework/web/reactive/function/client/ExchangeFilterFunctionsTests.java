@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
  */
 public class ExchangeFilterFunctionsTests {
 
-	private static final URI DEFAULT_URL = URI.create("http://example.com");
+	private static final URI DEFAULT_URL = URI.create("https://example.com");
 
 
 	@Test

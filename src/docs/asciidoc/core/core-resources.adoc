@@ -289,7 +289,7 @@ prefixes:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
+	Resource template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt");
 ----
 ====
 
@@ -309,7 +309,7 @@ The following table summarizes the strategy for converting `String` objects to `
 | Loaded as a `URL` from the filesystem. See also <<resources-filesystemresource-caveats>>.
 
 | http:
-| `http://myserver/logo.png`
+| `https://myserver/logo.png`
 | Loaded as a `URL`.
 
 | (none)
@@ -644,7 +644,7 @@ entries in the classpath. When you build JARs with Ant, do not activate the file
 switch of the JAR task. Also, classpath directories may not get exposed based on security
 policies in some environments -- for example, stand-alone applications on JDK 1.7.0_45
 and higher (which requires 'Trusted-Library' to be set up in your manifests. See
-http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+https://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
 
 On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
 Putting resources into a dedicated directory is highly recommendable here as well,

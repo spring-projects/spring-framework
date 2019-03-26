@@ -143,7 +143,7 @@ The following example shows the basic structure of XML-based configuration metad
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="..." class="..."> <1> <2>
 			<!-- collaborators and configuration for this bean go here -->
@@ -204,7 +204,7 @@ The following example shows the service layer objects `(services.xml)` configura
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<!-- services -->
 
@@ -230,7 +230,7 @@ The following example shows the data access objects `daos.xml` file:
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="accountDao"
 			class="org.springframework.samples.jpetstore.dao.jpa.JpaAccountDao">
@@ -1024,7 +1024,7 @@ example shows:
 Keep in mind that, to make this work out of the box, your code must be compiled with the
 debug flag enabled so that Spring can look up the parameter name from the constructor.
 If you cannot or do not want to compile your code with the debug flag, you can use the
-http://download.oracle.com/javase/8/docs/api/java/beans/ConstructorProperties.html[@ConstructorProperties]
+https://download.oracle.com/javase/8/docs/api/java/beans/ConstructorProperties.html[@ConstructorProperties]
 JDK annotation to explicitly name your constructor arguments. The sample class would
 then have to look as follows:
 
@@ -1398,7 +1398,7 @@ XML configuration:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:p="http://www.springframework.org/schema/p"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-		http://www.springframework.org/schema/beans/spring-beans.xsd">
+		https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
 			destroy-method="close"
@@ -1412,7 +1412,7 @@ XML configuration:
 ====
 
 The preceding XML is more succinct. However, typos are discovered at runtime rather than
-design time, unless you use an IDE (such as http://www.jetbrains.com/idea/[IntelliJ
+design time, unless you use an IDE (such as https://www.jetbrains.com/idea/[IntelliJ
 IDEA] or the https://spring.io/tools/sts[Spring Tool Suite])
 that supports automatic property completion when you create bean definitions. Such IDE
 assistance is highly recommended.
@@ -1855,7 +1855,7 @@ standard XML format and the second uses the p-namespace) that resolve to the sam
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:p="http://www.springframework.org/schema/p"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean name="classic" class="com.example.ExampleBean">
 			<property name="email" value="someone@somewhere.com"/>
@@ -1883,7 +1883,7 @@ another bean:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:p="http://www.springframework.org/schema/p"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean name="john-classic" class="com.example.Person">
 			<property name="name" value="John Doe"/>
@@ -1935,7 +1935,7 @@ The following example uses the `c:` namespace to do the same thing as the from
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:c="http://www.springframework.org/schema/c"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="beanTwo" class="x.y.ThingTwo"/>
 		<bean id="beanThree" class="x.y.ThingThree"/>
@@ -2941,9 +2941,9 @@ understand the "`why`" as well as the "`how`" behind it:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- an HTTP Session-scoped bean exposed as a proxy -->
 		<bean id="userPreferences" class="com.something.UserPreferences" scope="session">
@@ -3203,9 +3203,9 @@ of the scope. You can also do the `Scope` registration declaratively, by using t
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
 			<property name="scopes">
@@ -4103,9 +4103,9 @@ The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:lang="http://www.springframework.org/schema/lang"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/lang
-			http://www.springframework.org/schema/lang/spring-lang.xsd">
+			https://www.springframework.org/schema/lang/spring-lang.xsd">
 
 		<lang:groovy id="messenger"
 				script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
@@ -4500,9 +4500,9 @@ configuration (notice the inclusion of the `context` namespace):
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:annotation-config/>
 
@@ -4931,9 +4931,9 @@ The corresponding bean definitions follow:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:annotation-config/>
 
@@ -5014,9 +5014,9 @@ The following example shows corresponding bean definitions.
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:annotation-config/>
 
@@ -5161,9 +5161,9 @@ demonstrates both approaches:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:annotation-config/>
 
@@ -5318,9 +5318,9 @@ the following example:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:annotation-config/>
 
@@ -5795,9 +5795,9 @@ The following alternative uses XML:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:component-scan base-package="org.example"/>
 
@@ -5816,7 +5816,7 @@ entries in the classpath. When you build JARs with Ant, make sure that you do no
 activate the files-only switch of the JAR task. Also, classpath directories may not be
 exposed based on security policies in some environments -- for example, standalone apps on
 JDK 1.7.0_45 and higher (which requires 'Trusted-Library' setup in your manifests -- see
-http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+https://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
 
 On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
 However, make sure that your component classes are exported in your `module-info`
@@ -6365,7 +6365,7 @@ annotations. To use them, you need to have the relevant jars in your classpath.
 =====
 If you use Maven, the `javax.inject` artifact is available in the standard Maven
 repository (
-http://repo1.maven.org/maven2/javax/inject/javax.inject/1/[http://repo1.maven.org/maven2/javax/inject/javax.inject/1/]).
+https://repo1.maven.org/maven2/javax/inject/javax.inject/1/[https://repo1.maven.org/maven2/javax/inject/javax.inject/1/]).
 You can add the following dependency to your file pom.xml:
 
 ====
@@ -6597,7 +6597,7 @@ features are not available, as the following table shows:
   consistent with Spring's general defaults, a JSR-330 bean declared in the Spring
   container is a `singleton` by default. In order to use a scope other than `singleton`,
   you should use Spring's `@Scope` annotation. `javax.inject` also provides a
-  http://download.oracle.com/javaee/6/api/javax/inject/Scope.html[@Scope] annotation.
+  https://download.oracle.com/javaee/6/api/javax/inject/Scope.html[@Scope] annotation.
   Nevertheless, this one is only intended to be used for creating your own annotations.
 
 | @Qualifier
@@ -9097,9 +9097,9 @@ notify appropriate parties.
 NOTE: Spring's eventing mechanism is designed for simple communication between Spring beans
 within the same application context. However, for more sophisticated enterprise
 integration needs, the separately maintained
-http://projects.spring.io/spring-integration/[Spring Integration] project provides
+https://projects.spring.io/spring-integration/[Spring Integration] project provides
 complete support for building lightweight,
-http://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
+https://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
 architectures that build upon the well-known Spring programming model.
 
 

@@ -70,7 +70,7 @@ import org.springframework.web.context.ServletContextAware;
 
 /**
  * Helper class to configure Tiles 3.x for the Spring Framework. See
- * <a href="http://tiles.apache.org">http://tiles.apache.org</a>
+ * <a href="https://tiles.apache.org">https://tiles.apache.org</a>
  * for more information about Tiles, which basically is a templating mechanism
  * for web applications using JSPs and other template engines.
  *

@@ -134,10 +134,10 @@ public class HttpHeadersTests {
 
 	@Test
 	public void location() throws URISyntaxException {
-		URI location = new URI("http://www.example.com/hotels");
+		URI location = new URI("https://www.example.com/hotels");
 		headers.setLocation(location);
 		assertEquals("Invalid Location header", location, headers.getLocation());
-		assertEquals("Invalid Location header", "http://www.example.com/hotels", headers.getFirst("Location"));
+		assertEquals("Invalid Location header", "https://www.example.com/hotels", headers.getFirst("Location"));
 	}
 
 	@Test

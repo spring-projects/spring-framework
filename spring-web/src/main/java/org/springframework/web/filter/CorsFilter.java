@@ -48,7 +48,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  *
  * @author Sebastien Deleuze
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public class CorsFilter extends OncePerRequestFilter {
 

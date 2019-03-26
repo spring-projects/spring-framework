@@ -40,7 +40,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * target object with a transactional proxy, proxying all the interfaces that the target
  * implements. However, in Spring versions 2.0 and beyond, the functionality provided here
  * is superseded by the more convenient {@code tx:} XML namespace. See the <a
- * href="http://bit.ly/qUwvwz">declarative transaction management</a> section of the
+ * href="https://bit.ly/qUwvwz">declarative transaction management</a> section of the
  * Spring reference documentation to understand the modern options for managing
  * transactions in Spring applications. For these reasons, <strong>users should favor of
  * the {@code tx:} XML namespace as well as

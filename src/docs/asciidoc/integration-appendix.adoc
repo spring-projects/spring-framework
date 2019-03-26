@@ -28,8 +28,8 @@ correct schema so that the elements in the `jee` namespace are available to you:
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:jee="http://www.springframework.org/schema/jee"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"__>
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jee https://www.springframework.org/schema/jee/spring-jee.xsd"__>
 
 		<!-- bean definitions here -->
 	</beans>
@@ -329,8 +329,8 @@ are available to you:
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:jms="http://www.springframework.org/schema/jms"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"__>
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd"__>
 
 		<!-- bean definitions here -->
 	</beans>
@@ -367,8 +367,8 @@ the correct schema so that the elements in the `cache` namespace are available t
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		__xmlns:cache="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"__>
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			__http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd"__>
 
 		<!-- bean definitions here -->
 	</beans>

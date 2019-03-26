@@ -75,7 +75,7 @@ public class ResourceHandlerRegistration {
 	 * (e.g. files, HTTP URLs, etc) this method supports a special prefix to
 	 * indicate the charset associated with the URL so that relative paths
 	 * appended to it can be encoded correctly, e.g.
-	 * {@code [charset=Windows-31J]http://example.org/path}.
+	 * {@code [charset=Windows-31J]https://example.org/path}.
 	 * @return the same {@link ResourceHandlerRegistration} instance, for
 	 * chained method invocation
 	 */

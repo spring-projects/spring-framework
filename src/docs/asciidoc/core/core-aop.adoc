@@ -2168,8 +2168,8 @@ preceding advice for a particular join point:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- this is the object that will be proxied by Spring's AOP infrastructure -->
 		<bean id="personService" class="x.y.service.DefaultPersonService"/>
@@ -3286,7 +3286,7 @@ standard AspectJ. The following example shows the `aop.xml` file:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 	<aspectj>
 
 		<weaver>
@@ -3321,9 +3321,9 @@ the following example:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<!-- a service object; we will be profiling its methods -->
 		<bean id="entitlementCalculationService"
@@ -3376,7 +3376,7 @@ java -javaagent:C:/projects/foo/lib/global/spring-instrument.jar foo.Main
 ====
 
 The `-javaagent` is a flag for specifying and enabling
-http://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html[agents
+https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html[agents
 to instrument programs that run on the JVM]. The Spring Framework ships with such an
 agent, the `InstrumentationSavingAgent`, which is packaged in the
 `spring-instrument.jar` that was supplied as the value of the `-javaagent` argument in
@@ -3459,7 +3459,7 @@ The AspectJ LTW infrastructure is configured by using one or more `META-INF/aop.
 files that are on the Java classpath (either directly or, more typically, in jar files).
 
 The structure and contents of this file is detailed in the LTW part of the
-http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
 documentation]. Because the `aop.xml` file is 100% AspectJ, we do not describe it further here.
 
 
@@ -3526,9 +3526,9 @@ Alternatively, if you prefer XML-based configuration, use the
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:load-time-weaver/>
 
@@ -3611,9 +3611,9 @@ element. Again, the following example specifies a `ReflectiveLoadTimeWeaver`:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:load-time-weaver
 				weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/>

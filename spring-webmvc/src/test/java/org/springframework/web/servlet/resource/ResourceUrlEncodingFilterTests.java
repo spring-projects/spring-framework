@@ -129,8 +129,8 @@ public class ResourceUrlEncodingFilterTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		request.setContextPath("/");
 
-		testEncodeUrl(request, "/resources/bar.css?foo=bar&url=http://example.org",
-				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org");
+		testEncodeUrl(request, "/resources/bar.css?foo=bar&url=https://example.org",
+				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=https://example.org");
 	}
 
 	@Test // SPR-13847
@@ -151,8 +151,8 @@ public class ResourceUrlEncodingFilterTests {
 				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css#something");
 
 		testEncodeUrl(request,
-				"/resources/bar.css?foo=bar&url=http://example.org#something",
-				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org#something");
+				"/resources/bar.css?foo=bar&url=https://example.org#something",
+				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=https://example.org#something");
 	}
 
 	private void testEncodeUrl(MockHttpServletRequest request, String url, String expected)

@@ -441,7 +441,7 @@ public class ForwardedHeaderFilterTests {
 		this.request.addHeader(X_FORWARDED_HOST, "example.com");
 		this.request.addHeader(X_FORWARDED_PORT, "443");
 
-		String location = "http://other.info/foo/bar";
+		String location = "https://weibo.com/otherinfo/foo/bar";
 		String redirectedUrl = sendRedirect(location);
 		assertEquals(location, redirectedUrl);
 	}

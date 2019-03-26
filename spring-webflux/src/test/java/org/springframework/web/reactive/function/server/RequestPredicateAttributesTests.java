@@ -37,7 +37,7 @@ public class RequestPredicateAttributesTests {
 
 	@Before
 	public void createRequest() {
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com/path").build();
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com/path").build();
 		MockServerWebExchange webExchange = MockServerWebExchange.from(request);
 		webExchange.getAttributes().put("exchange", "bar");
 

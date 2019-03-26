@@ -5,7 +5,7 @@
 The original web framework included in the Spring Framework, Spring Web MVC, was
 purpose-built for the Servlet API and Servlet containers. The reactive-stack web framework,
 Spring WebFlux, was added later in version 5.0. It is fully non-blocking, supports
-http://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on such servers as
+https://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on such servers as
 Netty, Undertow, and Servlet 3.1+ containers.
 
 Both web frameworks mirror the names of their source modules
@@ -62,9 +62,9 @@ https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md#s
 (also https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.html[adopted] in Java 9)
 that defines the interaction between asynchronous components with back pressure.
 For example a data repository (acting as
-http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher])
+https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher])
 can produce data that an HTTP server (acting as
-http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber])
+https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber])
 can then write to the response. The main purpose of Reactive Streams is to let the
   subscriber to control how quickly or how slowly the publisher produces data.
 
@@ -1095,7 +1095,7 @@ The net effect is the same as if the controller had returned a `RedirectView` or
 `Rendering.redirectTo("abc").build()`, but now the controller itself can
 operate in terms of logical view names. A view name such as
 `redirect:/some/resource` is relative to the current application, while a view name such as
-`redirect:http://example.com/arbitrary/path` redirects to an absolute URL.
+`redirect:https://example.com/arbitrary/path` redirects to an absolute URL.
 
 
 [[webflux-multiple-representations]]
@@ -1727,9 +1727,9 @@ can be customized through a `WebDataBinder` (see <<mvc-ann-initbinder>>) or by r
 ==== Matrix Variables
 [.small]#<<web.adoc#mvc-ann-matrix-variables, Same as in Spring MVC>>#
 
-http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring WebFlux, we refer to those as "`matrix variables`" based on an
-http://www.w3.org/DesignIssues/MatrixURIs.html["`old post`"] by Tim Berners-Lee, but they
+https://www.w3.org/DesignIssues/MatrixURIs.html["`old post`"] by Tim Berners-Lee, but they
 can be also be referred to as URI path parameters.
 
 Matrix variables can appear in any path segment, with each variable separated by a semicolon and
@@ -2459,7 +2459,7 @@ Spring offers support for the Jackson JSON library.
 [.small]#<<web.adoc#mvc-ann-jackson, Same as in Spring MVC>>#
 
 Spring WebFlux provides built-in support for
-http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views],
+https://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views],
 which allows rendering only a subset of all fields in an `Object`. To use it with
 `@ResponseBody` or `ResponseEntity` controller methods, you can use Jackson's
 `@JsonView` annotation to activate a serialization view class, as the following example shows:
@@ -2815,7 +2815,7 @@ include::webflux-cors.adoc[leveloffset=+1]
 == Web Security
 [.small]#<<web.adoc#mvc-web-security, Same as in Spring MVC>>#
 
-The http://projects.spring.io/spring-security/[Spring Security] project provides support
+The https://projects.spring.io/spring-security/[Spring Security] project provides support
 for protecting web applications from malicious exploits. See the Spring Security
 reference documentation, including:
 
@@ -3160,8 +3160,8 @@ For Jackson JSON and XML, consider using
 {api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`],
 which customizes Jackson's default properties with the following ones:
 
-* http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
-* http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
@@ -3355,7 +3355,7 @@ Note that, when using both `EncodedResourceResolver` (for example, Gzip, Brotli 
 `VersionedResourceResolver`, they must be registered in that order, to ensure content-based
 versions are always computed reliably based on the unencoded file.
 
-http://www.webjars.org/documentation[WebJars] are also supported through the
+https://www.webjars.org/documentation[WebJars] are also supported through the
 `WebJarsResourceResolver` which is automatically registered when the
 `org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
 re-write URLs to include the version of the jar and can also match against incoming URLs

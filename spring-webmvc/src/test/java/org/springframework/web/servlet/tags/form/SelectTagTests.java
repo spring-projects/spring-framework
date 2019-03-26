@@ -677,7 +677,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 	/**
 	 * Tests new support added as a result of <a
-	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-2660"
+	 * href="https://opensource.atlassian.com/projects/spring/browse/SPR-2660"
 	 * target="_blank">SPR-2660</a>.
 	 * <p>
 	 * Specifically, if the {@code items} attribute is supplied a

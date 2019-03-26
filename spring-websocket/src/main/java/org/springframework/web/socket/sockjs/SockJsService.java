@@ -40,7 +40,7 @@ public interface SockJsService {
 	/**
 	 * Process a SockJS HTTP request.
 	 * <p>See the "Base URL", "Static URLs", and "Session URLs" sections of the <a
-	 * href="http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html">SockJS
+	 * href="https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html">SockJS
 	 * protocol</a> for details on the types of URLs expected.
 	 * @param request the current request
 	 * @param response the current response
