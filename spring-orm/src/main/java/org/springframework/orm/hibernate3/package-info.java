@@ -1,6 +1,6 @@
 /**
  * Package providing integration of
- * <a href="http://www.hibernate.org">Hibernate 3.x</a>
+ * <a href="https://hibernate.org/">Hibernate 3.x</a>
  * with Spring concepts.
  *
  * <p>Contains SessionFactory helper classes, a template plus callback

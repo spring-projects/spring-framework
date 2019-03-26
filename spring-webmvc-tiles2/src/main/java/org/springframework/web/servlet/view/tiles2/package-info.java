@@ -1,6 +1,6 @@
 /**
  * Support classes for the integration of
- * <a href="http://tiles.apache.org">Tiles 2</a>
+ * <a href="https://tiles.apache.org">Tiles 2</a>
  * (the standalone version of Tiles) as Spring web view technology.
  * Contains a View implementation for Tiles definitions.
  *

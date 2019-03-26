@@ -40,21 +40,21 @@ public class MockRestRequestMatchersTests {
 
 	@Test
 	public void requestTo() throws Exception {
-		this.request.setURI(new URI("http://foo.com/bar"));
+		this.request.setURI(new URI("http://www.foo.com/bar"));
 
-		MockRestRequestMatchers.requestTo("http://foo.com/bar").match(this.request);
+		MockRestRequestMatchers.requestTo("http://www.foo.com/bar").match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void requestToNoMatch() throws Exception {
-		this.request.setURI(new URI("http://foo.com/bar"));
+		this.request.setURI(new URI("http://www.foo.com/bar"));
 
-		MockRestRequestMatchers.requestTo("http://foo.com/wrong").match(this.request);
+		MockRestRequestMatchers.requestTo("http://www.foo.com/wrong").match(this.request);
 	}
 
 	@Test
 	public void requestToContains() throws Exception {
-		this.request.setURI(new URI("http://foo.com/bar"));
+		this.request.setURI(new URI("http://www.foo.com/bar"));
 
 		MockRestRequestMatchers.requestTo(containsString("bar")).match(this.request);
 	}
@@ -132,31 +132,31 @@ public class MockRestRequestMatchersTests {
 
 	@Test
 	public void queryParam() throws Exception {
-		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		this.request.setURI(new URI("http://www.foo.com/a?foo=bar&foo=baz"));
 		MockRestRequestMatchers.queryParam("foo", "bar", "baz").match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void queryParamMissing() throws Exception {
-		this.request.setURI(new URI("http://foo.com/a"));
+		this.request.setURI(new URI("http://www.foo.com/a"));
 		MockRestRequestMatchers.queryParam("foo", "bar").match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void queryParamMissingValue() throws Exception {
-		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		this.request.setURI(new URI("http://www.foo.com/a?foo=bar&foo=baz"));
 		MockRestRequestMatchers.queryParam("foo", "bad").match(this.request);
 	}
 
 	@Test
 	public void queryParamContains() throws Exception {
-		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		this.request.setURI(new URI("http://www.foo.com/a?foo=bar&foo=baz"));
 		MockRestRequestMatchers.queryParam("foo", containsString("ba")).match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void queryParamContainsWithMissingValue() throws Exception {
-		this.request.setURI(new URI("http://foo.com/a?foo=bar&foo=baz"));
+		this.request.setURI(new URI("http://www.foo.com/a?foo=bar&foo=baz"));
 		MockRestRequestMatchers.queryParam("foo", containsString("bx")).match(this.request);
 	}
 

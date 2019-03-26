@@ -40,7 +40,7 @@ import org.springframework.web.servlet.View;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link ObjectMapper}.
+ * using <a href="https://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
  * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
@@ -170,7 +170,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * specified by the JSONP request parameter value.
 	 * <p>The parameter names configured by default are "jsonp" and "callback".
 	 * @since 4.1
-	 * @see <a href="http://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/JSONP">JSONP Wikipedia article</a>
 	 * @deprecated Will be removed as of Spring Framework 5.1, use
 	 * <a href="https://docs.spring.io/spring/docs/4.3.x/spring-framework-reference/html/cors.html">CORS</a> instead.
 	 */

@@ -1,6 +1,6 @@
 /**
  * Spring's repackaging of
- * <a href="http://asm.ow2.org">ASM 6.0</a>
+ * <a href="https://asm.ow2.org">ASM 6.0</a>
  * (with Spring-specific patches; for internal use only).
  *
  * <p>This repackaging technique avoids any potential conflicts with

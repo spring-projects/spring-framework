@@ -21,13 +21,13 @@ to the MVC framework.
 [[view-thymeleaf]]
 == Thymeleaf
 
-http://www.thymeleaf.org/[Thymeleaf] is a good example of a view technology fitting
+https://www.thymeleaf.org/[Thymeleaf] is a good example of a view technology fitting
 perfectly in the MVC framework. Support for this integration is not provided by
 the Spring team but by the Thymeleaf team itself.
 
 Configuring Thymeleaf for Spring usually requires a few beans defined, like a
 `ServletContextTemplateResolver`, a `SpringTemplateEngine` and a `ThymeleafViewResolver`.
-Please refer to the http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring]
+Please refer to the https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring]
 documentation section for more details.
 
 
@@ -114,11 +114,11 @@ Here is a sample template for an HTML page:
 [[view-velocity]]
 == Velocity & FreeMarker
 
-http://velocity.apache.org[Velocity] and http://www.freemarker.org[FreeMarker] are two
+https://velocity.apache.org[Velocity] and https://freemarker.apache.org/[FreeMarker] are two
 templating languages that can be used as view technologies within Spring MVC
 applications. The languages are quite similar and serve similar needs and so are
 considered together in this section. For semantic and syntactic differences between the
-two languages, see the http://www.freemarker.org[FreeMarker] web site.
+two languages, see the https://freemarker.apache.org/[FreeMarker] web site.
 
 [NOTE]
 ====
@@ -1517,12 +1517,12 @@ and `Invocable` interfaces.
 
 It has been tested with:
 
-* http://handlebarsjs.com/[Handlebars] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
-* https://mustache.github.io/[Mustache] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
-* http://facebook.github.io/react/[React] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
-* http://www.embeddedjs.com/[EJS] running on http://openjdk.java.net/projects/nashorn/[Nashorn]
-* http://www.stuartellis.eu/articles/erb/[ERB] running on http://jruby.org[JRuby]
-* https://docs.python.org/2/library/string.html#template-strings[String templates] running on http://www.jython.org/[Jython]
+* https://handlebarsjs.com/[Handlebars] running on https://openjdk.java.net/projects/nashorn/[Nashorn]
+* https://mustache.github.io/[Mustache] running on https://openjdk.java.net/projects/nashorn/[Nashorn]
+* https://facebook.github.io/react/[React] running on https://openjdk.java.net/projects/nashorn/[Nashorn]
+* https://www.embeddedjs.com/[EJS] running on https://openjdk.java.net/projects/nashorn/[Nashorn]
+* https://www.stuartellis.name/articles/erb/[ERB] running on https://www.jruby.org[JRuby]
+* https://docs.python.org/2/library/string.html#template-strings[String templates] running on https://www.jython.org/[Jython]
 
 
 
@@ -1532,17 +1532,17 @@ It has been tested with:
 To be able to use script templates integration, you need to have available in your classpath
 the script engine:
 
-* http://openjdk.java.net/projects/nashorn/[Nashorn] Javascript engine is provided builtin with Java 8+.
+* https://openjdk.java.net/projects/nashorn/[Nashorn] Javascript engine is provided builtin with Java 8+.
    Using the latest update release available is highly recommended.
-* http://docs.oracle.com/javase/7/docs/technotes/guides/scripting/programmer_guide/#jsengine[Rhino]
+* https://docs.oracle.com/javase/7/docs/technotes/guides/scripting/programmer_guide/#jsengine[Rhino]
    Javascript engine is provided builtin with Java 6 and Java 7.
    Please notice that using Rhino is not recommended since it does not
    support running most template engines.
-* http://jruby.org[JRuby] dependency should be added in order to get Ruby support.
-* http://www.jython.org[Jython] dependency should be added in order to get Python support.
+* https://www.jruby.org[JRuby] dependency should be added in order to get Ruby support.
+* https://www.jython.org[Jython] dependency should be added in order to get Python support.
 
 You should also need to add dependencies for your script based template engine. For example,
-for Javascript you can use http://www.webjars.org/[WebJars] to add Maven/Gradle dependencies
+for Javascript you can use https://www.webjars.org/[WebJars] to add Maven/Gradle dependencies
 in order to make your javascript libraries available in the classpath.
 
 
@@ -1640,9 +1640,9 @@ The render function is called with the following parameters:
 `Mustache.render()` is natively compatible with this signature, so you can call it directly.
 
 If your templating technology requires some customization, you may provide a script that
-implements a custom render function. For example, http://handlebarsjs.com[Handlerbars]
+implements a custom render function. For example, https://handlebarsjs.com[Handlerbars]
 needs to compile templates before using them, and requires a
-http://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
+https://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
 browser facilities not available in the server-side script engine.
 
 [source,java,indent=0]
@@ -1739,7 +1739,7 @@ This section focuses on Spring's support for Tiles v3 in the
 === Dependencies
 
 To be able to use Tiles, you have to add a dependency on Tiles version 3.0.1 or higher
-and http://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
+and https://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
 to your project.
 
 
@@ -1749,7 +1749,7 @@ to your project.
 
 To be able to use Tiles, you have to configure it using files containing definitions
 (for basic information on definitions and other Tiles concepts, please have a look at
-http://tiles.apache.org[]). In Spring this is done using the `TilesConfigurer`. Have a
+https://tiles.apache.org[]). In Spring this is done using the `TilesConfigurer`. Have a
 look at the following piece of example ApplicationContext configuration:
 
 [source,xml,indent=0]
@@ -2683,7 +2683,7 @@ annotations. When further control is needed, a custom `ObjectMapper` can be inje
 through the `ObjectMapper` property for cases where custom JSON
 serializers/deserializers need to be provided for specific types.
 
-As of Spring Framework 4.3.18, http://en.wikipedia.org/wiki/JSONP[JSONP] support is
+As of Spring Framework 4.3.18, https://en.wikipedia.org/wiki/JSONP[JSONP] support is
 deprecated and requires to customize the JSONP query parameter
 name(s) through the `jsonpParameterNames` property. This support will be removed as of
 Spring Framework 5.1, <<cors,CORS>> should be used instead.

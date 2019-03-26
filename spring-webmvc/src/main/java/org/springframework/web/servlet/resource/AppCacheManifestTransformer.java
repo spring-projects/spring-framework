@@ -54,7 +54,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Brian Clozel
  * @since 4.1
- * @see <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/offline.html#offline">HTML5 offline applications spec</a>
+ * @see <a href="https://www.whatwg.org/specs/web-apps/current-work/multipage/offline.html#offline">HTML5 offline applications spec</a>
  */
 public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 

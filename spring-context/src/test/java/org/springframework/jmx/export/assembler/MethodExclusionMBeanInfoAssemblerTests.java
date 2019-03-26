@@ -74,7 +74,7 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 	}
 
 	/*
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2754
+	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2754
 	 */
 	@Test
 	public void testIsNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {

@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>When using Xerces, make sure a post 2.0.2 version is available on the classpath
  * to avoid a critical
- * <a href="http://nagoya.apache.org/bugzilla/show_bug.cgi?id=16014"/>bug</a>
+ * <a href="https://nagoya.apache.org/bugzilla/show_bug.cgi?id=16014"/>bug</a>
  * that leads to StackOverflow. Maven users are likely to encounter this problem since
  * 2.0.2 is used by default.
  *

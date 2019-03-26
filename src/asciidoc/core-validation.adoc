@@ -207,7 +207,7 @@ Oracle. A JavaBean is simply a class with a default no-argument constructor, whi
 a naming convention where (by way of an example) a property named `bingoMadness` would
 have a setter method `setBingoMadness(..)` and a getter method `getBingoMadness()`. For
 more information about JavaBeans and the specification, please refer to Oracle's website (
-http://docs.oracle.com/javase/6/docs/api/java/beans/package-summary.html[javabeans]).
+https://docs.oracle.com/javase/6/docs/api/java/beans/package-summary.html[javabeans]).
 
 One quite important class in the beans package is the `BeanWrapper` interface and its
 corresponding implementation ( `BeanWrapperImpl`). As quoted from the javadocs, the
@@ -462,7 +462,7 @@ com
 
 Note that you can also use the standard `BeanInfo` JavaBeans mechanism here as well
 (described
-http://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[in
+https://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[in
 not-amazing-detail here]). Find below an example of using the `BeanInfo` mechanism for
 explicitly registering one or more `PropertyEditor` instances with the properties of an
 associated class.
@@ -1374,7 +1374,7 @@ Time:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd>
+			https://www.springframework.org/schema/beans/spring-beans.xsd>
 
 		<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
 			<property name="registerDefaultFormatters" value="false" />
@@ -1463,7 +1463,7 @@ JSR-303 allows you to define declarative validation constraints against such pro
 When an instance of this class is validated by a JSR-303 Validator, these constraints
 will be enforced.
 
-For general information on JSR-303/JSR-349, see the http://beanvalidation.org/[Bean
+For general information on JSR-303/JSR-349, see the https://beanvalidation.org/[Bean
 Validation website]. For information on the specific capabilities of the default
 reference implementation, see the https://www.hibernate.org/412.html[Hibernate
 Validator] documentation. To learn how to setup a Bean Validation provider as a Spring

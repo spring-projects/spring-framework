@@ -122,7 +122,7 @@ public class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigur
 
 	/**
 	 * Introduced to investigate claims made in a discussion on
-	 * <a href="http://stackoverflow.com/questions/24725438/what-could-cause-a-class-implementing-applicationlistenercontextrefreshedevent">Stack Overflow</a>.
+	 * <a href="https://stackoverflow.com/questions/24725438/what-could-cause-a-class-implementing-applicationlistenercontextrefreshedevent">Stack Overflow</a>.
 	 */
 	@Test
 	public void buildMergedConfigWithAtWebAppConfigurationWithAnnotationAndClassesOnSuperclass() {

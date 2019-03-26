@@ -37,12 +37,12 @@ about the underlying concepts (such as __"Dependency Injection"__) that Spring h
 embraced.
 
 If you are just getting started with Spring, you may want to begin using the Spring Framework
-by creating a http://projects.spring.io/spring-boot/[Spring Boot] based application.
+by creating a https://projects.spring.io/spring-boot/[Spring Boot] based application.
 Spring Boot provides a quick (and opinionated) way to create a production-ready Spring based
 application. It is based on the Spring Framework, favors convention over configuration, and is
 designed to get you up and running as quickly as possible.
 
-You can use http://start.spring.io[start.spring.io] to generate a basic project or follow
+You can use https://start.spring.io[start.spring.io] to generate a basic project or follow
 one of the https://spring.io/guides["Getting Started" guides] like the
 https://spring.io/guides/gs/rest-service/[Getting Started Building a RESTful Web Service]
 one. As well as being easier to digest, these guides are very __task focused__, and most of
@@ -99,7 +99,7 @@ robust, __maintainable__ applications.
 ****
 "__The question is, what aspect of control are [they] inverting?__" Martin Fowler posed
 this question about Inversion of Control (IoC)
-http://martinfowler.com/articles/injection.html[on his site] in 2004. Fowler suggested
+https://martinfowler.com/articles/injection.html[on his site] in 2004. Fowler suggested
 renaming the principle to make it more self-explanatory and came up with __Dependency
 Injection__.
 ****
@@ -436,7 +436,7 @@ building, and our samples mostly use Gradle or Maven.
 
 [[overview-maven-dependency-management]]
 ===== Maven Dependency Management
-If you are using http://maven.apache.org/[Maven] for dependency management you don't even
+If you are using https://maven.apache.org/[Maven] for dependency management you don't even
 need to supply the logging dependency explicitly. For example, to create an application
 context and use dependency injection to configure an application, your Maven dependencies
 will look like this:
@@ -468,7 +468,7 @@ repository location in your Maven configuration. For full releases:
 	<repositories>
 		<repository>
 			<id>io.spring.repo.maven.release</id>
-			<url>http://repo.spring.io/release/</url>
+			<url>https://repo.spring.io/release/</url>
 			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
 	</repositories>
@@ -482,7 +482,7 @@ For milestones:
 	<repositories>
 		<repository>
 			<id>io.spring.repo.maven.milestone</id>
-			<url>http://repo.spring.io/milestone/</url>
+			<url>https://repo.spring.io/milestone/</url>
 			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
 	</repositories>
@@ -496,7 +496,7 @@ And for snapshots:
 	<repositories>
 		<repository>
 			<id>io.spring.repo.maven.snapshot</id>
-			<url>http://repo.spring.io/snapshot/</url>
+			<url>https://repo.spring.io/snapshot/</url>
 			<snapshots><enabled>true</enabled></snapshots>
 		</repository>
 	</repositories>
@@ -550,7 +550,7 @@ attribute when depending on Spring Framework artifacts:
 
 [[overview-gradle-dependency-management]]
 ===== Gradle Dependency Management
-To use the Spring repository with the http://www.gradle.org/[Gradle] build system,
+To use the Spring repository with the https://www.gradle.org/[Gradle] build system,
 include the appropriate URL in the `repositories` section:
 
 [source,groovy,indent=0]
@@ -559,7 +559,7 @@ include the appropriate URL in the `repositories` section:
 	repositories {
 		mavenCentral()
 		// and optionally...
-		maven { url "http://repo.spring.io/release" }
+		maven { url "https://repo.spring.io/release" }
 	}
 ----
 
@@ -578,7 +578,7 @@ usual Gradle way:
 
 [[overview-ivy-dependency-management]]
 ===== Ivy Dependency Management
-If you prefer to use http://ant.apache.org/ivy[Ivy] to manage dependencies then there
+If you prefer to use https://ant.apache.org/ivy[Ivy] to manage dependencies then there
 are similar configuration options.
 
 To configure Ivy to point to the Spring repository add the following resolver to your
@@ -590,7 +590,7 @@ To configure Ivy to point to the Spring repository add the following resolver to
 	<resolvers>
 		<ibiblio name="io.spring.repo.maven.release"
 				m2compatible="true"
-				root="http://repo.spring.io/release/"/>
+				root="https://repo.spring.io/release/"/>
 	</resolvers>
 ----
 
@@ -616,11 +616,11 @@ Distribution zips are published to the Spring Maven Repository (this is just for
 convenience, you don't need Maven or any other build system in order to download them).
 
 To download a distribution zip open a web browser to
-http://repo.spring.io/release/org/springframework/spring and select the appropriate
+https://repo.spring.io/release/org/springframework/spring and select the appropriate
 subfolder for the version that you want. Distribution files end `-dist.zip`, for example
 +spring-framework-{spring-version}-RELEASE-dist.zip+. Distributions are also published
-for http://repo.spring.io/milestone/org/springframework/spring[milestones] and
-http://repo.spring.io/snapshot/org/springframework/spring[snapshots].
+for https://repo.spring.io/milestone/org/springframework/spring[milestones] and
+https://repo.spring.io/snapshot/org/springframework/spring[snapshots].
 
 
 [[overview-logging]]
@@ -657,7 +657,7 @@ of the box in most situations, and that's important.
 NOTE: Log4j 1.2 is EOL in the meantime. Also, Log4j 2.3 is the last Java 6 compatible
 release, with newer Log4j 2.x releases requiring Java 7+.
 
-Many people use http://logging.apache.org/log4j[Log4j] as a logging framework for
+Many people use https://logging.apache.org/log4j[Log4j] as a logging framework for
 configuration and management purposes. It is efficient and well-established, and in
 fact it is what we use at runtime when we build Spring. Spring also provides some
 utilities for configuring and initializing Log4j, so it has an optional compile-time
@@ -701,7 +701,7 @@ log4j.category.org.springframework.beans.factory=DEBUG
 
 To use Log4j 2.x with JCL, all you need to do is put Log4j on the classpath and
 provide it with a configuration file (`log4j2.xml`, `log4j2.properties`, or other
-http://logging.apache.org/log4j/2.x/manual/configuration.html[supported configuration
+https://logging.apache.org/log4j/2.x/manual/configuration.html[supported configuration
 formats]). For Maven users, the minimal dependencies needed are:
 
 [source,xml,indent=0]
@@ -767,7 +767,7 @@ standard lookup, there are basically two ways to switch it off:
   explicitly depends on `commons-logging`)
 . Depend on a special `commons-logging` dependency that replaces the library with
   an empty jar (more details can be found in the
-  http://slf4j.org/faq.html#excludingJCL[SLF4J FAQ])
+  https://www.slf4j.org/faq.html#excludingJCL[SLF4J FAQ])
 
 To exclude commons-logging, add the following to your `dependencyManagement` section:
 
@@ -796,7 +796,7 @@ show you how to provide an alternative implementation of JCL using SLF4J.
 [[overview-logging-slf4j]]
 ===== Using SLF4J with Log4j or Logback
 
-The Simple Logging Facade for Java (http://www.slf4j.org[SLF4J]) is a popular API
+The Simple Logging Facade for Java (https://www.slf4j.org[SLF4J]) is a popular API
 used by other libraries commonly used with Spring. It is typically used with
 https://logback.qos.ch/[Logback] which is a native implementation of the SLF4J API.
 
@@ -846,7 +846,7 @@ itself. In Maven you would do that like this
 ----
 
 A more common choice amongst SLF4J users, which uses fewer steps and generates fewer
-dependencies, is to bind directly to http://logback.qos.ch[Logback]. This removes the
+dependencies, is to bind directly to https://logback.qos.ch[Logback]. This removes the
 extra binding step because Logback implements SLF4J directly, so you only need to depend
 on just two libraries, namely `jcl-over-slf4j` and `logback`):
 

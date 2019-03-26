@@ -27,7 +27,7 @@ applications.
 [[websocket-intro]]
 == Introduction
 
-The WebSocket protocol http://tools.ietf.org/html/rfc6455[RFC 6455] defines an important
+The WebSocket protocol https://tools.ietf.org/html/rfc6455[RFC 6455] defines an important
 new capability for web applications: full-duplex, two-way communication between client
 and server. It is an exciting new capability on the heels of a long history of
 techniques to make the web more interactive including Java Applets, XMLHttpRequest,
@@ -43,7 +43,7 @@ server can use it to send messages to each other.
 
 Spring Framework 4 includes a new `spring-websocket` module with comprehensive
 WebSocket support. It is compatible with the Java WebSocket API standard
-(http://jcp.org/en/jsr/detail?id=356[JSR-356])
+(https://jcp.org/en/jsr/detail?id=356[JSR-356])
 and also provides additional value-add as explained in the rest of the introduction.
 
 
@@ -53,12 +53,12 @@ and also provides additional value-add as explained in the rest of the introduct
 
 An important challenge to adoption is the lack of support for WebSocket in some
 browsers. Notably the first Internet Explorer version to support WebSocket is
-version 10 (see http://caniuse.com/websockets for support by browser versions).
+version 10 (see https://caniuse.com/websockets for support by browser versions).
 Furthermore, some restrictive proxies may be configured in ways that either
 preclude the attempt to do an HTTP upgrade or otherwise break connection after
 some time because it has remained opened for too long. A good overview on this
 topic from Peter Lubbers is available in the InfoQ article
-http://www.infoq.com/articles/Web-Sockets-Proxy-Servers["How HTML5 Web Sockets Interact With Proxy Servers"].
+https://www.infoq.com/articles/Web-Sockets-Proxy-Servers["How HTML5 Web Sockets Interact With Proxy Servers"].
 
 Therefore to build a WebSocket application today, fallback options are required in
 order to simulate the WebSocket API where necessary. The Spring Framework provides
@@ -88,7 +88,7 @@ to traditional messaging applications (e.g. JMS, AMQP).
 
 Spring Framework 4 includes a new `spring-messaging` module with key
 abstractions from the
-http://projects.spring.io/spring-integration/[Spring Integration] project
+https://projects.spring.io/spring-integration/[Spring Integration] project
 such as `Message`, `MessageChannel`, `MessageHandler`, and others that can serve as
 a foundation for such a messaging architecture. The module also includes a
 set of annotations for mapping messages to methods, similar to the Spring MVC
@@ -114,7 +114,7 @@ most web applications today are written using a web framework rather than the
 Servlet API alone.
 
 For this reason the WebSocket RFC defines the use of
-http://tools.ietf.org/html/rfc6455#section-1.9[sub-protocols].
+https://tools.ietf.org/html/rfc6455#section-1.9[sub-protocols].
 During the handshake, the client and server can use the header
 `Sec-WebSocket-Protocol` to agree on a sub-protocol, i.e. a higher, application-level
 protocol to use. The use of a sub-protocol is not required, but
@@ -123,7 +123,7 @@ format that both the client and server can understand. That format can be custom
 framework-specific, or a standard messaging protocol.
 
 The Spring Framework provides support for using
-http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] -- a simple, messaging protocol
+https://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] -- a simple, messaging protocol
 originally created for use in scripting languages with frames inspired
 by HTTP. STOMP is widely supported and well suited for use over
 WebSocket and over the web.
@@ -258,9 +258,9 @@ XML configuration equivalent:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -314,9 +314,9 @@ And the XML configuration equivalent:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -398,7 +398,7 @@ through the use of the `<absolute-ordering />` element in `web.xml`:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://java.sun.com/xml/ns/javaee
-			http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+			https://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		version="3.0">
 
 		<absolute-ordering/>
@@ -417,7 +417,7 @@ Java initialization API, if required:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://java.sun.com/xml/ns/javaee
-			http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+			https://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		version="3.0">
 
 		<absolute-ordering>
@@ -467,9 +467,9 @@ or WebSocket XML namespace:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<bean class="org.springframework...ServletServerContainerFactoryBean">
 			<property name="maxTextMessageBufferSize" value="8192"/>
@@ -525,9 +525,9 @@ or WebSocket XML namespace:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/echo" handler="echoHandler"/>
@@ -594,7 +594,7 @@ WebSocket and SockJS allowed origins can be configured as shown bellow:
 
 		@Override
 		public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-			registry.addHandler(myHandler(), "/myHandler").setAllowedOrigins("http://mydomain.com");
+			registry.addHandler(myHandler(), "/myHandler").setAllowedOrigins("https://mydomain.com");
 		}
 
 		@Bean
@@ -615,11 +615,11 @@ XML configuration equivalent:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-		<websocket:handlers allowed-origins="http://mydomain.com">
+		<websocket:handlers allowed-origins="https://mydomain.com">
 			<websocket:mapping path="/myHandler" handler="myHandler" />
 		</websocket:handlers>
 
@@ -653,7 +653,7 @@ SockJS consists of:
 
 * The https://github.com/sockjs/sockjs-protocol[SockJS protocol]
 defined in the form of executable
-http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tests].
+https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tests].
 * The https://github.com/sockjs/sockjs-client/[SockJS JavaScript client] - a client library for use in browsers.
 * SockJS server implementations including one in the Spring Framework `spring-websocket` module.
 * As of 4.1 `spring-websocket` also provides a SockJS Java client.
@@ -700,7 +700,7 @@ see each transport one at a time. The SockJS client also provides a debug flag
 which enables helpful messages in the browser console. On the server side enable
 `TRACE` logging for `org.springframework.web.socket`.
 For even more detail refer to the SockJS protocol
-http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated test].
+https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated test].
 
 
 
@@ -739,9 +739,9 @@ and the XML configuration equivalent:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:handlers>
 			<websocket:mapping path="/myHandler" handler="myHandler"/>
@@ -777,7 +777,7 @@ a key reason for having SockJS. This section covers important
 considerations about running in those browsers.
 
 The SockJS client supports Ajax/XHR streaming in IE 8 and 9 via Microsoft's
-http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[XDomainRequest].
+https://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[XDomainRequest].
 That works across domains but does not support sending cookies.
 Cookies are very often essential for Java applications.
 However since the SockJS client can be used with many server
@@ -860,7 +860,7 @@ from concluding a connection is hung. The Spring SockJS configuration has a prop
 called `heartbeatTime` that can be used to customize the frequency. By default a
 heartbeat is sent after 25 seconds assuming no other messages were sent on that
 connection. This 25 seconds value is in line with the following
-http://tools.ietf.org/html/rfc6202[IETF recommendation] for public Internet applications.
+https://tools.ietf.org/html/rfc6202[IETF recommendation] for public Internet applications.
 
 [NOTE]
 ====
@@ -1028,7 +1028,7 @@ server will need to agree on some protocol that defines message content.
 [[websocket-stomp-overview]]
 === Overview
 
-http://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] is a simple
+https://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] is a simple
 text-oriented messaging protocol that was originally created for scripting languages
 such as Ruby, Python, and Perl to connect to enterprise message brokers. It is
 designed to address a subset of commonly used messaging patterns. STOMP can be
@@ -1116,7 +1116,7 @@ client subscription.
 
 The above overview is intended to provide the most basic understanding of the
 STOMP protocol. It is recommended to review the protocol
-http://stomp.github.io/stomp-specification-1.2.html[specification] in full.
+https://stomp.github.io/stomp-specification-1.2.html[specification] in full.
 
 
 
@@ -1187,9 +1187,9 @@ The same configuration in XML:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker application-destination-prefix="/app">
 			<websocket:stomp-endpoint path="/portfolio">
@@ -1577,8 +1577,8 @@ sending loop, and is not suitable for clustering. As an alternative, application
 can upgrade to using a full-featured message broker.
 
 Check the STOMP documentation for your message broker of choice (e.g.
-http://www.rabbitmq.com/stomp.html[RabbitMQ],
-http://activemq.apache.org/stomp.html[ActiveMQ], etc.), install the broker,
+https://www.rabbitmq.com/stomp.html[RabbitMQ],
+https://activemq.apache.org/stomp.html[ActiveMQ], etc.), install the broker,
 and run it with STOMP support enabled. Then enable the STOMP broker relay in the
 Spring configuration instead of the simple broker.
 
@@ -1615,9 +1615,9 @@ XML configuration equivalent:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker application-destination-prefix="/app">
 			<websocket:stomp-endpoint path="/portfolio" />
@@ -1779,9 +1779,9 @@ In XML:
 			xmlns:websocket="http://www.springframework.org/schema/websocket"
 			xsi:schemaLocation="
 					http://www.springframework.org/schema/beans
-					http://www.springframework.org/schema/beans/spring-beans.xsd
+					https://www.springframework.org/schema/beans/spring-beans.xsd
 					http://www.springframework.org/schema/websocket
-					http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+					https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker application-destination-prefix="/app" path-matcher="**pathMatcher**">
 			<websocket:stomp-endpoint path="/stomp"/>
@@ -1864,7 +1864,7 @@ Spring Security provides
 https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#websocket[WebSocket sub-protocol authorization]
 that uses a `ChannelInterceptor` to authorize messages based on the user header in them.
 Also Spring Session provides a
-http://docs.spring.io/spring-session/docs/current/reference/html5/#websocket[WebSocket integration]
+https://docs.spring.io/spring-session/docs/current/reference/html5/#websocket[WebSocket integration]
 that ensures the user HTTP session does not expire when the WebSocket session is still active.
 ====
 
@@ -2056,7 +2056,7 @@ over, all unique user queues are removed. For example, RabbitMQ creates auto-del
 queues when destinations like `/exchange/amq.direct/position-updates` are used.
 So in that case the client could subscribe to `/user/exchange/amq.direct/position-updates`.
 Similarly, ActiveMQ has
-http://activemq.apache.org/delete-inactive-destinations.html[configuration options]
+https://activemq.apache.org/delete-inactive-destinations.html[configuration options]
 for purging inactive destinations.
 ====
 
@@ -2426,9 +2426,9 @@ Here is example configuration:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker>
 			<websocket:transport send-timeout="15000" send-buffer-size="524288" />
@@ -2478,9 +2478,9 @@ Here is example configuration:
 		xmlns:websocket="http://www.springframework.org/schema/websocket"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/websocket
-			http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 		<websocket:message-broker>
 			<websocket:transport message-size="131072" />

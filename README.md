@@ -74,29 +74,29 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 
 [Spring Integration]: https://github.com/spring-projects/spring-integration
 [Spring Batch]: https://github.com/spring-projects/spring-batch
-[family of projects]: http://spring.io/projects
+[family of projects]: https://spring.io/projects
 [Spring organization]: https://github.com/spring-projects
 [downloading Spring artifacts]: https://github.com/spring-projects/spring-framework/wiki/Downloading-Spring-artifacts
 [building a distribution with dependencies]: https://github.com/spring-projects/spring-framework/wiki/Building-a-distribution-with-dependencies
-[Javadoc]: http://docs.spring.io/spring-framework/docs/current/javadoc-api/
-[reference docs]: http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/
-[spring tags]: http://spring.io/questions
-[Stack Overflow]: http://stackoverflow.com/faq
-[Commercial support]: http://spring.io/services
+[Javadoc]: https://docs.spring.io/spring-framework/docs/current/javadoc-api/
+[reference docs]: https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/
+[spring tags]: https://spring.io/questions
+[Stack Overflow]: https://stackoverflow.com/faq
+[Commercial support]: https://spring.io/services
 [Spring Framework JIRA]: https://jira.spring.io/browse/SPR
 [the lifecycle of an issue]: https://github.com/spring-projects/spring-framework/wiki/The-Lifecycle-of-an-Issue
 [spring-framework-issues]: https://github.com/spring-projects/spring-framework-issues#readme
 [readme]: https://github.com/spring-projects/spring-framework-issues#readme
-[Gradle]: http://gradle.org
-[`./gradlew`]: http://vimeo.com/34436402
-[Git]: http://help.github.com/set-up-git-redirect
-[JDK8 build]: http://www.oracle.com/technetwork/java/javase/downloads
+[Gradle]: https://gradle.org
+[`./gradlew`]: https://vimeo.com/34436402
+[Git]: https://help.github.com/set-up-git-redirect
+[JDK8 build]: https://www.oracle.com/technetwork/java/javase/downloads
 [Gradle build and release FAQ]: https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ
-[Pull requests]: http://help.github.com/send-pull-requests
+[Pull requests]: https://help.github.com/send-pull-requests
 [contributor guidelines]: https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.md
 [@SpringFramework]: https://twitter.com/springframework
 [@SpringCentral]: https://twitter.com/springcentral
 [team members]: https://twitter.com/springframework/lists/team/members
-[The Spring Blog]: http://spring.io/blog/
-[news feed]: http://spring.io/blog/category/news
+[The Spring Blog]: https://spring.io/blog/
+[news feed]: https://spring.io/blog/category/news
 [Apache License]: https://www.apache.org/licenses/LICENSE-2.0

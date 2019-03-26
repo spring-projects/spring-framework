@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * JUnit 4 based integration test for verifying support for the
  * {@link ContextConfiguration#inheritLocations() inheritLocations} flag of
  * {@link ContextConfiguration @ContextConfiguration} indirectly proposed in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3896"
+ * href="https://opensource.atlassian.com/projects/spring/browse/SPR-3896"
  * target="_blank">SPR-3896</a>.
  *
  * @author Sam Brannen

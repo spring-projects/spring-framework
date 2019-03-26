@@ -46,7 +46,7 @@ public abstract class AbstractSockJsMessageCodec implements SockJsMessageCodec {
 	}
 
 	/**
-	 * Apply standard JSON string quoting (see http://www.json.org/).
+	 * Apply standard JSON string quoting (see https://www.json.org/).
 	 */
 	protected abstract char[] applyJsonQuoting(String content);
 

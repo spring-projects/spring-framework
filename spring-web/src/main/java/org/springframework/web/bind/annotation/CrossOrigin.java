@@ -83,13 +83,13 @@ public @interface CrossOrigin {
 	String[] value() default {};
 
 	/**
-	 * List of allowed origins, e.g. {@code "http://domain1.com"}.
+	 * List of allowed origins, e.g. {@code "https://domain1.com"}.
 	 * <p>These values are placed in the {@code Access-Control-Allow-Origin}
 	 * header of both the pre-flight response and the actual response.
 	 * {@code "*"} means that all origins are allowed.
 	 * <p>If undefined, all origins are allowed.
 	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
-	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
 	 * if present, in order to reflect the client-originated address.
 	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a

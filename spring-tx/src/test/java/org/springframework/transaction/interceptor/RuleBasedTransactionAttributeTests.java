@@ -150,7 +150,7 @@ public class RuleBasedTransactionAttributeTests {
 	}
 
 	/**
-	 * See <a href="http://forum.springframework.org/showthread.php?t=41350">this forum post</a>.
+	 * See <a href="https://forum.springframework.org/showthread.php?t=41350">this forum post</a>.
 	 */
 	@Test
 	public void testConflictingRulesToDetermineExactContract() {

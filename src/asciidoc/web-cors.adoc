@@ -9,9 +9,9 @@ could have the evil.com website open in another tab. The scripts from evil.com s
 be able to make AJAX requests to your bank API (e.g., withdrawing money from your account!)
 using your credentials.
 
-http://en.wikipedia.org/wiki/Cross-origin_resource_sharing[Cross-origin resource sharing]
-(CORS) is a http://www.w3.org/TR/cors/[W3C specification] implemented by
-http://caniuse.com/#feat=cors[most browsers] that allows you to specify in a flexible
+https://en.wikipedia.org/wiki/Cross-origin_resource_sharing[Cross-origin resource sharing]
+(CORS) is a https://www.w3.org/TR/cors/[W3C specification] implemented by
+https://caniuse.com/#feat=cors[most browsers] that allows you to specify in a flexible
 way what kind of cross domain requests are authorized, instead of using some less secured
 and less powerful hacks like IFRAME or JSONP.
 
@@ -64,7 +64,7 @@ It is also possible to enable CORS for the whole controller:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@CrossOrigin(origins = "http://domain2.com", maxAge = 3600)
+@CrossOrigin(origins = "https://domain2.com", maxAge = 3600)
 @RestController
 @RequestMapping("/account")
 public class AccountController {
@@ -96,7 +96,7 @@ then combine attributes from both annotations to create merged CORS configuratio
 @RequestMapping("/account")
 public class AccountController {
 
-	@CrossOrigin("http://domain2.com")
+	@CrossOrigin("https://domain2.com")
 	@RequestMapping("/{id}")
 	public Account retrieve(@PathVariable Long id) {
 		// ...
@@ -147,7 +147,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		registry.addMapping("/api/**")
-			.allowedOrigins("http://domain2.com")
+			.allowedOrigins("https://domain2.com")
 			.allowedMethods("PUT", "DELETE")
 			.allowedHeaders("header1", "header2", "header3")
 			.exposedHeaders("header1", "header2")
@@ -177,14 +177,14 @@ It is also possible to declare several CORS mappings with customized properties:
 <mvc:cors>
 
 	<mvc:mapping path="/api/**"
-		allowed-origins="http://domain1.com, http://domain2.com"
+		allowed-origins="https://domain1.com, https://domain2.com"
 		allowed-methods="GET, PUT"
 		allowed-headers="header1, header2, header3"
 		exposed-headers="header1, header2" allow-credentials="false"
 		max-age="123" />
 
 	<mvc:mapping path="/resources/**"
-		allowed-origins="http://domain1.com" />
+		allowed-origins="https://domain1.com" />
 
 </mvc:cors>
 ----
@@ -208,9 +208,9 @@ It can be provided in various ways:
 == Filter based CORS support
 
 In order to support CORS with filter-based security frameworks like
-http://projects.spring.io/spring-security/[Spring Security], or
+https://projects.spring.io/spring-security/[Spring Security], or
 with other libraries that do not support natively CORS, Spring Framework also
-provides a http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/filter/CorsFilter.html[`CorsFilter`].
+provides a https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/filter/CorsFilter.html[`CorsFilter`].
 Instead of using `@CrossOrigin` or `WebMvcConfigurer#addCorsMappings(CorsRegistry)`, you
 need to register a custom filter defined like bellow:
 
@@ -229,7 +229,7 @@ public class MyCorsFilter extends CorsFilter {
 	private static UrlBasedCorsConfigurationSource configurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		config.addAllowedOrigin("http://domain1.com");
+		config.addAllowedOrigin("https://domain1.com");
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("*");
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

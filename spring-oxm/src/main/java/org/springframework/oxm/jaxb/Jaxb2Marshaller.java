@@ -589,7 +589,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 							supportsInternal(classArgument, false));
 				}
 				else if (typeArgument instanceof GenericArrayType) {
-					// Only on JDK 6 - see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5041784
+					// Only on JDK 6 - see https://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5041784
 					GenericArrayType arrayType = (GenericArrayType) typeArgument;
 					return (Byte.TYPE == arrayType.getGenericComponentType());
 				}

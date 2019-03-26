@@ -1,7 +1,7 @@
 package org.springframework.scripting.jruby;
 
 /**
- * http://opensource.atlassian.com/projects/spring/browse/SPR-3026
+ * https://opensource.atlassian.com/projects/spring/browse/SPR-3026
  *
  * @author Rick Evans
  */

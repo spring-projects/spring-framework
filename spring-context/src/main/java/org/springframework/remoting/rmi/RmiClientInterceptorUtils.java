@@ -179,7 +179,7 @@ public abstract class RmiClientInterceptorUtils {
 	 * connection failure.
 	 * <p>This is relevant on the IBM JVM, in particular for WebSphere EJB clients.
 	 * <p>See the
-	 * <a href="http://www.redbooks.ibm.com/Redbooks.nsf/RedbookAbstracts/tips0243.html">IBM website</code>
+	 * <a href="https://www.redbooks.ibm.com/Redbooks.nsf/RedbookAbstracts/tips0243.html">IBM website</code>
 	 * for details.
 	 * @param ex the RMI exception to check
 	 */
