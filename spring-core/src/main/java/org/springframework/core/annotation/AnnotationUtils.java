@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,14 +57,14 @@ import org.springframework.util.StringUtils;
  * <p>Note that most of the features of this class are not provided by the
  * JDK's introspection facilities themselves.
  *
- * <p>As a general rule for runtime-retained annotations (e.g. for transaction
- * control, authorization, or service exposure), always use the lookup methods
- * on this class (e.g., {@link #findAnnotation(Method, Class)},
- * {@link #getAnnotation(Method, Class)}, and {@link #getAnnotations(Method)})
- * instead of the plain annotation lookup methods in the JDK. You can still
- * explicitly choose between a <em>get</em> lookup on the given class level only
- * ({@link #getAnnotation(Method, Class)}) and a <em>find</em> lookup in the entire
- * inheritance hierarchy of the given method ({@link #findAnnotation(Method, Class)}).
+ * <p>As a general rule for runtime-retained application annotations (e.g. for
+ * transaction control, authorization, or service exposure), always use the
+ * lookup methods on this class (e.g. {@link #findAnnotation(Method, Class)} or
+ * {@link #getAnnotation(Method, Class)}) instead of the plain annotation lookup
+ * methods in the JDK. You can still explicitly choose between a <em>get</em>
+ * lookup on the given class level only ({@link #getAnnotation(Method, Class)})
+ * and a <em>find</em> lookup in the entire inheritance hierarchy of the given
+ * method ({@link #findAnnotation(Method, Class)}).
  *
  * <h3>Terminology</h3>
  * The terms <em>directly present</em>, <em>indirectly present</em>, and
@@ -449,7 +449,13 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	@Nullable
-	public static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
+	public static <A extends Annotation> A findAnnotation(
+			AnnotatedElement annotatedElement, @Nullable Class<A> annotationType) {
+
+		if (annotationType == null) {
+			return null;
+		}
+
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
 		A ann = findAnnotation(annotatedElement, annotationType, new HashSet<>());
@@ -697,7 +703,7 @@ public abstract class AnnotationUtils {
 	 * @return the first matching annotation, or {@code null} if not found
 	 */
 	@Nullable
-	public static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType) {
+	public static <A extends Annotation> A findAnnotation(Class<?> clazz, @Nullable Class<A> annotationType) {
 		return findAnnotation(clazz, annotationType, true);
 	}
 
@@ -793,8 +799,8 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the annotation type to look for
 	 * @param clazz the class to check for the annotation on (may be {@code null})
 	 * @return the first {@link Class} in the inheritance hierarchy that
-	 * declares an annotation of the specified {@code annotationType}, or
-	 * {@code null} if not found
+	 * declares an annotation of the specified {@code annotationType},
+	 * or {@code null} if not found
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
 	 * @see #findAnnotationDeclaringClassForTypes(List, Class)
@@ -825,7 +831,7 @@ public abstract class AnnotationUtils {
 	 * one of several candidate {@linkplain Annotation annotations}, so we
 	 * need to handle this explicitly.
 	 * @param annotationTypes the annotation types to look for
-	 * @param clazz the class to check for the annotations on, or {@code null}
+	 * @param clazz the class to check for the annotation on (may be {@code null})
 	 * @return the first {@link Class} in the inheritance hierarchy that
 	 * declares an annotation of at least one of the specified
 	 * {@code annotationTypes}, or {@code null} if not found
@@ -1044,7 +1050,9 @@ public abstract class AnnotationUtils {
 	 * corresponding attribute values as values (never {@code null})
 	 * @see #getAnnotationAttributes(Annotation, boolean, boolean)
 	 */
-	public static Map<String, Object> getAnnotationAttributes(Annotation annotation, boolean classValuesAsString) {
+	public static Map<String, Object> getAnnotationAttributes(
+			Annotation annotation, boolean classValuesAsString) {
+
 		return getAnnotationAttributes(annotation, classValuesAsString, false);
 	}
 
@@ -1064,8 +1072,8 @@ public abstract class AnnotationUtils {
 	 * and corresponding attribute values as values (never {@code null})
 	 * @since 3.1.1
 	 */
-	public static AnnotationAttributes getAnnotationAttributes(Annotation annotation, boolean classValuesAsString,
-			boolean nestedAnnotationsAsMap) {
+	public static AnnotationAttributes getAnnotationAttributes(
+			Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
 		return getAnnotationAttributes(null, annotation, classValuesAsString, nestedAnnotationsAsMap);
 	}
@@ -1083,7 +1091,9 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
-	public static AnnotationAttributes getAnnotationAttributes(@Nullable AnnotatedElement annotatedElement, Annotation annotation) {
+	public static AnnotationAttributes getAnnotationAttributes(
+			@Nullable AnnotatedElement annotatedElement, Annotation annotation) {
+
 		return getAnnotationAttributes(annotatedElement, annotation, false, false);
 	}
 
@@ -1149,8 +1159,8 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 * @see #postProcessAnnotationAttributes
 	 */
-	static AnnotationAttributes retrieveAnnotationAttributes(@Nullable Object annotatedElement, Annotation annotation,
-			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+	static AnnotationAttributes retrieveAnnotationAttributes(@Nullable Object annotatedElement,
+			Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
 		Class<? extends Annotation> annotationType = annotation.annotationType();
 		AnnotationAttributes attributes = new AnnotationAttributes(annotationType);
@@ -1432,8 +1442,8 @@ public abstract class AnnotationUtils {
 		}
 		catch (InvocationTargetException ex) {
 			rethrowAnnotationConfigurationException(ex.getTargetException());
-			throw new IllegalStateException(
-					"Could not obtain value for annotation attribute '" + attributeName + "' in " + annotation, ex);
+			throw new IllegalStateException("Could not obtain value for annotation attribute '" +
+					attributeName + "' in " + annotation, ex);
 		}
 		catch (Throwable ex) {
 			handleIntrospectionFailure(annotation.getClass(), ex);
@@ -1462,10 +1472,7 @@ public abstract class AnnotationUtils {
 	 */
 	@Nullable
 	public static Object getDefaultValue(@Nullable Annotation annotation, @Nullable String attributeName) {
-		if (annotation == null) {
-			return null;
-		}
-		return getDefaultValue(annotation.annotationType(), attributeName);
+		return (annotation != null ? getDefaultValue(annotation.annotationType(), attributeName) : null);
 	}
 
 	/**
@@ -2042,7 +2049,7 @@ public abstract class AnnotationUtils {
 
 		private final Set<A> result = new LinkedHashSet<>();
 
-		AnnotationCollector(Class<A> annotationType,@Nullable Class<? extends Annotation> containerAnnotationType) {
+		AnnotationCollector(Class<A> annotationType, @Nullable Class<? extends Annotation> containerAnnotationType) {
 			this.annotationType = annotationType;
 			this.containerAnnotationType = (containerAnnotationType != null ? containerAnnotationType :
 					resolveContainerAnnotationType(annotationType));
