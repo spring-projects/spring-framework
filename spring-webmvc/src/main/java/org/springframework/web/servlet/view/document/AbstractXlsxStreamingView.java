@@ -29,7 +29,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
  * using POI's streaming variant. Compatible with Apache POI 3.9 and higher.
  *
  * <p>For working with the workbook in subclasses, see
- * <a href="http://poi.apache.org">Apache's POI site</a>.
+ * <a href="https://poi.apache.org">Apache's POI site</a>.
  *
  * @author Juergen Hoeller
  * @since 4.2

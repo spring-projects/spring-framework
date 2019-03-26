@@ -109,7 +109,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		WebMvcStompWebSocketEndpointRegistration registration =
 				new WebMvcStompWebSocketEndpointRegistration(new String[] {"/foo"}, this.handler, this.scheduler);
 
-		String origin = "http://mydomain.com";
+		String origin = "https://mydomain.com";
 		registration.setAllowedOrigins(origin).withSockJS();
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
@@ -178,7 +178,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
-		String origin = "http://mydomain.com";
+		String origin = "https://mydomain.com";
 		registration.setHandshakeHandler(handshakeHandler).addInterceptors(interceptor).setAllowedOrigins(origin);
 
 		MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
@@ -232,7 +232,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 
 		DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
-		String origin = "http://mydomain.com";
+		String origin = "https://mydomain.com";
 
 		registration.setHandshakeHandler(handshakeHandler).addInterceptors(interceptor).setAllowedOrigins(origin).withSockJS();
 

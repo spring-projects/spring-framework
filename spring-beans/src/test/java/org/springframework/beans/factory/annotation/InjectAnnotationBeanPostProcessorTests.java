@@ -551,7 +551,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	 * Verifies that a dependency on a {@link org.springframework.beans.factory.FactoryBean} can be autowired via
 	 * {@link org.springframework.beans.factory.annotation.Autowired @Inject}, specifically addressing the JIRA issue
 	 * raised in <a
-	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4040"
+	 * href="https://opensource.atlassian.com/projects/spring/browse/SPR-4040"
 	 * target="_blank">SPR-4040</a>.
 	 */
 	@Test

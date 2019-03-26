@@ -178,7 +178,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
 				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
 		assertTrue(defaultSockJsService.getAllowedOrigins().contains("http://mydomain3.com"));
-		assertTrue(defaultSockJsService.getAllowedOrigins().contains("http://mydomain4.com"));
+		assertTrue(defaultSockJsService.getAllowedOrigins().contains("http://www.mydomain4.com/"));
 
 		SimpUserRegistry userRegistry = this.appContext.getBean(SimpUserRegistry.class);
 		assertNotNull(userRegistry);

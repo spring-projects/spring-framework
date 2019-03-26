@@ -85,7 +85,7 @@ public class MockMvcWebClientBuilderTests {
 		this.webClient = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMvcProcessed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
+		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("https://example.com/"));
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class MockMvcWebClientBuilderTests {
 		this.webClient = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherClient).build();
 
 		assertMvcProcessed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
+		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("https://example.com/"));
 	}
 
 	private void assertMvcProcessed(String url) throws Exception {

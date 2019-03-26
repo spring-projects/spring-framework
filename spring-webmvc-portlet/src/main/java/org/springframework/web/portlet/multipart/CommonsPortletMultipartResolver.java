@@ -36,7 +36,7 @@ import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * {@link PortletMultipartResolver} implementation for
- * <a href="http://commons.apache.org/proper/commons-fileupload">Apache Commons FileUpload</a>
+ * <a href="https://commons.apache.org/proper/commons-fileupload">Apache Commons FileUpload</a>
  * 1.2 or above.
  *
  * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as

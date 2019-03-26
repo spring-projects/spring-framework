@@ -62,7 +62,7 @@ public class ClientSockJsSessionTests {
 
 	@Before
 	public void setup() throws Exception {
-		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
+		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
 		Transport transport = mock(Transport.class);
 		TransportRequest request = new DefaultTransportRequest(urlInfo, null, null, transport, TransportType.XHR, CODEC);
 		this.handler = mock(WebSocketHandler.class);

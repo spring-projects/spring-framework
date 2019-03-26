@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public class CorsConfiguration {
 
@@ -116,7 +116,7 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
+	 * Set the origins to allow, e.g. {@code "https://domain1.com"}.
 	 * <p>The special value {@code "*"} allows all domains.
 	 * <p>By default this is not set.
 	 */

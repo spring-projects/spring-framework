@@ -55,7 +55,7 @@ public @interface CrossOrigin {
 	String[] value() default {};
 
 	/**
-	 * List of allowed origins, e.g. {@code "http://domain1.com"}.
+	 * List of allowed origins, e.g. {@code "https://domain1.com"}.
 	 * <p>These values are placed in the {@code Access-Control-Allow-Origin}
 	 * header of both the pre-flight response and the actual response.
 	 * {@code "*"} means that all origins are allowed.

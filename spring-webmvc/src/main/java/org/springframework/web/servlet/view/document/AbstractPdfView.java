@@ -31,7 +31,7 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Abstract superclass for PDF views, using Bruno Lowagie's
- * <a href="http://www.lowagie.com/iText">iText</a> package.
+ * <a href="https://www.lowagie.com/iText">iText</a> package.
  * Application-specific view classes will extend this class.
  * The view will be held in the subclass itself, not in a template.
  *
