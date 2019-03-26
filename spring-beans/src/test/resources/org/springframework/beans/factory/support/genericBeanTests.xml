@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -15,19 +15,19 @@
 	</bean>
 
 	<bean id="list" class="org.springframework.beans.factory.config.ListFactoryBean">
-		<property name="sourceList" value="http://localhost:8080"/>
+		<property name="sourceList" value="https://localhost:8080"/>
 		<property name="targetListClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlList"/>
 	</bean>
 
 	<bean id="set" class="org.springframework.beans.factory.config.SetFactoryBean">
-		<property name="sourceSet" value="http://localhost:8080"/>
+		<property name="sourceSet" value="https://localhost:8080"/>
 		<property name="targetSetClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlSet"/>
 	</bean>
 
 	<bean id="map" class="org.springframework.beans.factory.config.MapFactoryBean">
 		<property name="sourceMap">
 			<map>
-				<entry key="10" value="http://localhost:8080"/>
+				<entry key="10" value="https://localhost:8080"/>
 			</map>
 		</property>
 		<property name="targetMapClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlMap"/>
@@ -64,7 +64,7 @@
   </bean>
 
   <bean id="setBean" class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$UrlSet">
-    <property name="urlNames" value="http://www.springframework.org"/>
+    <property name="urlNames" value="https://www.springframework.org"/>
   </bean>
 
 </beans>

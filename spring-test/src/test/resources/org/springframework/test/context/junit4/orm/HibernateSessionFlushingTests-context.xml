@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+<beans xmlns="https://www.springframework.org/schema/beans" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="https://www.springframework.org/schema/p" xmlns:context="https://www.springframework.org/schema/context"
+	xmlns:tx="https://www.springframework.org/schema/tx" xmlns:jdbc="https://www.springframework.org/schema/jdbc"
 	xsi:schemaLocation="
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
-		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+		https://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		https://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		https://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd
+		https://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
 	<context:component-scan base-package="org.springframework.test.context.junit4.orm"/>
 
