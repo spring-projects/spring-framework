@@ -85,7 +85,7 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
 		assertMvcProcessed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
+		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("https://example.com/"));
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMvcProcessed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
+		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("https://example.com/"));
 	}
 
 	@Test

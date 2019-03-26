@@ -83,8 +83,8 @@ public class ResourceUrlProviderTests {
 		request.setContextPath("/");
 		request.setRequestURI("/");
 
-		String url = this.translator.getForRequestUrl(request, "/resources/foo.css?foo=bar&url=http://example.org");
-		assertEquals("/resources/foo.css?foo=bar&url=http://example.org", url);
+		String url = this.translator.getForRequestUrl(request, "/resources/foo.css?foo=bar&url=https://example.org");
+		assertEquals("/resources/foo.css?foo=bar&url=https://example.org", url);
 	}
 
 	@Test

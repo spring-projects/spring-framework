@@ -66,7 +66,7 @@ public class RedirectViewTests {
 	@Test
 	public void http11() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.setUrl("http://url.somewhere.com");
+		rv.setUrl("https://url.somewhere.com");
 		rv.setHttp10Compatible(false);
 		MockHttpServletRequest request = createRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -74,7 +74,7 @@ public class RedirectViewTests {
 		request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager());
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(303, response.getStatus());
-		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
 	}
 
 	private MockHttpServletRequest createRequest() {
@@ -87,57 +87,57 @@ public class RedirectViewTests {
 	@Test
 	public void explicitStatusCodeHttp11() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.setUrl("http://url.somewhere.com");
+		rv.setUrl("https://url.somewhere.com");
 		rv.setHttp10Compatible(false);
 		rv.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
 		MockHttpServletRequest request = createRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(301, response.getStatus());
-		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
 	}
 
 	@Test
 	public void explicitStatusCodeHttp10() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.setUrl("http://url.somewhere.com");
+		rv.setUrl("https://url.somewhere.com");
 		rv.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
 		MockHttpServletRequest request = createRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(301, response.getStatus());
-		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
 	}
 
 	@Test
 	public void attributeStatusCodeHttp10() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.setUrl("http://url.somewhere.com");
+		rv.setUrl("https://url.somewhere.com");
 		MockHttpServletRequest request = createRequest();
 		request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.CREATED);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(201, response.getStatus());
-		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
 	}
 
 	@Test
 	public void attributeStatusCodeHttp11() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.setUrl("http://url.somewhere.com");
+		rv.setUrl("https://url.somewhere.com");
 		rv.setHttp10Compatible(false);
 		MockHttpServletRequest request = createRequest();
 		request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.CREATED);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(201, response.getStatus());
-		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+		assertEquals("https://url.somewhere.com", response.getHeader("Location"));
 	}
 
 	@Test
 	public void flashMap() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.setUrl("http://url.somewhere.com/path");
+		rv.setUrl("https://url.somewhere.com/path");
 		rv.setHttp10Compatible(false);
 		MockHttpServletRequest request = createRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -147,7 +147,7 @@ public class RedirectViewTests {
 		ModelMap model = new ModelMap("id", "1");
 		rv.render(model, request, response);
 		assertEquals(303, response.getStatus());
-		assertEquals("http://url.somewhere.com/path?id=1", response.getHeader("Location"));
+		assertEquals("https://url.somewhere.com/path?id=1", response.getHeader("Location"));
 
 		assertEquals("/path", flashMap.getTargetRequestPath());
 		assertEquals(model, flashMap.getTargetRequestParams().toSingleValueMap());
@@ -223,7 +223,7 @@ public class RedirectViewTests {
 
 	@Test
 	public void singleParam() throws Exception {
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		String key = "foo";
 		String val = "bar";
 		Map<String, String> model = new HashMap<String, String>();
@@ -234,7 +234,7 @@ public class RedirectViewTests {
 
 	@Test
 	public void singleParamWithoutExposingModelAttributes() throws Exception {
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		String key = "foo";
 		String val = "bar";
 		Map<String, String> model = new HashMap<String, String>();
@@ -245,12 +245,12 @@ public class RedirectViewTests {
 
 	@Test
 	public void paramWithAnchor() throws Exception {
-		String url = "http://url.somewhere.com/test.htm#myAnchor";
+		String url = "https://url.somewhere.com/test.htm#myAnchor";
 		String key = "foo";
 		String val = "bar";
 		Map<String, String> model = new HashMap<String, String>();
 		model.put(key, val);
-		String expectedUrlForEncoding = "http://url.somewhere.com/test.htm" + "?" + key + "=" + val + "#myAnchor";
+		String expectedUrlForEncoding = "https://url.somewhere.com/test.htm" + "?" + key + "=" + val + "#myAnchor";
 		doTest(model, url, false, expectedUrlForEncoding);
 	}
 
@@ -262,7 +262,7 @@ public class RedirectViewTests {
 
 	@Test
 	public void twoParams() throws Exception {
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		String key = "foo";
 		String val = "bar";
 		String key2 = "thisIsKey2";
@@ -271,37 +271,37 @@ public class RedirectViewTests {
 		model.put(key, val);
 		model.put(key2, val2);
 		try {
-			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
+			String expectedUrlForEncoding = "https://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
 		catch (AssertionError err) {
 			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
-			String expectedUrlForEncoding = "http://url.somewhere.com?" + key2 + "=" + val2 + "&" + key + "=" + val;
+			String expectedUrlForEncoding = "https://url.somewhere.com?" + key2 + "=" + val2 + "&" + key + "=" + val;
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
 	}
 
 	@Test
 	public void arrayParam() throws Exception {
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		String key = "foo";
 		String[] val = new String[] {"bar", "baz"};
 		Map<String, String[]> model = new HashMap<String, String[]>();
 		model.put(key, val);
 		try {
-			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val[0] + "&" + key + "=" + val[1];
+			String expectedUrlForEncoding = "https://url.somewhere.com?" + key + "=" + val[0] + "&" + key + "=" + val[1];
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
 		catch (AssertionError err) {
 			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
-			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val[1] + "&" + key + "=" + val[0];
+			String expectedUrlForEncoding = "https://url.somewhere.com?" + key + "=" + val[1] + "&" + key + "=" + val[0];
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
 	}
 
 	@Test
 	public void collectionParam() throws Exception {
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		String key = "foo";
 		List<String> val = new ArrayList<String>();
 		val.add("bar");
@@ -309,19 +309,19 @@ public class RedirectViewTests {
 		Map<String, List<String>> model = new HashMap<String, List<String>>();
 		model.put(key, val);
 		try {
-			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val.get(0) + "&" + key + "=" + val.get(1);
+			String expectedUrlForEncoding = "https://url.somewhere.com?" + key + "=" + val.get(0) + "&" + key + "=" + val.get(1);
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
 		catch (AssertionError err) {
 			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
-			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val.get(1) + "&" + key + "=" + val.get(0);
+			String expectedUrlForEncoding = "https://url.somewhere.com?" + key + "=" + val.get(1) + "&" + key + "=" + val.get(0);
 			doTest(model, url, false, expectedUrlForEncoding);
 		}
 	}
 
 	@Test
 	public void objectConversion() throws Exception {
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		String key = "foo";
 		String val = "bar";
 		String key2 = "int2";
@@ -332,7 +332,7 @@ public class RedirectViewTests {
 		model.put(key, val);
 		model.put(key2, val2);
 		model.put(key3, val3);
-		String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
+		String expectedUrlForEncoding = "https://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
 		doTest(model, url, false, expectedUrlForEncoding);
 	}
 
@@ -340,13 +340,13 @@ public class RedirectViewTests {
 	public void propagateQueryParams() throws Exception {
 		RedirectView rv = new RedirectView();
 		rv.setPropagateQueryParams(true);
-		rv.setUrl("http://url.somewhere.com?foo=bar#bazz");
+		rv.setUrl("https://url.somewhere.com?foo=bar#bazz");
 		MockHttpServletRequest request = createRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		request.setQueryString("a=b&c=d");
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(302, response.getStatus());
-		assertEquals("http://url.somewhere.com?foo=bar&a=b&c=d#bazz", response.getHeader("Location"));
+		assertEquals("https://url.somewhere.com?foo=bar&a=b&c=d#bazz", response.getHeader("Location"));
 	}
 
 	private void doTest(Map<String, ?> map, String url, boolean contextRelative, String expectedUrlForEncoding)

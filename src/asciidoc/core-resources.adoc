@@ -250,7 +250,7 @@ Similarly, one can force a `UrlResource` to be used by specifying any of the sta
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
+	Resource template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt");
 ----
 
 The following table summarizes the strategy for converting ``String``s to ``Resource``s:
@@ -270,7 +270,7 @@ The following table summarizes the strategy for converting ``String``s to ``Reso
   pass:specialcharacters,macros[<<resources-filesystemresource-caveats>>].]
 
 | http:
-| `http://myserver/logo.png`
+| `https://myserver/logo.png`
 | Loaded as a `URL`.
 
 | (none)

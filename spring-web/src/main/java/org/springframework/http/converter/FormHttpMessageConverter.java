@@ -66,7 +66,7 @@ import org.springframework.util.StringUtils;
  * form.add("field 1", "value 1");
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
- * template.postForLocation("http://example.com/myForm", form);
+ * template.postForLocation("https://example.com/myForm", form);
  * </pre>
  *
  * <p>The following snippet shows how to do a file upload:
@@ -74,7 +74,7 @@ import org.springframework.util.StringUtils;
  * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;String, Object&gt;();
  * parts.add("field 1", "value 1");
  * parts.add("file", new ClassPathResource("myFile.jpg"));
- * template.postForLocation("http://example.com/myFileUpload", parts);
+ * template.postForLocation("https://example.com/myFileUpload", parts);
  * </pre>
  *
  * <p>Some methods in this class were inspired by
@@ -127,7 +127,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * <p>If not set file names will be encoded as US-ASCII.
 	 * @param multipartCharset the charset to use
 	 * @since 4.1.1
-	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
 	 */
 	public void setMultipartCharset(Charset multipartCharset) {
 		this.multipartCharset = multipartCharset;

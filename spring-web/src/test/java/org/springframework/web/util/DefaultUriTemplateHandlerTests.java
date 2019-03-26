@@ -62,11 +62,11 @@ public class DefaultUriTemplateHandlerTests {
 		Map<String, String> vars = new HashMap<String, String>(2);
 		vars.put("hotel", "1");
 		vars.put("publicpath", "pics/logo.png");
-		String template = "http://example.com/hotels/{hotel}/pic/{publicpath}";
+		String template = "https://example.com/hotels/{hotel}/pic/{publicpath}";
 
 		URI actual = this.handler.expand(template, vars);
 
-		URI expected = new URI("http://example.com/hotels/1/pic/pics/logo.png");
+		URI expected = new URI("https://example.com/hotels/1/pic/pics/logo.png");
 		assertEquals(expected, actual);
 	}
 
@@ -76,12 +76,12 @@ public class DefaultUriTemplateHandlerTests {
 		vars.put("hotel", "1");
 		vars.put("publicpath", "pics/logo.png");
 		vars.put("scale", "150x150");
-		String template = "http://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
+		String template = "https://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
 
 		this.handler.setParsePath(true);
 		URI actual = this.handler.expand(template, vars);
 
-		URI expected = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
+		URI expected = new URI("https://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
 		assertEquals(expected, actual);
 	}
 

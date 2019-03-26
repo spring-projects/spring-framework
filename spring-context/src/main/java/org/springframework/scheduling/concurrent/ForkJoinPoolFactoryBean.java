@@ -30,7 +30,7 @@ import org.springframework.lang.UsesJava7;
  * (ideally on the VM bootstrap classpath).
  *
  * <p>For details on the ForkJoinPool API and its use with RecursiveActions, see the
- * <a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ForkJoinPool.html">JDK 7 javadoc</a>.
+ * <a href="https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ForkJoinPool.html">JDK 7 javadoc</a>.
  *
  * <p>{@code jsr166.jar}, containing {@code java.util.concurrent} updates for Java 6, can be obtained
  * from the <a href="http://gee.cs.oswego.edu/dl/concurrency-interest/">concurrency interest website</a>.

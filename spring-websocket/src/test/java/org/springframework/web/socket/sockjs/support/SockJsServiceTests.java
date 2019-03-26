@@ -102,7 +102,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":false,\"websocket\":false}",
 				body.substring(body.indexOf(',')));
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 		assertNull(this.servletResponse.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertNull(this.servletResponse.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
@@ -121,17 +121,17 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals("{\"entropy\"", body.substring(0, body.indexOf(':')));
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}", body.substring(body.indexOf(',')));
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		this.service.setAllowedOrigins(Arrays.asList("*"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		this.servletRequest.setServerName("mydomain3.com");
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
 	}
 
@@ -166,7 +166,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNull(this.service.getCorsConfiguration(this.servletRequest));
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNull(this.service.getCorsConfiguration(this.servletRequest));
 	}
@@ -180,11 +180,11 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
@@ -193,7 +193,7 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
 		this.servletRequest.setServerName("mydomain3.com");
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
 	}
 
@@ -207,11 +207,11 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNull(this.service.getCorsConfiguration(this.servletRequest));
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
 		assertNull(this.service.getCorsConfiguration(this.servletRequest));
 
-		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
+		this.service.setAllowedOrigins(Arrays.asList("https://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNull(this.service.getCorsConfiguration(this.servletRequest));
 	}

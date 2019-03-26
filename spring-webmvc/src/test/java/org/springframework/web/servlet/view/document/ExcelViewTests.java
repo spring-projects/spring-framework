@@ -328,7 +328,7 @@ public class ExcelViewTests {
 
 	/**
 	 * Workaround JXL bug that causes ArrayIndexOutOfBounds exceptions when running in
-	 * *nix machines. Same bug as reported at http://jira.pentaho.com/browse/PDI-5031.
+	 * *nix machines. Same bug as reported at https://jira.pentaho.com/browse/PDI-5031.
 	 * <p>We want to use the latest JXL code because it doesn't include log4j config files
 	 * inside the jar. Since the project appears to be abandoned, AbstractJExcelView is
 	 * deprecated as of Spring 4.0.

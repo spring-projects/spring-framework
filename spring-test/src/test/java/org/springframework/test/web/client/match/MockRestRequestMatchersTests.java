@@ -39,21 +39,21 @@ public class MockRestRequestMatchersTests {
 
 	@Test
 	public void requestTo() throws Exception {
-		this.request.setURI(new URI("http://foo.com/bar"));
+		this.request.setURI(new URI("http://www.foo.com/bar"));
 
-		MockRestRequestMatchers.requestTo("http://foo.com/bar").match(this.request);
+		MockRestRequestMatchers.requestTo("http://www.foo.com/bar").match(this.request);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void requestToNoMatch() throws Exception {
-		this.request.setURI(new URI("http://foo.com/bar"));
+		this.request.setURI(new URI("http://www.foo.com/bar"));
 
-		MockRestRequestMatchers.requestTo("http://foo.com/wrong").match(this.request);
+		MockRestRequestMatchers.requestTo("http://www.foo.com/wrong").match(this.request);
 	}
 
 	@Test
 	public void requestToContains() throws Exception {
-		this.request.setURI(new URI("http://foo.com/bar"));
+		this.request.setURI(new URI("http://www.foo.com/bar"));
 
 		MockRestRequestMatchers.requestTo(containsString("bar")).match(this.request);
 	}

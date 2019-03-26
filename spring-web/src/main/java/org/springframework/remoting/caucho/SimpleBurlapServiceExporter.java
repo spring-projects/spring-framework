@@ -33,7 +33,7 @@ import org.springframework.util.FileCopyUtils;
  *
  * <p>Burlap is a slim, XML-based RPC protocol.
  * For information on Burlap, see the
- * <a href="http://www.caucho.com/burlap">Burlap website</a>.
+ * <a href="https://www.caucho.com/burlap">Burlap website</a>.
  * This exporter requires Burlap 3.x.
  *
  * <p>Note: Burlap services exported with this class can be accessed by

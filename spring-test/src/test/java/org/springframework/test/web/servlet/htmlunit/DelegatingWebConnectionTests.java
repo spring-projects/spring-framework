@@ -138,7 +138,7 @@ public class DelegatingWebConnectionTests {
 
 		webClient.setWebConnection(webConnection);
 
-		Page page = webClient.getPage("http://code.jquery.com/jquery-1.11.0.min.js");
+		Page page = webClient.getPage("https://code.jquery.com/jquery-1.11.0.min.js");
 		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
 		assertThat(page.getWebResponse().getContentAsString(), not(isEmptyString()));
 	}
