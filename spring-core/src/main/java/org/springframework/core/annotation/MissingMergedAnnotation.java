@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
  * {@link MergedAnnotation#missing()}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 5.2
  * @param <A> the annotation type
  */
@@ -44,7 +45,7 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 
 
 	@Override
-	public String getType() {
+	public Class<A> getType() {
 		throw new NoSuchElementException("Unable to get type for missing annotation");
 	}
 
@@ -112,13 +113,8 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T extends Map<String, Object>> T asMap(
-			@Nullable Function<MergedAnnotation<?>, T> factory, MapValues... options) {
-		if (factory != null) {
-			return factory.apply(this);
-		}
-		return (T) ((Map) Collections.emptyMap());
+	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, MapValues... options) {
+		return factory.apply(this);
 	}
 
 	@Override

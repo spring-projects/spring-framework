@@ -51,6 +51,7 @@ import org.springframework.lang.Nullable;
  * synthesized} back into an actual {@link java.lang.annotation.Annotation}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 5.2
  * @param <A> the annotation type
  * @see MergedAnnotations
@@ -65,10 +66,10 @@ public interface MergedAnnotation<A extends Annotation> {
 
 
 	/**
-	 * Return the class name of the actual annotation type.
+	 * Return the {@code Class} reference for the actual annotation type.
 	 * @return the annotation type
 	 */
-	String getType();
+	Class<A> getType();
 
 	/**
 	 * Return if the annotation is present on the source. Considers
@@ -323,8 +324,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @return the value as a enum
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
-	<E extends Enum<E>> E getEnum(String attributeName, Class<E> type)
-			throws NoSuchElementException;
+	<E extends Enum<E>> E getEnum(String attributeName, Class<E> type) throws NoSuchElementException;
 
 	/**
 	 * Return a required enum array attribute value from the annotation.
@@ -333,8 +333,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @return the value as a enum array
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
-	<E extends Enum<E>> E[] getEnumArray(String attributeName, Class<E> type)
-			throws NoSuchElementException;
+	<E extends Enum<E>> E[] getEnumArray(String attributeName, Class<E> type) throws NoSuchElementException;
 
 	/**
 	 * Return a required annotation attribute value from the annotation.
@@ -353,8 +352,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @return the value as a {@link MergedAnnotation} array
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
-	<T extends Annotation> MergedAnnotation<T>[] getAnnotationArray(String attributeName,
-			Class<T> type) throws NoSuchElementException;
+	<T extends Annotation> MergedAnnotation<T>[] getAnnotationArray(String attributeName, Class<T> type)
+			throws NoSuchElementException;
 
 	/**
 	 * Return an optional attribute value from the annotation.
@@ -422,24 +421,21 @@ public interface MergedAnnotation<A extends Annotation> {
 	MergedAnnotation<A> withNonMergedAttributes();
 
 	/**
-	 * Return an immutable {@link Map} that contains all the annotation
-	 * attributes. The {@link MapValues} options may be used to change the way
-	 * that values are added.
+	 * Return an immutable {@link Map} that contains all the annotation attributes.
+	 * The {@link MapValues} options may be used to change the way that values are added.
 	 * @param options map value options
-	 * @return a map containing the attributes and values
+	 * @return an immutable map containing the attributes and values
 	 */
 	Map<String, Object> asMap(MapValues... options);
 
 	/**
-	 * Return a {@link Map} of the supplied type that contains all the annotation
-	 * attributes. The {@link MapValues} options may be used to change the way
-	 * that values are added.
-	 * @param factory a map factory or {@code null} to return an immutable map.
+	 * Return a {@link Map} of the given type that contains all the annotation attributes.
+	 * The {@link MapValues} options may be used to change the way that values are added.
+	 * @param factory a map factory
 	 * @param options map value options
 	 * @return a map containing the attributes and values
 	 */
-	<T extends Map<String, Object>> T asMap(
-			@Nullable Function<MergedAnnotation<?>, T> factory, MapValues... options);
+	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, MapValues... options);
 
 	/**
 	 * Return a type-safe synthesized version of this annotation that can be
@@ -460,8 +456,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @throws NoSuchElementException on a missing annotation
 	 * @see MergedAnnotationPredicates
 	 */
-	Optional<A> synthesize(@Nullable Predicate<? super MergedAnnotation<A>> condition)
-			throws NoSuchElementException;
+	Optional<A> synthesize(Predicate<? super MergedAnnotation<A>> condition) throws NoSuchElementException;
 
 
 	/**
@@ -511,10 +506,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Create a new {@link MergedAnnotations} instance from the specified
 	 * annotation type and attributes maps.
 	 * @param annotationType the annotation type
-	 * @param attributes the annotation attributes or {@code null} if just
-	 * default values should be used
-	 * @return a {@link MergedAnnotation} instance for the annotation and
-	 * attributes
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
 	 * @see #from(AnnotatedElement, Class, Map)
 	 */
 	static <A extends Annotation> MergedAnnotation<A> from(
@@ -530,10 +524,9 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * information and logging. It does not need to <em>actually</em> contain
 	 * the specified annotations and it will not be searched.
 	 * @param annotationType the annotation type
-	 * @param attributes the annotation attributes or {@code null} if just
-	 * default values should be used
-	 * @return a {@link MergedAnnotation} instance for the annotation and
-	 * attributes
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
 	 */
 	static <A extends Annotation> MergedAnnotation<A> from(
 			@Nullable AnnotatedElement source, Class<A> annotationType, @Nullable Map<String, ?> attributes) {

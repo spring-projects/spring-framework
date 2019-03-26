@@ -17,6 +17,7 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
@@ -36,7 +37,7 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
-import org.springframework.lang.Nullable;
+import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.*;
@@ -55,6 +56,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @author Phillip Webb
  * @author Oleg Zhurakousky
  */
+@SuppressWarnings("deprecation")
 public class AnnotationUtilsTests {
 
 	@Rule
@@ -396,7 +398,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void isAnnotationDeclaredLocallyForAllScenarios() throws Exception {
+	public void isAnnotationDeclaredLocallyForAllScenarios() {
 		// no class-level annotation
 		assertFalse(isAnnotationDeclaredLocally(Transactional.class, NonAnnotatedInterface.class));
 		assertFalse(isAnnotationDeclaredLocally(Transactional.class, NonAnnotatedClass.class));
@@ -433,6 +435,12 @@ public class AnnotationUtilsTests {
 		assertFalse(isAnnotationInherited(Order.class, SubNonInheritedAnnotationInterface.class));
 		assertFalse(isAnnotationInherited(Order.class, NonInheritedAnnotationClass.class));
 		assertFalse(isAnnotationInherited(Order.class, SubNonInheritedAnnotationClass.class));
+	}
+
+	@Test
+	public void isAnnotationMetaPresentForJavaLangType() {
+		assertTrue(isAnnotationMetaPresent(Order.class, Documented.class));
+		assertTrue(isAnnotationMetaPresent(NonNullApi.class, Documented.class));
 	}
 
 	@Test
@@ -538,6 +546,13 @@ public class AnnotationUtilsTests {
 	public void getDefaultValueFromAnnotationType() {
 		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(Order.class, VALUE));
 		assertEquals(Ordered.LOWEST_PRECEDENCE, getDefaultValue(Order.class));
+	}
+
+	@Test
+	public void findRepeatableAnnotation() {
+		Repeatable repeatable = findAnnotation(MyRepeatable.class, Repeatable.class);
+		assertNotNull(repeatable);
+		assertEquals(MyRepeatableContainer.class, repeatable.value());
 	}
 
 	@Test
@@ -924,10 +939,8 @@ public class AnnotationUtilsTests {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(either(allOf(startsWith("Attributes map"),
 				containsString("returned null for required attribute 'text'"),
-				containsString("defined by annotation type ["
-						+ AnnotationWithoutDefaults.class.getName() + "]"))).or(
-								containsString(
-										"No value found for attribute named 'text' in merged annotation")));
+				containsString("defined by annotation type [" + AnnotationWithoutDefaults.class.getName() + "]"))).or(
+								containsString("No value found for attribute named 'text' in merged annotation")));
 		synthesizeAnnotation(attributes, AnnotationWithoutDefaults.class, null);
 	}
 
@@ -936,8 +949,8 @@ public class AnnotationUtilsTests {
 		Map<String, Object> map = Collections.singletonMap(VALUE, 42L);
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(containsString(
-				"Attribute 'value' in annotation org.springframework.stereotype.Component "
-				+ "should be compatible with java.lang.String but a java.lang.Long value was returned"));
+				"Attribute 'value' in annotation org.springframework.stereotype.Component " +
+				"should be compatible with java.lang.String but a java.lang.Long value was returned"));
 		synthesizeAnnotation(map, Component.class, null);
 	}
 
@@ -1052,12 +1065,6 @@ public class AnnotationUtilsTests {
 	public interface AnnotatedInterface {
 
 		@Order(0)
-		void fromInterfaceImplementedByRoot();
-	}
-
-	public interface NullableAnnotatedInterface {
-
-		@Nullable
 		void fromInterfaceImplementedByRoot();
 	}
 

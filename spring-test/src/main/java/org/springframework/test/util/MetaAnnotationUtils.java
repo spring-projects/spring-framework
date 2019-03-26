@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,6 @@ public abstract class MetaAnnotationUtils {
 	 * @param annotationType the type of annotation to look for
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
-	 * @see AnnotationUtils#findAnnotationDeclaringClass(Class, Class)
 	 * @see #findAnnotationDescriptorForTypes(Class, Class...)
 	 */
 	@Nullable
@@ -164,7 +163,6 @@ public abstract class MetaAnnotationUtils {
 	 * @param annotationTypes the types of annotations to look for
 	 * @return the corresponding annotation descriptor if one of the annotations
 	 * was found; otherwise {@code null}
-	 * @see AnnotationUtils#findAnnotationDeclaringClassForTypes(java.util.List, Class)
 	 * @see #findAnnotationDescriptor(Class, Class)
 	 */
 	@SuppressWarnings("unchecked")

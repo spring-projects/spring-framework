@@ -521,9 +521,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
 	 */
+	@SuppressWarnings("deprecation")
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
-		return determineRequiredStatus(
-				ann.asMap(mergedAnnotation -> new AnnotationAttributes()));
+		return determineRequiredStatus((AnnotationAttributes)
+				ann.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
 	}
 
 	/**
@@ -533,7 +534,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * or method when no beans are found.
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
-	 * @deprecated since 5.2 in favor of {@link #determineRequiredStatus(MergedAnnotation)}
+	 * @deprecated since 5.2, in favor of {@link #determineRequiredStatus(MergedAnnotation)}
 	 */
 	@Deprecated
 	protected boolean determineRequiredStatus(AnnotationAttributes ann) {

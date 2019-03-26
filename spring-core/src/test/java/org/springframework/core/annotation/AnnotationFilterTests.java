@@ -99,39 +99,6 @@ public class AnnotationFilterTests {
 		assertThat(AnnotationFilter.NONE.matches(TestAnnotation.class)).isFalse();
 	}
 
-	@Test
-	public void pacakgesReturnsPackagesAnnotationFilter() {
-		assertThat(AnnotationFilter.packages("com.example")).isInstanceOf(PackagesAnnotationFilter.class);
-	}
-
-	@Test
-	public void mostAppropriateForCollectionReturnsPlainWhenPossible() {
-		AnnotationFilter filter = AnnotationFilter.mostAppropriateFor(
-				Arrays.asList(TestAnnotation.class, OtherAnnotation.class));
-		assertThat(filter).isSameAs(AnnotationFilter.PLAIN);
-	}
-
-	@Test
-	public void mostAppropriateForCollectionWhenCantUsePlainReturnsNone() {
-		AnnotationFilter filter = AnnotationFilter.mostAppropriateFor(Arrays.asList(
-				TestAnnotation.class, OtherAnnotation.class, Nullable.class));
-		assertThat(filter).isSameAs(AnnotationFilter.NONE);
-	}
-
-	@Test
-	public void mostAppropriateForArrayReturnsPlainWhenPossible() {
-		AnnotationFilter filter = AnnotationFilter.mostAppropriateFor(
-				TestAnnotation.class, OtherAnnotation.class);
-		assertThat(filter).isSameAs(AnnotationFilter.PLAIN);
-	}
-
-	@Test
-	public void mostAppropriateForArrayWhenCantUsePlainReturnsNone() {
-		AnnotationFilter filter = AnnotationFilter.mostAppropriateFor(
-				TestAnnotation.class, OtherAnnotation.class, Nullable.class);
-		assertThat(filter).isSameAs(AnnotationFilter.NONE);
-	}
-
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface TestAnnotation {

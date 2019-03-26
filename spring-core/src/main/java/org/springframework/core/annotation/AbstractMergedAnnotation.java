@@ -18,7 +18,6 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -30,6 +29,7 @@ import org.springframework.util.Assert;
  * Abstract base class for {@link MergedAnnotation} implementations.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 5.2
  * @param <A> the annotation type
  */
@@ -167,19 +167,10 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 	}
 
 	@Override
-	public Map<String, Object> asMap(MapValues... options) {
-		return asMap(null, options);
-	}
-
-	@Override
-	public Optional<A> synthesize(
-			@Nullable Predicate<? super MergedAnnotation<A>> condition)
+	public Optional<A> synthesize(Predicate<? super MergedAnnotation<A>> condition)
 			throws NoSuchElementException {
 
-		if (condition == null || condition.test(this)) {
-			return Optional.of(synthesize());
-		}
-		return Optional.empty();
+		return (condition.test(this) ? Optional.of(synthesize()) : Optional.empty());
 	}
 
 	@Override
@@ -199,7 +190,7 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 		T value = getAttributeValue(attributeName, type);
 		if (value == null) {
 			throw new NoSuchElementException("No attribute named '" + attributeName +
-					"' present in merged annotation " + getType());
+					"' present in merged annotation " + getType().getName());
 		}
 		return value;
 	}

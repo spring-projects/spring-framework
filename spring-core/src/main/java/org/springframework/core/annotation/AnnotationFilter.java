@@ -17,10 +17,6 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collection;
-
-import org.springframework.util.Assert;
 
 /**
  * Callback interface that can be used to filter specific annotation types.
@@ -94,54 +90,6 @@ public interface AnnotationFilter {
 	 */
 	static AnnotationFilter packages(String... packages) {
 		return new PackagesAnnotationFilter(packages);
-	}
-
-	/**
-	 * Return an {@link AnnotationFilter} that is the most appropriate for, and
-	 * will always match the given annotation type. Whenever possible,
-	 * {@link AnnotationFilter#PLAIN} will be returned.
-	 * @param annotationType the annotation type to check
-	 * @return the most appropriate annotation filter
-	 */
-	static AnnotationFilter mostAppropriateFor(Class<?> annotationType) {
-		return (PLAIN.matches(annotationType) ? NONE : PLAIN);
-	}
-
-	/**
-	 * Return an {@link AnnotationFilter} that is the most appropriate for, and
-	 * will always match all the given annotation types. Whenever possible,
-	 * {@link AnnotationFilter#PLAIN} will be returned.
-	 * @param annotationTypes the annotation types to check
-	 * @return the most appropriate annotation filter
-	 */
-	static AnnotationFilter mostAppropriateFor(Class<?>... annotationTypes) {
-		return mostAppropriateFor(Arrays.asList(annotationTypes));
-	}
-
-	/**
-	 * Return an {@link AnnotationFilter} that is the most appropriate for, and
-	 * will always match all the given annotation types. Whenever possible,
-	 * {@link AnnotationFilter#PLAIN} will be returned.
-	 * @param annotationTypes the annotation types to check (may be class names
-	 * or class types)
-	 * @return the most appropriate annotation filter
-	 */
-	@SuppressWarnings("unchecked")
-	static AnnotationFilter mostAppropriateFor(Collection<?> annotationTypes) {
-		for (Object annotationType : annotationTypes) {
-			if (annotationType == null) {
-				continue;
-			}
-			Assert.isTrue(annotationType instanceof Class || annotationType instanceof String,
-					"AnnotationType must be a Class or String");
-			if (annotationType instanceof Class && PLAIN.matches((Class<Annotation>) annotationType)) {
-				return NONE;
-			}
-			if (annotationType instanceof String && PLAIN.matches((String) annotationType)) {
-				return NONE;
-			}
-		}
-		return PLAIN;
 	}
 
 }

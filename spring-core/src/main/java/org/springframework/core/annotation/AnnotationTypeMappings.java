@@ -55,8 +55,7 @@ final class AnnotationTypeMappings {
 	private final List<AnnotationTypeMapping> mappings;
 
 
-	private AnnotationTypeMappings(AnnotationFilter filter,
-			Class<? extends Annotation> annotationType) {
+	private AnnotationTypeMappings(AnnotationFilter filter, Class<? extends Annotation> annotationType) {
 		this.filter = filter;
 		this.mappings = new ArrayList<>();
 		addAllMappings(annotationType);
@@ -97,27 +96,23 @@ final class AnnotationTypeMappings {
 		}
 	}
 
-	private void addIfPossible(Deque<AnnotationTypeMapping> queue,
-			AnnotationTypeMapping parent, Annotation annotation) {
-		addIfPossible(queue, parent, annotation.annotationType(), annotation);
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping parent, Annotation ann) {
+		addIfPossible(queue, parent, ann.annotationType(), ann);
 	}
 
-	private void addIfPossible(Deque<AnnotationTypeMapping> queue,
-			@Nullable AnnotationTypeMapping parent,
-			Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue, @Nullable AnnotationTypeMapping parent,
+			Class<? extends Annotation> annotationType, @Nullable Annotation ann) {
 
 		try {
-			queue.addLast(new AnnotationTypeMapping(parent, annotationType, annotation));
+			queue.addLast(new AnnotationTypeMapping(parent, annotationType, ann));
 		}
 		catch (Exception ex) {
 			if (ex instanceof AnnotationConfigurationException) {
 				throw (AnnotationConfigurationException) ex;
 			}
 			if (failureLogger.isEnabled()) {
-				failureLogger.log(
-						"Failed to introspect meta-annotation "
-								+ annotationType.getName(),
-						(parent != null) ? parent.getAnnotationType() : null, ex);
+				failureLogger.log("Failed to introspect meta-annotation " + annotationType.getName(),
+						(parent != null ? parent.getAnnotationType() : null), ex);
 			}
 		}
 	}
@@ -167,7 +162,7 @@ final class AnnotationTypeMappings {
 	 * @return type mappings for the annotation type
 	 */
 	static AnnotationTypeMappings forAnnotationType(Class<? extends Annotation> annotationType) {
-		return forAnnotationType(annotationType, AnnotationFilter.mostAppropriateFor(annotationType));
+		return forAnnotationType(annotationType, AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -197,7 +192,6 @@ final class AnnotationTypeMappings {
 
 		private final Map<Class<? extends Annotation>, AnnotationTypeMappings> mappings;
 
-
 		/**
 		 * Create a cache instance with the specified filter.
 		 * @param filter the annotation filter
@@ -206,7 +200,6 @@ final class AnnotationTypeMappings {
 			this.filter = filter;
 			this.mappings = new ConcurrentReferenceHashMap<>();
 		}
-
 
 		/**
 		 * Return or create {@link AnnotationTypeMappings} for the specified
@@ -218,8 +211,7 @@ final class AnnotationTypeMappings {
 			return this.mappings.computeIfAbsent(annotationType, this::createMappings);
 		}
 
-		AnnotationTypeMappings createMappings(
-				Class<? extends Annotation> annotationType) {
+		AnnotationTypeMappings createMappings(Class<? extends Annotation> annotationType) {
 			return new AnnotationTypeMappings(this.filter, annotationType);
 		}
 

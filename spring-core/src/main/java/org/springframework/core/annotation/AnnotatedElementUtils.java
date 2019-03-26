@@ -21,7 +21,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -137,9 +136,7 @@ public abstract class AnnotatedElementUtils {
 	 * @see #getMetaAnnotationTypes(AnnotatedElement, Class)
 	 * @see #hasMetaAnnotationTypes
 	 */
-	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element,
-			String annotationName) {
-
+	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationName) {
 		for (Annotation annotation : element.getAnnotations()) {
 			if (annotation.annotationType().getName().equals(annotationName)) {
 				return getMetaAnnotationTypes(element, annotation);
@@ -148,14 +145,12 @@ public abstract class AnnotatedElementUtils {
 		return Collections.emptySet();
 	}
 
-	private static Set<String> getMetaAnnotationTypes(AnnotatedElement element,
-			@Nullable Annotation annotation) {
-
+	private static Set<String> getMetaAnnotationTypes(AnnotatedElement element, @Nullable Annotation annotation) {
 		if (annotation == null) {
 			return Collections.emptySet();
 		}
 		return getAnnotations(annotation.annotationType()).stream()
-				.map(MergedAnnotation::getType)
+				.map(mergedAnnotation -> mergedAnnotation.getType().getName())
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
@@ -171,11 +166,8 @@ public abstract class AnnotatedElementUtils {
 	 * @since 4.2.3
 	 * @see #getMetaAnnotationTypes
 	 */
-	public static boolean hasMetaAnnotationTypes(AnnotatedElement element,
-			Class<? extends Annotation> annotationType) {
-
-		return getAnnotations(element).stream(annotationType)
-				.anyMatch(MergedAnnotation::isMetaPresent);
+	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
+		return getAnnotations(element).stream(annotationType).anyMatch(MergedAnnotation::isMetaPresent);
 	}
 
 	/**
@@ -190,11 +182,8 @@ public abstract class AnnotatedElementUtils {
 	 * @return {@code true} if a matching meta-annotation is present
 	 * @see #getMetaAnnotationTypes
 	 */
-	public static boolean hasMetaAnnotationTypes(AnnotatedElement element,
-			String annotationName) {
-
-		return getAnnotations(element).stream(annotationName)
-				.anyMatch(MergedAnnotation::isMetaPresent);
+	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, String annotationName) {
+		return getAnnotations(element).stream(annotationName).anyMatch(MergedAnnotation::isMetaPresent);
 	}
 
 	/**
@@ -211,9 +200,16 @@ public abstract class AnnotatedElementUtils {
 	 * @since 4.2.3
 	 * @see #hasAnnotation(AnnotatedElement, Class)
 	 */
-	public static boolean isAnnotated(AnnotatedElement element,
-			Class<? extends Annotation> annotationType) {
-
+	public static boolean isAnnotated(AnnotatedElement element,Class<? extends Annotation> annotationType) {
+		// Shortcut: directly present on the element, with no processing needed?
+		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+			return element.isAnnotationPresent(annotationType);
+		}
+		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
+		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
+			return false;
+		}
+		// Exhaustive retrieval of merged annotations...
 		return getAnnotations(element).isPresent(annotationType);
 	}
 
@@ -278,8 +274,8 @@ public abstract class AnnotatedElementUtils {
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String)
 	 */
 	@Nullable
-	public static AnnotationAttributes getMergedAnnotationAttributes(
-			AnnotatedElement element, String annotationName) {
+	public static AnnotationAttributes getMergedAnnotationAttributes(AnnotatedElement element,
+			String annotationName) {
 
 		return getMergedAnnotationAttributes(element, annotationName, false, false);
 	}
@@ -311,9 +307,8 @@ public abstract class AnnotatedElementUtils {
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	@Nullable
-	public static AnnotationAttributes getMergedAnnotationAttributes(
-			AnnotatedElement element, String annotationName, boolean classValuesAsString,
-			boolean nestedAnnotationsAsMap) {
+	public static AnnotationAttributes getMergedAnnotationAttributes(AnnotatedElement element,
+			String annotationName, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
 		MergedAnnotation<?> mergedAnnotation = getAnnotations(element)
 				.get(annotationName, null, MergedAnnotationSelectors.firstDirectlyDeclared());
@@ -328,30 +323,23 @@ public abstract class AnnotatedElementUtils {
 	 * the result back into an annotation of the specified {@code annotationType}.
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 * <p>This method delegates to {@link #getMergedAnnotationAttributes(AnnotatedElement, Class)}
-	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
 	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
 	 * @since 4.2
-	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
-	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
 	@Nullable
-	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element,
-			Class<A> annotationType) {
-
+	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
+		// Shortcut: directly present on the element, with no merging needed?
+		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+			return element.getDeclaredAnnotation(annotationType);
+		}
+		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
 		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
 			return null;
 		}
-		A annotation = AnnotationsScanner.getDeclaredAnnotation(element, annotationType);
-		if (annotation != null) {
-			return AnnotationUtils.synthesizeAnnotation(annotation, element);
-		}
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
-			return null;
-		}
+		// Exhaustive retrieval of merged annotations...
 		return getAnnotations(element)
 				.get(annotationType, null, MergedAnnotationSelectors.firstDirectlyDeclared())
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
@@ -515,9 +503,8 @@ public abstract class AnnotatedElementUtils {
 	 * attributes from all annotations found, or {@code null} if not found
 	 */
 	@Nullable
-	public static MultiValueMap<String, Object> getAllAnnotationAttributes(
-			AnnotatedElement element, String annotationName,
-			final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
+	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
+			String annotationName, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
 		MapValues[] mapValues = MapValues.of(classValuesAsString, nestedAnnotationsAsMap);
 		return getAnnotations(element).stream(annotationName)
@@ -540,16 +527,16 @@ public abstract class AnnotatedElementUtils {
 	 * @since 4.3
 	 * @see #isAnnotated(AnnotatedElement, Class)
 	 */
-	public static boolean hasAnnotation(AnnotatedElement element,
-			Class<? extends Annotation> annotationType) {
-
+	public static boolean hasAnnotation(AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		// Shortcut: directly present on the element, with no processing needed?
+		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+			return element.isAnnotationPresent(annotationType);
+		}
+		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
 		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
 			return false;
 		}
-		if (AnnotationsScanner.getDeclaredAnnotation(element, annotationType) != null) {
-			return true;
-		}
+		// Exhaustive retrieval of merged annotations...
 		return findAnnotations(element).isPresent(annotationType);
 	}
 
@@ -581,9 +568,8 @@ public abstract class AnnotatedElementUtils {
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	@Nullable
-	public static AnnotationAttributes findMergedAnnotationAttributes(
-			AnnotatedElement element, Class<? extends Annotation> annotationType,
-			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
+			Class<? extends Annotation> annotationType, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
 		MergedAnnotation<?> mergedAnnotation = findAnnotations(element)
 				.get(annotationType, null, MergedAnnotationSelectors.firstDirectlyDeclared());
@@ -618,9 +604,8 @@ public abstract class AnnotatedElementUtils {
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	@Nullable
-	public static AnnotationAttributes findMergedAnnotationAttributes(
-			AnnotatedElement element, String annotationName, boolean classValuesAsString,
-			boolean nestedAnnotationsAsMap) {
+	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
+			String annotationName, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
 		MergedAnnotation<?> mergedAnnotation = findAnnotations(element)
 				.get(annotationName, null, MergedAnnotationSelectors.firstDirectlyDeclared());
@@ -646,16 +631,16 @@ public abstract class AnnotatedElementUtils {
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
 	 */
 	@Nullable
-	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element,
-			Class<A> annotationType) {
-
-		A annotation = AnnotationsScanner.getDeclaredAnnotation(element, annotationType);
-		if (annotation != null) {
-			return AnnotationUtils.synthesizeAnnotation(annotation, element);
+	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
+		// Shortcut: directly present on the element, with no merging needed?
+		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+			return element.getDeclaredAnnotation(annotationType);
 		}
+		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
 		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
 			return null;
 		}
+		// Exhaustive retrieval of merged annotations...
 		return findAnnotations(element)
 				.get(annotationType, null, MergedAnnotationSelectors.firstDirectlyDeclared())
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
@@ -680,9 +665,7 @@ public abstract class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getAllMergedAnnotations(AnnotatedElement, Class)
 	 */
-	public static <A extends Annotation> Set<A> findAllMergedAnnotations(
-			AnnotatedElement element, Class<A> annotationType) {
-
+	public static <A extends Annotation> Set<A> findAllMergedAnnotations(AnnotatedElement element, Class<A> annotationType) {
 		return findAnnotations(element).stream(annotationType)
 				.sorted(highAggregateIndexesFirst())
 				.collect(MergedAnnotationCollectors.toAnnotationSet());
@@ -706,9 +689,7 @@ public abstract class AnnotatedElementUtils {
 	 * @since 5.1
 	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
 	 */
-	public static Set<Annotation> findAllMergedAnnotations(AnnotatedElement element,
-			Set<Class<? extends Annotation>> annotationTypes) {
-
+	public static Set<Annotation> findAllMergedAnnotations(AnnotatedElement element, Set<Class<? extends Annotation>> annotationTypes) {
 		return findAnnotations(element).stream()
 				.filter(MergedAnnotationPredicates.typeIn(annotationTypes))
 				.sorted(highAggregateIndexesFirst())
@@ -739,8 +720,8 @@ public abstract class AnnotatedElementUtils {
 	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
 	 * @see #findMergedRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 */
-	public static <A extends Annotation> Set<A> findMergedRepeatableAnnotations(
-			AnnotatedElement element, Class<A> annotationType) {
+	public static <A extends Annotation> Set<A> findMergedRepeatableAnnotations(AnnotatedElement element,
+			Class<A> annotationType) {
 
 		return findMergedRepeatableAnnotations(element, annotationType, null);
 	}
@@ -771,9 +752,8 @@ public abstract class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
 	 */
-	public static <A extends Annotation> Set<A> findMergedRepeatableAnnotations(
-			AnnotatedElement element, Class<A> annotationType,
-			@Nullable Class<? extends Annotation> containerType) {
+	public static <A extends Annotation> Set<A> findMergedRepeatableAnnotations(AnnotatedElement element,
+			Class<A> annotationType, @Nullable Class<? extends Annotation> containerType) {
 
 		return findRepeatableAnnotations(element, containerType, annotationType)
 				.stream(annotationType)
@@ -783,43 +763,40 @@ public abstract class AnnotatedElementUtils {
 
 	private static MergedAnnotations getAnnotations(AnnotatedElement element) {
 		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS,
-				RepeatableContainers.none(), AnnotationUtils.JAVA_LANG_ANNOTATION_FILTER);
+				RepeatableContainers.none(), AnnotationFilter.PLAIN);
 	}
 
 	private static MergedAnnotations getRepeatableAnnotations(AnnotatedElement element,
-			@Nullable Class<? extends Annotation> containerType,
-			Class<? extends Annotation> annotationType) {
+			@Nullable Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
 		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
 		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS,
-				repeatableContainers, AnnotationUtils.JAVA_LANG_ANNOTATION_FILTER);
+				repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	private static MergedAnnotations findAnnotations(AnnotatedElement element) {
 		return MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE,
-				RepeatableContainers.none(), AnnotationUtils.JAVA_LANG_ANNOTATION_FILTER);
+				RepeatableContainers.none(), AnnotationFilter.PLAIN);
 	}
 
 	private static MergedAnnotations findRepeatableAnnotations(AnnotatedElement element,
-			@Nullable Class<? extends Annotation> containerType,
-			Class<? extends Annotation> annotationType) {
+			@Nullable Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
 		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
 		return MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE,
-				repeatableContainers, AnnotationUtils.JAVA_LANG_ANNOTATION_FILTER);
+				repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	private static Object parentAndType(MergedAnnotation<Annotation> annotation) {
 		if (annotation.getParent() == null) {
-			return annotation.getType();
+			return annotation.getType().getName();
 		}
-		return annotation.getParent().getType() + ":" + annotation.getParent().getType();
+		return annotation.getParent().getType().getName() + ":" + annotation.getParent().getType().getName();
 	}
 
 	@Nullable
-	private static MultiValueMap<String, Object> nullIfEmpty(
-			MultiValueMap<String, Object> map) {
-		return map.isEmpty() ? null : map;
+	private static MultiValueMap<String, Object> nullIfEmpty(MultiValueMap<String, Object> map) {
+		return (map.isEmpty() ? null : map);
 	}
 
 	private static <A extends Annotation> Comparator<MergedAnnotation<A>> highAggregateIndexesFirst() {
@@ -834,7 +811,7 @@ public abstract class AnnotatedElementUtils {
 		if (!annotation.isPresent()) {
 			return null;
 		}
-		return annotation.asMap(mergedAnnotation -> new AnnotationAttributes(),
+		return annotation.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType()),
 				MapValues.of(classValuesAsString, nestedAnnotationsAsMap));
 	}
 

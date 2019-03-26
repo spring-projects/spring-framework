@@ -77,18 +77,17 @@ public class MergedAnnotationsTests {
 
 	@Test
 	public void streamWhenFromClassWithMetaDepth1() {
-		Stream<String> names = MergedAnnotations.from(TransactionalComponent.class)
+		Stream<Class<?>> classes = MergedAnnotations.from(TransactionalComponent.class)
 				.stream().map(MergedAnnotation::getType);
-		assertThat(names).containsExactly(Transactional.class.getName(),
-				Component.class.getName(), Indexed.class.getName());
+		assertThat(classes).containsExactly(Transactional.class, Component.class, Indexed.class);
 	}
 
 	@Test
 	public void streamWhenFromClassWithMetaDepth2() {
-		Stream<String> names = MergedAnnotations.from(ComposedTransactionalComponent.class)
+		Stream<Class<?>> classes = MergedAnnotations.from(ComposedTransactionalComponent.class)
 				.stream().map(MergedAnnotation::getType);
-		assertThat(names).containsExactly(TransactionalComponent.class.getName(),
-				Transactional.class.getName(), Component.class.getName(), Indexed.class.getName());
+		assertThat(classes).containsExactly(TransactionalComponent.class,
+				Transactional.class, Component.class, Indexed.class);
 	}
 
 	@Test
@@ -1149,17 +1148,16 @@ public class MergedAnnotationsTests {
 
 	@Test
 	public void getDirectWithoutAttributeAliases() {
-		MergedAnnotation<?> annotation = MergedAnnotations.from(WebController.class).get(
-				Component.class);
+		MergedAnnotation<?> annotation = MergedAnnotations.from(WebController.class)
+				.get(Component.class);
 		assertThat(annotation.getString("value")).isEqualTo("webController");
 	}
 
 	@Test
 	public void getDirectWithNestedAnnotations() {
-		MergedAnnotation<?> annotation = MergedAnnotations.from(
-				ComponentScanClass.class).get(ComponentScan.class);
-		MergedAnnotation<Filter>[] filters = annotation.getAnnotationArray(
-				"excludeFilters", Filter.class);
+		MergedAnnotation<?> annotation = MergedAnnotations.from(ComponentScanClass.class)
+				.get(ComponentScan.class);
+		MergedAnnotation<Filter>[] filters = annotation.getAnnotationArray("excludeFilters", Filter.class);
 		assertThat(Arrays.stream(filters).map(
 				filter -> filter.getString("pattern"))).containsExactly("*Foo", "*Bar");
 	}
@@ -1167,8 +1165,7 @@ public class MergedAnnotationsTests {
 	@Test
 	public void getDirectWithAttributeAliases1() throws Exception {
 		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
-		MergedAnnotation<?> annotation = MergedAnnotations.from(method).get(
-				RequestMapping.class);
+		MergedAnnotation<?> annotation = MergedAnnotations.from(method).get(RequestMapping.class);
 		assertThat(annotation.getString("name")).isEqualTo("foo");
 		assertThat(annotation.getStringArray("value")).containsExactly("/test");
 		assertThat(annotation.getStringArray("path")).containsExactly("/test");
@@ -1177,8 +1174,7 @@ public class MergedAnnotationsTests {
 	@Test
 	public void getDirectWithAttributeAliases2() throws Exception {
 		Method method = WebController.class.getMethod("handleMappedWithPathAttribute");
-		MergedAnnotation<?> annotation = MergedAnnotations.from(method).get(
-				RequestMapping.class);
+		MergedAnnotation<?> annotation = MergedAnnotations.from(method).get(RequestMapping.class);
 		assertThat(annotation.getString("name")).isEqualTo("bar");
 		assertThat(annotation.getStringArray("value")).containsExactly("/test");
 		assertThat(annotation.getStringArray("path")).containsExactly("/test");
@@ -1186,8 +1182,7 @@ public class MergedAnnotationsTests {
 
 	@Test
 	public void getDirectWithAttributeAliasesWithDifferentValues() throws Exception {
-		Method method = WebController.class.getMethod(
-				"handleMappedWithDifferentPathAndValueAttributes");
+		Method method = WebController.class.getMethod("handleMappedWithDifferentPathAndValueAttributes");
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(
 				() -> MergedAnnotations.from(method).get(
 						RequestMapping.class)).withMessageContaining(
@@ -1197,10 +1192,9 @@ public class MergedAnnotationsTests {
 
 	@Test
 	public void getValueFromAnnotation() throws Exception {
-		Method method = TransactionalStringGeneric.class.getMethod("something",
-				Object.class);
-		MergedAnnotation<?> annotation = MergedAnnotations.from(method,
-				SearchStrategy.EXHAUSTIVE).get(Order.class);
+		Method method = TransactionalStringGeneric.class.getMethod("something", Object.class);
+		MergedAnnotation<?> annotation = MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE)
+				.get(Order.class);
 		assertThat(annotation.getInt("value")).isEqualTo(1);
 	}
 
@@ -1210,21 +1204,17 @@ public class MergedAnnotationsTests {
 		assertThat(declaredAnnotations).hasSize(1);
 		Annotation annotation = declaredAnnotations[0];
 		MergedAnnotation<Annotation> mergedAnnotation = MergedAnnotation.from(annotation);
-		assertThat(mergedAnnotation.getType()).contains("NonPublicAnnotation");
-		assertThat(
-				mergedAnnotation.synthesize().annotationType().getSimpleName()).isEqualTo(
-						"NonPublicAnnotation");
+		assertThat(mergedAnnotation.getType().getSimpleName()).isEqualTo("NonPublicAnnotation");
+		assertThat(mergedAnnotation.synthesize().annotationType().getSimpleName()).isEqualTo("NonPublicAnnotation");
 		assertThat(mergedAnnotation.getInt("value")).isEqualTo(42);
 	}
 
 	@Test
 	public void getDefaultValueFromAnnotation() throws Exception {
-		Method method = TransactionalStringGeneric.class.getMethod("something",
-				Object.class);
-		MergedAnnotation<Order> annotation = MergedAnnotations.from(method,
-				SearchStrategy.EXHAUSTIVE).get(Order.class);
-		assertThat(annotation.getDefaultValue("value")).contains(
-				Ordered.LOWEST_PRECEDENCE);
+		Method method = TransactionalStringGeneric.class.getMethod("something", Object.class);
+		MergedAnnotation<Order> annotation = MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE)
+				.get(Order.class);
+		assertThat(annotation.getDefaultValue("value")).contains(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
@@ -1233,7 +1223,7 @@ public class MergedAnnotationsTests {
 		assertThat(declaredAnnotations).hasSize(1);
 		Annotation declaredAnnotation = declaredAnnotations[0];
 		MergedAnnotation<?> annotation = MergedAnnotation.from(declaredAnnotation);
-		assertThat(annotation.getType()).isEqualTo(
+		assertThat(annotation.getType().getName()).isEqualTo(
 				"org.springframework.core.annotation.subpackage.NonPublicAnnotation");
 		assertThat(annotation.getDefaultValue("value")).contains(-1);
 	}

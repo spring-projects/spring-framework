@@ -17,7 +17,6 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,7 +49,7 @@ public abstract class MergedAnnotationPredicates {
 	 * @return a {@link Predicate} to test the annotation type
 	 */
 	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(String... typeNames) {
-		return annotation -> ObjectUtils.containsElement(typeNames, annotation.getType());
+		return annotation -> ObjectUtils.containsElement(typeNames, annotation.getType().getName());
 	}
 
 	/**
@@ -62,7 +61,7 @@ public abstract class MergedAnnotationPredicates {
 	 * @return a {@link Predicate} to test the annotation type
 	 */
 	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(Class<?>... types) {
-		return annotation -> Arrays.stream(types).anyMatch(type -> type.getName().equals(annotation.getType()));
+		return annotation -> ObjectUtils.containsElement(types, annotation.getType());
 	}
 
 	/**
@@ -76,7 +75,7 @@ public abstract class MergedAnnotationPredicates {
 	public static <A extends Annotation> Predicate<MergedAnnotation<? extends A>> typeIn(Collection<?> types) {
 		return annotation -> types.stream()
 				.map(type -> type instanceof Class ? ((Class<?>) type).getName() : type.toString())
-				.anyMatch(typeName -> typeName.equals(annotation.getType()));
+				.anyMatch(typeName -> typeName.equals(annotation.getType().getName()));
 	}
 
 	/**
@@ -141,7 +140,6 @@ public abstract class MergedAnnotationPredicates {
 			return ObjectUtils.nullSafeEquals(value, this.lastValue);
 
 		}
-
 	}
 
 
@@ -165,7 +163,6 @@ public abstract class MergedAnnotationPredicates {
 			K key = this.keyExtractor.apply(annotation);
 			return this.seen.add(key);
 		}
-
 	}
 
 }

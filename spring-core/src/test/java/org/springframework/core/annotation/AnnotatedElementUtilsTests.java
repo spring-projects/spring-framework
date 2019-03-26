@@ -23,7 +23,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Resource;
@@ -34,9 +36,9 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Indexed;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.*;
@@ -631,7 +633,6 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	private AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-		Assert.notNull(annotationType, "annotationType must not be null");
 		return AnnotatedElementUtils.findMergedAnnotationAttributes(element, annotationType.getName(), false, false);
 	}
 
@@ -700,6 +701,15 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void javaLangAnnotationTypeViaFindMergedAnnotation() throws Exception {
+		Constructor<?> deprecatedCtor = Date.class.getConstructor(String.class);
+		assertEquals(deprecatedCtor.getAnnotation(Deprecated.class),
+				findMergedAnnotation(deprecatedCtor, Deprecated.class));
+		assertEquals(Date.class.getAnnotation(Deprecated.class),
+				findMergedAnnotation(Date.class, Deprecated.class));
+	}
+
+	@Test
 	public void javaxAnnotationTypeViaFindMergedAnnotation() throws Exception {
 		assertEquals(ResourceHolder.class.getAnnotation(Resource.class),
 				findMergedAnnotation(ResourceHolder.class, Resource.class));
@@ -708,16 +718,25 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void nullableAnnotationTypeViaFindMergedAnnotation() throws Exception {
+		Method method = TransactionalServiceImpl.class.getMethod("doIt");
+		assertEquals(method.getAnnotation(Resource.class),
+				findMergedAnnotation(method, Resource.class));
+		assertEquals(method.getAnnotation(Resource.class),
+				findMergedAnnotation(method, Resource.class));
+	}
+
+	@Test
 	public void getAllMergedAnnotationsOnClassWithInterface() throws Exception {
-		Method m = TransactionalServiceImpl.class.getMethod("doIt");
-		Set<Transactional> allMergedAnnotations = getAllMergedAnnotations(m, Transactional.class);
+		Method method = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations = getAllMergedAnnotations(method, Transactional.class);
 		assertTrue(allMergedAnnotations.isEmpty());
 	}
 
 	@Test
 	public void findAllMergedAnnotationsOnClassWithInterface() throws Exception {
-		Method m = TransactionalServiceImpl.class.getMethod("doIt");
-		Set<Transactional> allMergedAnnotations = findAllMergedAnnotations(m, Transactional.class);
+		Method method = TransactionalServiceImpl.class.getMethod("doIt");
+		Set<Transactional> allMergedAnnotations = findAllMergedAnnotations(method, Transactional.class);
 		assertEquals(1, allMergedAnnotations.size());
 	}
 
@@ -1299,20 +1318,22 @@ public class AnnotatedElementUtilsTests {
 	interface TransactionalService {
 
 		@Transactional
-		void doIt();
+		@Nullable
+		Object doIt();
 	}
 
 	class TransactionalServiceImpl implements TransactionalService {
 
 		@Override
-		public void doIt() {
+		@Nullable
+		public Object doIt() {
+			return null;
 		}
 	}
 
 	@Deprecated
 	@ComponentScan
 	class ForAnnotationsClass {
-
 	}
 
 }
