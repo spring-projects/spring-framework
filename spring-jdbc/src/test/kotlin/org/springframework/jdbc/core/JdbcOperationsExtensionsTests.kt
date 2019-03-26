@@ -46,6 +46,13 @@ class JdbcOperationsExtensionsTests {
 		verify { template.queryForObject(eq(sql), any<RowMapper<Int>>(), eq(3)) }
 	}
 
+	@Test  // gh-22682
+	fun `queryForObject with nullable RowMapper-like function`() {
+		val sql = "select age from customer where id = ?"
+		template.queryForObject(sql, 3) { _, _ -> null as Int? }
+		verify { template.queryForObject(eq(sql), any<RowMapper<Int?>>(), eq(3)) }
+	}
+
 	@Test
 	fun `queryForObject with reified type parameters and argTypes`() {
 		val sql = "select age from customer where id = ?"
@@ -95,6 +102,13 @@ class JdbcOperationsExtensionsTests {
 			rs.getInt(1)
 		}
 		verify { template.query(eq(sql), any<ResultSetExtractor<Int>>(), eq(3)) }
+	}
+
+	@Test  // gh-22682
+	fun `query with nullable ResultSetExtractor-like function`() {
+		val sql = "select age from customer where id = ?"
+		template.query<Int?>(sql, 3) { _ -> null }
+		verify { template.query(eq(sql), any<ResultSetExtractor<Int?>>(), eq(3)) }
 	}
 
 	@Suppress("RemoveExplicitTypeArguments")
