@@ -68,8 +68,7 @@ public class AnnotationIntrospectionFailureTests {
 		assertThat(AnnotatedElementUtils.getMergedAnnotationAttributes(
 				withExampleMetaAnnotation, exampleAnnotationClass)).isNull();
 		assertThat(AnnotatedElementUtils.getMergedAnnotationAttributes(
-				withExampleMetaAnnotation,
-				exampleMetaAnnotationClass)).isNull();
+				withExampleMetaAnnotation, exampleMetaAnnotationClass)).isNull();
 		assertThat(AnnotatedElementUtils.hasAnnotation(withExampleMetaAnnotation,
 				exampleAnnotationClass)).isFalse();
 		assertThat(AnnotatedElementUtils.hasAnnotation(withExampleMetaAnnotation,
@@ -97,11 +96,9 @@ public class AnnotationIntrospectionFailureTests {
 
 	static class FilteringClassLoader extends OverridingClassLoader {
 
-
 		FilteringClassLoader(ClassLoader parent) {
 			super(parent);
 		}
-
 
 		@Override
 		protected boolean isEligibleForOverriding(String className) {
@@ -110,36 +107,31 @@ public class AnnotationIntrospectionFailureTests {
 		}
 
 		@Override
-		protected Class<?> loadClass(String name, boolean resolve)
-				throws ClassNotFoundException {
-			if (name.startsWith(AnnotationIntrospectionFailureTests.class.getName())
-					&& name.contains("Filtered")) {
+		protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+			if (name.startsWith(AnnotationIntrospectionFailureTests.class.getName()) &&
+					name.contains("Filtered")) {
 				throw new ClassNotFoundException(name);
 			}
 			return super.loadClass(name, resolve);
 		}
-
 	}
 
 	static class FilteredType {
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ExampleAnnotation {
+	@interface ExampleAnnotation {
 
 		Class<?> value() default Void.class;
-
 	}
 
 	@ExampleAnnotation(FilteredType.class)
 	static class WithExampleAnnotation {
-
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ExampleAnnotation
-	static @interface ExampleMetaAnnotation {
+	@interface ExampleMetaAnnotation {
 
 		@AliasFor(annotation = ExampleAnnotation.class, attribute = "value")
 		Class<?> example1() default Void.class;
@@ -151,7 +143,6 @@ public class AnnotationIntrospectionFailureTests {
 
 	@ExampleMetaAnnotation(example1 = FilteredType.class)
 	static class WithExampleMetaAnnotation {
-
 	}
 
 }

@@ -118,17 +118,13 @@ abstract class AnnotationsScanner {
 
 		switch (searchStrategy) {
 			case DIRECT:
-				return processElement(context, source,
-						processor, classFilter);
+				return processElement(context, source, processor, classFilter);
 			case INHERITED_ANNOTATIONS:
-				return processClassInheritedAnnotations(context, source,
-						processor, classFilter);
+				return processClassInheritedAnnotations(context, source, processor, classFilter);
 			case SUPER_CLASS:
-				return processClassHierarchy(context, new int[] { 0 }, source,
-						processor, classFilter, false);
+				return processClassHierarchy(context, new int[] {0}, source, processor, classFilter, false);
 			case EXHAUSTIVE:
-				return processClassHierarchy(context, new int[] { 0 }, source,
-						processor, classFilter, true);
+				return processClassHierarchy(context, new int[] {0}, source, processor, classFilter, true);
 		}
 		throw new IllegalStateException("Unsupported search strategy " + searchStrategy);
 	}
@@ -405,8 +401,8 @@ abstract class AnnotationsScanner {
 			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
 
 		R result = processor.doWithAggregate(context, 0);
-		return (result != null ? result : processor.doWithAnnotations(context, 0, source,
-						getDeclaredAnnotations(context, source, classFilter, false)));
+		return (result != null ? result : processor.doWithAnnotations(
+				context, 0, source, getDeclaredAnnotations(context, source, classFilter, false)));
 	}
 
 	private static <C, R> Annotation[] getDeclaredAnnotations(C context,
@@ -426,7 +422,7 @@ abstract class AnnotationsScanner {
 	static <A extends Annotation> A getDeclaredAnnotation(AnnotatedElement source, Class<A> annotationType) {
 		Annotation[] annotations = getDeclaredAnnotations(source, false);
 		for (Annotation annotation : annotations) {
-			if (annotation != null && annotationType.equals(annotation.annotationType())) {
+			if (annotation != null && annotationType == annotation.annotationType()) {
 				return (A) annotation;
 			}
 		}
@@ -500,9 +496,12 @@ abstract class AnnotationsScanner {
 		else {
 			return false;
 		}
+
+		if (type == Ordered.class) {
+			return true;
+		}
 		String name = type.getName();
-		return (type == Ordered.class ||
-				name.startsWith("java") ||
+		return (name.startsWith("java") ||
 				name.startsWith("org.springframework.lang.") ||
 				name.startsWith("org.springframework.util.") ||
 				(name.startsWith("com.sun") && !name.contains("Proxy")));

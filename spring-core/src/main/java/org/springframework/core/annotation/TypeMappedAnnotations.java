@@ -248,9 +248,8 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		return null;
 	}
 
-	static MergedAnnotations from(@Nullable AnnotatedElement element,
-			SearchStrategy searchStrategy, RepeatableContainers repeatableContainers,
-			AnnotationFilter annotationFilter) {
+	static MergedAnnotations from(@Nullable AnnotatedElement element, SearchStrategy searchStrategy,
+			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
 		if (element == null || AnnotationsScanner.isKnownEmpty(element, searchStrategy, annotationFilter)) {
 			return NONE;
@@ -324,11 +323,11 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 						if (type == requiredType || type.getName().equals(requiredType)) {
 							return Boolean.TRUE;
 						}
-						Annotation[] repeatedAnnotations = this.repeatableContainers
-								.findRepeatedAnnotations(annotation);
+						Annotation[] repeatedAnnotations =
+								this.repeatableContainers.findRepeatedAnnotations(annotation);
 						if (repeatedAnnotations != null) {
-							Boolean result = doWithAnnotations(requiredType, aggregateIndex,
-									source, repeatedAnnotations);
+							Boolean result = doWithAnnotations(
+									requiredType, aggregateIndex, source, repeatedAnnotations);
 							if (result != null) {
 								return result;
 							}
@@ -402,8 +401,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 				@Nullable Object source, Annotation[] annotations) {
 
 			for (Annotation annotation : annotations) {
-				if (annotation != null &&
-						!annotationFilter.matches(annotation)) {
+				if (annotation != null && !annotationFilter.matches(annotation)) {
 					MergedAnnotation<A> result = process(type, aggregateIndex, source, annotation);
 					if (result != null) {
 						return result;

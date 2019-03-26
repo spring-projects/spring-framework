@@ -111,8 +111,8 @@ public abstract class RepeatableContainers {
 	 * {@code repeatable}.
 	 * @return a {@link RepeatableContainers} instance
 	 */
-	public static RepeatableContainers of(Class<? extends Annotation> repeatable,
-			@Nullable Class<? extends Annotation> container) {
+	public static RepeatableContainers of(
+			Class<? extends Annotation> repeatable, @Nullable Class<? extends Annotation> container) {
 
 		return new ExplicitRepeatableContainer(null, repeatable, container);
 	}
@@ -133,13 +133,11 @@ public abstract class RepeatableContainers {
 	 */
 	private static class StandardRepeatableContainers extends RepeatableContainers {
 
-		private static final Map<Class<? extends Annotation>, Object> cache =
-				new ConcurrentReferenceHashMap<>();
+		private static final Map<Class<? extends Annotation>, Object> cache = new ConcurrentReferenceHashMap<>();
 
 		private static final Object NONE = new Object();
 
-		private static StandardRepeatableContainers INSTANCE =
-				new StandardRepeatableContainers();
+		private static StandardRepeatableContainers INSTANCE = new StandardRepeatableContainers();
 
 		StandardRepeatableContainers() {
 			super(null);
@@ -156,17 +154,13 @@ public abstract class RepeatableContainers {
 		}
 
 		@Nullable
-		private static Method getRepeatedAnnotationsMethod(
-				Class<? extends Annotation> annotationType) {
-
+		private static Method getRepeatedAnnotationsMethod(Class<? extends Annotation> annotationType) {
 			Object result = cache.computeIfAbsent(annotationType,
 					StandardRepeatableContainers::computeRepeatedAnnotationsMethod);
-			return result != NONE ? (Method) result : null;
+			return (result != NONE ? (Method) result : null);
 		}
 
-		private static Object computeRepeatedAnnotationsMethod(
-				Class<? extends Annotation> annotationType) {
-
+		private static Object computeRepeatedAnnotationsMethod(Class<? extends Annotation> annotationType) {
 			AttributeMethods methods = AttributeMethods.forAnnotationType(annotationType);
 			if (methods.isOnlyValueAttribute()) {
 				Method method = methods.get("value");
@@ -176,15 +170,14 @@ public abstract class RepeatableContainers {
 				Class<?> returnType = method.getReturnType();
 				if (returnType.isArray()) {
 					Class<?> componentType = returnType.getComponentType();
-					if (Annotation.class.isAssignableFrom(componentType)
-							&& componentType.isAnnotationPresent(Repeatable.class)) {
+					if (Annotation.class.isAssignableFrom(componentType) &&
+							componentType.isAnnotationPresent(Repeatable.class)) {
 						return method;
 					}
 				}
 			}
 			return NONE;
 		}
-
 	}
 
 
