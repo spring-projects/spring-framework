@@ -1,4 +1,4 @@
-<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+<persistence xmlns="https://java.sun.com/xml/ns/persistence" version="1.0">
 
     <persistence-unit name="OrderManagement">
         <jar-file>order.jar</jar-file>
