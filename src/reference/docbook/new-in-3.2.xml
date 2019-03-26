@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0"
-         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd"
+         xsi:schemaLocation="http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd"
          xml:id="new-in-3.2" xmlns="http://docbook.org/ns/docbook"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -72,7 +72,7 @@
     also enables selective suffix pattern matching for incoming requests.
     For more details, see the Javadoc of
     <link
-    xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.BUILD-SNAPSHOT/api/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)">RequestMappingHandlerMapping.setUseRegisteredSuffixPatternMatch</link>.</para>
+    xl:href="https://docs.spring.io/spring-framework/docs/3.2.0.BUILD-SNAPSHOT/api/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)">RequestMappingHandlerMapping.setUseRegisteredSuffixPatternMatch</link>.</para>
   </section>
 
   <section xml:id="new-in-3.2-webmvc-controller-advice">

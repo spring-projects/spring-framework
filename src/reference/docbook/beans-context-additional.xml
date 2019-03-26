@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Additional Capabilities of the
     <interfacename>ApplicationContext</interfacename></title>
 
@@ -17,7 +17,7 @@
     functionality for managing and manipulating beans, including in a
     programmatic way. The <literal>org.springframework.context</literal> package
     adds the <link
-    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"
+    xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"
     ><interfacename>ApplicationContext</interfacename></link> interface, which
     extends the <interfacename>BeanFactory</interfacename> interface, in
     addition to extending other interfaces to provide additional functionality
@@ -497,9 +497,9 @@ argument.required=Ebagum lad, the {0} argument is required, I say, required.</pr
         between Spring beans within the same application context. However, for
         more sophisticated enterprise integration needs, the
         separately-maintained <link
-        xl:href="http://springsource.org/spring-integration">Spring
+        xl:href="https://springsource.org/spring-integration">Spring
         Integration</link> project provides complete support for building
-        lightweight, <link xl:href="http://www.enterpriseintegrationpatterns.com"
+        lightweight, <link xl:href="https://www.enterpriseintegrationpatterns.com"
         >pattern-oriented</link>, event-driven architectures that build upon
         the well-known Spring programming model.</para>
     </note>
@@ -612,7 +612,7 @@ argument.required=Ebagum lad, the {0} argument is required, I say, required.</pr
       <interfacename>TaskExecutor</interfacename> abstraction.</para>
 
     <para>Check out the JavaDoc of the <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jca/context/SpringContextResourceAdapter.html"
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jca/context/SpringContextResourceAdapter.html"
       >SpringContextResourceAdapter</link> class for the configuration details
       involved in RAR deployment.</para>
 

@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Spring Web Flow</title>
 
   <para>Spring Web Flow (SWF) aims to be the best solution for the management
@@ -23,6 +23,6 @@
   that drive business processes.</para>
 
   <para>For more information about SWF, consult the
-  <link xl:href="http://www.springframework.org/webflow">Spring Web Flow website</link>.
+  <link xl:href="https://www.springframework.org/webflow">Spring Web Flow website</link>.
   </para>
 </sidebar>

@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Using JSR 330 Standard Annotations</title>
 
   <para>Starting with Spring 3.0, Spring offers support for JSR-330 standard annotations (Dependency Injection).
@@ -17,7 +17,7 @@
       <para>
       If you are using Maven, the <interfacename>javax.inject</interfacename> artifact is available
       in the standard Maven repository
-      (<link xl:href="http://repo1.maven.org/maven2/javax/inject/javax.inject/1/">http://repo1.maven.org/maven2/javax/inject/javax.inject/1/</link>).
+      (<link xl:href="https://repo1.maven.org/maven2/javax/inject/javax.inject/1/">https://repo1.maven.org/maven2/javax/inject/javax.inject/1/</link>).
       You can add the following dependency to your file pom.xml:
       </para>
     <programlisting language="xml">
@@ -170,7 +170,7 @@ component-scanning in the exact same way as when using Spring annotations:
                     </para>
                     <para>
                         <interfacename>javax.inject</interfacename> also provides a
-                        <link xl:href="http://download.oracle.com/javaee/6/api/javax/inject/Scope.html">@Scope</link> annotation.
+                        <link xl:href="https://download.oracle.com/javaee/6/api/javax/inject/Scope.html">@Scope</link> annotation.
                         Nevertheless, this one is only intended to be used for creating your own annotations.
                     </para>
                 </entry>

@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Email</title>
 
   <section xml:id="mail-introduction">
@@ -17,10 +17,10 @@
         application in order to be able to use the Spring Framework's email library.</para>
         <itemizedlist>
             <listitem>
-                <para>The <link xl:href="http://java.sun.com/products/javamail/">JavaMail</link> <filename class="libraryfile">mail.jar</filename> library</para>
+                <para>The <link xl:href="https://java.sun.com/products/javamail/">JavaMail</link> <filename class="libraryfile">mail.jar</filename> library</para>
             </listitem>
             <listitem>
-                <para>The <link xl:href="http://java.sun.com/products/javabeans/jaf/downloads/index.html">JAF</link> <filename class="libraryfile">activation.jar</filename> library</para>
+                <para>The <link xl:href="https://java.sun.com/products/javabeans/jaf/downloads/index.html">JAF</link> <filename class="libraryfile">activation.jar</filename> library</para>
             </listitem>
         </itemizedlist>
         <para>All of these libraries are freely available on the web.</para>
@@ -303,7 +303,7 @@ sender.send(message);]]></programlisting>
             to create email content.</para>
             <section xml:id="mail-templates-example">
                 <title>A Velocity-based example</title>
-                <para>To use <link xl:href="http://velocity.apache.org">Velocity</link> to
+                <para>To use <link xl:href="https://velocity.apache.org">Velocity</link> to
                 create your email template(s), you will need to have the Velocity libraries
                 available on your classpath. You will also need to create one or more Velocity templates
                 for the email content that your application needs. Find below the Velocity
@@ -376,7 +376,7 @@ public class SimpleRegistrationService implements RegistrationService {
 <beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.springframework.org/schema/beans
-   http://www.springframework.org/schema/beans/spring-beans.xsd">
+   https://www.springframework.org/schema/beans/spring-beans.xsd">
 
    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
       <property name="host" value="mail.csonth.gov.uk"/>

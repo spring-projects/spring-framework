@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Aspect Oriented Programming with Spring</title>
 
   <section xml:id="aop-introduction">
@@ -309,7 +309,7 @@
 
     <para>@AspectJ refers to a style of declaring aspects as regular Java
     classes annotated with Java 5 annotations. The @AspectJ style was
-    introduced by the <link xl:href="http://www.eclipse.org/aspectj">AspectJ
+    introduced by the <link xl:href="https://www.eclipse.org/aspectj">AspectJ
     project</link> as part of the AspectJ 5 release. Spring 2.0 interprets
     the same annotations as AspectJ 5, using a library supplied by AspectJ for
     pointcut parsing and matching. The AOP runtime is still pure Spring AOP
@@ -462,9 +462,9 @@ private void anyOldTransfer() {}<lineannotation>// the pointcut signature</linea
       <interfacename>@Pointcut</interfacename> annotation is a regular AspectJ
       5 pointcut expression. For a full discussion of AspectJ's pointcut
       language, see the <link
-      xl:href="http://www.eclipse.org/aspectj/doc/released/progguide/index.html">AspectJ
+      xl:href="https://www.eclipse.org/aspectj/doc/released/progguide/index.html">AspectJ
       Programming Guide</link> (and for Java 5 based extensions, the <link
-      xl:href="http://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html">AspectJ
+      xl:href="https://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html">AspectJ
       5 Developers Notebook</link>) or one of the books on AspectJ such as
       <quote>Eclipse AspectJ</quote> by Colyer et. al. or <quote>AspectJ in
       Action</quote> by Ramnivas Laddad.</para>
@@ -761,7 +761,7 @@ public class SystemArchitecture {
         type, <literal>(*,String)</literal> matches a method taking two
         parameters, the first can be of any type, the second must be a String.
         Consult the <link
-        xl:href="http://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html">
+        xl:href="https://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html">
         Language Semantics</link> section of the AspectJ Programming Guide
         for more information.</para>
 
@@ -2152,8 +2152,8 @@ public class SimpleProfiler {
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:aop="http://www.springframework.org/schema/aop"
       xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
    <lineannotation>&lt;!-- this is the object that will be proxied by Spring's AOP infrastructure --&gt;</lineannotation>
    &lt;bean id="fooService" class="x.y.service.DefaultFooService"/&gt;
@@ -2463,7 +2463,7 @@ public @interface Idempotent {
       style. Clearly, if you are not using Java 5+ then the choice has been
       made for you... use the code style. If aspects play a large role in your
       design, and you are able to use the <link
-      xl:href="http://www.eclipse.org/ajdt/">AspectJ Development Tools
+      xl:href="https://www.eclipse.org/ajdt/">AspectJ Development Tools
       (AJDT)</link> plugin for Eclipse, then the AspectJ language syntax is
       the preferred option: it is cleaner and simpler because the language was
       purposefully designed for writing aspects. If you are not using Eclipse,
@@ -2907,7 +2907,7 @@ public class Account {
       '<literal>new</literal>' operator) as well as to
       <interfacename>Serializable</interfacename> objects that are undergoing
       deserialization (e.g., via <link
-      xl:href="http://java.sun.com/j2se/1.5.0/docs/api/java/io/Serializable.html">readResolve()</link>).</para>
+      xl:href="https://java.sun.com/j2se/1.5.0/docs/api/java/io/Serializable.html">readResolve()</link>).</para>
 
       <note>
         <para>One of the key phrases in the above paragraph is '<emphasis>in
@@ -2928,16 +2928,16 @@ public class Account {
 
         <para>You can find out more information about the language semantics
         of the various pointcut types in AspectJ <link
-        xl:href="http://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html">in
+        xl:href="https://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html">in
         this appendix</link> of the <link
-        xl:href="http://www.eclipse.org/aspectj/doc/next/progguide/index.html">AspectJ
+        xl:href="https://www.eclipse.org/aspectj/doc/next/progguide/index.html">AspectJ
         Programming Guide</link>.</para>
       </note>
 
       <para>For this to work the annotated types must be woven with the
       AspectJ weaver - you can either use a build-time Ant or Maven task to do
       this (see for example the <link
-      xl:href="http://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html">AspectJ
+      xl:href="https://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html">AspectJ
       Development Environment Guide</link>) or load-time weaving (see <xref
       linkend="aop-aj-ltw"/>). The
       <classname>AnnotationBeanConfigurerAspect</classname> itself needs
@@ -3182,7 +3182,7 @@ public class AppConfig {
       Framework: this section is not an introduction to LTW though. For full
       details on the specifics of LTW and configuring LTW with just AspectJ
       (with Spring not being involved at all), see the <link
-      xl:href="http://www.eclipse.org/aspectj/doc/released/devguide/ltw.html">LTW
+      xl:href="https://www.eclipse.org/aspectj/doc/released/devguide/ltw.html">LTW
       section of the AspectJ Development Environment Guide</link>.</para>
 
       <para>The value-add that the Spring Framework brings to AspectJ LTW is
@@ -3275,7 +3275,7 @@ public class ProfilingAspect {
         AspectJ.</para>
 
         <programlisting language="xml">&lt;!DOCTYPE aspectj PUBLIC
-        "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd"&gt;
+        "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd"&gt;
 &lt;aspectj&gt;
 
     &lt;weaver&gt;
@@ -3310,9 +3310,9 @@ public class ProfilingAspect {
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
+    https://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/context
-    http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+    https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     <lineannotation>&lt;!-- a service object; we will be profiling its methods --&gt;</lineannotation>
     &lt;bean id="entitlementCalculationService"
@@ -3358,7 +3358,7 @@ public final class Main {
 
         <para>The '<literal>-javaagent</literal>' is a Java 5+ flag for
         specifying and enabling <link
-        xl:href="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agents
+        xl:href="https://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agents
         to instrument programs running on the JVM</link>. The Spring
         Framework ships with such an agent, the
         <classname>InstrumentationSavingAgent</classname>, which is packaged
@@ -3447,7 +3447,7 @@ public final class Main {
 
         <para>The structure and contents of this file is detailed in the main
         AspectJ reference documentation, and the interested reader is <link
-        xl:href="http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html">referred
+        xl:href="https://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html">referred
         to that resource</link>. (I appreciate that this section is brief,
         but the '<filename>aop.xml</filename>' file is 100% AspectJ - there is
         no Spring-specific information or semantics that apply to it, and so
@@ -3541,9 +3541,9 @@ public class AppConfig {
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
+    https://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/context
-    http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+    https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;context:load-time-weaver/&gt;
 
@@ -3578,31 +3578,31 @@ http://www.springframework.org/schema/context
             <tbody>
               <row>
                 <entry><para>Running in <link
-                xl:href="http://www.bea.com/framework.jsp?CNT=index.htm&amp;FP=/content/products/weblogic/server">BEA's
+                xl:href="https://www.oracle.com/bea/index.html?CNT=index.htm&amp;FP=/content/products/weblogic/server">BEA's
                 Weblogic 10</link></para></entry>
                 <entry><para><classname>WebLogicLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
                 <entry><para>Running in <link
-                xl:href="http://www-01.ibm.com/software/webservers/appserv/was/">IBM WebSphere Application Server 7</link></para></entry>
+                xl:href="https://www-01.ibm.com/software/webservers/appserv/was/">IBM WebSphere Application Server 7</link></para></entry>
                 <entry><para><classname>WebSphereLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
                 <entry><para>Running in <link
-                xl:href="http://www.oracle.com/technology/products/oc4j/index.html">Oracle's
+                xl:href="https://www.oracle.com/technology/products/oc4j/index.html">Oracle's
                 OC4J</link></para></entry>
                 <entry><para><classname>OC4JLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
-                <entry><para>Running in <link xl:href="http://glassfish.dev.java.net/">GlassFish</link></para></entry>
+                <entry><para>Running in <link xl:href="https://glassfish.dev.java.net/">GlassFish</link></para></entry>
                 <entry><para><classname>GlassFishLoadTimeWeaver</classname></para></entry>
               </row>
 
               <row>
-                <entry><para>Running in <link xl:href="http://www.jboss.org/jbossas/">JBoss AS</link></para></entry>
+                <entry><para>Running in <link xl:href="https://www.jboss.org/jbossas/">JBoss AS</link></para></entry>
                 <entry><para><classname>JBossLoadTimeWeaver</classname></para></entry>
               </row>
 
@@ -3617,7 +3617,7 @@ http://www.springframework.org/schema/context
               <row>
                 <entry><para>Fallback, expecting the underlying ClassLoader to follow common conventions
                 (e.g. applicable to <classname>TomcatInstrumentableClassLoader</classname> and
-                <link xl:href="http://www.caucho.com/">Resin</link>)</para></entry>
+                <link xl:href="https://www.caucho.com/">Resin</link>)</para></entry>
                 <entry><para><classname>ReflectiveLoadTimeWeaver</classname></para></entry>
               </row>
             </tbody>
@@ -3655,9 +3655,9 @@ public class AppConfig implements LoadTimeWeavingConfigurer {
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
+    https://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/context
-    http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+    https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;context:load-time-weaver
             weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/&gt;
@@ -3739,7 +3739,7 @@ http://www.springframework.org/schema/context
         <section xml:id="aop-aj-ltw-environment-tomcat">
           <title>Tomcat</title>
 
-          <para><link xl:href="http://tomcat.apache.org/">Apache Tomcat</link>'s default class loader
+          <para><link xl:href="https://tomcat.apache.org/">Apache Tomcat</link>'s default class loader
           does not support class transformation which is why Spring provides an enhanced implementation that
           addresses this need. Named <classname>TomcatInstrumentableClassLoader</classname>, the loader works
           on Tomcat 5.0 and above and can be registered individually for <emphasis>each</emphasis> web application
@@ -3779,7 +3779,7 @@ http://www.springframework.org/schema/context
                 <para>For efficiency, the embedded per-web-app configuration style <!--Which one is inside the web-app config style? Reword. TR: REVISED, PLS REVIEW. Same change as for 5.0/5.5-->is
                 recommended because it will impact only applications that use
                 the custom class loader and does not require any changes to the server configuration.
-                See the Tomcat 6.0.x <link xl:href="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">documentation</link>
+                See the Tomcat 6.0.x <link xl:href="https://tomcat.apache.org/tomcat-6.0-doc/config/context.html">documentation</link>
                 for more details about available context locations.</para>
               </listitem>
             </orderedlist>
@@ -3818,7 +3818,7 @@ http://www.springframework.org/schema/context
                 <para>For efficiency, the embedded web-app configuration style<!--Which of the preceding is *inside the web-app config style*? Two paths contain webapp.
 TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 recommended because it will impact only applications that use the class loader. See the Tomcat 5.x <link
-                xl:href="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</link>
+                xl:href="https://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</link>
                 for more details about available context locations.</para>
 
                 <para>Tomcat versions prior to 5.5.20 contained a bug in the
@@ -3827,7 +3827,7 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
                 <emphasis>server.xml</emphasis> configuration, regardless of whether a class
                 loader is specified or whether it is the official or a custom
                 one. See Tomcat's bugzilla for <link
-                xl:href="http://issues.apache.org/bugzilla/show_bug.cgi?id=39704">more
+                xl:href="https://issues.apache.org/bugzilla/show_bug.cgi?id=39704">more
                 details</link>.</para><!--Will reader know what Tomcat's bugzilla is and where to find it? TR: OK AS IS. They just need to click on the hyerlink.-->
 
                 <para>In Tomcat 5.5.x, versions 5.5.20 or later, you should set
@@ -3896,7 +3896,7 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
           environments (depending on your operation policies). Additionally, the JDK agent will instrument the <emphasis>entire</emphasis>
           VM which can prove expensive.</para>
           <para>For performance reasons, it is recommended to use this configuration only if your target environment
-          (such as <link xl:href="http://www.eclipse.org/jetty/">Jetty</link>) does not have (or does not support) a dedicated LTW.</para>
+          (such as <link xl:href="https://www.eclipse.org/jetty/">Jetty</link>) does not have (or does not support) a dedicated LTW.</para>
         </section>
 
       </section>
@@ -3907,7 +3907,7 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
     <title>Further Resources</title>
 
     <para>More information on AspectJ can be found on the <link
-    xl:href="http://www.eclipse.org/aspectj">AspectJ website</link>.</para>
+    xl:href="https://www.eclipse.org/aspectj">AspectJ website</link>.</para>
 
     <para>The book <emphasis>Eclipse AspectJ</emphasis> by Adrian Colyer et.
     al. (Addison-Wesley, 2005) provides a comprehensive introduction and

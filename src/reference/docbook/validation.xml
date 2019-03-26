@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Validation, Data Binding, and Type Conversion</title>
 
   <section xml:id="validation-introduction">
@@ -233,9 +233,9 @@
     <para>More information on the
       <interfacename>MessageCodesResolver</interfacename> and the default
       strategy can be found online with the Javadocs for <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/validation/MessageCodesResolver.html"
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/validation/MessageCodesResolver.html"
       >MessageCodesResolver</link> and <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/validation/DefaultMessageCodesResolver.html"
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/validation/DefaultMessageCodesResolver.html"
       >DefaultMessageCodesResolver</link> respectively.</para>
   </section>
 
@@ -250,7 +250,7 @@
       would have a setter method <methodname>setBingoMadness(..)</methodname>
       and a getter method <methodname>getBingoMadness()</methodname>. For more
       information about JavaBeans and the specification, please refer to Sun's
-      website ( <link xl:href="http://java.sun.com/products/javabeans/"
+      website ( <link xl:href="https://java.sun.com/products/javabeans/"
       >java.sun.com/products/javabeans</link>).</para>
 
     <para>One quite important class in the beans package is the
@@ -625,7 +625,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
       <para>Note that you can also use the standard
         <interfacename>BeanInfo</interfacename> JavaBeans mechanism here as well
         (described <link
-        xl:href="http://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html"
+        xl:href="https://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html"
         >in not-amazing-detail here</link>). Find below an example of using the
         <interfacename>BeanInfo</interfacename> mechanism for explicitly
         registering one or more <interfacename>PropertyEditor</interfacename>
@@ -1268,8 +1268,8 @@ public final class DateFormatter implements Formatter<Date> {
 }]]></programlisting>
 
       <para> The Spring team welcomes community-driven Formatter contributions;
-        see <link xl:href="http://jira.springframework.org"
-        >http://jira.springframework.org</link> to contribute. </para>
+        see <link xl:href="https://jira.springframework.org"
+        >https://jira.springframework.org</link> to contribute. </para>
     </section>
 
     <section xml:id="format-CustomFormatAnnotations">
@@ -1456,9 +1456,9 @@ public interface FormatterRegistrar {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <mvc:annotation-driven/>
 
@@ -1480,9 +1480,9 @@ public interface FormatterRegistrar {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <mvc:annotation-driven conversion-service="conversionService"/>
 
@@ -1564,7 +1564,7 @@ public class AppConfig {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd>
+        https://www.springframework.org/schema/beans/spring-beans.xsd>
 
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="registerDefaultFormatters" value="false" />
@@ -1652,7 +1652,7 @@ public class AppConfig {
         these constraints will be enforced. </para>
 
       <para> For general information on JSR-303, see the <link
-        xl:href="http://jcp.org/en/jsr/detail?id=303">Bean Validation
+        xl:href="https://jcp.org/en/jsr/detail?id=303">Bean Validation
         Specification</link>. For information on the specific capabilities of
         the default reference implementation, see the <link
         xl:href="https://www.hibernate.org/412.html">Hibernate Validator</link>
@@ -1868,9 +1868,9 @@ public class MyController {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <mvc:annotation-driven validator="globalValidator"/>
 
@@ -1910,9 +1910,9 @@ public class MyController {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        https://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <!-- JSR-303 support will be detected on classpath and enabled automatically -->
     <mvc:annotation-driven/>

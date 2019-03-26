@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>View technologies</title>
 
   <section xml:id="view-introduction">
@@ -884,7 +884,7 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
       <para>To be able to use Tiles, you have to configure it using files
       containing definitions (for basic information on definitions and other
       Tiles concepts, please have a look at <link
-      xl:href="http://tiles.apache.org" />). In Spring this is done using the
+      xl:href="https://tiles.apache.org" />). In Spring this is done using the
       <classname>TilesConfigurer</classname>. Have a look at the following
       piece of example ApplicationContext configuration:</para>
 
@@ -1012,13 +1012,13 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   <section xml:id="view-velocity">
     <title>Velocity &amp; FreeMarker</title>
 
-    <para><link xl:href="http://velocity.apache.org">Velocity</link> and <link
-    xl:href="http://www.freemarker.org">FreeMarker</link> are two templating
+    <para><link xl:href="https://velocity.apache.org">Velocity</link> and <link
+    xl:href="https://freemarker.apache.org/">FreeMarker</link> are two templating
     languages that can be used as view technologies within Spring MVC
     applications. The languages are quite similar and serve similar needs and
     so are considered together in this section. For semantic and syntactic
     differences between the two languages, see the <link
-    xl:href="http://www.freemarker.org">FreeMarker</link> web site.</para>
+    xl:href="https://freemarker.apache.org/">FreeMarker</link> web site.</para>
 
     <section xml:id="view-velocity-dependencies">
       <title>Dependencies</title>
@@ -1147,7 +1147,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 &lt;/bean&gt;</programlisting>
 
         <para>Refer to the <link
-        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/ui/velocity/VelocityEngineFactory.html">API
+        xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/ui/velocity/VelocityEngineFactory.html">API
         documentation</link> for Spring configuration of Velocity, or the
         Velocity documentation for examples and definitions of the
         <filename>'velocity.properties'</filename> file itself.</para>
@@ -2609,7 +2609,7 @@ simpleReport.reportDataKey=myBeanData</programlisting>
 
     <para>For an example of creating an Atom view please refer to Alef
     Arendsen's SpringSource Team Blog <link
-    xl:href="http://blog.springsource.com/2009/03/16/adding-an-atom-view-to-an-application-using-springs-rest-support/">entry</link>.</para>
+    xl:href="https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-springs-rest-support/">entry</link>.</para>
   </section>
 
   <section xml:id="view-xml-marshalling">

@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>New Features and Enhancements in Spring Framework 3.0</title>
 
   <para>If you have been using the Spring Framework for some time, you will be
@@ -57,7 +57,7 @@
     this documentation, some errors may nevertheless have crept in. If you do
     spot any typos or even more serious errors, and you can spare a few cycles
     during lunch, please do bring the error to the attention of the Spring
-    team by <link xl:href="http://jira.springframework.org/">raising an
+    team by <link xl:href="https://jira.springframework.org/">raising an
     issue</link>.</para>
   </section>
 
@@ -67,7 +67,7 @@
     <para>
         There are many excellent articles and tutorials that show how to get
         started with Spring Framework 3 features. Read them at the
-        <link xl:href="http://www.springsource.org/documentation">Spring Documentation</link> page.
+        <link xl:href="https://www.springsource.org/documentation">Spring Documentation</link> page.
       </para>
       <para xml:id="new-in-3.0-samples">
       The samples have been improved and updated to take advantage of the new features in Spring
@@ -84,7 +84,7 @@
       some samples (in particular Petclinic) to illustrate various features.</para>
 
       <note><para>For more information on Subversion (or in short SVN), see the project homepage at:
-      <literal>http://subversion.apache.org/</literal></para>
+      <literal>https://subversion.apache.org/</literal></para>
       </note>
 
   </section>
@@ -292,7 +292,7 @@
       across all the products in the Spring portfolio. Its language features
       are driven by the requirements of the projects in the Spring portfolio,
       including tooling requirements for code completion support within the
-      Eclipse based <link xl:href="http://www.springsource.com/products/sts">SpringSource
+      Eclipse based <link xl:href="https://www.springsource.com/products/sts">SpringSource
       Tool Suite</link>.</para>
 
       <para>The following is an example of how the Expression Language can be
@@ -325,7 +325,7 @@ public class RewardsTestDatabase {
         <title>Java based bean metadata</title>
 
         <para>Some core features from the <link
-        xl:href="http://www.springsource.org/javaconfig">JavaConfig</link>
+        xl:href="https://www.springsource.org/javaconfig">JavaConfig</link>
         project have been added to the Spring Framework now. This means that
         the following annotations are now directly supported: <itemizedlist>
             <listitem>

@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Annotation-based container configuration</title>
 
   <sidebar>
@@ -29,7 +29,7 @@
       linkend="beans-java">JavaConfig</link> option, Spring allows annotations
       to be used in a non-invasive way, without touching the target components
       source code and that in terms of tooling, all configuration styles are
-      supported by the <link xl:href="http://www.springsource.com/products/sts"
+      supported by the <link xl:href="https://www.springsource.com/products/sts"
       >SpringSource Tool Suite</link>.</para>
   </sidebar>
 
@@ -68,23 +68,23 @@
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      <lineannotation>xmlns:context="http://www.springframework.org/schema/context"</lineannotation>
      xsi:schemaLocation="http://www.springframework.org/schema/beans
-         http://www.springframework.org/schema/beans/spring-beans.xsd
+         https://www.springframework.org/schema/beans/spring-beans.xsd
          http://www.springframework.org/schema/context
-         http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+         https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
    <lineannotation>&lt;context:annotation-config/&gt;</lineannotation>
 
 &lt;/beans&gt;</programlisting>
 
   <para>(The implicitly registered post-processors include <link
-    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html"
+    xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html"
     ><classname>AutowiredAnnotationBeanPostProcessor</classname></link>, <link
-    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html"
+    xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html"
     ><classname>CommonAnnotationBeanPostProcessor</classname></link>, <link
-    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html"
+    xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html"
     ><classname>PersistenceAnnotationBeanPostProcessor</classname></link>, as
     well as the aforementioned <link
-    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"
+    xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"
     ><classname>RequiredAnnotationBeanPostProcessor</classname></link>.)</para>
 
   <note>
@@ -362,9 +362,9 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd
+      https://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+      https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
   &lt;context:annotation-config/&gt;
 
@@ -479,9 +479,9 @@ public @interface Genre {
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd
+      https://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+      https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
   &lt;context:annotation-config/&gt;
 
@@ -602,9 +602,9 @@ public @interface MovieQualifier {
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd
+      https://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+      https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
   &lt;context:annotation-config/&gt;
 
@@ -643,7 +643,7 @@ public @interface MovieQualifier {
     <title><classname>CustomAutowireConfigurer</classname></title>
 
     <para>The <link
-      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html"
+      xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html"
       ><classname>CustomAutowireConfigurer</classname></link> is a
       <interfacename>BeanFactoryPostProcessor</interfacename> that enables you
       to register your own custom qualifier annotation types even if they are
@@ -724,7 +724,7 @@ public @interface MovieQualifier {
         the <interfacename>ApplicationContext</interfacename> of which the
         <classname>CommonAnnotationBeanPostProcessor</classname> is aware. The
         names can be resolved through JNDI if you configure Spring's <link
-        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jndi/support/SimpleJndiBeanFactory.html"
+        xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jndi/support/SimpleJndiBeanFactory.html"
         ><classname>SimpleJndiBeanFactory</classname></link> explicitly.
         However, it is recommended that you rely on the default behavior and
         simply use Spring's JNDI lookup capabilities to preserve the level of

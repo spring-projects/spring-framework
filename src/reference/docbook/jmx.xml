@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>JMX</title>
 
   <section xml:id="jmx-introduction">
@@ -1617,15 +1617,15 @@ public class JmxTestBean implements IJmxTestBean, NotificationPublisherAware {
 
     <itemizedlist>
       <listitem>
-        <para>The <link xl:href="http://java.sun.com/products/JavaManagement/">JMX homepage</link> at Sun</para>
+        <para>The <link xl:href="https://java.sun.com/products/JavaManagement/">JMX homepage</link> at Sun</para>
       </listitem>
 
       <listitem>
-        <para>The <link xl:href="http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html">JMX specification</link> (JSR-000003)</para>
+        <para>The <link xl:href="https://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html">JMX specification</link> (JSR-000003)</para>
       </listitem>
 
       <listitem>
-        <para>The <link xl:href="http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html">JMX Remote API specification</link> (JSR-000160)</para>
+        <para>The <link xl:href="https://jcp.org/aboutJava/communityprocess/final/jsr160/index.html">JMX Remote API specification</link> (JSR-000160)</para>
       </listitem>
 
       <listitem>
@@ -1635,7 +1635,7 @@ public class JmxTestBean implements IJmxTestBean, NotificationPublisherAware {
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://java.sun.com/developer/technicalArticles/J2SE/jmx.html">Getting Started with JMX</link> - an introductory article from Sun.</para>
+        <para><link xl:href="https://java.sun.com/developer/technicalArticles/J2SE/jmx.html">Getting Started with JMX</link> - an introductory article from Sun.</para>
       </listitem>
     </itemizedlist>
   </section>

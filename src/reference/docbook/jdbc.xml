@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Data access with JDBC</title>
 
   <section xml:id="jdbc-introduction">
@@ -453,9 +453,9 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+        https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;bean id="corporateEventDao" class="com.example.JdbcCorporateEventDao"&gt;
         &lt;property name="dataSource" ref="dataSource"/&gt;
@@ -502,9 +502,9 @@ public class JdbcCorporateEventDao implements CorporateEventDao {
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd
+        https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+        https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
     &lt;!-- Scans within the base package of the application for @Components to configure as beans --&gt;
     &lt;context:component-scan base-package="org.springframework.docs.test" /&gt;
@@ -623,7 +623,7 @@ public int countOfActorsByFirstName(String firstName) {
       <classname>BeanPropertySqlParameterSource</classname> class. This class
       wraps an arbitrary JavaBean (that is, an instance of a class that
       adheres to <link
-      xl:href="http://java.sun.com/products/javabeans/docs/spec.html">the JavaBean
+      xl:href="https://java.sun.com/products/javabeans/docs/spec.html">the JavaBean
       conventions</link>), and uses the properties of the wrapped JavaBean as
       the source of named parameter values.</para>
 
@@ -2669,8 +2669,8 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
     <para>The <literal>org.springframework.jdbc.datasource.embedded</literal>
     package provides support for embedded Java database engines. Support for
     <link xl:href="http://www.hsqldb.org">HSQL</link>, <link
-    xl:href="http://www.h2database.com">H2</link>, and <link
-    xl:href="http://db.apache.org/derby">Derby</link> is provided natively. You
+    xl:href="https://www.h2database.com">H2</link>, and <link
+    xl:href="https://db.apache.org/derby">Derby</link> is provided natively. You
     can also use an extensible API to plug in new embedded database types and
     <classname>DataSource</classname> implementations.</para>
 

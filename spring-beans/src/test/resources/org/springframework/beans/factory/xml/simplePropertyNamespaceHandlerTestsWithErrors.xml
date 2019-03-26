@@ -4,9 +4,9 @@
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xmlns:p="http://www.springframework.org/schema/p"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
+				http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd">
 
 	<bean id="rob" class="org.springframework.tests.sample.beans.TestBean" p:name="Rob Harrop" p:spouse-ref="sally">
 		<property name="name" value="Rob Harrop"/>

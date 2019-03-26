@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Spring Expression Language (SpEL)</title>
 
   <section xml:id="expressions-intro">
@@ -960,7 +960,7 @@ String queryResultString =
       <title>The Elvis Operator</title>
 
       <para>The Elvis operator is a shortening of the ternary operator syntax
-      and is used in the <link xl:href="http://groovy.codehaus.org/Operators#Operators-ElvisOperator(%3F%3A)">Groovy</link>
+      and is used in the <link xl:href="https://groovy.codehaus.org/Operators#Operators-ElvisOperator(%3F%3A)">Groovy</link>
       language. With the ternary operator syntax you usually have to repeat a
       variable twice, for example:</para>
 
@@ -1001,7 +1001,7 @@ System.out.println(name); // Elvis Presley</programlisting>
 
       <para>The Safe Navigation operator is used to avoid a
       <literal>NullPointerException</literal> and comes from the <link
-      xl:href="http://groovy.codehaus.org/Operators#Operators-SafeNavigationOperator(%3F.)">Groovy</link>
+      xl:href="https://groovy.codehaus.org/Operators#Operators-SafeNavigationOperator(%3F.)">Groovy</link>
       language. Typically when you have a reference to an object you might
       need to verify that it is not null before accessing methods or
       properties of the object. To avoid this, the safe navigation operator

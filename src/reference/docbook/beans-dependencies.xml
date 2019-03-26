@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Dependencies</title>
 
   <para>A typical enterprise application does not consist of a single object (or
@@ -180,7 +180,7 @@ public class ExampleBean {
           look up the parameter name from the constructor. If you can't compile
           your code with debug flag (or don't want to) you can use
           <interfacename><link
-          xl:href="http://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html">@ConstructorProperties</link></interfacename>
+          xl:href="https://download.oracle.com/javase/6/docs/api/java/beans/ConstructorProperties.html">@ConstructorProperties</link></interfacename>
           JDK annotation to explicitly name your constructor arguments. The
           sample class would then have to look as follows:</para>
 
@@ -537,7 +537,7 @@ public class ExampleBean {
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:p="http://www.springframework.org/schema/p"
      xsi:schemaLocation="http://www.springframework.org/schema/beans
-     http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+     https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
 &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
       destroy-method="close"
@@ -552,8 +552,8 @@ public class ExampleBean {
 
       <para>The preceding XML is more succinct; however, typos are discovered at
         runtime rather than design time, unless you use an IDE such as <link
-        xl:href="http://www.jetbrains.com/idea/">IntelliJ IDEA</link> or the <link
-        xl:href="http://www.springsource.com/products/sts">SpringSource Tool
+        xl:href="https://www.jetbrains.com/idea/">IntelliJ IDEA</link> or the <link
+        xl:href="https://www.springsource.com/products/sts">SpringSource Tool
         Suite</link> (STS) that support automatic property completion when you
         create bean definitions. Such IDE assistance is highly
         recommended.</para>
@@ -972,7 +972,7 @@ support=support@example.co.uk</programlisting>
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:p="http://www.springframework.org/schema/p"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+      https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean name="classic" class="com.example.ExampleBean"&gt;
       &lt;property name="email" value="foo@bar.com"/&gt;
@@ -995,7 +995,7 @@ support=support@example.co.uk</programlisting>
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:p="http://www.springframework.org/schema/p"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+      https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean name="john-classic" class="com.example.Person"&gt;
       &lt;property name="name" value="John Doe"/&gt;
@@ -1047,7 +1047,7 @@ support=support@example.co.uk</programlisting>
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:c="http://www.springframework.org/schema/c"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+      https://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean id="bar" class="x.y.Bar"/&gt;
   &lt;bean id="baz" class="x.y.Baz"/&gt;
@@ -1475,7 +1475,7 @@ public class CommandManager implements ApplicationContextAware {
 
     <sidebar>
       <para>You can read more about the motivation for Method Injection in
-        <link xl:href="http://blog.springsource.com/2004/08/06/method-injection/"
+        <link xl:href="https://spring.io/blog/2004/08/06/method-injection/"
         >this blog entry</link>.</para>
     </sidebar>
 

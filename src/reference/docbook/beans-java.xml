@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Java-based container configuration</title>
 
   <section xml:id="beans-java-basic-concepts">
@@ -723,7 +723,7 @@ public static void main(String[] args) {
             <literal>ServiceConfig</literal>, how do you know exactly where the
             <literal>@Autowired AccountRepository</literal> bean is declared?
             It's not explicit in the code, and this may be just fine. Remember
-            that the <link xl:href="http://www.springsource.com/products/sts"
+            that the <link xl:href="https://www.springsource.com/products/sts"
             >SpringSource Tool Suite</link> provides tooling that can render
             graphs showing how everything is wired up - that may be all you
             need. Also, your Java IDE can easily find all declarations and uses

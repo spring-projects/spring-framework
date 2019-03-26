@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
     <title>Marshalling XML using O/X Mappers</title>
 
     <section xml:id="oxm-introduction">
@@ -319,9 +319,9 @@ public class Application {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     ]]><emphasis role="bold"><![CDATA[xmlns:oxm="http://www.springframework.org/schema/oxm"]]></emphasis>
     <![CDATA[xsi:schemaLocation="http://www.springframework.org/schema/beans
-    ]]><![CDATA[http://www.springframework.org/schema/beans/spring-beans.xsd
+    ]]><![CDATA[https://www.springframework.org/schema/beans/spring-beans.xsd
     ]]><emphasis role="bold"><![CDATA[http://www.springframework.org/schema/oxm
-    ]]><![CDATA[http://www.springframework.org/schema/oxm/spring-oxm.xsd"]]></emphasis><![CDATA[>
+    ]]><![CDATA[https://www.springframework.org/schema/oxm/spring-oxm.xsd"]]></emphasis><![CDATA[>
 ]]></programlisting>
         <para>
             Currently, the following tags are available:
@@ -441,7 +441,7 @@ public class Application {
             though a mapping file can be used to have more control over the behavior of Castor.
         </para>
         <para>
-            For more information on Castor, refer to the <link xl:href="http://castor.codehaus.org/xml-framework.html">
+            For more information on Castor, refer to the <link xl:href="https://castor.codehaus.org/xml-framework.html">
             <citetitle>Castor web site</citetitle></link>. The Spring integration classes reside in the
             <package>org.springframework.oxm.castor</package> package.
         </para>
@@ -465,7 +465,7 @@ public class Application {
             <para>
                 Although it is possible to rely on Castor's default marshalling behavior, it might be necessary to have
                 more control over it. This can be accomplished using a Castor mapping file. For more information, refer
-                to <link xl:href="http://castor.codehaus.org/xml-mapping.html">Castor XML Mapping</link>.
+                to <link xl:href="https://castor.codehaus.org/xml-mapping.html">Castor XML Mapping</link>.
             </para>
             <para>
                 The mapping can be set using the <property>mappingLocation</property> resource property, indicated
@@ -570,7 +570,7 @@ public class Application {
             <interfacename>XmlObject</interfacename>, and contain XML binding information in them.
         </para>
         <para>
-            For more information on XMLBeans, refer to the <link xl:href="http://xmlbeans.apache.org/">
+            For more information on XMLBeans, refer to the <link xl:href="https://xmlbeans.apache.org/">
                <citetitle>XMLBeans web site </citetitle></link>. The Spring-WS integration classes reside
             in the <package>org.springframework.oxm.xmlbeans</package> package.
         </para>
@@ -727,7 +727,7 @@ public class Application {
             generates clean XML.
         </para>
         <para>
-            For more information on XStream, refer to the <link xl:href="http://xstream.codehaus.org/">
+            For more information on XStream, refer to the <link xl:href="https://xstream.codehaus.org/">
             <citetitle>XStream web site</citetitle></link>. The Spring integration classes reside in the
             <package>org.springframework.oxm.xstream</package> package.
         </para>
@@ -764,7 +764,7 @@ public class Application {
                   This will make sure that only the registered classes are eligible for unmarshalling.
                 </para>
                 <para>
-                  Additionally, you can register <link xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher[])">
+                  Additionally, you can register <link xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher[])">
                   custom converters</link> to make sure that only your supported classes can be unmarshalled.
                   You might want to add a <classname>CatchAllConverter</classname> as the last converter in the list,
                   in addition to converters that explicitly support the domain classes that should be supported.

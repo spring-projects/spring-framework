@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Bean scopes</title>
 
   <para>When you create a bean definition, you create a
@@ -99,7 +99,7 @@
     <para>As of Spring 3.0, a <emphasis>thread scope</emphasis> is available,
       but is not registered by default. For more information, see the
       documentation for <link
-      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/SimpleThreadScope.html"
+      xl:href="https://docs.spring.io/spring/docs/current/api/org/springframework/context/support/SimpleThreadScope.html"
       >SimpleThreadScope</link>. For instructions on how to register this or
       any other custom scope, see <xref
       linkend="beans-factory-scopes-custom-using"/>.</para>
@@ -393,9 +393,9 @@
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:aop="http://www.springframework.org/schema/aop"
      xsi:schemaLocation="http://www.springframework.org/schema/beans
-         http://www.springframework.org/schema/beans/spring-beans.xsd
+         https://www.springframework.org/schema/beans/spring-beans.xsd
          http://www.springframework.org/schema/aop
-         http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+         https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   <lineannotation>&lt;!-- an HTTP Session-scoped bean exposed as a proxy --&gt;</lineannotation>
   &lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"&gt;
@@ -545,7 +545,7 @@
         implement your own scopes, see the <interfacename>Scope</interfacename>
         implementations that are supplied with the Spring Framework itself and
         the <link
-        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/Scope.html"
+        xl:href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/Scope.html"
         >Scope Javadoc</link>, which explains the methods you need to implement
         in more detail.</para>
 
@@ -640,9 +640,9 @@ beanFactory.registerScope("thread", threadScope);</programlisting>
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:aop="http://www.springframework.org/schema/aop"
      xsi:schemaLocation="http://www.springframework.org/schema/beans
-         http://www.springframework.org/schema/beans/spring-beans.xsd
+         https://www.springframework.org/schema/beans/spring-beans.xsd
          http://www.springframework.org/schema/aop
-         http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+         https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;bean class="org.springframework.beans.factory.config.CustomScopeConfigurer"&gt;
       &lt;property name="scopes"&gt;

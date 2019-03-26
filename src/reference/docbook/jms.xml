@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>JMS (Java Message Service)</title>
 
   <section xml:id="jms-introduction">
@@ -922,8 +922,8 @@ public interface SessionAwareMessageListener {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        <emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis>
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-<emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"</emphasis>&gt;
+http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+<emphasis role="bold">http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd"</emphasis>&gt;
 
 <lineannotation>&lt;!-- &lt;bean/&gt; definitions here --&gt;</lineannotation>
 

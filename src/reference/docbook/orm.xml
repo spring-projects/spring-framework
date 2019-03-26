@@ -5,8 +5,8 @@
     xmlns:xi="http://www.w3.org/2001/XInclude"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+        http://docbook.org/ns/docbook https://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink https://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Object Relational Mapping (ORM) Data Access</title>
 
   <section xml:id="orm-introduction">
@@ -231,7 +231,7 @@ public class ProductDaoImpl implements ProductDao {
     <title>Hibernate</title>
 
     <para>We will start with a coverage of <link
-    xl:href="http://www.hibernate.org/">Hibernate 3</link> in a Spring
+    xl:href="https://hibernate.org/">Hibernate 3</link> in a Spring
     environment, using it to demonstrate the approach that Spring takes
     towards integrating O/R mappers. This section will cover many issues in
     detail and show different variations of DAO implementations and
@@ -419,11 +419,11 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
+       https://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/tx
-       http://www.springframework.org/schema/tx/spring-tx.xsd
+       https://www.springframework.org/schema/tx/spring-tx.xsd
        http://www.springframework.org/schema/aop
-       http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+       https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   <lineannotation>&lt;!-- SessionFactory, DataSource, etc. omitted --&gt;</lineannotation>
 
@@ -512,11 +512,11 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
+       https://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/tx
-       http://www.springframework.org/schema/tx/spring-tx.xsd
+       https://www.springframework.org/schema/tx/spring-tx.xsd
        http://www.springframework.org/schema/aop
-       http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+       https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   <lineannotation>&lt;!-- SessionFactory, DataSource, etc. omitted --&gt;</lineannotation>
 
@@ -1155,11 +1155,11 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
         xmlns:tx="http://www.springframework.org/schema/tx"
         xsi:schemaLocation="
    http://www.springframework.org/schema/beans
-   http://www.springframework.org/schema/beans/spring-beans.xsd
+   https://www.springframework.org/schema/beans/spring-beans.xsd
    http://www.springframework.org/schema/tx
-   http://www.springframework.org/schema/tx/spring-tx.xsd
+   https://www.springframework.org/schema/tx/spring-tx.xsd
    http://www.springframework.org/schema/aop
-   http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+   https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.jdo.JdoTransactionManager"&gt;
     &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
@@ -1260,7 +1260,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
     <para>The Spring JPA, available under the
     <literal>org.springframework.orm.jpa</literal> package, offers
     comprehensive support for the <link
-    xl:href="http://java.sun.com/developer/technicalArticles/J2EE/jpa/index.html">Java
+    xl:href="https://java.sun.com/developer/technicalArticles/J2EE/jpa/index.html">Java
     Persistence API</link> in a similar manner to the integration with
     Hibernate or JDO, while being aware of the underlying implementation in
     order to provide additional features.</para>
@@ -1459,7 +1459,7 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
         plugged in a specific manner, depending whether the environment is a
         web container or application server. <!--Preceding: is this what you mean? Avoid slashes (web container/application server); slashes mean different things depending on context.--><!--Revise if necessary. TR: OK.-->
         Hooking <literal>ClassTransformers</literal> through a Java 5 <link
-        xl:href="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agent</link>
+        xl:href="https://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agent</link>
         typically is not efficient. The agents work against the
         <emphasis>entire virtual machine</emphasis> and inspect
         <emphasis>every</emphasis> class that is loaded, which is usually
@@ -1736,11 +1736,11 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
+       https://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/tx
-       http://www.springframework.org/schema/tx/spring-tx.xsd
+       https://www.springframework.org/schema/tx/spring-tx.xsd
        http://www.springframework.org/schema/aop
-       http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
+       https://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
     &lt;property name="entityManagerFactory" ref="myEmf"/&gt;
