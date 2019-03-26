@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * A strategy interface for multipart file upload resolution in accordance
- * with <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.
+ * with <a href="https://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.
  * Implementations are typically usable both within an application context
  * and standalone.
  *

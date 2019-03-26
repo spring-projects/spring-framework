@@ -33,7 +33,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class RouterFunctionMappingTests {
 
-	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://example.com/match"));
+	private final ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com/match"));
 
 	private final ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
 

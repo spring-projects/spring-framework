@@ -22,7 +22,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
  * A helper class for assertions on JSON content.
  *
  * <p>Use of this class requires the <a
- * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
+ * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
  *
  * @author Sebastien Deleuze
  * @since 4.1

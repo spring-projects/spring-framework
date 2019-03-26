@@ -85,7 +85,7 @@ public class ResourceUrlProviderTests {
 	@Test  // SPR-13374
 	public void getStaticResourceUrlRequestWithQueryOrHash() {
 
-		String url = "/resources/foo.css?foo=bar&url=http://example.org";
+		String url = "/resources/foo.css?foo=bar&url=https://example.org";
 		String resolvedUrl = this.urlProvider.getForUriString(url, this.exchange).block(TIMEOUT);
 		assertEquals(url, resolvedUrl);
 

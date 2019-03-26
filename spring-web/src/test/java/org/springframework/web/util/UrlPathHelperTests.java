@@ -169,7 +169,7 @@ public class UrlPathHelperTests {
 
 	//
 	// suite of tests root requests for default servlets (SRV 11.2) on Websphere vs Tomcat and other containers
-	// see: http://jira.springframework.org/browse/SPR-7064
+	// see: https://jira.springframework.org/browse/SPR-7064
 	//
 
 

@@ -51,7 +51,7 @@ public class RedirectViewUriTemplateTests {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "bar");
 
-		String baseUrl = "http://url.somewhere.com";
+		String baseUrl = "https://url.somewhere.com";
 		RedirectView redirectView = new RedirectView(baseUrl + "/{foo}");
 		redirectView.renderMergedOutputModel(model, this.request, this.response);
 
@@ -63,7 +63,7 @@ public class RedirectViewUriTemplateTests {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "bar/bar baz");
 
-		String baseUrl = "http://url.somewhere.com";
+		String baseUrl = "https://url.somewhere.com";
 		RedirectView redirectView = new RedirectView(baseUrl + "/context path/{foo}");
 		redirectView.renderMergedOutputModel(model, this.request, this.response);
 
@@ -106,7 +106,7 @@ public class RedirectViewUriTemplateTests {
 		currentRequestUriTemplateVars.put("var3", "v3");
 		this.request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, currentRequestUriTemplateVars);
 
-		String url = "http://url.somewhere.com";
+		String url = "https://url.somewhere.com";
 		RedirectView redirectView = new RedirectView(url + "/{key1}/{var1}/{name}");
 		redirectView.renderMergedOutputModel(model, this.request, this.response);
 

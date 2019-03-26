@@ -95,7 +95,7 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void created() {
-		URI location = URI.create("http://example.com");
+		URI location = URI.create("https://example.com");
 		Mono<ServerResponse> result = ServerResponse.created(location).build();
 		StepVerifier.create(result)
 				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()) &&
@@ -126,7 +126,7 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void seeOther() {
-		URI location = URI.create("http://example.com");
+		URI location = URI.create("https://example.com");
 		Mono<ServerResponse> result = ServerResponse.seeOther(location).build();
 		StepVerifier.create(result)
 				.expectNextMatches(response -> HttpStatus.SEE_OTHER.equals(response.statusCode()) &&
@@ -137,7 +137,7 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void temporaryRedirect() {
-		URI location = URI.create("http://example.com");
+		URI location = URI.create("https://example.com");
 		Mono<ServerResponse> result = ServerResponse.temporaryRedirect(location).build();
 		StepVerifier.create(result)
 				.expectNextMatches(response -> HttpStatus.TEMPORARY_REDIRECT.equals(response.statusCode()) &&
@@ -148,7 +148,7 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void permanentRedirect() {
-		URI location = URI.create("http://example.com");
+		URI location = URI.create("https://example.com");
 		Mono<ServerResponse> result = ServerResponse.permanentRedirect(location).build();
 		StepVerifier.create(result)
 				.expectNextMatches(response -> HttpStatus.PERMANENT_REDIRECT.equals(response.statusCode()) &&
@@ -304,7 +304,7 @@ public class DefaultServerResponseBuilderTests {
 				.header("MyKey", "MyValue")
 				.cookie(cookie).build();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com").build();
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		result.flatMap(res -> res.writeTo(exchange, EMPTY_CONTEXT)).block();
@@ -321,7 +321,7 @@ public class DefaultServerResponseBuilderTests {
 		Mono<Void> mono = Mono.empty();
 		Mono<ServerResponse> result = ServerResponse.ok().build(mono);
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com").build();
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		result.flatMap(res -> res.writeTo(exchange, EMPTY_CONTEXT)).block();
@@ -345,7 +345,7 @@ public class DefaultServerResponseBuilderTests {
 				.syncBody("bar")
 				.block();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com")
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com")
 				.header(HttpHeaders.IF_NONE_MATCH, etag)
 				.build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
@@ -369,7 +369,7 @@ public class DefaultServerResponseBuilderTests {
 				.syncBody("bar")
 				.block();
 
-		MockServerHttpRequest request = MockServerHttpRequest.get("http://example.com")
+		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com")
 				.header(HttpHeaders.IF_MODIFIED_SINCE,
 						DateTimeFormatter.RFC_1123_DATE_TIME.format(now))
 				.build();

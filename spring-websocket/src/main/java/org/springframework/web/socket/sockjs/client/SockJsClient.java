@@ -57,7 +57,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
- * @see <a href="http://sockjs.org">http://sockjs.org</a>
+ * @see <a href="https://github.com/sockjs/sockjs-client">https://github.com/sockjs/sockjs-client</a>
  * @see org.springframework.web.socket.sockjs.client.Transport
  */
 public class SockJsClient implements WebSocketClient, Lifecycle {

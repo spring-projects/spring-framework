@@ -133,7 +133,7 @@ Typically, you need an application server's JTA capability only if your applicat
 to handle transactions across multiple resources, which is not a requirement for many
 applications. Many high-end applications use a single, highly scalable database (such as
 Oracle RAC) instead. Stand-alone transaction managers (such as
-http://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM])
+https://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM])
 are other options. Of course, you may need other application server capabilities, such as
 Java Message Service (JMS) and Java EE Connector Architecture (JCA).
 
@@ -294,9 +294,9 @@ and JNDI lookup version would look like:
 		xmlns:jee="http://www.springframework.org/schema/jee"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/jee
-			http://www.springframework.org/schema/jee/spring-jee.xsd">
+			https://www.springframework.org/schema/jee/spring-jee.xsd">
 
 		<jee:jndi-lookup id="dataSource" jndi-name="jdbc/jpetstore"/>
 
@@ -621,11 +621,11 @@ configuration is explained in detail in the next few paragraphs:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- this is the service object that we want to make transactional -->
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
@@ -897,11 +897,11 @@ the default transactional configuration, you could write the following:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<aop:config>
 
@@ -947,11 +947,11 @@ transactional settings:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<aop:config>
 
@@ -1118,11 +1118,11 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- this is the service object that we want to make transactional -->
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
@@ -1587,11 +1587,11 @@ transactional aspects applied to it in the desired order:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
 
@@ -1644,11 +1644,11 @@ declarative approach:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
 
@@ -1743,7 +1743,7 @@ regardless of visibility.
 
 To weave your applications with the `AnnotationTransactionAspect`, you must either build
 your application with AspectJ (see the
-http://www.eclipse.org/aspectj/doc/released/devguide/index.html[AspectJ Development
+https://www.eclipse.org/aspectj/doc/released/devguide/index.html[AspectJ Development
 Guide]) or use load-time weaving. See <<core.adoc#aop-aj-ltw,Load-time weaving with
 AspectJ in the Spring Framework>> for a discussion of load-time weaving with AspectJ.
 
@@ -2075,12 +2075,12 @@ treats them as errors.
 
 For more information about the Spring Framework's transaction support, see:
 
-* http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
+* https://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
   transactions in Spring, with and without XA] is a JavaWorld presentation in which
   Spring's David Syer guides you through seven patterns for distributed
   transactions in Spring applications, three of them with XA and four without.
-* http://www.infoq.com/minibooks/JTDS[_Java Transaction Design Strategies_] is a book
-  available from http://www.infoq.com/[InfoQ] that provides a well-paced introduction
+* https://www.infoq.com/minibooks/JTDS[_Java Transaction Design Strategies_] is a book
+  available from https://www.infoq.com/[InfoQ] that provides a well-paced introduction
   to transactions in Java. It also includes side-by-side examples of how to configure
   and use transactions with both the Spring Framework and EJB3.
 
@@ -2626,9 +2626,9 @@ The following example shows the corresponding XML configuration:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<bean id="corporateEventDao" class="com.example.JdbcCorporateEventDao">
 			<property name="dataSource" ref="dataSource"/>
@@ -2686,9 +2686,9 @@ The following example shows the corresponding XML configuration:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<!-- Scans within the base package of the application for @Component classes to configure as beans -->
 		<context:component-scan base-package="org.springframework.docs.test" />
@@ -2795,7 +2795,7 @@ are the parameter names and the values are the parameter values.
 
 Another `SqlParameterSource` implementation is the `BeanPropertySqlParameterSource`
 class. This class wraps an arbitrary JavaBean (that is, an instance of a class that
-adheres to http://www.oracle.com/technetwork/java/javase/documentation/spec-136004.html[the
+adheres to https://www.oracle.com/technetwork/java/javase/documentation/spec-136004.html[the
 JavaBean conventions]) and uses the properties of the wrapped JavaBean as the source
 of named parameter values.
 
@@ -4763,7 +4763,7 @@ it with values from the Java `ARRAY`, as the following example shows:
 
 The `org.springframework.jdbc.datasource.embedded` package provides support for embedded
 Java database engines. Support for http://www.hsqldb.org[HSQL],
-http://www.h2database.com[H2], and http://db.apache.org/derby[Derby] is provided
+https://www.h2database.com[H2], and https://db.apache.org/derby[Derby] is provided
 natively. You can also use an extensible API to plug in new embedded database types and
 `DataSource` implementations.
 
@@ -5204,7 +5204,7 @@ The benefits of using the Spring Framework to create your ORM DAOs include:
 
 TIP: For more comprehensive ORM support, including support for alternative database
 technologies such as MongoDB, you might want to check out the
-http://projects.spring.io/spring-data/[Spring Data] suite of projects. If you are
+https://projects.spring.io/spring-data/[Spring Data] suite of projects. If you are
 a JPA user, the https://spring.io/guides/gs/accessing-data-jpa/[Getting Started Accessing
 Data with JPA] guide from https://spring.io provides a great introduction.
 
@@ -5314,7 +5314,7 @@ exception hierarchies.
 [[orm-hibernate]]
 === Hibernate
 
-We start with a coverage of http://www.hibernate.org/[Hibernate 5] in a Spring
+We start with a coverage of https://hibernate.org/[Hibernate 5] in a Spring
 environment, using it to demonstrate the approach that Spring takes towards integrating
 OR mappers. This section covers many issues in detail and shows different variations
 of DAO implementations and transaction demarcation. Most of these patterns can be
@@ -5545,11 +5545,11 @@ processing at runtime. The following example shows how to do so:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- SessionFactory, DataSource, etc. omitted -->
 
@@ -5795,7 +5795,7 @@ following events occur when a JTA transaction commits:
 
 The Spring JPA, available under the `org.springframework.orm.jpa` package, offers
 comprehensive support for the
-http://www.oracle.com/technetwork/articles/javaee/jpa-137156.html[Java Persistence
+https://www.oracle.com/technetwork/articles/javaee/jpa-137156.html[Java Persistence
 API] in a manner similar to the integration with Hibernate while being aware of
 the underlying implementation in order to provide additional features.
 
@@ -5967,7 +5967,7 @@ The `LoadTimeWeaver` interface is a Spring-provided class that lets JPA
 `ClassTransformer` instances be plugged in a specific manner, depending on whether the
 environment is a web container or application server. Hooking `ClassTransformers`
 through an
-http://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html[agent]
+https://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html[agent]
 is typically not efficient. The agents work against the entire virtual machine and
 inspect every class that is loaded, which is usually undesirable in a production
 server environment.
@@ -6670,8 +6670,8 @@ preamble of the XML configuration file. The following example shows how to do so
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:oxm="http://www.springframework.org/schema/oxm" <1>
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd
-      http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
+      https://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/oxm https://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
 ----
 <1> Reference the `oxm` schema.
 <2> Specify the `oxm` schema location.
@@ -6794,7 +6794,7 @@ not require any further configuration, though you can use a mapping file to have
 control over the behavior of Castor.
 
 For more information on Castor, see the
-http://castor-data-binding.github.io/castor[Castor web site]. The Spring
+https://castor-data-binding.github.io/castor[Castor web site]. The Spring
 integration classes reside in the `org.springframework.oxm.castor` package.
 
 
@@ -6821,7 +6821,7 @@ interface. It can be wired up as follows:
 
 Although it is possible to rely on Castor's default marshalling behavior, it might be
 necessary to have more control over it. You can get more control by using a Castor mapping
-file. For more information, see http://castor-data-binding.github.io/castor/reference-guides/1.3.3/html-single/index.html#xml.mapping[Castor
+file. For more information, see https://castor-data-binding.github.io/castor/reference-guides/1.3.3/html-single/index.html#xml.mapping[Castor
 XML Mapping].
 
 You can set the mapping by using the `mappingLocation` resource property, indicated in the following example
@@ -6969,7 +6969,7 @@ The following table describes the available attributes:
 XStream is a simple library to serialize objects to XML and back again. It does not
 require any mapping and generates clean XML.
 
-For more information on XStream, see the http://x-stream.github.io/[XStream
+For more information on XStream, see the https://x-stream.github.io/[XStream
 web site]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
 

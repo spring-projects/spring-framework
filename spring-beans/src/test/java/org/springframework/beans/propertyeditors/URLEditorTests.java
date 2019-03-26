@@ -49,7 +49,7 @@ public class URLEditorTests {
 	@Test
 	public void testStandardURL() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
-		urlEditor.setAsText("http://www.springframework.org");
+		urlEditor.setAsText("https://www.springframework.org");
 		Object value = urlEditor.getValue();
 		assertTrue(value instanceof URL);
 		URL url = (URL) value;

@@ -920,14 +920,14 @@ public class MvcNamespaceTests {
 			assertEquals(2, configs.size());
 			CorsConfiguration config = configs.get("/api/**");
 			assertNotNull(config);
-			assertArrayEquals(new String[]{"http://domain1.com", "http://domain2.com"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"https://domain1.com", "https://domain2.com"}, config.getAllowedOrigins().toArray());
 			assertArrayEquals(new String[]{"GET", "PUT"}, config.getAllowedMethods().toArray());
 			assertArrayEquals(new String[]{"header1", "header2", "header3"}, config.getAllowedHeaders().toArray());
 			assertArrayEquals(new String[]{"header1", "header2"}, config.getExposedHeaders().toArray());
 			assertFalse(config.getAllowCredentials());
 			assertEquals(Long.valueOf(123), config.getMaxAge());
 			config = configs.get("/resources/**");
-			assertArrayEquals(new String[]{"http://domain1.com"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"https://domain1.com"}, config.getAllowedOrigins().toArray());
 			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());

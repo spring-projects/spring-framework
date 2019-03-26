@@ -244,13 +244,13 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 
-Copyright (c) 1999-2009, OW2 Consortium <http://www.ow2.org/>
+Copyright (c) 1999-2009, OW2 Consortium <https://www.ow2.org/>
 
 
 >>> CGLIB 3.0 (cglib:cglib:3.0):
 
 Per the LICENSE file in the CGLIB JAR distribution downloaded from
-http://sourceforge.net/projects/cglib/files/cglib3/3.0/cglib-3.0.jar/download,
+https://sourceforge.net/projects/cglib/files/cglib3/3.0/cglib-3.0.jar/download,
 CGLIB 3.0 is licensed under the Apache License, version 2.0, the text of which
 is included above.
 
@@ -263,7 +263,7 @@ source code to be made available (as would be noted above), you may obtain a
 copy of the source code corresponding to the binaries for such open source
 components and modifications thereto, if any, (the "Source Files"), by
 downloading the Source Files from https://spring.io/projects, Pivotal's website
-at http://network.pivotal.io/open-source, or by sending a request, with your
+at https://network.pivotal.io/open-source, or by sending a request, with your
 name and address to: Pivotal Software, Inc., 875 Howard Street, 5th floor, San
 Francisco, CA 94103, Attention: General Counsel. All such requests should
 clearly specify: OPEN SOURCE FILES REQUEST, Attention General Counsel. Pivotal

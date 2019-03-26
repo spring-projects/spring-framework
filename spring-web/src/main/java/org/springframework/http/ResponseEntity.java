@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  * {@link org.springframework.web.client.RestTemplate#getForEntity getForEntity()} and
  * {@link org.springframework.web.client.RestTemplate#exchange exchange()}:
  * <pre class="code">
- * ResponseEntity&lt;String&gt; entity = template.getForEntity("http://example.com", String.class);
+ * ResponseEntity&lt;String&gt; entity = template.getForEntity("https://example.com", String.class);
  * String body = entity.getBody();
  * MediaType contentType = entity.getHeaders().getContentType();
  * HttpStatus statusCode = entity.getStatusCode();

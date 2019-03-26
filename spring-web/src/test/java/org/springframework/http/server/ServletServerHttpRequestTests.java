@@ -59,7 +59,7 @@ public class ServletServerHttpRequestTests {
 
 	@Test
 	public void getUriForSimplePath() throws URISyntaxException {
-		URI uri = new URI("http://example.com/path");
+		URI uri = new URI("https://example.com/path");
 		mockRequest.setServerName(uri.getHost());
 		mockRequest.setServerPort(uri.getPort());
 		mockRequest.setRequestURI(uri.getPath());
@@ -69,7 +69,7 @@ public class ServletServerHttpRequestTests {
 
 	@Test
 	public void getUriWithQueryString() throws URISyntaxException {
-		URI uri = new URI("http://example.com/path?query");
+		URI uri = new URI("https://example.com/path?query");
 		mockRequest.setServerName(uri.getHost());
 		mockRequest.setServerPort(uri.getPort());
 		mockRequest.setRequestURI(uri.getPath());
@@ -82,7 +82,7 @@ public class ServletServerHttpRequestTests {
 		mockRequest.setServerName("example.com");
 		mockRequest.setRequestURI("/path");
 		mockRequest.setQueryString("query=foo");
-		assertEquals(new URI("http://example.com/path?query=foo"), request.getURI());
+		assertEquals(new URI("https://example.com/path?query=foo"), request.getURI());
 	}
 
 	@Test  // SPR-16414
@@ -90,7 +90,7 @@ public class ServletServerHttpRequestTests {
 		mockRequest.setServerName("example.com");
 		mockRequest.setRequestURI("/path");
 		mockRequest.setQueryString("query=foo%%x");
-		assertEquals(new URI("http://example.com/path"), request.getURI());
+		assertEquals(new URI("https://example.com/path"), request.getURI());
 	}
 
 	@Test  // SPR-13876

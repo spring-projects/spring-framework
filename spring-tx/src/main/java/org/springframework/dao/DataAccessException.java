@@ -21,7 +21,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Root of the hierarchy of data access exceptions discussed in
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>.
+ * <a href="https://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>.
  * Please see Chapter 9 of this book for detailed discussion of the
  * motivation for this package.
  *

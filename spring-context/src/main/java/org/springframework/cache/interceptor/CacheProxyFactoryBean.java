@@ -35,7 +35,7 @@ import org.springframework.cache.CacheManager;
  * target implements. Exists primarily for third-party framework integration.
  * <strong>Users should favor the {@code cache:} XML namespace
  * {@link org.springframework.cache.annotation.Cacheable @Cacheable} annotation.</strong>
- * See the <a href="http://bit.ly/p9rIvx">declarative annotation-based caching</a> section
+ * See the <a href="https://bit.ly/p9rIvx">declarative annotation-based caching</a> section
  * of the Spring reference documentation for more information.
  *
  * @author Costin Leau

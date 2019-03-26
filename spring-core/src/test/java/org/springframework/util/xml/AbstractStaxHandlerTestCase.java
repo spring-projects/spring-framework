@@ -46,7 +46,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 	private static final String COMPLEX_XML =
 			"<?xml version='1.0' encoding='UTF-8'?>" +
-					"<!DOCTYPE beans PUBLIC \"-//SPRING//DTD BEAN 2.0//EN\" \"http://www.springframework.org/dtd/spring-beans-2.0.dtd\">" +
+					"<!DOCTYPE beans PUBLIC \"-//SPRING//DTD BEAN 2.0//EN\" \"https://www.springframework.org/dtd/spring-beans-2.0.dtd\">" +
 					"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2' prefix:attr='value'>characters <![CDATA[cdata]]></prefix:child>" +
 					"<!-- comment -->" +
 					"</root>";

@@ -332,7 +332,7 @@ public class ProxyFactoryTests {
 	}
 
 	@Test
-	@Ignore("Not implemented yet, see http://jira.springframework.org/browse/SPR-5708")
+	@Ignore("Not implemented yet, see https://jira.springframework.org/browse/SPR-5708")
 	public void testExclusionOfNonPublicInterfaces() {
 		JFrame frame = new JFrame();
 		ProxyFactory proxyFactory = new ProxyFactory(frame);

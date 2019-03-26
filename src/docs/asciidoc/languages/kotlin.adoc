@@ -11,7 +11,7 @@ Kotlin applications almost as if the Spring Framework were a native Kotlin frame
 
 The easiest way to learn about Spring and Kotlin is to follow
 https://spring.io/guides/tutorials/spring-boot-kotlin/[this comprehensive tutorial].
-Feel free to join the #spring channel of http://slack.kotlinlang.org/[Kotlin Slack]
+Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Slack]
 or ask a question with `spring` and `kotlin` as tags on
 https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you need support.
 
@@ -90,7 +90,7 @@ which cleanly deals with `null` values at compile time rather than bumping into 
 `NullPointerException` at runtime. This makes applications safer through nullability
 declarations and expressing "`value or no value`" semantics without paying the cost of wrappers, such as `Optional`.
 (Kotlin allows using functional constructs with nullable values. See this
-http://www.baeldung.com/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
+https://www.baeldung.com/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
 
 Although Java does not let you express null-safety in its type-system, the Spring Framework
 provides <<core#null-safety, null-safety of the whole Spring Framework API>>
@@ -316,7 +316,7 @@ for a concrete example.
 === Kotlin Script Templates
 
 As of version 4.3, Spring Framework provides a
-http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
+https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
 to render templates by using script engines. It supports
 https://www.jcp.org/en/jsr/detail?id=223[JSR-223].
 Spring Framework 5 goes even further by extending this feature to WebFlux and supporting
@@ -393,7 +393,7 @@ Meta-annotations support means that types annotated with `@Configuration`, `@Con
 `@RestController`, `@Service`, or `@Repository` are automatically opened since these
 annotations are meta-annotated with `@Component`.
 
-http://start.spring.io/#!language=kotlin[start.spring.io] enables it by default, so, in practice,
+https://start.spring.io/#!language=kotlin[start.spring.io] enables it by default, so, in practice,
 you can write your Kotlin beans without any additional `open` keyword, as in Java.
 
 
@@ -767,8 +767,8 @@ MVC and its annotation-based programming model is the recommended choice.
 We recommend the following resources for people learning how to build applications with
 Kotlin and the Spring Framework:
 
-* http://kotlinlang.org/docs/reference/[Kotlin language reference]
-* http://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
+* https://kotlinlang.org/docs/reference/[Kotlin language reference]
+* https://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
 * https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow, with `spring` and `kotlin` tags]
 * https://try.kotlinlang.org/[Try Kotlin in your browser]
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]

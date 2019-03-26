@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation
- * that uses <a href="http://netty.io/">Netty 4</a> to create requests.
+ * that uses <a href="https://netty.io/">Netty 4</a> to create requests.
  *
  * <p>Allows to use a pre-configured {@link EventLoopGroup} instance: useful for
  * sharing across multiple clients.

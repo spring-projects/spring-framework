@@ -191,7 +191,7 @@ public class StompEncoder  {
 
 	/**
 	 * See STOMP Spec 1.2:
-	 * <a href="http://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
+	 * <a href="https://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
 	 */
 	private String escape(String inString) {
 		StringBuilder sb = null;
