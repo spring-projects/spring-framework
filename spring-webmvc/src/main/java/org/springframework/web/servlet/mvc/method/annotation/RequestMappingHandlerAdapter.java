@@ -99,7 +99,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Extension of {@link AbstractHandlerMethodAdapter} that supports
- * {@link RequestMapping} annotated {@code HandlerMethod RequestMapping} annotated {@code HandlerMethods}.
+ * {@link RequestMapping @RequestMapping} annotated {@link HandlerMethod HandlerMethods}.
  *
  * <p>Support for custom argument and return value types can be added via
  * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers},
