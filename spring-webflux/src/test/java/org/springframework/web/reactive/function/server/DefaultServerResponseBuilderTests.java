@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,11 +65,17 @@ public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void from() {
-		ServerResponse other = ServerResponse.ok().header("foo", "bar").build().block();
+		ResponseCookie cookie = ResponseCookie.from("foo", "bar").build();
+		ServerResponse other = ServerResponse.ok().header("foo", "bar")
+				.cookie(cookie)
+				.hint("foo", "bar")
+				.build().block();
+
 		Mono<ServerResponse> result = ServerResponse.from(other).build();
 		StepVerifier.create(result)
 				.expectNextMatches(response -> HttpStatus.OK.equals(response.statusCode()) &&
-						"bar".equals(response.headers().getFirst("foo")))
+						"bar".equals(response.headers().getFirst("foo")) &&
+						cookie.equals(response.cookies().getFirst("foo")))
 				.expectComplete()
 				.verify();
 	}
