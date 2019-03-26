@@ -158,6 +158,12 @@ class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 	}
 
 	@Override
+	public EntityResponse.Builder<T> hints(Consumer<Map<String, Object>> hintsConsumer) {
+		hintsConsumer.accept(this.hints);
+		return this;
+	}
+
+	@Override
 	public EntityResponse.Builder<T> lastModified(ZonedDateTime lastModified) {
 		this.headers.setLastModified(lastModified);
 		return this;
