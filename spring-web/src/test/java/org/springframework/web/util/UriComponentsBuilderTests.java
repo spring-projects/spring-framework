@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ public class UriComponentsBuilderTests {
 	@Test
 	public void plain() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		UriComponents result = builder.scheme("http").host("example.com").path("foo").queryParam("bar").fragment("baz").build();
-		assertEquals("http", result.getScheme());
+		UriComponents result = builder.scheme("https").host("example.com").path("foo").queryParam("bar").fragment("baz").build();
+		assertEquals("https", result.getScheme());
 		assertEquals("example.com", result.getHost());
 		assertEquals("foo", result.getPath());
 		assertEquals("bar", result.getQuery());
@@ -54,18 +54,18 @@ public class UriComponentsBuilderTests {
 
 	@Test
 	public void multipleFromSameBuilder() throws URISyntaxException {
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme("http").host("example.com").pathSegment("foo");
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme("https").host("example.com").pathSegment("foo");
 		UriComponents result1 = builder.build();
 		builder = builder.pathSegment("foo2").queryParam("bar").fragment("baz");
 		UriComponents result2 = builder.build();
 
-		assertEquals("http", result1.getScheme());
+		assertEquals("https", result1.getScheme());
 		assertEquals("example.com", result1.getHost());
 		assertEquals("/foo", result1.getPath());
 		URI expected = new URI("https://example.com/foo");
 		assertEquals("Invalid result URI", expected, result1.toUri());
 
-		assertEquals("http", result2.getScheme());
+		assertEquals("https", result2.getScheme());
 		assertEquals("example.com", result2.getHost());
 		assertEquals("/foo/foo2", result2.getPath());
 		assertEquals("bar", result2.getQuery());
@@ -97,7 +97,7 @@ public class UriComponentsBuilderTests {
 	public void fromHierarchicalUri() throws URISyntaxException {
 		URI uri = new URI("https://example.com/foo?bar#baz");
 		UriComponents result = UriComponentsBuilder.fromUri(uri).build();
-		assertEquals("http", result.getScheme());
+		assertEquals("https", result.getScheme());
 		assertEquals("example.com", result.getHost());
 		assertEquals("/foo", result.getPath());
 		assertEquals("bar", result.getQuery());
@@ -131,7 +131,7 @@ public class UriComponentsBuilderTests {
 	@Test
 	public void fromUriString() {
 		UriComponents result = UriComponentsBuilder.fromUriString("https://www.ietf.org/rfc/rfc3986.txt").build();
-		assertEquals("http", result.getScheme());
+		assertEquals("https", result.getScheme());
 		assertNull(result.getUserInfo());
 		assertEquals("www.ietf.org", result.getHost());
 		assertEquals(-1, result.getPort());
@@ -143,7 +143,7 @@ public class UriComponentsBuilderTests {
 		result = UriComponentsBuilder.fromUriString(
 				"https://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)")
 				.build();
-		assertEquals("http", result.getScheme());
+		assertEquals("https", result.getScheme());
 		assertEquals("arjen:foobar", result.getUserInfo());
 		assertEquals("java.sun.com", result.getHost());
 		assertEquals(80, result.getPort());
