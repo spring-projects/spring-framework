@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,8 +224,8 @@ public class HandlersBeanDefinitionParserTests {
 		List<HandshakeInterceptor> interceptors = transportService.getHandshakeInterceptors();
 		assertThat(interceptors, contains(instanceOf(OriginHandshakeInterceptor.class)));
 		assertTrue(transportService.shouldSuppressCors());
-		assertTrue(transportService.getAllowedOrigins().contains("http://mydomain1.com"));
-		assertTrue(transportService.getAllowedOrigins().contains("http://mydomain2.com"));
+		assertTrue(transportService.getAllowedOrigins().contains("https://mydomain1.com"));
+		assertTrue(transportService.getAllowedOrigins().contains("https://mydomain2.com"));
 	}
 
 
