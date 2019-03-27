@@ -16,6 +16,7 @@
 
 package org.springframework.core.env
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
@@ -27,22 +28,32 @@ import org.junit.Test
  */
 class PropertyResolverExtensionsTests {
 
-	val propertyResolver = mockk<PropertyResolver>(relaxed = true)
+	val propertyResolver = mockk<PropertyResolver>()
 
 	@Test
 	fun `get operator`() {
+		every { propertyResolver.getProperty("name") } returns "foo"
 		propertyResolver["name"]
 		verify { propertyResolver.getProperty("name") }
 	}
 
 	@Test
 	fun `getProperty extension`() {
+		every { propertyResolver.getProperty("name", String::class.java) } returns "foo"
 		propertyResolver.getProperty<String>("name")
 		verify { propertyResolver.getProperty("name", String::class.java) }
 	}
 
 	@Test
+	fun `getProperty extension with nullable type`() {
+		every { propertyResolver.getProperty("name", String::class.java) } returns null
+		propertyResolver.getProperty<String?>("name")
+		verify { propertyResolver.getProperty("name", String::class.java) }
+	}
+
+	@Test
 	fun `getRequiredProperty extension`() {
+		every { propertyResolver.getRequiredProperty("name", String::class.java) } returns "foo"
 		propertyResolver.getRequiredProperty<String>("name")
 		verify { propertyResolver.getRequiredProperty("name", String::class.java) }
 	}

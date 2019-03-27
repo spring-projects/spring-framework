@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ operator fun PropertyResolver.get(key: String) : String? = getProperty(key)
  * @author Sebastien Deleuze
  * @since 5.1
  */
-inline fun <reified T: Any?> PropertyResolver.getProperty(key: String) : T? =
-		getProperty(key, T::class.java)
+inline fun <reified T> PropertyResolver.getProperty(key: String) : T =
+		getProperty(key, T::class.java) as T
 
 /**
  * Extension for [PropertyResolver.getRequiredProperty] providing a
@@ -49,5 +49,5 @@ inline fun <reified T: Any?> PropertyResolver.getProperty(key: String) : T? =
  * @author Sebastien Deleuze
  * @since 5.1
  */
-inline fun <reified T: Any> PropertyResolver.getRequiredProperty(key: String) : T =
+inline fun <reified T> PropertyResolver.getRequiredProperty(key: String) : T =
 		getRequiredProperty(key, T::class.java)
