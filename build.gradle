@@ -38,7 +38,7 @@ ext {
 	kotlinVersion        = "1.2.71"
 	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.34.Final"
-	reactorVersion       = "Californium-SR5"
+	reactorVersion       = "Californium-SR6"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
 	rxjava2Version       = "2.2.7"
@@ -149,7 +149,6 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://repo.spring.io/snapshot" } // Reactor
 	}
 
 	dependencies {
