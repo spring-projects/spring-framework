@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,14 @@
 package org.springframework.core.io.buffer;
 
 import java.nio.ByteBuffer;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 
@@ -36,6 +41,9 @@ import org.springframework.util.Assert;
  * @see LeakAwareDataBufferFactory
  */
 public class LeakAwareDataBufferFactory implements DataBufferFactory {
+
+	private static final Log logger = LogFactory.getLog(LeakAwareDataBufferFactory.class);
+
 
 	private final DataBufferFactory delegate;
 
@@ -65,13 +73,27 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	 * method.
 	 */
 	public void checkForLeaks() {
-		this.created.stream()
-				.filter(LeakAwareDataBuffer::isAllocated)
-				.findFirst()
-				.map(LeakAwareDataBuffer::leakError)
-				.ifPresent(leakError -> {
-					throw leakError;
-				});
+		Instant start = Instant.now();
+		while (true) {
+			if (this.created.stream().noneMatch(LeakAwareDataBuffer::isAllocated)) {
+				return;
+			}
+			if (Instant.now().isBefore(start.plus(Duration.ofSeconds(5)))) {
+				try {
+					Thread.sleep(50);
+				}
+				catch (InterruptedException ex) {
+					// ignore
+				}
+			}
+			List<AssertionError> errors = this.created.stream()
+					.filter(LeakAwareDataBuffer::isAllocated)
+					.map(LeakAwareDataBuffer::leakError)
+					.collect(Collectors.toList());
+
+			errors.forEach(it -> logger.error("Leaked error: ", it));
+			throw new AssertionError(errors.size() + " buffer leaks detected (see logs above)");
+		}
 	}
 
 	@Override

@@ -123,9 +123,23 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 		if (this.bufferFactory instanceof NettyDataBufferFactory) {
 			ByteBufAllocator allocator = ((NettyDataBufferFactory) this.bufferFactory).getByteBufAllocator();
 			if (allocator instanceof PooledByteBufAllocator) {
-				PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
-				long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
-				assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
+				Instant start = Instant.now();
+				while (true) {
+					PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
+					long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
+					if (total == 0) {
+						return;
+					}
+					if (Instant.now().isBefore(start.plus(Duration.ofSeconds(5)))) {
+						try {
+							Thread.sleep(50);
+						}
+						catch (InterruptedException ex) {
+							// ignore
+						}
+					}
+					assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
+				}
 			}
 		}
 	}

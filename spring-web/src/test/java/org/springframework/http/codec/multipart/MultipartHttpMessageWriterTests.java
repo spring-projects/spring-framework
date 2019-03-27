@@ -197,8 +197,11 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
-		Map<String, Object> hints = Collections.emptyMap();
-		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, this.response, hints).block();
+		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, this.response, Collections.emptyMap())
+				.block(Duration.ofSeconds(5));
+
+		// Make sure body is consumed to avoid leak reports
+		this.response.getBodyAsString().block(Duration.ofSeconds(5));
 	}
 
 	@Test // SPR-16376

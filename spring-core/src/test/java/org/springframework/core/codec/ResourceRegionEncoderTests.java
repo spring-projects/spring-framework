@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.function.Consumer;
 
 import org.junit.Test;
+import org.reactivestreams.Subscription;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -28,7 +30,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
@@ -36,19 +37,18 @@ import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.charset.StandardCharsets.*;
 import static org.junit.Assert.*;
 
 /**
  * Test cases for {@link ResourceRegionEncoder} class.
- *
  * @author Brian Clozel
  */
 public class ResourceRegionEncoderTests  {
 
 	private ResourceRegionEncoder encoder = new ResourceRegionEncoder();
 
-	private DataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+	private LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
 
 	@Test
@@ -79,10 +79,13 @@ public class ResourceRegionEncoderTests  {
 				.consumeNextWith(stringConsumer("Spring"))
 				.expectComplete()
 				.verify();
+
+		// TODO: https://github.com/reactor/reactor-core/issues/1634
+		// this.bufferFactory.checkForLeaks();
 	}
 
 	@Test
-	public void shouldEncodeMultipleResourceRegionsFileResource() throws Exception {
+	public void shouldEncodeMultipleResourceRegionsFileResource() {
 		Resource resource = new ClassPathResource("ResourceRegionEncoderTests.txt", getClass());
 		Flux<ResourceRegion> regions = Flux.just(
 				new ResourceRegion(resource, 0, 6),
@@ -118,6 +121,33 @@ public class ResourceRegionEncoderTests  {
 				.consumeNextWith(stringConsumer("\r\n--" + boundary + "--"))
 				.expectComplete()
 				.verify();
+
+		// TODO: https://github.com/reactor/reactor-core/issues/1634
+		// this.bufferFactory.checkForLeaks();
+	}
+
+	@Test // gh-
+	public void cancelWithoutDemandForMultipleResourceRegions() {
+		Resource resource = new ClassPathResource("ResourceRegionEncoderTests.txt", getClass());
+		Flux<ResourceRegion> regions = Flux.just(
+				new ResourceRegion(resource, 0, 6),
+				new ResourceRegion(resource, 7, 9),
+				new ResourceRegion(resource, 17, 4),
+				new ResourceRegion(resource, 22, 17)
+		);
+		String boundary = MimeTypeUtils.generateMultipartBoundaryString();
+
+		Flux<DataBuffer> flux = this.encoder.encode(regions, this.bufferFactory,
+				ResolvableType.forClass(ResourceRegion.class),
+				MimeType.valueOf("text/plain"),
+				Collections.singletonMap(ResourceRegionEncoder.BOUNDARY_STRING_HINT, boundary)
+		);
+
+		ZeroDemandSubscriber subscriber = new ZeroDemandSubscriber();
+		flux.subscribe(subscriber);
+		subscriber.cancel();
+
+		this.bufferFactory.checkForLeaks();
 	}
 
 	@Test
@@ -142,6 +172,9 @@ public class ResourceRegionEncoderTests  {
 				.consumeNextWith(stringConsumer("Spring"))
 				.expectError(EncodingException.class)
 				.verify();
+
+		// TODO: https://github.com/reactor/reactor-core/issues/1634
+		// this.bufferFactory.checkForLeaks();
 	}
 
 	protected Consumer<DataBuffer> stringConsumer(String expected) {
@@ -153,5 +186,13 @@ public class ResourceRegionEncoderTests  {
 		};
 	}
 
+
+	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
+
+		@Override
+		protected void hookOnSubscribe(Subscription subscription) {
+			// Just subscribe without requesting
+		}
+	}
 
 }

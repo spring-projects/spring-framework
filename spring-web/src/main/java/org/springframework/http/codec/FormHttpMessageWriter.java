@@ -133,7 +133,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 			logFormData(form, hints);
 			String value = serializeForm(form, charset);
 			ByteBuffer byteBuffer = charset.encode(value);
-			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
+			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer); // wrapping only, no allocation
 			message.getHeaders().setContentLength(byteBuffer.remaining());
 			return message.writeWith(Mono.just(buffer));
 		});

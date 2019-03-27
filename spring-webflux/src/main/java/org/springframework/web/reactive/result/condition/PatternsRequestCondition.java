@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
@@ -53,7 +52,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	}
 
 	/**
-	 * Creates a new instance with the given {@code Stream} of URL patterns.
+	 * Creates a new instance with the given URL patterns.
 	 */
 	public PatternsRequestCondition(List<PathPattern> patterns) {
 		this(new TreeSet<>(patterns));
@@ -136,9 +135,13 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	private SortedSet<PathPattern> getMatchingPatterns(ServerWebExchange exchange) {
 		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
-		return this.patterns.stream()
-				.filter(pattern -> pattern.matches(lookupPath))
-				.collect(Collectors.toCollection(TreeSet::new));
+		TreeSet<PathPattern> pathPatterns = new TreeSet<>();
+		for (PathPattern pattern : this.patterns) {
+			if (pattern.matches(lookupPath)) {
+				pathPatterns.add(pattern);
+			}
+		}
+		return pathPatterns;
 	}
 
 	/**

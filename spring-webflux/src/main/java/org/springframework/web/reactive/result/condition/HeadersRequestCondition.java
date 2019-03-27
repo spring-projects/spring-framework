@@ -142,7 +142,13 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	}
 
 	private long getValueMatchCount(Set<HeaderExpression> expressions) {
-		return expressions.stream().filter(e -> e.getValue() != null && !e.isNegated()).count();
+		long count = 0;
+		for (HeaderExpression e : expressions) {
+			if (e.getValue() != null && !e.isNegated()) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 
