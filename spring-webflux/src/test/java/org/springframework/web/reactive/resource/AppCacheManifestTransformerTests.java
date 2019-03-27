@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public class AppCacheManifestTransformerTests {
 		assertThat("should not rewrite external resources", content,
 				Matchers.containsString("//example.org/style.css"));
 		assertThat("should not rewrite external resources", content,
-				Matchers.containsString("https://example.org/image.png"));
+				Matchers.containsString("http://example.org/image.png"));
 
 		assertThat("should generate fingerprint", content,
 				Matchers.containsString("# Hash: 8eefc904df3bd46537fa7bdbbc5ab9fb"));

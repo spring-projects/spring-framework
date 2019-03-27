@@ -61,7 +61,7 @@ public class RequestEntityTests {
 		URI uri = new UriTemplate("https://example.com/{foo}").expand("bar");
 		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
-		String url = "http://www.{host}.com/{path}";
+		String url = "https://www.{host}.com/{path}";
 		String host = "example";
 		String path = "foo/bar";
 		URI expected = new URI("https://www.example.com/foo/bar");

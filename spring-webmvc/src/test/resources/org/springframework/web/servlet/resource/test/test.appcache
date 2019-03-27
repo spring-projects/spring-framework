@@ -11,7 +11,7 @@ NETWORK:
 
 CACHE:
 js/bar.js
-https://example.org/image.png
+http://example.org/image.png
 
 FALLBACK:
 /main /static.html
