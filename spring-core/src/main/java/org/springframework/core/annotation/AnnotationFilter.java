@@ -28,17 +28,16 @@ import java.lang.annotation.Annotation;
 public interface AnnotationFilter {
 
 	/**
-	 * {@link AnnotationFilter} that matches annotations is in the
-	 * {@code java.lang.*} or in the
-	 * {@code org.springframework.lang.*} package.
+	 * {@link AnnotationFilter} that matches annotations in the
+	 * {@code java.lang.*} and {@code org.springframework.lang.*} packages.
 	 */
 	AnnotationFilter PLAIN = packages("java.lang", "org.springframework.lang");
 
 	/**
 	 * {@link AnnotationFilter} that matches annotations in the
-	 * {@code java.lang.*} package.
+	 * {@code java.*}/{@code javax.*} namespaces.
 	 */
-	AnnotationFilter JAVA = packages("java.lang");
+	AnnotationFilter JAVA = packages("java", "javax");
 
 	/**
 	 * {@link AnnotationFilter} that never matches and can be used when no

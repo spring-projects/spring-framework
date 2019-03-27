@@ -200,14 +200,11 @@ public abstract class AnnotatedElementUtils {
 	 * @since 4.2.3
 	 * @see #hasAnnotation(AnnotatedElement, Class)
 	 */
-	public static boolean isAnnotated(AnnotatedElement element,Class<? extends Annotation> annotationType) {
-		// Shortcut: directly present on the element, with no processing needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+	public static boolean isAnnotated(AnnotatedElement element, Class<? extends Annotation> annotationType) {
+		// Shortcut: directly present on the element, with no merging needed?
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
 			return element.isAnnotationPresent(annotationType);
-		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
-			return false;
 		}
 		// Exhaustive retrieval of merged annotations...
 		return getAnnotations(element).isPresent(annotationType);
@@ -332,12 +329,9 @@ public abstract class AnnotatedElementUtils {
 	@Nullable
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
 			return element.getDeclaredAnnotation(annotationType);
-		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
-			return null;
 		}
 		// Exhaustive retrieval of merged annotations...
 		return getAnnotations(element)
@@ -528,13 +522,10 @@ public abstract class AnnotatedElementUtils {
 	 * @see #isAnnotated(AnnotatedElement, Class)
 	 */
 	public static boolean hasAnnotation(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-		// Shortcut: directly present on the element, with no processing needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+		// Shortcut: directly present on the element, with no merging needed?
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
 			return element.isAnnotationPresent(annotationType);
-		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
-			return false;
 		}
 		// Exhaustive retrieval of merged annotations...
 		return findAnnotations(element).isPresent(annotationType);
@@ -633,12 +624,9 @@ public abstract class AnnotatedElementUtils {
 	@Nullable
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
 			return element.getDeclaredAnnotation(annotationType);
-		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
-			return null;
 		}
 		// Exhaustive retrieval of merged annotations...
 		return findAnnotations(element)

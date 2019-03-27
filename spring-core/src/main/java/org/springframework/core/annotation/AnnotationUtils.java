@@ -210,12 +210,9 @@ public abstract class AnnotationUtils {
 	@Nullable
 	public static <A extends Annotation> A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
 			return annotatedElement.getAnnotation(annotationType);
-		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
-			return null;
 		}
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS,
@@ -483,12 +480,9 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 		// Shortcut: directly present on the element, with no merging needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
 			return annotatedElement.getDeclaredAnnotation(annotationType);
-		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
-			return null;
 		}
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS)
@@ -517,12 +511,9 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 		// Shortcut: directly present on the element, with no merging needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(method)) {
 			return method.getDeclaredAnnotation(annotationType);
-		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(method)) {
-			return null;
 		}
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE)
@@ -558,12 +549,9 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 		// Shortcut: directly present on the element, with no merging needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType)) {
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
 			return clazz.getDeclaredAnnotation(annotationType);
-		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
-			return null;
 		}
 		// Exhaustive retrieval of merged annotations...
 		return MergedAnnotations.from(clazz, SearchStrategy.EXHAUSTIVE)
@@ -710,17 +698,13 @@ public abstract class AnnotationUtils {
 			return false;
 		}
 		// Shortcut: directly present on the element, with no merging needed?
-		if (AnnotationFilter.PLAIN.matches(annotationType) ||
-				AnnotationFilter.PLAIN.matches(metaAnnotationType)) {
+		if (AnnotationFilter.PLAIN.matches(metaAnnotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotationType)) {
 			return annotationType.isAnnotationPresent(metaAnnotationType);
 		}
-		// Shortcut: no searchable annotations to be found on plain Java classes and core Spring types...
-		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotationType)) {
-			return false;
-		}
 		// Exhaustive retrieval of merged annotations...
-		return (MergedAnnotations.from(
-				annotationType, SearchStrategy.INHERITED_ANNOTATIONS).isPresent(metaAnnotationType));
+		return MergedAnnotations.from(annotationType, SearchStrategy.INHERITED_ANNOTATIONS,
+				RepeatableContainers.none(), AnnotationFilter.PLAIN).isPresent(metaAnnotationType);
 	}
 
 	/**

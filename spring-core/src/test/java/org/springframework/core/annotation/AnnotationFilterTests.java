@@ -18,7 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
+import javax.annotation.Nonnull;
 
 import org.junit.Test;
 
@@ -80,6 +80,11 @@ public class AnnotationFilterTests {
 	@Test
 	public void javaWhenJavaLangAnnotationReturnsTrue() {
 		assertThat(AnnotationFilter.JAVA.matches(Retention.class)).isTrue();
+	}
+
+	@Test
+	public void javaWhenJavaxAnnotationReturnsTrue() {
+		assertThat(AnnotationFilter.JAVA.matches(Nonnull.class)).isTrue();
 	}
 
 	@Test

@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -438,9 +440,11 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void isAnnotationMetaPresentForJavaLangType() {
+	public void isAnnotationMetaPresentForPlainType() {
 		assertTrue(isAnnotationMetaPresent(Order.class, Documented.class));
 		assertTrue(isAnnotationMetaPresent(NonNullApi.class, Documented.class));
+		assertTrue(isAnnotationMetaPresent(NonNullApi.class, Nonnull.class));
+		assertTrue(isAnnotationMetaPresent(ParametersAreNonnullByDefault.class, Nonnull.class));
 	}
 
 	@Test

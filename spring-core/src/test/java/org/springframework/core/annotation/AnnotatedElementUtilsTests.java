@@ -17,6 +17,7 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -28,6 +29,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.Resource;
 
 import org.junit.Ignore;
@@ -36,6 +39,7 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Indexed;
@@ -121,31 +125,68 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void isAnnotatedOnNonAnnotatedClass() {
+		assertFalse(isAnnotated(NonAnnotatedClass.class, Transactional.class));
+	}
+
+	@Test
+	public void isAnnotatedOnClassWithMetaDepth() {
+		assertTrue(isAnnotated(TransactionalComponentClass.class, TransactionalComponent.class));
+		assertFalse("isAnnotated() does not search the class hierarchy.",
+				isAnnotated(SubTransactionalComponentClass.class, TransactionalComponent.class));
+		assertTrue(isAnnotated(TransactionalComponentClass.class, Transactional.class));
+		assertTrue(isAnnotated(TransactionalComponentClass.class, Component.class));
+		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, Transactional.class));
+		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, Component.class));
+		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class));
+	}
+
+	@Test
+	public void isAnnotatedForPlainTypes() {
+		assertTrue(isAnnotated(Order.class, Documented.class));
+		assertTrue(isAnnotated(NonNullApi.class, Documented.class));
+		assertTrue(isAnnotated(NonNullApi.class, Nonnull.class));
+		assertTrue(isAnnotated(ParametersAreNonnullByDefault.class, Nonnull.class));
+	}
+
+	@Test
+	public void isAnnotatedWithNameOnNonAnnotatedClass() {
 		assertFalse(isAnnotated(NonAnnotatedClass.class, TX_NAME));
 	}
 
 	@Test
-	public void isAnnotatedOnClassWithMetaDepth0() {
+	public void isAnnotatedWithNameOnClassWithMetaDepth() {
 		assertTrue(isAnnotated(TransactionalComponentClass.class, TransactionalComponent.class.getName()));
-	}
-
-	@Test
-	public void isAnnotatedOnSubclassWithMetaDepth0() {
 		assertFalse("isAnnotated() does not search the class hierarchy.",
 				isAnnotated(SubTransactionalComponentClass.class, TransactionalComponent.class.getName()));
-	}
-
-	@Test
-	public void isAnnotatedOnClassWithMetaDepth1() {
 		assertTrue(isAnnotated(TransactionalComponentClass.class, TX_NAME));
 		assertTrue(isAnnotated(TransactionalComponentClass.class, Component.class.getName()));
-	}
-
-	@Test
-	public void isAnnotatedOnClassWithMetaDepth2() {
 		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, TX_NAME));
 		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, Component.class.getName()));
 		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName()));
+	}
+
+	@Test
+	public void hasAnnotationOnNonAnnotatedClass() {
+		assertFalse(hasAnnotation(NonAnnotatedClass.class, Transactional.class));
+	}
+
+	@Test
+	public void hasAnnotationOnClassWithMetaDepth() {
+		assertTrue(hasAnnotation(TransactionalComponentClass.class, TransactionalComponent.class));
+		assertTrue(hasAnnotation(SubTransactionalComponentClass.class, TransactionalComponent.class));
+		assertTrue(hasAnnotation(TransactionalComponentClass.class, Transactional.class));
+		assertTrue(hasAnnotation(TransactionalComponentClass.class, Component.class));
+		assertTrue(hasAnnotation(ComposedTransactionalComponentClass.class, Transactional.class));
+		assertTrue(hasAnnotation(ComposedTransactionalComponentClass.class, Component.class));
+		assertTrue(hasAnnotation(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class));
+	}
+
+	@Test
+	public void hasAnnotationForPlainTypes() {
+		assertTrue(hasAnnotation(Order.class, Documented.class));
+		assertTrue(hasAnnotation(NonNullApi.class, Documented.class));
+		assertTrue(hasAnnotation(NonNullApi.class, Nonnull.class));
+		assertTrue(hasAnnotation(ParametersAreNonnullByDefault.class, Nonnull.class));
 	}
 
 	@Test

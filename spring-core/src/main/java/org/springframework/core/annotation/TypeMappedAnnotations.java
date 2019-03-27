@@ -40,7 +40,7 @@ import org.springframework.lang.Nullable;
  */
 final class TypeMappedAnnotations implements MergedAnnotations {
 
-	private static final AnnotationFilter FILTER_ALL = annotationType -> true;
+	private static final AnnotationFilter FILTER_ALL = (annotationType -> true);
 
 	private static final MergedAnnotations NONE = new TypeMappedAnnotations(
 			null, new Annotation[0], RepeatableContainers.none(), FILTER_ALL);
@@ -108,8 +108,8 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 	}
 
 	@Override
-	public <A extends Annotation> boolean isDirectlyPresent(@Nullable Class<A> annotationType) {
-		if (annotationType == null || this.annotationFilter.matches(annotationType)) {
+	public <A extends Annotation> boolean isDirectlyPresent(Class<A> annotationType) {
+		if (this.annotationFilter.matches(annotationType)) {
 			return false;
 		}
 		return Boolean.TRUE.equals(scan(annotationType,
@@ -176,9 +176,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 	}
 
 	@Override
-	public <A extends Annotation> Stream<MergedAnnotation<A>> stream(
-			@Nullable Class<A> annotationType) {
-
+	public <A extends Annotation> Stream<MergedAnnotation<A>> stream(Class<A> annotationType) {
 		if (this.annotationFilter == FILTER_ALL) {
 			return Stream.empty();
 		}
@@ -186,9 +184,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 	}
 
 	@Override
-	public <A extends Annotation> Stream<MergedAnnotation<A>> stream(
-			@Nullable String annotationType) {
-
+	public <A extends Annotation> Stream<MergedAnnotation<A>> stream(String annotationType) {
 		if (this.annotationFilter == FILTER_ALL) {
 			return Stream.empty();
 		}
@@ -219,8 +215,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		return spliterator(null);
 	}
 
-	private <A extends Annotation> Spliterator<MergedAnnotation<A>> spliterator(
-			@Nullable Object annotationType) {
+	private <A extends Annotation> Spliterator<MergedAnnotation<A>> spliterator(@Nullable Object annotationType) {
 		return new AggregatesSpliterator<>(annotationType, getAggregates());
 	}
 
@@ -247,6 +242,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		}
 		return null;
 	}
+
 
 	static MergedAnnotations from(@Nullable AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
