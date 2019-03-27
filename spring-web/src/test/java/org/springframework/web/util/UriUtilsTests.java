@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class UriUtilsTests {
 	@Test
 	public void encode() {
 		assertEquals("Invalid encoded result", "foo", UriUtils.encode("foo", CHARSET));
-		assertEquals("Invalid encoded result", "http%3A%2F%2Fexample.com%2Ffoo%20bar",
+		assertEquals("Invalid encoded result", "https%3A%2F%2Fexample.com%2Ffoo%20bar",
 				UriUtils.encode("https://example.com/foo bar", CHARSET));
 	}
 

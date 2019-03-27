@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		marshaller.marshal(flights, domResult);
 		Document expected = builder.newDocument();
 		Element flightsElement = expected.createElementNS("http://samples.springframework.org/flight", "tns:flights");
-		Attr namespace = expected.createAttributeNS("https://www.w3.org/2000/xmlns/", "xmlns:tns");
+		Attr namespace = expected.createAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:tns");
 		namespace.setNodeValue("http://samples.springframework.org/flight");
 		flightsElement.setAttributeNode(namespace);
 		expected.appendChild(flightsElement);
@@ -98,7 +98,7 @@ public abstract class AbstractMarshallerTests<M extends Marshaller> {
 		Document result = (Document) domResult.getNode();
 		Document expected = builder.newDocument();
 		Element flightsElement = expected.createElementNS("http://samples.springframework.org/flight", "tns:flights");
-		Attr namespace = expected.createAttributeNS("https://www.w3.org/2000/xmlns/", "xmlns:tns");
+		Attr namespace = expected.createAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:tns");
 		namespace.setNodeValue("http://samples.springframework.org/flight");
 		flightsElement.setAttributeNode(namespace);
 		expected.appendChild(flightsElement);

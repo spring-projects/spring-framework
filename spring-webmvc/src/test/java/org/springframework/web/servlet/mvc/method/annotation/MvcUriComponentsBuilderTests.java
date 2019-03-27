@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -424,7 +424,7 @@ public class MvcUriComponentsBuilderTests {
 		this.request.setServerPort(9999);
 		this.request.setContextPath("/base");
 
-		assertEquals("https://example.org:9999/base/api/people/123/addresses",
+		assertEquals("http://example.org:9999/base/api/people/123/addresses",
 				fromController(PersonsAddressesController.class).buildAndExpand("123").toString());
 	}
 
@@ -437,7 +437,7 @@ public class MvcUriComponentsBuilderTests {
 		this.request.setServerPort(9999);
 		this.request.setContextPath("/base");
 
-		assertEquals("https://example.org:9999/base/api/people/123/addresses/DE",
+		assertEquals("http://example.org:9999/base/api/people/123/addresses/DE",
 				fromMethodCall(on(PersonsAddressesController.class).getAddressesForCountry("DE"))
 						.buildAndExpand("123").toString());
 	}

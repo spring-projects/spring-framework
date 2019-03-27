@@ -562,7 +562,7 @@ public class RestTemplateTests {
 	public void ioExceptionWithEmptyQueryString() throws Exception {
 
 		// https://example.com/resource?
-		URI uri = new URI("http", "example.com", "/resource", "", null);
+		URI uri = new URI("https", "example.com", "/resource", "", null);
 
 		given(converter.canRead(String.class, null)).willReturn(true);
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(parseMediaType("foo/bar")));
