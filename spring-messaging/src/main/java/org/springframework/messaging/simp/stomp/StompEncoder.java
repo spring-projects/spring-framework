@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,8 @@ public class StompEncoder  {
 			return;
 		}
 
-		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
+		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.STOMP
+				&& command != StompCommand.CONNECTED);
 
 		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
 			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {
@@ -146,7 +147,7 @@ public class StompEncoder  {
 			}
 
 			List<String> values = entry.getValue();
-			if (StompCommand.CONNECT.equals(command) &&
+			if ((StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) &&
 					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
 				values = Collections.singletonList(StompHeaderAccessor.getPasscode(headers));
 			}

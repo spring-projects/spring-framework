@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,9 +102,9 @@ public class StompHeaderAccessorTests {
 		extHeaders.add(StompHeaderAccessor.STOMP_LOGIN_HEADER, "joe");
 		extHeaders.add(StompHeaderAccessor.STOMP_PASSCODE_HEADER, "joe123");
 
-		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.CONNECT, extHeaders);
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.STOMP, extHeaders);
 
-		assertEquals(StompCommand.CONNECT, headerAccessor.getCommand());
+		assertEquals(StompCommand.STOMP, headerAccessor.getCommand());
 		assertEquals(SimpMessageType.CONNECT, headerAccessor.getMessageType());
 		assertNotNull(headerAccessor.getHeader("stompCredentials"));
 		assertEquals("joe", headerAccessor.getLogin());
