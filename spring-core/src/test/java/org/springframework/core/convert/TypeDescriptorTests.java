@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,6 +166,13 @@ public class TypeDescriptorTests {
 		assertNotNull(t1.getAnnotation(ParameterAnnotation.class));
 		assertTrue(t1.hasAnnotation(ParameterAnnotation.class));
 		assertEquals(123, t1.getAnnotation(ParameterAnnotation.class).value());
+	}
+
+	@Test
+	public void getAnnotationsReturnsClonedArray() throws Exception {
+		TypeDescriptor t = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0));
+		t.getAnnotations()[0] = null;
+		assertNotNull(t.getAnnotations()[0]);
 	}
 
 	@Test

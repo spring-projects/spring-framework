@@ -765,7 +765,7 @@ public class TypeDescriptor implements Serializable {
 
 		@Override
 		public Annotation[] getAnnotations() {
-			return (this.annotations != null ? this.annotations : EMPTY_ANNOTATION_ARRAY);
+			return (this.annotations != null ? this.annotations.clone() : EMPTY_ANNOTATION_ARRAY);
 		}
 
 		@Override
