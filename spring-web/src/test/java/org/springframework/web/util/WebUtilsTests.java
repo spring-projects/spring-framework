@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,21 +116,21 @@ public class WebUtilsTests {
 	@Test
 	public void isValidOrigin() {
 		List<String> allowed = Collections.emptyList();
-		assertTrue(checkValidOrigin("mydomain1.com", -1, "https://mydomain1.com", allowed));
+		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain1.com", allowed));
 		assertFalse(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
 
 		allowed = Collections.singletonList("*");
 		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
 
-		allowed = Collections.singletonList("https://mydomain1.com");
-		assertTrue(checkValidOrigin("mydomain2.com", -1, "https://mydomain1.com", allowed));
+		allowed = Collections.singletonList("http://mydomain1.com");
+		assertTrue(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com", allowed));
 		assertFalse(checkValidOrigin("mydomain2.com", -1, "http://mydomain3.com", allowed));
 	}
 
 	@Test
 	public void isSameOrigin() {
-		assertTrue(checkSameOrigin("mydomain1.com", -1, "https://mydomain1.com"));
-		assertTrue(checkSameOrigin("mydomain1.com", -1, "https://www.mydomain1.com/"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80"));
 		assertTrue(checkSameOrigin("mydomain1.com", 443, "https://mydomain1.com"));
 		assertTrue(checkSameOrigin("mydomain1.com", 443, "https://mydomain1.com:443"));
 		assertTrue(checkSameOrigin("mydomain1.com", 123, "https://mydomain1.com:123"));
@@ -142,14 +142,14 @@ public class WebUtilsTests {
 		assertFalse(checkSameOrigin("mydomain1.com", -1, "invalid-origin"));
 
 		// Handling of invalid origins as described in SPR-13478
-		assertTrue(checkSameOrigin("mydomain1.com", -1, "https://mydomain1.com/"));
-		assertTrue(checkSameOrigin("mydomain1.com", -1, "https://www.mydomain1.com/"));
-		assertTrue(checkSameOrigin("mydomain1.com", -1, "https://mydomain1.com/path"));
-		assertTrue(checkSameOrigin("mydomain1.com", -1, "https://www.mydomain1.com/path"));
-		assertFalse(checkSameOrigin("mydomain2.com", -1, "https://mydomain1.com/"));
-		assertFalse(checkSameOrigin("mydomain2.com", -1, "https://www.mydomain1.com/"));
-		assertFalse(checkSameOrigin("mydomain2.com", -1, "https://mydomain1.com/path"));
-		assertFalse(checkSameOrigin("mydomain2.com", -1, "https://www.mydomain1.com/path"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com/"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com/path"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80/path"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com/"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com:80/"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com/path"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com:80/path"));
 
 		// Handling of IPv6 hosts as described in SPR-13525
 		assertTrue(checkSameOrigin("[::1]", -1, "http://[::1]"));

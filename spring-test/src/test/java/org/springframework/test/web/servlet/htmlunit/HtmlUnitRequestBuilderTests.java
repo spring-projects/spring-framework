@@ -596,7 +596,7 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test
 	public void buildRequestRemotePort80WithDefault() throws Exception {
-		webRequest.setUrl(new URL("https://example.com/"));
+		webRequest.setUrl(new URL("http://example.com/"));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
@@ -628,7 +628,7 @@ public class HtmlUnitRequestBuilderTests {
 	@Test
 	public void buildRequestUrl() {
 		String uri = requestBuilder.buildRequest(servletContext).getRequestURL().toString();
-		assertThat(uri, equalTo("https://example.com/test/this/here"));
+		assertThat(uri, equalTo("http://example.com/test/this/here"));
 	}
 
 	@Test
