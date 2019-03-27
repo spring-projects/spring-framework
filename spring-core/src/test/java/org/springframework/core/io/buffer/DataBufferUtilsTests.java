@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,11 @@ import java.util.concurrent.CountDownLatch;
 
 import io.netty.buffer.ByteBuf;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
+import org.reactivestreams.Subscription;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -182,6 +185,20 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.consumeNextWith(stringConsumer("foo"))
 				.thenCancel()
 				.verify();
+	}
+
+	// TODO: Remove ignore after https://github.com/reactor/reactor-core/issues/1634
+	@Ignore
+	@Test // gh-22107
+	public void readAsynchronousFileChannelCancelWithoutDemand() throws Exception {
+		URI uri = this.resource.getURI();
+		Flux<DataBuffer> flux = DataBufferUtils.readAsynchronousFileChannel(
+				() -> AsynchronousFileChannel.open(Paths.get(uri), StandardOpenOption.READ),
+				this.bufferFactory, 3);
+
+		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
+		flux.subscribe(subscriber);
+		subscriber.cancel();
 	}
 
 	@Test
@@ -735,5 +752,12 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 
+	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
+
+		@Override
+		protected void hookOnSubscribe(Subscription subscription) {
+			// Just subscribe without requesting
+		}
+	}
 
 }

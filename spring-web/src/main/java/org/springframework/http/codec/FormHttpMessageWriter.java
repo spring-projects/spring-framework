@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public class FormHttpMessageWriter extends LoggingCodecSupport
 			logFormData(form, hints);
 			String value = serializeForm(form, charset);
 			ByteBuffer byteBuffer = charset.encode(value);
-			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer);
+			DataBuffer buffer = message.bufferFactory().wrap(byteBuffer); // wrapping only, no allocation
 			message.getHeaders().setContentLength(byteBuffer.remaining());
 			return message.writeWith(Mono.just(buffer));
 		});

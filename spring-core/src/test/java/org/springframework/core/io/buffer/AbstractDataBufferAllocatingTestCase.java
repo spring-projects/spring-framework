@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,9 +121,23 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 		if (this.bufferFactory instanceof NettyDataBufferFactory) {
 			ByteBufAllocator allocator = ((NettyDataBufferFactory) this.bufferFactory).getByteBufAllocator();
 			if (allocator instanceof PooledByteBufAllocator) {
-				PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
-				long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
-				assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
+				Instant start = Instant.now();
+				while (true) {
+					PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
+					long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
+					if (total == 0) {
+						return;
+					}
+					if (Instant.now().isBefore(start.plus(Duration.ofSeconds(5)))) {
+						try {
+							Thread.sleep(50);
+						}
+						catch (InterruptedException ex) {
+							// ignore
+						}
+					}
+					assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
+				}
 			}
 		}
 	}
