@@ -48,7 +48,7 @@ ext {
 	kotlinVersion        = "1.2.71"
 	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.34.Final"
-	reactorVersion       = "Bismuth-SR16"
+	reactorVersion       = "Bismuth-SR17"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
 	rxjava2Version       = "2.1.17"
