@@ -149,12 +149,9 @@ public final class SpringBeanContainer implements BeanContainer {
 			else {
 				return new SpringContainedBean<>(this.beanFactory.getBean(beanType));
 			}
-		}
-		catch (BeansException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Falling back to Hibernate's default producer after bean creation failure for " +
-						beanType + ": " + ex);
-			}
+		} catch (BeansException ex) {
+			logger.warn("Falling back to Hibernate's default producer after bean creation failure for " +
+					beanType + ": " + ex.getRootCause());
 			return new SpringContainedBean<>(fallbackProducer.produceBeanInstance(beanType));
 		}
 	}
@@ -173,12 +170,9 @@ public final class SpringBeanContainer implements BeanContainer {
 			else {
 				return new SpringContainedBean<>(this.beanFactory.getBean(name, beanType));
 			}
-		}
-		catch (BeansException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Falling back to Hibernate's default producer after bean creation failure for " +
-						beanType + ": " + ex);
-			}
+		} catch (BeansException ex) {
+			logger.warn("Falling back to Hibernate's default producer after bean creation failure for " +
+					beanType + ": " + ex.getRootCause());
 			return new SpringContainedBean<>(fallbackProducer.produceBeanInstance(name, beanType));
 		}
 	}
