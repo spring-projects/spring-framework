@@ -180,10 +180,18 @@ In Java, you can, for example, write the following:
 
 [source,java,indent=0]
 ----
+	class Foo {}
+
+	class Bar {
+		private final Foo foo;
+		public Bar(Foo foo) {
+			this.foo = foo;
+		}
+	}
+
 	GenericApplicationContext context = new GenericApplicationContext();
 	context.registerBean(Foo.class);
-	context.registerBean(Bar.class, () -> new Bar(context.getBean(Foo.class))
-);
+	context.registerBean(Bar.class, () -> new Bar(context.getBean(Foo.class)));
 ----
 
 In Kotlin, with reified type parameters and `GenericApplicationContext` Kotlin extensions,
@@ -191,6 +199,10 @@ you can instead write the following:
 
 [source,kotlin,indent=0]
 ----
+	class Foo
+
+	class Bar(private val foo: Foo)
+
 	val context = GenericApplicationContext().apply {
 		registerBean<Foo>()
 		registerBean { Bar(it.getBean()) }
@@ -198,7 +210,7 @@ you can instead write the following:
 ----
 ====
 
-If the class `Bar` has a single constructor, you can even just specify the bean class,
+When the class `Bar` has a single constructor, you can even just specify the bean class,
 the constructor parameters will be autowired by type:
 
 ====
@@ -214,10 +226,21 @@ In order to allow a more declarative approach and cleaner syntax, Spring Framewo
 a {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.context.support/-bean-definition-dsl/[Kotlin bean definition DSL]
 It declares an `ApplicationContextInitializer` through a clean declarative API,
 which lets you deal with profiles and `Environment` for customizing
-how beans are registered. The following example creates a `Play` profile:
+how beans are registered.
+
+In the following example notice that:
+ - Type inference usually allows to avoid specifying the type for bean references like `ref("bazBean")`
+ - It is possible to use Kotlin top level functions to declare beans using callable references like `bean(::myRouter)` in this example
+ - When specifying `bean<Bar>()` or `bean(::myRouter)`, parameters are autowired by type
+ - The `FooBar` bean will be registered only if the `foobar` profile is active
 
 [source,kotlin,indent=0]
 ----
+	class Foo
+	class Bar(private val foo: Foo)
+	class Baz(var message: String = "")
+	class FooBar(private val baz: Baz)
+
 	val myBeans = beans {
 		bean<Foo>()
 		bean<Bar>()
@@ -229,6 +252,11 @@ how beans are registered. The following example creates a `Play` profile:
 		profile("foobar") {
 			bean { FooBar(ref("bazBean")) }
 		}
+		bean(::myRouter)
+	}
+
+	fun myRouter(foo: Foo, bar: Bar, baz: Baz) = router {
+		// ...
 	}
 ----
 
@@ -275,7 +303,7 @@ and idiomatic Kotlin code to build a `RouterFunction` instance as the following 
 
 [source,kotlin,indent=0]
 ----
-	val routes: RouterFunction<ServerResponse> = router {
+	val myRouter: RouterFunction<ServerResponse> = router {
 		accept(TEXT_HTML).nest {
 			GET("/") { ok().render("index") }
 			GET("/sse") { ok().render("sse") }
