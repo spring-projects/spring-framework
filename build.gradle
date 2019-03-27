@@ -41,7 +41,7 @@ ext {
 	reactorVersion       = "Californium-SR6"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
-	rxjava2Version       = "2.2.7"
+	rxjava2Version       = "2.2.8"
 	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
 	tomcatVersion        = "9.0.17"
@@ -155,7 +155,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:4.12") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.25.0") {
+		testCompile("org.mockito:mockito-core:2.25.1") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 		testCompile("com.nhaarman:mockito-kotlin:1.6.0") {
