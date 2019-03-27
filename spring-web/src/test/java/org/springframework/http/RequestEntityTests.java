@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class RequestEntityTests {
 		URI uri = new UriTemplate("https://example.com/{foo}").expand("bar");
 		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
-		String url = "http://www.{host}.com/{path}";
+		String url = "https://www.{host}.com/{path}";
 		String host = "example";
 		String path = "foo/bar";
 		URI expected = new URI("https://www.example.com/foo/bar");

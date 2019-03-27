@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 	 */
 	private static final String XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
-			" xmlns:java=\"https://java.sun.com\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
 			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
 			"<name>test</name><value>8</value></castor-object></objects>";
 
@@ -91,7 +91,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 	 */
 	private static final String ROOT_WITH_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<objects xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
-			" xmlns:java=\"https://java.sun.com\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
 			" xsi:type=\"java:java.util.Arrays$ArrayList\">" +
 			"<castor-object xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
 			"<name>test</name><value>8</value></castor-object></objects>";
@@ -101,7 +101,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 	 */
 	private static final String ROOT_WITHOUT_XSI_EXPECTED_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<objects><castor-object xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
-			" xmlns:java=\"https://java.sun.com\"" +
+			" xmlns:java=\"http://java.sun.com\"" +
 			" xsi:type=\"java:org.springframework.oxm.castor.CastorObject\">" +
 			"<name>test</name><value>8</value></castor-object></objects>";
 
