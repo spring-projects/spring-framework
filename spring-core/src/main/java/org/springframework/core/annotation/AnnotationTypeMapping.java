@@ -272,17 +272,26 @@ final class AnnotationTypeMapping {
 	private void addConventionAnnotationValues() {
 		for (int i = 0; i < this.attributes.size(); i++) {
 			Method attribute = this.attributes.get(i);
+			boolean isValueAttribute = MergedAnnotation.VALUE.equals(attribute.getName());
 			AnnotationTypeMapping mapping = this;
 			while (mapping != null && mapping.depth > 0) {
 				int mapped = mapping.getAttributes().indexOf(attribute.getName());
-				if (mapped != -1 && (this.annotationValueMappings[i] == -1 ||
-						this.annotationValueSource[i].depth > mapping.depth)) {
+				if (mapped != -1  && isBetterConventionAnnotationValue(i, isValueAttribute, mapping)) {
 					this.annotationValueMappings[i] = mapped;
 					this.annotationValueSource[i] = mapping;
 				}
 				mapping = mapping.parent;
 			}
 		}
+	}
+
+	private boolean isBetterConventionAnnotationValue(int index, boolean isValueAttribute,
+			AnnotationTypeMapping mapping) {
+		if (this.annotationValueMappings[index] == -1) {
+			return true;
+		}
+		int existingDepth = this.annotationValueSource[index].depth;
+		return !isValueAttribute && existingDepth > mapping.depth;
 	}
 
 	/**

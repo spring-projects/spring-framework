@@ -822,6 +822,14 @@ public class AnnotatedElementUtilsTests {
 		assertThat(element.getDeclaredAnnotations()).isNotSameAs(element.getDeclaredAnnotations());
 	}
 
+	@Test // gh-22703
+	public void getMergedAnnotationOnThreeDeepMetaWithValue() {
+		ValueAttribute annotation = AnnotatedElementUtils.getMergedAnnotation(
+				ValueAttributeMetaMetaClass.class, ValueAttribute.class);
+		assertThat(annotation.value()).containsExactly("FromValueAttributeMeta");
+	}
+
+
 	// -------------------------------------------------------------------------
 
 	@MetaCycle3
@@ -1392,6 +1400,34 @@ public class AnnotatedElementUtilsTests {
 	@Deprecated
 	@ComponentScan
 	class ForAnnotationsClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface ValueAttribute {
+
+		String[] value();
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueAttribute("FromValueAttributeMeta")
+	static @interface ValueAttributeMeta {
+
+		@AliasFor("alias")
+		String[] value() default {};
+
+		@AliasFor("value")
+		String[] alias() default {};
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueAttributeMeta("FromValueAttributeMetaMeta")
+	static @interface ValueAttributeMetaMeta {
+	}
+
+	@ValueAttributeMetaMeta
+	static class ValueAttributeMetaMetaClass {
 	}
 
 }

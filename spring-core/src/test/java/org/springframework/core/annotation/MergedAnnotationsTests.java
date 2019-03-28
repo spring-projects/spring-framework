@@ -2045,6 +2045,14 @@ public class MergedAnnotationsTests {
 		assertThat(annotation.getString("value")).isEqualTo("meta");
 	}
 
+	@Test // gh-22703
+	public void getValueWhenThreeDeepMetaWithValue() {
+		MergedAnnotation<?> annotation = MergedAnnotations.from(
+				ValueAttributeMetaMetaClass.class).get(ValueAttribute.class);
+		assertThat(annotation.getStringArray(MergedAnnotation.VALUE)).containsExactly(
+				"FromValueAttributeMeta");
+	}
+
 	// @formatter:off
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -3430,6 +3438,31 @@ public class MergedAnnotationsTests {
 
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface ValueAttribute {
+
+		String[] value();
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueAttribute("FromValueAttributeMeta")
+	static @interface ValueAttributeMeta {
+
+		String[] value() default {};
+
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ValueAttributeMeta("FromValueAttributeMetaMeta")
+	static @interface ValueAttributeMetaMeta {
+
+	}
+
+	@ValueAttributeMetaMeta
+	static class ValueAttributeMetaMetaClass {
+
+	}
 	// @formatter:on
 
 }
