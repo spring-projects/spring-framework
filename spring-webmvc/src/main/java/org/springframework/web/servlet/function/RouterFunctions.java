@@ -369,7 +369,7 @@ public abstract class RouterFunctions {
 		 * {@code OrderController.routerFunction()}.
 		 * to the {@code changeUser} method in {@code userController}:
 		 * <pre class="code">
-		 * RouterFunctionlt;ServerResponsegt; route =
+		 * RouterFunction&lt;ServerResponse&gt; route =
 		 *   RouterFunctions.route()
 		 *     .GET("/users", userController::listUsers)
 		 *     .add(orderController.routerFunction());
