@@ -350,7 +350,14 @@ public interface WebClient {
 
 		/**
 		 * Build the URI for the request using the {@link UriBuilderFactory}
+		 * configured for this client and initialized with the specified <code>uri</code>.
+		 */
+		S uri(String uri, Function<UriBuilder, URI> uriFunction);
+
+		/**
+		 * Build the URI for the request using the {@link UriBuilderFactory}
 		 * configured for this client.
+		 * @see #uri(String, Function)
 		 */
 		S uri(Function<UriBuilder, URI> uriFunction);
 	}
