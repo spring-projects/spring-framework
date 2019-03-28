@@ -979,6 +979,13 @@ public class AnnotationUtilsTests {
 		assertEquals("value from synthesized component: ", "webController", synthesizedComponent.value());
 	}
 
+	@Test // gh-22702
+	public void findAnnotationWithRepeatablesElements() {
+		assertNull(AnnotationUtils.findAnnotation(TestRepeatablesClass.class,
+				TestRepeatable.class));
+		assertNotNull(AnnotationUtils.findAnnotation(TestRepeatablesClass.class,
+				TestRepeatableContainer.class));
+	}
 
 	@SafeVarargs
 	static <T> T[] asArray(T... arr) {
@@ -1808,4 +1815,21 @@ public class AnnotationUtilsTests {
 	interface ContextConfigMismatch {
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Repeatable(TestRepeatableContainer.class)
+	static @interface TestRepeatable {
+
+		String value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	static @interface TestRepeatableContainer {
+
+		TestRepeatable[] value();
+	}
+
+	@TestRepeatable("a")
+	@TestRepeatable("b")
+	static class TestRepeatablesClass {
+	}
 }

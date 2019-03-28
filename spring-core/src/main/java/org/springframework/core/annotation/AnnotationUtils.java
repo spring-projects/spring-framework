@@ -197,7 +197,8 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(annotation)
+		return MergedAnnotations.from(null, new Annotation[] {annotation},
+					RepeatableContainers.none(), AnnotationFilter.PLAIN)
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(AnnotationUtils::isSingleLevelPresent).orElse(null);
 	}
@@ -492,7 +493,8 @@ public abstract class AnnotationUtils {
 			return annotatedElement.getDeclaredAnnotation(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS)
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS,
+					RepeatableContainers.none(), AnnotationFilter.PLAIN)
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
@@ -523,7 +525,8 @@ public abstract class AnnotationUtils {
 			return method.getDeclaredAnnotation(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE)
+		return MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE,
+					RepeatableContainers.none(), AnnotationFilter.PLAIN)
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
@@ -561,7 +564,8 @@ public abstract class AnnotationUtils {
 			return clazz.getDeclaredAnnotation(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(clazz, SearchStrategy.EXHAUSTIVE)
+		return MergedAnnotations.from(clazz, SearchStrategy.EXHAUSTIVE,
+					RepeatableContainers.none(), AnnotationFilter.PLAIN)
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
