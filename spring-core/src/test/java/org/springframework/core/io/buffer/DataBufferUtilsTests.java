@@ -187,8 +187,6 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.verify();
 	}
 
-	// TODO: Remove ignore after https://github.com/reactor/reactor-core/issues/1634
-	@Ignore
 	@Test // gh-22107
 	public void readAsynchronousFileChannelCancelWithoutDemand() throws Exception {
 		URI uri = this.resource.getURI();

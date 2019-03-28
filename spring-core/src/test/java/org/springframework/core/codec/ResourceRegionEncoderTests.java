@@ -80,8 +80,7 @@ public class ResourceRegionEncoderTests  {
 				.expectComplete()
 				.verify();
 
-		// TODO: https://github.com/reactor/reactor-core/issues/1634
-		// this.bufferFactory.checkForLeaks();
+		 this.bufferFactory.checkForLeaks();
 	}
 
 	@Test
@@ -122,11 +121,10 @@ public class ResourceRegionEncoderTests  {
 				.expectComplete()
 				.verify();
 
-		// TODO: https://github.com/reactor/reactor-core/issues/1634
-		// this.bufferFactory.checkForLeaks();
+		 this.bufferFactory.checkForLeaks();
 	}
 
-	@Test // gh-
+	@Test // gh-22107
 	public void cancelWithoutDemandForMultipleResourceRegions() {
 		Resource resource = new ClassPathResource("ResourceRegionEncoderTests.txt", getClass());
 		Flux<ResourceRegion> regions = Flux.just(
@@ -173,8 +171,7 @@ public class ResourceRegionEncoderTests  {
 				.expectError(EncodingException.class)
 				.verify();
 
-		// TODO: https://github.com/reactor/reactor-core/issues/1634
-		// this.bufferFactory.checkForLeaks();
+		 this.bufferFactory.checkForLeaks();
 	}
 
 	protected Consumer<DataBuffer> stringConsumer(String expected) {

@@ -135,6 +135,7 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 						catch (InterruptedException ex) {
 							// ignore
 						}
+						continue;
 					}
 					assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
 				}
