@@ -85,6 +85,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 				catch (InterruptedException ex) {
 					// ignore
 				}
+				continue;
 			}
 			List<AssertionError> errors = this.created.stream()
 					.filter(LeakAwareDataBuffer::isAllocated)
