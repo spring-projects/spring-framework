@@ -95,7 +95,6 @@ task testNG(type: Test) {
 	// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
 	// testLogging.showStandardStreams = true
 	// forkEvery 1
-	reports.junitXml.destination = file("$buildDir/test-results")
 }
 
 task testJUnitJupiter(type: Test) {
@@ -107,7 +106,6 @@ task testJUnitJupiter(type: Test) {
 	filter {
 		includeTestsMatching "org.springframework.test.context.junit.jupiter.*"
 	}
-	reports.junitXml.destination = file("$buildDir/test-results")
 	// Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
 }
@@ -119,7 +117,6 @@ test {
 	scanForTestClasses = false
 	include(["**/*Tests.class", "**/*Test.class"])
 	exclude(["**/testng/**/*.*", "**/jupiter/**/*.*"])
-	reports.junitXml.destination = file("$buildDir/test-results")
 }
 
 task aggregateTestReports(type: TestReport) {
