@@ -676,6 +676,7 @@ public class Jackson2ObjectMapperBuilderTests {
 
 	}
 
+	@SuppressWarnings("serial")
 	public static class MyXmlFactory extends XmlFactory {
 	}
 

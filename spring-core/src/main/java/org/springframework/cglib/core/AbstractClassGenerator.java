@@ -244,7 +244,7 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 
 	/**
 	 * Set the strategy to use to create the bytecode from this generator.
-	 * By default an instance of {@see DefaultGeneratorStrategy} is used.
+	 * By default an instance of {@link DefaultGeneratorStrategy} is used.
 	 */
 	public void setStrategy(GeneratorStrategy strategy) {
 		if (strategy == null)

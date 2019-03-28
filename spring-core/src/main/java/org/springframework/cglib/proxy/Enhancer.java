@@ -762,7 +762,7 @@ public class Enhancer extends AbstractClassGenerator {
 
 	/**
 	 * This method should not be called in regular flow.
-	 * Technically speaking {@link #wrapCachedClass(Class)} uses {@link EnhancerFactoryData} as a cache value,
+	 * Technically speaking {@link #wrapCachedClass(Class)} uses {@link Enhancer.EnhancerFactoryData} as a cache value,
 	 * and the latter enables faster instantiation than plain old reflection lookup and invoke.
 	 * This method is left intact for backward compatibility reasons: just in case it was ever used.
 	 * @param type class to instantiate

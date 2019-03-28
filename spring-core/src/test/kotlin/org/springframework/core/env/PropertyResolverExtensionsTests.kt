@@ -40,14 +40,14 @@ class PropertyResolverExtensionsTests {
 	@Test
 	fun `getProperty extension`() {
 		every { propertyResolver.getProperty("name", String::class.java) } returns "foo"
-		val name: String? = propertyResolver.getProperty<String>("name")
+		propertyResolver.getProperty<String>("name")
 		verify { propertyResolver.getProperty("name", String::class.java) }
 	}
 
 	@Test
 	fun `getRequiredProperty extension`() {
 		every { propertyResolver.getRequiredProperty("name", String::class.java) } returns "foo"
-		val name: String = propertyResolver.getRequiredProperty<String>("name")
+		propertyResolver.getRequiredProperty<String>("name")
 		verify { propertyResolver.getRequiredProperty("name", String::class.java) }
 	}
 
