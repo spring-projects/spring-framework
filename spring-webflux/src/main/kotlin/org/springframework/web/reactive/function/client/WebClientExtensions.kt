@@ -67,7 +67,7 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun WebClient.RequestHeadersSpec<out WebClient.RequestHeadersSpec<*>>.awaitResponse(): ClientResponse =
+suspend fun WebClient.RequestHeadersSpec<out WebClient.RequestHeadersSpec<*>>.awaitExchange(): ClientResponse =
 		exchange().awaitSingle()
 
 /**

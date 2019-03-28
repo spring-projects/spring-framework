@@ -61,10 +61,10 @@ class ServerRequestExtensionsTests {
 	}
 
 	@Test
-	fun awaitBodyNull() {
+	fun awaitBodyOrNull() {
 		every { request.bodyToMono<String>() } returns Mono.empty()
 		runBlocking {
-			assertNull(request.awaitBody<String>())
+			assertNull(request.awaitBodyOrNull<String>())
 		}
 	}
 

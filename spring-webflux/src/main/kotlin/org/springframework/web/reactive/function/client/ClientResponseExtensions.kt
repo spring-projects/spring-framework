@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.client
 
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
@@ -67,13 +68,22 @@ inline fun <reified T : Any> ClientResponse.toEntityList(): Mono<ResponseEntity<
 		toEntityList(object : ParameterizedTypeReference<T>() {})
 
 /**
- * Coroutines variant of [ClientResponse.bodyToMono].
+ * Non-nullable Coroutines variant of [ClientResponse.bodyToMono].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
 suspend inline fun <reified T : Any> ClientResponse.awaitBody(): T =
 		bodyToMono<T>().awaitSingle()
+
+/**
+ * Nullable coroutines variant of [ClientResponse.bodyToMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
+		bodyToMono<T>().awaitFirstOrNull()
 
 /**
  * Coroutines variant of [ClientResponse.toEntity].

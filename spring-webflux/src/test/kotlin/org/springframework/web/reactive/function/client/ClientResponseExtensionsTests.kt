@@ -21,6 +21,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
@@ -66,6 +67,15 @@ class ClientResponseExtensionsTests {
 		every { response.bodyToMono<String>() } returns Mono.just("foo")
 		runBlocking {
 			assertEquals("foo", response.awaitBody<String>())
+		}
+	}
+
+	@Test
+	fun awaitBodyOrNull() {
+		val response = mockk<ClientResponse>()
+		every { response.bodyToMono<String>() } returns Mono.empty()
+		runBlocking {
+			assertNull(response.awaitBodyOrNull<String>())
 		}
 	}
 

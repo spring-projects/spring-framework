@@ -49,12 +49,21 @@ inline fun <reified T : Any> ServerRequest.bodyToFlux(): Flux<T> =
 		bodyToFlux(object : ParameterizedTypeReference<T>() {})
 
 /**
- * Coroutines variant of [ServerRequest.bodyToMono].
+ * Non-nullable Coroutines variant of [ServerRequest.bodyToMono].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T? =
+suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
+		bodyToMono<T>().awaitSingle()
+
+/**
+ * Nullable Coroutines variant of [ServerRequest.bodyToMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitFirstOrNull()
 
 /**
@@ -81,8 +90,8 @@ suspend fun ServerRequest.awaitMultipartData(): MultiValueMap<String, Part> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun ServerRequest.awaitPrincipal(): Principal =
-		principal().awaitSingle()
+suspend fun ServerRequest.awaitPrincipal(): Principal? =
+		principal().awaitFirstOrNull()
 
 /**
  * Coroutines variant of [ServerRequest.session].

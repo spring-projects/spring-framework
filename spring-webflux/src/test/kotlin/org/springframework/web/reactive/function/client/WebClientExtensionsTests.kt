@@ -58,11 +58,11 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	fun awaitResponse() {
+	fun awaitExchange() {
 		val response = mockk<ClientResponse>()
 		every { requestBodySpec.exchange() } returns Mono.just(response)
 		runBlocking {
-			assertEquals(response, requestBodySpec.awaitResponse())
+			assertEquals(response, requestBodySpec.awaitExchange())
 		}
 	}
 
