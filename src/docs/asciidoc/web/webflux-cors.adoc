@@ -17,7 +17,7 @@ For example, you could have your bank account in one tab and evil.com in another
 from evil.com should not be able to make AJAX requests to your bank API with your
 credentials -- for example, withdrawing money from your account!
 
-Cross-Origin Resource Sharing (CORS) is a http://www.w3.org/TR/cors/[W3C specification]
+Cross-Origin Resource Sharing (CORS) is a https://www.w3.org/TR/cors/[W3C specification]
 implemented by https://caniuse.com/#feat=cors[most browsers] that lets you specify
 what kind of cross-domain requests are authorized, rather than using less secure and less
 powerful workarounds based on IFRAME or JSONP.
