@@ -462,18 +462,18 @@ abstract class AnnotationsScanner {
 		return annotations.clone();
 	}
 
-	private static boolean isIgnorable(Class<?> annotationType) {
-		return AnnotationFilter.PLAIN.matches(annotationType);
-	}
-
 	private static <C> boolean isFiltered(
 			Class<?> sourceClass, C context, @Nullable BiPredicate<C, Class<?>> classFilter) {
 
 		return (classFilter != null && classFilter.test(context, sourceClass));
 	}
 
-	static boolean isKnownEmpty(AnnotatedElement source,SearchStrategy searchStrategy, AnnotationFilter annotationFilter) {
-		if (annotationFilter == AnnotationFilter.PLAIN && hasPlainJavaAnnotationsOnly(source)) {
+	private static boolean isIgnorable(Class<?> annotationType) {
+		return AnnotationFilter.PLAIN.matches(annotationType);
+	}
+
+	static boolean isKnownEmpty(AnnotatedElement source, SearchStrategy searchStrategy) {
+		if (hasPlainJavaAnnotationsOnly(source)) {
 			return true;
 		}
 		if (searchStrategy == SearchStrategy.DIRECT || isWithoutHierarchy(source)) {
@@ -486,25 +486,19 @@ abstract class AnnotationsScanner {
 	}
 
 	static boolean hasPlainJavaAnnotationsOnly(@Nullable Object annotatedElement) {
-		Class<?> type;
 		if (annotatedElement instanceof Class) {
-			type = (Class<?>) annotatedElement;
+			return hasPlainJavaAnnotationsOnly((Class<?>) annotatedElement);
 		}
 		else if (annotatedElement instanceof Member) {
-			type = ((Member) annotatedElement).getDeclaringClass();
+			return hasPlainJavaAnnotationsOnly(((Member) annotatedElement).getDeclaringClass());
 		}
 		else {
 			return false;
 		}
+	}
 
-		if (type == Ordered.class) {
-			return true;
-		}
-		String name = type.getName();
-		return (name.startsWith("java") ||
-				name.startsWith("org.springframework.lang.") ||
-				name.startsWith("org.springframework.util.") ||
-				(name.startsWith("com.sun") && !name.contains("Proxy")));
+	static boolean hasPlainJavaAnnotationsOnly(Class<?> type) {
+		return (type.getName().startsWith("java.") || type == Ordered.class);
 	}
 
 	private static boolean isWithoutHierarchy(AnnotatedElement source) {

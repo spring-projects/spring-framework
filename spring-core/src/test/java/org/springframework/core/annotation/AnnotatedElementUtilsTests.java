@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.Resource;
+import javax.annotation.meta.When;
 
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -198,7 +199,7 @@ public class AnnotatedElementUtilsTests {
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotation() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxConfig.class, TX_NAME);
 		assertNotNull("Annotation attributes map for @Transactional on TxConfig", attributes);
-		assertEquals("value for TxConfig.", asList("TxConfig"), attributes.get("value"));
+		assertEquals("value for TxConfig", asList("TxConfig"), attributes.get("value"));
 	}
 
 	@Test
@@ -234,7 +235,7 @@ public class AnnotatedElementUtilsTests {
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(DerivedTxConfig.class, TX_NAME);
 		assertNotNull("Annotation attributes map for @Transactional on DerivedTxConfig", attributes);
-		assertEquals("value for DerivedTxConfig.", asList("DerivedTxConfig"), attributes.get("value"));
+		assertEquals("value for DerivedTxConfig", asList("DerivedTxConfig"), attributes.get("value"));
 	}
 
 	/**
@@ -250,12 +251,28 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void getAllAnnotationAttributesOnLangType() {
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(
+				NonNullApi.class, Nonnull.class.getName());
+		assertNotNull("Annotation attributes map for @Nonnull on NonNullApi", attributes);
+		assertEquals("value for NonNullApi", asList(When.ALWAYS), attributes.get("when"));
+	}
+
+	@Test
+	public void getAllAnnotationAttributesOnJavaxType() {
+		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(
+				ParametersAreNonnullByDefault.class, Nonnull.class.getName());
+		assertNotNull("Annotation attributes map for @Nonnull on NonNullApi", attributes);
+		assertEquals("value for NonNullApi", asList(When.ALWAYS), attributes.get("when"));
+	}
+
+	@Test
 	public void getMergedAnnotationAttributesOnClassWithLocalAnnotation() {
 		Class<?> element = TxConfig.class;
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 		assertNotNull("Annotation attributes for @Transactional on TxConfig", attributes);
-		assertEquals("value for TxConfig.", "TxConfig", attributes.getString("value"));
+		assertEquals("value for TxConfig", "TxConfig", attributes.getString("value"));
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
 	}
@@ -266,7 +283,7 @@ public class AnnotatedElementUtilsTests {
 		String name = TX_NAME;
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 		assertNotNull("Annotation attributes for @Transactional on DerivedTxConfig", attributes);
-		assertEquals("value for DerivedTxConfig.", "DerivedTxConfig", attributes.getString("value"));
+		assertEquals("value for DerivedTxConfig", "DerivedTxConfig", attributes.getString("value"));
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
 	}

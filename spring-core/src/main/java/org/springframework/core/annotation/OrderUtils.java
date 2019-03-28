@@ -127,9 +127,8 @@ public abstract class OrderUtils {
 	 */
 	@Nullable
 	public static Integer getPriority(Class<?> type) {
-		return MergedAnnotations.from(type, SearchStrategy.EXHAUSTIVE).get(
-				JAVAX_PRIORITY_ANNOTATION).getValue(MergedAnnotation.VALUE,
-						Integer.class).orElse(null);
+		return MergedAnnotations.from(type, SearchStrategy.EXHAUSTIVE).get(JAVAX_PRIORITY_ANNOTATION)
+				.getValue(MergedAnnotation.VALUE, Integer.class).orElse(null);
 	}
 
 }

@@ -163,7 +163,14 @@ public abstract class AnnotationUtils {
 	 * @since 5.2
 	 */
 	public static boolean isCandidateClass(Class<?> clazz, String annotationName) {
-		return !clazz.getName().startsWith("java");
+		if (annotationName.startsWith("java.")) {
+			return true;
+		}
+		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
+			return false;
+		}
+		// TODO: annotation presence registry to be integrated here
+		return true;
 	}
 
 	/**

@@ -244,10 +244,10 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 	}
 
 
-	static MergedAnnotations from(@Nullable AnnotatedElement element, SearchStrategy searchStrategy,
+	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
-		if (element == null || AnnotationsScanner.isKnownEmpty(element, searchStrategy, annotationFilter)) {
+		if (AnnotationsScanner.isKnownEmpty(element, searchStrategy)) {
 			return NONE;
 		}
 		return new TypeMappedAnnotations(element, searchStrategy, repeatableContainers, annotationFilter);
@@ -262,12 +262,9 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		return new TypeMappedAnnotations(source, annotations, repeatableContainers, annotationFilter);
 	}
 
-	private static boolean isMappingForType(@Nullable AnnotationTypeMapping mapping,
+	private static boolean isMappingForType(AnnotationTypeMapping mapping,
 			AnnotationFilter annotationFilter, @Nullable Object requiredType) {
 
-		if (mapping == null) {
-			return false;
-		}
 		Class<? extends Annotation> actualType = mapping.getAnnotationType();
 		return (!annotationFilter.matches(actualType) &&
 				(requiredType == null || actualType == requiredType || actualType.getName().equals(requiredType)));
@@ -523,7 +520,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		@Nullable
 		AnnotationTypeMapping getMapping(int annotationIndex, int mappingIndex) {
 			AnnotationTypeMappings mappings = getMappings(annotationIndex);
-			return mappingIndex < mappings.size() ? mappings.get(mappingIndex) : null;
+			return (mappingIndex < mappings.size() ? mappings.get(mappingIndex) : null);
 		}
 
 		AnnotationTypeMappings getMappings(int annotationIndex) {
@@ -612,7 +609,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 				AnnotationTypeMapping mapping;
 				do {
 					mapping = aggregate.getMapping(annotationIndex, cursors[annotationIndex]);
-					if (isMappingForType(mapping, annotationFilter, this.requiredType)) {
+					if (mapping != null && isMappingForType(mapping, annotationFilter, this.requiredType)) {
 						return mapping;
 					}
 					cursors[annotationIndex]++;

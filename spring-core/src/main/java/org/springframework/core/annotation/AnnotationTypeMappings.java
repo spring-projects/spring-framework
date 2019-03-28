@@ -156,6 +156,7 @@ final class AnnotationTypeMappings {
 		return this.mappings.get(index);
 	}
 
+
 	/**
 	 * Return {@link AnnotationTypeMappings} for the specified annotation type.
 	 * @param annotationType the source annotation type
@@ -202,8 +203,7 @@ final class AnnotationTypeMappings {
 		}
 
 		/**
-		 * Return or create {@link AnnotationTypeMappings} for the specified
-		 * annotation type.
+		 * Return or create {@link AnnotationTypeMappings} for the specified annotation type.
 		 * @param annotationType the annotation type
 		 * @return a new or existing {@link AnnotationTypeMapping} instance
 		 */
@@ -214,7 +214,6 @@ final class AnnotationTypeMappings {
 		AnnotationTypeMappings createMappings(Class<? extends Annotation> annotationType) {
 			return new AnnotationTypeMappings(this.filter, annotationType);
 		}
-
 	}
 
 }
