@@ -59,7 +59,7 @@ public abstract class DataBufferUtils {
 
 	/**
 	 * Workaround to disable use of pooled buffers:
-	 * https://github.com/reactor/reactor-core/issues/1634
+	 * https://github.com/reactor/reactor-core/issues/1634.
 	 */
 	private static final DataBufferFactory defaultDataBufferFactory = new DefaultDataBufferFactory();
 
