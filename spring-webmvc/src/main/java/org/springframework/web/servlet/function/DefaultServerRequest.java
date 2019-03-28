@@ -27,7 +27,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -372,11 +371,8 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public void clear() {
-			Enumeration<String> attributeNames = this.servletRequest.getAttributeNames();
-			while (attributeNames.hasMoreElements()) {
-				String name = attributeNames.nextElement();
-				this.servletRequest.removeAttribute(name);
-			}
+			List<String> attributeNames = Collections.list(this.servletRequest.getAttributeNames());
+			attributeNames.forEach(this.servletRequest::removeAttribute);
 		}
 
 		@NotNull
