@@ -263,7 +263,7 @@ source code to be made available (as would be noted above), you may obtain a
 copy of the source code corresponding to the binaries for such open source
 components and modifications thereto, if any, (the "Source Files"), by
 downloading the Source Files from https://spring.io/projects, Pivotal's website
-at http://network.pivotal.io/open-source, or by sending a request, with your
+at https://network.pivotal.io/open-source, or by sending a request, with your
 name and address to: Pivotal Software, Inc., 875 Howard Street, 5th floor, San
 Francisco, CA 94103, Attention: General Counsel. All such requests should
 clearly specify: OPEN SOURCE FILES REQUEST, Attention General Counsel. Pivotal
