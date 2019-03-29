@@ -2195,19 +2195,19 @@ The following example shows how to get the cookie value:
 <1> Get the value of the `JSESSIONID` cookie.
 ====
 
-if the target method parameter type is not
-`String`, type conversion is applied automatically. See <<mvc-ann-typeconversion>>.
+If the target method parameter type is not `String`, type conversion is applied automatically.
+See <<mvc-ann-typeconversion>>.
 
 
 [[mvc-ann-modelattrib-method-args]]
 ==== `@ModelAttribute`
 [.small]#<<web-reactive.adoc#webflux-ann-modelattrib-method-args, Same as in Spring WebFlux>>#
 
-You can use the `@ModelAttribute` annotation on a method argument to access an attribute from the
-model or have it be instantiated if not present. The model attribute is also overlain with
-values from HTTP Servlet request parameters whose names match to field names. This is
-referred to as data binding, and it saves you from having to deal with parsing and
-converting individual query parameters and form fields. The following example shows how to do so:
+You can use the `@ModelAttribute` annotation on a method argument to access an attribute from
+the model or have it be instantiated if not present. The model attribute is also overlain with
+values from HTTP Servlet request parameters whose names match to field names. This is referred
+to as data binding, and it saves you from having to deal with parsing and converting individual
+query parameters and form fields. The following example shows how to do so:
 
 ====
 [source,java,indent=0]
