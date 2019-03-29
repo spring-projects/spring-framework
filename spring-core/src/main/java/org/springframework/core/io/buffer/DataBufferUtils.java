@@ -144,10 +144,10 @@ public abstract class DataBufferUtils {
 				channel -> Flux.create(sink -> {
 					ReadCompletionHandler handler =
 							new ReadCompletionHandler(channel, sink, position, bufferFactoryToUse, bufferSize);
+					sink.onDispose(handler::dispose);
 					DataBuffer dataBuffer = bufferFactoryToUse.allocateBuffer(bufferSize);
 					ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, bufferSize);
 					channel.read(byteBuffer, position, dataBuffer, handler);
-					sink.onDispose(handler::dispose);
 				}),
 				channel -> {
 					// Do not close channel from here, rather wait for the current read callback
