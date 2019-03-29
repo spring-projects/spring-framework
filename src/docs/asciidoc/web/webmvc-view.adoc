@@ -798,9 +798,8 @@ When developing with JSPs, you can declare a `InternalResourceViewResolver` or a
 `ResourceBundleViewResolver` bean.
 
 `ResourceBundleViewResolver` relies on a properties file to define the view names
-mapped to a class and a URL. With a `ResourceBundleViewResolver`, you
-can mix different types of views by using only one resolver, as the following example
-shows:
+mapped to a class and a URL. With a `ResourceBundleViewResolver`, you can mix
+different types of views by using only one resolver, as the following example shows:
 
 ====
 [source,xml,indent=0]
@@ -1960,7 +1959,7 @@ In order to use Excel views, you need to add the Apache POI library to your clas
 For PDF generation, you need to add (preferably) the OpenPDF library.
 
 NOTE: You should use the latest versions of the underlying document-generation libraries,
-if possible. In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.0.5)
+if possible. In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.2.12)
 instead of the outdated original iText 2.1.7, since OpenPDF is actively maintained and
 fixes an important vulnerability for untrusted PDF content.
 
