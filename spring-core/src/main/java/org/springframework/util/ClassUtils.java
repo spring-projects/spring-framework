@@ -841,7 +841,9 @@ public abstract class ClassUtils {
 	 * @param object the object to check
 	 * @see #isCglibProxyClass(Class)
 	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 */
+	@Deprecated
 	public static boolean isCglibProxy(Object object) {
 		return isCglibProxyClass(object.getClass());
 	}
@@ -850,7 +852,9 @@ public abstract class ClassUtils {
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
 	 * @see #isCglibProxyClassName(String)
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 */
+	@Deprecated
 	public static boolean isCglibProxyClass(@Nullable Class<?> clazz) {
 		return (clazz != null && isCglibProxyClassName(clazz.getName()));
 	}
@@ -858,7 +862,9 @@ public abstract class ClassUtils {
 	/**
 	 * Check whether the specified class name is a CGLIB-generated class.
 	 * @param className the class name to check
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 */
+	@Deprecated
 	public static boolean isCglibProxyClassName(@Nullable String className) {
 		return (className != null && className.contains(CGLIB_CLASS_SEPARATOR));
 	}
