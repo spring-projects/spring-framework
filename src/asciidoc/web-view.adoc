@@ -699,7 +699,7 @@ when developing with JSPs are the `InternalResourceViewResolver` and the
 		<property name="basename" value="views"/>
 	</bean>
 
-	# And a sample properties file is uses (views.properties in WEB-INF/classes):
+	# And a sample properties file is used (views.properties in WEB-INF/classes):
 	welcome.(class)=org.springframework.web.servlet.view.JstlView
 	welcome.url=/WEB-INF/jsp/welcome.jsp
 
@@ -721,17 +721,17 @@ can mix different types of views using only one resolver.
 	</bean>
 ----
 
-The `InternalResourceBundleViewResolver` can be configured for using JSPs as described
-above. As a best practice, we strongly encourage placing your JSP files in a directory
-under the `'WEB-INF'` directory, so there can be no direct access by clients.
+The `InternalResourceViewResolver` can be configured for using JSPs as described above.
+As a best practice, we strongly encourage placing your JSP files in a directory under
+the `'WEB-INF'` directory, so there can be no direct access by clients.
 
 
 
 [[view-jsp-jstl]]
 === 'Plain-old' JSPs versus JSTL
 
-When using the Java Standard Tag Library you must use a special view class, the
-`JstlView`, as JSTL needs some preparation before things such as the I18N features will
+When using the JSP Standard Tag Library (JSTL) you must use a special view class, the
+`JstlView`, as JSTL needs some preparation before things such as the I18N features can
 work.
 
 
@@ -1438,7 +1438,7 @@ The HTML would look like:
 A key principle of REST is the use of the Uniform Interface. This means that all
 resources (URLs) can be manipulated using the same four HTTP methods: GET, PUT, POST,
 and DELETE. For each method, the HTTP specification defines the exact semantics. For
-instance, a GET should always be a safe operation, meaning that is has no side effects,
+instance, a GET should always be a safe operation, meaning that it has no side effects,
 and a PUT or DELETE should be idempotent, meaning that you can repeat these operations
 over and over again, but the end result should be the same. While HTTP defines these
 four methods, HTML only supports two: GET and POST. Fortunately, there are two possible
