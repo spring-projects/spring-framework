@@ -753,7 +753,7 @@ When developing with JSPs, you can declare a `InternalResourceViewResolver` or a
 
 `ResourceBundleViewResolver` relies on a properties file to define the view names
 mapped to a class and a URL. With a `ResourceBundleViewResolver`, you
-can mix different types of views byusing only one resolver, as the following example shows:
+can mix different types of views by using only one resolver, as the following example shows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -763,7 +763,7 @@ can mix different types of views byusing only one resolver, as the following exa
 		<property name="basename" value="views"/>
 	</bean>
 
-	# And a sample properties file is uses (views.properties in WEB-INF/classes):
+	# And a sample properties file is used (views.properties in WEB-INF/classes):
 	welcome.(class)=org.springframework.web.servlet.view.JstlView
 	welcome.url=/WEB-INF/jsp/welcome.jsp
 
@@ -771,7 +771,7 @@ can mix different types of views byusing only one resolver, as the following exa
 	productList.url=/WEB-INF/jsp/productlist.jsp
 ----
 
-`InternalResourceBundleViewResolver` can also be used for JSPs. As a best practice, we
+`InternalResourceViewResolver` can also be used for JSPs. As a best practice, we
 strongly encourage placing your JSP files in a directory under the `'WEB-INF'`
 directory so there can be no direct access by clients.
 
@@ -790,7 +790,7 @@ directory so there can be no direct access by clients.
 [[mvc-view-jsp-jstl]]
 === JSPs versus JSTL
 
-When using the Java Standard Tag Library you must use a special view class, the
+When using the JSP Standard Tag Library (JSTL) you must use a special view class, the
 `JstlView`, as JSTL needs some preparation before things such as the I18N features can
 work.
 
@@ -1513,7 +1513,7 @@ or see the tag library description.
 A key principle of REST is the use of the "`Uniform Interface`". This means that all
 resources (URLs) can be manipulated by using the same four HTTP methods: GET, PUT, POST,
 and DELETE. For each method, the HTTP specification defines the exact semantics. For
-instance, a GET should always be a safe operation, meaning that is has no side effects,
+instance, a GET should always be a safe operation, meaning that it has no side effects,
 and a PUT or DELETE should be idempotent, meaning that you can repeat these operations
 over and over again, but the end result should be the same. While HTTP defines these
 four methods, HTML only supports two: GET and POST. Fortunately, there are two possible
@@ -1537,7 +1537,7 @@ sample:
 	</form:form>
 ----
 
-The preceding example perform an HTTP POST, with the "`real`" DELETE method hidden behind a
+The preceding example performs an HTTP POST, with the "`real`" DELETE method hidden behind a
 request parameter. It is picked up by the `HiddenHttpMethodFilter`, which is defined in
 web.xml, as the following example shows:
 
@@ -1720,7 +1720,7 @@ implementations. See the Tiles documentation for details on how to use
 You can specify `SimpleSpringPreparerFactory` to autowire `ViewPreparer` instances based on
 specified preparer classes, applying Spring's container callbacks as well as applying
 configured Spring BeanPostProcessors. If Spring's context-wide annotation configuration has
-been activated, annotations in `ViewPreparer` classes aree automatically detected and
+been activated, annotations in `ViewPreparer` classes are automatically detected and
 applied. Note that this expects preparer classes in the Tiles definition files, as
 the default `PreparerFactory` does.
 
@@ -1730,7 +1730,7 @@ application context. The full bean creation process is in the control of the Spr
 application context in this case, allowing for the use of explicit dependency injection
 configuration, scoped beans, and so on. Note that you need to define one Spring bean definition
 for each preparer name (as used in your Tiles definitions). The following example shows
-how to define a set a `SpringBeanPreparerFactory` property on a `TilesConfigurer` bean:
+how to define a `SpringBeanPreparerFactory` property on a `TilesConfigurer` bean:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1793,7 +1793,7 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as the follow
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class SampleContentAtomView extends AbstractRssFeedView {
+	public class SampleContentRssView extends AbstractRssFeedView {
 
 		@Override
 		protected void buildFeedMetadata(Map<String, Object> model,
@@ -1837,7 +1837,7 @@ dynamically from the model data. The document is the view and is streamed from t
 server with the correct content type, to (hopefully) enable the client PC to run their
 spreadsheet or PDF viewer application in response.
 
-In order to use Excel views, you need to add the Apache POI library to your classpath,
+In order to use Excel views, you need to add the Apache POI library to your classpath.
 For PDF generation, you need to add (preferably) the OpenPDF library.
 
 NOTE: You should use the latest versions of the underlying document-generation libraries, if possible.
@@ -1923,7 +1923,7 @@ serializers and deserializers for specific types.
 
 `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`
-to render the response content as XML. If the model contains multiples entries, you should explicitly set the
+to render the response content as XML. If the model contains multiple entries, you should explicitly set the
 object to be serialized by using the `modelKey` bean property.
 If the model contains a single entry, it is serialized automatically.
 
