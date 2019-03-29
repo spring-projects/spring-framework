@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import reactor.netty.NettyOutbound;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.MonoToListenableFutureAdapter;
 
 /**
  * Reactor Netty based implementation of {@link TcpConnection}.

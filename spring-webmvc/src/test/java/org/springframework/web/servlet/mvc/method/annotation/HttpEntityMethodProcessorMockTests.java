@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -568,8 +568,24 @@ public class HttpEntityMethodProcessorMockTests {
 		assertThat(servletResponse.getHeader(HttpHeaders.ACCEPT_RANGES), Matchers.isEmptyOrNullString());
 	}
 
+	@Test //SPR-16921
+	public void disableRangeSupportIfContentRangePresent() throws Exception {
+		ResponseEntity<Resource> returnValue = ResponseEntity
+				.status(HttpStatus.PARTIAL_CONTENT)
+				.header(HttpHeaders.RANGE, "bytes=0-5")
+				.body(new ByteArrayResource("Content".getBytes(StandardCharsets.UTF_8)));
+
+		given(resourceRegionMessageConverter.canWrite(any(), eq(null))).willReturn(true);
+		given(resourceRegionMessageConverter.canWrite(any(), eq(APPLICATION_OCTET_STREAM))).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
+
+		then(resourceRegionMessageConverter).should(never()).write(anyCollection(), any(), any());
+		assertEquals(206, servletResponse.getStatus());
+	}
+
 	@Test  //SPR-14767
-	public void shouldHandleValidatorHeadersInPutResponses() throws Exception {
+	public void shouldHandleValidatorHeadersInputResponses() throws Exception {
 		servletRequest.setMethod("PUT");
 		String etagValue = "\"some-etag\"";
 		ResponseEntity<String> returnValue = ResponseEntity.ok().header(HttpHeaders.ETAG, etagValue).body("body");

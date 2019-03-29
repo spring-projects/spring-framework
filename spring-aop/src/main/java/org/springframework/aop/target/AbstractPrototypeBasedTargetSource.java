@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -85,7 +85,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 				((DisposableBean) target).destroy();
 			}
 			catch (Throwable ex) {
-				logger.error("Couldn't invoke destroy method of bean with name '" + getTargetBeanName() + "'", ex);
+				logger.warn("Destroy method on bean with name '" + getTargetBeanName() + "' threw an exception", ex);
 			}
 		}
 	}

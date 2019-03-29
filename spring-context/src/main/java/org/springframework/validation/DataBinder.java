@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,6 +41,7 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormatterPropertyEditorAdapter;
 import org.springframework.lang.Nullable;
@@ -700,6 +701,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return getTypeConverter().convertIfNecessary(value, requiredType, field);
 	}
 
+	@Nullable
+	@Override
+	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
+			@Nullable TypeDescriptor typeDescriptor) throws TypeMismatchException {
+
+		return getTypeConverter().convertIfNecessary(value, requiredType, typeDescriptor);
+	}
+
 
 	/**
 	 * Bind the given property values to this binder's target.
@@ -853,8 +862,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #getBindingResult()
 	 */
 	public void validate() {
-		for (Validator validator : this.validators) {
-			validator.validate(getTarget(), getBindingResult());
+		Object target = getTarget();
+		Assert.state(target != null, "No target to validate");
+		BindingResult bindingResult = getBindingResult();
+		// Call each validator with the same binding result
+		for (Validator validator : getValidators()) {
+			validator.validate(target, bindingResult);
 		}
 	}
 
@@ -862,16 +875,21 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Invoke the specified Validators, if any, with the given validation hints.
 	 * <p>Note: Validation hints may get ignored by the actual target Validator.
 	 * @param validationHints one or more hint objects to be passed to a {@link SmartValidator}
+	 * @since 3.1
 	 * @see #setValidator(Validator)
 	 * @see SmartValidator#validate(Object, Errors, Object...)
 	 */
 	public void validate(Object... validationHints) {
+		Object target = getTarget();
+		Assert.state(target != null, "No target to validate");
+		BindingResult bindingResult = getBindingResult();
+		// Call each validator with the same binding result
 		for (Validator validator : getValidators()) {
 			if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
-				((SmartValidator) validator).validate(getTarget(), getBindingResult(), validationHints);
+				((SmartValidator) validator).validate(target, bindingResult, validationHints);
 			}
 			else if (validator != null) {
-				validator.validate(getTarget(), getBindingResult());
+				validator.validate(target, bindingResult);
 			}
 		}
 	}

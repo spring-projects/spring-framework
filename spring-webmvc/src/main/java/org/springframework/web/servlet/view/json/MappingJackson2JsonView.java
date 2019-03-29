@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,7 +35,7 @@ import org.springframework.web.servlet.View;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link ObjectMapper}.
+ * using <a href="https://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
  * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
@@ -149,7 +149,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Filter out undesired attributes from the given model.
 	 * The return value can be either another {@link Map} or a single value object.
 	 * <p>The default implementation removes {@link BindingResult} instances and entries
-	 * not included in the {@link #setModelKeys renderedAttributes} property.
+	 * not included in the {@link #setModelKeys modelKeys} property.
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
 	 * @return the value to be rendered
 	 */

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -85,6 +85,7 @@ import org.springframework.web.context.request.async.CallableProcessingIntercept
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.InvocableHandlerMethod;
@@ -887,7 +888,9 @@ public class MvcNamespaceTests {
 		for (String beanName : beanNames) {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertNotNull(handlerMapping);
-			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfigurations();
+			DirectFieldAccessor accessor = new DirectFieldAccessor(handlerMapping);
+			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource)accessor
+					.getPropertyValue("corsConfigurationSource")).getCorsConfigurations();
 			assertNotNull(configs);
 			assertEquals(1, configs.size());
 			CorsConfiguration config = configs.get("/**");
@@ -910,19 +913,21 @@ public class MvcNamespaceTests {
 		for (String beanName : beanNames) {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertNotNull(handlerMapping);
-			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfigurations();
+			DirectFieldAccessor accessor = new DirectFieldAccessor(handlerMapping);
+			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource)accessor
+					.getPropertyValue("corsConfigurationSource")).getCorsConfigurations();
 			assertNotNull(configs);
 			assertEquals(2, configs.size());
 			CorsConfiguration config = configs.get("/api/**");
 			assertNotNull(config);
-			assertArrayEquals(new String[]{"http://domain1.com", "http://domain2.com"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"https://domain1.com", "https://domain2.com"}, config.getAllowedOrigins().toArray());
 			assertArrayEquals(new String[]{"GET", "PUT"}, config.getAllowedMethods().toArray());
 			assertArrayEquals(new String[]{"header1", "header2", "header3"}, config.getAllowedHeaders().toArray());
 			assertArrayEquals(new String[]{"header1", "header2"}, config.getExposedHeaders().toArray());
 			assertFalse(config.getAllowCredentials());
 			assertEquals(Long.valueOf(123), config.getMaxAge());
 			config = configs.get("/resources/**");
-			assertArrayEquals(new String[]{"http://domain1.com"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"https://domain1.com"}, config.getAllowedOrigins().toArray());
 			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());

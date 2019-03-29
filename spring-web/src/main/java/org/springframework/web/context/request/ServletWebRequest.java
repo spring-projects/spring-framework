@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -287,13 +287,15 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
+		if (etag.startsWith("W/")) {
+			etag = etag.substring(2);
+		}
 		while (ifNoneMatch.hasMoreElements()) {
 			String clientETags = ifNoneMatch.nextElement();
 			Matcher etagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 			while (etagMatcher.find()) {
-				if (StringUtils.hasLength(etagMatcher.group()) &&
-						etag.replaceFirst("^W/", "").equals(etagMatcher.group(3))) {
+				if (StringUtils.hasLength(etagMatcher.group()) && etag.equals(etagMatcher.group(3))) {
 					this.notModified = true;
 					break;
 				}

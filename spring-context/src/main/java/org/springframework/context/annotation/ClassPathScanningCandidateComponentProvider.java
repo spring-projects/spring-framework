@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -209,7 +209,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false));
-			logger.debug("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
+			logger.trace("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-250 1.1 API (as included in Java EE 6) not available - simply skip.
@@ -217,7 +217,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Named", cl)), false));
-			logger.debug("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
+			logger.trace("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
 		}
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
@@ -377,7 +377,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			for (TypeFilter filter : this.includeFilters) {
 				String stereotype = extractStereotype(filter);
 				if (stereotype == null) {
-					throw new IllegalArgumentException("Failed to extract stereotype from "+ filter);
+					throw new IllegalArgumentException("Failed to extract stereotype from " + filter);
 				}
 				types.addAll(index.getCandidateTypes(basePackage, stereotype));
 			}

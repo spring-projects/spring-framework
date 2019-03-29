@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,7 +59,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * @return the adapted comparator
 	 * @since 4.1
 	 */
-	public Comparator<Object> withSourceProvider(final OrderSourceProvider sourceProvider) {
+	public Comparator<Object> withSourceProvider(OrderSourceProvider sourceProvider) {
 		return (o1, o2) -> doCompare(o1, o2, sourceProvider);
 	}
 
@@ -78,10 +78,9 @@ public class OrderComparator implements Comparator<Object> {
 			return 1;
 		}
 
-		// Direct evaluation instead of Integer.compareTo to avoid unnecessary object creation.
 		int i1 = getOrder(o1, sourceProvider);
 		int i2 = getOrder(o2, sourceProvider);
-		return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
+		return Integer.compare(i1, i2);
 	}
 
 	/**

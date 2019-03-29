@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -123,11 +123,10 @@ public class ResourceTests {
 
 	@Test
 	public void testFileSystemResource() throws IOException {
-		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
+		String file = getClass().getResource("Resource.class").getFile();
+		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
-		assertEquals(new FileSystemResource(getClass().getResource("Resource.class").getFile()), resource);
-		Resource resource2 = new FileSystemResource("core/io/Resource.class");
-		assertEquals(resource2, new FileSystemResource("core/../core/io/./Resource.class"));
+		assertEquals(new FileSystemResource(file), resource);
 	}
 
 	@Test
@@ -136,8 +135,12 @@ public class ResourceTests {
 		Resource resource = new FileSystemResource(filePath);
 		doTestResource(resource);
 		assertEquals(new FileSystemResource(filePath), resource);
-		Resource resource2 = new FileSystemResource("core/io/Resource.class");
-		assertEquals(resource2, new FileSystemResource("core/../core/io/./Resource.class"));
+	}
+
+	@Test
+	public void testFileSystemResourceWithPlainPath() {
+		Resource resource = new FileSystemResource("core/io/Resource.class");
+		assertEquals(resource, new FileSystemResource("core/../core/io/./Resource.class"));
 	}
 
 	@Test
@@ -157,23 +160,52 @@ public class ResourceTests {
 	private void doTestResource(Resource resource) throws IOException {
 		assertEquals("Resource.class", resource.getFilename());
 		assertTrue(resource.getURL().getFile().endsWith("Resource.class"));
+		assertTrue(resource.exists());
+		assertTrue(resource.isReadable());
+		assertTrue(resource.contentLength() > 0);
+		assertTrue(resource.lastModified() > 0);
 
 		Resource relative1 = resource.createRelative("ClassPathResource.class");
 		assertEquals("ClassPathResource.class", relative1.getFilename());
 		assertTrue(relative1.getURL().getFile().endsWith("ClassPathResource.class"));
 		assertTrue(relative1.exists());
+		assertTrue(relative1.isReadable());
+		assertTrue(relative1.contentLength() > 0);
+		assertTrue(relative1.lastModified() > 0);
 
 		Resource relative2 = resource.createRelative("support/ResourcePatternResolver.class");
 		assertEquals("ResourcePatternResolver.class", relative2.getFilename());
 		assertTrue(relative2.getURL().getFile().endsWith("ResourcePatternResolver.class"));
 		assertTrue(relative2.exists());
+		assertTrue(relative2.isReadable());
+		assertTrue(relative2.contentLength() > 0);
+		assertTrue(relative2.lastModified() > 0);
 
-		/*
 		Resource relative3 = resource.createRelative("../SpringVersion.class");
 		assertEquals("SpringVersion.class", relative3.getFilename());
 		assertTrue(relative3.getURL().getFile().endsWith("SpringVersion.class"));
 		assertTrue(relative3.exists());
-		*/
+		assertTrue(relative3.isReadable());
+		assertTrue(relative3.contentLength() > 0);
+		assertTrue(relative3.lastModified() > 0);
+
+		Resource relative4 = resource.createRelative("X.class");
+		assertFalse(relative4.exists());
+		assertFalse(relative4.isReadable());
+		try {
+			relative4.contentLength();
+			fail("Should have thrown FileNotFoundException");
+		}
+		catch (FileNotFoundException ex) {
+			// expected
+		}
+		try {
+			relative4.lastModified();
+			fail("Should have thrown FileNotFoundException");
+		}
+		catch (FileNotFoundException ex) {
+			// expected
+		}
 	}
 
 	@Test
@@ -199,7 +231,7 @@ public class ResourceTests {
 
 	@Ignore @Test // this test is quite slow. TODO: re-enable with JUnit categories
 	public void testNonFileResourceExists() throws Exception {
-		Resource resource = new UrlResource("http://www.springframework.org");
+		Resource resource = new UrlResource("https://www.springframework.org");
 		assertTrue(resource.exists());
 	}
 

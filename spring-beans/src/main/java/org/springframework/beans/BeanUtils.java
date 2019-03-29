@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -70,6 +70,18 @@ public abstract class BeanUtils {
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
+	private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES;
+
+	static {
+		Map<Class<?>, Object> values = new HashMap<>();
+		values.put(boolean.class, false);
+		values.put(byte.class, (byte) 0);
+		values.put(short.class, (short) 0);
+		values.put(int.class, 0);
+		values.put(long.class, (long) 0);
+		DEFAULT_TYPE_VALUES = Collections.unmodifiableMap(values);
+	}
+
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
@@ -119,11 +131,13 @@ public abstract class BeanUtils {
 			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
-			Constructor<T> ctor = (KotlinDetector.isKotlinType(clazz) ?
-					KotlinDelegate.getPrimaryConstructor(clazz) : clazz.getDeclaredConstructor());
-			return instantiateClass(ctor);
+			return instantiateClass(clazz.getDeclaredConstructor());
 		}
 		catch (NoSuchMethodException ex) {
+			Constructor<T> ctor = findPrimaryConstructor(clazz);
+			if (ctor != null) {
+				return instantiateClass(ctor);
+			}
 			throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 		}
 		catch (LinkageError err) {
@@ -157,7 +171,7 @@ public abstract class BeanUtils {
 	 * with optional parameters and default values.
 	 * @param ctor the constructor to instantiate
 	 * @param args the constructor arguments to apply (use {@code null} for an unspecified
-	 * parameter if needed for Kotlin classes with optional parameters and default values)
+	 * parameter, Kotlin optional parameters and Java primitive types are supported)
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 * @see Constructor#newInstance
@@ -166,8 +180,24 @@ public abstract class BeanUtils {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			ReflectionUtils.makeAccessible(ctor);
-			return (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) ?
-					KotlinDelegate.instantiateClass(ctor, args) : ctor.newInstance(args));
+			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+				return KotlinDelegate.instantiateClass(ctor, args);
+			}
+			else {
+				Class<?>[] parameterTypes = ctor.getParameterTypes();
+				Assert.isTrue(args.length <= parameterTypes.length, "Can't specify more arguments than constructor parameters");
+				Object[] argsWithDefaultValues = new Object[args.length];
+				for (int i = 0 ; i < args.length; i++) {
+					if (args[i] == null) {
+						Class<?> parameterType = parameterTypes[i];
+						argsWithDefaultValues[i] = (parameterType.isPrimitive() ? DEFAULT_TYPE_VALUES.get(parameterType) : null);
+					}
+					else {
+						argsWithDefaultValues[i] = args[i];
+					}
+				}
+				return ctor.newInstance(argsWithDefaultValues);
+			}
 		}
 		catch (InstantiationException ex) {
 			throw new BeanInstantiationException(ctor, "Is it an abstract class?", ex);
@@ -190,13 +220,13 @@ public abstract class BeanUtils {
 	 * classes, this simply returns {@code null}.
 	 * @param clazz the class to check
 	 * @since 5.0
-	 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
+	 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">Kotlin docs</a>
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		if (KotlinDetector.isKotlinType(clazz)) {
+		if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(clazz)) {
 			Constructor<T> kotlinPrimaryConstructor = KotlinDelegate.findPrimaryConstructor(clazz);
 			if (kotlinPrimaryConstructor != null) {
 				return kotlinPrimaryConstructor;
@@ -401,8 +431,7 @@ public abstract class BeanUtils {
 
 
 	/**
-	 * Retrieve the JavaBeans {@code PropertyDescriptor}s of a given
-	 * class.
+	 * Retrieve the JavaBeans {@code PropertyDescriptor}s of a given class.
 	 * @param clazz the Class to retrieve the PropertyDescriptors for
 	 * @return an array of {@code PropertyDescriptors} for the given class
 	 * @throws BeansException if PropertyDescriptor look fails
@@ -497,8 +526,8 @@ public abstract class BeanUtils {
 		try {
 			Class<?> editorClass = cl.loadClass(editorName);
 			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Editor class [" + editorName +
+				if (logger.isInfoEnabled()) {
+					logger.info("Editor class [" + editorName +
 							"] does not implement [java.beans.PropertyEditor] interface");
 				}
 				unknownEditorTypes.add(targetType);
@@ -507,8 +536,8 @@ public abstract class BeanUtils {
 			return (PropertyEditor) instantiateClass(editorClass);
 		}
 		catch (ClassNotFoundException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No property editor [" + editorName + "] found for type " +
+			if (logger.isTraceEnabled()) {
+				logger.trace("No property editor [" + editorName + "] found for type " +
 						targetType.getName() + " according to 'Editor' suffix convention");
 			}
 			unknownEditorTypes.add(targetType);
@@ -701,26 +730,10 @@ public abstract class BeanUtils {
 	private static class KotlinDelegate {
 
 		/**
-		 * Determine the Java constructor corresponding to the Kotlin primary constructor.
-		 * @param clazz the {@link Class} of the Kotlin class
-		 * @throws NoSuchMethodException if no such constructor found
-		 * @since 5.0.3
-		 * @see #findPrimaryConstructor
-		 * @see Class#getDeclaredConstructor
-		 */
-		public static <T> Constructor<T> getPrimaryConstructor(Class<T> clazz) throws NoSuchMethodException {
-			Constructor<T> ctor = findPrimaryConstructor(clazz);
-			if (ctor == null) {
-				throw new NoSuchMethodException();
-			}
-			return ctor;
-		}
-
-		/**
 		 * Retrieve the Java constructor corresponding to the Kotlin primary constructor, if any.
 		 * @param clazz the {@link Class} of the Kotlin class
-		 * @see <a href="http://kotlinlang.org/docs/reference/classes.html#constructors">
-		 * http://kotlinlang.org/docs/reference/classes.html#constructors</a>
+		 * @see <a href="https://kotlinlang.org/docs/reference/classes.html#constructors">
+		 * https://kotlinlang.org/docs/reference/classes.html#constructors</a>
 		 */
 		@Nullable
 		public static <T> Constructor<T> findPrimaryConstructor(Class<T> clazz) {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,7 +63,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if (bean instanceof AopInfrastructureBean || this.advisor == null) {
+		if (this.advisor == null || bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
@@ -92,7 +92,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 			return proxyFactory.getProxy(getProxyClassLoader());
 		}
 
-		// No async proxy needed.
+		// No proxy needed.
 		return bean;
 	}
 

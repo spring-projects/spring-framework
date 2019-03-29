@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,8 +58,8 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 		if (context == null) {
 			return;
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for @MessageExceptionHandler mappings: " + context);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Looking for @MessageExceptionHandler mappings: " + context);
 		}
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(context);
 		AnnotationAwareOrderComparator.sort(beans);
@@ -76,7 +76,9 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 				AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(type);
 				if (resolver.hasExceptionMappings()) {
 					registerExceptionHandlerAdvice(bean, resolver);
-					logger.info("Detected @MessageExceptionHandler methods in " + bean);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Detected @MessageExceptionHandler methods in " + bean);
+					}
 				}
 			}
 		}

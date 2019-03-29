@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -65,7 +64,7 @@ public class ExpressionState {
 	private Deque<TypedValue> contextObjects;
 
 	@Nullable
-	private LinkedList<VariableScope> variableScopes;
+	private Deque<VariableScope> variableScopes;
 
 	// When entering a new scope there is a new base object which should be used
 	// for '#this' references (or to act as a target for unqualified references).
@@ -215,7 +214,7 @@ public class ExpressionState {
 
 	private Deque<VariableScope> initVariableScopes() {
 		if (this.variableScopes == null) {
-			this.variableScopes = new LinkedList<>();
+			this.variableScopes = new ArrayDeque<>();
 			// top-level empty variable scope
 			this.variableScopes.add(new VariableScope());
 		}

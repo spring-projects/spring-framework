@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,15 +18,20 @@ package org.springframework.web.server.session;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.junit.Test;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.web.server.WebSession;
 
 import static junit.framework.TestCase.assertSame;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link InMemoryWebSessionStore}.
@@ -78,6 +83,7 @@ public class InMemoryWebSessionStoreTests {
 		assertNotNull(session1);
 		String id = session1.getId();
 		Instant time1 = session1.getLastAccessTime();
+		session1.start();
 		session1.save().block();
 
 		// Fast-forward a few seconds
@@ -90,45 +96,74 @@ public class InMemoryWebSessionStoreTests {
 		assertTrue(time1.isBefore(time2));
 	}
 
-	@Test
-	public void expirationChecks() {
-		// Create 3 sessions
+	@Test // SPR-17051
+	public void sessionInvalidatedBeforeSave() {
+		// Request 1 creates session
 		WebSession session1 = this.store.createWebSession().block();
 		assertNotNull(session1);
+		String id = session1.getId();
 		session1.start();
 		session1.save().block();
 
-		WebSession session2 = this.store.createWebSession().block();
+		// Request 2 retrieves session
+		WebSession session2 = this.store.retrieveSession(id).block();
 		assertNotNull(session2);
-		session2.start();
+		assertSame(session1, session2);
+
+		// Request 3 retrieves and invalidates
+		WebSession session3 = this.store.retrieveSession(id).block();
+		assertNotNull(session3);
+		assertSame(session1, session3);
+		session3.invalidate().block();
+
+		// Request 2 saves session after invalidated
 		session2.save().block();
 
-		WebSession session3 = this.store.createWebSession().block();
-		assertNotNull(session3);
-		session3.start();
-		session3.save().block();
+		// Session should not be present
+		WebSession session4 = this.store.retrieveSession(id).block();
+		assertNull(session4);
+	}
 
-		// Fast-forward 31 minutes
-		this.store.setClock(Clock.offset(this.store.getClock(), Duration.ofMinutes(31)));
+	@Test
+	public void expirationCheckPeriod() {
 
-		// Create 2 more sessions
-		WebSession session4 = this.store.createWebSession().block();
-		assertNotNull(session4);
-		session4.start();
-		session4.save().block();
+		DirectFieldAccessor accessor = new DirectFieldAccessor(this.store);
+		Map<?,?> sessions = (Map<?, ?>) accessor.getPropertyValue("sessions");
+		assertNotNull(sessions);
 
-		WebSession session5 = this.store.createWebSession().block();
-		assertNotNull(session5);
-		session5.start();
-		session5.save().block();
+		// Create 100 sessions
+		IntStream.range(0, 100).forEach(i -> insertSession());
+		assertEquals(100, sessions.size());
 
-		// Retrieve, forcing cleanup of all expired..
-		assertNull(this.store.retrieveSession(session1.getId()).block());
-		assertNull(this.store.retrieveSession(session2.getId()).block());
-		assertNull(this.store.retrieveSession(session3.getId()).block());
+		// Force a new clock (31 min later), don't use setter which would clean expired sessions
+		accessor.setPropertyValue("clock", Clock.offset(this.store.getClock(), Duration.ofMinutes(31)));
+		assertEquals(100, sessions.size());
 
-		assertNotNull(this.store.retrieveSession(session4.getId()).block());
-		assertNotNull(this.store.retrieveSession(session5.getId()).block());
+		// Create 1 more which forces a time-based check (clock moved forward)
+		insertSession();
+		assertEquals(1, sessions.size());
+	}
+
+	@Test
+	public void maxSessions() {
+
+		IntStream.range(0, 10000).forEach(i -> insertSession());
+
+		try {
+			insertSession();
+			fail();
+		}
+		catch (IllegalStateException ex) {
+			assertEquals("Max sessions limit reached: 10000", ex.getMessage());
+		}
+	}
+
+	private WebSession insertSession() {
+		WebSession session = this.store.createWebSession().block();
+		assertNotNull(session);
+		session.start();
+		session.save().block();
+		return session;
 	}
 
 }

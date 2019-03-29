@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -101,15 +101,15 @@ public class DefaultCorsProcessorTests {
 	@Test
 	public void actualRequestCredentials() throws Exception {
 		ServerWebExchange exchange = actualRequest();
-		this.conf.addAllowedOrigin("http://domain1.com");
-		this.conf.addAllowedOrigin("http://domain2.com");
+		this.conf.addAllowedOrigin("https://domain1.com");
+		this.conf.addAllowedOrigin("https://domain2.com");
 		this.conf.addAllowedOrigin("http://domain3.com");
 		this.conf.setAllowCredentials(true);
 		this.processor.process(this.conf, exchange);
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertTrue(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("https://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertThat(response.getHeaders().get(VARY), contains(ORIGIN,
@@ -126,7 +126,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertTrue(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("https://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertThat(response.getHeaders().get(VARY), contains(ORIGIN,
@@ -137,7 +137,7 @@ public class DefaultCorsProcessorTests {
 	@Test
 	public void actualRequestCaseInsensitiveOriginMatch() throws Exception {
 		ServerWebExchange exchange = actualRequest();
-		this.conf.addAllowedOrigin("http://DOMAIN2.com");
+		this.conf.addAllowedOrigin("https://DOMAIN2.com");
 		this.processor.process(this.conf, exchange);
 
 		ServerHttpResponse response = exchange.getResponse();
@@ -152,12 +152,12 @@ public class DefaultCorsProcessorTests {
 		ServerWebExchange exchange = actualRequest();
 		this.conf.addExposedHeader("header1");
 		this.conf.addExposedHeader("header2");
-		this.conf.addAllowedOrigin("http://domain2.com");
+		this.conf.addAllowedOrigin("https://domain2.com");
 		this.processor.process(this.conf, exchange);
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertTrue(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("https://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
 		assertTrue(response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS).contains("header1"));
 		assertTrue(response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS).contains("header2"));
@@ -278,8 +278,8 @@ public class DefaultCorsProcessorTests {
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
 				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1"));
 
-		this.conf.addAllowedOrigin("http://domain1.com");
-		this.conf.addAllowedOrigin("http://domain2.com");
+		this.conf.addAllowedOrigin("https://domain1.com");
+		this.conf.addAllowedOrigin("https://domain2.com");
 		this.conf.addAllowedOrigin("http://domain3.com");
 		this.conf.addAllowedHeader("Header1");
 		this.conf.setAllowCredentials(true);
@@ -288,7 +288,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertTrue(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("https://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertThat(response.getHeaders().get(VARY), contains(ORIGIN,
@@ -302,7 +302,7 @@ public class DefaultCorsProcessorTests {
 				.header(ACCESS_CONTROL_REQUEST_METHOD, "GET")
 				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1"));
 
-		this.conf.addAllowedOrigin("http://domain1.com");
+		this.conf.addAllowedOrigin("https://domain1.com");
 		this.conf.addAllowedOrigin("*");
 		this.conf.addAllowedOrigin("http://domain3.com");
 		this.conf.addAllowedHeader("Header1");
@@ -312,7 +312,7 @@ public class DefaultCorsProcessorTests {
 
 		ServerHttpResponse response = exchange.getResponse();
 		assertTrue(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("https://domain2.com", response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertThat(response.getHeaders().get(VARY), contains(ORIGIN,
 				ACCESS_CONTROL_REQUEST_METHOD, ACCESS_CONTROL_REQUEST_HEADERS));
 		assertNull(response.getStatusCode());
@@ -327,7 +327,7 @@ public class DefaultCorsProcessorTests {
 		this.conf.addAllowedHeader("Header1");
 		this.conf.addAllowedHeader("Header2");
 		this.conf.addAllowedHeader("Header3");
-		this.conf.addAllowedOrigin("http://domain2.com");
+		this.conf.addAllowedOrigin("https://domain2.com");
 
 		this.processor.process(this.conf, exchange);
 
@@ -349,7 +349,7 @@ public class DefaultCorsProcessorTests {
 				.header(ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2"));
 
 		this.conf.addAllowedHeader("*");
-		this.conf.addAllowedOrigin("http://domain2.com");
+		this.conf.addAllowedOrigin("https://domain2.com");
 
 		this.processor.process(this.conf, exchange);
 
@@ -371,7 +371,7 @@ public class DefaultCorsProcessorTests {
 				.header(ACCESS_CONTROL_REQUEST_HEADERS, ""));
 
 		this.conf.addAllowedHeader("*");
-		this.conf.addAllowedOrigin("http://domain2.com");
+		this.conf.addAllowedOrigin("https://domain2.com");
 
 		this.processor.process(this.conf, exchange);
 
@@ -407,7 +407,7 @@ public class DefaultCorsProcessorTests {
 	private MockServerHttpRequest.BaseBuilder<?> corsRequest(HttpMethod method) {
 		return MockServerHttpRequest
 				.method(method, "http://localhost/test.html")
-				.header(HttpHeaders.ORIGIN, "http://domain2.com");
+				.header(HttpHeaders.ORIGIN, "https://domain2.com");
 	}
 
 }

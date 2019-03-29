@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,11 @@ import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.awaitility.Awaitility;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -47,6 +49,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
+@SuppressWarnings("resource")
 public class AsyncExecutionTests {
 
 	private static String originalThreadName;
@@ -365,19 +368,26 @@ public class AsyncExecutionTests {
 
 	@Test
 	public void asyncMethodListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodListener.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
-		Thread.sleep(1000);
-		assertEquals(1, listenerCalled);
+		// Assert
+		Awaitility.await()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 1);
+		context.close();
 	}
 
 	@Test
 	public void asyncClassListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		listenerConstructed = 0;
@@ -385,15 +395,20 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassListener.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
 		context.close();
-		Thread.sleep(1000);
-		assertEquals(2, listenerCalled);
+		// Assert
+		Awaitility.await()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 2);
 		assertEquals(1, listenerConstructed);
 	}
 
 	@Test
 	public void asyncPrototypeClassListener() throws Exception {
+		// Arrange
 		originalThreadName = Thread.currentThread().getName();
 		listenerCalled = 0;
 		listenerConstructed = 0;
@@ -403,10 +418,14 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", listenerDef);
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		// Act
 		context.refresh();
 		context.close();
-		Thread.sleep(1000);
-		assertEquals(2, listenerCalled);
+		// Assert
+		Awaitility.await()
+					.atMost(1, TimeUnit.SECONDS)
+					.pollInterval(10, TimeUnit.MILLISECONDS)
+					.until(() -> listenerCalled == 2);
 		assertEquals(2, listenerConstructed);
 	}
 

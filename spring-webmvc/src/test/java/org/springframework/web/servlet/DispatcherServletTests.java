@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -564,7 +564,7 @@ public class DispatcherServletTests {
 		}
 		catch (ServletException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("No adapter for handler") != -1);
+			assertTrue(ex.getMessage().contains("No adapter for handler"));
 		}
 	}
 
@@ -584,7 +584,7 @@ public class DispatcherServletTests {
 		}
 		catch (ServletException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("failed0") != -1);
+			assertTrue(ex.getMessage().contains("failed0"));
 		}
 	}
 

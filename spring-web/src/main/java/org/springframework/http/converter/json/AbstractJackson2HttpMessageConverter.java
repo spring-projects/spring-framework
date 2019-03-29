@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -256,10 +256,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		try {
 			writePrefix(generator, object);
 
+			Object value = object;
 			Class<?> serializationView = null;
 			FilterProvider filters = null;
-			Object value = object;
 			JavaType javaType = null;
+
 			if (object instanceof MappingJacksonValue) {
 				MappingJacksonValue container = (MappingJacksonValue) object;
 				value = container.getValue();
@@ -269,15 +270,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			if (type != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
 			}
-			ObjectWriter objectWriter;
-			if (serializationView != null) {
-				objectWriter = this.objectMapper.writerWithView(serializationView);
-			}
-			else if (filters != null) {
-				objectWriter = this.objectMapper.writer(filters);
-			}
-			else {
-				objectWriter = this.objectMapper.writer();
+
+			ObjectWriter objectWriter = (serializationView != null ?
+					this.objectMapper.writerWithView(serializationView) : this.objectMapper.writer());
+			if (filters != null) {
+				objectWriter = objectWriter.with(filters);
 			}
 			if (javaType != null && javaType.isContainerType()) {
 				objectWriter = objectWriter.forType(javaType);
@@ -291,7 +288,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 			writeSuffix(generator, object);
 			generator.flush();
-
 		}
 		catch (InvalidDefinitionException ex) {
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);

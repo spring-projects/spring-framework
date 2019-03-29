@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,8 +32,8 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
- * {@link java.sql.ResultSet}, catching any {@link SQLException java.sql.ResultSet}, catching any {@link SQLExceptions} and translating
- * them to a corresponding Spring {@link InvalidResultSetAccessException}.
+ * {@link java.sql.ResultSet}, catching any {@link SQLException SQLExceptions} and
+ * translating them to a corresponding Spring {@link InvalidResultSetAccessException}.
  *
  * <p>The passed-in ResultSet should already be disconnected if the SqlRowSet is supposed
  * to be usable in a disconnected fashion. This means that you will usually pass in a

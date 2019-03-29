@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -123,16 +123,14 @@ public final class MockMvc {
 		this.defaultResultHandlers = resultHandlers;
 	}
 
-
 	/**
 	 * Return the underlying {@link DispatcherServlet} instance that this
 	 * {@code MockMvc} was initialized with.
-	 * <p>This is intended for use in custom request processing scenario where
-	 * a request handling component happens to delegate to the
-	 * {@code DispatcherServlet} at runtime and therefore needs to be injected
-	 * with it.
-	 * <p>For most processing scenarios, simply use {@link MockMvc#perform}, or
-	 * if you need to configure the {@code DispatcherServlet}, provide a
+	 * <p>This is intended for use in custom request processing scenario where a
+	 * request handling component happens to delegate to the {@code DispatcherServlet}
+	 * at runtime and therefore needs to be injected with it.
+	 * <p>For most processing scenarios, simply use {@link MockMvc#perform},
+	 * or if you need to configure the {@code DispatcherServlet}, provide a
 	 * {@link DispatcherServletCustomizer} to the {@code MockMvcBuilder}.
 	 * @since 5.1
 	 */

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -76,7 +76,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		doTest("/mono-error", "Recovered from error: Argument");
 	}
 
-	@Test // SPR-16051
+	@Test  // SPR-16051
 	public void exceptionAfterSeveralItems() {
 		try {
 			performGet("/SPR-16051", new HttpHeaders(), String.class).getBody();
@@ -89,11 +89,11 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		}
 	}
 
-	@Test // SPR-16318
+	@Test  // SPR-16318
 	public void exceptionFromMethodWithProducesCondition() throws Exception {
 		try {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("Accept", "text/csv, application/problem+json");
+			headers.add("Accept", "text/plain, application/problem+json");
 			performGet("/SPR-16318", headers, String.class).getBody();
 			fail();
 		}
@@ -152,9 +152,9 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 					});
 		}
 
-		@GetMapping(path = "/SPR-16318", produces = "text/csv")
-		public String handleCsv() throws Exception {
-			throw new Spr16318Exception();
+		@GetMapping(path = "/SPR-16318", produces = "text/plain")
+		public Mono<String> handleTextPlain() throws Exception {
+			return Mono.error(new Spr16318Exception());
 		}
 
 		@ExceptionHandler
@@ -178,7 +178,9 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		}
 	}
 
+
 	@SuppressWarnings("serial")
-	private static class Spr16318Exception extends Exception {}
+	private static class Spr16318Exception extends Exception {
+	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -284,7 +284,6 @@ public class ValidatorFactoryTests {
 		errors.initConversion(new DefaultConversionService());
 		validator.validate(listContainer, errors);
 
-		FieldError fieldError = errors.getFieldError("list[1]");
 		assertEquals("X", errors.getFieldValue("list[1]"));
 	}
 

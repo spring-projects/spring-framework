@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -174,8 +175,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			if (!bean.isRunning() &&
 					(!autoStartupOnly || !(bean instanceof SmartLifecycle) || ((SmartLifecycle) bean).isAutoStartup())) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Starting bean '" + beanName + "' of type [" + bean.getClass() + "]");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Starting bean '" + beanName + "' of type [" + bean.getClass().getName() + "]");
 				}
 				try {
 					bean.start();
@@ -194,11 +195,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<>();
 		lifecycleBeans.forEach((beanName, bean) -> {
-			int shutdownOrder = getPhase(bean);
-			LifecycleGroup group = phases.get(shutdownOrder);
+			int shutdownPhase = getPhase(bean);
+			LifecycleGroup group = phases.get(shutdownPhase);
 			if (group == null) {
-				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans, false);
-				phases.put(shutdownOrder, group);
+				group = new LifecycleGroup(shutdownPhase, this.timeoutPerShutdownPhase, lifecycleBeans, false);
+				phases.put(shutdownPhase, group);
 			}
 			group.add(beanName, bean);
 		});
@@ -229,8 +230,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			try {
 				if (bean.isRunning()) {
 					if (bean instanceof SmartLifecycle) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Asking bean '" + beanName + "' of type [" + bean.getClass() + "] to stop");
+						if (logger.isTraceEnabled()) {
+							logger.trace("Asking bean '" + beanName + "' of type [" +
+									bean.getClass().getName() + "] to stop");
 						}
 						countDownBeanNames.add(beanName);
 						((SmartLifecycle) bean).stop(() -> {
@@ -242,8 +244,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 						});
 					}
 					else {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Stopping bean '" + beanName + "' of type [" + bean.getClass() + "]");
+						if (logger.isTraceEnabled()) {
+							logger.trace("Stopping bean '" + beanName + "' of type [" +
+									bean.getClass().getName() + "]");
 						}
 						bean.stop();
 						if (logger.isDebugEnabled()) {
@@ -299,11 +302,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	/**
 	 * Determine the lifecycle phase of the given bean.
-	 * <p>The default implementation checks for the {@link Phased} interface.
-	 * Can be overridden to apply other/further policies.
+	 * <p>The default implementation checks for the {@link Phased} interface, using
+	 * a default of 0 otherwise. Can be overridden to apply other/further policies.
 	 * @param bean the bean to introspect
-	 * @return the phase an integer value. The suggested default is 0.
-	 * @see Phased
+	 * @return the phase (an integer value)
+	 * @see Phased#getPhase()
 	 * @see SmartLifecycle
 	 */
 	protected int getPhase(Lifecycle bean) {
@@ -349,14 +352,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if (this.members.isEmpty()) {
 				return;
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Starting beans in phase " + this.phase);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Starting beans in phase " + this.phase);
 			}
 			Collections.sort(this.members);
 			for (LifecycleGroupMember member : this.members) {
-				if (this.lifecycleBeans.containsKey(member.name)) {
-					doStart(this.lifecycleBeans, member.name, this.autoStartupOnly);
-				}
+				doStart(this.lifecycleBeans, member.name, this.autoStartupOnly);
 			}
 		}
 
@@ -364,14 +365,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			if (this.members.isEmpty()) {
 				return;
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Stopping beans in phase " + this.phase);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Stopping beans in phase " + this.phase);
 			}
 			this.members.sort(Collections.reverseOrder());
 			CountDownLatch latch = new CountDownLatch(this.smartMemberCount);
 			Set<String> countDownBeanNames = Collections.synchronizedSet(new LinkedHashSet<>());
+			Set<String> lifecycleBeanNames = new HashSet<>(this.lifecycleBeans.keySet());
 			for (LifecycleGroupMember member : this.members) {
-				if (this.lifecycleBeans.containsKey(member.name)) {
+				if (lifecycleBeanNames.contains(member.name)) {
 					doStop(this.lifecycleBeans, member.name, latch, countDownBeanNames);
 				}
 				else if (member.bean instanceof SmartLifecycle) {
@@ -381,8 +383,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			try {
 				latch.await(this.timeout, TimeUnit.MILLISECONDS);
-				if (latch.getCount() > 0 && !countDownBeanNames.isEmpty() && logger.isWarnEnabled()) {
-					logger.warn("Failed to shut down " + countDownBeanNames.size() + " bean" +
+				if (latch.getCount() > 0 && !countDownBeanNames.isEmpty() && logger.isInfoEnabled()) {
+					logger.info("Failed to shut down " + countDownBeanNames.size() + " bean" +
 							(countDownBeanNames.size() > 1 ? "s" : "") + " with phase value " +
 							this.phase + " within timeout of " + this.timeout + ": " + countDownBeanNames);
 				}
@@ -410,9 +412,9 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		@Override
 		public int compareTo(LifecycleGroupMember other) {
-			int thisOrder = getPhase(this.bean);
-			int otherOrder = getPhase(other.bean);
-			return Integer.compare(thisOrder, otherOrder);
+			int thisPhase = getPhase(this.bean);
+			int otherPhase = getPhase(other.bean);
+			return Integer.compare(thisPhase, otherPhase);
 		}
 	}
 

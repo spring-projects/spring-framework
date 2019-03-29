@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,30 +38,21 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for with a server-side session.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private RestTemplate restTemplate;
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	private DefaultWebSessionManager sessionManager;
 
 	private TestWebHandler handler;
 
-
-	@Override
-	public void setup() throws Exception {
-		super.setup();
-		this.restTemplate = new RestTemplate();
-	}
 
 	@Override
 	protected HttpHandler createHttpHandler() {

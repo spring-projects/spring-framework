@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -158,7 +158,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean primary = false;
 
-	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>(0);
+	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
 
 	@Nullable
 	private Supplier<?> instanceSupplier;
@@ -663,7 +663,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Return whether this bean has the specified qualifier.
 	 */
 	public boolean hasQualifier(String typeName) {
-		return this.qualifiers.keySet().contains(typeName);
+		return this.qualifiers.containsKey(typeName);
 	}
 
 	/**
@@ -878,6 +878,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set the name of the initializer method.
 	 * <p>The default is {@code null} in which case there is no initializer method.
 	 */
+	@Override
 	public void setInitMethodName(@Nullable String initMethodName) {
 		this.initMethodName = initMethodName;
 	}
@@ -885,6 +886,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the name of the initializer method.
 	 */
+	@Override
 	@Nullable
 	public String getInitMethodName() {
 		return this.initMethodName;
@@ -911,6 +913,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * Set the name of the destroy method.
 	 * <p>The default is {@code null} in which case there is no destroy method.
 	 */
+	@Override
 	public void setDestroyMethodName(@Nullable String destroyMethodName) {
 		this.destroyMethodName = destroyMethodName;
 	}
@@ -918,6 +921,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return the name of the destroy method.
 	 */
+	@Override
 	@Nullable
 	public String getDestroyMethodName() {
 		return this.destroyMethodName;
@@ -960,6 +964,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set the role hint for this {@code BeanDefinition}.
 	 */
+	@Override
 	public void setRole(int role) {
 		this.role = role;
 	}
@@ -975,6 +980,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set a human-readable description of this bean definition.
 	 */
+	@Override
 	public void setDescription(@Nullable String description) {
 		this.description = description;
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,13 +32,15 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.KotlinDetector;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,8 +51,6 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
-
-import static org.springframework.core.MethodIntrospector.selectMethods;
 
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
@@ -69,8 +69,21 @@ import static org.springframework.core.MethodIntrospector.selectMethods;
  */
 class ControllerMethodResolver {
 
-	private static Log logger = LogFactory.getLog(ControllerMethodResolver.class);
+	/**
+	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
+	 */
+	private static final MethodFilter INIT_BINDER_METHODS = method ->
+			AnnotatedElementUtils.hasAnnotation(method, InitBinder.class);
 
+	/**
+	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
+	 */
+	private static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
+			(!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class) &&
+					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
+
+
+	private static Log logger = LogFactory.getLog(ControllerMethodResolver.class);
 
 	private final List<SyncHandlerMethodArgumentResolver> initBinderResolvers;
 
@@ -178,6 +191,9 @@ class ControllerMethodResolver {
 		result.add(new RequestAttributeMethodArgumentResolver(beanFactory, reactiveRegistry));
 
 		// Type-based...
+		if (KotlinDetector.isKotlinPresent()) {
+			result.add(new ContinuationHandlerMethodArgumentResolver());
+		}
 		if (!readers.isEmpty()) {
 			result.add(new HttpEntityArgumentResolver(readers, reactiveRegistry));
 		}
@@ -205,18 +221,17 @@ class ControllerMethodResolver {
 	}
 
 	private void initControllerAdviceCaches(ApplicationContext applicationContext) {
-
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(applicationContext);
 		AnnotationAwareOrderComparator.sort(beans);
 
 		for (ControllerAdviceBean bean : beans) {
 			Class<?> beanType = bean.getBeanType();
 			if (beanType != null) {
-				Set<Method> attrMethods = selectMethods(beanType, ATTRIBUTE_METHODS);
+				Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 				if (!attrMethods.isEmpty()) {
 					this.modelAttributeAdviceCache.put(bean, attrMethods);
 				}
-				Set<Method> binderMethods = selectMethods(beanType, BINDER_METHODS);
+				Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 				if (!binderMethods.isEmpty()) {
 					this.initBinderAdviceCache.put(bean, binderMethods);
 				}
@@ -270,7 +285,8 @@ class ControllerMethodResolver {
 		});
 
 		this.initBinderMethodCache
-				.computeIfAbsent(handlerType, aClass -> selectMethods(handlerType, BINDER_METHODS))
+				.computeIfAbsent(handlerType,
+						clazz -> MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS))
 				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
 					result.add(getInitBinderMethod(bean, method));
@@ -302,7 +318,8 @@ class ControllerMethodResolver {
 		});
 
 		this.modelAttributeMethodCache
-				.computeIfAbsent(handlerType, aClass -> selectMethods(handlerType, ATTRIBUTE_METHODS))
+				.computeIfAbsent(handlerType,
+						clazz -> MethodIntrospector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS))
 				.forEach(method -> {
 					Object bean = handlerMethod.getBean();
 					result.add(createAttributeMethod(bean, method));
@@ -372,15 +389,5 @@ class ControllerMethodResolver {
 		}
 		return result;
 	}
-
-
-	/** Filter for {@link InitBinder @InitBinder} methods. */
-	private static final ReflectionUtils.MethodFilter BINDER_METHODS = method ->
-			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
-
-	/** Filter for {@link ModelAttribute @ModelAttribute} methods. */
-	private static final ReflectionUtils.MethodFilter ATTRIBUTE_METHODS = method ->
-			(AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
-					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null);
 
 }

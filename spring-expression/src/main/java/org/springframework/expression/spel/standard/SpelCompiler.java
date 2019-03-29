@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A SpelCompiler will take a regular parsed expression and create (and load) a class
@@ -132,9 +133,9 @@ public final class SpelCompiler implements Opcodes {
 	@Nullable
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
-		String clazzName = "spel/Ex" + getNextSuffix();
+		String className = "spel/Ex" + getNextSuffix();
 		ClassWriter cw = new ExpressionClassWriter();
-		cw.visit(V1_5, ACC_PUBLIC, clazzName, null, "org/springframework/expression/spel/CompiledExpression", null);
+		cw.visit(V1_5, ACC_PUBLIC, className, null, "org/springframework/expression/spel/CompiledExpression", null);
 
 		// Create default constructor
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
@@ -152,7 +153,7 @@ public final class SpelCompiler implements Opcodes {
 				new String[ ]{"org/springframework/expression/EvaluationException"});
 		mv.visitCode();
 
-		CodeFlow cf = new CodeFlow(clazzName, cw);
+		CodeFlow cf = new CodeFlow(className, cw);
 
 		// Ask the expression AST to generate the body of the method
 		try {
@@ -181,7 +182,7 @@ public final class SpelCompiler implements Opcodes {
 		byte[] data = cw.toByteArray();
 		// TODO need to make this conditionally occur based on a debug flag
 		// dump(expressionToCompile.toStringAST(), clazzName, data);
-		return loadClass(clazzName.replaceAll("/", "."), data);
+		return loadClass(StringUtils.replace(className, "/", "."), data);
 	}
 
 	/**

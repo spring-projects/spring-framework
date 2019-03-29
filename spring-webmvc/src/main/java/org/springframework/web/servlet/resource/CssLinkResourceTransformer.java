@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -108,7 +108,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 	private boolean hasScheme(String link) {
 		int schemeIndex = link.indexOf(':');
-		return (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")) || link.indexOf("//") == 0;
+		return ((schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")) || link.indexOf("//") == 0);
 	}
 
 
@@ -167,9 +167,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		 * Invoked after a keyword match, after whitespaces removed, and when
 		 * the next char is neither a single nor double quote.
 		 */
-		protected abstract int extractLink(int index, String content,
-				SortedSet<ContentChunkInfo> linksToAdd);
-
+		protected abstract int extractLink(int index, String content, SortedSet<ContentChunkInfo> linksToAdd);
 	}
 
 

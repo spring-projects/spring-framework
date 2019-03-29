@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.core.codec;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.OptionalLong;
@@ -73,7 +72,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		return super.canEncode(elementType, mimeType)
-				&& ResourceRegion.class.isAssignableFrom(elementType.resolve(Object.class));
+				&& ResourceRegion.class.isAssignableFrom(elementType.toClass());
 	}
 
 	@Override
@@ -86,22 +85,33 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		Assert.notNull(elementType, "'elementType' must not be null");
 
 		if (inputStream instanceof Mono) {
-			return ((Mono<? extends ResourceRegion>) inputStream)
-					.flatMapMany(region -> writeResourceRegion(region, bufferFactory, hints));
+			return Mono.from(inputStream)
+					.flatMapMany(region -> {
+						if (!region.getResource().isReadable()) {
+							return Flux.error(new EncodingException(
+									"Resource " + region.getResource() + " is not readable"));
+						}
+						return writeResourceRegion(region, bufferFactory, hints);
+					});
 		}
 		else {
 			final String boundaryString = Hints.getRequiredHint(hints, BOUNDARY_STRING_HINT);
 			byte[] startBoundary = getAsciiBytes("\r\n--" + boundaryString + "\r\n");
-			byte[] contentType =
-					(mimeType != null ? getAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0]);
+			byte[] contentType = mimeType != null ? getAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0];
 
-			Flux<DataBuffer> regions = Flux.from(inputStream).
-					concatMap(region ->
-							Flux.concat(
+			return Flux.from(inputStream).
+					concatMap(region -> {
+						if (!region.getResource().isReadable()) {
+							return Flux.error(new EncodingException(
+									"Resource " + region.getResource() + " is not readable"));
+						}
+						else {
+							return Flux.concat(
 									getRegionPrefix(bufferFactory, startBoundary, contentType, region),
-									writeResourceRegion(region, bufferFactory, hints)
-							));
-			return Flux.concat(regions, getRegionSuffix(bufferFactory, boundaryString));
+									writeResourceRegion(region, bufferFactory, hints));
+						}
+					})
+					.concatWith(getRegionSuffix(bufferFactory, boundaryString));
 		}
 	}
 
@@ -109,10 +119,9 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 			byte[] contentType, ResourceRegion region) {
 
 		return Flux.just(
-				bufferFactory.allocateBuffer(startBoundary.length).write(startBoundary),
-				bufferFactory.allocateBuffer(contentType.length).write(contentType),
-				bufferFactory.wrap(ByteBuffer.wrap(getContentRangeHeader(region)))
-		);
+				bufferFactory.wrap(startBoundary),
+				bufferFactory.wrap(contentType),
+				bufferFactory.wrap(getContentRangeHeader(region))); // only wrapping, no allocation
 	}
 
 	private Flux<DataBuffer> writeResourceRegion(
@@ -122,7 +131,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		long position = region.getPosition();
 		long count = region.getCount();
 
-		if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 			logger.debug(Hints.getLogPrefix(hints) +
 					"Writing region " + position + "-" + (position + count) + " of [" + resource + "]");
 		}
@@ -133,7 +142,7 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
 	private Flux<DataBuffer> getRegionSuffix(DataBufferFactory bufferFactory, String boundaryString) {
 		byte[] endBoundary = getAsciiBytes("\r\n--" + boundaryString + "--");
-		return Flux.just(bufferFactory.allocateBuffer(endBoundary.length).write(endBoundary));
+		return Flux.just(bufferFactory.wrap(endBoundary));
 	}
 
 	private byte[] getAsciiBytes(String in) {

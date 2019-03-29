@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -99,6 +99,14 @@ public class BootstrapUtilsTests {
 		assertBootstrapper(DuplicateMetaAnnotatedBootstrapWithAnnotationClass.class, FooBootstrapper.class);
 	}
 
+	/**
+	 * @since 5.1
+	 */
+	@Test
+	public void resolveTestContextBootstrapperWithLocalDeclarationThatOverridesMetaBootstrapWithAnnotations() {
+		assertBootstrapper(LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass.class, EnigmaBootstrapper.class);
+	}
+
 	private void assertBootstrapper(Class<?> testClass, Class<?> expectedBootstrapper) {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(testClass, delegate);
 		TestContextBootstrapper bootstrapper = resolveTestContextBootstrapper(bootstrapContext);
@@ -111,6 +119,8 @@ public class BootstrapUtilsTests {
 	static class FooBootstrapper extends DefaultTestContextBootstrapper {}
 
 	static class BarBootstrapper extends DefaultTestContextBootstrapper {}
+
+	static class EnigmaBootstrapper extends DefaultTestContextBootstrapper {}
 
 	@BootstrapWith(FooBootstrapper.class)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -146,7 +156,12 @@ public class BootstrapUtilsTests {
 	@BootWithFoo
 	@BootWithFooAgain
 	static class DuplicateMetaAnnotatedBootstrapWithAnnotationClass {}
-
+	
+	@BootWithFoo
+	@BootWithBar
+	@BootstrapWith(EnigmaBootstrapper.class)
+	static class LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass {}
+	
 	@WebAppConfiguration
 	static class WebAppConfigurationAnnotatedClass {}
 

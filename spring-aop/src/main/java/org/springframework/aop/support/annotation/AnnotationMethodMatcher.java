@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,7 @@ import java.lang.reflect.Proxy;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcher;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -55,7 +54,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 	 * @param annotationType the annotation type to look for
 	 * @param checkInherited whether to also check the superclasses and
 	 * interfaces as well as meta-annotations for the annotation type
-	 * (i.e. whether to use {@link AnnotationUtils#findAnnotation(Method, Class)}
+	 * (i.e. whether to use {@link AnnotatedElementUtils#hasAnnotation}
 	 * semantics instead of standard Java {@link Method#isAnnotationPresent})
 	 * @since 5.0
 	 */
@@ -68,12 +67,12 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 
 
 	@Override
-	public boolean matches(Method method, @Nullable Class<?> targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		if (matchesMethod(method)) {
 			return true;
 		}
 		// Proxy classes never have annotations on their redeclared methods.
-		if (targetClass != null && Proxy.isProxyClass(targetClass)) {
+		if (Proxy.isProxyClass(targetClass)) {
 			return false;
 		}
 		// The method may be on an interface, so let's check on the target class as well.
@@ -82,8 +81,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 	}
 
 	private boolean matchesMethod(Method method) {
-		return (this.checkInherited ?
-				(AnnotationUtils.findAnnotation(method, this.annotationType) != null) :
+		return (this.checkInherited ? AnnotatedElementUtils.hasAnnotation(method, this.annotationType) :
 				method.isAnnotationPresent(this.annotationType));
 	}
 

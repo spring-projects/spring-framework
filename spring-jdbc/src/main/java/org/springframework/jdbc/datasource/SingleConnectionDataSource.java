@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -223,8 +223,8 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 			closeConnection();
 			this.target = getConnectionFromDriver(getUsername(), getPassword());
 			prepareConnection(this.target);
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared JDBC Connection: " + this.target);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established shared JDBC Connection: " + this.target);
 			}
 			this.connection = (isSuppressClose() ? getCloseSuppressingConnectionProxy(this.target) : this.target);
 		}
@@ -264,7 +264,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 				this.target.close();
 			}
 			catch (Throwable ex) {
-				logger.warn("Could not close shared JDBC Connection", ex);
+				logger.info("Could not close shared JDBC Connection", ex);
 			}
 		}
 	}

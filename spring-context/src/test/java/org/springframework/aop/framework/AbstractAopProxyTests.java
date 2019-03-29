@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -365,7 +365,7 @@ public abstract class AbstractAopProxyTests {
 		assertEquals("Only one invocation via AOP as use of this wasn't proxied", 1, di.getCount());
 		// 1 invocation
 		assertEquals("Increment happened", 1, proxied.getCount());
-		proxied.incrementViaProxy(); // 2 invoocations
+		proxied.incrementViaProxy(); // 2 invocations
 		assertEquals("Increment happened", 2, target.getCount());
 		assertEquals("3 more invocations via AOP as the first call was reentrant through the proxy", 4, di.getCount());
 	}
@@ -511,7 +511,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 	@Test
-	public void testUndeclaredUnheckedException() throws Throwable {
+	public void testUndeclaredUncheckedException() throws Throwable {
 		final RuntimeException unexpectedException = new RuntimeException();
 		// Test return value
 		MethodInterceptor mi = new MethodInterceptor() {
@@ -736,7 +736,7 @@ public abstract class AbstractAopProxyTests {
 			fail("Shouldn't be able to add introduction interceptor except via introduction advice");
 		}
 		catch (AopConfigException ex) {
-			assertTrue(ex.getMessage().indexOf("ntroduction") > -1);
+			assertTrue(ex.getMessage().contains("ntroduction"));
 		}
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		ITestBean proxied = (ITestBean) createProxy(pc);
@@ -786,7 +786,7 @@ public abstract class AbstractAopProxyTests {
 
 	/**
 	 * Note that an introduction can't throw an unexpected checked exception,
-	 * as it's constained by the interface.
+	 * as it's constrained by the interface.
 	 */
 	@Test
 	public void testIntroductionThrowsUncheckedException() throws Throwable {
@@ -849,7 +849,7 @@ public abstract class AbstractAopProxyTests {
 			fail("Shouldn't be able to add interceptor when frozen");
 		}
 		catch (AopConfigException ex) {
-			assertTrue(ex.getMessage().indexOf("frozen") > -1);
+			assertTrue(ex.getMessage().contains("frozen"));
 		}
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertEquals(target.getAge(), proxied.getAge());

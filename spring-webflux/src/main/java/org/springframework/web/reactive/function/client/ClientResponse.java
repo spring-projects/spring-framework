@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,8 +60,20 @@ public interface ClientResponse {
 
 	/**
 	 * Return the status code of this response.
+	 * @return the status as an HttpStatus enum value
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus statusCode();
+
+	/**
+	 * Return the (potentially non-standard) status code of this response.
+	 * @return the status as an integer
+	 * @since 5.1
+	 * @see #statusCode()
+	 * @see HttpStatus#resolve(int)
+	 */
+	int rawStatusCode();
 
 	/**
 	 * Return the headers of this response.

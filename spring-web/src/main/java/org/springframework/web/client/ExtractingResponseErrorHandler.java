@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,25 +29,26 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Implementation of {@link ResponseErrorHandler} that uses {@link HttpMessageConverter ResponseErrorHandler} that uses {@link HttpMessageConverters} to
- * convert HTTP error responses to {@link RestClientException}.
+ * Implementation of {@link ResponseErrorHandler} that uses {@link HttpMessageConverter
+ * HttpMessageConverters} to convert HTTP error responses to {@link RestClientException
+ * RestClientExceptions}.
  *
  * <p>To use this error handler, you must specify a
  * {@linkplain #setStatusMapping(Map) status mapping} and/or a
  * {@linkplain #setSeriesMapping(Map) series mapping}. If either of these mappings has a match
  * for the {@linkplain ClientHttpResponse#getStatusCode() status code} of a given
  * {@code ClientHttpResponse}, {@link #hasError(ClientHttpResponse)} will return
- * {@code true} and {@link #handleError(ClientHttpResponse)} will attempt to use the
+ * {@code true}, and {@link #handleError(ClientHttpResponse)} will attempt to use the
  * {@linkplain #setMessageConverters(List) configured message converters} to convert the response
  * into the mapped subclass of {@link RestClientException}. Note that the
  * {@linkplain #setStatusMapping(Map) status mapping} takes precedence over
  * {@linkplain #setSeriesMapping(Map) series mapping}.
  *
  * <p>If there is no match, this error handler will default to the behavior of
- * {@link DefaultResponseErrorHandler}. Note that you can override this default behavior by
- * specifying a {@linkplain #setSeriesMapping(Map) series mapping} from
- * {@link HttpStatus.Series#CLIENT_ERROR} and/or {@link HttpStatus.Series#SERVER_ERROR} to
- * {@code null}.
+ * {@link DefaultResponseErrorHandler}. Note that you can override this default behavior
+ * by specifying a {@linkplain #setSeriesMapping(Map) series mapping} from
+ * {@code HttpStatus.Series#CLIENT_ERROR} and/or {@code HttpStatus.Series#SERVER_ERROR}
+ * to {@code null}.
  *
  * @author Simon Galperin
  * @author Arjen Poutsma

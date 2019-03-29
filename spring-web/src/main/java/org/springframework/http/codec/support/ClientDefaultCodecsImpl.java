@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -88,10 +88,10 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	protected void extendTypedWriters(List<HttpMessageWriter<?>> typedWriters) {
 
 		FormHttpMessageWriter formWriter = new FormHttpMessageWriter();
-		formWriter.setDisableLoggingRequestDetails(isDisableLoggingRequestDetails());
+		formWriter.setEnableLoggingRequestDetails(isEnableLoggingRequestDetails());
 
 		MultipartHttpMessageWriter multipartWriter = new MultipartHttpMessageWriter(getPartWriters(), formWriter);
-		multipartWriter.setDisableLoggingRequestDetails(isDisableLoggingRequestDetails());
+		multipartWriter.setEnableLoggingRequestDetails(isEnableLoggingRequestDetails());
 
 		typedWriters.add(multipartWriter);
 	}

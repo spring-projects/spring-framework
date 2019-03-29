@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -255,11 +255,11 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	private void assertTagOpened(String output) {
-		assertTrue(output.indexOf("<input ") > -1);
+		assertTrue(output.contains("<input "));
 	}
 
 	private void assertTagClosed(String output) {
-		assertTrue(output.indexOf("/>") > -1);
+		assertTrue(output.contains("/>"));
 	}
 
 	private Float getFloat() {

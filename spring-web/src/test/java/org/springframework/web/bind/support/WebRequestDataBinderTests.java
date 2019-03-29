@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -301,7 +301,7 @@ public class WebRequestDataBinderTests {
 		request.addParameter("test_age", "" + 50);
 
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertTrue("Didn't fidn normal when given prefix", !pvs.contains("forname"));
+		assertTrue("Didn't find normal when given prefix", !pvs.contains("forname"));
 		assertTrue("Did treat prefix as normal when not given prefix", pvs.contains("test_forname"));
 
 		pvs = new ServletRequestParameterPropertyValues(request, "test");

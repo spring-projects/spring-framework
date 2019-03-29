@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -116,9 +116,10 @@ public class UndertowWebSocketClient implements WebSocketClient {
 	/**
 	 * Set the {@link io.undertow.connector.ByteBufferPool ByteBufferPool} to pass to
 	 * {@link io.undertow.websockets.client.WebSocketClient#connectionBuilder}.
-	 * <p>By default an indirect {@link io.undertow.server.DefaultByteBufferPool} with a buffer size
-	 * of {@value #DEFAULT_POOL_BUFFER_SIZE} is used.
+	 * <p>By default an indirect {@link io.undertow.server.DefaultByteBufferPool}
+	 * with a buffer size of 8192 is used.
 	 * @since 5.0.8
+	 * @see #DEFAULT_POOL_BUFFER_SIZE
 	 */
 	public void setByteBufferPool(ByteBufferPool byteBufferPool) {
 		Assert.notNull(byteBufferPool, "ByteBufferPool must not be null");
@@ -203,7 +204,9 @@ public class UndertowWebSocketClient implements WebSocketClient {
 		channel.getReceiveSetter().set(adapter);
 		channel.resumeReceives();
 
-		handler.handle(session).subscribe(session);
+		handler.handle(session)
+				.checkpoint(url + " [UndertowWebSocketClient]")
+				.subscribe(session);
 	}
 
 	private HandshakeInfo createHandshakeInfo(URI url, DefaultNegotiation negotiation) {

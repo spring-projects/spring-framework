@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -311,6 +311,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		MultiValueMap<String, String> matrixVariables;
 		Map<String, String> uriVariables;
 
+		// URI var parsed into path variable + matrix params..
 		request = new MockHttpServletRequest();
 		handleMatch(request, "/{cars}", "/cars;colors=red,blue,green;year=2012");
 
@@ -322,6 +323,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("2012", matrixVariables.getFirst("year"));
 		assertEquals("cars", uriVariables.get("cars"));
 
+		// URI var with regex for path variable, and URI var for matrix params..
 		request = new MockHttpServletRequest();
 		handleMatch(request, "/{cars:[^;]+}{params}", "/cars;colors=red,blue,green;year=2012");
 
@@ -334,6 +336,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("cars", uriVariables.get("cars"));
 		assertEquals(";colors=red,blue,green;year=2012", uriVariables.get("params"));
 
+		// URI var with regex for path variable, and (empty) URI var for matrix params..
 		request = new MockHttpServletRequest();
 		handleMatch(request, "/{cars:[^;]+}{params}", "/cars");
 
@@ -343,6 +346,19 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertNull(matrixVariables);
 		assertEquals("cars", uriVariables.get("cars"));
 		assertEquals("", uriVariables.get("params"));
+
+		// SPR-11897
+		request = new MockHttpServletRequest();
+		handleMatch(request, "/{foo}", "/a=42;b=c");
+
+		matrixVariables = getMatrixVariables(request, "foo");
+		uriVariables = getUriTemplateVariables(request);
+
+		assertNotNull(matrixVariables);
+		assertEquals(2, matrixVariables.size());
+		assertEquals("42", matrixVariables.getFirst("a"));
+		assertEquals("c", matrixVariables.getFirst("b"));
+		assertEquals("a=42", uriVariables.get("foo"));
 	}
 
 	@Test // SPR-10140, SPR-16867

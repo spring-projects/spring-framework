@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,8 @@ import java.lang.annotation.Target;
  * Declares that a field or method parameter should be formatted as a date or time.
  *
  * <p>Supports formatting by style pattern, ISO date time pattern, or custom format pattern string.
- * Can be applied to {@code java.util.Date}, {@code java.util.Calendar}, {@code java.lang.Long},
- * Joda-Time value types; and as of Spring 4 and JDK 8, to JSR-310 <code>java.time</code> types too.
+ * Can be applied to {@code java.util.Date}, {@code java.util.Calendar}, {@code Long} (for
+ * millisecond timestamps) as well as JSR-310 <code>java.time</code> and Joda-Time value types.
  *
  * <p>For style-based formatting, set the {@link #style} attribute to be the style pattern code.
  * The first character of the code is the date style, and the second character is the time style.
@@ -48,6 +48,7 @@ import java.lang.annotation.Target;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 3.0
+ * @see java.time.format.DateTimeFormatter
  * @see org.joda.time.format.DateTimeFormat
  */
 @Documented
@@ -97,13 +98,13 @@ public @interface DateTimeFormat {
 		DATE,
 
 		/**
-		 * The most common ISO Time Format {@code HH:mm:ss.SSSZ},
+		 * The most common ISO Time Format {@code HH:mm:ss.SSSXXX},
 		 * e.g. "01:30:00.000-05:00".
 		 */
 		TIME,
 
 		/**
-		 * The most common ISO DateTime Format {@code yyyy-MM-dd'T'HH:mm:ss.SSSZ},
+		 * The most common ISO DateTime Format {@code yyyy-MM-dd'T'HH:mm:ss.SSSXXX},
 		 * e.g. "2000-10-31T01:30:00.000-05:00".
 		 * <p>This is the default if no annotation value is specified.
 		 */

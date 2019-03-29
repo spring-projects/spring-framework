@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -147,6 +147,19 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Person> responseEntity = performGet("/person-response/mono", JSON, Person.class);
 		assertEquals(17, responseEntity.getHeaders().getContentLength());
 		assertEquals(expected, responseEntity.getBody());
+	}
+
+	@Test // SPR-17506
+	public void personResponseBodyWithEmptyMono() throws Exception {
+		ResponseEntity<Person> responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
+		assertEquals(0, responseEntity.getHeaders().getContentLength());
+		assertNull(responseEntity.getBody());
+
+		// As we're on the same connection, the 2nd request proves server response handling
+		// did complete after the 1st request..
+		responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
+		assertEquals(0, responseEntity.getHeaders().getContentLength());
+		assertNull(responseEntity.getBody());
 	}
 
 	@Test
@@ -493,6 +506,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		@GetMapping("/mono")
 		public Mono<Person> getMono() {
 			return Mono.just(new Person("Robert"));
+		}
+
+		@GetMapping("/mono-empty")
+		public Mono<Person> getMonoEmpty() {
+			return Mono.empty();
 		}
 
 		@GetMapping("/mono-declared-as-object")

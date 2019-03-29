@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -275,7 +275,7 @@ public class DataBinderTests {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("class.classLoader.URLs[0]", "http://myserver");
+		pvs.add("class.classLoader.URLs[0]", "https://myserver");
 		binder.setIgnoreUnknownFields(false);
 
 		try {

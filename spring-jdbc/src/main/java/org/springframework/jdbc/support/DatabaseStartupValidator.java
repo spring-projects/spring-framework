@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -104,8 +104,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		DataSource dataSource = this.dataSource;
-		if (dataSource == null) {
+		if (this.dataSource == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
 		if (this.validationQuery == null) {
@@ -122,10 +121,10 @@ public class DatabaseStartupValidator implements InitializingBean {
 				Connection con = null;
 				Statement stmt = null;
 				try {
-					con = dataSource.getConnection();
+					con = this.dataSource.getConnection();
 					if (con == null) {
 						throw new CannotGetJdbcConnectionException("Failed to execute validation query: " +
-								"DataSource returned null from getConnection(): " + dataSource);
+								"DataSource returned null from getConnection(): " + this.dataSource);
 					}
 					stmt = con.createStatement();
 					stmt.execute(this.validationQuery);
@@ -136,10 +135,10 @@ public class DatabaseStartupValidator implements InitializingBean {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
 					}
-					if (logger.isWarnEnabled()) {
+					if (logger.isInfoEnabled()) {
 						float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
 						if (rest > this.interval) {
-							logger.warn("Database has not started up yet - retrying in " + this.interval +
+							logger.info("Database has not started up yet - retrying in " + this.interval +
 									" seconds (timeout in " + rest + " seconds)");
 						}
 					}
@@ -150,7 +149,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 				}
 
 				if (!validated) {
-					Thread.sleep(TimeUnit.SECONDS.toMillis(this.interval));
+					TimeUnit.SECONDS.sleep(this.interval);
 				}
 			}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -399,6 +399,8 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		this.flashMapManager = new SessionFlashMapManager();
 		wac.addBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, this.flashMapManager);
+
+		extendMvcSingletons(sc).forEach(wac::addBean);
 	}
 
 	private List<ViewResolver> initViewResolvers(WebApplicationContext wac) {
@@ -410,6 +412,18 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 			}
 		}
 		return this.viewResolvers;
+	}
+
+	/**
+	 * This method could be used from a sub-class to register additional Spring
+	 * MVC infrastructure such as additional {@code HandlerMapping},
+	 * {@code HandlerAdapter}, and others.
+	 * @param servletContext the ServletContext
+	 * @return a map with additional MVC infrastructure object instances
+	 * @since 5.1.4
+	 */
+	protected Map<String, Object> extendMvcSingletons(@Nullable ServletContext servletContext) {
+		return Collections.emptyMap();
 	}
 
 

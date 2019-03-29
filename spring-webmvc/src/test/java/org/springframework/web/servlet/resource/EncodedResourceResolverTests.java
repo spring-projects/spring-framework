@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -78,7 +78,7 @@ public class EncodedResourceResolverTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.cache = new ConcurrentMapCache("resourceCache");
 
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
@@ -127,9 +127,7 @@ public class EncodedResourceResolverTests {
 
 	@Test
 	public void resolveFromCacheWithEncodingVariants() {
-
 		// 1. Resolve, and cache .gz variant
-
 		String file = "js/foo.js";
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/js/foo.js");
 		request.addHeader("Accept-Encoding", "gzip");
@@ -140,7 +138,6 @@ public class EncodedResourceResolverTests {
 		assertTrue(resolved instanceof HttpResource);
 
 		// 2. Resolve unencoded resource
-
 		request = new MockHttpServletRequest("GET", "/js/foo.js");
 		resolved = this.resolver.resolveResource(request, file, this.locations);
 
@@ -149,7 +146,7 @@ public class EncodedResourceResolverTests {
 		assertFalse(resolved instanceof HttpResource);
 	}
 
-	@Test // SPR-13149
+	@Test  // SPR-13149
 	public void resolveWithNullRequest() {
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(null, file, this.locations);

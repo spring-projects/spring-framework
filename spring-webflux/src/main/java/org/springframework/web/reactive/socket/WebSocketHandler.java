@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,7 @@ import reactor.core.publisher.Mono;
  * 	&#064;Override
  * 	public Mono&lt;Void&gt; handle(WebSocketSession session) {
  *
- * 		Flux&lt;WebSocketMessage&gt; input = session.receive()
+ * 		Flux&lt;WebSocketMessage&gt; output = session.receive()
  *			.doOnNext(message -> {
  * 				// ...
  * 			})
@@ -89,7 +89,7 @@ import reactor.core.publisher.Mono;
  * completion of that flow. That means there is no need to check if the
  * connection is open, since Reactive Streams signals will terminate activity.
  * The inbound stream receives a completion/error signal, and the outbound
- * stream receives receives a cancellation signal.
+ * stream receives a cancellation signal.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,9 @@ import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpLog;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -48,6 +49,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  * @param <T> the type of objects in the input stream
  */
@@ -66,17 +68,16 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	 */
 	public EncoderHttpMessageWriter(Encoder<T> encoder) {
 		Assert.notNull(encoder, "Encoder is required");
+		initLogger(encoder);
 		this.encoder = encoder;
 		this.mediaTypes = MediaType.asMediaTypes(encoder.getEncodableMimeTypes());
 		this.defaultMediaType = initDefaultMediaType(this.mediaTypes);
-		initLogger(encoder);
 	}
 
-	private void initLogger(Encoder<T> encoder) {
+	private static void initLogger(Encoder<?> encoder) {
 		if (encoder instanceof AbstractEncoder &&
-				encoder.getClass().getPackage().getName().startsWith("org.springframework.core.codec")) {
-
-			Log logger = HttpLog.create(((AbstractEncoder) encoder).getLogger());
+				encoder.getClass().getName().startsWith("org.springframework.core.codec")) {
+			Log logger = HttpLogging.forLog(((AbstractEncoder) encoder).getLogger());
 			((AbstractEncoder) encoder).setLogger(logger);
 		}
 	}
@@ -117,13 +118,16 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		if (inputStream instanceof Mono) {
 			HttpHeaders headers = message.getHeaders();
-			if (headers.getContentLength() < 0 && !headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
-				return Mono.from(body)
-						.flatMap(dataBuffer -> {
-							headers.setContentLength(dataBuffer.readableByteCount());
-							return message.writeWith(Mono.just(dataBuffer));
-						});
-			}
+			return Mono.from(body)
+					.switchIfEmpty(Mono.defer(() -> {
+						headers.setContentLength(0);
+						return message.setComplete().then(Mono.empty());
+					}))
+					.flatMap(buffer -> {
+						headers.setContentLength(buffer.readableByteCount());
+						return message.writeWith(Mono.fromCallable(() -> buffer)
+								.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release));
+					});
 		}
 
 		return (isStreamingMediaType(contentType) ?
@@ -160,7 +164,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	private boolean isStreamingMediaType(@Nullable MediaType contentType) {
 		return (contentType != null && this.encoder instanceof HttpMessageEncoder &&
 				((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
-						.anyMatch(contentType::isCompatibleWith));
+						.anyMatch(streamingMediaType -> contentType.isCompatibleWith(streamingMediaType) &&
+								contentType.getParameters().entrySet().containsAll(streamingMediaType.getParameters().keySet())));
 	}
 
 

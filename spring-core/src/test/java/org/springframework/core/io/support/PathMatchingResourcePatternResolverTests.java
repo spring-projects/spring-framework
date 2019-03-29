@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -89,7 +89,7 @@ public class PathMatchingResourcePatternResolverTests {
 				noCloverResources.add(resource);
 			}
 		}
-		resources = noCloverResources.toArray(new Resource[noCloverResources.size()]);
+		resources = noCloverResources.toArray(new Resource[0]);
 		assertProtocolAndFilenames(resources, "file",
 				StringUtils.concatenateStringArrays(CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT));
 	}
@@ -113,6 +113,7 @@ public class PathMatchingResourcePatternResolverTests {
 		for (Resource resource : resources) {
 			if (resource.getFilename().equals("aspectj_1_5_0.dtd")) {
 				found = true;
+				break;
 			}
 		}
 		assertTrue("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar", found);

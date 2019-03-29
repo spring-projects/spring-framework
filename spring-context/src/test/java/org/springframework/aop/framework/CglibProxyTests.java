@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -73,6 +73,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	protected boolean requiresTarget() {
 		return true;
 	}
+
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullConfig() {
@@ -151,6 +152,20 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 		CglibTestBean proxy = (CglibTestBean) aop.getProxy();
 		assertEquals("The name property has been overwritten by the constructor", "Rob Harrop", proxy.getName());
+	}
+
+	@Test
+	public void testToStringInvocation() {
+		PrivateCglibTestBean bean = new PrivateCglibTestBean();
+		bean.setName("Rob Harrop");
+
+		AdvisedSupport as = new AdvisedSupport();
+		as.setTarget(bean);
+		as.addAdvice(new NopInterceptor());
+		AopProxy aop = new CglibAopProxy(as);
+
+		PrivateCglibTestBean proxy = (PrivateCglibTestBean) aop.getProxy();
+		assertEquals("The name property has been overwritten by the constructor", "Rob Harrop", proxy.toString());
 	}
 
 	@Test
@@ -480,6 +495,29 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 			return this.value;
 		}
 	}
+
+
+	private static class PrivateCglibTestBean {
+
+		private String name;
+
+		public PrivateCglibTestBean() {
+			setName("Some Default");
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public String toString() {
+			return this.name;
+		}
+	}
 }
 
 
@@ -496,6 +534,11 @@ class CglibTestBean {
 	}
 
 	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public String toString() {
 		return this.name;
 	}
 }

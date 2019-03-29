@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,12 +32,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
- * Encapsulates information about an {@linkplain ControllerAdvice @ControllerAdvice}
+ * Encapsulates information about an {@link ControllerAdvice @ControllerAdvice}
  * Spring-managed bean without necessarily requiring it to be instantiated.
  *
  * <p>The {@link #findAnnotatedBeans(ApplicationContext)} method can be used to
  * discover such beans. However, a {@code ControllerAdviceBean} may be created
- * from any object, including ones without an {@code @ControllerAdvice}.
+ * from any object, including ones without an {@code @ControllerAdvice} annotation.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
@@ -113,7 +113,7 @@ public class ControllerAdviceBean implements Ordered {
 
 
 	/**
-	 * Returns the order value extracted from the {@link ControllerAdvice}
+	 * Return the order value extracted from the {@link ControllerAdvice}
 	 * annotation, or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
 	 */
 	@Override
@@ -146,11 +146,11 @@ public class ControllerAdviceBean implements Ordered {
 	}
 
 	/**
-	 * Check whether the given bean type should be assisted by this
-	 * {@code @ControllerAdvice} instance.
+	 * Check whether the given bean type should be advised by this
+	 * {@code ControllerAdviceBean}.
 	 * @param beanType the type of the bean to check
 	 * @since 4.0
-	 * @see org.springframework.web.bind.annotation.ControllerAdvice
+	 * @see ControllerAdvice
 	 */
 	public boolean isApplicableToBeanType(@Nullable Class<?> beanType) {
 		return this.beanTypePredicate.test(beanType);
@@ -181,9 +181,9 @@ public class ControllerAdviceBean implements Ordered {
 
 
 	/**
-	 * Find the names of beans annotated with
-	 * {@linkplain ControllerAdvice @ControllerAdvice} in the given
-	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.
+	 * Find beans annotated with {@link ControllerAdvice @ControllerAdvice} in the
+	 * given {@link ApplicationContext} and wrap them as {@code ControllerAdviceBean}
+	 * instances.
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
 		return Arrays.stream(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class))

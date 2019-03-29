@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,8 +74,10 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 		assertEquals("Wrong endpoint type", MethodJmsListenerEndpoint.class, endpoint.getClass());
 		MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
 		assertEquals(SimpleMessageListenerTestBean.class, methodEndpoint.getBean().getClass());
-		assertEquals(SimpleMessageListenerTestBean.class.getMethod("handleIt", String.class), methodEndpoint.getMethod());
-		assertEquals(SimpleMessageListenerTestBean.class.getMethod("handleIt", String.class), methodEndpoint.getMostSpecificMethod());
+		assertEquals(SimpleMessageListenerTestBean.class.getMethod("handleIt", String.class),
+				methodEndpoint.getMethod());
+		assertEquals(SimpleMessageListenerTestBean.class.getMethod("handleIt", String.class),
+				methodEndpoint.getMostSpecificMethod());
 
 		SimpleMessageListenerContainer listenerContainer = new SimpleMessageListenerContainer();
 		methodEndpoint.setupListenerContainer(listenerContainer);
@@ -99,8 +101,10 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			assertEquals("Wrong endpoint type", MethodJmsListenerEndpoint.class, endpoint.getClass());
 			MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
 			assertEquals(MetaAnnotationTestBean.class, methodEndpoint.getBean().getClass());
-			assertEquals(MetaAnnotationTestBean.class.getMethod("handleIt", String.class), methodEndpoint.getMethod());
-			assertEquals(MetaAnnotationTestBean.class.getMethod("handleIt", String.class), methodEndpoint.getMostSpecificMethod());
+			assertEquals(MetaAnnotationTestBean.class.getMethod("handleIt", String.class),
+					methodEndpoint.getMethod());
+			assertEquals(MetaAnnotationTestBean.class.getMethod("handleIt", String.class),
+					methodEndpoint.getMostSpecificMethod());
 			assertEquals("metaTestQueue", ((AbstractJmsListenerEndpoint) endpoint).getDestination());
 		}
 		finally {
@@ -121,12 +125,14 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
 			assertTrue(AopUtils.isJdkDynamicProxy(methodEndpoint.getBean()));
 			assertTrue(methodEndpoint.getBean() instanceof SimpleService);
-			assertEquals(SimpleService.class.getMethod("handleIt", String.class, String.class), methodEndpoint.getMethod());
-			assertEquals(InterfaceProxyTestBean.class.getMethod("handleIt", String.class, String.class), methodEndpoint.getMostSpecificMethod());
+			assertEquals(SimpleService.class.getMethod("handleIt", String.class, String.class),
+					methodEndpoint.getMethod());
+			assertEquals(InterfaceProxyTestBean.class.getMethod("handleIt", String.class, String.class),
+					methodEndpoint.getMostSpecificMethod());
 
-			Method m = ReflectionUtils.findMethod(endpoint.getClass(), "getDefaultResponseDestination");
-			ReflectionUtils.makeAccessible(m);
-			Object destination = ReflectionUtils.invokeMethod(m, endpoint);
+			Method method = ReflectionUtils.findMethod(endpoint.getClass(), "getDefaultResponseDestination");
+			ReflectionUtils.makeAccessible(method);
+			Object destination = ReflectionUtils.invokeMethod(method, endpoint);
 			assertEquals("SendTo annotation not found on proxy", "foobar", destination);
 		}
 		finally {
@@ -147,12 +153,14 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			MethodJmsListenerEndpoint methodEndpoint = (MethodJmsListenerEndpoint) endpoint;
 			assertTrue(AopUtils.isCglibProxy(methodEndpoint.getBean()));
 			assertTrue(methodEndpoint.getBean() instanceof ClassProxyTestBean);
-			assertEquals(ClassProxyTestBean.class.getMethod("handleIt", String.class, String.class), methodEndpoint.getMethod());
-			assertEquals(ClassProxyTestBean.class.getMethod("handleIt", String.class, String.class), methodEndpoint.getMostSpecificMethod());
+			assertEquals(ClassProxyTestBean.class.getMethod("handleIt", String.class, String.class),
+					methodEndpoint.getMethod());
+			assertEquals(ClassProxyTestBean.class.getMethod("handleIt", String.class, String.class),
+					methodEndpoint.getMostSpecificMethod());
 
-			Method m = ReflectionUtils.findMethod(endpoint.getClass(), "getDefaultResponseDestination");
-			ReflectionUtils.makeAccessible(m);
-			Object destination = ReflectionUtils.invokeMethod(m, endpoint);
+			Method method = ReflectionUtils.findMethod(endpoint.getClass(), "getDefaultResponseDestination");
+			ReflectionUtils.makeAccessible(method);
+			Object destination = ReflectionUtils.invokeMethod(method, endpoint);
 			assertEquals("SendTo annotation not found on proxy", "foobar", destination);
 		}
 		finally {
@@ -201,8 +209,8 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 		@Bean
 		public JmsListenerAnnotationBeanPostProcessor postProcessor() {
 			JmsListenerAnnotationBeanPostProcessor postProcessor = new JmsListenerAnnotationBeanPostProcessor();
-			postProcessor.setEndpointRegistry(jmsListenerEndpointRegistry());
 			postProcessor.setContainerFactoryBeanName("testFactory");
+			postProcessor.setEndpointRegistry(jmsListenerEndpointRegistry());
 			return postProcessor;
 		}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,17 +47,19 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent DataBuffer} stream into a stream of {@link XMLEvents}.
- * That is, given the following XML:
+ * Decodes a {@link DataBuffer} stream into a stream of {@link XMLEvent XMLEvents}.
  *
- * <pre>
+ * <p>Given the following XML:
+ *
+ * <pre class="code">
  * &lt;root>
  *     &lt;child&gt;foo&lt;/child&gt;
  *     &lt;child&gt;bar&lt;/child&gt;
  * &lt;/root&gt;
  * </pre>
  *
- * this method with result in a flux with the following events:
+ * this decoder will produce a {@link Flux} with the following events:
+ *
  * <ol>
  * <li>{@link javax.xml.stream.events.StartDocument}</li>
  * <li>{@link javax.xml.stream.events.StartElement} {@code root}</li>
@@ -70,8 +72,8 @@ import org.springframework.util.xml.StaxUtils;
  * <li>{@link javax.xml.stream.events.EndElement} {@code root}</li>
  * </ol>
  *
- * Note that this decoder is not registered by default but used internally
- * by other decoders who are there by default.
+ * <p>Note that this decoder is not registered by default but is used internally
+ * by other decoders which are registered by default.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -125,12 +127,14 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 	 */
 	private static class AaltoDataBufferToXmlEvent implements Function<DataBuffer, Publisher<? extends XMLEvent>> {
 
-		private static final AsyncXMLInputFactory inputFactory = new InputFactoryImpl();
+		private static final AsyncXMLInputFactory inputFactory =
+				StaxUtils.createDefensiveInputFactory(InputFactoryImpl::new);
 
 		private final AsyncXMLStreamReader<AsyncByteBufferFeeder> streamReader =
 				inputFactory.createAsyncForByteBuffer();
 
 		private final XMLEventAllocator eventAllocator = EventAllocatorImpl.getDefaultInstance();
+
 
 		@Override
 		public Publisher<? extends XMLEvent> apply(DataBuffer dataBuffer) {

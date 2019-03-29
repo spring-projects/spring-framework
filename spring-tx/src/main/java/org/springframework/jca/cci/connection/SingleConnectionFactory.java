@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -154,8 +154,8 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 			}
 			this.target = doCreateConnection();
 			prepareConnection(this.target);
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared CCI Connection: " + this.target);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Established shared CCI Connection: " + this.target);
 			}
 			this.connection = getCloseSuppressingConnectionProxy(this.target);
 		}

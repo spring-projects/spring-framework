@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 		HttpComponentsHttpInvokerRequestExecutor executor = new HttpComponentsHttpInvokerRequestExecutor();
 		executor.setConnectTimeout(5000);
 
-		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("https://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
 		assertEquals(5000, httpPost.getConfig().getConnectTimeout());
 	}
@@ -49,7 +49,7 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 		HttpComponentsHttpInvokerRequestExecutor executor = new HttpComponentsHttpInvokerRequestExecutor();
 		executor.setConnectionRequestTimeout(7000);
 
-		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("https://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
 		assertEquals(7000, httpPost.getConfig().getConnectionRequestTimeout());
 	}
@@ -59,7 +59,7 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 		HttpComponentsHttpInvokerRequestExecutor executor = new HttpComponentsHttpInvokerRequestExecutor();
 		executor.setReadTimeout(10000);
 
-		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("https://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
 		assertEquals(10000, httpPost.getConfig().getSocketTimeout());
 	}
@@ -74,7 +74,7 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 
 		HttpComponentsHttpInvokerRequestExecutor executor =
 				new HttpComponentsHttpInvokerRequestExecutor(client);
-		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("https://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
 		assertSame("Default client configuration is expected", defaultConfig, httpPost.getConfig());
 
@@ -99,7 +99,7 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 				new HttpComponentsHttpInvokerRequestExecutor(client);
 		executor.setConnectTimeout(5000);
 
-		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("https://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
 		RequestConfig requestConfig = httpPost.getConfig();
 		assertEquals(5000, requestConfig.getConnectTimeout());
@@ -124,7 +124,7 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 					}
 				};
 		executor.setReadTimeout(5000);
-		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("https://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
 		RequestConfig requestConfig = httpPost.getConfig();
 		assertEquals(-1, requestConfig.getConnectTimeout());
@@ -153,7 +153,7 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 			}
 		};
 
-		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
+		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("https://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
 		assertNull("custom request config should not be set", httpPost.getConfig());
 	}

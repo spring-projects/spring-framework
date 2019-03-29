@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -310,7 +310,15 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 					!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
 				this.jobDetails.add(jobDetail);
 			}
-			getScheduler().rescheduleJob(trigger.getKey(), trigger);
+			try {
+				getScheduler().rescheduleJob(trigger.getKey(), trigger);
+			}
+			catch (ObjectAlreadyExistsException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unexpectedly encountered existing trigger on rescheduling, assumably due to " +
+							"cluster race condition: " + ex.getMessage() + " - can safely be ignored");
+				}
+			}
 		}
 		else {
 			try {
@@ -325,8 +333,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 			}
 			catch (ObjectAlreadyExistsException ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " +
-							ex.getMessage() + " - can safely be ignored");
+					logger.debug("Unexpectedly encountered existing trigger on job scheduling, assumably due to " +
+							"cluster race condition: " + ex.getMessage() + " - can safely be ignored");
 				}
 				if (this.overwriteExistingJobs) {
 					getScheduler().rescheduleJob(trigger.getKey(), trigger);

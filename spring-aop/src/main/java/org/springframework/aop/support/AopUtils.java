@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -305,7 +305,7 @@ public abstract class AopUtils {
 		if (candidateAdvisors.isEmpty()) {
 			return candidateAdvisors;
 		}
-		List<Advisor> eligibleAdvisors = new LinkedList<>();
+		List<Advisor> eligibleAdvisors = new ArrayList<>();
 		for (Advisor candidate : candidateAdvisors) {
 			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);

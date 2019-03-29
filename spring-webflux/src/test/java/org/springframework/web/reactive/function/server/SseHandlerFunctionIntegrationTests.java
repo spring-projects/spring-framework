@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,18 +42,18 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	private WebClient webClient;
 
 
+	@Before
+	public void setup() throws Exception {
+		super.setup();
+		this.webClient = WebClient.create("http://localhost:" + this.port);
+	}
+
 	@Override
 	protected RouterFunction<?> routerFunction() {
 		SseHandler sseHandler = new SseHandler();
 		return route(RequestPredicates.GET("/string"), sseHandler::string)
 				.and(route(RequestPredicates.GET("/person"), sseHandler::person))
 				.and(route(RequestPredicates.GET("/event"), sseHandler::sse));
-	}
-
-	@Before
-	public void setup() throws Exception {
-		super.setup();
-		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
 

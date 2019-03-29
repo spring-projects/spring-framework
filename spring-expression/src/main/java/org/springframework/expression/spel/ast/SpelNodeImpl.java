@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,7 +47,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	private static final SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
 
 
-	protected int pos;  // start = top 16bits, end = bottom 16bits
+	private final int startPos;
+
+	private final int endPos;
 
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 
@@ -67,10 +69,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	protected volatile String exitTypeDescriptor;
 
 
-	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
-		this.pos = pos;
-		// pos combines start and end so can never be zero because tokens cannot be zero length
-		Assert.isTrue(pos != 0, "Pos must not be 0");
+	public SpelNodeImpl(int startPos, int endPos, SpelNodeImpl... operands) {
+		this.startPos = startPos;
+		this.endPos = endPos;
 		if (!ObjectUtils.isEmpty(operands)) {
 			this.children = operands;
 			for (SpelNodeImpl operand : operands) {
@@ -84,7 +85,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	/**
      * Return {@code true} if the next child is one of the specified classes.
      */
-	protected boolean nextChildIs(Class<?>... clazzes) {
+	protected boolean nextChildIs(Class<?>... classes) {
 		if (this.parent != null) {
 			SpelNodeImpl[] peers = this.parent.children;
 			for (int i = 0, max = peers.length; i < max; i++) {
@@ -92,9 +93,9 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 					if (i + 1 >= max) {
 						return false;
 					}
-					Class<?> clazz = peers[i + 1].getClass();
-					for (Class<?> desiredClazz : clazzes) {
-						if (clazz.equals(desiredClazz)) {
+					Class<?> peerClass = peers[i + 1].getClass();
+					for (Class<?> desiredClass : classes) {
+						if (peerClass == desiredClass) {
 							return true;
 						}
 					}
@@ -146,23 +147,14 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
 	}
 
-	@Nullable
-	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
-		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
-	}
-
 	@Override
 	public int getStartPosition() {
-		return (this.pos >> 16);
+		return this.startPos;
 	}
 
 	@Override
 	public int getEndPosition() {
-		return (this.pos & 0xffff);
-	}
-
-	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
-		throw new SpelEvaluationException(this.pos, SpelMessage.NOT_ASSIGNABLE, toStringAST());
+		return this.endPos;
 	}
 
 	/**
@@ -177,9 +169,8 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 
 	/**
 	 * Generate the bytecode for this node into the supplied visitor. Context info about
-	 * the current expression being compiled is available in the codeflow object. For
-	 * example it will include information about the type of the object currently
-	 * on the stack.
+	 * the current expression being compiled is available in the codeflow object, e.g.
+	 * including information about the type of the object currently on the stack.
 	 * @param mv the ASM MethodVisitor into which code should be generated
 	 * @param cf a context object with info about what is on the stack
 	 */
@@ -190,6 +181,15 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	@Nullable
 	public String getExitDescriptor() {
 		return this.exitTypeDescriptor;
+	}
+
+	@Nullable
+	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
+		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
+	}
+
+	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
+		throw new SpelEvaluationException(getStartPosition(), SpelMessage.NOT_ASSIGNABLE, toStringAST());
 	}
 
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;

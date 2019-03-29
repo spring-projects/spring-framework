@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import org.junit.Test;
 
@@ -62,10 +59,10 @@ public class ResponseCookieTests {
 
 	@Test
 	public void maxAge0() {
-		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT",
+		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
 				ResponseCookie.from("id", "1fWa").maxAge(Duration.ofSeconds(0)).build().toString());
 
-		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 1 Jan 1970 00:00:00 GMT",
+		assertEquals("id=1fWa; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
 				ResponseCookie.from("id", "1fWa").maxAge(0).build().toString());
 	}
 

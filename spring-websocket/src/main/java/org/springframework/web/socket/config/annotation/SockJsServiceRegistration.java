@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,18 +81,6 @@ public class SockJsServiceRegistration {
 
 
 	public SockJsServiceRegistration() {
-	}
-
-	/**
-	 * Deprecated constructor with a TaskScheduler.
-	 * @deprecated as of 5.0 a TaskScheduler is not provided upfront, not until
-	 * it is obvious that it is needed; call {@link #getTaskScheduler()} to check
-	 * and then {@link #setTaskScheduler(TaskScheduler)} to set it before a call
-	 * to {@link #createSockJsService()}
-	 */
-	@Deprecated
-	public SockJsServiceRegistration(TaskScheduler defaultTaskScheduler) {
-		this.scheduler = defaultTaskScheduler;
 	}
 
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -164,7 +164,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param keysToIgnore the keys of the entries to ignore
 	 */
 	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
-		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
+		this.headers = new HashMap<>(original.headers.size());
 		original.headers.forEach((key, value) -> {
 			if (!keysToIgnore.contains(key)) {
 				this.headers.put(key, value);

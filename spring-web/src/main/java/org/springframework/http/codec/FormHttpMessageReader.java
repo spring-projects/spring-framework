@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.lang.Nullable;
@@ -84,7 +85,7 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
 		return ((MULTIVALUE_TYPE.isAssignableFrom(elementType) ||
 				(elementType.hasUnresolvableGenerics() &&
-						MultiValueMap.class.isAssignableFrom(elementType.resolve(Object.class)))) &&
+						MultiValueMap.class.isAssignableFrom(elementType.toClass()))) &&
 				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)));
 	}
 
@@ -108,11 +109,16 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 					String body = charBuffer.toString();
 					DataBufferUtils.release(buffer);
 					MultiValueMap<String, String> formData = parseFormData(charset, body);
-					if (shouldLogRequestDetails()) {
-						logger.debug(Hints.getLogPrefix(hints) + "Decoded " + formData);
-					}
+					logFormData(formData, hints);
 					return formData;
 				});
+	}
+
+	private void logFormData(MultiValueMap<String, String> formData, Map<String, Object> hints) {
+		LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Read " +
+				(isEnableLoggingRequestDetails() ?
+						LogFormatUtils.formatValue(formData, !traceOn) :
+						"form fields " + formData.keySet() + " (content masked)"));
 	}
 
 	private Charset getMediaTypeCharset(@Nullable MediaType mediaType) {

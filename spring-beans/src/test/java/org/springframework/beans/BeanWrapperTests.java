@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -89,7 +89,7 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		catch (PropertyBatchUpdateException ex) {
 			assertTrue("Must contain 2 exceptions", ex.getExceptionCount() == 2);
 			// Test validly set property matches
-			assertTrue("Vaid set property must stick", target.getName().equals(newName));
+			assertTrue("Valid set property must stick", target.getName().equals(newName));
 			assertTrue("Invalid set property must retain old value", target.getAge() == 0);
 			assertTrue("New value of dodgy setter must be available through exception",
 					ex.getPropertyAccessException("touchy").getPropertyChangeEvent().getNewValue().equals(invalidTouchy));

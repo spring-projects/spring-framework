@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
@@ -38,6 +37,7 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -58,7 +58,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  */
 public class DefaultStompSession implements ConnectionHandlingStompSession {
 
-	private static final Log logger = LogFactory.getLog(DefaultStompSession.class);
+	private static final Log logger = SimpLogging.forLogName(DefaultStompSession.class);
 
 	private static final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
@@ -121,7 +121,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory =
 				new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
 
-		List<Advisor> advisors = new LinkedList<>();
+		List<Advisor> advisors = new ArrayList<>();
 		for (Method method : getAdvisorMethods(aspectClass)) {
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
 			if (advisor != null) {
@@ -147,13 +147,13 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
-		final List<Method> methods = new LinkedList<>();
+		final List<Method> methods = new ArrayList<>();
 		ReflectionUtils.doWithMethods(aspectClass, method -> {
 			// Exclude pointcuts
 			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
 				methods.add(method);
 			}
-		});
+		}, ReflectionUtils.USER_DECLARED_METHODS);
 		methods.sort(METHOD_COMPARATOR);
 		return methods;
 	}
@@ -246,6 +246,15 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		AbstractAspectJAdvice springAdvice;
 
 		switch (aspectJAnnotation.getAnnotationType()) {
+			case AtPointcut:
+				if (logger.isDebugEnabled()) {
+					logger.debug("Processing pointcut '" + candidateAdviceMethod.getName() + "'");
+				}
+				return null;
+			case AtAround:
+				springAdvice = new AspectJAroundAdvice(
+						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+				break;
 			case AtBefore:
 				springAdvice = new AspectJMethodBeforeAdvice(
 						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
@@ -270,15 +279,6 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 					springAdvice.setThrowingName(afterThrowingAnnotation.throwing());
 				}
 				break;
-			case AtAround:
-				springAdvice = new AspectJAroundAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
-				break;
-			case AtPointcut:
-				if (logger.isDebugEnabled()) {
-					logger.debug("Processing pointcut '" + candidateAdviceMethod.getName() + "'");
-				}
-				return null;
 			default:
 				throw new UnsupportedOperationException(
 						"Unsupported advice type on method: " + candidateAdviceMethod);

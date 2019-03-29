@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * A logical disjunction (' || ') request condition to match a request's 'Accept' header
@@ -46,7 +47,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
-	private static final ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
+	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
 
 
 	private final List<ProduceMediaTypeExpression> mediaTypeAllList =
@@ -184,15 +185,25 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	@Override
 	@Nullable
 	public ProducesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
-			return PRE_FLIGHT_MATCH;
-		}
-		if (isEmpty()) {
-			return this;
+		if (isEmpty() || CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			return EMPTY_CONDITION;
 		}
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
 		result.removeIf(expression -> !expression.match(exchange));
-		return (!result.isEmpty() ? new ProducesRequestCondition(result, this.contentTypeResolver) : null);
+		if (!result.isEmpty()) {
+			return new ProducesRequestCondition(result, this.contentTypeResolver);
+		}
+		else {
+			try {
+				if (MediaType.ALL.isPresentIn(getAcceptedMediaTypes(exchange))) {
+					return EMPTY_CONDITION;
+				}
+			}
+			catch (NotAcceptableStatusException | UnsupportedMediaTypeStatusException ex) {
+				// Ignore
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -192,7 +193,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			Class<?> fileLocatorClass = ClassUtils.forName("org.eclipse.core.runtime.FileLocator",
 					PathMatchingResourcePatternResolver.class.getClassLoader());
 			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", URL.class);
-			logger.debug("Found Equinox FileLocator for OSGi bundle URL resolution");
+			logger.trace("Found Equinox FileLocator for OSGi bundle URL resolution");
 		}
 		catch (Throwable ex) {
 			equinoxResolveMethod = null;
@@ -318,8 +319,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			path = path.substring(1);
 		}
 		Set<Resource> result = doFindAllClassPathResources(path);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Resolved classpath location [" + location + "] to resources " + result);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved classpath location [" + location + "] to resources " + result);
 		}
 		return result.toArray(new Resource[0]);
 	}
@@ -371,8 +372,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			try {
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
 					try {
-						UrlResource jarResource = new UrlResource(
-								ResourceUtils.JAR_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR);
+						UrlResource jarResource = (ResourceUtils.URL_PROTOCOL_JAR.equals(url.getProtocol()) ?
+								new UrlResource(url) :
+								new UrlResource(ResourceUtils.JAR_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR));
 						if (jarResource.exists()) {
 							result.add(jarResource);
 						}
@@ -511,8 +513,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
 			}
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Resolved location pattern [" + locationPattern + "] to resources " + result);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved location pattern [" + locationPattern + "] to resources " + result);
 		}
 		return result.toArray(new Resource[0]);
 	}
@@ -634,8 +636,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		try {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Looking for matching resources in jar file [" + jarFileUrl + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Looking for matching resources in jar file [" + jarFileUrl + "]");
 			}
 			if (!"".equals(rootEntryPath) && !rootEntryPath.endsWith("/")) {
 				// Root entry path must end with slash to allow for proper matching.
@@ -697,10 +699,16 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		try {
 			rootDir = rootDirResource.getFile().getAbsoluteFile();
 		}
-		catch (IOException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Cannot search for matching files underneath " + rootDirResource +
-						" because it does not correspond to a directory in the file system", ex);
+		catch (FileNotFoundException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot search for matching files underneath " + rootDirResource +
+						" in the file system: " + ex.getMessage());
+			}
+			return Collections.emptySet();
+		}
+		catch (Exception ex) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Failed to resolve " + rootDirResource + " in the file system: " + ex);
 			}
 			return Collections.emptySet();
 		}
@@ -718,8 +726,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.util.PathMatcher
 	 */
 	protected Set<Resource> doFindMatchingFileSystemResources(File rootDir, String subPattern) throws IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
 		Set<File> matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
 		Set<Resource> result = new LinkedHashSet<>(matchingFiles.size());
@@ -748,14 +756,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		if (!rootDir.isDirectory()) {
 			// Complain louder if it exists but is no directory.
-			if (logger.isWarnEnabled()) {
-				logger.warn("Skipping [" + rootDir.getAbsolutePath() + "] because it does not denote a directory");
+			if (logger.isInfoEnabled()) {
+				logger.info("Skipping [" + rootDir.getAbsolutePath() + "] because it does not denote a directory");
 			}
 			return Collections.emptySet();
 		}
 		if (!rootDir.canRead()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Cannot search for matching files underneath directory [" + rootDir.getAbsolutePath() +
+			if (logger.isInfoEnabled()) {
+				logger.info("Skipping search for matching files underneath directory [" + rootDir.getAbsolutePath() +
 						"] because the application is not allowed to read the directory");
 			}
 			return Collections.emptySet();
@@ -780,8 +788,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @throws IOException if directory contents could not be retrieved
 	 */
 	protected void doRetrieveMatchingFiles(String fullPattern, File dir, Set<File> result) throws IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Searching directory [" + dir.getAbsolutePath() +
+		if (logger.isTraceEnabled()) {
+			logger.trace("Searching directory [" + dir.getAbsolutePath() +
 					"] for files matching pattern [" + fullPattern + "]");
 		}
 		for (File content : listDirectory(dir)) {
@@ -813,8 +821,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected File[] listDirectory(File dir) {
 		File[] files = dir.listFiles();
 		if (files == null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
+			if (logger.isInfoEnabled()) {
+				logger.info("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
 			}
 			return new File[0];
 		}

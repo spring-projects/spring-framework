@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,7 +46,7 @@ public interface CacheAwareContextLoaderDelegate {
 	 * {@link org.springframework.test.context.cache.ContextCache#logStatistics()}.
 	 * @param mergedContextConfiguration the merged context configuration to use
 	 * to load the application context; never {@code null}
-	 * @return the application context
+	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving or loading
 	 * the application context
 	 */

@@ -8,8 +8,8 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="https://www.springframework.org/schema/tool/spring-tool.xsd"/>
 
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
@@ -641,7 +641,7 @@
 	with resources in the web app root taking precedence.
 	For URL-based resources (e.g. files, HTTP URLs, etc) this property supports a special prefix to
 	indicate the charset associated with the URL so that relative paths appended to it can be encoded
-	correctly, e.g. "[charset=Windows-31J]http://example.org/path".
+	correctly, e.g. "[charset=Windows-31J]https://example.org/path".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -1119,7 +1119,7 @@
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 	The location of a file containing Tiles definitions (or a Spring resource pattern).
-	If no Tiles definitions are registerd, then "/WEB-INF/tiles.xml" is expected to exists.
+	If no Tiles definitions are registered, then "/WEB-INF/tiles.xml" is expected to exists.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -1329,7 +1329,7 @@
 						<xsd:attribute name="allowed-origins" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Comma-separated list of origins to allow, e.g. "http://domain1.com, http://domain2.com".
+	Comma-separated list of origins to allow, e.g. "https://domain1.com, https://domain2.com".
 	The special value "*" allows all domains (default).
 
 	Note that CORS checks use values from "Forwarded" (RFC 7239), "X-Forwarded-Host",

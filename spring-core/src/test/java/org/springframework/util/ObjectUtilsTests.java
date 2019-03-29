@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,6 +44,7 @@ public class ObjectUtilsTests {
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
+
 
 	@Test
 	public void isCheckedException() {
@@ -101,8 +102,8 @@ public class ObjectUtilsTests {
 		assertTrue(isEmpty(new Object[0]));
 		assertTrue(isEmpty(new Integer[0]));
 
-		assertFalse(isEmpty(new int[] { 42 }));
-		assertFalse(isEmpty(new Integer[] { 42 }));
+		assertFalse(isEmpty(new int[] {42}));
+		assertFalse(isEmpty(new Integer[] {42}));
 	}
 
 	@Test
@@ -807,7 +808,8 @@ public class ObjectUtilsTests {
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR"), is(Tropes.BAR));
 
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(is("constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes"));
+		exception.expectMessage(
+				is("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes"));
 		ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus");
 	}
 
@@ -818,6 +820,6 @@ public class ObjectUtilsTests {
 	}
 
 
-	enum Tropes { FOO, BAR, baz }
+	enum Tropes {FOO, BAR, baz}
 
 }

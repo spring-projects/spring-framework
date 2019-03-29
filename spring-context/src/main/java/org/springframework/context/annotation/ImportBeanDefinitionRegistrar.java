@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
@@ -42,6 +43,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * <p>See implementations and associated unit tests for usage examples.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see Import
  * @see ImportSelector
@@ -55,10 +57,31 @@ public interface ImportBeanDefinitionRegistrar {
 	 * <p>Note that {@link BeanDefinitionRegistryPostProcessor} types may <em>not</em> be
 	 * registered here, due to lifecycle constraints related to {@code @Configuration}
 	 * class processing.
+	 * <p>The default implementation delegates to
+	 * {@link #registerBeanDefinitions(AnnotationMetadata, BeanDefinitionRegistry)}.
+	 * @param importingClassMetadata annotation metadata of the importing class
+	 * @param registry current bean definition registry
+	 * @param importBeanNameGenerator the configuration-level bean name generator
+	 * strategy for imported beans
+	 * @since 5.2
+	 */
+	default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry,
+			BeanNameGenerator importBeanNameGenerator) {
+
+		registerBeanDefinitions(importingClassMetadata, registry);
+	}
+
+	/**
+	 * Register bean definitions as necessary based on the given annotation metadata of
+	 * the importing {@code @Configuration} class.
+	 * <p>Note that {@link BeanDefinitionRegistryPostProcessor} types may <em>not</em> be
+	 * registered here, due to lifecycle constraints related to {@code @Configuration}
+	 * class processing.
+	 * <p>The default implementation is empty.
 	 * @param importingClassMetadata annotation metadata of the importing class
 	 * @param registry current bean definition registry
 	 */
-	public void registerBeanDefinitions(
-			AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry);
+	default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+	}
 
 }

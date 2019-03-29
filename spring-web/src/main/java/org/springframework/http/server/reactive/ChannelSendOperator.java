@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -338,6 +338,9 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 		private final WriteBarrier writeBarrier;
 
+		@Nullable
+		private Subscription subscription;
+
 
 		public WriteCompletionBarrier(CoreSubscriber<? super Void> subscriber, WriteBarrier writeBarrier) {
 			this.completionSubscriber = subscriber;
@@ -357,6 +360,7 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
+			this.subscription = subscription;
 			subscription.request(Long.MAX_VALUE);
 		}
 
@@ -388,6 +392,10 @@ public class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		@Override
 		public void cancel() {
 			this.writeBarrier.cancel();
+			Subscription subscription = this.subscription;
+			if (subscription != null) {
+				subscription.cancel();
+			}
 		}
 	}
 

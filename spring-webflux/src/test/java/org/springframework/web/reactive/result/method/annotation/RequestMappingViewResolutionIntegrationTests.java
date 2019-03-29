@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,8 +43,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * {@code @RequestMapping} integration tests with view resolution scenarios.
@@ -78,10 +77,9 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 		assertNull(response.getBody());
 	}
 
-	@Test // SPR-15291
+	@Test  // SPR-15291
 	public void redirect() throws Exception {
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
-
 			@Override
 			protected void prepareConnection(HttpURLConnection conn, String method) throws IOException {
 				super.prepareConnection(conn, method);

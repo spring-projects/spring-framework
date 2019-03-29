@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -154,10 +153,19 @@ abstract class BootstrapUtils {
 		if (annotations.isEmpty()) {
 			return null;
 		}
-		Assert.state(annotations.size() <= 1, () -> String.format(
+		if (annotations.size() == 1) {
+			return annotations.iterator().next().value();
+		}
+
+		// Allow directly-present annotation to override annotations that are meta-present.
+		BootstrapWith bootstrapWith = testClass.getDeclaredAnnotation(BootstrapWith.class);
+		if (bootstrapWith != null) {
+			return bootstrapWith.value();
+		}
+
+		throw new IllegalStateException(String.format(
 				"Configuration error: found multiple declarations of @BootstrapWith for test class [%s]: %s",
 				testClass.getName(), annotations));
-		return annotations.iterator().next().value();
 	}
 
 	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {

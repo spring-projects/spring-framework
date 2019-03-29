@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -58,12 +57,14 @@ public class EnableMBeanExportConfigurationTests {
 
 	private AnnotationConfigApplicationContext ctx;
 
+
 	@After
 	public void closeContext() {
 		if (this.ctx != null) {
 			this.ctx.close();
 		}
 	}
+
 
 	@Test
 	public void testLazyNaming() throws Exception {
@@ -159,7 +160,7 @@ public class EnableMBeanExportConfigurationTests {
 	static class LazyNamingConfiguration {
 
 		@Bean
-		public MBeanServerFactoryBean server() throws Exception {
+		public MBeanServerFactoryBean server() {
 			return new MBeanServerFactoryBean();
 		}
 
@@ -178,7 +179,7 @@ public class EnableMBeanExportConfigurationTests {
 	static class ProxyConfiguration {
 
 		@Bean
-		public MBeanServerFactoryBean server() throws Exception {
+		public MBeanServerFactoryBean server() {
 			return new MBeanServerFactoryBean();
 		}
 
@@ -199,7 +200,7 @@ public class EnableMBeanExportConfigurationTests {
 	static class PlaceholderBasedConfiguration {
 
 		@Bean
-		public MBeanServerFactoryBean server() throws Exception {
+		public MBeanServerFactoryBean server() {
 			return new MBeanServerFactoryBean();
 		}
 
@@ -219,12 +220,7 @@ public class EnableMBeanExportConfigurationTests {
 	static class LazyAssemblingConfiguration {
 
 		@Bean
-		public PropertyPlaceholderConfigurer ppc() {
-			return new PropertyPlaceholderConfigurer();
-		}
-
-		@Bean
-		public MBeanServerFactoryBean server() throws Exception {
+		public MBeanServerFactoryBean server() {
 			return new MBeanServerFactoryBean();
 		}
 
@@ -238,7 +234,7 @@ public class EnableMBeanExportConfigurationTests {
 		}
 
 		@Bean("bean:name=testBean5")
-		public AnnotationTestBeanFactory testBean5() throws Exception {
+		public AnnotationTestBeanFactory testBean5() {
 			return new AnnotationTestBeanFactory();
 		}
 
@@ -265,12 +261,12 @@ public class EnableMBeanExportConfigurationTests {
 
 
 	@Configuration
-	@ComponentScan(excludeFilters = @ComponentScan.Filter(value=Configuration.class))
+	@ComponentScan(excludeFilters = @ComponentScan.Filter(Configuration.class))
 	@EnableMBeanExport(server = "server")
 	static class ComponentScanConfiguration {
 
 		@Bean
-		public MBeanServerFactoryBean server() throws Exception {
+		public MBeanServerFactoryBean server() {
 			return new MBeanServerFactoryBean();
 		}
 	}
@@ -280,7 +276,7 @@ public class EnableMBeanExportConfigurationTests {
 	static class PackagePrivateConfiguration {
 
 		@Bean
-		public MBeanServerFactoryBean server() throws Exception {
+		public MBeanServerFactoryBean server() {
 			return new MBeanServerFactoryBean();
 		}
 
@@ -312,7 +308,7 @@ public class EnableMBeanExportConfigurationTests {
 	static class PackagePrivateExtensionConfiguration {
 
 		@Bean
-		public MBeanServerFactoryBean server() throws Exception {
+		public MBeanServerFactoryBean server() {
 			return new MBeanServerFactoryBean();
 		}
 
@@ -333,7 +329,7 @@ public class EnableMBeanExportConfigurationTests {
 	static class PackagePrivateInterfaceImplementationConfiguration {
 
 		@Bean
-		public MBeanServerFactoryBean server() throws Exception {
+		public MBeanServerFactoryBean server() {
 			return new MBeanServerFactoryBean();
 		}
 
@@ -349,7 +345,6 @@ public class EnableMBeanExportConfigurationTests {
 
 		@Override
 		public void foo() {
-
 		}
 
 		@Override

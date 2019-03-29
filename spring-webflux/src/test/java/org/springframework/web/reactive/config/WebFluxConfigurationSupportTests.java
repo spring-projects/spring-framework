@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.google.protobuf.Message;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -59,6 +60,7 @@ import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
@@ -148,7 +150,7 @@ public class WebFluxConfigurationSupportTests {
 		assertNotNull(adapter);
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertEquals(12, readers.size());
+		assertEquals(13, readers.size());
 
 		ResolvableType multiValueMapType = forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
@@ -156,6 +158,7 @@ public class WebFluxConfigurationSupportTests {
 		assertHasMessageReader(readers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageReader(readers, forClass(Resource.class), IMAGE_PNG);
+		assertHasMessageReader(readers, forClass(Message.class), new MediaType("application", "x-protobuf"));
 		assertHasMessageReader(readers, multiValueMapType, APPLICATION_FORM_URLENCODED);
 		assertHasMessageReader(readers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageReader(readers, forClass(TestBean.class), APPLICATION_JSON);
@@ -202,12 +205,13 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(0, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(10, writers.size());
+		assertEquals(11, writers.size());
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageWriter(writers, forClass(Resource.class), IMAGE_PNG);
+		assertHasMessageWriter(writers, forClass(Message.class), new MediaType("application", "x-protobuf"));
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_JSON);
 		assertHasMessageWriter(writers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
@@ -229,12 +233,13 @@ public class WebFluxConfigurationSupportTests {
 		assertEquals(100, handler.getOrder());
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertEquals(10, writers.size());
+		assertEquals(11, writers.size());
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageWriter(writers, forClass(Resource.class), IMAGE_PNG);
+		assertHasMessageWriter(writers, forClass(Message.class), new MediaType("application", "x-protobuf"));
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_JSON);
 		assertHasMessageWriter(writers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
@@ -279,6 +284,15 @@ public class WebFluxConfigurationSupportTests {
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
 		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");
 		assertNotNull(webHandler);
+	}
+
+	@Test
+	public void resourceUrlProvider() throws Exception {
+		ApplicationContext context = loadConfig(WebFluxConfig.class);
+
+		String name = "resourceUrlProvider";
+		ResourceUrlProvider resourceUrlProvider = context.getBean(name, ResourceUrlProvider.class);
+		assertNotNull(resourceUrlProvider);
 	}
 
 

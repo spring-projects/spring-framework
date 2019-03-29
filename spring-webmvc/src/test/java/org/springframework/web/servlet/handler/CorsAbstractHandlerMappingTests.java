@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,7 +66,7 @@ public class CorsAbstractHandlerMappingTests {
 	public void actualRequestWithoutCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/foo");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -77,7 +77,7 @@ public class CorsAbstractHandlerMappingTests {
 	public void preflightRequestWithoutCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/foo");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -89,7 +89,7 @@ public class CorsAbstractHandlerMappingTests {
 	public void actualRequestWithCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/cors");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -103,7 +103,7 @@ public class CorsAbstractHandlerMappingTests {
 	public void preflightRequestWithCorsConfigurationProvider() throws Exception {
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/cors");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -121,7 +121,7 @@ public class CorsAbstractHandlerMappingTests {
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
 		this.request.setMethod(RequestMethod.GET.name());
 		this.request.setRequestURI("/foo");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -138,7 +138,7 @@ public class CorsAbstractHandlerMappingTests {
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
 		this.request.setMethod(RequestMethod.OPTIONS.name());
 		this.request.setRequestURI("/foo");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
 		assertNotNull(chain);
@@ -147,6 +147,39 @@ public class CorsAbstractHandlerMappingTests {
 		config = getCorsConfiguration(chain, true);
 		assertNotNull(config);
 		assertArrayEquals(config.getAllowedOrigins().toArray(), new String[]{"*"});
+	}
+
+	@Test
+	public void actualRequestWithCorsConfigurationSource() throws Exception {
+		this.handlerMapping.setCorsConfigurationSource(new CustomCorsConfigurationSource());
+		this.request.setMethod(RequestMethod.GET.name());
+		this.request.setRequestURI("/foo");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		assertNotNull(chain);
+		assertTrue(chain.getHandler() instanceof SimpleHandler);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertEquals(true, config.getAllowCredentials());
+	}
+
+	@Test
+	public void preflightRequestWithCorsConfigurationSource() throws Exception {
+		this.handlerMapping.setCorsConfigurationSource(new CustomCorsConfigurationSource());
+		this.request.setMethod(RequestMethod.OPTIONS.name());
+		this.request.setRequestURI("/foo");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = handlerMapping.getHandler(this.request);
+		assertNotNull(chain);
+		assertNotNull(chain.getHandler());
+		assertTrue(chain.getHandler().getClass().getSimpleName().equals("PreFlightHandler"));
+		CorsConfiguration config = getCorsConfiguration(chain, true);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertEquals(true, config.getAllowCredentials());
 	}
 
 
@@ -206,6 +239,17 @@ public class CorsAbstractHandlerMappingTests {
 			return config;
 		}
 
+	}
+
+	public class CustomCorsConfigurationSource implements CorsConfigurationSource {
+
+		@Override
+		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+			CorsConfiguration config = new CorsConfiguration();
+			config.addAllowedOrigin("*");
+			config.setAllowCredentials(true);
+			return config;
+		}
 	}
 
 }

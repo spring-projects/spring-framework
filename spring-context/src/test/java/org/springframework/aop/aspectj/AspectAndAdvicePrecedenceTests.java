@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,9 +49,9 @@ public class AspectAndAdvicePrecedenceTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ClassPathXmlApplicationContext ctx =
-			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		highPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("highPrecedenceAspect");
 		lowPrecedenceAspect = (PrecedenceTestAspect) ctx.getBean("lowPrecedenceAspect");
 		highPrecedenceSpringAdvice = (SimpleSpringBeforeAdvice) ctx.getBean("highPrecedenceSpringAdvice");
@@ -59,7 +59,6 @@ public class AspectAndAdvicePrecedenceTests {
 		testBean = (ITestBean) ctx.getBean("testBean");
 	}
 
-	// ========== end of test case set up, start of tests proper ===================
 
 	@Test
 	public void testAdviceOrder() {

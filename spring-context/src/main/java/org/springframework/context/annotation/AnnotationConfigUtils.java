@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -118,12 +117,16 @@ public abstract class AnnotationConfigUtils {
 	public static final String EVENT_LISTENER_FACTORY_BEAN_NAME =
 			"org.springframework.context.event.internalEventListenerFactory";
 
-	private static final boolean jsr250Present =
-			ClassUtils.isPresent("javax.annotation.Resource", AnnotationConfigUtils.class.getClassLoader());
+	private static final boolean jsr250Present;
 
-	private static final boolean jpaPresent =
-			ClassUtils.isPresent("javax.persistence.EntityManagerFactory", AnnotationConfigUtils.class.getClassLoader()) &&
-			ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, AnnotationConfigUtils.class.getClassLoader());
+	private static final boolean jpaPresent;
+
+	static {
+		ClassLoader classLoader = AnnotationConfigUtils.class.getClassLoader();
+		jsr250Present = ClassUtils.isPresent("javax.annotation.Resource", classLoader);
+		jpaPresent = ClassUtils.isPresent("javax.persistence.EntityManagerFactory", classLoader) &&
+				ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, classLoader);
+	}
 
 
 	/**
@@ -155,7 +158,7 @@ public abstract class AnnotationConfigUtils {
 			}
 		}
 
-		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(4);
+		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
@@ -196,6 +199,7 @@ public abstract class AnnotationConfigUtils {
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		}
+
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
 			def.setSource(source);
@@ -250,16 +254,13 @@ public abstract class AnnotationConfigUtils {
 			abd.setDependsOn(dependsOn.getStringArray("value"));
 		}
 
-		if (abd instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition absBd = (AbstractBeanDefinition) abd;
-			AnnotationAttributes role = attributesFor(metadata, Role.class);
-			if (role != null) {
-				absBd.setRole(role.getNumber("value").intValue());
-			}
-			AnnotationAttributes description = attributesFor(metadata, Description.class);
-			if (description != null) {
-				absBd.setDescription(description.getString("value"));
-			}
+		AnnotationAttributes role = attributesFor(metadata, Role.class);
+		if (role != null) {
+			abd.setRole(role.getNumber("value").intValue());
+		}
+		AnnotationAttributes description = attributesFor(metadata, Description.class);
+		if (description != null) {
+			abd.setDescription(description.getString("value"));
 		}
 	}
 

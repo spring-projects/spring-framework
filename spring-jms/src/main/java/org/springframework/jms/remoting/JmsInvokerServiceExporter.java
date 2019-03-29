@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -153,7 +153,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @param session the JMS session to use
 	 * @param result the invocation result
 	 * @return the message response to send
-	 * @throws javax.jms.JMSException if creating the messsage failed
+	 * @throws javax.jms.JMSException if creating the message failed
 	 */
 	protected Message createResponseMessage(Message request, Session session, RemoteInvocationResult result)
 			throws JMSException {
@@ -184,8 +184,8 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	@Nullable
 	protected RemoteInvocation onInvalidRequest(Message requestMessage) throws JMSException {
 		if (this.ignoreInvalidRequests) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Invalid request message will be discarded: " + requestMessage);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invalid request message will be discarded: " + requestMessage);
 			}
 			return null;
 		}

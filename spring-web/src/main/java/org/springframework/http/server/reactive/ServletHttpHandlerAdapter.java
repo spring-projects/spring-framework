@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,20 +35,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.HttpLog;
+import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
- * support and Servlet 3.1 non-blocking I/O.
+ * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async support
+ * and Servlet 3.1 non-blocking I/O.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -58,7 +57,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class ServletHttpHandlerAdapter implements Servlet {
 
-	private static final Log logger = HttpLog.create(LogFactory.getLog(ServletHttpHandlerAdapter.class));
+	private static final Log logger = HttpLogging.forLogName(ServletHttpHandlerAdapter.class);
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
@@ -141,8 +140,8 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			}
 			if (mapping.endsWith("/*")) {
 				String path = mapping.substring(0, mapping.length() - 2);
-				if (!path.isEmpty()) {
-					logger.info("Found servlet mapping prefix '" + path + "' for '" + name + "'");
+				if (!path.isEmpty() && logger.isDebugEnabled()) {
+					logger.debug("Found servlet mapping prefix '" + path + "' for '" + name + "'");
 				}
 				return path;
 			}
@@ -157,7 +156,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 	@Override
 	public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
-
+		// Check for existing error attribute first
 		if (DispatcherType.ASYNC.equals(request.getDispatcherType())) {
 			Throwable ex = (Throwable) request.getAttribute(WRITE_ERROR_ATTRIBUTE_NAME);
 			throw new ServletException("Failed to create response content", ex);
@@ -180,9 +179,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			return;
 		}
 
-		ServerHttpResponse httpResponse =
-				createResponse(((HttpServletResponse) response), asyncContext, httpRequest);
-
+		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext, httpRequest);
 		if (httpRequest.getMethod() == HttpMethod.HEAD) {
 			httpResponse = new HttpHeadResponseDecorator(httpResponse);
 		}
@@ -248,7 +245,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		private final String logPrefix;
 
-
 		public HandlerResultAsyncListener(AtomicBoolean isCompleted, ServletServerHttpRequest httpRequest) {
 			this.isCompleted = isCompleted;
 			this.logPrefix = httpRequest.getLogPrefix();
@@ -288,7 +284,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		private final AtomicBoolean isCompleted;
 
 		private final String logPrefix;
-
 
 		public HandlerResultSubscriber(
 				AsyncContext asyncContext, AtomicBoolean isCompleted, ServletServerHttpRequest httpRequest) {

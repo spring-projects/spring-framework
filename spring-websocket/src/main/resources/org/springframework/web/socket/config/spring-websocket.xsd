@@ -8,8 +8,8 @@
 			elementFormDefault="qualified"
 			attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="https://www.springframework.org/schema/tool/spring-tool.xsd"/>
 
 	<xsd:complexType name="mapping">
 		<xsd:annotation>
@@ -895,6 +895,22 @@
 
 	Prefixes without a trailing slash will have one appended automatically.
 	By default the list of prefixes is empty in which case all destinations match.
+                    ]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="preserve-publish-order" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Whether the client must receive messages in the order of publication.
+
+	By default messages sent to the clientOutboundChannel may
+	not be processed in the same order because the channel is backed by a
+	ThreadPoolExecutor that in turn does not guarantee processing in order.
+
+	When this flag is set to true messages within the same session
+	will be sent to the clientOutboundChannel one at a time in
+	order to preserve the order of publication. Enable this only if needed
+	since there is some performance overhead to keep messages in order.
                     ]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

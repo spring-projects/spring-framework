@@ -1,10 +1,10 @@
 [[webflux-fn]]
 = Functional Endpoints
 
-Spring WebFlux includes a lightweight, functional programming model in which functions
+Spring WebFlux includes WebFlux.fn, a lightweight functional programming model in which functions
 are used to route and handle requests and contracts are designed for immutability.
-It is an alternative to the annotated-based programming model but otherwise running on
-the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation
+It is an alternative to the annotation-based programming model but otherwise runs on
+the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation.
 
 
 
@@ -12,19 +12,21 @@ the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation
 [[webflux-fn-overview]]
 == Overview
 
-An HTTP request is handled with a **`HandlerFunction`** that takes `ServerRequest` and
-returns `Mono<ServerResponse>`, both of which are immutable contracts that offer JDK-8
-friendly access to the HTTP request and response. `HandlerFunction` is the equivalent of
-an `@RequestMapping` method in the annotation-based programming model.
+In WebFlux.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
+`ServerRequest` and returns a delayed `ServerResponse` (i.e. `Mono<ServerResponse>`).
+Both the request as the response object have immutable contracts that offer JDK 8-friendly
+access to the HTTP request and response.
+`HandlerFunction` is the equivalent of the body of a `@RequestMapping` method in the
+annotation-based programming model.
 
-Requests are routed to a `HandlerFunction` with a **`RouterFunction`** that takes
-`ServerRequest` and returns `Mono<HandlerFunction>`. When a request is matched to a
-particular route, the `HandlerFunction` mapped to the route is used. `RouterFunction` is
-the equivalent of an `@RequestMapping` annotation.
+Incoming requests are routed to a handler function with a `RouterFunction`: a function that
+takes `ServerRequest` and returns a delayed `HandlerFunction` (i.e. `Mono<HandlerFunction>`).
+When the router function matches, a handler function is returned; otherwise an empty Mono.
+`RouterFunction` is the equivalent of a `@RequestMapping` annotation, but with the major
+difference that router functions provide not just data, but also behavior.
 
-`RouterFunctions.route(RequestPredicate, HandlerFunction)` provides a router function
-default implementation that can be used with a number of built-in request predicates.
-For example:
+`RouterFunctions.route()` provides a router builder that facilitates the creation of routers,
+as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -36,10 +38,11 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 PersonRepository repository = ...
 PersonHandler handler = new PersonHandler(repository);
 
-RouterFunction<ServerResponse> route =
-	route(GET("/person/{id}").and(accept(APPLICATION_JSON)), handler::getPerson)
-		.andRoute(GET("/person").and(accept(APPLICATION_JSON)), handler::listPeople)
-		.andRoute(POST("/person"), handler::createPerson);
+RouterFunction<ServerResponse> route = route()
+	.GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson)
+	.GET("/person", accept(APPLICATION_JSON), handler::listPeople)
+	.POST("/person", handler::createPerson)
+	.build();
 
 
 public class PersonHandler {
@@ -61,13 +64,12 @@ public class PersonHandler {
 ----
 
 One way to run a `RouterFunction` is to turn it into an `HttpHandler` and install it
-through one of the built-in <<web-reactive.adoc#webflux-httphandler,server adapters>>:
+through one of the built-in <<web-reactive.adoc#webflux-httphandler, server adapters>>:
 
 * `RouterFunctions.toHttpHandler(RouterFunction)`
 * `RouterFunctions.toHttpHandler(RouterFunction, HandlerStrategies)`
 
-
-Most applications will run through the WebFlux Java config, see <<webflux-fn-running>>.
+Most applications can run through the WebFlux Java configuration, see <<webflux-fn-running>>.
 
 
 
@@ -75,75 +77,99 @@ Most applications will run through the WebFlux Java config, see <<webflux-fn-run
 [[webflux-fn-handler-functions]]
 == HandlerFunction
 
-`ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK-8 friendly
-access to the HTTP request and response with
-http://www.reactive-streams.org[Reactive Streams] back pressure against the request
-and response body stream. The request body is represented with a Reactor `Flux` or `Mono`.
-The response body is represented with any Reactive Streams `Publisher`, including `Flux`
-and `Mono`. For more on that see
-<<web-reactive.adoc#webflux-reactive-libraries,Reactive Libraries>>.
+`ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
+access to the HTTP request and response.
+Both request and response provide https://www.reactive-streams.org[Reactive Streams] back pressure
+against the body streams.
+The request body is represented with a Reactor `Flux` or `Mono`.
+The response body is represented with any Reactive Streams `Publisher`, including `Flux` and `Mono`.
+For more on that, see <<web-reactive.adoc#webflux-reactive-libraries, Reactive Libraries>>.
 
 
 
 [[webflux-fn-request]]
-=== ServerRequest
+=== `ServerRequest`
 
-`ServerRequest` provides access to the HTTP method, URI, headers, and query parameters
+`ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
 
-To extract the request body to a `Mono<String>`:
+The following example extracts the request body to a `Mono<String>`:
 
- Mono<String> string = request.bodyToMono(String.class);
+[source,java]
+----
+Mono<String> string = request.bodyToMono(String.class);
+----
 
-To extract the body to a `Flux<Person>`, where `Person` objects are decoded from some
+The following example extracts the body to a `Flux<Person>`, where `Person` objects are decoded from some
 serialized form, such as JSON or XML:
 
- Flux<Person> people = request.bodyToFlux(Person.class);
+[source,java]
+----
+Flux<Person> people = request.bodyToFlux(Person.class);
+----
 
-The above are shortcuts that use the more general `ServerRequest.body(BodyExtractor)`
-which accepts the `BodyExtractor` functional, strategy interface. The utility class
-`BodyExtractors` provides access to a number of instances. For example, the above can
+The preceding examples are shortcuts that use the more general `ServerRequest.body(BodyExtractor)`,
+which accepts the `BodyExtractor` functional strategy interface. The utility class
+`BodyExtractors` provides access to a number of instances. For example, the preceding examples can
 also be written as follows:
 
- Mono<String> string = request.body(BodyExtractors.toMono(String.class));
- Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
+[source,java]
+----
+Mono<String> string = request.body(BodyExtractors.toMono(String.class));
+Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
+----
 
-To access form data:
+The following example shows how to access form data:
 
- Mono<MultiValueMap<String, String> map = request.body(BodyExtractors.toFormData());
+[source,java]
+----
+Mono<MultiValueMap<String, String> map = request.body(BodyExtractors.toFormData());
+----
 
-To access multipart data as a map:
+The following example shows how to access multipart data as a map:
 
- Mono<MultiValueMap<String, Part> map = request.body(BodyExtractors.toMultipartData());
+[source,java]
+----
+Mono<MultiValueMap<String, Part> map = request.body(BodyExtractors.toMultipartData());
+----
 
-To access multiparts, one at a time, in streaming fashion:
+The following example shows how to access multiparts, one at a time, in streaming fashion:
 
- Flux<Part> parts = request.body(BodyExtractos.toParts());
+[source,java]
+----
+Flux<Part> parts = request.body(BodyExtractos.toParts());
+----
 
 
 
 [[webflux-fn-response]]
-=== ServerResponse
+=== `ServerResponse`
 
-`ServerResponse` provides access to the HTTP response and since it is immutable, you use
-a build to create it. The builder can be used to set the response status, to add response
-headers, or to provide a body. Below is an example with a 200 (OK) response with JSON
+`ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
+a `build` method to create it. You can use the builder to set the response status, to add response
+headers, or to provide a body. The following example creates a 200 (OK) response with JSON
 content:
 
- Mono<Person> person = ...
- ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person.class);
+[source,java]
+----
+Mono<Person> person = ...
+ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person.class);
+----
 
-This is how to build a 201 (CREATED) response with `"Location"` header, and no body:
+The following example shows how to build a 201 (CREATED) response with a `Location` header and no body:
 
- URI location = ...
- ServerResponse.created(location).build();
+[source,java]
+----
+URI location = ...
+ServerResponse.created(location).build();
+----
 
 
 
 [[webflux-fn-handler-classes]]
 === Handler Classes
 
-We can write a handler function as a lambda. For example:
+We can write a handler function as a lambda, as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -152,9 +178,11 @@ HandlerFunction<ServerResponse> helloWorld =
   request -> ServerResponse.ok().body(fromObject("Hello World"));
 ----
 
-That is convenient but in an application we need multiple functions and useful to group
-related handler functions together into a handler (like an `@Controller`). For example,
-here is a class that exposes a reactive `Person` repository:
+That is convenient, but in an application we need multiple functions, and multiple inline
+lambda's can get messy.
+Therefore, it is useful to group related handler functions together into a handler class, which
+has a similar role as  `@Controller` in an annotation-based application.
+For example, the following class exposes a reactive `Person` repository:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -192,70 +220,129 @@ public class PersonHandler {
 <1> `listPeople` is a handler function that returns all `Person` objects found in the repository as
 JSON.
 <2> `createPerson` is a handler function that stores a new `Person` contained in the request body.
-Note that `PersonRepository.savePerson(Person)` returns `Mono<Void>`: an empty Mono that emits
+Note that `PersonRepository.savePerson(Person)` returns `Mono<Void>`: an empty `Mono` that emits
 a completion signal when the person has been read from the request and stored. So we use the
-`build(Publisher<Void>)` method to send a response when that completion signal is received, i.e.
-when the `Person` has been saved.
-<3> `getPerson` is a handler function that returns a single person, identified via the path
-variable `id`. We retrieve that `Person` via the repository, and create a JSON response if it is
+`build(Publisher<Void>)` method to send a response when that completion signal is received (that is,
+when the `Person` has been saved).
+<3> `getPerson` is a handler function that returns a single person, identified by the `id` path
+variable. We retrieve that `Person` from the repository and create a JSON response, if it is
 found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not Found response.
 
 
 
+[[webflux-fn-handler-validation]]
+=== Validation
+
+A functional endpoint can use Spring's <<core.adoc#validation, validation facilities>> to
+apply validation to the request body. For example, given a custom Spring
+<<core.adoc#validation, Validator>> implementation for a `Person`:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class PersonHandler {
+
+	private final Validator validator = new PersonValidator(); // <1>
+
+	// ...
+
+	public Mono<ServerResponse> createPerson(ServerRequest request) {
+		Mono<Person> person = request.bodyToMono(Person.class).doOnNext(this::validate); <2>
+		return ok().build(repository.savePerson(person));
+	}
+
+	private void validate(Person person) {
+		Errors errors = new BeanPropertyBindingResult(body, "person");
+		validator.validate(body, errors);
+		if (errors.hasErrors) {
+			throw new ServerWebInputException(errors.toString()); <3>
+		}
+	}
+
+----
+<1> Create `Validator` instance.
+<2> Apply validation.
+<3> Raise exception for a 400 response.
+====
+
+Handlers can also use the standard bean validation API (JSR-303) by creating and injecting
+a global `Validator` instance based on `LocalValidatorFactoryBean`.
+See <<core.adoc#validation-beanvalidation, Spring Validation>>.
+
+
 
 [[webflux-fn-router-functions]]
-== RouterFunction
+== `RouterFunction`
 
-`RouterFunction` is used to route requests to a `HandlerFunction`. Typically, you do not
-write router functions yourself, but rather use
-`RouterFunctions.route(RequestPredicate, HandlerFunction)`. If the predicate applies, the
-request is routed to the given `HandlerFunction`, or otherwise no routing is performed,
-and that would translate to a 404 (Not Found) response.
+Router functions are used to route the requests to the corresponding `HandlerFunction`.
+Typically, you do not write router functions yourself, but rather use a method on the
+`RouterFunctions` utility class to create one.
+`RouterFunctions.route()` (no parameters) provides you with a fluent builder for creating a router
+function, whereas `RouterFunctions.route(RequestPredicate, HandlerFunction)` offers a direct way
+to create a router.
 
+Generally, it is recommended to use the `route()` builder, as it provides
+convenient short-cuts for typical mapping scenarios without requiring hard-to-discover
+static imports.
+For instance, the router function builder offers the method `GET(String, HandlerFunction)` to create a mapping for GET requests; and `POST(String, HandlerFunction)` for POSTs.
+
+Besides HTTP method-based mapping, the route builder offers a way to introduce additional
+predicates when mapping to requests.
+For each HTTP method there is an overloaded variant that takes a `RequestPredicate` as a
+parameter, though which additional constraints can be expressed.
 
 
 [[webflux-fn-predicates]]
 === Predicates
 
 You can write your own `RequestPredicate`, but the `RequestPredicates` utility class
-offers commonly implementations, based on the request path, HTTP method, content-type,
-and so on. For example:
+offers commonly used implementations, based on the request path, HTTP method, content-type,
+and so on.
+The following example uses a request predicate to create a constraint based on the `Accept`
+header:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-RouterFunction<ServerResponse> route =
-	RouterFunctions.route(RequestPredicates.path("/hello-world"),
-	request -> Response.ok().body(fromObject("Hello World")));
+RouterFunction<ServerResponse> route = RouterFunctions.route()
+	.GET("/hello-world", accept(MediaType.TEXT_PLAIN),
+		request -> Response.ok().body(fromObject("Hello World")));
 ----
 
-You can compose multiple request predicates together via:
+You can compose multiple request predicates together by using:
 
 * `RequestPredicate.and(RequestPredicate)` -- both must match.
-* `RequestPredicate.or(RequestPredicate)` -- either may match.
+* `RequestPredicate.or(RequestPredicate)` -- either can match.
 
-Many of the predicates from `RequestPredicates` are composed. For example
-`RequestPredicates.GET(String)` is composed from `RequestPredicates.method(HttpMethod)`
+Many of the predicates from `RequestPredicates` are composed.
+For example, `RequestPredicates.GET(String)` is composed from `RequestPredicates.method(HttpMethod)`
 and `RequestPredicates.path(String)`.
-
-You can compose multiple router functions into one, such that they're evaluated in order,
-and if the first route doesn't match, the second is evaluated. You can declare more
-specific routes before more general ones.
+The example shown above also uses two request predicates, as the builder uses
+`RequestPredicates.GET` internally, and composes that with the `accept` predicate.
 
 
 
 [[webflux-fn-routes]]
 === Routes
 
-You can compose multiple router functions together via:
+Router functions are evaluated in order: if the first route does not match, the
+second is evaluated, and so on.
+Therefore, it makes sense to declare more specific routes before general ones.
+Note that this behavior is different from the annotation-based programming model, where the
+"most specific" controller method is picked automatically.
 
+When using the router function builder, all defined routes are composed into one
+`RouterFunction` that is returned from `build()`.
+There are also other ways to compose multiple router functions together:
+
+* `add(RouterFunction)` on the `RouterFunctions.route()` builder
 * `RouterFunction.and(RouterFunction)`
 * `RouterFunction.andRoute(RequestPredicate, HandlerFunction)` -- shortcut for
 `RouterFunction.and()` with nested `RouterFunctions.route()`.
 
-Using composed routes and predicates, we can then declare the following routes, referring
-to methods in the `PersonHandler`, shown in <<webflux-fn-handler-class>>, through
-https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html[method-references]:
+The following example shows the composition of four routes:
+
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -266,49 +353,100 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 PersonRepository repository = ...
 PersonHandler handler = new PersonHandler(repository);
 
-RouterFunction<ServerResponse> personRoute =
-	route(GET("/person/{id}").and(accept(APPLICATION_JSON)), handler::getPerson)
-		.andRoute(GET("/person").and(accept(APPLICATION_JSON)), handler::listPeople)
-		.andRoute(POST("/person"), handler::createPerson);
+RouterFunction<ServerResponse> otherRoute = ...
+
+RouterFunction<ServerResponse> route = route()
+	.GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson) // <1>
+	.GET("/person", accept(APPLICATION_JSON), handler::listPeople) // <2>
+	.POST("/person", handler::createPerson) // <3>
+	.add(otherRoute) // <4>
+	.build();
+----
+<1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
+`PersonHandler.getPerson`
+<2> `GET /person` with an `Accept` header that matches JSON is routed to
+`PersonHandler.listPeople`
+<3> `POST /person` with no additional predicates is mapped to
+`PersonHandler.createPerson`, and
+<4> `otherRoute` is a router function that is created elsewhere, and added to the route built.
+
+
+
+=== Nested Routes
+
+It is common for a group of router functions to have a shared predicate, for instance a shared
+path.
+In the example above, the shared predicate would be a path predicate that matches `/person`,
+used by three of the routes.
+When using annotations, you would remove this duplication by using a type-level `@RequestMapping`
+ annotation that maps to `/person`.
+In WebFlux.fn, path predicates can be shared through the `path` method on the router function builder.
+For instance, the last few lines of the example above can be improved in the following way by using nested routes:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+RouterFunction<ServerResponse> route = route()
+	.path("/person", builder -> builder
+		.GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
+		.GET("", accept(APPLICATION_JSON), handler::listPeople)
+		.POST("/person", handler::createPerson))
+	.build();
+----
+
+Note that second parameter of `path` is a consumer that takes the a router builder.
+
+Though path-based nesting is the most common, you can nest on any kind of predicate by using
+the `nest` method on the builder.
+The above still contains some duplication in the form of the shared `Accept`-header predicate.
+We can further improve by using the `nest` method together with `accept`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+RouterFunction<ServerResponse> route = route()
+	.path("/person", b1 -> b1
+		.nest(accept(APPLICATION_JSON), b2 -> b2
+			.GET("/{id}", handler::getPerson)
+			.GET("", handler::listPeople))
+		.POST("/person", handler::createPerson))
+	.build();
 ----
 
 
-
-
-
 [[webflux-fn-running]]
-== Running a server
+== Running a Server
 
 How do you run a router function in an HTTP server? A simple option is to convert a router
-function to an `HttpHandler` using one of the following:
+function to an `HttpHandler` by using one of the following:
 
 * `RouterFunctions.toHttpHandler(RouterFunction)`
 * `RouterFunctions.toHttpHandler(RouterFunction, HandlerStrategies)`
 
-The returned `HttpHandler` can then be used with a number of servers adapters by following
-<<web-reactive.adoc#webflux-httphandler,HttpHandler>> for server-specific instructions.
+You can then use the returned `HttpHandler` with a number of server adapters by following
+<<web-reactive.adoc#webflux-httphandler, HttpHandler>> for server-specific instructions.
 
-A more advanced option is to run with a
-<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>>-based setup through the
-<<web-reactive.adoc#webflux-config>> which uses Spring configuration to declare the
-components quired to process requests. The WebFlux Java config declares the following
+A more typical option, also used by Spring Boot, is to run with a
+<<web-reactive.adoc#webflux-dispatcher-handler, `DispatcherHandler`>>-based setup through the
+<<web-reactive.adoc#webflux-config>>, which uses Spring configuration to declare the
+components required to process requests. The WebFlux Java configuration declares the following
 infrastructure components to support functional endpoints:
 
-* `RouterFunctionMapping` -- detects one or more `RouterFunction<?>` beans in the Spring
-configuration, combines them via `RouterFunction.andOther`, and routes requests to the
+* `RouterFunctionMapping`: Detects one or more `RouterFunction<?>` beans in the Spring
+configuration, combines them through `RouterFunction.andOther`, and routes requests to the
 resulting composed `RouterFunction`.
-* `HandlerFunctionAdapter` -- simple adapter that allows the `DispatcherHandler` to invoke
+* `HandlerFunctionAdapter`: Simple adapter that lets `DispatcherHandler` invoke
 a `HandlerFunction` that was mapped to a request.
-* `ServerResponseResultHandler` -- handles the result from the invocation of a
+* `ServerResponseResultHandler`: Handles the result from the invocation of a
 `HandlerFunction` by invoking the `writeTo` method of the `ServerResponse`.
 
-The above components allow functional endpoints to fit within the `DispatcherHandler` request
-processing lifecycle, and also potentially run side by side with annotated controllers, if
-any are declared. It is also how functional endpoints are enabled the Spring Boot WebFlux
+The preceding components let functional endpoints fit within the `DispatcherHandler` request
+processing lifecycle and also (potentially) run side by side with annotated controllers, if
+any are declared. It is also how functional endpoints are enabled by the Spring Boot WebFlux
 starter.
 
-Below is example WebFlux Java config (see
-<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>> for how to run):
+The following example shows a WebFlux Java configuration (see
+<<web-reactive.adoc#webflux-dispatcher-handler, DispatcherHandler>> for how to run it):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -335,7 +473,7 @@ public class WebConfig implements WebFluxConfigurer {
 	}
 
 	@Override
-	default void addCorsMappings(CorsRegistry registry) {
+	public void addCorsMappings(CorsRegistry registry) {
 		// configure CORS...
 	}
 
@@ -350,41 +488,72 @@ public class WebConfig implements WebFluxConfigurer {
 
 
 [[webflux-fn-handler-filter-function]]
-== HandlerFilterFunction
+== Filtering Handler Functions
 
-Routes mapped by a router function can be filtered by calling
-`RouterFunction.filter(HandlerFilterFunction)`, where `HandlerFilterFunction` is essentially a
-function that takes a `ServerRequest` and `HandlerFunction`, and returns a `ServerResponse`.
-The handler function parameter represents the next element in the chain: this is typically the
-`HandlerFunction` that is routed to, but can also be another `FilterFunction` if multiple filters
-are applied.
-With annotations, similar functionality can be achieved using `@ControllerAdvice` and/or a `ServletFilter`.
-Let's add a simple security filter to our route, assuming that we have a `SecurityManager` that
-can determine whether a particular path is allowed:
+You can filter handler functions by using the `before`, `after`, or `filter` methods on the routing
+function builder.
+With annotations, you can achieve similar functionality by using `@ControllerAdvice`, a `ServletFilter`, or both.
+The filter will apply to all routes that are built by the builder.
+This means that filters defined in nested routes do not apply to "top-level" routes.
+For instance, consider the following example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+RouterFunction<ServerResponse> route = route()
+	.path("/person", b1 -> b1
+		.nest(accept(APPLICATION_JSON), b2 -> b2
+			.GET("/{id}", handler::getPerson)
+			.GET("", handler::listPeople)
+			.before(request -> ServerRequest.from(request) // <1>
+				.header("X-RequestHeader", "Value")
+				.build()))
+		.POST("/person", handler::createPerson))
+	.after((request, response) -> logResponse(response)) // <2>
+	.build();
+----
+<1> The `before` filter that adds a custom request header is only applied to the two GET routes.
+<2> The `after` filter that logs the response is applied to all routes, including the nested ones.
+
+
+The `filter` method on the router builder takes a `HandlerFilterFunction`: a
+function that takes a `ServerRequest` and `HandlerFunction` and returns a `ServerResponse`.
+The handler function parameter represents the next element in the chain.
+This is typically the handler that is routed to, but it can also be another
+filter if multiple are applied.
+
+Now we can add a simple security filter to our route, assuming that we have a `SecurityManager` that
+can determine whether a particular path is allowed.
+The following example shows how to do so:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
 
 SecurityManager securityManager = ...
-RouterFunction<ServerResponse> route = ...
 
-RouterFunction<ServerResponse> filteredRoute =
-	route.filter((request, next) -> {
+RouterFunction<ServerResponse> route = route()
+	.path("/person", b1 -> b1
+		.nest(accept(APPLICATION_JSON), b2 -> b2
+			.GET("/{id}", handler::getPerson)
+			.GET("", handler::listPeople))
+		.POST("/person", handler::createPerson))
+	.filter((request, next) -> {
 		if (securityManager.allowAccessTo(request.path())) {
 			return next.handle(request);
 		}
 		else {
 			return ServerResponse.status(UNAUTHORIZED).build();
 		}
-  });
+	})
+	.build();
 ----
 
-You can see in this example that invoking the `next.handle(ServerRequest)` is optional: we only
-allow the handler function to be executed when access is allowed.
+The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
+We allow only the handler function to be executed when access is allowed.
 
-[NOTE]
-====
-CORS support for functional endpoints is provided via a dedicated <<webflux-cors-webfilter,`CorsWebFilter`>>.
-====
+Besides using the `filter` method on the router function builder, it is possible to apply a
+filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.
+
+NOTE: CORS support for functional endpoints is provided through a dedicated
+<<webflux-cors-webfilter, `CorsWebFilter`>>.

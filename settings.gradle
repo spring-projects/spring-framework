@@ -5,6 +5,7 @@ include "spring-context"
 include "spring-context-support"
 include "spring-context-indexer"
 include "spring-core"
+include "spring-core-coroutines"
 include "spring-expression"
 include "spring-instrument"
 include "spring-jcl"
@@ -25,7 +26,7 @@ include "spring-framework-bom"
 include "buildSrc"
 rootProject.children.find{ it.name == "buildSrc" }.name = "spring-build-src"
 
-rootProject.name = 'spring'
+rootProject.name = "spring"
 rootProject.children.each {project ->
 	project.buildFileName = "${project.name}.gradle"
 }

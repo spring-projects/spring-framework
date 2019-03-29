@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,12 +34,14 @@ import static org.junit.Assert.*;
  */
 public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private ErrorHandler handler = new ErrorHandler();
+	private final ErrorHandler handler = new ErrorHandler();
+
 
 	@Override
 	protected HttpHandler createHttpHandler() {
 		return handler;
 	}
+
 
 	@Test
 	public void responseBodyError() throws Exception {
@@ -75,6 +77,7 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
+
 	private static class ErrorHandler implements HttpHandler {
 
 		@Override
@@ -92,6 +95,7 @@ public class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegration
 			}
 		}
 	}
+
 
 	private static final ResponseErrorHandler NO_OP_ERROR_HANDLER = new ResponseErrorHandler() {
 

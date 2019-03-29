@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -79,7 +79,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	private boolean autoStartup = true;
 
-	private int phase = Integer.MAX_VALUE;
+	private int phase = DEFAULT_PHASE;
 
 	private volatile boolean running = false;
 
@@ -192,12 +192,6 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 				((Lifecycle) getWebSocketClient()).stop();
 			}
 		}
-	}
-
-	@Override
-	public void stop(Runnable callback) {
-		stop();
-		callback.run();
 	}
 
 	@Override
@@ -396,7 +390,10 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		}
 
 		private void updateLastWriteTime() {
-			this.lastWriteTime = (this.lastWriteTime != -1 ? System.currentTimeMillis() : -1);
+			long lastWriteTime = this.lastWriteTime;
+			if (lastWriteTime != -1) {
+				this.lastWriteTime = System.currentTimeMillis();
+			}
 		}
 
 		@Override

@@ -1,0 +1,9 @@
+description = "Spring Core Coroutines support"
+
+dependencies {
+	compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+	compile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	compile("io.projectreactor:reactor-core")
+	compile("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
+	compile("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${coroutinesVersion}")
+}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -197,7 +197,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * will already have been instantiated before. Use a BeanFactoryPostProcessor
 	 * to intercept the BeanFactory setup process before beans get touched.
 	 * <p>Generally, this internal factory will only be accessible while the context
-	 * is active, that is, inbetween {@link #refresh()} and {@link #close()}.
+	 * is active, that is, in-between {@link #refresh()} and {@link #close()}.
 	 * The {@link #isActive()} flag can be used to check whether the context
 	 * is in an appropriate state.
 	 * @return the underlying bean factory

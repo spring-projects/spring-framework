@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -70,6 +68,14 @@ public abstract class RouterFunctions {
 	 */
 	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE =
 			RouterFunctions.class.getName() + ".uriTemplateVariables";
+
+	/**
+	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
+	 * contains the matching pattern, as a {@link org.springframework.web.util.pattern.PathPattern}.
+	 */
+	public static final String MATCHING_PATTERN_ATTRIBUTE =
+			RouterFunctions.class.getName() + ".matchingPattern";
+
 
 	private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER =
 			request -> ServerResponse.notFound().build();
@@ -480,7 +486,7 @@ public abstract class RouterFunctions {
 		 * {@code OrderController.routerFunction()}.
 		 * to the {@code changeUser} method in {@code userController}:
 		 * <pre class="code">
-		 * RouterFunctionlt;ServerResponsegt; route =
+		 * RouterFunction&lt;ServerResponse&gt; route =
 		 *   RouterFunctions.route()
 		 *     .GET("/users", userController::listUsers)
 		 *     .add(orderController.routerFunction());
@@ -934,25 +940,16 @@ public abstract class RouterFunctions {
 								}
 								return this.routerFunction.route(nestedRequest)
 										.doOnNext(match -> {
-											mergeTemplateVariables(serverRequest, nestedRequest.pathVariables());
+											if (nestedRequest != serverRequest) {
+												serverRequest.attributes().clear();
+												serverRequest.attributes()
+														.putAll(nestedRequest.attributes());
+											}
 										});
 							}
 					).orElseGet(Mono::empty);
 		}
 
-		@SuppressWarnings("unchecked")
-		private void mergeTemplateVariables(ServerRequest request, Map<String, String> variables) {
-			if (!variables.isEmpty()) {
-				Map<String, Object> attributes = request.attributes();
-				Map<String, String> oldVariables =
-						(Map<String, String>) request.attribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
-						.orElseGet(LinkedHashMap::new);
-				Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
-				mergedVariables.putAll(variables);
-				attributes.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-						Collections.unmodifiableMap(mergedVariables));
-			}
-		}
 
 		@Override
 		public void accept(Visitor visitor) {

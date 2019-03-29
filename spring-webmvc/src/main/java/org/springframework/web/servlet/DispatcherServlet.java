@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,6 +48,7 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.context.ThemeSource;
@@ -309,9 +310,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Perform cleanup of request attributes after include request?. */
 	private boolean cleanupAfterInclude = true;
 
-	/** Do not log potentially sensitive information (params at DEBUG and headers at TRACE). */
-	private boolean disableLoggingRequestDetails = false;
-
 	/** MultipartResolver used by this servlet. */
 	@Nullable
 	private MultipartResolver multipartResolver;
@@ -487,25 +485,6 @@ public class DispatcherServlet extends FrameworkServlet {
 		this.cleanupAfterInclude = cleanupAfterInclude;
 	}
 
-	/**
-	 * Set whether the {@code DispatcherServlet} should not log request
-	 * parameters and headers. By default request parameters are logged at DEBUG
-	 * while headers are logged at TRACE under the log category
-	 * {@code "org.springframework.web.servlet.DispatcherServlet"}. Those may
-	 * contain sensitive information, however this is typically not a problem
-	 * since DEBUG and TRACE are only expected to be enabled in development.
-	 * This property may be used to explicitly disable logging of such
-	 * information regardless of the log level.
-	 * <p>By default this is set to {@code false} in which case request details
-	 * are logged. If set to {@code true} request details will not be logged at
-	 * any log level.
-	 * @param disableLoggingRequestDetails whether to disable or not
-	 * @since 5.1
-	 */
-	public void setDisableLoggingRequestDetails(boolean disableLoggingRequestDetails) {
-		this.disableLoggingRequestDetails = disableLoggingRequestDetails;
-	}
-
 
 	/**
 	 * This implementation calls {@link #initStrategies}.
@@ -529,20 +508,6 @@ public class DispatcherServlet extends FrameworkServlet {
 		initRequestToViewNameTranslator(context);
 		initViewResolvers(context);
 		initFlashMapManager(context);
-
-		if (logger.isDebugEnabled()) {
-			if (this.disableLoggingRequestDetails) {
-				logger.debug("Logging request parameters and headers is OFF.");
-			}
-			else {
-				logger.warn("\n\n" +
-						"!!!!!!!!!!!!!!!!!!!\n" +
-						"Logging request parameters (DEBUG) and headers (TRACE) may show sensitive data.\n" +
-						"If not in development, use the DispatcherServlet property \"disableLoggingRequestDetails=true\",\n" +
-						"or lower the log level.\n" +
-						"!!!!!!!!!!!!!!!!!!!\n");
-			}
-		}
 	}
 
 	/**
@@ -942,7 +907,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
 		logRequest(request);
 
 		// Keep a snapshot of the request attributes in case of an include,
@@ -988,33 +952,36 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	private void logRequest(HttpServletRequest request) {
-		if (logger.isDebugEnabled()) {
-
-			String params = "";
-			if (!this.disableLoggingRequestDetails) {
+		LogFormatUtils.traceDebug(logger, traceOn -> {
+			String params;
+			if (isEnableLoggingRequestDetails()) {
 				params = request.getParameterMap().entrySet().stream()
 						.map(entry -> entry.getKey() + ":" + Arrays.toString(entry.getValue()))
-						.collect(Collectors.joining(", ", ", parameters={", "}"));
-			}
-
-			String dispatchType = !request.getDispatcherType().equals(DispatcherType.REQUEST) ?
-					"\"" + request.getDispatcherType().name() + "\" dispatch for " : "";
-
-			String message = dispatchType + request.getMethod() + " \"" + getRequestUri(request) + "\"" + params;
-
-			if (logger.isTraceEnabled()) {
-				String headers = "";
-				if (!this.disableLoggingRequestDetails) {
-					headers = Collections.list(request.getHeaderNames()).stream()
-							.map(name -> name + ":" + Collections.list(request.getHeaders(name)))
-							.collect(Collectors.joining(", ", ", headers={", "}"));
-				}
-				logger.trace(message + headers + " in DispatcherServlet '" + getServletName() + "'");
+						.collect(Collectors.joining(", "));
 			}
 			else {
-				logger.debug(message);
+				params = (request.getParameterMap().isEmpty() ? "" : "masked");
 			}
-		}
+
+			String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
+			String dispatchType = (!request.getDispatcherType().equals(DispatcherType.REQUEST) ?
+					"\"" + request.getDispatcherType().name() + "\" dispatch for " : "");
+			String message = (dispatchType + request.getMethod() + " \"" + getRequestUri(request) +
+					query + "\", parameters={" + params + "}");
+
+			if (traceOn) {
+				List<String> values = Collections.list(request.getHeaderNames());
+				String headers = values.size() > 0 ? "masked" : "";
+				if (isEnableLoggingRequestDetails()) {
+					headers = values.stream().map(name -> name + ":" + Collections.list(request.getHeaders(name)))
+							.collect(Collectors.joining(", "));
+				}
+				return message + ", headers={" + headers + "} in DispatcherServlet '" + getServletName() + "'";
+			}
+			else {
+				return message;
+			}
+		});
 	}
 
 	/**
@@ -1199,7 +1166,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					logger.trace("Request already resolved to MultipartHttpServletRequest, e.g. by MultipartFilter");
 				}
 			}
-			else if (hasMultipartException(request) ) {
+			else if (hasMultipartException(request)) {
 				logger.debug("Multipart resolution previously failed for current request - " +
 						"skipping re-resolution for undisturbed error rendering");
 			}
@@ -1465,7 +1432,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param attributesSnapshot the snapshot of the request attributes before the include
 	 */
 	@SuppressWarnings("unchecked")
-	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?,?> attributesSnapshot) {
+	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?, ?> attributesSnapshot) {
 		// Need to copy into separate Collection here, to avoid side effects
 		// on the Enumeration when removing attributes.
 		Set<String> attrsToCheck = new HashSet<>();
@@ -1484,7 +1451,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// or removing the attribute, respectively, if appropriate.
 		for (String attrName : attrsToCheck) {
 			Object attrValue = attributesSnapshot.get(attrName);
-			if (attrValue == null){
+			if (attrValue == null) {
 				request.removeAttribute(attrName);
 			}
 			else if (attrValue != request.getAttribute(attrName)) {

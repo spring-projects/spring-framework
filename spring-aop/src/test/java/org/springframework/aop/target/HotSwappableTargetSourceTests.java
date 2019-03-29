@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,6 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.Resource;
 import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
 import org.springframework.tests.sample.beans.Person;
 import org.springframework.tests.sample.beans.SerializablePerson;
@@ -41,31 +40,31 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class HotSwappableTargetSourceTests {
 
-	private static final Resource CONTEXT = qualifiedResource(HotSwappableTargetSourceTests.class, "context.xml");
-
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
 	private DefaultListableBeanFactory beanFactory;
 
+
 	@Before
-	public void setUp() throws Exception {
+	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(CONTEXT);
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
+				qualifiedResource(HotSwappableTargetSourceTests.class, "context.xml"));
 	}
 
 	/**
 	 * We must simulate container shutdown, which should clear threads.
 	 */
 	@After
-	public void tearDown() {
+	public void close() {
 		// Will call pool.close()
 		this.beanFactory.destroySingletons();
 	}
 
+
 	/**
 	 * Check it works like a normal invoker
-	 *
 	 */
 	@Test
 	public void testBasicFunctionality() {
@@ -106,18 +105,13 @@ public class HotSwappableTargetSourceTests {
 		assertEquals(target1.getCount(), proxied.getCount());
 	}
 
-
-	/**
-	 *
-	 * @param invalid
-	 * @return the message
-	 */
-	private IllegalArgumentException testRejectsSwapToInvalidValue(Object invalid) {
+	@Test
+	public void testRejectsSwapToNull() {
 		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 		IllegalArgumentException aopex = null;
 		try {
-			swapper.swap(invalid);
-			fail("Shouldn't be able to swap to invalid value [" + invalid + "]");
+			swapper.swap(null);
+			fail("Shouldn't be able to swap to invalid value");
 		}
 		catch (IllegalArgumentException ex) {
 			// Ok
@@ -126,18 +120,8 @@ public class HotSwappableTargetSourceTests {
 
 		// It shouldn't be corrupted, it should still work
 		testBasicFunctionality();
-		return aopex;
+		assertTrue(aopex.getMessage().contains("null"));
 	}
-
-	@Test
-	public void testRejectsSwapToNull() {
-		IllegalArgumentException ex = testRejectsSwapToInvalidValue(null);
-		assertTrue(ex.getMessage().indexOf("null") != -1);
-	}
-
-	// TODO test reject swap to wrong interface or class?
-	// how to decide what's valid?
-
 
 	@Test
 	public void testSerialization() throws Exception {
@@ -165,4 +149,5 @@ public class HotSwappableTargetSourceTests {
 		assertEquals(sp1.getName(), p.getName());
 
 	}
+
 }

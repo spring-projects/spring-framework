@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -274,6 +275,7 @@ public class ResourceWebHandlerTests {
 	private void testInvalidPath(String requestPath, ResourceWebHandler handler) {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, requestPath);
+
 		StepVerifier.create(handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err, instanceOf(ResponseStatusException.class));
@@ -468,11 +470,18 @@ public class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.method(httpMethod, "").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "not-there.css");
-		StepVerifier.create(this.handler.handle(exchange))
+		Mono<Void> mono = this.handler.handle(exchange);
+
+		StepVerifier.create(mono)
 				.expectErrorSatisfies(err -> {
 					assertThat(err, instanceOf(ResponseStatusException.class));
 					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
 				}).verify(TIMEOUT);
+
+		// SPR-17475
+		AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
+		StepVerifier.create(mono).consumeErrorWith(exceptionRef::set).verify();
+		StepVerifier.create(mono).consumeErrorWith(ex -> assertNotSame(exceptionRef.get(), ex)).verify();
 	}
 
 	@Test

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -99,6 +99,8 @@ public abstract class BodyInserters {
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
 			P publisher, Class<T> elementClass) {
 
+		Assert.notNull(publisher, "Publisher must not be null");
+		Assert.notNull(elementClass, "Element Class must not be null");
 		return (message, context) ->
 				writeWithMessageWriters(message, context, publisher, ResolvableType.forClass(elementClass));
 	}
@@ -109,16 +111,18 @@ public abstract class BodyInserters {
 	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
 	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
 	 * @param publisher the publisher to write with
-	 * @param typeRef the type of elements contained in the publisher
+	 * @param typeReference the type of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <P> the {@code Publisher} type
 	 * @return the inserter to write a {@code Publisher}
 	 */
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
-			P publisher, ParameterizedTypeReference<T> typeRef) {
+			P publisher, ParameterizedTypeReference<T> typeReference) {
 
+		Assert.notNull(publisher, "Publisher must not be null");
+		Assert.notNull(typeReference, "ParameterizedTypeReference must not be null");
 		return (message, context) ->
-				writeWithMessageWriters(message, context, publisher, ResolvableType.forType(typeRef.getType()));
+				writeWithMessageWriters(message, context, publisher, ResolvableType.forType(typeReference.getType()));
 	}
 
 	/**
@@ -130,6 +134,7 @@ public abstract class BodyInserters {
 	 * @return the inserter to write a {@code Publisher}
 	 */
 	public static <T extends Resource> BodyInserter<T, ReactiveHttpOutputMessage> fromResource(T resource) {
+		Assert.notNull(resource, "Resource must not be null");
 		return (outputMessage, context) -> {
 			ResolvableType elementType = RESOURCE_TYPE;
 			HttpMessageWriter<Resource> writer = findWriter(context, elementType, null);
@@ -151,11 +156,12 @@ public abstract class BodyInserters {
 	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(
 			S eventsPublisher) {
 
+		Assert.notNull(eventsPublisher, "Publisher must not be null");
 		return (serverResponse, context) -> {
-			ResolvableType elmentType = SSE_TYPE;
+			ResolvableType elementType = SSE_TYPE;
 			MediaType mediaType = MediaType.TEXT_EVENT_STREAM;
-			HttpMessageWriter<ServerSentEvent<T>> writer = findWriter(context, elmentType, mediaType);
-			return write(eventsPublisher, elmentType, mediaType, serverResponse, context, writer);
+			HttpMessageWriter<ServerSentEvent<T>> writer = findWriter(context, elementType, mediaType);
+			return write(eventsPublisher, elementType, mediaType, serverResponse, context, writer);
 		};
 	}
 
@@ -163,13 +169,11 @@ public abstract class BodyInserters {
 	 * Return a {@link FormInserter} to write the given {@code MultiValueMap}
 	 * as URL-encoded form data. The returned inserter allows for additional
 	 * entries to be added via {@link FormInserter#with(String, Object)}.
-	 *
 	 * <p>Note that you can also use the {@code syncBody(Object)} method in the
 	 * request builders of both the {@code WebClient} and {@code WebTestClient}.
 	 * In that case the setting of the request content type is also not required,
 	 * just be sure the map contains String values only or otherwise it would be
 	 * interpreted as a multipart request.
-	 *
 	 * @param formData the form data to write to the output message
 	 * @return the inserter that allows adding more form data
 	 */
@@ -260,8 +264,7 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Inserter to write the given
-	 * {@code Publisher<DataBuffer>} to the body.
+	 * Inserter to write the given {@code Publisher<DataBuffer>} to the body.
 	 * @param publisher the data buffer publisher to write
 	 * @param <T> the type of the publisher
 	 * @return the inserter to write directly to the body

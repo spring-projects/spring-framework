@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,7 +60,7 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		Class<?> clazz = elementType.resolve(Object.class);
+		Class<?> clazz = elementType.toClass();
 		return (super.canEncode(elementType, mimeType) && Resource.class.isAssignableFrom(clazz));
 	}
 
@@ -68,7 +68,7 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
 			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		if (logger.isDebugEnabled() && !Hints.suppressLogging(hints)) {
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
 			String logPrefix = Hints.getLogPrefix(hints);
 			logger.debug(logPrefix + "Writing [" + resource + "]");
 		}

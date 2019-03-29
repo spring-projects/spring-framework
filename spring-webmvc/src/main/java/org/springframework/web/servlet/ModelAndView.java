@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -280,12 +280,12 @@ public class ModelAndView {
 
 	/**
 	 * Add an attribute to the model.
-	 * @param attributeName name of the object to add to the model
-	 * @param attributeValue object to add to the model (never {@code null})
+	 * @param attributeName name of the object to add to the model (never {@code null})
+	 * @param attributeValue object to add to the model (can be {@code null})
 	 * @see ModelMap#addAttribute(String, Object)
 	 * @see #getModelMap()
 	 */
-	public ModelAndView addObject(String attributeName, Object attributeValue) {
+	public ModelAndView addObject(String attributeName, @Nullable Object attributeValue) {
 		getModelMap().addAttribute(attributeName, attributeValue);
 		return this;
 	}

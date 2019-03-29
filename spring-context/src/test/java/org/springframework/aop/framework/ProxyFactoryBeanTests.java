@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -145,7 +145,7 @@ public class ProxyFactoryBeanTests {
 		catch (BeanCreationException ex) {
 			// Root cause of the problem must be an AOP exception
 			AopConfigException aex = (AopConfigException) ex.getCause();
-			assertTrue(aex.getMessage().indexOf("TargetSource") != -1);
+			assertTrue(aex.getMessage().contains("TargetSource"));
 		}
 	}
 
@@ -398,7 +398,7 @@ public class ProxyFactoryBeanTests {
 		config.removeAdvice(debugInterceptor);
 		it.getSpouse();
 
-		// Still invoked wiht old reference
+		// Still invoked with old reference
 		assertEquals(2, debugInterceptor.getCount());
 
 		// not invoked with new object

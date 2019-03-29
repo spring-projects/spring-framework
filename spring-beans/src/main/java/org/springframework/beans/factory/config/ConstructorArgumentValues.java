@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,9 +43,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class ConstructorArgumentValues {
 
-	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<>(0);
+	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<>();
 
-	private final List<ValueHolder> genericArgumentValues = new LinkedList<>();
+	private final List<ValueHolder> genericArgumentValues = new ArrayList<>();
 
 
 	/**
@@ -484,7 +484,6 @@ public class ConstructorArgumentValues {
 
 		/**
 		 * Set the value for the constructor argument.
-		 * @see PropertyPlaceholderConfigurer
 		 */
 		public void setValue(@Nullable Object value) {
 			this.value = value;

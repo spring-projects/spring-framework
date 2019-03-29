@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,10 +61,10 @@ public class FlashAttributeAssertionTests {
 		this.mockMvc.perform(post("/persons"))
 			.andExpect(flash().attribute("one", "1"))
 			.andExpect(flash().attribute("two", 2.222))
-			.andExpect(flash().attribute("three", new URL("http://example.com")))
+			.andExpect(flash().attribute("three", new URL("https://example.com")))
 			.andExpect(flash().attribute("one", equalTo("1")))	// Hamcrest...
 			.andExpect(flash().attribute("two", equalTo(2.222)))
-			.andExpect(flash().attribute("three", equalTo(new URL("http://example.com"))));
+			.andExpect(flash().attribute("three", equalTo(new URL("https://example.com"))));
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class FlashAttributeAssertionTests {
 		public String save(RedirectAttributes redirectAttrs) throws Exception {
 			redirectAttrs.addFlashAttribute("one", "1");
 			redirectAttrs.addFlashAttribute("two", 2.222);
-			redirectAttrs.addFlashAttribute("three", new URL("http://example.com"));
+			redirectAttrs.addFlashAttribute("three", new URL("https://example.com"));
 			return "redirect:/person/1";
 		}
 	}

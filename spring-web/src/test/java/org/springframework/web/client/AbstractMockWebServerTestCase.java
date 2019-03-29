@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -240,6 +240,9 @@ public class AbstractMockWebServerTestCase {
 				}
 				else if (request.getPath().equals("/status/notfound")) {
 					return new MockResponse().setResponseCode(404);
+				}
+				else if (request.getPath().equals("/status/badrequest")) {
+					return new MockResponse().setResponseCode(400);
 				}
 				else if (request.getPath().equals("/status/server")) {
 					return new MockResponse().setResponseCode(500);

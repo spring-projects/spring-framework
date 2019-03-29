@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -96,8 +96,8 @@ public abstract class JmxUtils {
 			List<MBeanServer> servers = MBeanServerFactory.findMBeanServer(agentId);
 			if (!CollectionUtils.isEmpty(servers)) {
 				// Check to see if an MBeanServer is registered.
-				if (servers.size() > 1 && logger.isWarnEnabled()) {
-					logger.warn("Found more than one MBeanServer instance" +
+				if (servers.size() > 1 && logger.isInfoEnabled()) {
+					logger.info("Found more than one MBeanServer instance" +
 							(agentId != null ? " with agent id [" + agentId + "]" : "") +
 							". Returning first from list.");
 				}

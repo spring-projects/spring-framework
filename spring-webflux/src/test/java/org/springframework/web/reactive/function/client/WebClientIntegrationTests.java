@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
@@ -32,6 +33,8 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -43,9 +46,14 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.JettyClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.Pojo;
 
 import static org.junit.Assert.*;
@@ -55,18 +63,36 @@ import static org.junit.Assert.*;
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
+ * @author Denys Ivano
+ * @author Sebastien Deleuze
  */
+@RunWith(Parameterized.class)
 public class WebClientIntegrationTests {
 
 	private MockWebServer server;
 
 	private WebClient webClient;
 
+	@Parameterized.Parameter(0)
+	public ClientHttpConnector connector;
+
+	@Parameterized.Parameters(name = "webClient [{0}]")
+	public static Object[][] arguments() {
+		return new Object[][] {
+				{new JettyClientHttpConnector()},
+				{new ReactorClientHttpConnector()}
+		};
+	}
+
 
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
-		this.webClient = WebClient.create(this.server.url("/").toString());
+		this.webClient = WebClient
+				.builder()
+				.clientConnector(this.connector)
+				.baseUrl(this.server.url("/").toString())
+				.build();
 	}
 
 	@After
@@ -110,6 +136,28 @@ public class WebClientIntegrationTests {
 				.header("X-Test-Header", "testvalue")
 				.retrieve()
 				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Hello Spring!")
+				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("testvalue", request.getHeader("X-Test-Header"));
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/greeting?name=Spring", request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldReceivePlainTextFlux() throws Exception {
+		prepareResponse(response -> response.setBody("Hello Spring!"));
+
+		Flux<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.header("X-Test-Header", "testvalue")
+				.exchange()
+				.flatMapMany(response -> response.bodyToFlux(String.class));
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -413,7 +461,7 @@ public class WebClientIntegrationTests {
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.expectError(WebClientException.class)
+				.expectError(WebClientResponseException.class)
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
@@ -433,7 +481,7 @@ public class WebClientIntegrationTests {
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.expectError(WebClientException.class)
+				.expectError(WebClientResponseException.class)
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
@@ -449,8 +497,9 @@ public class WebClientIntegrationTests {
 		prepareResponse(response -> response.setResponseCode(500)
 				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
 
+		String path = "/greeting?name=Spring";
 		Mono<String> result = this.webClient.get()
-				.uri("/greeting?name=Spring")
+				.uri(path)
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -459,6 +508,70 @@ public class WebClientIntegrationTests {
 					assertTrue(throwable instanceof WebClientResponseException);
 					WebClientResponseException ex = (WebClientResponseException) throwable;
 					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
+					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getRawStatusCode());
+					assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+							ex.getStatusText());
+					assertEquals(MediaType.TEXT_PLAIN, ex.getHeaders().getContentType());
+					assertEquals(errorMessage, ex.getResponseBodyAsString());
+
+					HttpRequest request = ex.getRequest();
+					assertEquals(HttpMethod.GET, request.getMethod());
+					assertEquals(URI.create(this.server.url(path).toString()), request.getURI());
+					assertNotNull(request.getHeaders());
+				})
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals(path, request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldSupportUnknownStatusCode() {
+		int errorStatus = 555;
+		assertNull(HttpStatus.resolve(errorStatus));
+		String errorMessage = "Something went wrong";
+		prepareResponse(response -> response.setResponseCode(errorStatus)
+				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
+
+		Mono<ClientResponse> result = this.webClient.get()
+				.uri("/unknownPage")
+				.exchange();
+
+		StepVerifier.create(result)
+				.consumeNextWith(response -> assertEquals(555, response.rawStatusCode()))
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+			assertEquals("/unknownPage", request.getPath());
+		});
+	}
+
+	@Test
+	public void shouldGetErrorSignalWhenRetrievingUnknownStatusCode() {
+		int errorStatus = 555;
+		assertNull(HttpStatus.resolve(errorStatus));
+		String errorMessage = "Something went wrong";
+		prepareResponse(response -> response.setResponseCode(errorStatus)
+				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/unknownPage")
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertTrue(throwable instanceof UnknownHttpStatusCodeException);
+					UnknownHttpStatusCodeException ex = (UnknownHttpStatusCodeException) throwable;
+					assertEquals("Unknown status code ["+errorStatus+"]", ex.getMessage());
+					assertEquals(errorStatus, ex.getRawStatusCode());
+					assertEquals("", ex.getStatusText());
 					assertEquals(MediaType.TEXT_PLAIN, ex.getHeaders().getContentType());
 					assertEquals(errorMessage, ex.getResponseBodyAsString());
 				})
@@ -467,7 +580,7 @@ public class WebClientIntegrationTests {
 		expectRequestCount(1);
 		expectRequest(request -> {
 			assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-			assertEquals("/greeting?name=Spring", request.getPath());
+			assertEquals("/unknownPage", request.getPath());
 		});
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,9 +41,13 @@ import static org.junit.Assert.*;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
+/**
+ * @author Sebastien Deleuze
+ */
 public class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final WebClient webClient = WebClient.create();
+
 
 	@Test
 	public void multipartData() {
@@ -86,6 +90,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 		return route(POST("/multipartData"), multipartHandler::multipartData)
 				.andRoute(POST("/parts"), multipartHandler::parts);
 	}
+
 
 	private static class MultipartHandler {
 

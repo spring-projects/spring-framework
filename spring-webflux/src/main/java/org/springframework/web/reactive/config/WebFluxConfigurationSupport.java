@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,7 @@ import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -54,6 +55,7 @@ import org.springframework.web.reactive.function.server.support.RouterFunctionMa
 import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.handler.WebFluxResponseStatusExceptionHandler;
+import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
@@ -73,6 +75,7 @@ import org.springframework.web.server.i18n.LocaleContextResolver;
  * <p>Import directly or extend and override protected methods to customize.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class WebFluxConfigurationSupport implements ApplicationContextAware {
@@ -93,6 +96,11 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+		if (applicationContext != null) {
+				Assert.state(!applicationContext.containsBean("mvcContentNegotiationManager"),
+						"The Java/XML config for Spring MVC and Spring WebFlux cannot both be enabled, " +
+						"e.g. via @EnableWebMvc and @EnableWebFlux, in the same application.");
+		}
 	}
 
 	@Nullable
@@ -120,17 +128,14 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
-
 		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-
 		Boolean useCaseSensitiveMatch = configurer.isUseCaseSensitiveMatch();
 		if (useCaseSensitiveMatch != null) {
 			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
-
 		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
 		if (pathPrefixes != null) {
 			mapping.setPathPrefixes(pathPrefixes);
@@ -226,6 +231,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			resourceLoader = new DefaultResourceLoader();
 		}
 		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(resourceLoader);
+		registry.setResourceUrlProvider(resourceUrlProvider());
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
@@ -244,6 +250,11 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 			handlerMapping = new EmptyHandlerMapping();
 		}
 		return handlerMapping;
+	}
+
+	@Bean
+	public ResourceUrlProvider resourceUrlProvider() {
+		return new ResourceUrlProvider();
 	}
 
 	/**
@@ -325,6 +336,10 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		return initializer;
 	}
 
+	/**
+	 * Return a {@link FormattingConversionService} for use with annotated controllers.
+	 * <p>See {@link #addFormatters} as an alternative to overriding this method.
+	 */
 	@Bean
 	public FormattingConversionService webFluxConversionService() {
 		FormattingConversionService service = new DefaultFormattingConversionService();
@@ -333,7 +348,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override to add custom {@link Converter}s and {@link Formatter Converter}s and {@link Formatters}.
+	 * Override this method to add custom {@link Converter} and/or {@link Formatter}
+	 * delegates to the common {@link FormattingConversionService}.
+	 * @see #webFluxConversionService()
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
 	}

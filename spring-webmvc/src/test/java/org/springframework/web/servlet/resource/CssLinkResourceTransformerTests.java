@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,11 +34,11 @@ import org.springframework.web.servlet.resource.EncodedResourceResolver.EncodedR
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for
- * {@link org.springframework.web.servlet.resource.CssLinkResourceTransformer}.
+ * Unit tests for {@link CssLinkResourceTransformer}.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 4.1
  */
 public class CssLinkResourceTransformerTests {
@@ -112,7 +112,7 @@ public class CssLinkResourceTransformerTests {
 		ResourceTransformerChain chain = new DefaultResourceTransformerChain(mockChain, transformers);
 
 		Resource resource = getResource("external.css");
-		String expected = "@import url(\"http://example.org/fonts/css\");\n" +
+		String expected = "@import url(\"https://example.org/fonts/css\");\n" +
 				"body { background: url(\"file:///home/spring/image.png\") }\n" +
 				"figure { background: url(\"//example.org/style.css\")}";
 
@@ -122,7 +122,7 @@ public class CssLinkResourceTransformerTests {
 		assertEquals(expected, result);
 
 		List<Resource> locations = Collections.singletonList(resource);
-		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("http://example.org/fonts/css", locations);
+		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("https://example.org/fonts/css", locations);
 		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("file:///home/spring/image.png", locations);
 		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("//example.org/style.css", locations);
 	}
@@ -147,6 +147,21 @@ public class CssLinkResourceTransformerTests {
 		Resource actual = this.transformerChain.transform(this.request, gzipped);
 
 		assertSame(gzipped, actual);
+	}
+
+	@Test // https://github.com/spring-projects/spring-framework/issues/22602
+	public void transformEmptyUrlFunction() throws Exception {
+		this.request = new MockHttpServletRequest("GET", "/static/empty_url_function.css");
+		Resource css = getResource("empty_url_function.css");
+		String expected =
+				".fooStyle {\n" +
+				"\tbackground: transparent url() no-repeat left top;\n" +
+				"}";
+
+		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
+		String result = new String(actual.getByteArray(), StandardCharsets.UTF_8);
+		result = StringUtils.deleteAny(result, "\r");
+		assertEquals(expected, result);
 	}
 
 	private Resource getResource(String filePath) {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,13 +64,6 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	private BodyInserter<?, ? super ClientHttpRequest> body = BodyInserters.empty();
 
 
-	public DefaultClientRequestBuilder(HttpMethod method, URI url) {
-		Assert.notNull(method, "HttpMethod must not be null");
-		Assert.notNull(url, "URI must not be null");
-		this.method = method;
-		this.url = url;
-	}
-
 	public DefaultClientRequestBuilder(ClientRequest other) {
 		Assert.notNull(other, "ClientRequest must not be null");
 		this.method = other.method();
@@ -81,17 +74,24 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		body(other.body());
 	}
 
+	public DefaultClientRequestBuilder(HttpMethod method, URI url) {
+		Assert.notNull(method, "HttpMethod must not be null");
+		Assert.notNull(url, "URI must not be null");
+		this.method = method;
+		this.url = url;
+	}
+
 
 	@Override
 	public ClientRequest.Builder method(HttpMethod method) {
-		Assert.notNull(method, "'method' must not be null");
+		Assert.notNull(method, "HttpMethod must not be null");
 		this.method = method;
 		return this;
 	}
 
 	@Override
 	public ClientRequest.Builder url(URI url) {
-		Assert.notNull(url, "'url' must not be null");
+		Assert.notNull(url, "URI must not be null");
 		this.url = url;
 		return this;
 	}
@@ -126,9 +126,6 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher, Class<S> elementClass) {
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(elementClass, "'elementClass' must not be null");
-
 		this.body = BodyInserters.fromPublisher(publisher, elementClass);
 		return this;
 	}
@@ -136,9 +133,6 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	@Override
 	public <S, P extends Publisher<S>> ClientRequest.Builder body(
 			P publisher, ParameterizedTypeReference<S> typeReference) {
-
-		Assert.notNull(publisher, "'publisher' must not be null");
-		Assert.notNull(typeReference, "'typeReference' must not be null");
 
 		this.body = BodyInserters.fromPublisher(publisher, typeReference);
 		return this;
@@ -184,7 +178,6 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 		private final String logPrefix;
 
-
 		public BodyInserterRequest(HttpMethod method, URI url, HttpHeaders headers,
 				MultiValueMap<String, String> cookies, BodyInserter<?, ? super ClientHttpRequest> body,
 				Map<String, Object> attributes) {
@@ -199,7 +192,6 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 			Object id = attributes.computeIfAbsent(LOG_ID_ATTRIBUTE, name -> ObjectUtils.getIdentityHexString(this));
 			this.logPrefix = "[" + id + "] ";
 		}
-
 
 		@Override
 		public HttpMethod method() {

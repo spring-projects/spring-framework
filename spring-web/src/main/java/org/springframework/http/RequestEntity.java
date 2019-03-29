@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,8 @@ package org.springframework.http;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 import org.springframework.lang.Nullable;
@@ -34,7 +36,7 @@ import org.springframework.util.ObjectUtils;
  * <pre class="code">
  * MyRequest body = ...
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity
- *     .post(new URI(&quot;http://example.com/bar&quot;))
+ *     .post(new URI(&quot;https://example.com/bar&quot;))
  *     .accept(MediaType.APPLICATION_JSON)
  *     .body(body);
  * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
@@ -43,7 +45,7 @@ import org.springframework.util.ObjectUtils;
  * <p>If you would like to provide a URI template with variables, consider using
  * {@link org.springframework.web.util.UriTemplate}:
  * <pre class="code">
- * URI uri = new UriTemplate(&quot;http://example.com/{foo}&quot;).expand(&quot;bar&quot;);
+ * URI uri = new UriTemplate(&quot;https://example.com/{foo}&quot;).expand(&quot;bar&quot;);
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
  * </pre>
  *
@@ -329,6 +331,20 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the value of the {@code If-Modified-Since} header.
+		 * @param ifModifiedSince the new value of the header
+		 * @since 5.1.4
+		 */
+		B ifModifiedSince(ZonedDateTime ifModifiedSince);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
+		 * @param ifModifiedSince the new value of the header
+		 * @since 5.1.4
+		 */
+		B ifModifiedSince(Instant ifModifiedSince);
+
+		/**
+		 * Set the value of the {@code If-Modified-Since} header.
 		 * <p>The date should be specified as the number of milliseconds since
 		 * January 1, 1970 GMT.
 		 * @param ifModifiedSince the new value of the header
@@ -435,6 +451,18 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder contentType(MediaType contentType) {
 			this.headers.setContentType(contentType);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder ifModifiedSince(ZonedDateTime ifModifiedSince) {
+			this.headers.setIfModifiedSince(ifModifiedSince);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder ifModifiedSince(Instant ifModifiedSince) {
+			this.headers.setIfModifiedSince(ifModifiedSince);
 			return this;
 		}
 

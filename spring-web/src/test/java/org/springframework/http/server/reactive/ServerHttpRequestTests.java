@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,7 +59,7 @@ public class ServerHttpRequestTests {
 	}
 
 	@Test
-	public void queryParamsWithMulitpleValues() throws Exception {
+	public void queryParamsWithMultipleValues() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a=1&a=2").getQueryParams();
 		assertEquals(1, params.size());
 		assertEquals(Arrays.asList("1", "2"), params.get("a"));
@@ -96,16 +96,16 @@ public class ServerHttpRequestTests {
 		request = createHttpRequest("/").mutate().method(HttpMethod.DELETE).build();
 		assertEquals(HttpMethod.DELETE, request.getMethod());
 
-		String baseUri = "http://aaa.org:8080/a";
+		String baseUri = "https://aaa.org:8080/a";
 
-		request = createHttpRequest(baseUri).mutate().uri(URI.create("http://bbb.org:9090/b")).build();
-		assertEquals("http://bbb.org:9090/b", request.getURI().toString());
+		request = createHttpRequest(baseUri).mutate().uri(URI.create("https://bbb.org:9090/b")).build();
+		assertEquals("https://bbb.org:9090/b", request.getURI().toString());
 
 		request = createHttpRequest(baseUri).mutate().path("/b/c/d").build();
-		assertEquals("http://aaa.org:8080/b/c/d", request.getURI().toString());
+		assertEquals("https://aaa.org:8080/b/c/d", request.getURI().toString());
 
 		request = createHttpRequest(baseUri).mutate().path("/app/b/c/d").contextPath("/app").build();
-		assertEquals("http://aaa.org:8080/app/b/c/d", request.getURI().toString());
+		assertEquals("https://aaa.org:8080/app/b/c/d", request.getURI().toString());
 		assertEquals("/app", request.getPath().contextPath().value());
 	}
 

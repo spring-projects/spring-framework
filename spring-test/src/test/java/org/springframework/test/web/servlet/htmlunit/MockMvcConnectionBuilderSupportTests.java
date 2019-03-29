@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -91,7 +91,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = this.builder.createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcNotUsed(conn, "http://example.com/");
+		assertMockMvcNotUsed(conn, "https://example.com/");
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = new MockMvcWebConnectionBuilderSupport(mockMvc) {}.createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcNotUsed(conn, "http://example.com/");
+		assertMockMvcNotUsed(conn, "https://example.com/");
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class MockMvcConnectionBuilderSupportTests {
 		WebConnection conn = this.builder.useMockMvcForHosts("example.com").createConnection(this.client);
 
 		assertMockMvcUsed(conn, "http://localhost/");
-		assertMockMvcUsed(conn, "http://example.com/");
+		assertMockMvcUsed(conn, "https://example.com/");
 		assertMockMvcNotUsed(conn, "http://other.com/");
 	}
 

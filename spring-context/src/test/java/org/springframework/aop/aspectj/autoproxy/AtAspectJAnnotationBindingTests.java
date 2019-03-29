@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +40,7 @@ public class AtAspectJAnnotationBindingTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 		testBean = (AnnotatedTestBean) ctx.getBean("testBean");
 	}
@@ -59,7 +59,7 @@ public class AtAspectJAnnotationBindingTests {
 	}
 
 	@Test
-	public void testPointcutEvaulatedAgainstArray() {
+	public void testPointcutEvaluatedAgainstArray() {
 		ctx.getBean("arrayFactoryBean");
 	}
 
@@ -84,7 +84,7 @@ class ResourceArrayFactoryBean implements FactoryBean<Object> {
 
 	@Override
 	@TestAnnotation("some value")
-	public Object getObject() throws Exception {
+	public Object getObject() {
 		return new Resource[0];
 	}
 

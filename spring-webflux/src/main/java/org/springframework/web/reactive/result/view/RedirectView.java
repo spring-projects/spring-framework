@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -244,7 +244,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		while (found) {
 			String name = matcher.group(1);
 			Object value = (model.containsKey(name) ? model.get(name) : uriVariables.get(name));
-			Assert.notNull(value, "No value for URI variable '" + name + "'");
+			Assert.notNull(value, () -> "No value for URI variable '" + name + "'");
 			result.append(targetUrl.substring(endLastMatch, matcher.start()));
 			result.append(encodeUriVariable(value.toString()));
 			endLastMatch = matcher.end();

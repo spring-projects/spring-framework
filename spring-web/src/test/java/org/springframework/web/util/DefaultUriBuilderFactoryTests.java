@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,60 +33,67 @@ import static junit.framework.TestCase.assertEquals;
 public class DefaultUriBuilderFactoryTests {
 
 	@Test
-	public void defaultSettings() throws Exception {
+	public void defaultSettings() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-		URI uri = factory.uriString("/foo").pathSegment("{id}").build("a/b");
+		URI uri = factory.uriString("/foo/{id}").build("a/b");
+		assertEquals("/foo/a%2Fb", uri.toString());
+	}
+
+	@Test // SPR-17465
+	public void defaultSettingsWithBuilder() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		URI uri = factory.builder().path("/foo/{id}").build("a/b");
 		assertEquals("/foo/a%2Fb", uri.toString());
 	}
 
 	@Test
-	public void baseUri() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://foo.com/v1?id=123");
+	public void baseUri() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.com/v1?id=123");
 		URI uri = factory.uriString("/bar").port(8080).build();
-		assertEquals("http://foo.com:8080/v1/bar?id=123", uri.toString());
+		assertEquals("https://foo.com:8080/v1/bar?id=123", uri.toString());
 	}
 
 	@Test
-	public void baseUriWithFullOverride() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://foo.com/v1?id=123");
-		URI uri = factory.uriString("http://example.com/1/2").build();
+	public void baseUriWithFullOverride() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.com/v1?id=123");
+		URI uri = factory.uriString("https://example.com/1/2").build();
 		assertEquals("Use of host should case baseUri to be completely ignored",
-				"http://example.com/1/2", uri.toString());
+				"https://example.com/1/2", uri.toString());
 	}
 
 	@Test
-	public void baseUriWithPathOverride() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://foo.com/v1");
+	public void baseUriWithPathOverride() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://foo.com/v1");
 		URI uri = factory.builder().replacePath("/baz").build();
-		assertEquals("http://foo.com/baz", uri.toString());
+		assertEquals("https://foo.com/baz", uri.toString());
 	}
 
 	@Test
-	public void defaultUriVars() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/v1");
+	public void defaultUriVars() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://{host}/v1");
 		factory.setDefaultUriVariables(singletonMap("host", "foo.com"));
 		URI uri = factory.uriString("/{id}").build(singletonMap("id", "123"));
-		assertEquals("http://foo.com/v1/123", uri.toString());
+		assertEquals("https://foo.com/v1/123", uri.toString());
 	}
 
 	@Test
-	public void defaultUriVarsWithOverride() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/v1");
+	public void defaultUriVarsWithOverride() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://{host}/v1");
 		factory.setDefaultUriVariables(singletonMap("host", "spring.io"));
 		URI uri = factory.uriString("/bar").build(singletonMap("host", "docs.spring.io"));
-		assertEquals("http://docs.spring.io/v1/bar", uri.toString());
+		assertEquals("https://docs.spring.io/v1/bar", uri.toString());
 	}
 
 	@Test
-	public void defaultUriVarsWithEmptyVarArg() throws Exception {
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://{host}/v1");
+	public void defaultUriVarsWithEmptyVarArg() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://{host}/v1");
 		factory.setDefaultUriVariables(singletonMap("host", "foo.com"));
 		URI uri = factory.uriString("/bar").build();
-		assertEquals("Expected delegation to build(Map) method", "http://foo.com/v1/bar", uri.toString());
+		assertEquals("Expected delegation to build(Map) method", "https://foo.com/v1/bar", uri.toString());
 	}
 
 	@Test
-	public void defaultUriVarsSpr14147() throws Exception {
+	public void defaultUriVarsSpr14147() {
 		Map<String, String> defaultUriVars = new HashMap<>(2);
 		defaultUriVars.put("host", "api.example.com");
 		defaultUriVars.put("port", "443");
@@ -98,7 +105,23 @@ public class DefaultUriBuilderFactoryTests {
 	}
 
 	@Test
-	public void encodingValuesOnly() throws Exception {
+	public void encodeTemplateAndValues() {
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
+		UriBuilder uriBuilder = factory.uriString("/hotel list/{city} specials?q={value}");
+
+		String expected = "/hotel%20list/Z%C3%BCrich%20specials?q=a%2Bb";
+
+		Map<String, Object> vars = new HashMap<>();
+		vars.put("city", "Z\u00fcrich");
+		vars.put("value", "a+b");
+
+		assertEquals(expected, uriBuilder.build("Z\u00fcrich", "a+b").toString());
+		assertEquals(expected, uriBuilder.build(vars).toString());
+	}
+
+	@Test
+	public void encodingValuesOnly() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
 		factory.setEncodingMode(EncodingMode.VALUES_ONLY);
 		UriBuilder uriBuilder = factory.uriString("/foo/a%2Fb/{id}");
@@ -111,18 +134,18 @@ public class DefaultUriBuilderFactoryTests {
 	}
 
 	@Test
-	public void encodingValuesOnlySpr14147() throws Exception {
+	public void encodingValuesOnlySpr14147() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
 		factory.setEncodingMode(EncodingMode.VALUES_ONLY);
 		factory.setDefaultUriVariables(singletonMap("host", "www.example.com"));
-		UriBuilder uriBuilder = factory.uriString("http://{host}/user/{userId}/dashboard");
+		UriBuilder uriBuilder = factory.uriString("https://{host}/user/{userId}/dashboard");
 
-		assertEquals("http://www.example.com/user/john%3Bdoe/dashboard",
+		assertEquals("https://www.example.com/user/john%3Bdoe/dashboard",
 				uriBuilder.build(singletonMap("userId", "john;doe")).toString());
 	}
 
 	@Test
-	public void encodingNone() throws Exception {
+	public void encodingNone() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
 		factory.setEncodingMode(EncodingMode.NONE);
 		UriBuilder uriBuilder = factory.uriString("/foo/a%2Fb/{id}");
@@ -135,29 +158,30 @@ public class DefaultUriBuilderFactoryTests {
 	}
 
 	@Test
-	public void parsePathWithDefaultSettings() throws Exception {
+	public void parsePathWithDefaultSettings() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("/foo/{bar}");
 		URI uri = factory.uriString("/baz/{id}").build("a/b", "c/d");
 		assertEquals("/foo/a%2Fb/baz/c%2Fd", uri.toString());
 	}
 
 	@Test
-	public void parsePathIsTurnedOff() throws Exception {
+	public void parsePathIsTurnedOff() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("/foo/{bar}");
+		factory.setEncodingMode(EncodingMode.URI_COMPONENT);
 		factory.setParsePath(false);
 		URI uri = factory.uriString("/baz/{id}").build("a/b", "c/d");
 		assertEquals("/foo/a/b/baz/c/d", uri.toString());
 	}
 
 	@Test // SPR-15201
-	public void pathWithTrailingSlash() throws Exception {
+	public void pathWithTrailingSlash() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-		URI uri = factory.expand("http://localhost:8080/spring/");
-		assertEquals("http://localhost:8080/spring/", uri.toString());
+		URI uri = factory.expand("https://localhost:8080/spring/");
+		assertEquals("https://localhost:8080/spring/", uri.toString());
 	}
 
 	@Test
-	public void pathWithDuplicateSlashes() throws Exception {
+	public void pathWithDuplicateSlashes() {
 		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
 		URI uri = factory.expand("/foo/////////bar");
 		assertEquals("/foo/bar", uri.toString());

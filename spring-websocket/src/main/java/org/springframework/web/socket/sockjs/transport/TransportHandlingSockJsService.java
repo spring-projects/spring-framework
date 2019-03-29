@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,8 +53,8 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  * A basic implementation of {@link org.springframework.web.socket.sockjs.SockJsService}
  * with support for SPI-based transport handling and session management.
  *
- * <p>Based on the {@link TransportHandler} SPI. {@link TransportHandler TransportHandler} SPI. {@link TransportHandlers} may additionally
- * implement the {@link SockJsSessionFactory} and {@link HandshakeHandler} interfaces.
+ * <p>Based on the {@link TransportHandler} SPI. {@code TransportHandlers} may
+ * additionally implement the {@link SockJsSessionFactory} and {@link HandshakeHandler} interfaces.
  *
  * <p>See the {@link AbstractSockJsService} base class for important details on request mapping.
  *

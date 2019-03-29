@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -121,18 +121,21 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		Assert.notNull(codecConfigurer, "'codecConfigurer' is required");
 		Assert.notNull(localeContextResolver, "'localeContextResolver' is required");
 
+		// Initialize before first call to getLogPrefix()
+		this.attributes.put(ServerWebExchange.LOG_ID_ATTRIBUTE, request.getId());
+
 		this.request = request;
 		this.response = response;
 		this.sessionMono = sessionManager.getSession(this).cache();
 		this.localeContextResolver = localeContextResolver;
-		this.formDataMono = initFormData(request, codecConfigurer);
-		this.multipartDataMono = initMultipartData(request, codecConfigurer);
+		this.formDataMono = initFormData(request, codecConfigurer, getLogPrefix());
+		this.multipartDataMono = initMultipartData(request, codecConfigurer, getLogPrefix());
 		this.applicationContext = applicationContext;
 	}
 
 	@SuppressWarnings("unchecked")
 	private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request,
-			ServerCodecConfigurer configurer) {
+			ServerCodecConfigurer configurer, String logPrefix) {
 
 		try {
 			MediaType contentType = request.getHeaders().getContentType();
@@ -141,7 +144,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 						.filter(reader -> reader.canRead(FORM_DATA_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
 						.findFirst()
 						.orElseThrow(() -> new IllegalStateException("No form data HttpMessageReader.")))
-						.readMono(FORM_DATA_TYPE, request, Hints.none())
+						.readMono(FORM_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
 						.switchIfEmpty(EMPTY_FORM_DATA)
 						.cache();
 			}
@@ -154,7 +157,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	@SuppressWarnings("unchecked")
 	private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
-			ServerCodecConfigurer configurer) {
+			ServerCodecConfigurer configurer, String logPrefix) {
 
 		try {
 			MediaType contentType = request.getHeaders().getContentType();
@@ -163,7 +166,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 						.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
 						.findFirst()
 						.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
-						.readMono(MULTIPART_DATA_TYPE, request, Hints.none())
+						.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
 						.switchIfEmpty(EMPTY_MULTIPART_DATA)
 						.cache();
 			}
@@ -315,12 +318,19 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		}
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
-		for (String clientETag : ifNoneMatch) {
+		if (etag.startsWith("W/")) {
+			etag = etag.substring(2);
+		}
+		for (String clientEtag : ifNoneMatch) {
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			if (StringUtils.hasLength(clientETag) &&
-					clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))) {
-				this.notModified = true;
-				break;
+			if (StringUtils.hasLength(clientEtag)) {
+				if (clientEtag.startsWith("W/")) {
+					clientEtag = clientEtag.substring(2);
+				}
+				if (clientEtag.equals(etag)) {
+					this.notModified = true;
+					break;
+				}
 			}
 		}
 		return true;

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,6 +73,7 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.HttpEntity;
@@ -1863,7 +1865,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addParameter("param1", "value1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("value1-null-null", response.getContentAsString());
+		assertEquals("1:value1-null-null", response.getContentAsString());
 	}
 
 	@Test
@@ -1875,7 +1877,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addParameter("param2", "x");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("value1-x-null", response.getContentAsString());
+		assertEquals("1:value1-x-null", response.getContentAsString());
 	}
 
 	@Test
@@ -1884,10 +1886,21 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
 		request.addParameter("param2", "true");
-		request.addParameter("param3", "3");
+		request.addParameter("param3", "0");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("null-true-3", response.getContentAsString());
+		assertEquals("1:null-true-0", response.getContentAsString());
+	}
+
+	@Test
+	public void dataClassBindingWithValidationErrorAndConversionError() throws Exception {
+		initServletWithControllers(ValidatedDataClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param2", "x");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("2:null-x-null", response.getContentAsString());
 	}
 
 	@Test
@@ -1963,6 +1976,17 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals("value1-false-0", response.getContentAsString());
+	}
+
+	@Test
+	public void dataClassBindingWithLocalDate() throws Exception {
+		initServletWithControllers(DateClassController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("date", "2010-01-01");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("2010-01-01", response.getContentAsString());
 	}
 
 
@@ -2915,14 +2939,12 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@Override
-		public Object read(Class<?> clazz, HttpInputMessage inputMessage)
-				throws IOException, HttpMessageNotReadableException {
-			throw new HttpMessageNotReadableException("Could not read");
+		public Object read(Class<?> clazz, HttpInputMessage inputMessage) {
+			throw new HttpMessageNotReadableException("Could not read", inputMessage);
 		}
 
 		@Override
-		public void write(Object o, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
-				throws IOException, HttpMessageNotWritableException {
+		public void write(Object o, @Nullable MediaType contentType, HttpOutputMessage outputMessage) {
 			throw new UnsupportedOperationException("Not implemented");
 		}
 	}
@@ -3672,25 +3694,10 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@RequestMapping("/bind")
 		public BindStatusView handle(@Valid DataClass data, BindingResult result) {
 			if (result.hasErrors()) {
-				return new BindStatusView(result.getFieldValue("param1") + "-" +
+				return new BindStatusView(result.getErrorCount() + ":" + result.getFieldValue("param1") + "-" +
 						result.getFieldValue("param2") + "-" + result.getFieldValue("param3"));
 			}
 			return new BindStatusView(data.param1 + "-" + data.param2 + "-" + data.param3);
-		}
-	}
-
-	@RestController
-	public static class OptionalDataClassController {
-
-		@RequestMapping("/bind")
-		public String handle(Optional<DataClass> optionalData, BindingResult result) {
-			if (result.hasErrors()) {
-				assertNotNull(optionalData);
-				assertFalse(optionalData.isPresent());
-				return result.getFieldValue("param1") + "-" + result.getFieldValue("param2") + "-" +
-						result.getFieldValue("param3");
-			}
-			return optionalData.map(data -> data.param1 + "-" + data.param2 + "-" + data.param3).orElse("");
 		}
 	}
 
@@ -3711,6 +3718,54 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			rc.getBindStatus("dataClass.param2");
 			rc.getBindStatus("dataClass.param3");
 			response.getWriter().write(this.content);
+		}
+	}
+
+	@RestController
+	public static class OptionalDataClassController {
+
+		@RequestMapping("/bind")
+		public String handle(Optional<DataClass> optionalData, BindingResult result) {
+			if (result.hasErrors()) {
+				assertNotNull(optionalData);
+				assertFalse(optionalData.isPresent());
+				return result.getFieldValue("param1") + "-" + result.getFieldValue("param2") + "-" +
+						result.getFieldValue("param3");
+			}
+			return optionalData.map(data -> data.param1 + "-" + data.param2 + "-" + data.param3).orElse("");
+		}
+	}
+
+	public static class DateClass {
+
+		@DateTimeFormat(pattern = "yyyy-MM-dd")
+		public LocalDate date;
+
+		public DateClass(LocalDate date) {
+			this.date = date;
+		}
+	}
+
+	@RestController
+	public static class DateClassController {
+
+		@InitBinder
+		public void initBinder(WebDataBinder binder) {
+			binder.initDirectFieldAccess();
+			binder.setConversionService(new DefaultFormattingConversionService());
+		}
+
+		@RequestMapping("/bind")
+		public String handle(DateClass data, BindingResult result) {
+			if (result.hasErrors()) {
+				return result.getFieldError().toString();
+			}
+			assertNotNull(data);
+			assertNotNull(data.date);
+			assertEquals(2010, data.date.getYear());
+			assertEquals(1, data.date.getMonthValue());
+			assertEquals(1, data.date.getDayOfMonth());
+			return result.getFieldValue("date").toString();
 		}
 	}
 

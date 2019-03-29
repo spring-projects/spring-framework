@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,7 +43,7 @@ public class CorsFilterTests {
 
 	@Before
 	public void setup() throws Exception {
-		config.setAllowedOrigins(Arrays.asList("http://domain1.com", "http://domain2.com"));
+		config.setAllowedOrigins(Arrays.asList("https://domain1.com", "https://domain2.com"));
 		config.setAllowedMethods(Arrays.asList("GET", "POST"));
 		config.setAllowedHeaders(Arrays.asList("header1", "header2"));
 		config.setExposedHeaders(Arrays.asList("header3", "header4"));
@@ -56,12 +56,12 @@ public class CorsFilterTests {
 	public void validActualRequest() throws ServletException, IOException {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.GET.name(), "/test.html");
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		request.addHeader("header2", "foo");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
-			assertEquals("http://domain2.com", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+			assertEquals("https://domain2.com", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 			assertEquals("header3, header4", response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
 		};
 		filter.doFilter(request, response, filterChain);
@@ -71,7 +71,7 @@ public class CorsFilterTests {
 	public void invalidActualRequest() throws ServletException, IOException {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.DELETE.name(), "/test.html");
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		request.addHeader("header2", "foo");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -86,7 +86,7 @@ public class CorsFilterTests {
 	public void validPreFlightRequest() throws ServletException, IOException {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.OPTIONS.name(), "/test.html");
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET.name());
 		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -95,7 +95,7 @@ public class CorsFilterTests {
 				fail("Preflight requests must not be forwarded to the filter chain");
 		filter.doFilter(request, response, filterChain);
 
-		assertEquals("http://domain2.com", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("https://domain2.com", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals("header1, header2", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS));
 		assertEquals("header3, header4", response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
 		assertEquals(123L, Long.parseLong(response.getHeader(HttpHeaders.ACCESS_CONTROL_MAX_AGE)));
@@ -105,7 +105,7 @@ public class CorsFilterTests {
 	public void invalidPreFlightRequest() throws ServletException, IOException {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.OPTIONS.name(), "/test.html");
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.DELETE.name());
 		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2");
 		MockHttpServletResponse response = new MockHttpServletResponse();

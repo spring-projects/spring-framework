@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +36,6 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
@@ -45,6 +44,7 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageReader;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
@@ -54,12 +54,14 @@ import org.springframework.http.codec.json.Jackson2SmileDecoder;
 import org.springframework.http.codec.json.Jackson2SmileEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
+import org.springframework.http.codec.protobuf.ProtobufDecoder;
+import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ServerCodecConfigurer}.
@@ -76,12 +78,13 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertEquals(12, readers.size());
+		assertEquals(13, readers.size());
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
-		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(ResourceHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
+		assertEquals(ProtobufDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(SynchronossPartHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(MultipartHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
@@ -94,12 +97,13 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertEquals(10, writers.size());
+		assertEquals(11, writers.size());
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ByteBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(DataBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ResourceHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertStringEncoder(getNextEncoder(writers), true);
+		assertEquals(ProtobufHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2SmileEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());

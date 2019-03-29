@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,7 +55,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 
 
 	@Override
-	public JCacheOperation<?> getCacheOperation(Method method, Class<?> targetClass) {
+	public JCacheOperation<?> getCacheOperation(Method method, @Nullable Class<?> targetClass) {
 		MethodClassKey cacheKey = new MethodClassKey(method, targetClass);
 		Object cached = this.cache.get(cacheKey);
 
@@ -78,7 +78,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 	}
 
 	@Nullable
-	private JCacheOperation<?> computeCacheOperation(Method method, Class<?> targetClass) {
+	private JCacheOperation<?> computeCacheOperation(Method method, @Nullable Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
@@ -113,7 +113,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 	 * (or {@code null} if none)
 	 */
 	@Nullable
-	protected abstract JCacheOperation<?> findCacheOperation(Method method, Class<?> targetType);
+	protected abstract JCacheOperation<?> findCacheOperation(Method method, @Nullable Class<?> targetType);
 
 	/**
 	 * Should only public methods be allowed to have caching semantics?

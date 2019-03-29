@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +42,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -50,6 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.deser.BasicDeserializerFactory;
@@ -67,13 +71,16 @@ import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kotlin.ranges.IntRange;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
+import org.springframework.util.StringUtils;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -95,6 +102,8 @@ import static org.junit.Assert.assertTrue;
 public class Jackson2ObjectMapperBuilderTests {
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
+
+	private static final String DATA = "{\"offsetDateTime\": \"2020-01-01T00:00:00\"}";
 
 
 	@Test(expected = FatalBeanException.class)
@@ -308,6 +317,18 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
 	}
 
+	@Test  // gh-22576
+	public void overrideWellKnownModuleWithModule() throws IOException {
+		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+		JavaTimeModule javaTimeModule = new JavaTimeModule();
+		javaTimeModule.addDeserializer(OffsetDateTime.class, new OffsetDateTimeDeserializer());
+		builder.modulesToInstall(javaTimeModule);
+		builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		ObjectMapper objectMapper =  builder.build();
+		DemoPojo demoPojo = objectMapper.readValue(DATA, DemoPojo.class);
+		assertNotNull(demoPojo.getOffsetDateTime());
+	}
+
 
 	private static SerializerFactoryConfig getSerializerFactoryConfig(ObjectMapper objectMapper) {
 		return ((BasicSerializerFactory) objectMapper.getSerializerFactory()).getFactoryConfig();
@@ -458,6 +479,14 @@ public class Jackson2ObjectMapperBuilderTests {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.xml().build();
 		assertNotNull(objectMapper);
 		assertEquals(XmlMapper.class, objectMapper.getClass());
+	}
+
+	@Test  // gh-22428
+	public void xmlMapperAndCustomFactory() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.xml().factory(new MyXmlFactory()).build();
+		assertNotNull(objectMapper);
+		assertEquals(XmlMapper.class, objectMapper.getClass());
+		assertEquals(MyXmlFactory.class, objectMapper.getFactory().getClass());
 	}
 
 	@Test
@@ -611,6 +640,44 @@ public class Jackson2ObjectMapperBuilderTests {
 			return null;
 		}
 
+	}
+
+	static class OffsetDateTimeDeserializer extends JsonDeserializer<OffsetDateTime> {
+
+		private static final String CURRENT_ZONE_OFFSET = OffsetDateTime.now().getOffset().toString();
+
+		@Override
+		public OffsetDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+			final String value = jsonParser.getValueAsString();
+			if (StringUtils.isEmpty(value)) {
+				return null;
+			}
+			try {
+				return OffsetDateTime.parse(value);
+
+			} catch (DateTimeParseException exception) {
+				return OffsetDateTime.parse(value + CURRENT_ZONE_OFFSET);
+			}
+		}
+	}
+
+	@JsonDeserialize
+	static class DemoPojo {
+
+		private OffsetDateTime offsetDateTime;
+
+		public OffsetDateTime getOffsetDateTime() {
+			return offsetDateTime;
+		}
+
+		public void setOffsetDateTime(OffsetDateTime offsetDateTime) {
+			this.offsetDateTime = offsetDateTime;
+		}
+
+	}
+
+	@SuppressWarnings("serial")
+	public static class MyXmlFactory extends XmlFactory {
 	}
 
 }

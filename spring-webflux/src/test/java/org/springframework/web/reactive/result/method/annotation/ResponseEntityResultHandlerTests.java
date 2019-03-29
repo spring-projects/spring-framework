@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,6 +44,7 @@ import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -333,6 +334,22 @@ public class ResponseEntityResultHandlerTests {
 		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
 		assertResponseBodyIsEmpty(exchange);
 	}
+
+	@Test // SPR-17082
+	public void handleResponseEntityWithExistingResponseHeaders() throws Exception {
+		ResponseEntity<Void> value = ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(Void.class));
+		HandlerResult result = handlerResult(value, returnType);
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		exchange.getResponse().getHeaders().setContentType(MediaType.TEXT_PLAIN);
+		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
+
+		assertEquals(HttpStatus.OK, exchange.getResponse().getStatusCode());
+		assertEquals(1, exchange.getResponse().getHeaders().size());
+		assertEquals(MediaType.APPLICATION_JSON, exchange.getResponse().getHeaders().getContentType());
+		assertResponseBodyIsEmpty(exchange);
+	}
+
 
 
 	private void testHandle(Object returnValue, MethodParameter returnType) {

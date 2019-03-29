@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,11 +38,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
@@ -192,11 +192,15 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 		}
 	}
 
+
 	private static class SessionClosingHandler implements WebSocketHandler {
 
 		@Override
 		public Mono<Void> handle(WebSocketSession session) {
-			return Flux.never().mergeWith(session.close(CloseStatus.GOING_AWAY)).then();
+			return session.send(Flux
+					.error(new Throwable())
+					.onErrorResume(ex -> session.close(CloseStatus.GOING_AWAY)) // SPR-17306 (nested close)
+					.cast(WebSocketMessage.class));
 		}
 	}
 

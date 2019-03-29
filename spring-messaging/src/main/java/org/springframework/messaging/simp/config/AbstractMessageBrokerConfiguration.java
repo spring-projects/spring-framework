@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,8 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.lang.Nullable;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
@@ -38,6 +38,7 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
@@ -66,18 +67,20 @@ import org.springframework.validation.Validator;
  * protocols such as STOMP.
  *
  * <p>{@link #clientInboundChannel()} and {@link #clientOutboundChannel()} deliver
- * messages to and from remote clients to several message handlers such as
+ * messages to and from remote clients to several message handlers such as the
+ * following.
  * <ul>
  * <li>{@link #simpAnnotationMethodMessageHandler()}</li>
  * <li>{@link #simpleBrokerMessageHandler()}</li>
  * <li>{@link #stompBrokerRelayMessageHandler()}</li>
  * <li>{@link #userDestinationMessageHandler()}</li>
  * </ul>
- * while {@link #brokerChannel()} delivers messages from within the application to the
+ *
+ * <p>{@link #brokerChannel()} delivers messages from within the application to the
  * the respective message handlers. {@link #brokerMessagingTemplate()} can be injected
  * into any application component to send messages.
  *
- * <p>Subclasses are responsible for the part of the configuration that feed messages
+ * <p>Subclasses are responsible for the parts of the configuration that feed messages
  * to and from the client inbound/outbound channels (e.g. STOMP over WebSocket).
  *
  * @author Rossen Stoyanchev
@@ -126,6 +129,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractSubscribableChannel clientInboundChannel() {
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientInboundChannelExecutor());
+		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientInboundChannelRegistration();
 		if (reg.hasInterceptors()) {
 			channel.setInterceptors(reg.getInterceptors());
@@ -161,6 +165,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Bean
 	public AbstractSubscribableChannel clientOutboundChannel() {
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(clientOutboundChannelExecutor());
+		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		ChannelRegistration reg = getClientOutboundChannelRegistration();
 		if (reg.hasInterceptors()) {
 			channel.setInterceptors(reg.getInterceptors());
@@ -199,6 +204,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		ExecutorSubscribableChannel channel = (reg.hasTaskExecutor() ?
 				new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel());
 		reg.interceptors(new ImmutableMessageChannelInterceptor());
+		channel.setLogger(SimpLogging.forLog(channel.getLogger()));
 		channel.setInterceptors(reg.getInterceptors());
 		return channel;
 	}
@@ -290,10 +296,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@Nullable
 	public AbstractBrokerMessageHandler simpleBrokerMessageHandler() {
 		SimpleBrokerMessageHandler handler = getBrokerRegistry().getSimpleBroker(brokerChannel());
 		if (handler == null) {
-			return new NoOpBrokerMessageHandler();
+			return null;
 		}
 		updateUserDestinationResolver(handler);
 		return handler;
@@ -307,12 +314,13 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@Nullable
 	public AbstractBrokerMessageHandler stompBrokerRelayMessageHandler() {
 		StompBrokerRelayMessageHandler handler = getBrokerRegistry().getStompBrokerRelay(brokerChannel());
 		if (handler == null) {
-			return new NoOpBrokerMessageHandler();
+			return null;
 		}
-		Map<String, MessageHandler> subscriptions = new HashMap<>(1);
+		Map<String, MessageHandler> subscriptions = new HashMap<>(4);
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
 		if (destination != null) {
 			subscriptions.put(destination, userDestinationMessageHandler());
@@ -338,9 +346,10 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@Nullable
 	public MessageHandler userRegistryMessageHandler() {
 		if (getBrokerRegistry().getUserRegistryBroadcast() == null) {
-			return new NoOpMessageHandler();
+			return null;
 		}
 		SimpUserRegistry userRegistry = userRegistry();
 		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry, "MultiServerUserRegistry required");
@@ -396,7 +405,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Override this method to add custom message converters.
 	 * @param messageConverters the list to add converters to, initially empty
 	 * @return {@code true} if default message converters should be added to list,
-	 * {@code false} if no more converters should be added.
+	 * {@code false} if no more converters should be added
 	 */
 	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 		return true;
@@ -413,19 +422,36 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
+	@SuppressWarnings("deprecation")
 	public SimpUserRegistry userRegistry() {
-		return (getBrokerRegistry().getUserRegistryBroadcast() != null ?
-				new MultiServerUserRegistry(createLocalUserRegistry()) : createLocalUserRegistry());
+		SimpUserRegistry registry = createLocalUserRegistry();
+		if (registry == null) {
+			registry = createLocalUserRegistry(getBrokerRegistry().getUserRegistryOrder());
+		}
+		boolean broadcast = getBrokerRegistry().getUserRegistryBroadcast() != null;
+		return (broadcast ? new MultiServerUserRegistry(registry) : registry);
 	}
 
 	/**
-	 * Create the user registry that provides access to the local users.
+	 * Create the user registry that provides access to local users.
+	 * @deprecated as of 5.1 in favor of {@link #createLocalUserRegistry(Integer)}
 	 */
-	protected abstract SimpUserRegistry createLocalUserRegistry();
+	@Deprecated
+	@Nullable
+	protected SimpUserRegistry createLocalUserRegistry() {
+		return null;
+	}
 
 	/**
-	 * Return a {@link org.springframework.validation.Validator org.springframework.validation.Validators} instance for validating
-	 * {@code @Payload} method arguments.
+	 * Create the user registry that provides access to local users.
+	 * @param order the order to use as a {@link SmartApplicationListener}.
+	 * @since 5.1
+	 */
+	protected abstract SimpUserRegistry createLocalUserRegistry(@Nullable Integer order);
+
+	/**
+	 * Return an {@link org.springframework.validation.Validator} instance for
+	 * validating {@code @Payload} method arguments.
 	 * <p>In order, this method tries to get a Validator instance:
 	 * <ul>
 	 * <li>delegating to getValidator() first</li>
@@ -475,38 +501,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	@Nullable
 	public Validator getValidator() {
 		return null;
-	}
-
-
-	private static class NoOpMessageHandler implements MessageHandler {
-
-		@Override
-		public void handleMessage(Message<?> message) {
-		}
-	}
-
-
-	private class NoOpBrokerMessageHandler extends AbstractBrokerMessageHandler {
-
-		public NoOpBrokerMessageHandler() {
-			super(clientInboundChannel(), clientOutboundChannel(), brokerChannel());
-		}
-
-		@Override
-		public void start() {
-		}
-
-		@Override
-		public void stop() {
-		}
-
-		@Override
-		public void handleMessage(Message<?> message) {
-		}
-
-		@Override
-		protected void handleMessageInternal(Message<?> message) {
-		}
 	}
 
 }

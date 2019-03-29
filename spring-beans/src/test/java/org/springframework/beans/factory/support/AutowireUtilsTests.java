@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,8 +27,11 @@ import org.springframework.util.ReflectionUtils;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link AutowireUtils}.
+ *
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Loïc Ledoyen
  */
 public class AutowireUtilsTests {
 
@@ -36,7 +39,7 @@ public class AutowireUtilsTests {
 	public void genericMethodReturnTypes() {
 		Method notParameterized = ReflectionUtils.findMethod(MyTypeWithMethods.class, "notParameterized");
 		assertEquals(String.class,
-				AutowireUtils.resolveReturnTypeForFactoryMethod(notParameterized, new Object[]{}, getClass().getClassLoader()));
+				AutowireUtils.resolveReturnTypeForFactoryMethod(notParameterized, new Object[0], getClass().getClassLoader()));
 
 		Method notParameterizedWithArguments = ReflectionUtils.findMethod(MyTypeWithMethods.class, "notParameterizedWithArguments", Integer.class, Boolean.class);
 		assertEquals(String.class,
@@ -93,31 +96,6 @@ public class AutowireUtilsTests {
 
 	public static class MyTypeWithMethods<T> {
 
-		public MyInterfaceType<Integer> integer() {
-			return null;
-		}
-
-		public MySimpleInterfaceType string() {
-			return null;
-		}
-
-		public Object object() {
-			return null;
-		}
-
-		@SuppressWarnings("rawtypes")
-		public MyInterfaceType raw() {
-			return null;
-		}
-
-		public String notParameterized() {
-			return null;
-		}
-
-		public String notParameterizedWithArguments(Integer x, Boolean b) {
-			return null;
-		}
-
 		/**
 		 * Simulates a factory method that wraps the supplied object in a proxy of the
 		 * same type.
@@ -170,6 +148,31 @@ public class AutowireUtilsTests {
 		 * Extract some magic value from the supplied map.
 		 */
 		public static <K, V> V extractMagicValue(Map<K, V> map) {
+			return null;
+		}
+
+		public MyInterfaceType<Integer> integer() {
+			return null;
+		}
+
+		public MySimpleInterfaceType string() {
+			return null;
+		}
+
+		public Object object() {
+			return null;
+		}
+
+		@SuppressWarnings("rawtypes")
+		public MyInterfaceType raw() {
+			return null;
+		}
+
+		public String notParameterized() {
+			return null;
+		}
+
+		public String notParameterizedWithArguments(Integer x, Boolean b) {
 			return null;
 		}
 

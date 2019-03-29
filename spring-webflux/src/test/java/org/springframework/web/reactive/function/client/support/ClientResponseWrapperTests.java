@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,6 +66,14 @@ public class ClientResponseWrapperTests {
 	}
 
 	@Test
+	public void rawStatusCode() {
+		int status = 999;
+		when(mockResponse.rawStatusCode()).thenReturn(status);
+
+		assertEquals(status, wrapper.rawStatusCode());
+	}
+
+	@Test
 	public void headers() {
 		ClientResponse.Headers headers = mock(ClientResponse.Headers.class);
 		when(mockResponse.headers()).thenReturn(headers);
@@ -74,6 +82,7 @@ public class ClientResponseWrapperTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void cookies() {
 		MultiValueMap<String, ResponseCookie> cookies = mock(MultiValueMap.class);
 		when(mockResponse.cookies()).thenReturn(cookies);

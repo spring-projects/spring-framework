@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,7 +81,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	public void testEntityManagerProxyIsProxy() {
 		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
-		List<Person> people = q.getResultList();
+		q.getResultList();
 
 		assertTrue("Should be open to start with", sharedEntityManager.isOpen());
 		sharedEntityManager.close();

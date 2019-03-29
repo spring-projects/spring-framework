@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,7 +51,7 @@ public class RequestMethodsRequestConditionTests {
 	@Test
 	public void getMatchingConditionWithHttpHead() throws Exception {
 		testMatch(new RequestMethodsRequestCondition(HEAD), HEAD);
-		testMatch(new RequestMethodsRequestCondition(GET), HEAD);
+		testMatch(new RequestMethodsRequestCondition(GET), GET);
 		testNoMatch(new RequestMethodsRequestCondition(POST), HEAD);
 	}
 
@@ -79,7 +79,7 @@ public class RequestMethodsRequestConditionTests {
 	@Ignore
 	public void getMatchingConditionWithCorsPreFlight() throws Exception {
 		ServerWebExchange exchange = getExchange("OPTIONS");
-		exchange.getRequest().getHeaders().add("Origin", "http://example.com");
+		exchange.getRequest().getHeaders().add("Origin", "https://example.com");
 		exchange.getRequest().getHeaders().add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT");
 
 		assertNotNull(new RequestMethodsRequestCondition().getMatchingCondition(exchange));

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -222,17 +222,13 @@ public class SubProtocolWebSocketHandler
 	}
 
 	/**
-	 * Set the maximum time allowed in milliseconds after the WebSocket
-	 * connection is established and before the first sub-protocol message is
-	 * received.
-	 *
+	 * Set the maximum time allowed in milliseconds after the WebSocket connection
+	 * is established and before the first sub-protocol message is received.
 	 * <p>This handler is for WebSocket connections that use a sub-protocol.
 	 * Therefore, we expect the client to send at least one sub-protocol message
 	 * in the beginning, or else we assume the connection isn't doing well, e.g.
 	 * proxy issue, slow network, and can be closed.
-	 *
 	 * <p>By default this is set to {@code 60,000} (1 minute).
-	 *
 	 * @param timeToFirstMessage the maximum time allowed in milliseconds
 	 * @since 5.1
 	 * @see #checkSessions()
@@ -257,16 +253,6 @@ public class SubProtocolWebSocketHandler
 		return this.stats.toString();
 	}
 
-
-	@Override
-	public boolean isAutoStartup() {
-		return true;
-	}
-
-	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
 
 	@Override
 	public final void start() {

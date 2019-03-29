@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,12 +61,16 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	private static final String JCACHE_ASPECT_CLASS_NAME =
 			"org.springframework.cache.aspectj.JCacheCacheAspect";
 
-	private static final boolean jsr107Present = ClassUtils.isPresent(
-			"javax.cache.Cache", AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jsr107Present;
 
-	private static final boolean jcacheImplPresent = ClassUtils.isPresent(
-			"org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource",
-			AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader());
+	private static final boolean jcacheImplPresent;
+
+	static {
+		ClassLoader classLoader = AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader();
+		jsr107Present = ClassUtils.isPresent("javax.cache.Cache", classLoader);
+		jcacheImplPresent = ClassUtils.isPresent(
+				"org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource", classLoader);
+	}
 
 
 	/**
@@ -112,21 +116,21 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	 */
 	private static void parseCacheResolution(Element element, BeanDefinition def, boolean setBoth) {
 		String name = element.getAttribute("cache-resolver");
-		if (StringUtils.hasText(name)) {
+		boolean hasText = StringUtils.hasText(name);
+		if (hasText) {
 			def.getPropertyValues().add("cacheResolver", new RuntimeBeanReference(name.trim()));
 		}
-		if (!StringUtils.hasText(name) || setBoth) {
+		if (!hasText || setBoth) {
 			def.getPropertyValues().add("cacheManager",
 					new RuntimeBeanReference(CacheNamespaceHandler.extractCacheManager(element)));
 		}
 	}
 
-	private static BeanDefinition parseErrorHandler(Element element, BeanDefinition def) {
+	private static void parseErrorHandler(Element element, BeanDefinition def) {
 		String name = element.getAttribute("error-handler");
 		if (StringUtils.hasText(name)) {
 			def.getPropertyValues().add("errorHandler", new RuntimeBeanReference(name.trim()));
 		}
-		return def;
 	}
 
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -80,7 +80,7 @@ public class CrossOriginTests {
 	public void setup() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		Properties props = new Properties();
-		props.setProperty("myOrigin", "http://example.com");
+		props.setProperty("myOrigin", "https://example.com");
 		wac.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		wac.registerSingleton("ppc", PropertySourcesPlaceholderConfigurer.class);
 		wac.refresh();
@@ -89,7 +89,7 @@ public class CrossOriginTests {
 		wac.getAutowireCapableBeanFactory().initializeBean(this.handlerMapping, "hm");
 
 		this.request.setMethod("GET");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain.com/");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain.com/");
 	}
 
 
@@ -141,7 +141,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"DELETE"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"http://site1.com", "http://site2.com"}, config.getAllowedOrigins().toArray());
+		assertArrayEquals(new String[] {"https://site1.com", "https://site2.com"}, config.getAllowedOrigins().toArray());
 		assertArrayEquals(new String[] {"header1", "header2"}, config.getAllowedHeaders().toArray());
 		assertArrayEquals(new String[] {"header3", "header4"}, config.getExposedHeaders().toArray());
 		assertEquals(new Long(123), config.getMaxAge());
@@ -155,7 +155,7 @@ public class CrossOriginTests {
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
-		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
+		assertEquals(Arrays.asList("https://example.com"), config.getAllowedOrigins());
 		assertNull(config.getAllowCredentials());
 	}
 
@@ -166,7 +166,7 @@ public class CrossOriginTests {
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
-		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
+		assertEquals(Arrays.asList("https://example.com"), config.getAllowedOrigins());
 		assertNull(config.getAllowCredentials());
 	}
 
@@ -216,7 +216,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"http://foo.com"}, config.getAllowedOrigins().toArray());
+		assertArrayEquals(new String[] {"http://www.foo.com/"}, config.getAllowedOrigins().toArray());
 		assertTrue(config.getAllowCredentials());
 	}
 
@@ -229,7 +229,7 @@ public class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"http://foo.com"}, config.getAllowedOrigins().toArray());
+		assertArrayEquals(new String[] {"http://www.foo.com/"}, config.getAllowedOrigins().toArray());
 		assertTrue(config.getAllowCredentials());
 	}
 
@@ -288,7 +288,7 @@ public class CrossOriginTests {
 	@Test
 	public void preFlightRequestWithoutRequestMethodHeader() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/default");
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
 		assertNull(this.handlerMapping.getHandler(request));
 	}
 
@@ -338,27 +338,27 @@ public class CrossOriginTests {
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-header", headers = "header1=a")
-		public void ambigousHeader1a() {
+		public void ambiguousHeader1a() {
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-header", headers = "header1=b")
-		public void ambigousHeader1b() {
+		public void ambiguousHeader1b() {
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-produces", produces = "application/xml")
-		public String ambigousProducesXml() {
+		public String ambiguousProducesXml() {
 			return "<a></a>";
 		}
 
 		@CrossOrigin
 		@GetMapping(path = "/ambiguous-produces", produces = "application/json")
-		public String ambigousProducesJson() {
+		public String ambiguousProducesJson() {
 			return "{}";
 		}
 
-		@CrossOrigin(origins = { "http://site1.com", "http://site2.com" },
+		@CrossOrigin(origins = { "https://site1.com", "https://site2.com" },
 				allowedHeaders = { "header1", "header2" },
 				exposedHeaders = { "header3", "header4" },
 				methods = RequestMethod.DELETE,
@@ -368,7 +368,7 @@ public class CrossOriginTests {
 		public void customized() {
 		}
 
-		@CrossOrigin("http://example.com")
+		@CrossOrigin("https://example.com")
 		@RequestMapping("/customOrigin")
 		public void customOriginDefinedViaValueAttribute() {
 		}
@@ -423,7 +423,7 @@ public class CrossOriginTests {
 
 
 	@Controller
-	@ComposedCrossOrigin(origins = "http://foo.com", allowCredentials = "true")
+	@ComposedCrossOrigin(origins = "http://www.foo.com/", allowCredentials = "true")
 	private static class ClassLevelMappingWithComposedAnnotation {
 
 		@RequestMapping(path = "/foo", method = RequestMethod.GET)
@@ -436,7 +436,7 @@ public class CrossOriginTests {
 	private static class MethodLevelMappingWithComposedAnnotation {
 
 		@RequestMapping(path = "/foo", method = RequestMethod.GET)
-		@ComposedCrossOrigin(origins = "http://foo.com", allowCredentials = "true")
+		@ComposedCrossOrigin(origins = "http://www.foo.com/", allowCredentials = "true")
 		public void foo() {
 		}
 	}

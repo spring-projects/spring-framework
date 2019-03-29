@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -229,7 +229,7 @@ public final class GenericTypeResolver {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> map) {
-		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).resolve(Object.class);
+		return ResolvableType.forType(genericType, new TypeVariableMapVariableResolver(map)).toClass();
 	}
 
 	/**

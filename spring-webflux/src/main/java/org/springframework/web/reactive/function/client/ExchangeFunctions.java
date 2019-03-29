@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.log.LogFormatUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -71,7 +73,7 @@ public abstract class ExchangeFunctions {
 
 		private final ExchangeStrategies strategies;
 
-		private boolean disableLoggingRequestDetails;
+		private boolean enableLoggingRequestDetails;
 
 
 		public DefaultExchangeFunction(ClientHttpConnector connector, ExchangeStrategies strategies) {
@@ -83,8 +85,8 @@ public abstract class ExchangeFunctions {
 			strategies.messageWriters().stream()
 					.filter(LoggingCodecSupport.class::isInstance)
 					.forEach(reader -> {
-						if (((LoggingCodecSupport) reader).isDisableLoggingRequestDetails()) {
-							this.disableLoggingRequestDetails = true;
+						if (((LoggingCodecSupport) reader).isEnableLoggingRequestDetails()) {
+							this.enableLoggingRequestDetails = true;
 						}
 					});
 		}
@@ -103,34 +105,29 @@ public abstract class ExchangeFunctions {
 					.doOnCancel(() -> logger.debug(logPrefix + "Cancel signal (to close connection)"))
 					.map(httpResponse -> {
 						logResponse(httpResponse, logPrefix);
-						return new DefaultClientResponse(httpResponse, this.strategies, logPrefix);
+						return new DefaultClientResponse(
+								httpResponse, this.strategies, logPrefix, httpMethod.name() + " " + url);
 					});
 		}
 
 		private void logRequest(ClientRequest request) {
-			if (logger.isDebugEnabled()) {
-				String formatted = request.url().toString();
-				if (this.disableLoggingRequestDetails) {
-					int index = formatted.indexOf("?");
-					formatted = (index != -1 ? formatted.substring(0, index) : formatted);
-				}
-				logger.debug(request.logPrefix() + "HTTP " + request.method() + " " + formatted);
-			}
+			LogFormatUtils.traceDebug(logger, traceOn ->
+					request.logPrefix() + "HTTP " + request.method() + " " + request.url() +
+							(traceOn ? ", headers=" + formatHeaders(request.headers()) : "")
+			);
 		}
 
 		private void logResponse(ClientHttpResponse response, String logPrefix) {
-			if (logger.isDebugEnabled()) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
 				int code = response.getRawStatusCode();
 				HttpStatus status = HttpStatus.resolve(code);
-				String message = "Response " + (status != null ? status : code);
-				if (logger.isTraceEnabled()) {
-					String headers = this.disableLoggingRequestDetails ? "" : ", headers=" + response.getHeaders();
-					logger.trace(logPrefix + message + headers);
-				}
-				else {
-					logger.debug(logPrefix + message);
-				}
-			}
+				return logPrefix + "Response " + (status != null ? status : code) +
+						(traceOn ? ", headers=" + formatHeaders(response.getHeaders()) : "");
+			});
+		}
+
+		private String formatHeaders(HttpHeaders headers) {
+			return this.enableLoggingRequestDetails ? headers.toString() : headers.isEmpty() ? "{}" : "{masked}";
 		}
 	}
 

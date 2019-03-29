@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 /**
  * {@link PathMatcher} implementation for Ant-style path patterns.
  *
- * <p>Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache Ant</a>.
+ * <p>Part of this mapping code has been kindly borrowed from <a href="https://ant.apache.org">Apache Ant</a>.
  *
  * <p>The mapping matches URLs using the following rules:<br>
  * <ul>
@@ -571,8 +571,8 @@ public class AntPathMatcher implements PathMatcher {
 		int dotPos2 = pattern2.indexOf('.');
 		String file2 = (dotPos2 == -1 ? pattern2 : pattern2.substring(0, dotPos2));
 		String ext2 = (dotPos2 == -1 ? "" : pattern2.substring(dotPos2));
-		boolean ext1All = (ext1.equals(".*") || ext1.equals(""));
-		boolean ext2All = (ext2.equals(".*") || ext2.equals(""));
+		boolean ext1All = (ext1.equals(".*") || ext1.isEmpty());
+		boolean ext2All = (ext2.equals(".*") || ext2.isEmpty());
 		if (!ext1All && !ext2All) {
 			throw new IllegalArgumentException("Cannot combine patterns: " + pattern1 + " vs " + pattern2);
 		}

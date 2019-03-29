@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,21 +43,18 @@ import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * A non-blocking, reactive client for performing HTTP requests with Reactive
- * Streams back pressure. Provides a higher level, common API over HTTP client
- * libraries. Reactor Netty is used by default but other clients may be plugged
- * in with a {@link ClientHttpConnector}.
+ * Non-blocking, reactive client to perform HTTP requests, exposing a fluent,
+ * reactive API over underlying HTTP client libraries such as Reactor Netty.
  *
- * <p>Use one of the static factory methods {@link #create()} or
- * {@link #create(String)} or obtain a {@link WebClient#builder()} to create an
- * instance.
+ * <p>Use static factory methods {@link #create()} or {@link #create(String)},
+ * or {@link WebClient#builder()} to prepare an instance.
  *
- * <p>For examples with a response body, see the Javadoc for:
+ * <p>For examples with a response body see:
  * <ul>
  * <li>{@link RequestHeadersSpec#retrieve() retrieve()}
  * <li>{@link RequestHeadersSpec#exchange() exchange()}
  * </ul>
- * For examples with a request body see:
+ * <p>For examples with a request body see:
  * <ul>
  * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}
  * <li>{@link RequestBodySpec#syncBody(Object) syncBody(Object)}
@@ -163,29 +160,29 @@ public interface WebClient {
 		/**
 		 * Configure a base URL for requests performed through the client.
 		 *
-		 * <p>For example given base URL "http://abc.com/v1":
+		 * <p>For example given base URL "https://abc.go.com/v1":
 		 * <p><pre class="code">
 		 * Mono&#060;Account&#062; result = client.get().uri("/accounts/{id}", 43)
 		 *         .retrieve()
 		 *         .bodyToMono(Account.class);
 		 *
-		 * // Result: http://abc.com/v1/accounts/43
+		 * // Result: https://abc.go.com/v1/accounts/43
 		 *
 		 * Flux&#060;Account&#062; result = client.get()
 		 *         .uri(builder -> builder.path("/accounts").queryParam("q", "12").build())
 		 *         .retrieve()
 		 *         .bodyToFlux(Account.class);
 		 *
-		 * // Result: http://abc.com/v1/accounts?q=12
+		 * // Result: https://abc.go.com/v1/accounts?q=12
 		 * </pre>
 		 *
 		 * <p>The base URL can be overridden with an absolute URI:
 		 * <pre class="code">
-		 * Mono&#060;Account&#062; result = client.get().uri("http://xyz.com/path")
+		 * Mono&#060;Account&#062; result = client.get().uri("https://xyz.com/path")
 		 *         .retrieve()
 		 *         .bodyToMono(Account.class);
 		 *
-		 * // Result: http://xyz.com/path
+		 * // Result: https://xyz.com/path
 		 * </pre>
 		 *
 		 * <p>Or partially overridden with a {@code UriBuilder}:
@@ -195,7 +192,7 @@ public interface WebClient {
 		 *         .retrieve()
 		 *         .bodyToFlux(Account.class);
 		 *
-		 * // Result: http://abc.com/v2/accounts?q=12
+		 * // Result: https://abc.com/v2/accounts?q=12
 		 * </pre>
 		 *
 		 * @see #defaultUriVariables(Map)
@@ -598,6 +595,9 @@ public interface WebClient {
 		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
 		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
 		 * applies
+		 * <p><strong>NOTE:</strong> if the response is expected to have content,
+		 * the exceptionFunction should consume it. If not, the content will be
+		 * automatically drained to ensure resources are released.
 		 * @param exceptionFunction the function that returns the exception
 		 * @return this builder
 		 */

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -104,6 +104,18 @@ public class SimpleClientHttpResponseTests {
 		this.response.close();
 
 		verify(is).close();
+	}
+
+	@Test // SPR-17181
+	public void shouldDrainResponseEvenIfResponseNotRead() throws Exception {
+		TestByteArrayInputStream is = new TestByteArrayInputStream("SpringSpring".getBytes(StandardCharsets.UTF_8));
+		given(this.connection.getErrorStream()).willReturn(null);
+		given(this.connection.getInputStream()).willReturn(is);
+
+		this.response.close();
+		assertThat(is.available(), is(0));
+		assertTrue(is.isClosed());
+		verify(this.connection, never()).disconnect();
 	}
 
 

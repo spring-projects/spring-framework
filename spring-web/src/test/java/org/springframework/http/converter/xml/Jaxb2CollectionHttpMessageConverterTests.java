@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,7 +62,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 
 	@Before
-	public void setUp() {
+	public void setup() {
 		converter = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>();
 		rootElementListType = new ParameterizedTypeReference<List<RootElement>>() {}.getType();
 		rootElementSetType = new ParameterizedTypeReference<Set<RootElement>>() {}.getType();
@@ -72,7 +72,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 
 	@Test
-	public void canRead() throws Exception {
+	public void canRead() {
 		assertTrue(converter.canRead(rootElementListType, null, null));
 		assertTrue(converter.canRead(rootElementSetType, null, null));
 		assertTrue(converter.canRead(typeSetType, null, null));
