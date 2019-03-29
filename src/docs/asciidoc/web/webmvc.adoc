@@ -2398,11 +2398,11 @@ Spring MVC has two main abstractions in support of flash attributes. `FlashMap` 
 to hold flash attributes, while `FlashMapManager` is used to store, retrieve, and manage
 `FlashMap` instances.
 
-Flash attribute support is always "`on`" and does not need to be enabled explicitly. However,
-if not used, it never causes HTTP session creation. On each request, there is an "`input`"
-`FlashMap` with attributes passed from a previous request (if any) and an "`output`"
-`FlashMap` with attributes to save for a subsequent request. Both `FlashMap` instances
-are accessible from anywhere in Spring MVC through static methods in
+Flash attribute support is always "`on`" and does not need to be enabled explicitly.
+However, if not used, it never causes HTTP session creation. On each request, there is an
+"`input`" `FlashMap` with attributes passed from a previous request (if any) and an
+"`output`" `FlashMap` with attributes to save for a subsequent request. Both `FlashMap`
+instances are accessible from anywhere in Spring MVC through static methods in
 `RequestContextUtils`.
 
 Annotated controllers typically do not need to work with `FlashMap` directly. Instead, a
