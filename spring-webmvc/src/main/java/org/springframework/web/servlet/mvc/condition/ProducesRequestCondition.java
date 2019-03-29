@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -322,11 +323,22 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 		private boolean matchMediaType(List<MediaType> acceptedMediaTypes) {
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
-				if (getMediaType().isCompatibleWith(acceptedMediaType)) {
+				if (getMediaType().isCompatibleWith(acceptedMediaType) && matchParameters(acceptedMediaType)) {
 					return true;
 				}
 			}
 			return false;
+		}
+
+		private boolean matchParameters(MediaType acceptedMediaType) {
+			for (String name : getMediaType().getParameters().keySet()) {
+				String s1 = getMediaType().getParameter(name);
+				String s2 = acceptedMediaType.getParameter(name);
+				if (StringUtils.hasText(s1) && StringUtils.hasText(s2) && !s1.equalsIgnoreCase(s2)) {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 

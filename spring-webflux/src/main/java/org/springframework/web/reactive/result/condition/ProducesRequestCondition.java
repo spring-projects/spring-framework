@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
@@ -315,11 +316,22 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		protected boolean matchMediaType(ServerWebExchange exchange) throws NotAcceptableStatusException {
 			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(exchange);
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
-				if (getMediaType().isCompatibleWith(acceptedMediaType)) {
+				if (getMediaType().isCompatibleWith(acceptedMediaType) && matchParameters(acceptedMediaType)) {
 					return true;
 				}
 			}
 			return false;
+		}
+
+		private boolean matchParameters(MediaType acceptedMediaType) {
+			for (String name : getMediaType().getParameters().keySet()) {
+				String s1 = getMediaType().getParameter(name);
+				String s2 = acceptedMediaType.getParameter(name);
+				if (StringUtils.hasText(s1) && StringUtils.hasText(s2) && !s1.equalsIgnoreCase(s2)) {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 

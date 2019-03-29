@@ -90,6 +90,30 @@ public class ProducesRequestConditionTests {
 		assertNull(condition.getMatchingCondition(request));
 	}
 
+	@Test // gh-21670
+	public void matchWithParameters() {
+		String base = "application/atom+xml";
+		ProducesRequestCondition condition = new ProducesRequestCondition(base + ";type=feed");
+		HttpServletRequest request = createRequest(base + ";type=entry");
+		assertNull("Declared parameter value must match if present in request",
+				condition.getMatchingCondition(request));
+
+		condition = new ProducesRequestCondition(base + ";type=feed");
+		request = createRequest(base + ";type=feed");
+		assertNotNull("Declared parameter value must match if present in request",
+				condition.getMatchingCondition(request));
+
+		condition = new ProducesRequestCondition(base + ";type=feed");
+		request = createRequest(base);
+		assertNotNull("Declared parameter has no impact if not present in request",
+				condition.getMatchingCondition(request));
+
+		condition = new ProducesRequestCondition(base);
+		request = createRequest(base + ";type=feed");
+		assertNotNull("No impact from other parameters in request",
+				condition.getMatchingCondition(request));
+	}
+
 	@Test
 	public void matchParseError() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");

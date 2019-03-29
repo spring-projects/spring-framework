@@ -24,12 +24,8 @@ import org.junit.Test;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.junit.Assert.*;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
 
 /**
  * Unit tests for {@link ProducesRequestCondition}.
@@ -82,6 +78,29 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
 		assertNull(condition.getMatchingCondition(exchange));
+	}
+
+	@Test // gh-21670
+	public void matchWithParameters() {
+		String base = "application/atom+xml";
+		ProducesRequestCondition condition = new ProducesRequestCondition(base + ";type=feed");
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
+		assertNotNull("Declared parameter value must match if present in request",
+				condition.getMatchingCondition(exchange));
+
+		condition = new ProducesRequestCondition(base + ";type=feed");
+		exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=entry"));
+		assertNull("Declared parameter value must match if present in request",
+				condition.getMatchingCondition(exchange));
+
+		condition = new ProducesRequestCondition(base + ";type=feed");
+		exchange = MockServerWebExchange.from(get("/").header("Accept", base));
+		assertNotNull("Declared parameter has no impact if not present in request",
+				condition.getMatchingCondition(exchange));
+
+		condition = new ProducesRequestCondition(base);
+		exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
+		assertNotNull("No impact from other parameters in request", condition.getMatchingCondition(exchange));
 	}
 
 	@Test
