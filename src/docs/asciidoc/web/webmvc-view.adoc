@@ -943,7 +943,6 @@ For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag>>. You can als
 HTML5-specific types, such as `email`, `tel`, `date`, and others.
 
 
-
 [[mvc-view-jsp-formtaglib-checkboxtag]]
 ==== The `checkbox` Tag
 
@@ -1061,7 +1060,6 @@ telling Spring that "`the checkbox was visible in the form, and I want my object
 which the form data binds to reflect the state of the checkbox, no matter what.`"
 
 
-
 [[mvc-view-jsp-formtaglib-checkboxestag]]
 ==== The `checkboxes` Tag
 
@@ -1118,7 +1116,6 @@ but with different values, as the following example shows:
 		</td>
 	</tr>
 ----
-
 
 
 [[mvc-view-jsp-formtaglib-radiobuttonstag]]
@@ -1212,7 +1209,6 @@ as follows:
 ----
 
 
-
 [[mvc-view-jsp-formtaglib-optiontag]]
 ==== The `option` Tag
 
@@ -1256,7 +1252,6 @@ as follows:
 <1> Note the addition of a `selected` attribute.
 
 
-
 [[mvc-view-jsp-formtaglib-optionstag]]
 ==== The `options` Tag
 
@@ -1296,7 +1291,6 @@ If the `User` lived in the UK, the HTML source of the 'Country' row would be as 
 ----
 <1> Note the addition of a `selected` attribute.
 
-
 As the preceding example shows, the combined usage of an `option` tag with the `options` tag
 generates the same standard HTML but lets you explicitly specify a value in the
 JSP that is for display only (where it belongs), such as the default string in the
@@ -1309,7 +1303,6 @@ you can specify a `Map` of items, in which case the map keys are interpreted as 
 values and the map values correspond to option labels. If `itemValue` or `itemLabel` (or both)
 happen to be specified as well, the item value property applies to the map key, and
 the item label property applies to the map value.
-
 
 
 [[mvc-view-jsp-formtaglib-textareatag]]
