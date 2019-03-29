@@ -275,20 +275,20 @@ The parameters to any of the above macros have consistent meanings:
   and bound to the command object. Map objects stored against the keys are the labels
   displayed on the form to the user and may be different from the corresponding values
   posted back by the form. Usually, such a map is supplied as reference data by the
-  controller. You can use any `Map` implementation, depending on required behavior. For
-  strictly sorted maps, you can use a `SortedMap` (such as a `TreeMap`) with a suitable `Comparator`
-  and, for arbitrary Maps that should return values in insertion order, use a
-  `LinkedHashMap` or a `LinkedMap` from `commons-collections`.
-* `separator`: Where multiple options are available as discreet elements (radio buttons or
-  checkboxes), the sequence of characters used to separate each one in the list (such as
-  `<br>`).
-* `attributes`: An additional string of arbitrary tags or text to be included within the
-  HTML tag itself. This string is echoed literally by the macro. For example, in a
-  `textarea` field, you may supply attributes (such as 'rows="5" cols="60"'), or you could pass
-  style information such as 'style="border:1px solid silver"'.
-* `classOrStyle`: For the `showErrors` macro, the name of the CSS class that the `span` element
-  that wraps each error uses. If no information is supplied (or the value is empty),
-  the errors are wrapped in `<b></b>` tags.
+  controller. You can use any `Map` implementation, depending on required behavior.
+  For strictly sorted maps, you can use a `SortedMap` (such as a `TreeMap`) with a
+  suitable `Comparator` and, for arbitrary Maps that should return values in insertion
+  order, use a `LinkedHashMap` or a `LinkedMap` from `commons-collections`.
+* `separator`: Where multiple options are available as discreet elements (radio buttons
+  or checkboxes), the sequence of characters used to separate each one in the list
+  (such as `<br>`).
+* `attributes`: An additional string of arbitrary tags or text to be included within
+  the HTML tag itself. This string is echoed literally by the macro. For example, in a
+  `textarea` field, you may supply attributes (such as 'rows="5" cols="60"'), or you
+  could pass style information such as 'style="border:1px solid silver"'.
+* `classOrStyle`: For the `showErrors` macro, the name of the CSS class that the `span`
+  element that wraps each error uses. If no information is supplied (or the value is
+  empty), the errors are wrapped in `<b></b>` tags.
 
 The following sections outline examples of the macros (some in FTL and some in VTL). Where usage
 differences exist between the two languages, they are explained in the notes.
@@ -752,9 +752,8 @@ When developing with JSPs, you can declare a `InternalResourceViewResolver` or a
 `ResourceBundleViewResolver` bean.
 
 `ResourceBundleViewResolver` relies on a properties file to define the view names
-mapped to a class and a URL. With a `ResourceBundleViewResolver`, you
-can mix different types of views by using only one resolver, as the following example
-shows:
+mapped to a class and a URL. With a `ResourceBundleViewResolver`, you can mix
+different types of views by using only one resolver, as the following example shows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1527,8 +1526,7 @@ with a hidden `method` parameter is converted into the corresponding HTTP method
 request.
 
 To support HTTP method conversion, the Spring MVC form tag was updated to support setting
-the HTTP method. For example, the following snippet comes from the Pet Clinic
-sample:
+the HTTP method. For example, the following snippet comes from the Pet Clinic sample:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1838,13 +1836,13 @@ dynamically from the model data. The document is the view and is streamed from t
 server with the correct content type, to (hopefully) enable the client PC to run their
 spreadsheet or PDF viewer application in response.
 
-In order to use Excel views, you need to add the Apache POI library to your classpath. For
-PDF generation, you need to add (preferably) the OpenPDF library.
+In order to use Excel views, you need to add the Apache POI library to your classpath.
+For PDF generation, you need to add (preferably) the OpenPDF library.
 
-NOTE: You should use the latest versions of the underlying document-generation libraries, if possible.
-In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.0.5) instead of the
-outdated original iText 2.1.7, since OpenPDF is actively maintained and fixes an important
-vulnerability for untrusted PDF content.
+NOTE: You should use the latest versions of the underlying document-generation libraries,
+if possible. In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.2.12)
+instead of the outdated original iText 2.1.7, since OpenPDF is actively maintained and
+fixes an important vulnerability for untrusted PDF content.
 
 
 
@@ -1907,9 +1905,9 @@ The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to rende
 content as JSON. By default, the entire contents of the model map (with the exception of
 framework-specific classes) are encoded as JSON. For cases where the contents of the
 map need to be filtered, you can specify a specific set of model attributes to encode
-by using the `modelKeys` property. You can also use the `extractValueFromSingleKeyModel` property
-to have the value in single-key models extracted and serialized directly rather than
-as a map of model attributes.
+by using the `modelKeys` property. You can also use the `extractValueFromSingleKeyModel`
+property to have the value in single-key models extracted and serialized directly rather
+than as a map of model attributes.
 
 You can customize JSON mapping as needed by using Jackson's provided
 annotations. When you need further control, you can inject a custom `ObjectMapper`
@@ -1940,12 +1938,11 @@ you need to provide serializers and deserializers for specific types.
 == XML Marshalling
 
 The `MarshallingView` uses an XML `Marshaller` (defined in the `org.springframework.oxm`
-package) to render the response content as XML. You can explicitly set the object to be marshalled
-by using a `MarshallingView` instance's `modelKey` bean property. Alternatively, the view
-iterates over all model properties and marshals the first type that is supported
+package) to render the response content as XML. You can explicitly set the object to be
+marshalled by using a `MarshallingView` instance's `modelKey` bean property. Alternatively,
+the view iterates over all model properties and marshals the first type that is supported
 by the `Marshaller`. For more information on the functionality in the
-`org.springframework.oxm` package, see
-<<data-access.adoc#oxm,Marshalling XML using O/X Mappers>>.
+`org.springframework.oxm` package, see <<data-access.adoc#oxm,Marshalling XML using O/X Mappers>>.
 
 
 
