@@ -1456,6 +1456,24 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testGetFactoryBeanByTypeWithPrimary() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(NullTestBeanFactoryBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NullTestBeanFactoryBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		NullTestBeanFactoryBean factoryBeanByType = lbf.getBean(NullTestBeanFactoryBean.class);
+		NullTestBeanFactoryBean bd1FactoryBean = (NullTestBeanFactoryBean)lbf.getBean("&bd1");
+		NullTestBeanFactoryBean bd2FactoryBean = (NullTestBeanFactoryBean)lbf.getBean("&bd2");
+		assertNotNull(factoryBeanByType);
+		assertNotNull(bd1FactoryBean);
+		assertNotNull(bd2FactoryBean);
+		assertNotEquals(factoryBeanByType, bd1FactoryBean);
+		assertEquals(factoryBeanByType, bd2FactoryBean);
+	}
+
+	@Test
 	public void testGetBeanByTypeWithMultiplePrimary() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
@@ -1867,6 +1885,24 @@ public class DefaultListableBeanFactoryTests {
 				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 		assertEquals("The FactoryBeanDependentBean should have been autowired 'by type' with the LazyInitFactory.",
 				factoryBean, bean.getFactoryBean());
+	}
+
+	@Test
+	public void testAutowireBeanWithFactoryBeanByTypeWithPrimary() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(LazyInitFactory.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(LazyInitFactory.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		LazyInitFactory bd1FactoryBean = (LazyInitFactory) lbf.getBean("&bd1");
+		LazyInitFactory bd2FactoryBean = (LazyInitFactory) lbf.getBean("&bd2");
+		assertNotNull(bd1FactoryBean);
+		assertNotNull(bd2FactoryBean);
+		FactoryBeanDependentBean bean = (FactoryBeanDependentBean) lbf.autowire(FactoryBeanDependentBean.class,
+				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+		assertNotEquals(bd1FactoryBean, bean.getFactoryBean());
+		assertEquals(bd2FactoryBean, bean.getFactoryBean());
 	}
 
 	@Test
