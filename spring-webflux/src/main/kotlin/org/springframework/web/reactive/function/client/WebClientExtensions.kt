@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.client
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
@@ -77,7 +78,7 @@ suspend fun WebClient.RequestHeadersSpec<out WebClient.RequestHeadersSpec<*>>.aw
  * @since 5.2
  */
 inline fun <reified T: Any> WebClient.RequestBodySpec.body(crossinline supplier: suspend () -> T)
-		= body(GlobalScope.mono { supplier.invoke() })
+		= body(GlobalScope.mono(Dispatchers.Unconfined) { supplier.invoke() })
 
 /**
  * Coroutines variant of [WebClient.ResponseSpec.bodyToMono].
