@@ -362,9 +362,17 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	@Override
 	public void disconnect() {
+		disconnect(null);
+	}
+
+	@Override
+	public void disconnect(@Nullable StompHeaders headers) {
 		this.closing = true;
 		try {
 			StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.DISCONNECT);
+			if (headers != null) {
+				accessor.addNativeHeaders(headers);
+			}
 			Message<byte[]> message = createMessage(accessor, EMPTY_PAYLOAD);
 			execute(message);
 		}
