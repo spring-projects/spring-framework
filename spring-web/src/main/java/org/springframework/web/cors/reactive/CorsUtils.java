@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,21 @@ import org.springframework.web.util.UriComponentsBuilder;
 public abstract class CorsUtils {
 
 	/**
-	 * Returns {@code true} if the request is a valid CORS one.
+	 * Returns {@code true} if the request is a valid CORS one by checking {@code Origin}
+	 * header presence and ensuring that origins are different via {@link #isSameOrigin}.
 	 */
+	@SuppressWarnings("deprecation")
 	public static boolean isCorsRequest(ServerHttpRequest request) {
-		return (request.getHeaders().get(HttpHeaders.ORIGIN) != null);
+		return request.getHeaders().containsKey(HttpHeaders.ORIGIN) && !isSameOrigin(request);
 	}
 
 	/**
 	 * Returns {@code true} if the request is a valid CORS pre-flight one.
+	 * To be used in combination with {@link #isCorsRequest(ServerHttpRequest)} since
+	 * regular CORS checks are not invoked here for performance reasons.
 	 */
 	public static boolean isPreFlightRequest(ServerHttpRequest request) {
-		return (request.getMethod() == HttpMethod.OPTIONS && isCorsRequest(request) &&
-				request.getHeaders().get(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD) != null);
+		return (request.getMethod() == HttpMethod.OPTIONS && request.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD));
 	}
 
 	/**
@@ -61,7 +64,9 @@ public abstract class CorsUtils {
 	 *
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
 	 * of a cross-origin request
+	 * @deprecated as of 5.2, same-origin checks are performed directly by {@link #isCorsRequest}
 	 */
+	@Deprecated
 	public static boolean isSameOrigin(ServerHttpRequest request) {
 		String origin = request.getHeaders().getOrigin();
 		if (origin == null) {

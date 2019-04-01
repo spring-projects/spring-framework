@@ -371,6 +371,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	@Override
+	protected boolean hasCorsConfigurationSource(Object handler) {
+		return super.hasCorsConfigurationSource(handler) ||
+				(handler instanceof HandlerMethod && this.mappingRegistry.getCorsConfiguration((HandlerMethod) handler) != null) ||
+				handler.equals(PREFLIGHT_AMBIGUOUS_MATCH);
+	}
+
+	@Override
 	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
 		CorsConfiguration corsConfig = super.getCorsConfiguration(handler, exchange);
 		if (handler instanceof HandlerMethod) {
@@ -451,6 +458,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		/**
 		 * Return CORS configuration. Thread-safe for concurrent use.
 		 */
+		@Nullable
 		public CorsConfiguration getCorsConfiguration(HandlerMethod handlerMethod) {
 			HandlerMethod original = handlerMethod.getResolvedFromHandlerMethod();
 			return this.corsLookup.get(original != null ? original : handlerMethod);

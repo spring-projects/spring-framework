@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.springframework.web.server.ServerWebExchange;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 /**
@@ -74,8 +73,7 @@ public class CorsUrlHandlerMappingTests {
 		Object actual = this.handlerMapping.getHandler(exchange).block();
 
 		assertNotNull(actual);
-		assertNotSame(this.welcomeController, actual);
-		assertNull(exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertSame(this.welcomeController, actual);
 	}
 
 	@Test

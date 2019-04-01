@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
 
-	private CorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
+	@Nullable
+	private CorsConfigurationSource corsConfigurationSource;
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
@@ -206,11 +207,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
 		Assert.notNull(corsConfigurations, "corsConfigurations must not be null");
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.setCorsConfigurations(corsConfigurations);
-		source.setPathMatcher(this.pathMatcher);
-		source.setUrlPathHelper(this.urlPathHelper);
-		this.corsConfigurationSource = source;
+		if (!corsConfigurations.isEmpty()) {
+			UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+			source.setCorsConfigurations(corsConfigurations);
+			source.setPathMatcher(this.pathMatcher);
+			source.setUrlPathHelper(this.urlPathHelper);
+			this.corsConfigurationSource = source;
+		}
+		else {
+			this.corsConfigurationSource = null;
+		}
 	}
 
 	/**
@@ -420,10 +426,10 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			logger.debug("Mapped to " + executionChain.getHandler());
 		}
 
-		if (CorsUtils.isCorsRequest(request)) {
-			CorsConfiguration globalConfig = this.corsConfigurationSource.getCorsConfiguration(request);
+		if (hasCorsConfigurationSource(handler)) {
+			CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(request) : null);
 			CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
-			CorsConfiguration config = (globalConfig != null ? globalConfig.combine(handlerConfig) : handlerConfig);
+			config = (config != null ? config.combine(handlerConfig) : handlerConfig);
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}
 
@@ -486,6 +492,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			}
 		}
 		return chain;
+	}
+
+	/**
+	 * Return {@code true} if there is a {@link CorsConfigurationSource} for this handler.
+	 * @since 5.2
+	 */
+	protected boolean hasCorsConfigurationSource(Object handler) {
+		return handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null;
 	}
 
 	/**

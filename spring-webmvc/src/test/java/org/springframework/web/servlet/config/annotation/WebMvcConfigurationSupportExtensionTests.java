@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		HandlerExecutionChain chain = rmHandlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain);
 		assertNotNull(chain.getInterceptors());
-		assertEquals(3, chain.getInterceptors().length);
+		assertEquals(4, chain.getInterceptors().length);
 		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[0].getClass());
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
 		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[2].getClass());
@@ -177,7 +177,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
 		assertNotNull(chain);
 		assertNotNull(chain.getHandler());
-		assertEquals(Arrays.toString(chain.getInterceptors()), 4, chain.getInterceptors().length);
+		assertEquals(Arrays.toString(chain.getInterceptors()), 5, chain.getInterceptors().length);
 		// PathExposingHandlerInterceptor at chain.getInterceptors()[0]
 		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[1].getClass());
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[2].getClass());

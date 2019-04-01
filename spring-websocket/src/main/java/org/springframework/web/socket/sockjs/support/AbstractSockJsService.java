@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
@@ -48,7 +49,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
@@ -495,7 +495,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		if (!this.suppressCors && CorsUtils.isCorsRequest(request)) {
+		if (!this.suppressCors && (request.getHeader(HttpHeaders.ORIGIN) != null)) {
 			CorsConfiguration config = new CorsConfiguration();
 			config.setAllowedOrigins(new ArrayList<>(this.allowedOrigins));
 			config.addAllowedMethod("*");
