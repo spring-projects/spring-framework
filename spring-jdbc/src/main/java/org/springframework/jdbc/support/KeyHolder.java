@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
  * In the general case, the keys are returned as a List containing one Map
  * for each row of keys.
  *
- * <p>Most applications only use on key per row and process only one row at a
+ * <p>Most applications only use one key per row and process only one row at a
  * time in an insert statement. In these cases, just call {@code getKey}
  * to retrieve the key. The returned value is a Number here, which is the
  * usual type for auto-generated keys.
