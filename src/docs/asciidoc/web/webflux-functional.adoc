@@ -137,7 +137,7 @@ The following example shows how to access multiparts, one at a time, in streamin
 
 [source,java]
 ----
-Flux<Part> parts = request.body(BodyExtractos.toParts());
+Flux<Part> parts = request.body(BodyExtractors.toParts());
 ----
 
 
