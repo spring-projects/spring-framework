@@ -231,22 +231,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Get the "global" CORS configurations.
-	 * @deprecated as of 5.1 since it is now possible to set a {@link CorsConfigurationSource} which is not a
-	 * {@link UrlBasedCorsConfigurationSource}. Expected to be removed in 5.2.
-	 */
-	@Deprecated
-	public Map<String, CorsConfiguration> getCorsConfigurations() {
-		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			return ((UrlBasedCorsConfigurationSource)this.corsConfigurationSource).getCorsConfigurations();
-		}
-		else {
-			throw new IllegalStateException("No CORS configurations available when the source " +
-					"is not an UrlBasedCorsConfigurationSource");
-		}
-	}
-
-	/**
 	 * Configure a custom {@link CorsProcessor} to use to apply the matched
 	 * {@link CorsConfiguration} for a request.
 	 * <p>By default {@link DefaultCorsProcessor} is used.
