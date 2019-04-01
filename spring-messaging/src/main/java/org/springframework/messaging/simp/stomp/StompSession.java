@@ -116,6 +116,12 @@ public interface StompSession {
 	 */
 	void disconnect();
 
+	/**
+	 * Disconnect the session by sending a DISCONNECT frame.
+	 * @param headers the headers for the disconnect message frame
+	 */
+	void disconnect(StompHeaders headers);
+
 
 	/**
 	 * A handle to use to track receipts.
