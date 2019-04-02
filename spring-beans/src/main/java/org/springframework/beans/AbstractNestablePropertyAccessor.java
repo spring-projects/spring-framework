@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -958,21 +958,24 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		return tokens;
 	}
 
-	private static int getPropertyNameKeyEnd(String propertyName, int startIndex) {
+	private int getPropertyNameKeyEnd(String propertyName, int startIndex) {
 		int unclosedPrefixes = 0;
 		int length = propertyName.length();
 		for (int i = startIndex; i < length; i++) {
 			switch (propertyName.charAt(i)) {
 				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR:
-					// The property name contains opening prefix(es)
+					// The property name contains opening prefix(es)...
 					unclosedPrefixes++;
 					break;
 				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR:
 					if (unclosedPrefixes == 0) {
-						// No unclosed prefix(es) in the property name (left), this is the suffix we are looking for
+						// No unclosed prefix(es) in the property name (left) ->
+						// this is the suffix we are looking for.
 						return i;
-					} else {
-						// This suffix does not close the initial prefix, but one that occurred within the property name
+					}
+					else {
+						// This suffix does not close the initial prefix but rather
+						// just one that occurred within the property name.
 						unclosedPrefixes--;
 					}
 					break;
@@ -980,6 +983,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 		return -1;
 	}
+
 
 	@Override
 	public String toString() {
