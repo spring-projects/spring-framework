@@ -2354,6 +2354,27 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testLazyInitFlag() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setLazyInit(true);
+		factory.registerBeanDefinition("tb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setLazyInit(false);
+		factory.registerBeanDefinition("tb2", bd2);
+		factory.registerBeanDefinition("tb3", new RootBeanDefinition(TestBean.class));
+
+		assertEquals(Boolean.TRUE, ((AbstractBeanDefinition) factory.getMergedBeanDefinition("tb1")).getLazyInit());
+		assertEquals(Boolean.FALSE, ((AbstractBeanDefinition) factory.getMergedBeanDefinition("tb2")).getLazyInit());
+		assertNull(((AbstractBeanDefinition) factory.getMergedBeanDefinition("tb3")).getLazyInit());
+
+		factory.preInstantiateSingletons();
+		assertFalse(factory.containsSingleton("tb1"));
+		assertTrue(factory.containsSingleton("tb2"));
+		assertTrue(factory.containsSingleton("tb3"));
+	}
+
+	@Test
 	public void testLazyInitFactory() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(LazyInitFactory.class));
@@ -2877,8 +2898,8 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testInitSecurityAwarePrototypeBean() {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestSecuredBean.class);
@@ -2889,12 +2910,7 @@ public class DefaultListableBeanFactoryTests {
 		subject.getPrincipals().add(new TestPrincipal("user1"));
 
 		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
-				new PrivilegedAction() {
-					@Override
-					public Object run() {
-						return lbf.getBean("test");
-					}
-				}, null);
+				(PrivilegedAction) () -> lbf.getBean("test"), null);
 		assertNotNull(bean);
 		assertEquals("user1", bean.getUserName());
 	}
