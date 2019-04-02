@@ -80,11 +80,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with fatal log level.
+	 * @param cause the exception to log
 	 * @param message the message to log
-	 * @param t log this cause
 	 */
-	public void fatal(CharSequence message, Throwable t) {
-		this.log.fatal(message, t);
+	public void fatal(Throwable cause, CharSequence message) {
+		this.log.fatal(message, cause);
 	}
 
 	/**
@@ -97,11 +97,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with error log level.
+	 * @param cause the exception to log
 	 * @param message the message to log
-	 * @param t log this cause
 	 */
-	public void error(CharSequence message, Throwable t) {
-		this.log.error(message, t);
+	public void error(Throwable cause, CharSequence message) {
+		this.log.error(message, cause);
 	}
 
 	/**
@@ -114,11 +114,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with warn log level.
+	 * @param cause the exception to log
 	 * @param message the message to log
-	 * @param t log this cause
 	 */
-	public void warn(CharSequence message, Throwable t) {
-		this.log.warn(message, t);
+	public void warn(Throwable cause, CharSequence message) {
+		this.log.warn(message, cause);
 	}
 
 	/**
@@ -131,11 +131,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with info log level.
+	 * @param cause the exception to log
 	 * @param message the message to log
-	 * @param t log this cause
 	 */
-	public void info(CharSequence message, Throwable t) {
-		this.log.info(message, t);
+	public void info(Throwable cause, CharSequence message) {
+		this.log.info(message, cause);
 	}
 
 	/**
@@ -148,11 +148,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with debug log level.
+	 * @param cause the exception to log
 	 * @param message the message to log
-	 * @param t log this cause
 	 */
-	public void debug(CharSequence message, Throwable t) {
-		this.log.debug(message, t);
+	public void debug(Throwable cause, CharSequence message) {
+		this.log.debug(message, cause);
 	}
 
 	/**
@@ -165,11 +165,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with trace log level.
+	 * @param cause the exception to log
 	 * @param message the message to log
-	 * @param t log this cause
 	 */
-	public void trace(CharSequence message, Throwable t) {
-		this.log.trace(message, t);
+	public void trace(Throwable cause, CharSequence message) {
+		this.log.trace(message, cause);
 	}
 
 
@@ -185,11 +185,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with fatal log level.
+	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
-	 * @param t log this cause
 	 */
-	public void fatal(Supplier<? extends CharSequence> messageSupplier, Throwable t) {
-		this.log.fatal(new LogMessage(messageSupplier), t);
+	public void fatal(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
+		this.log.fatal(new LogMessage(messageSupplier), cause);
 	}
 
 	/**
@@ -202,11 +202,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with error log level.
+	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
-	 * @param t log this cause
 	 */
-	public void error(Supplier<? extends CharSequence> messageSupplier, Throwable t) {
-		this.log.error(new LogMessage(messageSupplier), t);
+	public void error(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
+		this.log.error(new LogMessage(messageSupplier), cause);
 	}
 
 	/**
@@ -219,11 +219,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with warn log level.
+	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
-	 * @param t log this cause
 	 */
-	public void warn(Supplier<? extends CharSequence> messageSupplier, Throwable t) {
-		this.log.warn(new LogMessage(messageSupplier), t);
+	public void warn(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
+		this.log.warn(new LogMessage(messageSupplier), cause);
 	}
 
 	/**
@@ -236,11 +236,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with info log level.
+	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
-	 * @param t log this cause
 	 */
-	public void info(Supplier<? extends CharSequence> messageSupplier, Throwable t) {
-		this.log.info(new LogMessage(messageSupplier), t);
+	public void info(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
+		this.log.info(new LogMessage(messageSupplier), cause);
 	}
 
 	/**
@@ -253,11 +253,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with debug log level.
+	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
-	 * @param t log this cause
 	 */
-	public void debug(Supplier<? extends CharSequence> messageSupplier, Throwable t) {
-		this.log.debug(new LogMessage(messageSupplier), t);
+	public void debug(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
+		this.log.debug(new LogMessage(messageSupplier), cause);
 	}
 
 	/**
@@ -270,11 +270,11 @@ public class LogAccessor {
 
 	/**
 	 * Log an error with trace log level.
+	 * @param cause the exception to log
 	 * @param messageSupplier a lazy supplier for the message to log
-	 * @param t log this cause
 	 */
-	public void trace(Supplier<? extends CharSequence> messageSupplier, Throwable t) {
-		this.log.trace(new LogMessage(messageSupplier), t);
+	public void trace(Throwable cause, Supplier<? extends CharSequence> messageSupplier) {
+		this.log.trace(new LogMessage(messageSupplier), cause);
 	}
 
 }
