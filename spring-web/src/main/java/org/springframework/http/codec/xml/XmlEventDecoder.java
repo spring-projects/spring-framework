@@ -18,7 +18,6 @@ package org.springframework.http.codec.xml;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,6 +32,7 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import org.reactivestreams.Publisher;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -106,18 +106,17 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 		}
 		else {
 			Mono<DataBuffer> singleBuffer = DataBufferUtils.join(flux);
-			return singleBuffer.
-					flatMapMany(dataBuffer -> {
-						try {
-							InputStream is = dataBuffer.asInputStream();
-							Iterator eventReader = inputFactory.createXMLEventReader(is);
-							return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader)
-									.doFinally(t -> DataBufferUtils.release(dataBuffer));
-						}
-						catch (XMLStreamException ex) {
-							return Mono.error(ex);
-						}
-					});
+			return singleBuffer.flatMapIterable(dataBuffer -> {
+				InputStream is = dataBuffer.asInputStream();
+				return () -> {
+					try {
+						return inputFactory.createXMLEventReader(is);
+					}
+					catch (XMLStreamException ex) {
+						throw Exceptions.propagate(ex);
+					}
+				};
+			});
 		}
 	}
 

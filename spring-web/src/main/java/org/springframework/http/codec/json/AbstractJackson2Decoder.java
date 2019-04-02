@@ -115,7 +115,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 				getObjectMapper().readerWithView(jsonView).forType(javaType) :
 				getObjectMapper().readerFor(javaType));
 
-		return tokens.flatMap(tokenBuffer -> {
+		return tokens.handle((tokenBuffer, sink) -> {
 			try {
 				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
 				if (!Hints.isLoggingSuppressed(hints)) {
@@ -124,16 +124,18 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 						return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
 					});
 				}
-				return Mono.justOrEmpty(value);
+				if (value != null) {
+					sink.next(value);
+				}
 			}
 			catch (InvalidDefinitionException ex) {
-				return Mono.error(new CodecException("Type definition error: " + ex.getType(), ex));
+				sink.error(new CodecException("Type definition error: " + ex.getType(), ex));
 			}
 			catch (JsonProcessingException ex) {
-				return Mono.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
+				sink.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
 			}
 			catch (IOException ex) {
-				return Mono.error(new DecodingException("I/O error while parsing input stream", ex));
+				sink.error(new DecodingException("I/O error while parsing input stream", ex));
 			}
 		});
 	}
