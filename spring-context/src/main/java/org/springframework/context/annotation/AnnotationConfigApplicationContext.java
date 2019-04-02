@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.annotation.Annotation;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
@@ -153,8 +152,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @see #scan(String...)
 	 * @see #refresh()
 	 */
-	@Override
-	public final void register(Class<?>... annotatedClasses) {
+	public void register(Class<?>... annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
 		this.reader.register(annotatedClasses);
 	}
@@ -167,8 +165,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @see #register(Class...)
 	 * @see #refresh()
 	 */
-	@Override
-	public final void scan(String... basePackages) {
+	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		this.scanner.scan(basePackages);
 	}
@@ -177,65 +174,6 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	//---------------------------------------------------------------------
 	// Convenient methods for registering individual beans
 	//---------------------------------------------------------------------
-
-	/**
-	 * Register a bean from the given bean class.
-	 * @param annotatedClass the class of the bean
-	 * @since 5.2
-	 */
-	public final <T> void registerBean(Class<T> annotatedClass) {
-		this.reader.doRegisterBean(annotatedClass, null, null, null);
-	}
-
-	/**
-	 * Register a bean from the given bean class, using the given supplier for
-	 * obtaining a new instance (typically declared as a lambda expression or
-	 * method reference).
-	 * @param annotatedClass the class of the bean
-	 * @param supplier a callback for creating an instance of the bean
-	 * @since 5.2
-	 */
-	public final <T> void registerBean(Class<T> annotatedClass, Supplier<T> supplier) {
-		this.reader.doRegisterBean(annotatedClass, supplier, null, null);
-	}
-
-	/**
-	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations.
-	 * @param annotatedClass the class of the bean
-	 * @param qualifiers specific qualifier annotations to consider,
-	 * in addition to qualifiers at the bean class level (may be empty).
-	 * These can be actual autowire qualifiers as well as {@link Primary}
-	 * and {@link Lazy}.
-	 * @since 5.2
-	 */
-	@Override
-	@SafeVarargs
-	@SuppressWarnings("varargs")
-	public final <T> void registerBean(Class<T> annotatedClass, Class<? extends Annotation>... qualifiers) {
-		this.reader.doRegisterBean(annotatedClass, null, null, qualifiers);
-	}
-
-	/**
-	 * Register a bean from the given bean class, using the given supplier for
-	 * obtaining a new instance (typically declared as a lambda expression or
-	 * method reference).
-	 * @param annotatedClass the class of the bean
-	 * @param supplier a callback for creating an instance of the bean
-	 * @param qualifiers specific qualifier annotations to consider,
-	 * in addition to qualifiers at the bean class level (may be empty).
-	 * These can be actual autowire qualifiers as well as {@link Primary}
-	 * and {@link Lazy}.
-	 * @since 5.2
-	 */
-	@Override
-	@SafeVarargs
-	@SuppressWarnings("varargs")
-	public final <T> void registerBean(
-			Class<T> annotatedClass, Supplier<T> supplier, Class<? extends Annotation>... qualifiers) {
-
-		this.reader.doRegisterBean(annotatedClass, supplier, null, qualifiers);
-	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
@@ -249,7 +187,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * (may be {@code null} or empty)
 	 * @since 5.0
 	 */
-	public final <T> void registerBean(Class<T> annotatedClass, Object... constructorArguments) {
+	public <T> void registerBean(Class<T> annotatedClass, Object... constructorArguments) {
 		registerBean(null, annotatedClass, constructorArguments);
 	}
 
@@ -265,9 +203,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * (may be {@code null} or empty)
 	 * @since 5.0
 	 */
-	public final <T> void registerBean(
-			@Nullable String beanName, Class<T> annotatedClass, Object... constructorArguments) {
-
+	public <T> void registerBean(@Nullable String beanName, Class<T> annotatedClass, Object... constructorArguments) {
 		this.reader.doRegisterBean(annotatedClass, null, beanName, null,
 				bd -> {
 					for (Object arg : constructorArguments) {
@@ -277,8 +213,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	}
 
 	@Override
-	public final <T> void registerBean(@Nullable String beanName, Class<T> beanClass,
-			@Nullable Supplier<T> supplier, BeanDefinitionCustomizer... customizers) {
+	public <T> void registerBean(@Nullable String beanName, Class<T> beanClass, @Nullable Supplier<T> supplier,
+			BeanDefinitionCustomizer... customizers) {
 
 		this.reader.doRegisterBean(beanClass, supplier, beanName, null, customizers);
 	}
