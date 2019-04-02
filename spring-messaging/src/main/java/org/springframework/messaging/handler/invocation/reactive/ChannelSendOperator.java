@@ -402,7 +402,12 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 		@Override
 		public void onError(Throwable ex) {
-			this.completionSubscriber.onError(ex);
+			try {
+				this.completionSubscriber.onError(ex);
+			}
+			finally {
+				this.writeBarrier.releaseCachedItem();
+			}
 		}
 
 		@Override
