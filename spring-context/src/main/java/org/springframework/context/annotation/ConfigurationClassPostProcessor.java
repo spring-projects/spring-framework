@@ -86,6 +86,24 @@ import org.springframework.util.ClassUtils;
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
 		PriorityOrdered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
 
+	/**
+	 * A {@code BeanNameGenerator} using fully qualified class names as default bean names.
+	 * <p>This default for configuration-level import purposes may be overridden through
+	 * {@link #setBeanNameGenerator}. Note that the default for component scanning purposes
+	 * is a plain {@link AnnotationBeanNameGenerator#INSTANCE}, unless overridden through
+	 * {@link #setBeanNameGenerator} with a unified user-level bean name generator.
+	 * @since 5.2
+	 * @see #setBeanNameGenerator
+	 */
+	public static final AnnotationBeanNameGenerator IMPORT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator() {
+		@Override
+		protected String buildDefaultBeanName(BeanDefinition definition) {
+			String beanClassName = definition.getBeanClassName();
+			Assert.state(beanClassName != null, "No bean class name set");
+			return beanClassName;
+		}
+	};
+
 	private static final String IMPORT_REGISTRY_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importRegistry";
 
@@ -117,18 +135,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private boolean localBeanNameGeneratorSet = false;
 
-	/* Using short class names as default bean names */
-	private BeanNameGenerator componentScanBeanNameGenerator = new AnnotationBeanNameGenerator();
+	/* Using short class names as default bean names by default. */
+	private BeanNameGenerator componentScanBeanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
 
-	/* Using fully qualified class names as default bean names */
-	private BeanNameGenerator importBeanNameGenerator = new AnnotationBeanNameGenerator() {
-		@Override
-		protected String buildDefaultBeanName(BeanDefinition definition) {
-			String beanClassName = definition.getBeanClassName();
-			Assert.state(beanClassName != null, "No bean class name set");
-			return beanClassName;
-		}
-	};
+	/* Using fully qualified class names as default bean names by default. */
+	private BeanNameGenerator importBeanNameGenerator = IMPORT_BEAN_NAME_GENERATOR;
 
 
 	@Override
