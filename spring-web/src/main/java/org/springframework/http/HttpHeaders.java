@@ -24,6 +24,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -590,6 +591,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the (new) value of the {@code Access-Control-Max-Age} response header.
+	 * @since 5.2
+	 */
+	public void setAccessControlMaxAge(Duration maxAge) {
+		set(ACCESS_CONTROL_MAX_AGE, Long.toString(maxAge.getSeconds()));
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Max-Age} response header.
 	 */
 	public void setAccessControlMaxAge(long maxAge) {
 		set(ACCESS_CONTROL_MAX_AGE, Long.toString(maxAge));
@@ -931,6 +940,24 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the date and time at which the message was created, as specified
 	 * by the {@code Date} header.
+	 * @since 5.2
+	 */
+	public void setDate(ZonedDateTime date) {
+		setZonedDateTime(DATE, date);
+	}
+
+	/**
+	 * Set the date and time at which the message was created, as specified
+	 * by the {@code Date} header.
+	 * @since 5.2
+	 */
+	public void setDate(Instant date) {
+		setInstant(DATE, date);
+	}
+
+	/**
+	 * Set the date and time at which the message was created, as specified
+	 * by the {@code Date} header.
 	 * <p>The date should be specified as the number of milliseconds since
 	 * January 1, 1970 GMT.
 	 */
@@ -979,6 +1006,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setExpires(ZonedDateTime expires) {
 		setZonedDateTime(EXPIRES, expires);
+	}
+
+	/**
+	 * Set the date and time at which the message is no longer valid,
+	 * as specified by the {@code Expires} header.
+	 * @since 5.2
+	 */
+	public void setExpires(Instant expires) {
+		setInstant(EXPIRES, expires);
 	}
 
 	/**
