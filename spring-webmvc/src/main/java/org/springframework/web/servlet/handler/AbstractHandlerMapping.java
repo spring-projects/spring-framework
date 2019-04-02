@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource)this.corsConfigurationSource).setAlwaysUseFullPath(alwaysUseFullPath);
+			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setAlwaysUseFullPath(alwaysUseFullPath);
 		}
 	}
 
@@ -127,7 +127,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource)this.corsConfigurationSource).setUrlDecode(urlDecode);
+			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setUrlDecode(urlDecode);
 		}
 	}
 
@@ -138,7 +138,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource)this.corsConfigurationSource).setRemoveSemicolonContent(removeSemicolonContent);
+			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setRemoveSemicolonContent(removeSemicolonContent);
 		}
 	}
 
@@ -152,7 +152,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource)this.corsConfigurationSource).setUrlPathHelper(urlPathHelper);
+			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setUrlPathHelper(urlPathHelper);
 		}
 	}
 
@@ -172,7 +172,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			((UrlBasedCorsConfigurationSource)this.corsConfigurationSource).setPathMatcher(pathMatcher);
+			((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setPathMatcher(pathMatcher);
 		}
 	}
 
@@ -232,7 +232,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Deprecated
 	public Map<String, CorsConfiguration> getCorsConfigurations() {
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource) {
-			return ((UrlBasedCorsConfigurationSource)this.corsConfigurationSource).getCorsConfigurations();
+			return ((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).getCorsConfigurations();
 		}
 		else {
 			throw new IllegalStateException("No CORS configurations available when the source " +

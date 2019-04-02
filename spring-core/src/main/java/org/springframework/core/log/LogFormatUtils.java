@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,9 @@ public abstract class LogFormatUtils {
 	 */
 	public static void traceDebug(Log logger, Function<Boolean, String> messageFactory) {
 		if (logger.isDebugEnabled()) {
-			String logMessage = messageFactory.apply(logger.isTraceEnabled());
-			if (logger.isTraceEnabled()) {
+			boolean traceEnabled = logger.isTraceEnabled();
+			String logMessage = messageFactory.apply(traceEnabled);
+			if (traceEnabled) {
 				logger.trace(logMessage);
 			}
 			else {
