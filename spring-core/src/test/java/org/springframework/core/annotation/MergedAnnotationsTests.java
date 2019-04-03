@@ -936,39 +936,39 @@ public class MergedAnnotationsTests {
 	public void getSuperClassForAllScenarios() {
 		// no class-level annotation
 		assertThat(MergedAnnotations.from(NonAnnotatedInterface.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isNull();
 		assertThat(MergedAnnotations.from(NonAnnotatedClass.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isNull();
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertThat(MergedAnnotations.from(InheritedAnnotationInterface.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isEqualTo(
 								InheritedAnnotationInterface.class);
 		assertThat(MergedAnnotations.from(SubInheritedAnnotationInterface.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isNull();
 		assertThat(MergedAnnotations.from(InheritedAnnotationClass.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isEqualTo(
 								InheritedAnnotationClass.class);
 		assertThat(MergedAnnotations.from(SubInheritedAnnotationClass.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isEqualTo(
 								InheritedAnnotationClass.class);
 		// non-inherited class-level annotation; note: @Order is not inherited,
 		// but we should still find it on classes.
 		assertThat(MergedAnnotations.from(NonInheritedAnnotationInterface.class,
-				SearchStrategy.SUPER_CLASS).get(Order.class).getSource()).isEqualTo(
+				SearchStrategy.SUPERCLASS).get(Order.class).getSource()).isEqualTo(
 						NonInheritedAnnotationInterface.class);
 		assertThat(MergedAnnotations.from(SubNonInheritedAnnotationInterface.class,
-				SearchStrategy.SUPER_CLASS).get(Order.class).getSource()).isNull();
+				SearchStrategy.SUPERCLASS).get(Order.class).getSource()).isNull();
 		assertThat(MergedAnnotations.from(NonInheritedAnnotationClass.class,
-				SearchStrategy.SUPER_CLASS).get(Order.class).getSource()).isEqualTo(
+				SearchStrategy.SUPERCLASS).get(Order.class).getSource()).isEqualTo(
 						NonInheritedAnnotationClass.class);
 		assertThat(MergedAnnotations.from(SubNonInheritedAnnotationClass.class,
-				SearchStrategy.SUPER_CLASS).get(Order.class).getSource()).isEqualTo(
+				SearchStrategy.SUPERCLASS).get(Order.class).getSource()).isEqualTo(
 						NonInheritedAnnotationClass.class);
 	}
 
@@ -1045,7 +1045,7 @@ public class MergedAnnotationsTests {
 
 	private Object getSuperClassSourceWithTypeIn(Class<?> clazz,
 			List<Class<? extends Annotation>> annotationTypes) {
-		return MergedAnnotations.from(clazz, SearchStrategy.SUPER_CLASS).stream().filter(
+		return MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS).stream().filter(
 				MergedAnnotationPredicates.typeIn(annotationTypes).and(
 						MergedAnnotation::isDirectlyPresent)).map(
 								MergedAnnotation::getSource).findFirst().orElse(null);
@@ -1279,7 +1279,7 @@ public class MergedAnnotationsTests {
 		Class<?> element = MyRepeatableClass.class;
 		String[] expectedValuesJava = { "A", "B", "C" };
 		String[] expectedValuesSpring = { "A", "B", "C", "meta1" };
-		testRepeatables(SearchStrategy.SUPER_CLASS, element, expectedValuesJava,
+		testRepeatables(SearchStrategy.SUPERCLASS, element, expectedValuesJava,
 				expectedValuesSpring);
 	}
 
@@ -1288,7 +1288,7 @@ public class MergedAnnotationsTests {
 		Class<?> element = SubMyRepeatableClass.class;
 		String[] expectedValuesJava = { "A", "B", "C" };
 		String[] expectedValuesSpring = { "A", "B", "C", "meta1" };
-		testRepeatables(SearchStrategy.SUPER_CLASS, element, expectedValuesJava,
+		testRepeatables(SearchStrategy.SUPERCLASS, element, expectedValuesJava,
 				expectedValuesSpring);
 	}
 
@@ -1297,7 +1297,7 @@ public class MergedAnnotationsTests {
 		Class<?> element = SubMyRepeatableWithAdditionalLocalDeclarationsClass.class;
 		String[] expectedValuesJava = { "X", "Y", "Z" };
 		String[] expectedValuesSpring = { "X", "Y", "Z", "meta2" };
-		testRepeatables(SearchStrategy.SUPER_CLASS, element, expectedValuesJava,
+		testRepeatables(SearchStrategy.SUPERCLASS, element, expectedValuesJava,
 				expectedValuesSpring);
 	}
 
@@ -1306,7 +1306,7 @@ public class MergedAnnotationsTests {
 		Class<?> element = SubSubMyRepeatableWithAdditionalLocalDeclarationsClass.class;
 		String[] expectedValuesJava = { "X", "Y", "Z" };
 		String[] expectedValuesSpring = { "X", "Y", "Z", "meta2" };
-		testRepeatables(SearchStrategy.SUPER_CLASS, element, expectedValuesJava,
+		testRepeatables(SearchStrategy.SUPERCLASS, element, expectedValuesJava,
 				expectedValuesSpring);
 	}
 

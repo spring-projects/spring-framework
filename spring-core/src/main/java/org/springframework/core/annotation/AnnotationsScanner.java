@@ -121,7 +121,7 @@ abstract class AnnotationsScanner {
 				return processElement(context, source, processor, classFilter);
 			case INHERITED_ANNOTATIONS:
 				return processClassInheritedAnnotations(context, source, processor, classFilter);
-			case SUPER_CLASS:
+			case SUPERCLASS:
 				return processClassHierarchy(context, new int[] {0}, source, processor, classFilter, false);
 			case EXHAUSTIVE:
 				return processClassHierarchy(context, new int[] {0}, source, processor, classFilter, true);
@@ -229,7 +229,7 @@ abstract class AnnotationsScanner {
 			case DIRECT:
 			case INHERITED_ANNOTATIONS:
 				return processMethodInheritedAnnotations(context, source, processor, classFilter);
-			case SUPER_CLASS:
+			case SUPERCLASS:
 				return processMethodHierarchy(context, new int[] {0}, source.getDeclaringClass(),
 						processor, classFilter, source, false);
 			case EXHAUSTIVE:

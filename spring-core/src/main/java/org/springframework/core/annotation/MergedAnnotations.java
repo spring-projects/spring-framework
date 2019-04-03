@@ -118,6 +118,7 @@ import org.springframework.lang.Nullable;
  * </pre>
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2
  * @see MergedAnnotation
  * @see MergedAnnotationCollectors
@@ -372,31 +373,31 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		/**
 		 * Find only directly declared annotations, without considering
 		 * {@link Inherited @Inherited} annotations and without searching
-		 * super-classes or implemented interfaces.
+		 * superclasses or implemented interfaces.
 		 */
 		DIRECT,
 
 		/**
-		 * Find all directly declared annotations as well any
-		 * {@link Inherited @Inherited} super-class annotations. This strategy
+		 * Find all directly declared annotations as well as any
+		 * {@link Inherited @Inherited} superclass annotations. This strategy
 		 * is only really useful when used with {@link Class} types since the
 		 * {@link Inherited @Inherited} annotation is ignored for all other
-		 * {@link AnnotatedElement annotated elements}. This strategy does not
-		 * search implemented interfaces.
+		 * {@linkplain AnnotatedElement annotated elements}. This strategy does
+		 * not search implemented interfaces.
 		 */
 		INHERITED_ANNOTATIONS,
 
 		/**
-		 * Find all directly declared and super-class annotations. This strategy
+		 * Find all directly declared and superclass annotations. This strategy
 		 * is similar to {@link #INHERITED_ANNOTATIONS} except the annotations
 		 * do not need to be meta-annotated with {@link Inherited @Inherited}.
 		 * This strategy does not search implemented interfaces.
 		 */
-		SUPER_CLASS,
+		SUPERCLASS,
 
 		/**
-		 * Perform a full search of all related elements, include those on any
-		 * super-classes or implemented interfaces. Superclass annotations do
+		 * Perform a full search of all related elements, including those on any
+		 * superclasses or implemented interfaces. Superclass annotations do
 		 * not need to be meta-annotated with {@link Inherited @Inherited}.
 		 */
 		EXHAUSTIVE

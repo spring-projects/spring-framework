@@ -139,41 +139,41 @@ public class AnnotationsScannerTests {
 	@Test
 	public void superclassStrategyOnClassWhenNotAnnoatedScansNone() {
 		Class<?> source = WithNoAnnotations.class;
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).isEmpty();
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).isEmpty();
 	}
 
 	@Test
 	public void superclassStrategyOnClassScansAnnotations() {
 		Class<?> source = WithSingleAnnotation.class;
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1");
 	}
 
 	@Test
 	public void superclassStrategyOnClassWhenMultipleAnnotationsScansAnnotations() {
 		Class<?> source = WithMultipleAnnotations.class;
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1", "0:TestAnnotation2");
 	}
 
 	@Test
 	public void superclassStrategyOnClassWhenHasSuperclassScansSuperclass() {
 		Class<?> source = WithSingleSuperclass.class;
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1", "1:TestAnnotation2", "1:TestInheritedAnnotation2");
 	}
 
 	@Test
 	public void superclassStrategyOnClassWhenHasInterfaceDoesNotIncludeInterfaces() {
 		Class<?> source = WithSingleInterface.class;
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1");
 	}
 
 	@Test
 	public void superclassStrategyOnClassHierarchyScansInCorrectOrder() {
 		Class<?> source = WithHierarchy.class;
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1", "1:TestAnnotation2", "1:TestInheritedAnnotation2",
 				"2:TestAnnotation3");
 	}
@@ -306,41 +306,41 @@ public class AnnotationsScannerTests {
 	@Test
 	public void superclassStrategyOnMethodWhenNotAnnoatedScansNone() {
 		Method source = methodFrom(WithNoAnnotations.class);
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).isEmpty();
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).isEmpty();
 	}
 
 	@Test
 	public void superclassStrategyOnMethodScansAnnotations() {
 		Method source = methodFrom(WithSingleAnnotation.class);
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1");
 	}
 
 	@Test
 	public void superclassStrategyOnMethodWhenMultipleAnnotationsScansAnnotations() {
 		Method source = methodFrom(WithMultipleAnnotations.class);
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1", "0:TestAnnotation2");
 	}
 
 	@Test
 	public void superclassStrategyOnMethodWhenHasSuperclassScansSuperclass() {
 		Method source = methodFrom(WithSingleSuperclass.class);
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1", "1:TestAnnotation2", "1:TestInheritedAnnotation2");
 	}
 
 	@Test
 	public void superclassStrategyOnMethodWhenHasInterfaceDoesNotIncludeInterfaces() {
 		Method source = methodFrom(WithSingleInterface.class);
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1");
 	}
 
 	@Test
 	public void superclassStrategyOnMethodHierarchyScansInCorrectOrder() {
 		Method source = methodFrom(WithHierarchy.class);
-		assertThat(scan(source, SearchStrategy.SUPER_CLASS)).containsExactly(
+		assertThat(scan(source, SearchStrategy.SUPERCLASS)).containsExactly(
 				"0:TestAnnotation1", "1:TestAnnotation2", "1:TestInheritedAnnotation2",
 				"2:TestAnnotation3");
 	}

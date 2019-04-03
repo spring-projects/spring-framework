@@ -376,7 +376,7 @@ public abstract class AnnotationUtils {
 		RepeatableContainers repeatableContainers = (containerAnnotationType != null ?
 				RepeatableContainers.of(annotationType, containerAnnotationType) :
 				RepeatableContainers.standardRepeatables());
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.SUPER_CLASS,
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.SUPERCLASS,
 						repeatableContainers, AnnotationFilter.PLAIN)
 				.stream(annotationType)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
@@ -600,7 +600,7 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 
-		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPER_CLASS)
+		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS)
 				.get(annotationType, MergedAnnotation::isDirectlyPresent)
 				.getSource();
 	}
@@ -637,7 +637,7 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 
-		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPER_CLASS)
+		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS)
 				.stream()
 				.filter(MergedAnnotationPredicates.typeIn(annotationTypes).and(MergedAnnotation::isDirectlyPresent))
 				.map(MergedAnnotation::getSource)
