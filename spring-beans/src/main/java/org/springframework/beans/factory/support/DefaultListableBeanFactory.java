@@ -678,21 +678,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		Class<?> beanType = getType(beanName);
 		if (beanType != null) {
-			MergedAnnotation<A> annotation = MergedAnnotations.from(beanType,
-					SearchStrategy.EXHAUSTIVE).get(annotationType);
+			MergedAnnotation<A> annotation =
+					MergedAnnotations.from(beanType, SearchStrategy.EXHAUSTIVE).get(annotationType);
 			if (annotation.isPresent()) {
 				return annotation;
 			}
 		}
 		if (containsBeanDefinition(beanName)) {
-			BeanDefinition bd = getMergedBeanDefinition(beanName);
-			if (bd instanceof AbstractBeanDefinition) {
-				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
-				if (abd.hasBeanClass()) {
-					Class<?> beanClass = abd.getBeanClass();
-					if (beanClass != beanType) {
-						return MergedAnnotations.from(beanClass, SearchStrategy.EXHAUSTIVE).get(annotationType);
+			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			if (bd.hasBeanClass()) {
+				Class<?> beanClass = bd.getBeanClass();
+				if (beanClass != beanType) {
+					MergedAnnotation<A> annotation =
+							MergedAnnotations.from(beanClass, SearchStrategy.EXHAUSTIVE).get(annotationType);
+					if (annotation.isPresent()) {
+						return annotation;
 					}
+				}
+			}
+			Method factoryMethod = bd.getResolvedFactoryMethod();
+			if (factoryMethod != null) {
+				MergedAnnotation<A> annotation =
+						MergedAnnotations.from(factoryMethod, SearchStrategy.EXHAUSTIVE).get(annotationType);
+				if (annotation.isPresent()) {
+					return annotation;
 				}
 			}
 		}
@@ -1988,10 +1997,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		@Override
 		@Nullable
 		public Object getOrderSource(Object obj) {
-			RootBeanDefinition beanDefinition = getRootBeanDefinition(this.instancesToBeanNames.get(obj));
-			if (beanDefinition == null) {
+			String beanName = this.instancesToBeanNames.get(obj);
+			if (beanName == null || !containsBeanDefinition(beanName)) {
 				return null;
 			}
+			RootBeanDefinition beanDefinition = getMergedLocalBeanDefinition(beanName);
 			List<Object> sources = new ArrayList<>(2);
 			Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
 			if (factoryMethod != null) {
@@ -2002,17 +2012,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				sources.add(targetType);
 			}
 			return sources.toArray();
-		}
-
-		@Nullable
-		private RootBeanDefinition getRootBeanDefinition(@Nullable String beanName) {
-			if (beanName != null && containsBeanDefinition(beanName)) {
-				BeanDefinition bd = getMergedBeanDefinition(beanName);
-				if (bd instanceof RootBeanDefinition) {
-					return (RootBeanDefinition) bd;
-				}
-			}
-			return null;
 		}
 	}
 
