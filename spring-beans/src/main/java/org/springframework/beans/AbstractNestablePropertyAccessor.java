@@ -972,6 +972,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		return tokens;
 	}
 
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getName());
@@ -985,6 +986,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 
+	/**
+	 * A handler for a specific property.
+	 */
 	protected abstract static class PropertyHandler {
 
 		private final Class<?> propertyType;
@@ -1035,6 +1039,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 
+	/**
+	 * Holder class used to store property tokens.
+	 */
 	protected static class PropertyTokenHolder {
 
 		public String canonicalName;

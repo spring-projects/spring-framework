@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,21 +112,28 @@ import org.springframework.util.xml.StaxUtils;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 3.0
- * @see #setContextPath(String)
- * @see #setClassesToBeBound(Class[])
- * @see #setJaxbContextProperties(Map)
- * @see #setMarshallerProperties(Map)
- * @see #setUnmarshallerProperties(Map)
- * @see #setSchema(Resource)
- * @see #setSchemas(Resource[])
- * @see #setMarshallerListener(javax.xml.bind.Marshaller.Listener)
- * @see #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener)
- * @see #setAdapters(XmlAdapter[])
+ * @see #setContextPath
+ * @see #setClassesToBeBound
+ * @see #setJaxbContextProperties
+ * @see #setMarshallerProperties
+ * @see #setUnmarshallerProperties
+ * @see #setSchema
+ * @see #setSchemas
+ * @see #setMarshallerListener
+ * @see #setUnmarshallerListener
+ * @see #setAdapters
  */
 public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller,
 		BeanClassLoaderAware, InitializingBean {
 
 	private static final String CID = "cid:";
+
+	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
+		@Override
+		public InputSource resolveEntity(String publicId, String systemId) {
+			return new InputSource(new StringReader(""));
+		}
+	};
 
 
 	/** Logger available to subclasses */
@@ -226,8 +233,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Set the packages to search for classes with JAXB2 annotations in the classpath.
 	 * This is using a Spring-bases search and therefore analogous to Spring's component-scan
 	 * feature ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
-	 * <p>Setting either this property, {@link #setContextPath "contextPath"}
-	 * or {@link #setClassesToBeBound "classesToBeBound"} is required.
+	 * <p>Setting either this property, {@link #setContextPath "contextPath"} or
+	 * {@link #setClassesToBeBound "classesToBeBound"} is required.
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
@@ -249,8 +256,9 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Set the JAXB {@code Marshaller} properties. These properties will be set on the
-	 * underlying JAXB {@code Marshaller}, and allow for features such as indentation.
+	 * Set the JAXB {@code Marshaller} properties.
+	 * <p>These properties will be set on the underlying JAXB {@code Marshaller},
+	 * and allow for features such as indentation.
 	 * @param properties the properties
 	 * @see javax.xml.bind.Marshaller#setProperty(String, Object)
 	 * @see javax.xml.bind.Marshaller#JAXB_ENCODING
@@ -263,8 +271,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Set the JAXB {@code Unmarshaller} properties. These properties will be set on the
-	 * underlying JAXB {@code Unmarshaller}.
+	 * Set the JAXB {@code Unmarshaller} properties.
+	 * <p>These properties will be set on the underlying JAXB {@code Unmarshaller}.
 	 * @param properties the properties
 	 * @see javax.xml.bind.Unmarshaller#setProperty(String, Object)
 	 */
@@ -296,7 +304,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 	/**
 	 * Specify the {@code XmlAdapter}s to be registered with the JAXB {@code Marshaller}
-	 * and {@code Unmarshaller}
+	 * and {@code Unmarshaller}.
 	 */
 	public void setAdapters(XmlAdapter<?, ?>... adapters) {
 		this.adapters = adapters;
@@ -317,7 +325,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Set the schema language. Default is the W3C XML Schema: {@code http://www.w3.org/2001/XMLSchema"}.
+	 * Set the schema language.
+	 * Default is the W3C XML Schema: {@code http://www.w3.org/2001/XMLSchema"}.
 	 * @see XMLConstants#W3C_XML_SCHEMA_NS_URI
 	 * @see XMLConstants#RELAXNG_NS_URI
 	 */
@@ -353,10 +362,11 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Specify whether the {@link #supports(Class)} returns {@code true} for the {@link JAXBElement} class.
-	 * <p>Default is {@code false}, meaning that {@code supports(Class)} always returns {@code false} for
-	 * {@code JAXBElement} classes (though {@link #supports(Type)} can return {@code true}, since it can
-	 * obtain the type parameters of {@code JAXBElement}).
+	 * Specify whether the {@link #supports(Class)} returns {@code true} for the
+	 * {@link JAXBElement} class.
+	 * <p>Default is {@code false}, meaning that {@code supports(Class)} always returns
+	 * {@code false} for {@code JAXBElement} classes (though {@link #supports(Type)} can
+	 * return {@code true}, since it can obtain the type parameters of {@code JAXBElement}).
 	 * <p>This property is typically enabled in combination with usage of classes like
 	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView},
 	 * since the {@code ModelAndView} does not offer type parameter information at runtime.
@@ -412,8 +422,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * {@code Source} passed to {@link #unmarshal(Source)} is a {@link SAXSource} or
 	 * {@link StreamSource}. It has no effect for {@link DOMSource} or {@link StAXSource}
 	 * instances.
-	 * <p><strong>Note:</strong> setting this option to {@code true} also
-	 * automatically sets {@link #setSupportDtd} to {@code true}.
+	 * <p><strong>Note:</strong> setting this option to {@code true} also automatically
+	 * sets {@link #setSupportDtd} to {@code true}.
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
@@ -685,6 +695,21 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
+	/**
+	 * Return a newly created JAXB marshaller.
+	 * <p>Note: JAXB marshallers are not necessarily thread-safe.
+	 */
+	protected Marshaller createMarshaller() {
+		try {
+			Marshaller marshaller = getJaxbContext().createMarshaller();
+			initJaxbMarshaller(marshaller);
+			return marshaller;
+		}
+		catch (JAXBException ex) {
+			throw convertJaxbException(ex);
+		}
+	}
+
 	private void marshalStaxResult(Marshaller jaxbMarshaller, Object graph, Result staxResult) throws JAXBException {
 		XMLStreamWriter streamWriter = StaxUtils.getXMLStreamWriter(staxResult);
 		if (streamWriter != null) {
@@ -702,26 +727,14 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Return a newly created JAXB marshaller. JAXB marshallers are not necessarily thread safe.
-	 */
-	protected Marshaller createMarshaller() {
-		try {
-			Marshaller marshaller = getJaxbContext().createMarshaller();
-			initJaxbMarshaller(marshaller);
-			return marshaller;
-		}
-		catch (JAXBException ex) {
-			throw convertJaxbException(ex);
-		}
-	}
-
-	/**
-	 * Template method that can be overridden by concrete JAXB marshallers for custom initialization behavior.
-	 * Gets called after creation of JAXB {@code Marshaller}, and after the respective properties have been set.
-	 * <p>The default implementation sets the {@link #setMarshallerProperties(Map) defined properties}, the {@link
-	 * #setValidationEventHandler(ValidationEventHandler) validation event handler}, the {@link #setSchemas(Resource[])
-	 * schemas}, {@link #setMarshallerListener(javax.xml.bind.Marshaller.Listener) listener}, and
-	 * {@link #setAdapters(XmlAdapter[]) adapters}.
+	 * Template method that can be overridden by concrete JAXB marshallers
+	 * for custom initialization behavior. Gets called after creation of JAXB
+	 * {@code Marshaller}, and after the respective properties have been set.
+	 * <p>The default implementation sets the
+	 * {@link #setMarshallerProperties defined properties}, the
+	 * {@link #setValidationEventHandler validation event handler}, the
+	 * {@link #setSchemas schemas}, {@link #setMarshallerListener listener},
+	 * and {@link #setAdapters adapters}.
 	 */
 	protected void initJaxbMarshaller(Marshaller marshaller) throws JAXBException {
 		if (this.marshallerProperties != null) {
@@ -774,11 +787,25 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 		catch (NullPointerException ex) {
 			if (!isSupportDtd()) {
-				throw new UnmarshallingFailureException("NPE while unmarshalling. " +
-						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.", ex);
+				throw new UnmarshallingFailureException("NPE while unmarshalling: " +
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
 			}
 			throw ex;
+		}
+		catch (JAXBException ex) {
+			throw convertJaxbException(ex);
+		}
+	}
+
+	/**
+	 * Return a newly created JAXB unmarshaller.
+	 * <p>Note: JAXB unmarshallers are not necessarily thread-safe.
+	 */
+	protected Unmarshaller createUnmarshaller() {
+		try {
+			Unmarshaller unmarshaller = getJaxbContext().createUnmarshaller();
+			initJaxbUnmarshaller(unmarshaller);
+			return unmarshaller;
 		}
 		catch (JAXBException ex) {
 			throw convertJaxbException(ex);
@@ -850,27 +877,14 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Return a newly created JAXB unmarshaller.
-	 * Note: JAXB unmarshallers are not necessarily thread-safe.
-	 */
-	protected Unmarshaller createUnmarshaller() {
-		try {
-			Unmarshaller unmarshaller = getJaxbContext().createUnmarshaller();
-			initJaxbUnmarshaller(unmarshaller);
-			return unmarshaller;
-		}
-		catch (JAXBException ex) {
-			throw convertJaxbException(ex);
-		}
-	}
-
-	/**
-	 * Template method that can be overridden by concrete JAXB marshallers for custom initialization behavior.
-	 * Gets called after creation of JAXB {@code Marshaller}, and after the respective properties have been set.
-	 * <p>The default implementation sets the {@link #setUnmarshallerProperties(Map) defined properties}, the {@link
-	 * #setValidationEventHandler(ValidationEventHandler) validation event handler}, the {@link #setSchemas(Resource[])
-	 * schemas}, {@link #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener) listener}, and
-	 * {@link #setAdapters(XmlAdapter[]) adapters}.
+	 * Template method that can be overridden by concrete JAXB marshallers
+	 * for custom initialization behavior. Gets called after creation of JAXB
+	 * {@code Marshaller}, and after the respective properties have been set.
+	 * <p>The default implementation sets the
+	 * {@link #setUnmarshallerProperties defined properties}, the
+	 * {@link #setValidationEventHandler validation event handler}, the
+	 * {@link #setSchemas schemas}, {@link #setUnmarshallerListener listener},
+	 * and {@link #setAdapters adapters}.
 	 */
 	protected void initJaxbUnmarshaller(Unmarshaller unmarshaller) throws JAXBException {
 		if (this.unmarshallerProperties != null) {
@@ -895,8 +909,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Convert the given {@code JAXBException} to an appropriate exception from the
-	 * {@code org.springframework.oxm} hierarchy.
+	 * Convert the given {@code JAXBException} to an appropriate exception
+	 * from the {@code org.springframework.oxm} hierarchy.
 	 * @param ex {@code JAXBException} that occurred
 	 * @return the corresponding {@code XmlMappingException}
 	 */
@@ -1052,13 +1066,5 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			return "ByteArrayDataSource";
 		}
 	}
-
-
-	private static final EntityResolver NO_OP_ENTITY_RESOLVER = new EntityResolver() {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			return new InputSource(new StringReader(""));
-		}
-	};
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,21 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Arjen Poutsma
  */
-public final class MapSqlParameterSourceTests {
+public class MapSqlParameterSourceTests {
 
 	@Test
-	public void nullParameterValuesPassedToCtorIsOk() throws Exception {
+	public void nullParameterValuesPassedToCtorIsOk() {
 		new MapSqlParameterSource(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void getValueChokesIfParameterIsNotPresent() throws Exception {
+	public void getValueChokesIfParameterIsNotPresent() {
 		MapSqlParameterSource source = new MapSqlParameterSource();
 		source.getValue("pechorin was right!");
 	}
 
 	@Test
-	public void sqlParameterValueRegistersSqlType() throws Exception {
+	public void sqlParameterValueRegistersSqlType() {
 		MapSqlParameterSource msps = new MapSqlParameterSource("FOO", new SqlParameterValue(2, "Foo"));
 		assertEquals("Correct SQL Type not registered", 2, msps.getSqlType("FOO"));
 		MapSqlParameterSource msps2 = new MapSqlParameterSource();
