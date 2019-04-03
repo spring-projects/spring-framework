@@ -54,7 +54,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * an exception, the exception will not propagate to the underlying testing framework.
  * For further details on asynchronous exception handling, consult the class-level
  * Javadoc for {@link org.springframework.context.event.EventListener @EventListener}.
- * 
+ *
  * <h3>Asynchronous Listeners</h3>
  * <p>If you want a particular test event listener to process events asynchronously,
  * you can use Spring's {@link org.springframework.scheduling.annotation.Async @Async}
