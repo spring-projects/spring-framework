@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -212,7 +213,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		if (this.patterns.isEmpty()) {
 			return this;
 		}
-		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+		String lookupPath = this.pathHelper.getLookupPathForRequest(request, HandlerMapping.LOOKUP_PATH);
 		List<String> matches = getMatchingPatterns(lookupPath);
 		return !matches.isEmpty() ? new PatternsRequestCondition(new LinkedHashSet<>(matches), this) : null;
 	}
@@ -287,7 +288,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
-		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
+		String lookupPath = this.pathHelper.getLookupPathForRequest(request, HandlerMapping.LOOKUP_PATH);
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
 		Iterator<String> iterator = this.patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
