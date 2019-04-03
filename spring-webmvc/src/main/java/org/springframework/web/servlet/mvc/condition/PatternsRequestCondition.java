@@ -105,8 +105,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			boolean useTrailingSlashMatch, @Nullable List<String> fileExtensions) {
 
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
-		this.pathHelper = (urlPathHelper != null ? urlPathHelper : new UrlPathHelper());
-		this.pathMatcher = (pathMatcher != null ? pathMatcher : new AntPathMatcher());
+		this.pathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
+		this.pathMatcher = pathMatcher != null ? pathMatcher : new AntPathMatcher();
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 
@@ -118,6 +118,18 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 				this.fileExtensions.add(fileExtension);
 			}
 		}
+	}
+
+	/**
+	 * Private constructor for use when combining and matching.
+	 */
+	private PatternsRequestCondition(Set<String> patterns, PatternsRequestCondition other) {
+		this.patterns = patterns;
+		this.pathHelper = other.pathHelper;
+		this.pathMatcher = other.pathMatcher;
+		this.useSuffixPatternMatch = other.useSuffixPatternMatch;
+		this.useTrailingSlashMatch = other.useTrailingSlashMatch;
+		this.fileExtensions.addAll(other.fileExtensions);
 	}
 
 
@@ -175,8 +187,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, this.pathHelper, this.pathMatcher,
-				this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions);
+		return new PatternsRequestCondition(result, this);
 	}
 
 	/**
@@ -203,27 +214,28 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		}
 		String lookupPath = this.pathHelper.getLookupPathForRequest(request);
 		List<String> matches = getMatchingPatterns(lookupPath);
-		return (!matches.isEmpty() ?
-				new PatternsRequestCondition(matches, this.pathHelper, this.pathMatcher,
-						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions) : null);
+		return !matches.isEmpty() ? new PatternsRequestCondition(new LinkedHashSet<>(matches), this) : null;
 	}
 
 	/**
 	 * Find the patterns matching the given lookup path. Invoking this method should
-	 * yield results equivalent to those of calling
-	 * {@link #getMatchingCondition(javax.servlet.http.HttpServletRequest)}.
+	 * yield results equivalent to those of calling {@link #getMatchingCondition}.
 	 * This method is provided as an alternative to be used if no request is available
 	 * (e.g. introspection, tooling, etc).
 	 * @param lookupPath the lookup path to match to existing patterns
 	 * @return a collection of matching patterns sorted with the closest match at the top
 	 */
 	public List<String> getMatchingPatterns(String lookupPath) {
-		List<String> matches = new ArrayList<>();
+		List<String> matches = null;
 		for (String pattern : this.patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
 			if (match != null) {
+				matches = matches != null ? matches : new ArrayList<>();
 				matches.add(match);
 			}
+		}
+		if (matches == null) {
+			return Collections.emptyList();
 		}
 		if (matches.size() > 1) {
 			matches.sort(this.pathMatcher.getPatternComparator(lookupPath));
