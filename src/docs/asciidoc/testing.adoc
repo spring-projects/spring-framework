@@ -1659,8 +1659,11 @@ subclasses instead.
 ==== `TestExecutionListener` Configuration
 
 Spring provides the following `TestExecutionListener` implementations that are registered
-by default, exactly in the following order:
+exactly in the following order. Except for the `EventPublishingTestExecutionListener`,
+each of these listeners is registered by default.
 
+* `EventPublishingTestExecutionListener`: Publishes test execution events to the test's
+  `ApplicationContext` (see <<testcontext-test-execution-events>>).
 * `ServletTestExecutionListener`: Configures Servlet API mocks for a
   `WebApplicationContext`.
 * `DirtiesContextBeforeModesTestExecutionListener`: Handles the `@DirtiesContext`
@@ -1675,23 +1678,22 @@ by default, exactly in the following order:
   annotation.
 
 [[testcontext-tel-config-registering-tels]]
-===== Registering Custom `TestExecutionListener` Implementations
+===== Registering `TestExecutionListener` Implementations
 
-You can register custom `TestExecutionListener` implementations for a test class
-and its subclasses by using the `@TestExecutionListeners` annotation.
-See <<integration-testing-annotations, annotation support>> and the javadoc for
+You can register `TestExecutionListener` implementations for a test class and its
+subclasses by using the `@TestExecutionListeners` annotation. See
+<<integration-testing-annotations, annotation support>> and the javadoc for
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`]
 for details and examples.
 
 [[testcontext-tel-config-automatic-discovery]]
 ===== Automatic Discovery of Default `TestExecutionListener` Implementations
 
-Registering custom `TestExecutionListener` implementations by using
-`@TestExecutionListeners` is suitable for custom listeners that are used in limited
-testing scenarios. However, it can become cumbersome if a custom listener needs to be
-used across a test suite. Since Spring Framework 4.1, this issue is addressed through
-support for automatic discovery of default `TestExecutionListener` implementations
-through the `SpringFactoriesLoader` mechanism.
+Registering `TestExecutionListener` implementations by using `@TestExecutionListeners` is
+suitable for custom listeners that are used in limited testing scenarios. However, it can
+become cumbersome if a custom listener needs to be used across a test suite. Since Spring
+Framework 4.1, this issue is addressed through support for automatic discovery of default
+`TestExecutionListener` implementations through the `SpringFactoriesLoader` mechanism.
 
 Specifically, the `spring-test` module declares all core default TestExecutionListener`
 implementations under the `org.springframework.test.context.TestExecutionListener` key in
@@ -1779,6 +1781,68 @@ be replaced with the following:
 		// class body...
 	}
 ----
+
+[[testcontext-test-execution-events]]
+==== Test Execution Events
+
+The `EventPublishingTestExecutionListener` introduced in Spring Framework 5.2 offers an
+alternative approach to implementing a custom `TestExecutionListener`. If the
+`EventPublishingTestExecutionListener` is <<testcontext-tel-config-registering-tels,
+registered>>, components in the `ApplicationContext` can listen to the following events
+published by the `EventPublishingTestExecutionListener`. Each of these events corresponds
+to a method in the `TestExecutionListener` API.
+
+* `BeforeTestClassEvent`
+* `PrepareTestInstanceEvent`
+* `BeforeTestMethodEvent`
+* `BeforeTestExecutionEvent`
+* `AfterTestExecutionEvent`
+* `AfterTestMethodEvent`
+* `AfterTestClassEvent`
+
+These events may be consumed for various reasons, such as resetting mock beans or tracing
+test execution. One advantage of consuming test execution events rather than implementing
+a custom `TestExecutionListener` is that test execution events may be consumed by any
+Spring bean registered in the test `ApplicationContext`, and such beans may benefit
+directly from dependency injection and other features of the `ApplicationContext`. In
+contrast, a `TestExecutionListener` is not a bean in the `ApplicationContext`.
+
+In order to listen to test execution events, a Spring bean may choose to implement the
+`org.springframework.context.ApplicationListener` interface. Alternatively, listener
+methods can be annotated with `@EventListener` and configured to listen to one of the
+particular event types listed above (see
+<<core.adoc#context-functionality-events-annotation, Annotation-based Event Listeners>>).
+Due to the popularity of this approach, Spring provides the following dedicated
+`@EventListener` annotations to simplify registration of test execution event listeners.
+These annotations reside in the `org.springframework.test.context.event.annotation`
+package.
+
+* `@BeforeTestClass`
+* `@PrepareTestInstance`
+* `@BeforeTestMethod`
+* `@BeforeTestExecution`
+* `@AfterTestExecution`
+* `@AfterTestMethod`
+* `@AfterTestClass`
+
+[[testcontext-test-execution-events-exception-handling]]
+===== Exception Handling
+
+By default, if a test execution event listener throws an exception while consuming an
+event, that exception will propagate to the underlying testing framework in use (such as
+JUnit or TestNG). For example, if the consumption of a `BeforeTestMethodEvent` results in
+an exception, the corresponding test method will fail as a result of the exception. In
+contrast, if an asynchronous test execution event listener throws an exception, the
+exception will not propagate to the underlying testing framework. For further details on
+asynchronous exception handling, consult the class-level javadoc for `@EventListener`.
+
+[[testcontext-test-execution-events-async]]
+===== Asynchronous Listeners
+
+If you want a particular test execution event listener to process events asynchronously,
+you can use Spring's <<integration.adoc#scheduling-annotation-support-async,regular
+`@Async` support>>. For further details, consult the class-level javadoc for
+`@EventListener`.
 
 
 [[testcontext-ctx-management]]

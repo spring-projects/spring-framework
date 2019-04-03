@@ -23,7 +23,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * {@link org.springframework.test.context.TestExecutionListener TestExecutionListener}
- * that publishes test lifecycle events to a Spring test
+ * that publishes test execution events to a Spring test
  * {@link org.springframework.context.ApplicationContext ApplicationContext}.
  *
  * <h3>Supported Events</h3>
