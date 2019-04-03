@@ -32,7 +32,7 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Collector implementations that provide various reduction operations for
- * {@link MergedAnnotation MergedAnnotations}.
+ * {@link MergedAnnotation} instances.
  *
  * @author Phillip Webb
  * @since 5.2
@@ -49,8 +49,8 @@ public abstract class MergedAnnotationCollectors {
 
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to a
-	 * {@link LinkedHashSet} containing {@link MergedAnnotation#synthesize()
+	 * Create a new {@link Collector} that accumulates merged annotations to a
+	 * {@link LinkedHashSet} containing {@linkplain MergedAnnotation#synthesize()
 	 * synthesized} versions.
 	 * @param <A> the annotation type
 	 * @return a {@link Collector} which collects and synthesizes the
@@ -62,8 +62,8 @@ public abstract class MergedAnnotationCollectors {
 	}
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to an
-	 * {@link Annotation} array containing {@link MergedAnnotation#synthesize()
+	 * Create a new {@link Collector} that accumulates merged annotations to an
+	 * {@link Annotation} array containing {@linkplain MergedAnnotation#synthesize()
 	 * synthesized} versions.
 	 * @param <A> the annotation type
 	 * @return a {@link Collector} which collects and synthesizes the
@@ -75,8 +75,8 @@ public abstract class MergedAnnotationCollectors {
 	}
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to an
-	 * {@link Annotation} array containing {@link MergedAnnotation#synthesize()
+	 * Create a new {@link Collector} that accumulates merged annotations to an
+	 * {@link Annotation} array containing {@linkplain MergedAnnotation#synthesize()
 	 * synthesized} versions.
 	 * @param <A> the annotation type
 	 * @param <R> the resulting array type
@@ -94,8 +94,8 @@ public abstract class MergedAnnotationCollectors {
 	}
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to an
-	 * {@link MultiValueMap} with items {@link MultiValueMap#add(Object, Object)
+	 * Create a new {@link Collector} that accumulates merged annotations to an
+	 * {@link MultiValueMap} with items {@linkplain MultiValueMap#add(Object, Object)
 	 * added} from each merged annotation
 	 * {@link MergedAnnotation#asMap(MapValues...) as a map}.
 	 * @param <A> the annotation type
@@ -111,8 +111,8 @@ public abstract class MergedAnnotationCollectors {
 	}
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to an
-	 * {@link MultiValueMap} with items {@link MultiValueMap#add(Object, Object)
+	 * Create a new {@link Collector} that accumulates merged annotations to an
+	 * {@link MultiValueMap} with items {@linkplain MultiValueMap#add(Object, Object)
 	 * added} from each merged annotation
 	 * {@link MergedAnnotation#asMap(MapValues...) as a map}.
 	 * @param <A> the annotation type

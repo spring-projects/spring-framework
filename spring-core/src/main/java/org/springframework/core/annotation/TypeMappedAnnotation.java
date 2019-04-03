@@ -41,7 +41,7 @@ import org.springframework.util.ReflectionUtils;
  * {@code BiFunction}. This allows various different annotation models to be
  * supported by the same class. For example, the attributes source might be an
  * actual {@link Annotation} instance where methods on the annotation instance
- * are {@link ReflectionUtils#invokeMethod(Method, Object) invoked} to extract
+ * are {@linkplain ReflectionUtils#invokeMethod(Method, Object) invoked} to extract
  * values. Equally, the source could be a simple {@link Map} with values
  * extracted using {@link Map#get(Object)}.
  *
@@ -49,12 +49,12 @@ import org.springframework.util.ReflectionUtils;
  * return type, namely:
  *
  * <p><table border="1">
- * <tr><th>Return Type</th><th >Extracted Type</th></tr>
+ * <tr><th>Return Type</th><th>Extracted Type</th></tr>
  * <tr><td>Class</td><td>Class or String</td></tr>
  * <tr><td>Class[]</td><td>Class[] or String[]</td></tr>
- * <tr><td>Annotation</td><td>Annotation, Map or Object compatible with the value
+ * <tr><td>Annotation</td><td>Annotation, Map, or Object compatible with the value
  * extractor</td></tr>
- * <tr><td>Annotation[]</td><td>Annotation[], Map[] or Object[] where elements are
+ * <tr><td>Annotation[]</td><td>Annotation[], Map[], or Object[] where elements are
  * compatible with the value extractor</td></tr>
  * <tr><td>Other types</td><td>An exact match or the appropriate primitive wrapper</td></tr>
  * </table>

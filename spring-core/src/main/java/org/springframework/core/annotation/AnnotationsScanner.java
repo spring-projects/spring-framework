@@ -35,7 +35,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Scanner to search for relevant annotations on the hierarchy of an
+ * Scanner to search for relevant annotations in the annotation hierarchy of an
  * {@link AnnotatedElement}.
  *
  * @author Phillip Webb

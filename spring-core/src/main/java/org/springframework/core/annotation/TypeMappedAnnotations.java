@@ -273,7 +273,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 	/**
 	 * {@link AnnotationsProcessor} used to detect if an annotation is directly
-	 * or meta-present.
+	 * present or meta-present.
 	 */
 	private static final class IsPresent implements AnnotationsProcessor<Object, Boolean> {
 
@@ -358,8 +358,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 
 	/**
-	 * {@link AnnotationsProcessor} that finds a single
-	 * {@link MergedAnnotation}.
+	 * {@link AnnotationsProcessor} that finds a single {@link MergedAnnotation}.
 	 */
 	private class MergedAnnotationFinder<A extends Annotation>
 			implements AnnotationsProcessor<Object, MergedAnnotation<A>> {

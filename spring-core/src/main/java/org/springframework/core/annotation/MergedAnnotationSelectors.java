@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 /**
  * {@link MergedAnnotationSelector} implementations that provide various options
- * for {@link MergedAnnotation MergedAnnotations}.
+ * for {@link MergedAnnotation} instances.
  *
  * @author Phillip Webb
  * @since 5.2
