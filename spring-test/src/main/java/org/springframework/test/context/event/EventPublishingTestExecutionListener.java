@@ -61,14 +61,6 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * support. For further details, consult the class-level Javadoc for
  * {@link org.springframework.context.event.EventListener @EventListener}.
  *
- * <h3>Listener Registration</h3>
- * <p>Note that this {@code TestExecutionListener} is not registered by default,
- * but it may be registered for a given test class via
- * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners}
- * or globally via the {@link org.springframework.core.io.support.SpringFactoriesLoader
- * SpringFactoriesLoader} mechanism (consult the Javadoc and Spring reference manual for
- * details).
- *
  * @author Frank Scheffler
  * @author Sam Brannen
  * @since 5.2

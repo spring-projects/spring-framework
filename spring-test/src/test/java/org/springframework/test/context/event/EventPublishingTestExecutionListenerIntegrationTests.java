@@ -41,7 +41,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestExecutionListener;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.event.annotation.AfterTestClass;
 import org.springframework.test.context.event.annotation.AfterTestExecution;
 import org.springframework.test.context.event.annotation.AfterTestMethod;
@@ -193,7 +192,6 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 	@RunWith(SpringRunner.class)
 	@ContextConfiguration(classes = TestEventListenerConfiguration.class)
-	@TestExecutionListeners(EventPublishingTestExecutionListener.class)
 	public static class ExampleTestCase {
 
 		@Traceable

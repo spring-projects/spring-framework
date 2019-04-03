@@ -1659,8 +1659,7 @@ subclasses instead.
 ==== `TestExecutionListener` Configuration
 
 Spring provides the following `TestExecutionListener` implementations that are registered
-exactly in the following order. Except for the `EventPublishingTestExecutionListener`,
-each of these listeners is registered by default.
+by default, exactly in the following order:
 
 * `EventPublishingTestExecutionListener`: Publishes test execution events to the test's
   `ApplicationContext` (see <<testcontext-test-execution-events>>).
@@ -1786,11 +1785,10 @@ be replaced with the following:
 ==== Test Execution Events
 
 The `EventPublishingTestExecutionListener` introduced in Spring Framework 5.2 offers an
-alternative approach to implementing a custom `TestExecutionListener`. If the
-`EventPublishingTestExecutionListener` is <<testcontext-tel-config-registering-tels,
-registered>>, components in the `ApplicationContext` can listen to the following events
-published by the `EventPublishingTestExecutionListener`. Each of these events corresponds
-to a method in the `TestExecutionListener` API.
+alternative approach to implementing a custom `TestExecutionListener`. Components in the
+test `ApplicationContext` can listen to the following events published by the
+`EventPublishingTestExecutionListener`, each of which corresponds to a method in the
+`TestExecutionListener` API.
 
 * `BeforeTestClassEvent`
 * `PrepareTestInstanceEvent`
