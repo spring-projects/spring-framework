@@ -161,7 +161,7 @@ public abstract class MimeTypeUtils {
 
 
 	private static final ConcurrentLruCache<String, MimeType> cachedMimeTypes =
-			new ConcurrentLruCache<>(32, MimeTypeUtils::parseMimeTypeInternal);
+			new ConcurrentLruCache<>(64, MimeTypeUtils::parseMimeTypeInternal);
 
 	@Nullable
 	private static volatile Random random;

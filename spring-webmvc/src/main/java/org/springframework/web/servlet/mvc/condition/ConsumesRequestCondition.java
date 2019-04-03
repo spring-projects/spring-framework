@@ -171,6 +171,8 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 			return this;
 		}
 
+		// Common media types are cached at the level of MimeTypeUtils
+
 		MediaType contentType;
 		try {
 			contentType = (StringUtils.hasLength(request.getContentType()) ?

@@ -52,6 +52,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
 
+	private static final String MEDIA_TYPES_ATTRIBUTE = ProducesRequestCondition.class.getName() + ".MEDIA_TYPES";
+
 
 	private final List<ProduceMediaTypeExpression> mediaTypeAllList =
 			Collections.singletonList(new ProduceMediaTypeExpression(MediaType.ALL_VALUE));
@@ -262,7 +264,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	private List<MediaType> getAcceptedMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
-		return this.contentTypeResolver.resolveMediaTypes(exchange);
+		List<MediaType> result = exchange.getAttribute(MEDIA_TYPES_ATTRIBUTE);
+		if (result == null) {
+			result = this.contentTypeResolver.resolveMediaTypes(exchange);
+			exchange.getAttributes().put(MEDIA_TYPES_ATTRIBUTE, result);
+		}
+		return result;
 	}
 
 	private int indexOfEqualMediaType(MediaType mediaType) {

@@ -56,6 +56,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	private static final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
 			Collections.singletonList(new ProduceMediaTypeExpression(MediaType.ALL_VALUE));
 
+	private static final String MEDIA_TYPES_ATTRIBUTE = ProducesRequestCondition.class.getName() + ".MEDIA_TYPES";
+
 
 	private final List<ProduceMediaTypeExpression> expressions;
 
@@ -266,8 +268,16 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		}
 	}
 
-	private List<MediaType> getAcceptedMediaTypes(HttpServletRequest request) throws HttpMediaTypeNotAcceptableException {
-		return this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
+	@SuppressWarnings("unchecked")
+	private List<MediaType> getAcceptedMediaTypes(HttpServletRequest request)
+			throws HttpMediaTypeNotAcceptableException {
+
+		List<MediaType> result = (List<MediaType>) request.getAttribute(MEDIA_TYPES_ATTRIBUTE);
+		if (result == null) {
+			result = this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
+			request.setAttribute(MEDIA_TYPES_ATTRIBUTE, result);
+		}
+		return result;
 	}
 
 	private int indexOfEqualMediaType(MediaType mediaType) {
