@@ -212,6 +212,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			source.setCorsConfigurations(corsConfigurations);
 			source.setPathMatcher(this.pathMatcher);
 			source.setUrlPathHelper(this.urlPathHelper);
+			source.setLookupPathAttributeName(LOOKUP_PATH);
 			this.corsConfigurationSource = source;
 		}
 		else {
@@ -463,7 +464,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, LOOKUP_PATH);
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;

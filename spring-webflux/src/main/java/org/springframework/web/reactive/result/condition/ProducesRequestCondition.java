@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.condition;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,11 +24,11 @@ import java.util.Set;
 
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
-import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -48,7 +47,12 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
+	private static final RequestedContentTypeResolver DEFAULT_CONTENT_TYPE_RESOLVER =
+			new RequestedContentTypeResolverBuilder().build();
+
 	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
+
+	private static final String MEDIA_TYPES_ATTRIBUTE = ProducesRequestCondition.class.getName() + ".MEDIA_TYPES";
 
 
 	private final List<ProduceMediaTypeExpression> mediaTypeAllList =
@@ -90,18 +94,16 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	public ProducesRequestCondition(String[] produces, String[] headers, RequestedContentTypeResolver resolver) {
 		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
 		Collections.sort(this.expressions);
-		this.contentTypeResolver = (resolver != null ? resolver : new HeaderContentTypeResolver());
+		this.contentTypeResolver = resolver != null ? resolver : DEFAULT_CONTENT_TYPE_RESOLVER;
 	}
 
 	/**
-	 * Private constructor with already parsed media type expressions.
+	 * Private constructor for internal use to create matching conditions.
+	 * Note the expressions List is neither sorted, nor deep copied.
 	 */
-	private ProducesRequestCondition(Collection<ProduceMediaTypeExpression> expressions,
-			RequestedContentTypeResolver resolver) {
-
-		this.expressions = new ArrayList<>(expressions);
-		Collections.sort(this.expressions);
-		this.contentTypeResolver = (resolver != null ? resolver : new RequestedContentTypeResolverBuilder().build());
+	private ProducesRequestCondition(List<ProduceMediaTypeExpression> expressions, ProducesRequestCondition other) {
+		this.expressions = expressions;
+		this.contentTypeResolver = other.contentTypeResolver;
 	}
 
 
@@ -189,10 +191,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		if (isEmpty() || CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return EMPTY_CONDITION;
 		}
-		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
-		result.removeIf(expression -> !expression.match(exchange));
-		if (!result.isEmpty()) {
-			return new ProducesRequestCondition(result, this.contentTypeResolver);
+		List<ProduceMediaTypeExpression> result = getMatchingExpressions(exchange);
+		if (!CollectionUtils.isEmpty(result)) {
+			return new ProducesRequestCondition(result, this);
 		}
 		else {
 			try {
@@ -205,6 +206,18 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			}
 		}
 		return null;
+	}
+
+	@Nullable
+	private List<ProduceMediaTypeExpression> getMatchingExpressions(ServerWebExchange exchange) {
+		List<ProduceMediaTypeExpression> result = null;
+		for (ProduceMediaTypeExpression expression : this.expressions) {
+			if (expression.match(exchange)) {
+				result = result != null ? result : new ArrayList<>();
+				result.add(expression);
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -251,7 +264,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	private List<MediaType> getAcceptedMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
-		return this.contentTypeResolver.resolveMediaTypes(exchange);
+		List<MediaType> result = exchange.getAttribute(MEDIA_TYPES_ATTRIBUTE);
+		if (result == null) {
+			result = this.contentTypeResolver.resolveMediaTypes(exchange);
+			exchange.getAttributes().put(MEDIA_TYPES_ATTRIBUTE, result);
+		}
+		return result;
 	}
 
 	private int indexOfEqualMediaType(MediaType mediaType) {

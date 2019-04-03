@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.CorsUtils;
@@ -70,15 +71,16 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * @param headers as described in {@link RequestMapping#headers()}
 	 */
 	public ConsumesRequestCondition(String[] consumes, @Nullable String[] headers) {
-		this(parseExpressions(consumes, headers));
+		this.expressions = new ArrayList<>(parseExpressions(consumes, headers));
+		Collections.sort(this.expressions);
 	}
 
 	/**
-	 * Private constructor accepting parsed media type expressions.
+	 * Private constructor for internal when creating matching conditions.
+	 * Note the expressions List is neither sorted nor deep copied.
 	 */
-	private ConsumesRequestCondition(Collection<ConsumeMediaTypeExpression> expressions) {
-		this.expressions = new ArrayList<>(expressions);
-		Collections.sort(this.expressions);
+	private ConsumesRequestCondition(List<ConsumeMediaTypeExpression> expressions) {
+		this.expressions = expressions;
 	}
 
 
@@ -169,6 +171,8 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 			return this;
 		}
 
+		// Common media types are cached at the level of MimeTypeUtils
+
 		MediaType contentType;
 		try {
 			contentType = (StringUtils.hasLength(request.getContentType()) ?
@@ -179,9 +183,20 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 			return null;
 		}
 
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
-		result.removeIf(expression -> !expression.match(contentType));
-		return (!result.isEmpty() ? new ConsumesRequestCondition(result) : null);
+		List<ConsumeMediaTypeExpression> result = getMatchingExpressions(contentType);
+		return !CollectionUtils.isEmpty(result) ? new ConsumesRequestCondition(result) : null;
+	}
+
+	@Nullable
+	private List<ConsumeMediaTypeExpression> getMatchingExpressions(MediaType contentType) {
+		List<ConsumeMediaTypeExpression> result = null;
+		for (ConsumeMediaTypeExpression expression : this.expressions) {
+			if (expression.match(contentType)) {
+				result = result != null ? result : new ArrayList<>();
+				result.add(expression);
+			}
+		}
+		return result;
 	}
 
 	/**
