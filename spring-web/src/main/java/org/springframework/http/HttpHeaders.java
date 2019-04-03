@@ -60,6 +60,8 @@ import org.springframework.util.StringUtils;
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
  *
+ * <p>Note that {@code HttpHeaders} generally treats header names in a case-insensitive manner.
+ *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel
