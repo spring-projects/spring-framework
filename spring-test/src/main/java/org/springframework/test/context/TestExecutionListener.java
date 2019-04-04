@@ -45,7 +45,7 @@ package org.springframework.test.context;
  * which implement {@code Ordered}):
  * <ul>
  * <li>{@link org.springframework.test.context.event.EventPublishingTestExecutionListener
- * EventPublishingTestExecutionListener}</li>
+ * EventPublishingTestExecutionListener} (not registered by default)</li>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
  * ServletTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
