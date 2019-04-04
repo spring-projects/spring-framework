@@ -27,12 +27,21 @@ import org.springframework.web.reactive.function.server.RouterFunctions.nest
 import java.net.URI
 
 /**
+ * Coroutines variant of [router].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+fun coRouter(routes: (CoRouterFunctionDsl.() -> Unit)) =
+        CoRouterFunctionDsl(routes).build()
+
+/**
  * Coroutines variant of [RouterFunctionDsl].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-open class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)): () -> RouterFunction<ServerResponse> {
+class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 
     private val builder = RouterFunctions.route()
 
@@ -104,7 +113,7 @@ open class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit
      * @see RouterFunctions.nest
      */
     fun RequestPredicate.nest(r: (CoRouterFunctionDsl.() -> Unit)) {
-        builder.add(nest(this, CoRouterFunctionDsl(r).invoke()))
+        builder.add(nest(this, CoRouterFunctionDsl(r).build()))
     }
 
 
@@ -396,10 +405,10 @@ open class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit
         }
     }
 
-	/**
-	 * Return a composed routing function created from all the registered routes.
-	 */
-    override fun invoke(): RouterFunction<ServerResponse> {
+    /**
+     * Return a composed routing function created from all the registered routes.
+     */
+    internal fun build(): RouterFunction<ServerResponse> {
         init()
         return builder.build()
     }
@@ -484,12 +493,3 @@ open class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit
  */
 operator fun <T: ServerResponse> RouterFunction<T>.plus(other: RouterFunction<T>) =
         this.and(other)
-
-/**
- * Coroutines variant of [router].
- *
- * @author Sebastien Deleuze
- * @since 5.2
- */
-fun coRouter(routes: (CoRouterFunctionDsl.() -> Unit)) =
-        CoRouterFunctionDsl(routes).invoke()
