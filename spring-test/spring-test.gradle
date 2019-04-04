@@ -72,7 +72,7 @@ dependencies {
 	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testCompile("org.apache.httpcomponents:httpclient:4.5.7") {
+	testCompile("org.apache.httpcomponents:httpclient:4.5.8") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	testCompile("io.projectreactor.netty:reactor-netty")
