@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationConfigurationException;
-import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
@@ -55,7 +54,7 @@ public class TestExecutionListenersTests {
 
 	@Test
 	public void defaultListeners() {
-		List<Class<?>> expected = asList(EventPublishingTestExecutionListener.class, ServletTestExecutionListener.class,
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class);
@@ -67,10 +66,10 @@ public class TestExecutionListenersTests {
 	 */
 	@Test
 	public void defaultListenersMergedWithCustomListenerPrepended() {
-		List<Class<?>> expected = asList(QuuxTestExecutionListener.class, EventPublishingTestExecutionListener.class,
-				ServletTestExecutionListener.class, DirtiesContextBeforeModesTestExecutionListener.class,
-				DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-				TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class);
+		List<Class<?>> expected = asList(QuuxTestExecutionListener.class, ServletTestExecutionListener.class,
+				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
+				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
+				SqlScriptsTestExecutionListener.class);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerPrependedTestCase.class, expected);
 	}
 
@@ -79,7 +78,7 @@ public class TestExecutionListenersTests {
 	 */
 	@Test
 	public void defaultListenersMergedWithCustomListenerAppended() {
-		List<Class<?>> expected = asList(EventPublishingTestExecutionListener.class, ServletTestExecutionListener.class,
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class, BazTestExecutionListener.class);
@@ -91,7 +90,7 @@ public class TestExecutionListenersTests {
 	 */
 	@Test
 	public void defaultListenersMergedWithCustomListenerInserted() {
-		List<Class<?>> expected = asList(EventPublishingTestExecutionListener.class, ServletTestExecutionListener.class,
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				BarTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
 				TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class);
@@ -119,7 +118,7 @@ public class TestExecutionListenersTests {
 	@Test
 	public void customListenersDeclaredOnInterface() {
 		assertRegisteredListeners(ExplicitListenersOnTestInterfaceTestCase.class,
-				asList(FooTestExecutionListener.class, BarTestExecutionListener.class));
+			asList(FooTestExecutionListener.class, BarTestExecutionListener.class));
 	}
 
 	@Test
@@ -236,7 +235,7 @@ public class TestExecutionListenersTests {
 	static class NonInheritedListenersTestCase extends InheritedListenersTestCase {
 	}
 
-	@TestExecutionListeners({FooTestExecutionListener.class, BarTestExecutionListener.class})
+	@TestExecutionListeners({ FooTestExecutionListener.class, BarTestExecutionListener.class })
 	interface ExplicitListenersTestInterface {
 	}
 
