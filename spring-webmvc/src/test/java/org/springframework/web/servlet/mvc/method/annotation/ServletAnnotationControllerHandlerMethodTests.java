@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,10 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -151,11 +151,13 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
 
@@ -251,7 +253,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Test
 	public void defaultExpressionParameters() throws Exception {
 		initServlet(wac -> {
-			RootBeanDefinition ppc = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+			RootBeanDefinition ppc = new RootBeanDefinition(PropertySourcesPlaceholderConfigurer.class);
 			ppc.getPropertyValues().add("properties", "myKey=foo");
 			wac.registerBeanDefinition("ppc", ppc);
 		}, DefaultExpressionValueParamController.class);
@@ -787,15 +789,19 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Test
-	public void equivalentMappingsWithSameMethodName() throws Exception {
-		try {
-			initServletWithControllers(ChildController.class);
-			fail("Expected 'method already mapped' error");
-		}
-		catch (BeanCreationException e) {
-			assertTrue(e.getCause() instanceof IllegalStateException);
-			assertTrue(e.getCause().getMessage().contains("Ambiguous mapping"));
-		}
+	public void equivalentMappingsWithSameMethodName() {
+		assertThatThrownBy(() -> initServletWithControllers(ChildController.class))
+			.isInstanceOf(BeanCreationException.class)
+			.hasCauseInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("Ambiguous mapping");
+	}
+
+	@Test
+	public void unmappedPathMapping() {
+		assertThatThrownBy(() -> initServletWithControllers(UnmappedPathController.class))
+			.isInstanceOf(BeanCreationException.class)
+			.hasCauseInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("Missing path mapping");
 	}
 
 	@Test
@@ -1993,7 +1999,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	static class ControllerWithEmptyValueMapping {
 
-		@RequestMapping("")
+		@RequestMapping("/**")
 		public void myPath2(HttpServletResponse response) throws IOException {
 			throw new IllegalStateException("test");
 		}
@@ -2012,7 +2018,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	private static class ControllerWithErrorThrown {
 
-		@RequestMapping("")
+		@RequestMapping("/**")
 		public void myPath2(HttpServletResponse response) throws IOException {
 			throw new AssertionError("test");
 		}
@@ -2723,6 +2729,15 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@RequestMapping(method = RequestMethod.GET)
 		public void doGet(HttpServletRequest req, HttpServletResponse resp, @RequestParam("childId") String id) {
+		}
+	}
+
+	@Controller
+	@RequestMapping // path intentionally omitted
+	static class UnmappedPathController {
+
+		@GetMapping // path intentionally omitted
+		public void get(@RequestParam(required = false) String id) {
 		}
 	}
 
@@ -3586,7 +3601,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	static class HttpHeadersResponseController {
 
-		@RequestMapping(value = "", method = RequestMethod.POST)
+		@RequestMapping(value = "/*", method = RequestMethod.POST)
 		@ResponseStatus(HttpStatus.CREATED)
 		public HttpHeaders create() throws URISyntaxException {
 			HttpHeaders headers = new HttpHeaders();

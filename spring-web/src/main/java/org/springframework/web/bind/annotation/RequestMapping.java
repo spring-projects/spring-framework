@@ -88,26 +88,33 @@ public @interface RequestMapping {
 
 	/**
 	 * The primary mapping expressed by this annotation.
-	 * <p>This is an alias for {@link #path}. For example
+	 * <p>This is an alias for {@link #path}. For example,
 	 * {@code @RequestMapping("/foo")} is equivalent to
 	 * {@code @RequestMapping(path="/foo")}.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
+	 * <p><strong>NOTE</strong>: Each handler method must be mapped to a
+	 * non-empty path, either at the type level, at the method level, or a
+	 * combination of the two. If you wish to map to all paths, please map
+	 * explicitly to {@code "/**"} or {@code "**"}.
 	 */
 	@AliasFor("path")
 	String[] value() default {};
 
 	/**
-	 * The path mapping URIs (e.g. "/myPath.do").
-	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
-	 * At the method level, relative paths (e.g. "edit.do") are supported
+	 * The path mapping URIs (e.g. {@code "/myPath.do"}).
+	 * <p>Ant-style path patterns are also supported (e.g. {@code "/myPath/*.do"}).
+	 * At the method level, relative paths (e.g. {@code "edit.do"}) are supported
 	 * within the primary mapping expressed at the type level.
-	 * Path mapping URIs may contain placeholders (e.g. "/${connect}").
+	 * Path mapping URIs may contain placeholders (e.g. <code>"/${connect}"</code>).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
-	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
+	 * <p><strong>NOTE</strong>: Each handler method must be mapped to a
+	 * non-empty path, either at the type level, at the method level, or a
+	 * combination of the two. If you wish to map to all paths, please map
+	 * explicitly to {@code "/**"} or {@code "**"}.
 	 * @since 4.2
 	 */
 	@AliasFor("value")

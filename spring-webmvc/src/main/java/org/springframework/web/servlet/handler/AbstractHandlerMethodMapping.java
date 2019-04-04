@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -58,6 +59,7 @@ import org.springframework.web.servlet.HandlerMapping;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  * @param <T> the mapping for a {@link HandlerMethod} containing the conditions
  * needed to match the handler method to incoming request.
@@ -587,6 +589,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.readWriteLock.writeLock().lock();
 			try {
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+				assertMappedPathMethodMapping(handlerMethod, mapping);
 				assertUniqueMethodMapping(handlerMethod, mapping);
 				this.mappingLookup.put(mapping, handlerMethod);
 
@@ -610,6 +613,21 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 			finally {
 				this.readWriteLock.writeLock().unlock();
+			}
+		}
+
+		/**
+		 * Assert that the supplied {@code mapping} maps the supplied {@link HandlerMethod}
+		 * to explicit, non-empty paths.
+		 * @since 5.2
+		 * @see StringUtils#hasText(String)
+		 */
+		private void assertMappedPathMethodMapping(HandlerMethod handlerMethod, T mapping) {
+			if (!getMappingPathPatterns(mapping).stream().allMatch(StringUtils::hasText)) {
+				throw new IllegalStateException(String.format("Missing path mapping. " +
+						"Handler method '%s' in bean '%s' must be mapped to a non-empty path. " +
+						"If you wish to map to all paths, please map explicitly to \"/**\" or \"**\".",
+					handlerMethod, handlerMethod.getBean()));
 			}
 		}
 
