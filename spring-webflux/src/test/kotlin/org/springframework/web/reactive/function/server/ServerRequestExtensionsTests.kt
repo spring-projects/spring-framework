@@ -91,7 +91,7 @@ class ServerRequestExtensionsTests {
 		val principal = mockk<Principal>()
 		every { request.principal() } returns Mono.just(principal)
 		runBlocking {
-			assertEquals(principal, request.awaitPrincipal())
+			assertEquals(principal, request.awaitPrincipalOrNull())
 		}
 	}
 

@@ -90,7 +90,7 @@ suspend fun ServerRequest.awaitMultipartData(): MultiValueMap<String, Part> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun ServerRequest.awaitPrincipal(): Principal? =
+suspend fun ServerRequest.awaitPrincipalOrNull(): Principal? =
 		principal().awaitFirstOrNull()
 
 /**
