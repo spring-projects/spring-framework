@@ -39,7 +39,7 @@ ext {
 	kotlinVersion        = "1.3.21"
 	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.34.Final"
-	quartzVersion        = "2.3.0"
+	quartzVersion        = "2.3.1"
 	reactorVersion       = "Californium-SR6"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
