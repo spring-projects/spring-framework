@@ -3540,12 +3540,12 @@ where collaborators are provided to beans as properties. Other methods of the
 and accessing a `MessageSource`. These additional features are described in
 <<context-introduction>>.
 
-As of Spring 2.5, autowiring is another alternative to obtain a reference to the
-`ApplicationContext`. The "`traditional`" `constructor` and `byType` autowiring modes
+Autowiring is another alternative to obtain a reference to the
+`ApplicationContext`. The _traditional_ `constructor` and `byType` autowiring modes
 (as described in <<beans-factory-autowire>>) can provide a dependency of type
 `ApplicationContext` for a constructor argument or a setter method parameter,
 respectively. For more flexibility, including the ability to autowire fields and
-multiple parameter methods, use the new annotation-based autowiring features. If you do,
+multiple parameter methods, use the annotation-based autowiring features. If you do,
 the `ApplicationContext` is autowired into a field, constructor argument, or method
 parameter that expects the `ApplicationContext` type if the field, constructor, or
 method in question carries the `@Autowired` annotation. For more information, see
@@ -4257,8 +4257,8 @@ configuration (notice the inclusion of the `context` namespace):
 
 (The implicitly registered post-processors include
 {api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
- {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
- {api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`],
+{api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
+{api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`],
 and the aforementioned
 {api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
 
@@ -4344,11 +4344,11 @@ You can apply the `@Autowired` annotation to constructors, as the following exam
 As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is
 no longer necessary if the target bean defines only one constructor to begin with.
 However, if several constructors are available, at least one must be annotated to
-teach the container which one to use.
+instruct the container which one to use.
 ====
 
-You can also apply the `@Autowired` annotation to "`traditional`" setter
-methods, as the following example shows:
+You can also apply the `@Autowired` annotation to _traditional_ setter methods,
+as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4829,7 +4829,7 @@ the effected methods to a separate delegate bean in such a scenario. Alternative
 can use `@Resource`, which may obtain a proxy back to the current bean by its unique name.
 
 `@Autowired` applies to fields, constructors, and multi-argument methods, allowing for
-narrowing through qualifier annotations at the parameter level. By contrast, `@Resource`
+narrowing through qualifier annotations at the parameter level. In contrast, `@Resource`
 is supported only for fields and bean property setter methods with a single argument.
 As a consequence, you should stick with qualifiers if your injection target is a constructor or a
 multi-argument method.
@@ -6380,7 +6380,7 @@ definitions, and it is assumed that DI metadata such as `@Autowired` or `@Inject
 used within those classes where necessary.
 
 
-[[beans-java-instantiating-container-contstructor]]
+[[beans-java-instantiating-container-constructor]]
 ==== Simple Construction
 
 In much the same way that Spring XML files are used as input when instantiating a
