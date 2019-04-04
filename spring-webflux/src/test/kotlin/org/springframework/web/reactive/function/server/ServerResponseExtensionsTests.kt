@@ -19,12 +19,16 @@ package org.springframework.web.reactive.function.server
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.MediaType
 import org.springframework.http.MediaType.*
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -48,7 +52,7 @@ class ServerResponseExtensionsTests {
 	fun `BodyBuilder#bodyToServerSentEvents with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<List<Foo>>>()
 		bodyBuilder.bodyToServerSentEvents(body)
-		verify { bodyBuilder.contentType(TEXT_EVENT_STREAM) }
+		verify { bodyBuilder.contentType(TEXT_EVENT_STREAM).body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
@@ -90,6 +94,32 @@ class ServerResponseExtensionsTests {
 		verify {
 			bodyBuilder.syncBody(ofType<String>())
 		}
+	}
+
+	@Test
+	@FlowPreview
+	fun `BodyBuilder#body with Flow and reified type parameters`() {
+		val response = mockk<ServerResponse>()
+		val body = mockk<Flow<List<Foo>>>()
+		every { bodyBuilder.body(ofType<Publisher<List<Foo>>>()) } returns Mono.just(response)
+		runBlocking {
+			bodyBuilder.bodyAndAwait(body)
+		}
+		verify { bodyBuilder.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	@FlowPreview
+	fun `BodyBuilder#bodyToServerSentEvents with Flow and reified type parameters`() {
+		val response = mockk<ServerResponse>()
+		val body = mockk<Flow<List<Foo>>>()
+		every { bodyBuilder.contentType(ofType()) } returns bodyBuilder
+		every { bodyBuilder.body(ofType<Publisher<List<Foo>>>()) } returns Mono.just(response)
+		runBlocking {
+			bodyBuilder.bodyToServerSentEventsAndAwait(body)
+		}
+		verify { bodyBuilder.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+		verify { bodyBuilder.contentType(TEXT_EVENT_STREAM) }
 	}
 
 	@Test

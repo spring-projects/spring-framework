@@ -27,6 +27,9 @@ import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import kotlinx.coroutines.CompletableDeferredKt;
 import kotlinx.coroutines.Deferred;
+import kotlinx.coroutines.flow.FlowKt;
+import kotlinx.coroutines.reactive.flow.FlowAsPublisherKt;
+import kotlinx.coroutines.reactive.flow.PublisherAsFlowKt;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -96,6 +99,10 @@ public class ReactiveAdapterRegistry {
 		// Coroutines
 		if (ClassUtils.isPresent("kotlinx.coroutines.Deferred", classLoader)) {
 			new CoroutinesRegistrar().registerAdapters(this);
+		}
+		// TODO Use a single CoroutinesRegistrar when Flow will be not experimental anymore
+		if (ClassUtils.isPresent("kotlinx.coroutines.flow.Flow", classLoader)) {
+			new CoroutinesFlowRegistrar().registerAdapters(this);
 		}
 	}
 
@@ -335,7 +342,17 @@ public class ReactiveAdapterRegistry {
 					source -> CoroutinesUtils.deferredToMono((Deferred<?>) source),
 					source -> CoroutinesUtils.monoToDeferred(Mono.from(source)));
 		}
+	}
 
+	private static class CoroutinesFlowRegistrar {
+
+		void registerAdapters(ReactiveAdapterRegistry registry) {
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, FlowKt::emptyFlow),
+					source -> FlowAsPublisherKt.from((kotlinx.coroutines.flow.Flow<?>) source),
+					PublisherAsFlowKt::from
+			);
+		}
 	}
 
 }

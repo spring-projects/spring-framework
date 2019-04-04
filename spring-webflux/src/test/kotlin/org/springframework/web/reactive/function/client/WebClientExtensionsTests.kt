@@ -19,6 +19,8 @@ package org.springframework.web.reactive.function.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -46,6 +48,14 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	@FlowPreview
+	fun `RequestBodySpec#body with Flow and reified type parameters`() {
+		val body = mockk<Flow<List<Foo>>>()
+		requestBodySpec.body(body)
+		verify { requestBodySpec.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
 	fun `ResponseSpec#bodyToMono with reified type parameters`() {
 		responseSpec.bodyToMono<List<Foo>>()
 		verify { responseSpec.bodyToMono(object : ParameterizedTypeReference<List<Foo>>() {}) }
@@ -54,6 +64,13 @@ class WebClientExtensionsTests {
 	@Test
 	fun `ResponseSpec#bodyToFlux with reified type parameters`() {
 		responseSpec.bodyToFlux<List<Foo>>()
+		verify { responseSpec.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	@FlowPreview
+	fun `bodyToFlow with reified type parameters`() {
+		responseSpec.bodyToFlow<List<Foo>>()
 		verify { responseSpec.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
