@@ -48,6 +48,15 @@ import java.lang.annotation.Target;
  * Bean property setter methods are effectively just a special case of such a general
  * config method. Such config methods do not have to be public.
  *
+ * <h3>Autowired Parameters</h3>
+ * <p>Although {@code @Autowired} can technically be declared on individual method
+ * or constructor parameters since Spring Framework 5.0, most parts of the
+ * framework ignore such declarations. The only part of the core Spring Framework
+ * that actively supports autowired parameters is the JUnit Jupiter support in
+ * the {@code spring-test} module (see the
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/testing.html#testcontext-junit-jupiter-di">TestContext framework</a>
+ * reference documentation for details).
+ *
  * <h3>Multiple Arguments and 'required' Semantics</h3>
  * <p>In the case of a multi-arg constructor or method, the 'required' parameter is
  * applicable to all arguments. Individual parameters may be declared as Java-8 style
