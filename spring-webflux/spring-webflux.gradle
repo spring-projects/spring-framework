@@ -35,7 +35,7 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
-	optional("org.apache.httpcomponents:httpclient:4.5.7") {
+	optional("org.apache.httpcomponents:httpclient:4.5.8") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -53,7 +53,7 @@ dependencies {
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
-	testCompile("org.eclipse.jetty:jetty-reactive-httpclient:1.0.2")
+	testCompile("org.eclipse.jetty:jetty-reactive-httpclient:1.0.3")
 	testCompile("com.squareup.okhttp3:mockwebserver:3.14.0")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testCompile(project(":spring-core-coroutines"))
