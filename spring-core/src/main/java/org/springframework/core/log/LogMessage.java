@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 5.2
- * @see #lazy(Supplier)
+ * @see #of(Supplier)
  * @see #format(String, Object)
  * @see #format(String, Object...)
  * @see org.apache.commons.logging.Log#fatal(Object)
@@ -76,16 +76,16 @@ public abstract class LogMessage implements CharSequence {
 
 
 	/**
-	 * Build a lazy resolution message from the given supplier.
+	 * Build a lazily resolving message from the given supplier.
 	 * @param supplier the supplier (typically bound to a Java 8 lambda expression)
 	 * @see #toString()
 	 */
-	public static LogMessage lazy(Supplier<? extends CharSequence> supplier) {
-		return new LazyMessage(supplier);
+	public static LogMessage of(Supplier<? extends CharSequence> supplier) {
+		return new SupplierMessage(supplier);
 	}
 
 	/**
-	 * Build a formatted message from the given format string and argument.
+	 * Build a lazily formatted message from the given format string and argument.
 	 * @param format the format string (following {@link String#format} rules)
 	 * @param arg1 the argument
 	 * @see String#format(String, Object...)
@@ -95,7 +95,7 @@ public abstract class LogMessage implements CharSequence {
 	}
 
 	/**
-	 * Build a formatted message from the given format string and arguments.
+	 * Build a lazily formatted message from the given format string and arguments.
 	 * @param format the format string (following {@link String#format} rules)
 	 * @param arg1 the first argument
 	 * @param arg2 the second argument
@@ -106,7 +106,7 @@ public abstract class LogMessage implements CharSequence {
 	}
 
 	/**
-	 * Build a formatted message from the given format string and arguments.
+	 * Build a lazily formatted message from the given format string and arguments.
 	 * @param format the format string (following {@link String#format} rules)
 	 * @param arg1 the first argument
 	 * @param arg2 the second argument
@@ -118,7 +118,7 @@ public abstract class LogMessage implements CharSequence {
 	}
 
 	/**
-	 * Build a formatted message from the given format string and arguments.
+	 * Build a lazily formatted message from the given format string and arguments.
 	 * @param format the format string (following {@link String#format} rules)
 	 * @param arg1 the first argument
 	 * @param arg2 the second argument
@@ -131,7 +131,7 @@ public abstract class LogMessage implements CharSequence {
 	}
 
 	/**
-	 * Build a formatted message from the given format string and varargs.
+	 * Build a lazily formatted message from the given format string and varargs.
 	 * @param format the format string (following {@link String#format} rules)
 	 * @param args the varargs array (costly, prefer individual arguments)
 	 * @see String#format(String, Object...)
@@ -141,11 +141,11 @@ public abstract class LogMessage implements CharSequence {
 	}
 
 
-	private static final class LazyMessage extends LogMessage {
+	private static final class SupplierMessage extends LogMessage {
 
 		private Supplier<? extends CharSequence> supplier;
 
-		LazyMessage(Supplier<? extends CharSequence> supplier) {
+		SupplierMessage(Supplier<? extends CharSequence> supplier) {
 			Assert.notNull(supplier, "Supplier must not be null");
 			this.supplier = supplier;
 		}

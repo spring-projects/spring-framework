@@ -28,7 +28,7 @@ public class LogSupportTests {
 
 	@Test
 	public void testLogMessageWithSupplier() {
-		LogMessage msg = LogMessage.lazy(() -> new StringBuilder("a").append(" b"));
+		LogMessage msg = LogMessage.of(() -> new StringBuilder("a").append(" b"));
 		assertEquals("a b", msg.toString());
 		assertSame(msg.toString(), msg.toString());
 	}
