@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
@@ -150,14 +146,6 @@ public class ClassLevelDirtiesContextTests {
 
 	@RunWith(SpringRunner.class)
 	@ContextConfiguration
-	// Ensure that we do not include the EventPublishingTestExecutionListener
-	// since it will access the ApplicationContext for each method in the
-	// TestExecutionListener API, thus distorting our cache hit/miss results.
-	@TestExecutionListeners({
-		DirtiesContextBeforeModesTestExecutionListener.class,
-		DependencyInjectionTestExecutionListener.class,
-		DirtiesContextTestExecutionListener.class
-	})
 	static abstract class BaseTestCase {
 
 		@Configuration

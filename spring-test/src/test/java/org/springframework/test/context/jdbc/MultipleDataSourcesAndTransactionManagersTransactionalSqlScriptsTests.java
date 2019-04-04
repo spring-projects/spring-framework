@@ -97,19 +97,19 @@ public class MultipleDataSourcesAndTransactionManagersTransactionalSqlScriptsTes
 		@Bean
 		public DataSource dataSource1() {
 			return new EmbeddedDatabaseBuilder()//
-					.generateUniqueName(true)//
-					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
-					.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
-					.build();
+			.setName("database1")//
+			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
+			.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
+			.build();
 		}
 
 		@Bean
 		public DataSource dataSource2() {
 			return new EmbeddedDatabaseBuilder()//
-					.generateUniqueName(true)//
-					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
-					.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
-					.build();
+			.setName("database2")//
+			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
+			.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
+			.build();
 		}
 
 	}
