@@ -133,7 +133,6 @@ class ServerRequestExtensionsTests {
 
 	@Test
 	fun `contentTypeOrNull with null`() {
-		val contentType = mockk<MediaType>()
 		every { headers.contentType() } returns Optional.empty()
 		assertNull(headers.contentTypeOrNull())
 		verify { headers.contentType() }

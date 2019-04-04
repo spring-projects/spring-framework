@@ -39,7 +39,6 @@ fun ServerRequest.remoteAddressOrNull(): InetSocketAddress? = remoteAddress().or
  */
 inline fun <reified T : Any> ServerRequest.body(): T = body(object : ParameterizedTypeReference<T>() {})
 
-
 /**
  * Nullable variant of [ServerRequest.attribute]
  *
@@ -79,6 +78,3 @@ fun ServerRequest.Headers.contentLengthOrNull(): Long? = contentLength().let { i
  * @since 5.2
  */
 fun ServerRequest.Headers.contentTypeOrNull(): MediaType? = contentType().orElse(null)
-
-
-
