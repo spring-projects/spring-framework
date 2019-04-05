@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
-import org.springframework.core.annotation.MergedAnnotation.MapValues;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.*;
@@ -72,7 +72,7 @@ public class MergedAnnotationCollectorsTests {
 		MultiValueMap<String, Object> map = stream().map(
 				MergedAnnotation::filterDefaultValues).collect(
 						MergedAnnotationCollectors.toMultiValueMap(
-								MapValues.CLASS_TO_STRING));
+								Adapt.CLASS_TO_STRING));
 		assertThat(map.get("value")).containsExactly("a", "b", "c");
 		assertThat(map.get("extra")).containsExactly("java.lang.String",
 				"java.lang.Integer");

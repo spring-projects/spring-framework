@@ -40,7 +40,7 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.MergedAnnotation.MapValues;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.lang.Nullable;
@@ -1665,7 +1665,7 @@ public class MergedAnnotationsTests {
 		assertThat(componentScan.value().pattern()).isEqualTo("*Foo");
 		Map<String, Object> map = MergedAnnotation.from(componentScan).asMap(
 				annotation -> new LinkedHashMap<String, Object>(),
-				MapValues.ANNOTATION_TO_MAP);
+				Adapt.ANNOTATION_TO_MAP);
 		Map<String, Object> filterMap = (Map<String, Object>) map.get("value");
 		assertThat(filterMap.get("pattern")).isEqualTo("*Foo");
 		filterMap.put("pattern", "newFoo");
@@ -1685,7 +1685,7 @@ public class MergedAnnotationsTests {
 		assertThat(componentScan).isNotNull();
 		Map<String, Object> map = MergedAnnotation.from(componentScan).asMap(
 				annotation -> new LinkedHashMap<String, Object>(),
-				MapValues.ANNOTATION_TO_MAP);
+				Adapt.ANNOTATION_TO_MAP);
 		Map<String, Object>[] filters = (Map[]) map.get("excludeFilters");
 		List<String> patterns = Arrays.stream(filters).map(
 				m -> (String) m.get("pattern")).collect(Collectors.toList());
@@ -2051,6 +2051,17 @@ public class MergedAnnotationsTests {
 				ValueAttributeMetaMetaClass.class).get(ValueAttribute.class);
 		assertThat(annotation.getStringArray(MergedAnnotation.VALUE)).containsExactly(
 				"FromValueAttributeMeta");
+	}
+
+	@Test
+	public void asAnnotationAttributesReturnsPopulatedAnnotationAttributes() {
+		MergedAnnotation<?> annotation = MergedAnnotations.from(
+				SpringApplicationConfigurationClass.class).get(
+						SpringApplicationConfiguration.class);
+		AnnotationAttributes attributes = annotation.asAnnotationAttributes(
+				Adapt.CLASS_TO_STRING);
+		assertThat(attributes).containsEntry("classes", new String[] { Number.class.getName() });
+		assertThat(attributes.annotationType()).isEqualTo(SpringApplicationConfiguration.class);
 	}
 
 	// @formatter:off

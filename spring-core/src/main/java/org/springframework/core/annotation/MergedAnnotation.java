@@ -422,21 +422,32 @@ public interface MergedAnnotation<A extends Annotation> {
 	MergedAnnotation<A> withNonMergedAttributes();
 
 	/**
-	 * Create an immutable {@link Map} that contains all the annotation attributes.
-	 * <p>The {@link MapValues options} may be used to change the way that values are added.
-	 * @param options map value options
+	 * Create a new mutable {@link AnnotationAttributes} instance from this
+	 * merged annotation.
+	 * <p>The {@link Adapt adaptations} may be used to change the way that values
+	 * are added.
+	 * @param adaptations adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
-	Map<String, Object> asMap(MapValues... options);
+	AnnotationAttributes asAnnotationAttributes(Adapt... adaptations);
 
 	/**
-	 * Create a {@link Map} of the given type that contains all the annotation attributes.
-	 * <p>The {@link MapValues options} may be used to change the way that values are added.
+	 * Return an immutable {@link Map} that contains all the annotation attributes.
+	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
+	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @return an immutable map containing the attributes and values
+	 */
+	Map<String, Object> asMap(Adapt... adaptations);
+
+	/**
+	 * Create a new {@link Map} instance of the given type that contains all the annotation
+	 * attributes.
+	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
 	 * @param factory a map factory
-	 * @param options map value options
+	 * @param adaptations adaptations that should be applied to the annotation values
 	 * @return a map containing the attributes and values
 	 */
-	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, MapValues... options);
+	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);
 
 	/**
 	 * Create a type-safe synthesized version of this annotation that can be
@@ -539,24 +550,25 @@ public interface MergedAnnotation<A extends Annotation> {
 
 
 	/**
-	 * Options that effect the way map values are
-	 * {@linkplain MergedAnnotation#asMap(MapValues...) converted}.
+	 * Adaptations that can be applied to attributes values when creating
+	 * {@linkplain MergedAnnotation#asMap(Adapt...) Maps} or
+	 * {@link MergedAnnotation#asAnnotationAttributes(Adapt...) AnnotationAttributes}.
 	 */
-	enum MapValues {
+	enum Adapt {
 
 		/**
-		 * Add class or class array attributes as strings.
+		 * Adapt class or class array attributes to strings.
 		 */
 		CLASS_TO_STRING,
 
 		/**
-		 * Convert any nested annotation or annotation arrays to maps rather
+		 * Adapt nested annotation or annotation arrays to maps rather
 		 * than synthesizing the values.
 		 */
 		ANNOTATION_TO_MAP;
 
-		protected final boolean isIn(MapValues... options) {
-			for (MapValues candidate : options) {
+		protected final boolean isIn(Adapt... adaptations) {
+			for (Adapt candidate : adaptations) {
 				if (candidate == this) {
 					return true;
 				}
@@ -565,16 +577,16 @@ public interface MergedAnnotation<A extends Annotation> {
 		}
 
 		/**
-		 * Factory method to create a {@link MapValues} array from a set of boolean flags.
-		 * @param classToString if {@link MapValues#CLASS_TO_STRING} is included
-		 * @param annotationsToMap if {@link MapValues#ANNOTATION_TO_MAP} is included
-		 * @return a new {@link MapValues} array
+		 * Factory method to create a {@link Adapt} array from a set of boolean flags.
+		 * @param classToString if {@link Adapt#CLASS_TO_STRING} is included
+		 * @param annotationsToMap if {@link Adapt#ANNOTATION_TO_MAP} is included
+		 * @return a new {@link Adapt} array
 		 */
-		public static MapValues[] of(boolean classToString, boolean annotationsToMap) {
-			EnumSet<MapValues> result = EnumSet.noneOf(MapValues.class);
-			addIfTrue(result, MapValues.CLASS_TO_STRING, classToString);
-			addIfTrue(result, MapValues.ANNOTATION_TO_MAP, annotationsToMap);
-			return result.toArray(new MapValues[0]);
+		public static Adapt[] values(boolean classToString, boolean annotationsToMap) {
+			EnumSet<Adapt> result = EnumSet.noneOf(Adapt.class);
+			addIfTrue(result, Adapt.CLASS_TO_STRING, classToString);
+			addIfTrue(result, Adapt.ANNOTATION_TO_MAP, annotationsToMap);
+			return result.toArray(new Adapt[0]);
 		}
 
 		private static <T> void addIfTrue(Set<T> result, T value, boolean test) {

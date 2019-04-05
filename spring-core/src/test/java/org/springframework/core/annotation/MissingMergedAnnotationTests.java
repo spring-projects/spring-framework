@@ -265,6 +265,13 @@ public class MissingMergedAnnotationTests {
 	}
 
 	@Test
+	public void asAnnotationAttributesReturnsNewAnnotationAttributes() {
+		AnnotationAttributes attributes = this.missing.asAnnotationAttributes();
+		assertThat(attributes).isEmpty();
+		assertThat(this.missing.asAnnotationAttributes()).isNotSameAs(attributes);
+	}
+
+	@Test
 	public void asMapReturnsEmptyMap() {
 		Map<String, Object> map = this.missing.asMap();
 		assertThat(map).isSameAs(Collections.EMPTY_MAP);
