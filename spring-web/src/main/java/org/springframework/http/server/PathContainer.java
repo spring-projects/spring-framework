@@ -36,7 +36,7 @@ import org.springframework.util.MultiValueMap;
 public interface PathContainer {
 
 	/**
-	 * The original path that was parsed.
+	 * The original (raw, encoded) path that this instance was parsed from.
 	 */
 	String value();
 
@@ -83,7 +83,7 @@ public interface PathContainer {
 	interface Element {
 
 		/**
-		 * Return the original, raw (encoded) value for the path component.
+		 * Return the original (raw, encoded) value of this path element.
 		 */
 		String value();
 	}
