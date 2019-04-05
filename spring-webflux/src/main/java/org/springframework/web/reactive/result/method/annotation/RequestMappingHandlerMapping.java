@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -41,6 +43,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
+import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates
@@ -48,6 +51,7 @@ import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerM
  * {@link RequestMapping @RequestMapping} annotations.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
@@ -159,6 +163,15 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			}
 		}
 		return info;
+	}
+
+	/**
+	 * Get the URL path patterns associated with the supplied {@link RequestMappingInfo}.
+	 * @since 5.2
+	 */
+	@Override
+	protected Set<String> getMappingPathPatterns(RequestMappingInfo info) {
+		return info.getPatternsCondition().getPatterns().stream().map(PathPattern::getPatternString).collect(Collectors.toSet());
 	}
 
 	/**

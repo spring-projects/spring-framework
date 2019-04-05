@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +70,9 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class RequestMappingInfoHandlerMappingTests {
 
@@ -474,6 +477,11 @@ public class RequestMappingInfoHandlerMappingTests {
 			else {
 				return null;
 			}
+		}
+
+		@Override
+		protected Set<String> getMappingPathPatterns(RequestMappingInfo info) {
+			return info.getPatternsCondition().getPatterns().stream().map(PathPattern::getPatternString).collect(Collectors.toSet());
 		}
 	}
 

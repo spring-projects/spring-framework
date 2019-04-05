@@ -797,11 +797,28 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Test
-	public void unmappedPathMapping() {
-		assertThatThrownBy(() -> initServletWithControllers(UnmappedPathController.class))
-			.isInstanceOf(BeanCreationException.class)
-			.hasCauseInstanceOf(IllegalStateException.class)
-			.hasMessageContaining("Missing path mapping");
+	public void unmappedPathMapping() throws Exception {
+		initServletWithControllers(UnmappedPathController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bogus-unmapped");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("get", response.getContentAsString());
+	}
+
+	@Test
+	public void explicitAndEmptyPathsControllerMapping() throws Exception {
+		initServletWithControllers(ExplicitAndEmptyPathsController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("get", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("get", response.getContentAsString());
 	}
 
 	@Test
@@ -2733,11 +2750,22 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	@RequestMapping // path intentionally omitted
+	// @RequestMapping intentionally omitted
 	static class UnmappedPathController {
 
 		@GetMapping // path intentionally omitted
-		public void get(@RequestParam(required = false) String id) {
+		public void get(Writer writer) throws IOException {
+			writer.write("get");
+		}
+	}
+
+	@Controller
+	// @RequestMapping intentionally omitted
+	static class ExplicitAndEmptyPathsController {
+
+		@GetMapping({"/", ""})
+		public void get(Writer writer) throws IOException {
+			writer.write("get");
 		}
 	}
 

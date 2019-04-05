@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Set;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -44,6 +46,7 @@ import static org.junit.Assert.assertThat;
  * Unit tests for {@link AbstractHandlerMethodMapping}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class HandlerMethodMappingTests {
 
@@ -156,6 +159,11 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
+		protected Set<String> getMappingPathPatterns(String mapping) {
+			return Collections.emptySet();
+		}
+		
+		@Override
 		protected String getMatchingMapping(String pattern, ServerWebExchange exchange) {
 			PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
 			PathPattern parsedPattern = this.parser.parse(pattern);
@@ -182,4 +190,5 @@ public class HandlerMethodMappingTests {
 		public void handlerMethod2() {
 		}
 	}
+
 }
