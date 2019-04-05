@@ -143,34 +143,19 @@ public class AnnotatedBeanDefinitionReader {
 	 * @param annotatedClass the class of the bean
 	 */
 	public void registerBean(Class<?> annotatedClass) {
-		doRegisterBean(annotatedClass, null, null, null);
+		doRegisterBean(annotatedClass, null, null, null, null);
 	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations, using the given supplier for obtaining a new
-	 * instance (possibly declared as a lambda expression or method reference).
-	 * @param annotatedClass the class of the bean
-	 * @param instanceSupplier a callback for creating an instance of the bean
-	 * (may be {@code null})
-	 * @since 5.0
-	 */
-	public <T> void registerBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier) {
-		doRegisterBean(annotatedClass, instanceSupplier, null, null);
-	}
-
-	/**
-	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations, using the given supplier for obtaining a new
-	 * instance (possibly declared as a lambda expression or method reference).
+	 * class-declared annotations.
 	 * @param annotatedClass the class of the bean
 	 * @param name an explicit name for the bean
-	 * @param instanceSupplier a callback for creating an instance of the bean
-	 * (may be {@code null})
-	 * @since 5.0
+	 * (or {@code null} for generating a default bean name)
+	 * @since 5.2
 	 */
-	public <T> void registerBean(Class<T> annotatedClass, String name, @Nullable Supplier<T> instanceSupplier) {
-		doRegisterBean(annotatedClass, instanceSupplier, name, null);
+	public void registerBean(Class<?> annotatedClass, @Nullable String name) {
+		doRegisterBean(annotatedClass, name, null, null, null);
 	}
 
 	/**
@@ -182,7 +167,7 @@ public class AnnotatedBeanDefinitionReader {
 	 */
 	@SuppressWarnings("unchecked")
 	public void registerBean(Class<?> annotatedClass, Class<? extends Annotation>... qualifiers) {
-		doRegisterBean(annotatedClass, null, null, qualifiers);
+		doRegisterBean(annotatedClass, null, qualifiers, null, null);
 	}
 
 	/**
@@ -190,36 +175,86 @@ public class AnnotatedBeanDefinitionReader {
 	 * class-declared annotations.
 	 * @param annotatedClass the class of the bean
 	 * @param name an explicit name for the bean
+	 * (or {@code null} for generating a default bean name)
 	 * @param qualifiers specific qualifier annotations to consider,
 	 * in addition to qualifiers at the bean class level
 	 */
 	@SuppressWarnings("unchecked")
-	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
-		doRegisterBean(annotatedClass, null, name, qualifiers);
+	public void registerBean(Class<?> annotatedClass, @Nullable String name,
+			Class<? extends Annotation>... qualifiers) {
+
+		doRegisterBean(annotatedClass, name, qualifiers, null, null);
+	}
+
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations, using the given supplier for obtaining a new
+	 * instance (possibly declared as a lambda expression or method reference).
+	 * @param annotatedClass the class of the bean
+	 * @param supplier a callback for creating an instance of the bean
+	 * (may be {@code null})
+	 * @since 5.0
+	 */
+	public <T> void registerBean(Class<T> annotatedClass, @Nullable Supplier<T> supplier) {
+		doRegisterBean(annotatedClass, null, null, supplier, null);
+	}
+
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations, using the given supplier for obtaining a new
+	 * instance (possibly declared as a lambda expression or method reference).
+	 * @param annotatedClass the class of the bean
+	 * @param name an explicit name for the bean
+	 * (or {@code null} for generating a default bean name)
+	 * @param supplier a callback for creating an instance of the bean
+	 * (may be {@code null})
+	 * @since 5.0
+	 */
+	public <T> void registerBean(Class<T> annotatedClass, @Nullable String name, @Nullable Supplier<T> supplier) {
+		doRegisterBean(annotatedClass, name, null, supplier, null);
 	}
 
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
 	 * @param annotatedClass the class of the bean
-	 * @param instanceSupplier a callback for creating an instance of the bean
-	 * (may be {@code null})
 	 * @param name an explicit name for the bean
+	 * (or {@code null} for generating a default bean name)
+	 * @param supplier a callback for creating an instance of the bean
+	 * (may be {@code null})
+	 * @param customizers one or more callbacks for customizing the factory's
+	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @since 5.2
+	 */
+	public <T> void registerBean(Class<T> annotatedClass, @Nullable String name, @Nullable Supplier<T> supplier,
+			BeanDefinitionCustomizer... customizers) {
+
+		doRegisterBean(annotatedClass, name, null, supplier, customizers);
+	}
+
+	/**
+	 * Register a bean from the given bean class, deriving its metadata from
+	 * class-declared annotations.
+	 * @param annotatedClass the class of the bean
+	 * @param name an explicit name for the bean
+	 * @param supplier a callback for creating an instance of the bean
+	 * (may be {@code null})
 	 * @param qualifiers specific qualifier annotations to consider, if any,
 	 * in addition to qualifiers at the bean class level
-	 * @param definitionCustomizers one or more callbacks for customizing the
-	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
+	 * @param customizers one or more callbacks for customizing the factory's
+	 * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
-	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
-			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
+	private <T> void doRegisterBean(Class<T> annotatedClass, @Nullable String name,
+			@Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
+			@Nullable BeanDefinitionCustomizer[] customizers) {
 
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}
 
-		abd.setInstanceSupplier(instanceSupplier);
+		abd.setInstanceSupplier(supplier);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
@@ -238,8 +273,10 @@ public class AnnotatedBeanDefinitionReader {
 				}
 			}
 		}
-		for (BeanDefinitionCustomizer customizer : definitionCustomizers) {
-			customizer.customize(abd);
+		if (customizers != null) {
+			for (BeanDefinitionCustomizer customizer : customizers) {
+				customizer.customize(abd);
+			}
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
