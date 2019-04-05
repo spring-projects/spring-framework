@@ -196,7 +196,7 @@ public class MergedAnnotationsTests {
 	 * the algorithm is accidentally picking up shadowed annotations of the same
 	 * type within the class hierarchy. Such undesirable behavior would cause
 	 * the logic in
-	 * {@link org.springframework.context.annotation.ProfileCondition} to fail.
+	 * {@code org.springframework.context.annotation.ProfileCondition} to fail.
 	 */
 	@Test
 	public void collectMultiValueMapFromClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
@@ -208,7 +208,7 @@ public class MergedAnnotationsTests {
 
 	/**
 	 * Note: this functionality is required by
-	 * {@link org.springframework.context.annotation.ProfileCondition}.
+	 * {@code org.springframework.context.annotation.ProfileCondition}.
 	 */
 	@Test
 	public void collectMultiValueMapFromClassWithMultipleComposedAnnotations() {
