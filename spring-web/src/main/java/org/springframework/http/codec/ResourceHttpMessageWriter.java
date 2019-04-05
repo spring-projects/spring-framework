@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,8 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * {@code HttpMessageWriter} that can write a {@link Resource}.
  *
- * <p>Also an implementation of {@code HttpMessageWriter} with support
- * for writing one or more {@link ResourceRegion}'s based on the HTTP ranges
- * specified in the request.
+ * <p>Also an implementation of {@code HttpMessageWriter} with support for writing one
+ * or more {@link ResourceRegion}'s based on the HTTP ranges specified in the request.
  *
  * <p>For reading to a Resource, use {@link ResourceDecoder} wrapped with
  * {@link DecoderHttpMessageReader}.
@@ -174,7 +173,6 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 	// Server-side only: single Resource or sub-regions...
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Mono<Void> write(Publisher<? extends Resource> inputStream, @Nullable ResolvableType actualType,
 			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
@@ -192,11 +190,9 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		}
 
 		return Mono.from(inputStream).flatMap(resource -> {
-
 			if (ranges.isEmpty()) {
 				return writeResource(resource, elementType, mediaType, response, hints);
 			}
-
 			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
 			List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
 			MediaType resourceMediaType = getResourceMediaType(mediaType, resource);
