@@ -589,8 +589,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.readWriteLock.writeLock().lock();
 			try {
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
-				assertMappedPathMethodMapping(handlerMethod, mapping);
-				assertUniqueMethodMapping(handlerMethod, mapping);
+				validateMethodMapping(handlerMethod, mapping);
 				this.mappingLookup.put(mapping, handlerMethod);
 
 				List<String> directUrls = getDirectUrls(mapping);
@@ -616,28 +615,23 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 		}
 
-		/**
-		 * Assert that the supplied {@code mapping} maps the supplied {@link HandlerMethod}
-		 * to explicit, non-empty paths.
-		 * @since 5.2
-		 * @see StringUtils#hasText(String)
-		 */
-		private void assertMappedPathMethodMapping(HandlerMethod handlerMethod, T mapping) {
+		private void validateMethodMapping(HandlerMethod handlerMethod, T mapping) {
+			// Assert that the supplied mapping maps the supplied HandlerMethod
+			// to explicit, non-empty paths.
 			if (!getMappingPathPatterns(mapping).stream().allMatch(StringUtils::hasText)) {
 				throw new IllegalStateException(String.format("Missing path mapping. " +
 						"Handler method '%s' in bean '%s' must be mapped to a non-empty path. " +
 						"If you wish to map to all paths, please map explicitly to \"/**\" or \"**\".",
-					handlerMethod, handlerMethod.getBean()));
+						handlerMethod, handlerMethod.getBean()));
 			}
-		}
 
-		private void assertUniqueMethodMapping(HandlerMethod newHandlerMethod, T mapping) {
-			HandlerMethod handlerMethod = this.mappingLookup.get(mapping);
-			if (handlerMethod != null && !handlerMethod.equals(newHandlerMethod)) {
+			// Assert that the supplied mapping is unique.
+			HandlerMethod existingHandlerMethod = this.mappingLookup.get(mapping);
+			if (existingHandlerMethod != null && !existingHandlerMethod.equals(handlerMethod)) {
 				throw new IllegalStateException(
-						"Ambiguous mapping. Cannot map '" +	newHandlerMethod.getBean() + "' method \n" +
-						newHandlerMethod + "\nto " + mapping + ": There is already '" +
-						handlerMethod.getBean() + "' bean method\n" + handlerMethod + " mapped.");
+						"Ambiguous mapping. Cannot map '" + handlerMethod.getBean() + "' method \n" +
+						handlerMethod + "\nto " + mapping + ": There is already '" +
+						existingHandlerMethod.getBean() + "' bean method\n" + existingHandlerMethod + " mapped.");
 			}
 		}
 
