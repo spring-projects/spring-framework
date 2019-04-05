@@ -18,6 +18,7 @@
 	<!-- spring-core -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]asm[\\/]" checks=".*" />
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]cglib[\\/]" checks=".*" />
+	<suppress files="ByteArrayEncoder" checks="SpringLambda" />
 	<suppress files="SocketUtils" checks="HideUtilityClassConstructor" />
 	<suppress files="ResolvableType" checks="FinalClass" />
 
