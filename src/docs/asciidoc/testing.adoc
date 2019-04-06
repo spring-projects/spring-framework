@@ -1659,11 +1659,8 @@ subclasses instead.
 ==== `TestExecutionListener` Configuration
 
 Spring provides the following `TestExecutionListener` implementations that are registered
-exactly in the following order. Except for the `EventPublishingTestExecutionListener`,
-each of these listeners is registered by default.
+by default, exactly in the following order:
 
-* `EventPublishingTestExecutionListener`: Publishes test execution events to the test's
-  `ApplicationContext` (see <<testcontext-test-execution-events>>).
 * `ServletTestExecutionListener`: Configures Servlet API mocks for a
   `WebApplicationContext`.
 * `DirtiesContextBeforeModesTestExecutionListener`: Handles the `@DirtiesContext`
@@ -1676,6 +1673,8 @@ each of these listeners is registered by default.
   default rollback semantics.
 * `SqlScriptsTestExecutionListener`: Runs SQL scripts configured by using the `@Sql`
   annotation.
+* `EventPublishingTestExecutionListener`: Publishes test execution events to the test's
+  `ApplicationContext` (see <<testcontext-test-execution-events>>).
 
 [[testcontext-tel-config-registering-tels]]
 ===== Registering `TestExecutionListener` Implementations
@@ -1695,7 +1694,7 @@ become cumbersome if a custom listener needs to be used across a test suite. Sin
 Framework 4.1, this issue is addressed through support for automatic discovery of default
 `TestExecutionListener` implementations through the `SpringFactoriesLoader` mechanism.
 
-Specifically, the `spring-test` module declares all core default TestExecutionListener`
+Specifically, the `spring-test` module declares all core default `TestExecutionListener`
 implementations under the `org.springframework.test.context.TestExecutionListener` key in
 its `META-INF/spring.factories` properties file. Third-party frameworks and developers
 can contribute their own `TestExecutionListener` implementations to the list of default
@@ -1786,11 +1785,10 @@ be replaced with the following:
 ==== Test Execution Events
 
 The `EventPublishingTestExecutionListener` introduced in Spring Framework 5.2 offers an
-alternative approach to implementing a custom `TestExecutionListener`. If the
-`EventPublishingTestExecutionListener` is <<testcontext-tel-config-registering-tels,
-registered>>, components in the `ApplicationContext` can listen to the following events
-published by the `EventPublishingTestExecutionListener`. Each of these events corresponds
-to a method in the `TestExecutionListener` API.
+alternative approach to implementing a custom `TestExecutionListener`. Components in the
+test's `ApplicationContext` can listen to the following events published by the
+`EventPublishingTestExecutionListener`, each of which corresponds to a method in the
+`TestExecutionListener` API.
 
 * `BeforeTestClassEvent`
 * `PrepareTestInstanceEvent`
@@ -1799,6 +1797,8 @@ to a method in the `TestExecutionListener` API.
 * `AfterTestExecutionEvent`
 * `AfterTestMethodEvent`
 * `AfterTestClassEvent`
+
+NOTE: These events are only published if the `ApplicationContext` has already been loaded.
 
 These events may be consumed for various reasons, such as resetting mock beans or tracing
 test execution. One advantage of consuming test execution events rather than implementing
