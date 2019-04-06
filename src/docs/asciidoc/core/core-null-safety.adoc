@@ -1,4 +1,4 @@
-[-[null-safety]]
+[[null-safety]]
 = Null-safety
 
 Although Java does not let you express null-safety with its type system, the Spring Framework
