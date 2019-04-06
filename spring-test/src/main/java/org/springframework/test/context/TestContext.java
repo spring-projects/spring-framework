@@ -41,7 +41,27 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
  * @see TestContextManager
  * @see TestExecutionListener
  */
+// Suppression required due to bug in javac in Java 8: presence of default method in a Serializable interface
+@SuppressWarnings("serial")
 public interface TestContext extends AttributeAccessor, Serializable {
+
+	/**
+	 * Determine if the {@linkplain ApplicationContext application context} for
+	 * this test context is known to be available.
+	 * <p>If this method returns {@code true}, a subsequent invocation of
+	 * {@link #getApplicationContext()} should succeed.
+	 * <p>The default implementation of this method always returns {@code false}.
+	 * Custom {@code TestContext} implementations are therefore highly encouraged
+	 * to override this method with a more meaningful implementation. Note that
+	 * the standard {@code TestContext} implementation in Spring overrides this
+	 * method appropriately.
+	 * @return {@code true} if the application context has already been loaded
+	 * @since 5.2
+	 * @see #getApplicationContext()
+	 */
+	default boolean hasApplicationContext() {
+		return false;
+	}
 
 	/**
 	 * Get the {@linkplain ApplicationContext application context} for this
@@ -52,6 +72,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
+	 * @see #hasApplicationContext()
 	 */
 	ApplicationContext getApplicationContext();
 
