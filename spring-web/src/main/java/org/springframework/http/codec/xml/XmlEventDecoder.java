@@ -18,6 +18,7 @@ package org.springframework.http.codec.xml;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -76,6 +77,7 @@ import org.springframework.util.xml.StaxUtils;
  * by other decoders which are registered by default.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.0
  */
 public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
@@ -94,7 +96,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked"})  // on JDK 9 where XMLEventReader is Iterator<Object>
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // on JDK 9 where XMLEventReader is Iterator<Object> instead of simply Iterator
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
@@ -110,7 +112,9 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 				InputStream is = dataBuffer.asInputStream();
 				return () -> {
 					try {
-						return inputFactory.createXMLEventReader(is);
+						// Explicit cast to (Iterator) is necessary on JDK 9+ since XMLEventReader
+						// now extends Iterator<Object> instead of simply Iterator
+						return (Iterator) inputFactory.createXMLEventReader(is);
 					}
 					catch (XMLStreamException ex) {
 						throw Exceptions.propagate(ex);
