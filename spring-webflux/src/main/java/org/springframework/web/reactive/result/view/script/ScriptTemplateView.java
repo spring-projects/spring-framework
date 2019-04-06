@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.scripting.support.StandardScriptEvalException;
 import org.springframework.scripting.support.StandardScriptUtils;
@@ -301,8 +299,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	protected Mono<Void> renderInternal(
 			Map<String, Object> model, @Nullable MediaType contentType, ServerWebExchange exchange) {
 
-		return Mono.defer(() -> {
-			ServerHttpResponse response = exchange.getResponse();
+		return exchange.getResponse().writeWith(Mono.fromCallable(() -> {
 			try {
 				ScriptEngine engine = getEngine();
 				String url = getUrl();
@@ -338,8 +335,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				}
 
 				byte[] bytes = String.valueOf(html).getBytes(StandardCharsets.UTF_8);
-				DataBuffer buffer = response.bufferFactory().allocateBuffer(bytes.length).write(bytes);
-				return response.writeWith(Mono.just(buffer));
+				return exchange.getResponse().bufferFactory().wrap(bytes); // just wrapping, no allocation
 			}
 			catch (ScriptException ex) {
 				throw new IllegalStateException("Failed to render script template", new StandardScriptEvalException(ex));
@@ -347,7 +343,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			catch (Exception ex) {
 				throw new IllegalStateException("Failed to render script template", ex);
 			}
-		});
+		}));
 	}
 
 	protected String getTemplate(String path) throws IOException {
