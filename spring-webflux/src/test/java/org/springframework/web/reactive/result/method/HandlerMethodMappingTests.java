@@ -159,7 +159,7 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected Set<String> getMappingPathPatterns(String mapping) {
+		protected Set<PathPattern> getMappingPathPatterns(String mapping) {
 			return Collections.emptySet();
 		}
 		

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -480,8 +479,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		}
 
 		@Override
-		protected Set<String> getMappingPathPatterns(RequestMappingInfo info) {
-			return info.getPatternsCondition().getPatterns().stream().map(PathPattern::getPatternString).collect(Collectors.toSet());
+		protected Set<PathPattern> getMappingPathPatterns(RequestMappingInfo info) {
+			return info.getPatternsCondition().getPatterns();
 		}
 	}
 

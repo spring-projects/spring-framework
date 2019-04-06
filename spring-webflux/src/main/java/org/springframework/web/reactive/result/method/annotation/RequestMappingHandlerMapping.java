@@ -170,8 +170,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @since 5.2
 	 */
 	@Override
-	protected Set<String> getMappingPathPatterns(RequestMappingInfo info) {
-		return info.getPatternsCondition().getPatterns().stream().map(PathPattern::getPatternString).collect(Collectors.toSet());
+	protected Set<PathPattern> getMappingPathPatterns(RequestMappingInfo info) {
+		return info.getPatternsCondition().getPatterns();
 	}
 
 	/**
