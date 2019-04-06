@@ -416,7 +416,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
-	 * Extract and return the URL paths contained in the supplied mapping.
+	 * Extract and return the URL path patterns contained in the supplied mapping.
 	 * @since 5.2
 	 */
 	protected abstract Set<PathPattern> getMappingPathPatterns(T mapping);
