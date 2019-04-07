@@ -32,6 +32,8 @@ public enum EmbeddedDatabaseType {
 	H2,
 
 	/** The <a href="https://db.apache.org/derby">Apache Derby</a> Embedded SQL Database. */
-	DERBY
+	DERBY,
 
+	/** The <a href="https://www.postgresql.org/">PostgreSQL</a> Embedded SQL Database. */
+	POSTGRESQL
 }

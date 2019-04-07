@@ -161,6 +161,20 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
+	public void setTypeToPostgresql() throws Exception {
+		doTwice(new Runnable() {
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder
+				.setType(POSTGRESQL)
+				.addScripts("db-schema-postgresql.sql", "db-test-data.sql")
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	@Test
 	public void createSameSchemaTwiceWithoutUniqueDbNames() throws Exception {
 		EmbeddedDatabase db1 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))//
 		.addScripts("db-schema-without-dropping.sql").build();
