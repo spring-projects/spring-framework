@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Helper class for URL path matching. Provides support for URL paths in
- * RequestDispatcher includes and support for consistent URL decoding.
+ * {@code RequestDispatcher} includes and support for consistent URL decoding.
  *
  * <p>Used by {@link org.springframework.web.servlet.handler.AbstractUrlHandlerMapping},
  * {@link org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver}
@@ -43,6 +43,8 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Rossen Stoyanchev
  * @since 14.01.2004
+ * @see #getLookupPathForRequest
+ * @see javax.servlet.RequestDispatcher
  */
 public class UrlPathHelper {
 
@@ -68,22 +70,29 @@ public class UrlPathHelper {
 
 
 	/**
-	 * Set if URL lookup should always use full path within current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is "false".
+	 * Whether URL lookups should always use the full path within the current
+	 * web application context, i.e. within
+	 * {@link javax.servlet.ServletContext#getContextPath()}.
+	 * <p>If set to {@literal false} the path within the current servlet mapping
+	 * is used instead if applicable (i.e. in the case of a prefix based Servlet
+	 * mapping such as "/myServlet/*").
+	 * <p>By default this is set to "false".
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.alwaysUseFullPath = alwaysUseFullPath;
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
-	 * in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Default is "true", as of Spring 2.5.
+	 * Whether the context path and request URI should be decoded -- both of
+	 * which are returned <i>undecoded</i> by the Servlet API, in contrast to
+	 * the servlet path.
+	 * <p>Either the request encoding or the default Servlet spec encoding
+	 * (ISO-8859-1) is used when set to "true".
+	 * <p>By default this is set to {@literal true}.
+	 * <p><strong>Note:</strong> Be aware the servlet path will not match when
+	 * compared to encoded paths. Therefore use of {@code urlDecode=false} is
+	 * not compatible with a prefix-based Servlet mapping and likewise implies
+	 * also setting {@code alwaysUseFullPath=true}.
 	 * @see #getServletPath
 	 * @see #getContextPath
 	 * @see #getRequestUri
@@ -149,8 +158,8 @@ public class UrlPathHelper {
 	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
 	 * @return the lookup path
-	 * @see #getPathWithinApplication
 	 * @see #getPathWithinServletMapping
+	 * @see #getPathWithinApplication
 	 */
 	public String getLookupPathForRequest(HttpServletRequest request) {
 		// Always use full path within current servlet context?
@@ -179,6 +188,7 @@ public class UrlPathHelper {
 	 * <p>E.g.: servlet mapping = "/*.test"; request URI = "/a.test" -> "".
 	 * @param request current HTTP request
 	 * @return the path within the servlet mapping, or ""
+	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinServletMapping(HttpServletRequest request) {
 		String pathWithinApp = getPathWithinApplication(request);
@@ -226,6 +236,7 @@ public class UrlPathHelper {
 	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
 	 * @return the path within the web application
+	 * @see #getLookupPathForRequest
 	 */
 	public String getPathWithinApplication(HttpServletRequest request) {
 		String contextPath = getContextPath(request);
@@ -279,7 +290,7 @@ public class UrlPathHelper {
 	/**
 	 * Sanitize the given path with the following rules:
 	 * <ul>
-	 *     <li>replace all "//" by "/"</li>
+	 * <li>replace all "//" by "/"</li>
 	 * </ul>
 	 */
 	private String getSanitizedPath(final String path) {
