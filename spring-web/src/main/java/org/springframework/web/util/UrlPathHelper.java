@@ -90,7 +90,7 @@ public class UrlPathHelper {
 	 * <p>By default this is set to {@literal true}.
 	 * <p><strong>Note:</strong> Be aware the servlet path will not match when
 	 * compared to encoded paths. Therefore use of {@code urlDecode=false} is
-	 * not compatible with a prefix-based Servlet mappping and likewise implies
+	 * not compatible with a prefix-based Servlet mapping and likewise implies
 	 * also setting {@code alwaysUseFullPath=true}.
 	 * @see #getServletPath
 	 * @see #getContextPath
