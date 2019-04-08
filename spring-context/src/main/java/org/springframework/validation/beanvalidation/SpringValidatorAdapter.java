@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,17 @@ import org.springframework.validation.SmartValidator;
  * while also exposing the original JSR-303 Validator interface itself.
  *
  * <p>Can be used as a programmatic wrapper. Also serves as base class for
- * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean}.
+ * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean},
+ * and as the primary implementation of the {@link SmartValidator} interface.
  *
  * <p>As of Spring Framework 5.0, this adapter is fully compatible with
  * Bean Validation 1.1 as well as 2.0.
  *
  * @author Juergen Hoeller
  * @since 3.0
+ * @see SmartValidator
+ * @see CustomValidatorBean
+ * @see LocalValidatorFactoryBean
  */
 public class SpringValidatorAdapter implements SmartValidator, javax.validation.Validator {
 
@@ -141,7 +145,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
 						BindingResult bindingResult = (BindingResult) errors;
 						String nestedField = bindingResult.getNestedPath() + field;
-						if ("".equals(nestedField)) {
+						if (nestedField.isEmpty()) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
 							ObjectError error = new ObjectError(
 									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());
