@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,19 +205,13 @@ public class AnnotationMetadataTests {
 		assertThat("length of basePackageClasses[]", basePackageClasses.length, is(0));
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-11649
-	 */
-	@Test
+	@Test  // SPR-11649
 	public void multipleAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedAnnotationsClass.class);
 		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-11649
-	 */
-	@Test
+	@Test  // SPR-11649
 	public void multipleAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedAnnotationsClass.class.getName());
@@ -225,19 +219,13 @@ public class AnnotationMetadataTests {
 		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-11649
-	 */
-	@Test
+	@Test  // SPR-11649
 	public void composedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedComposedAnnotationClass.class);
 		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-11649
-	 */
-	@Test
+	@Test  // SPR-11649
 	public void composedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedComposedAnnotationClass.class.getName());
