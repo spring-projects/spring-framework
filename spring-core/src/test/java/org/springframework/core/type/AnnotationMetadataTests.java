@@ -52,7 +52,7 @@ import static org.junit.Assert.*;
 public class AnnotationMetadataTests {
 
 	@Test
-	public void standardAnnotationMetadata() throws Exception {
+	public void standardAnnotationMetadata() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponent.class, true);
 		doTestAnnotationInfo(metadata);
 		doTestMethodAnnotationInfo(metadata);
@@ -68,7 +68,7 @@ public class AnnotationMetadataTests {
 	}
 
 	@Test
-	public void standardAnnotationMetadataForSubclass() throws Exception {
+	public void standardAnnotationMetadataForSubclass() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponentSubClass.class, true);
 		doTestSubClassAnnotationInfo(metadata);
 	}
@@ -104,7 +104,7 @@ public class AnnotationMetadataTests {
 	}
 
 	@Test
-	public void standardAnnotationMetadataForInterface() throws Exception {
+	public void standardAnnotationMetadataForInterface() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotationMetadata.class, true);
 		doTestMetadataForInterfaceClass(metadata);
 	}
@@ -132,7 +132,7 @@ public class AnnotationMetadataTests {
 	}
 
 	@Test
-	public void standardAnnotationMetadataForAnnotation() throws Exception {
+	public void standardAnnotationMetadataForAnnotation() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(Component.class, true);
 		doTestMetadataForAnnotationClass(metadata);
 	}
@@ -172,7 +172,7 @@ public class AnnotationMetadataTests {
 	 * 'true' as is done in the main test above.
 	 */
 	@Test
-	public void standardAnnotationMetadata_nestedAnnotationsAsMap_false() throws Exception {
+	public void standardAnnotationMetadata_nestedAnnotationsAsMap_false() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponent.class);
 		AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(SpecialAttr.class.getName());
 		Annotation[] nestedAnnoArray = (Annotation[]) specialAttrs.get("nestedAnnoArray");

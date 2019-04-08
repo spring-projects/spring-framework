@@ -83,15 +83,8 @@ import org.junit.Test;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.util.StringUtils;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Test class for {@link Jackson2ObjectMapperBuilder}.
@@ -695,6 +688,7 @@ public class Jackson2ObjectMapperBuilderTests {
 
 	}
 
+	@SuppressWarnings("serial")
 	public static class MyXmlFactory extends XmlFactory {
 	}
 
