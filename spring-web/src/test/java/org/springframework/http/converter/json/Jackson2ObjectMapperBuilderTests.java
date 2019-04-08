@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFilter;
@@ -329,6 +330,24 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertNotNull(demoPojo.getOffsetDateTime());
 	}
 
+	@Test  // gh-22740
+	public void registerMultipleModulesWithNullTypeId() {
+		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+		SimpleModule fooModule = new SimpleModule();
+		fooModule.addSerializer(new FooSerializer());
+		SimpleModule barModule = new SimpleModule();
+		barModule.addSerializer(new BarSerializer());
+		builder.modulesToInstall(fooModule, barModule);
+		ObjectMapper objectMapper = builder.build();
+		assertEquals(1, StreamSupport
+				.stream(getSerializerFactoryConfig(objectMapper).serializers().spliterator(), false)
+				.filter(s -> s.findSerializer(null, SimpleType.construct(Foo.class), null) != null)
+				.count());
+		assertEquals(1, StreamSupport
+				.stream(getSerializerFactoryConfig(objectMapper).serializers().spliterator(), false)
+				.filter(s -> s.findSerializer(null, SimpleType.construct(Bar.class), null) != null)
+				.count());
+	}
 
 	private static SerializerFactoryConfig getSerializerFactoryConfig(ObjectMapper objectMapper) {
 		return ((BasicSerializerFactory) objectMapper.getSerializerFactory()).getFactoryConfig();
@@ -677,6 +696,31 @@ public class Jackson2ObjectMapperBuilderTests {
 	}
 
 	public static class MyXmlFactory extends XmlFactory {
+	}
+
+	static class Foo {}
+
+	static class Bar {}
+
+	static class FooSerializer extends JsonSerializer<Foo> {
+		@Override
+		public void serialize(Foo value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+		}
+
+		@Override
+		public Class<Foo> handledType() {
+			return Foo.class;
+		}
+	}
+
+	static class BarSerializer extends JsonSerializer<Bar> {
+		@Override
+		public void serialize(Bar value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+		}
+		@Override
+		public Class<Bar> handledType() {
+			return Bar.class;
+		}
 	}
 
 }
