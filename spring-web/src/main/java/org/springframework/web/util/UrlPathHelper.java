@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
@@ -494,7 +495,7 @@ public class UrlPathHelper {
 
 	/**
 	 * Remove ";" (semicolon) content from the given request URI if the
-	 * {@linkplain #setRemoveSemicolonContent(boolean) removeSemicolonContent}
+	 * {@linkplain #setRemoveSemicolonContent removeSemicolonContent}
 	 * property is set to "true". Note that "jssessionid" is always removed.
 	 * @param requestUri the request URI string to remove ";" content from
 	 * @return the updated URI string
@@ -526,12 +527,10 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Decode the given URI path variables via
-	 * {@link #decodeRequestString(HttpServletRequest, String)} unless
-	 * {@link #setUrlDecode(boolean)} is set to {@code true} in which case it is
-	 * assumed the URL path from which the variables were extracted is already
-	 * decoded through a call to
-	 * {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 * Decode the given URI path variables via {@link #decodeRequestString} unless
+	 * {@link #setUrlDecode} is set to {@code true} in which case it is assumed
+	 * the URL path from which the variables were extracted is already decoded
+	 * through a call to {@link #getLookupPathForRequest(HttpServletRequest)}.
 	 * @param request current HTTP request
 	 * @param vars URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance
@@ -550,25 +549,25 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Decode the given matrix variables via
-	 * {@link #decodeRequestString(HttpServletRequest, String)} unless
-	 * {@link #setUrlDecode(boolean)} is set to {@code true} in which case it is
-	 * assumed the URL path from which the variables were extracted is already
-	 * decoded through a call to
-	 * {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 * Decode the given matrix variables via {@link #decodeRequestString} unless
+	 * {@link #setUrlDecode} is set to {@code true} in which case it is assumed
+	 * the URL path from which the variables were extracted is already decoded
+	 * through a call to {@link #getLookupPathForRequest(HttpServletRequest)}.
 	 * @param request current HTTP request
 	 * @param vars URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance
 	 */
-	public MultiValueMap<String, String> decodeMatrixVariables(HttpServletRequest request, MultiValueMap<String, String> vars) {
+	public MultiValueMap<String, String> decodeMatrixVariables(
+			HttpServletRequest request, MultiValueMap<String, String> vars) {
+
 		if (this.urlDecode) {
 			return vars;
 		}
 		else {
-			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap	<String, String>(vars.size());
-			for (String key : vars.keySet()) {
-				for (String value : vars.get(key)) {
-					decodedVars.add(key, decodeInternal(request, value));
+			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap<String, String>(vars.size());
+			for (Map.Entry<String, List<String>> entry : vars.entrySet()) {
+				for (String value : entry.getValue()) {
+					decodedVars.add(entry.getKey(), decodeInternal(request, value));
 				}
 			}
 			return decodedVars;
