@@ -56,6 +56,8 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
@@ -599,11 +601,10 @@ public class Jackson2ObjectMapperBuilder {
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
-		Map<Object, Module> modulesToRegister = new LinkedHashMap<Object, Module>();
+		MultiValueMap<Object, Module> modulesToRegister = new LinkedMultiValueMap<Object, Module>();
 		if (this.findModulesViaServiceLoader) {
-			// Jackson 2.2+
 			for (Module module : ObjectMapper.findModules(this.moduleClassLoader)) {
-				modulesToRegister.put(module.getTypeId(), module);
+				registerModule(module, modulesToRegister);
 			}
 		}
 		else if (this.findWellKnownModules) {
@@ -612,18 +613,19 @@ public class Jackson2ObjectMapperBuilder {
 
 		if (this.modules != null) {
 			for (Module module : this.modules) {
-				modulesToRegister.put(module.getTypeId(), module);
+				registerModule(module, modulesToRegister);
 			}
 		}
 		if (this.moduleClasses != null) {
 			for (Class<? extends Module> moduleClass : this.moduleClasses) {
-				Module module = BeanUtils.instantiateClass(moduleClass);
-				modulesToRegister.put(module.getTypeId(), module);
+				registerModule(BeanUtils.instantiateClass(moduleClass), modulesToRegister);
 			}
 		}
 		// Using Jackson 2.0+ registerModule method, not Jackson 2.2+ registerModules
-		for (Module module : modulesToRegister.values()) {
-			objectMapper.registerModule(module);
+		for (List<Module> nestedModules : modulesToRegister.values()) {
+			for (Module module : nestedModules) {
+				objectMapper.registerModule(module);
+			}
 		}
 
 		if (this.dateFormat != null) {
@@ -678,6 +680,15 @@ public class Jackson2ObjectMapperBuilder {
 		}
 	}
 
+	private void registerModule(Module module, MultiValueMap<Object, Module> modulesToRegister) {
+		if (module.getTypeId() == null) {
+			modulesToRegister.add(SimpleModule.class.getName(), module);
+		}
+		else {
+			modulesToRegister.set(module.getTypeId(), module);
+		}
+	}
+
 
 	// Any change to this method should be also applied to spring-jms and spring-messaging
 	// MappingJackson2MessageConverter default constructors
@@ -726,14 +737,14 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void registerWellKnownModulesIfAvailable(Map<Object, Module> modulesToRegister) {
+	private void registerWellKnownModulesIfAvailable(MultiValueMap<Object, Module> modulesToRegister) {
 		// Java 7 java.nio.file.Path class present?
 		if (ClassUtils.isPresent("java.nio.file.Path", this.moduleClassLoader)) {
 			try {
 				Class<? extends Module> jdk7ModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module", this.moduleClassLoader);
 				Module jdk7Module = BeanUtils.instantiateClass(jdk7ModuleClass);
-				modulesToRegister.put(jdk7Module.getTypeId(), jdk7Module);
+				modulesToRegister.set(jdk7Module.getTypeId(), jdk7Module);
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-jdk7 not available
@@ -746,7 +757,7 @@ public class Jackson2ObjectMapperBuilder {
 				Class<? extends Module> jdk8ModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.jdk8.Jdk8Module", this.moduleClassLoader);
 				Module jdk8Module = BeanUtils.instantiateClass(jdk8ModuleClass);
-				modulesToRegister.put(jdk8Module.getTypeId(), jdk8Module);
+				modulesToRegister.set(jdk8Module.getTypeId(), jdk8Module);
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-jdk8 not available
@@ -759,7 +770,7 @@ public class Jackson2ObjectMapperBuilder {
 				Class<? extends Module> javaTimeModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", this.moduleClassLoader);
 				Module javaTimeModule = BeanUtils.instantiateClass(javaTimeModuleClass);
-				modulesToRegister.put(javaTimeModule.getTypeId(), javaTimeModule);
+				modulesToRegister.set(javaTimeModule.getTypeId(), javaTimeModule);
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-jsr310 not available
@@ -772,7 +783,7 @@ public class Jackson2ObjectMapperBuilder {
 				Class<? extends Module> jodaModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.joda.JodaModule", this.moduleClassLoader);
 				Module jodaModule = BeanUtils.instantiateClass(jodaModuleClass);
-				modulesToRegister.put(jodaModule.getTypeId(), jodaModule);
+				modulesToRegister.set(jodaModule.getTypeId(), jodaModule);
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-joda not available
@@ -785,7 +796,7 @@ public class Jackson2ObjectMapperBuilder {
 				Class<? extends Module> kotlinModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);
 				Module kotlinModule = BeanUtils.instantiateClass(kotlinModuleClass);
-				modulesToRegister.put(kotlinModule.getTypeId(), kotlinModule);
+				modulesToRegister.set(kotlinModule.getTypeId(), kotlinModule);
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-module-kotlin not available
