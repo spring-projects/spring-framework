@@ -534,15 +534,13 @@ class ConfigurationClassParser {
 		if (visited.add(sourceClass)) {
 			for (SourceClass annotation : sourceClass.getAnnotations()) {
 				String annName = annotation.getMetadata().getClassName();
-				if (!annName.startsWith("java") && !annName.equals(Import.class.getName())) {
+				if (!annName.equals(Import.class.getName())) {
 					collectImports(annotation, imports, visited);
 				}
 			}
 			imports.addAll(sourceClass.getAnnotationAttributes(Import.class.getName(), "value"));
 		}
 	}
-
-
 
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
 			Collection<SourceClass> importCandidates, boolean checkForCircularImports) {
@@ -565,8 +563,7 @@ class ConfigurationClassParser {
 						ParserStrategyUtils.invokeAwareMethods(
 								selector, this.environment, this.resourceLoader, this.registry);
 						if (selector instanceof DeferredImportSelector) {
-							this.deferredImportSelectorHandler.handle(
-									configClass, (DeferredImportSelector) selector);
+							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
 						else {
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
@@ -641,13 +638,13 @@ class ConfigurationClassParser {
 	 * Factory method to obtain a {@link SourceClass} from a {@link Class}.
 	 */
 	SourceClass asSourceClass(@Nullable Class<?> classType) throws IOException {
-		if (classType == null || classType.getName().startsWith("java.lang.annotation")) {
+		if (classType == null || classType.getName().startsWith("java.lang.annotation.")) {
 			return this.objectSourceClass;
 		}
 		try {
 			// Sanity test that we can reflectively read annotations,
 			// including Class attributes; if not -> fall back to ASM
-			for (Annotation ann : classType.getAnnotations()) {
+			for (Annotation ann : classType.getDeclaredAnnotations()) {
 				AnnotationUtils.validateAnnotation(ann);
 			}
 			return new SourceClass(classType);
@@ -673,7 +670,7 @@ class ConfigurationClassParser {
 	 * Factory method to obtain a {@link SourceClass} from a class name.
 	 */
 	SourceClass asSourceClass(@Nullable String className) throws IOException {
-		if (className == null || className.startsWith("java.lang.annotation")) {
+		if (className == null || className.startsWith("java.lang.annotation.")) {
 			return this.objectSourceClass;
 		}
 		if (className.startsWith("java")) {
@@ -1018,13 +1015,32 @@ class ConfigurationClassParser {
 
 		public Set<SourceClass> getAnnotations() {
 			Set<SourceClass> result = new LinkedHashSet<>();
-			for (String className : this.metadata.getAnnotationTypes()) {
-				try {
-					result.add(getRelated(className));
+			if (this.source instanceof Class) {
+				Class<?> sourceClass = (Class<?>) this.source;
+				for (Annotation ann : sourceClass.getDeclaredAnnotations()) {
+					Class<?> annType = ann.annotationType();
+					if (!annType.getName().startsWith("java")) {
+						try {
+							result.add(asSourceClass(annType));
+						}
+						catch (Throwable ex) {
+							// An annotation not present on the classpath is being ignored
+							// by the JVM's class loading -> ignore here as well.
+						}
+					}
 				}
-				catch (Throwable ex) {
-					// An annotation not present on the classpath is being ignored
-					// by the JVM's class loading -> ignore here as well.
+			}
+			else {
+				for (String className : this.metadata.getAnnotationTypes()) {
+					if (!className.startsWith("java")) {
+						try {
+							result.add(getRelated(className));
+						}
+						catch (Throwable ex) {
+							// An annotation not present on the classpath is being ignored
+							// by the JVM's class loading -> ignore here as well.
+						}
+					}
 				}
 			}
 			return result;

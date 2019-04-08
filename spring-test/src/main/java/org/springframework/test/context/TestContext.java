@@ -18,8 +18,10 @@ package org.springframework.test.context;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
@@ -75,6 +77,23 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @see #hasApplicationContext()
 	 */
 	ApplicationContext getApplicationContext();
+
+	/**
+	 * Publish the {@link ApplicationEvent} created by the given {@code eventFactory}
+	 * to the {@linkplain ApplicationContext application context} for this
+	 * test context.
+	 * <p>The {@code ApplicationEvent} will only be published if the application
+	 * context for this test context {@linkplain #hasApplicationContext() is available}.
+	 * @param eventFactory factory for lazy creation of the {@code ApplicationEvent}
+	 * @since 5.2
+	 * @see #hasApplicationContext()
+	 * @see #getApplicationContext()
+	 */
+	default void publishEvent(Function<TestContext, ? extends ApplicationEvent> eventFactory) {
+		if (hasApplicationContext()) {
+			getApplicationContext().publishEvent(eventFactory.apply(this));
+		}
+	}
 
 	/**
 	 * Get the {@linkplain Class test class} for this test context.

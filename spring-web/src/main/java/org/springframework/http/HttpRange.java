@@ -170,8 +170,7 @@ public abstract class HttpRange {
 	 * @param ranges the list of ranges
 	 * @param resource the resource to select the regions from
 	 * @return the list of regions for the given resource
-	 * @throws IllegalArgumentException if the sum of all ranges exceeds the
-	 * resource length.
+	 * @throws IllegalArgumentException if the sum of all ranges exceeds the resource length
 	 * @since 4.3
 	 */
 	public static List<ResourceRegion> toResourceRegions(List<HttpRange> ranges, Resource resource) {
@@ -184,7 +183,10 @@ public abstract class HttpRange {
 		}
 		if (ranges.size() > 1) {
 			long length = getLengthFor(resource);
-			long total = regions.stream().map(ResourceRegion::getCount).reduce(0L, (count, sum) -> sum + count);
+			long total = 0;
+			for (ResourceRegion region : regions) {
+				total += region.getCount();
+			}
 			if (total >= length) {
 				throw new IllegalArgumentException("The sum of all ranges (" + total +
 						") should be less than the resource length (" + length + ")");

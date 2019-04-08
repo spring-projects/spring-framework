@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class TestGroupTests {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("Unable to find test group 'missing' when parsing " +
 				"testGroups value: 'performance, missing'. Available groups include: " +
-				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI]");
+				"[LONG_RUNNING,PERFORMANCE,CI]");
 		TestGroup.parse("performance, missing");
 	}
 
@@ -92,7 +92,7 @@ public class TestGroupTests {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("Unable to find test group 'missing' when parsing " +
 				"testGroups value: 'all-missing'. Available groups include: " +
-				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI]");
+				"[LONG_RUNNING,PERFORMANCE,CI]");
 		TestGroup.parse("all-missing");
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import org.springframework.validation.FieldError;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.StringContains.*;
 import static org.junit.Assert.*;
 
 /**
@@ -170,6 +171,24 @@ public class SpringValidatorAdapterTests {
 		assertThat(error2.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("confirmEmail"));
 	}
 
+	@Test
+	public void testPatternMessage() {
+		TestBean testBean = new TestBean();
+		testBean.setEmail("X");
+		testBean.setConfirmEmail("X");
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(testBean, "testBean");
+		validatorAdapter.validate(testBean, errors);
+
+		assertThat(errors.getFieldErrorCount("email"), is(1));
+		assertThat(errors.getFieldValue("email"), is("X"));
+		FieldError error = errors.getFieldError("email");
+		assertNotNull(error);
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH), containsString("[\\w.'-]{1,}@[\\w.'-]{1,}"));
+		assertTrue(error.contains(ConstraintViolation.class));
+		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("email"));
+	}
+
 	@Test  // SPR-16177
 	public void testWithList() {
 		Parent parent = new Parent();
@@ -218,6 +237,7 @@ public class SpringValidatorAdapterTests {
 
 		private String confirmPassword;
 
+		@Pattern(regexp = "[\\w.'-]{1,}@[\\w.'-]{1,}")
 		private String email;
 
 		@Pattern(regexp = "[\\p{L} -]*", message = "Email required")
