@@ -122,6 +122,9 @@ public @interface CachePut {
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
 	 * <ul>
+	 * <li>{@code #result} for a reference to the result of the method invocation. For
+	 * supported wrappers such as {@code Optional}, {@code #result} refers to the actual
+	 * object, not the wrapper</li>
 	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
 	 * references to the {@link java.lang.reflect.Method method}, target object, and
 	 * affected cache(s) respectively.</li>
@@ -136,8 +139,6 @@ public @interface CachePut {
 
 	/**
 	 * Spring Expression Language (SpEL) expression used to veto the cache put operation.
-	 * <p>Unlike {@link #condition}, this expression is evaluated after the method
-	 * has been called and can therefore refer to the {@code result}.
 	 * <p>Default is {@code ""}, meaning that caching is never vetoed.
 	 * <p>The SpEL expression evaluates against a dedicated context that provides the
 	 * following meta-data:
