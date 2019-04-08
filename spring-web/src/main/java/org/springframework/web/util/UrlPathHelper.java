@@ -289,7 +289,7 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Sanitize the given path with the following rules:
+	 * Sanitize the given path. Uses the following rules:
 	 * <ul>
 	 * <li>replace all "//" by "/"</li>
 	 * </ul>
@@ -496,7 +496,7 @@ public class UrlPathHelper {
 	/**
 	 * Remove ";" (semicolon) content from the given request URI if the
 	 * {@linkplain #setRemoveSemicolonContent removeSemicolonContent}
-	 * property is set to "true". Note that "jssessionid" is always removed.
+	 * property is set to "true". Note that "jsessionid" is always removed.
 	 * @param requestUri the request URI string to remove ";" content from
 	 * @return the updated URI string
 	 */
@@ -532,7 +532,7 @@ public class UrlPathHelper {
 	 * the URL path from which the variables were extracted is already decoded
 	 * through a call to {@link #getLookupPathForRequest(HttpServletRequest)}.
 	 * @param request current HTTP request
-	 * @param vars URI variables extracted from the URL path
+	 * @param vars the URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance
 	 */
 	public Map<String, String> decodePathVariables(HttpServletRequest request, Map<String, String> vars) {
@@ -554,7 +554,7 @@ public class UrlPathHelper {
 	 * the URL path from which the variables were extracted is already decoded
 	 * through a call to {@link #getLookupPathForRequest(HttpServletRequest)}.
 	 * @param request current HTTP request
-	 * @param vars URI variables extracted from the URL path
+	 * @param vars the URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance
 	 */
 	public MultiValueMap<String, String> decodeMatrixVariables(
