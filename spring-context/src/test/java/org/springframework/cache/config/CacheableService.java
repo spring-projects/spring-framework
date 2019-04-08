@@ -95,4 +95,8 @@ public interface CacheableService<T> {
 
 	TestEntity putRefersToResult(TestEntity arg1);
 
+	TestEntity putRefersToNullResult(TestEntity arg1);
+
+	TestEntity putRefersToNullResultWithUnless(TestEntity arg1);
+
 }

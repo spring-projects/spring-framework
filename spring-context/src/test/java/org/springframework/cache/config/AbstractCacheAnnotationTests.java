@@ -29,6 +29,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.expression.spel.SpelEvaluationException;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -489,6 +490,29 @@ public abstract class AbstractCacheAnnotationTests {
 		assertSame(entity, primary.get(id).get());
 	}
 
+	public void testPutRefersToNullResult(CacheableService<?> service) {
+		Long id = Long.MIN_VALUE;
+		TestEntity entity = new TestEntity();
+		Cache primary = this.cm.getCache("primary");
+		assertNull(primary.get(id));
+		try {
+			service.putRefersToNullResult(entity);
+		} catch (Exception e) {
+			assertEquals(SpelEvaluationException.class, e.getClass());
+			assertEquals("EL1007E: Property or field 'id' cannot be found on null", e.getMessage());
+		}
+		assertNull(primary.get(id));
+	}
+
+	public void testPutRefersToNullResultWithUnless(CacheableService<?> service) {
+		Long id = Long.MIN_VALUE;
+		TestEntity entity = new TestEntity();
+		Cache primary = this.cm.getCache("primary");
+		assertNull(primary.get(id));
+		service.putRefersToNullResultWithUnless(entity);
+		assertNull(primary.get(id));
+	}
+
 	public void testMultiCacheAndEvict(CacheableService<?> service) {
 		String methodName = "multiCacheAndEvict";
 
@@ -842,6 +866,26 @@ public abstract class AbstractCacheAnnotationTests {
 	@Test
 	public void testClassPutRefersToResult() throws Exception {
 		testPutRefersToResult(this.ccs);
+	}
+
+	@Test
+	public void testPutRefersToNullResult() throws Exception {
+		testPutRefersToNullResult(this.cs);
+	}
+
+	@Test
+	public void testClassPutRefersToNullResult() throws Exception {
+		testPutRefersToNullResult(this.ccs);
+	}
+
+	@Test
+	public void testPutRefersToNullResultWithUnless() throws Exception {
+		testPutRefersToNullResultWithUnless(this.cs);
+	}
+
+	@Test
+	public void testClassPutRefersToNullResultWithUnless() throws Exception {
+		testPutRefersToNullResultWithUnless(this.ccs);
 	}
 
 	@Test

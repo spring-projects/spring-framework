@@ -248,4 +248,15 @@ public class DefaultCacheableService implements CacheableService<Long> {
 		return arg1;
 	}
 
+	@Override
+	@CachePut(cacheNames = "primary", key = "#result.id")
+	public TestEntity putRefersToNullResult(TestEntity arg1) {
+		return null;
+	}
+
+	@Override
+	@CachePut(cacheNames = "primary", key = "#result.id", unless = "#result == null")
+	public TestEntity putRefersToNullResultWithUnless(TestEntity arg1) {
+		return null;
+	}
 }
