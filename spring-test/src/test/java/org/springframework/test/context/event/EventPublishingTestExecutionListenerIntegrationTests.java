@@ -77,9 +77,13 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 	private final TestContextManager testContextManager = new TestContextManager(ExampleTestCase.class);
 	private final TestContext testContext = testContextManager.getTestContext();
+	// Note that the following invocation of getApplicationContext() forces eager
+	// loading of the test's ApplicationContext which consequently results in the
+	// publication of all test execution events. Otherwise, TestContext#publishEvent
+	// would never fire any events for ExampleTestCase.
 	private final TestExecutionListener listener = testContext.getApplicationContext().getBean(TestExecutionListener.class);
 	private final Object testInstance = new ExampleTestCase();
-	private final Method testMethod = ReflectionUtils.findMethod(ExampleTestCase.class, "traceableTest");
+	private final Method traceableTestMethod = ReflectionUtils.findMethod(ExampleTestCase.class, "traceableTest");
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -104,7 +108,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 	@Test
 	public void beforeTestMethodAnnotation() throws Exception {
-		testContextManager.beforeTestMethod(testInstance, testMethod);
+		testContextManager.beforeTestMethod(testInstance, traceableTestMethod);
 		verify(listener, only()).beforeTestMethod(testContext);
 	}
 
@@ -162,19 +166,19 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 	@Test
 	public void beforeTestExecutionAnnotation() throws Exception {
-		testContextManager.beforeTestExecution(testInstance, testMethod);
+		testContextManager.beforeTestExecution(testInstance, traceableTestMethod);
 		verify(listener, only()).beforeTestExecution(testContext);
 	}
 
 	@Test
 	public void afterTestExecutionAnnotation() throws Exception {
-		testContextManager.afterTestExecution(testInstance, testMethod, null);
+		testContextManager.afterTestExecution(testInstance, traceableTestMethod, null);
 		verify(listener, only()).afterTestExecution(testContext);
 	}
 
 	@Test
 	public void afterTestMethodAnnotation() throws Exception {
-		testContextManager.afterTestMethod(testInstance, testMethod, null);
+		testContextManager.afterTestMethod(testInstance, traceableTestMethod, null);
 		verify(listener, only()).afterTestMethod(testContext);
 	}
 

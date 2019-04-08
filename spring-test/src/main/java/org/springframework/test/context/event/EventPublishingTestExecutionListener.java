@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.event;
 
-import java.util.function.Function;
-
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -92,7 +90,7 @@ public class EventPublishingTestExecutionListener extends AbstractTestExecutionL
 	 */
 	@Override
 	public void beforeTestClass(TestContext testContext) {
-		publishEvent(testContext, BeforeTestClassEvent::new);
+		testContext.publishEvent(BeforeTestClassEvent::new);
 	}
 
 	/**
@@ -101,7 +99,7 @@ public class EventPublishingTestExecutionListener extends AbstractTestExecutionL
 	 */
 	@Override
 	public void prepareTestInstance(TestContext testContext) {
-		publishEvent(testContext, PrepareTestInstanceEvent::new);
+		testContext.publishEvent(PrepareTestInstanceEvent::new);
 	}
 
 	/**
@@ -110,7 +108,7 @@ public class EventPublishingTestExecutionListener extends AbstractTestExecutionL
 	 */
 	@Override
 	public void beforeTestMethod(TestContext testContext) {
-		publishEvent(testContext, BeforeTestMethodEvent::new);
+		testContext.publishEvent(BeforeTestMethodEvent::new);
 	}
 
 	/**
@@ -119,7 +117,7 @@ public class EventPublishingTestExecutionListener extends AbstractTestExecutionL
 	 */
 	@Override
 	public void beforeTestExecution(TestContext testContext) {
-		publishEvent(testContext, BeforeTestExecutionEvent::new);
+		testContext.publishEvent(BeforeTestExecutionEvent::new);
 	}
 
 	/**
@@ -128,7 +126,7 @@ public class EventPublishingTestExecutionListener extends AbstractTestExecutionL
 	 */
 	@Override
 	public void afterTestExecution(TestContext testContext) {
-		publishEvent(testContext, AfterTestExecutionEvent::new);
+		testContext.publishEvent(AfterTestExecutionEvent::new);
 	}
 
 	/**
@@ -137,7 +135,7 @@ public class EventPublishingTestExecutionListener extends AbstractTestExecutionL
 	 */
 	@Override
 	public void afterTestMethod(TestContext testContext) {
-		publishEvent(testContext, AfterTestMethodEvent::new);
+		testContext.publishEvent(AfterTestMethodEvent::new);
 	}
 
 	/**
@@ -146,13 +144,7 @@ public class EventPublishingTestExecutionListener extends AbstractTestExecutionL
 	 */
 	@Override
 	public void afterTestClass(TestContext testContext) {
-		publishEvent(testContext, AfterTestClassEvent::new);
-	}
-
-	private void publishEvent(TestContext testContext, Function<TestContext, TestContextEvent> eventFactory) {
-		if (testContext.hasApplicationContext()) {
-			testContext.getApplicationContext().publishEvent(eventFactory.apply(testContext));
-		}
+		testContext.publishEvent(AfterTestClassEvent::new);
 	}
 
 }
