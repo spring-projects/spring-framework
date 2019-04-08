@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.google.protobuf.Message;
+import org.junit.After;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -38,16 +40,26 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
+import org.springframework.http.codec.protobuf.ProtobufDecoder;
+import org.springframework.http.codec.protobuf.ProtobufEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.protobuf.Msg;
+import org.springframework.protobuf.SecondMsg;
+import org.springframework.util.MimeType;
 
 /**
  * Test scenarios for data buffer leaks.
  * @author Rossen Stoyanchev
- * @since 5.2
  */
-public class CodecDataBufferLeakTests {
+public class CancelWithoutDemandCodecTests {
 
 	private final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+
+
+	@After
+	public void tearDown() throws Exception {
+		this.bufferFactory.checkForLeaks();
+	}
 
 
 	@Test // gh-22107
@@ -58,8 +70,6 @@ public class CodecDataBufferLeakTests {
 
 		writer.write(Mono.just("foo"), ResolvableType.forType(String.class), MediaType.TEXT_PLAIN,
 				outputMessage, Collections.emptyMap()).block(Duration.ofSeconds(5));
-
-		this.bufferFactory.checkForLeaks();
 	}
 
 	@Test // gh-22107
@@ -73,8 +83,6 @@ public class CodecDataBufferLeakTests {
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
 		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)..
 		subscriber.cancel();
-
-		this.bufferFactory.checkForLeaks();
 	}
 
 	@Test // gh-22107
@@ -88,8 +96,39 @@ public class CodecDataBufferLeakTests {
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
 		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)..
 		subscriber.cancel();
+	}
 
-		this.bufferFactory.checkForLeaks();
+	@Test // gh-22543
+	public void cancelWithProtobufEncoder() {
+		ProtobufEncoder encoder = new ProtobufEncoder();
+		Msg msg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
+
+		Flux<DataBuffer> flux = encoder.encode(Mono.just(msg),
+				this.bufferFactory, ResolvableType.forClass(Msg.class),
+				new MimeType("application", "x-protobuf"), Collections.emptyMap());
+
+		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
+		flux.subscribe(subscriber); // Assume sync execution (e.g. encoding with Flux.just)..
+		subscriber.cancel();
+	}
+
+	@Test // gh-22731
+	public void cancelWithProtobufDecoder() throws InterruptedException {
+		ProtobufDecoder decoder = new ProtobufDecoder();
+
+		Mono<DataBuffer> input = Mono.fromCallable(() -> {
+			Msg msg = Msg.newBuilder().setFoo("Foo").build();
+			byte[] bytes = msg.toByteArray();
+			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+			buffer.write(bytes);
+			return buffer;
+		});
+
+		Flux<Message> messages = decoder.decode(input, ResolvableType.forType(Msg.class),
+				new MimeType("application", "x-protobuf"), Collections.emptyMap());
+		ZeroDemandMessageSubscriber subscriber = new ZeroDemandMessageSubscriber();
+		messages.subscribe(subscriber);
+		subscriber.cancel();
 	}
 
 	@Test // gh-22107
@@ -104,8 +143,6 @@ public class CodecDataBufferLeakTests {
 
 		writer.write(Mono.just(builder.build()), null, MediaType.MULTIPART_FORM_DATA,
 				outputMessage, Collections.emptyMap()).block(Duration.ofSeconds(5));
-
-		this.bufferFactory.checkForLeaks();
 	}
 
 	@Test // gh-22107
@@ -116,8 +153,6 @@ public class CodecDataBufferLeakTests {
 
 		writer.write(Mono.just(event), ResolvableType.forClass(ServerSentEvent.class), MediaType.TEXT_EVENT_STREAM,
 				outputMessage, Collections.emptyMap()).block(Duration.ofSeconds(5));
-
-		this.bufferFactory.checkForLeaks();
 	}
 
 
@@ -177,6 +212,15 @@ public class CodecDataBufferLeakTests {
 
 
 	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
+
+		@Override
+		protected void hookOnSubscribe(Subscription subscription) {
+			// Just subscribe without requesting
+		}
+	}
+
+
+	private static class ZeroDemandMessageSubscriber extends BaseSubscriber<Message> {
 
 		@Override
 		protected void hookOnSubscribe(Subscription subscription) {
