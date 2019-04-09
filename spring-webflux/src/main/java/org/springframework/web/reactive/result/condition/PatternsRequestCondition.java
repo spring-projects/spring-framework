@@ -16,9 +16,9 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +29,7 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -39,6 +40,10 @@ import org.springframework.web.util.pattern.PathPattern;
  * @since 5.0
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
+
+	private static final SortedSet<PathPattern> EMPTY_PATTERNS =
+			new TreeSet<>(Collections.singleton(new PathPatternParser().parse("")));
+
 
 	private final SortedSet<PathPattern> patterns;
 
@@ -55,7 +60,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * Creates a new instance with the given URL patterns.
 	 */
 	public PatternsRequestCondition(List<PathPattern> patterns) {
-		this(new TreeSet<>(patterns));
+		this(patterns.isEmpty() ? EMPTY_PATTERNS : new TreeSet<>(patterns));
 	}
 
 
@@ -89,8 +94,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public PatternsRequestCondition combine(PatternsRequestCondition other) {
-		List<PathPattern> combined = new ArrayList<>();
+		SortedSet<PathPattern> combined;
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
+			combined = new TreeSet<>();
 			for (PathPattern pattern1 : this.patterns) {
 				for (PathPattern pattern2 : other.patterns) {
 					combined.add(pattern1.combine(pattern2));
@@ -98,10 +104,13 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			}
 		}
 		else if (!this.patterns.isEmpty()) {
-			combined.addAll(this.patterns);
+			combined = this.patterns;
 		}
 		else if (!other.patterns.isEmpty()) {
-			combined.addAll(other.patterns);
+			combined = other.patterns;
+		}
+		else {
+			combined = EMPTY_PATTERNS;
 		}
 		return new PatternsRequestCondition(combined);
 	}

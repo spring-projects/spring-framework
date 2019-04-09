@@ -796,13 +796,19 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			.hasMessageContaining("Ambiguous mapping");
 	}
 
-	@Test
+	@Test // gh-22543
 	public void unmappedPathMapping() throws Exception {
 		initServletWithControllers(UnmappedPathController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bogus-unmapped");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
+		assertEquals(404, response.getStatus());
+
+		request = new MockHttpServletRequest("GET", "");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(200, response.getStatus());
 		assertEquals("get", response.getContentAsString());
 	}
 

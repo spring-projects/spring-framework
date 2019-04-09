@@ -49,7 +49,7 @@ public class RequestMappingInfoTests {
 	public void createEmpty() {
 		RequestMappingInfo info = paths().build();
 
-		assertEquals(0, info.getPatternsCondition().getPatterns().size());
+		assertEquals(Collections.singleton(""), info.getPatternsCondition().getPatterns()); // gh-22543
 		assertEquals(0, info.getMethodsCondition().getMethods().size());
 		assertEquals(true, info.getConsumesCondition().isEmpty());
 		assertEquals(true, info.getProducesCondition().isEmpty());

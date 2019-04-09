@@ -253,14 +253,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertSame(handlerMethod, mapped);
 	}
 
-	@Test
+	@Test // gh-22543
 	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() {
-		RequestMappingInfo key = paths().build();
-		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
-		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
-
-		PathPattern bestMatch = (PathPattern) exchange.getAttributes().get(BEST_MATCHING_PATTERN_ATTRIBUTE);
-		assertEquals("/1/2", bestMatch.getPatternString());
+		ServerWebExchange exchange = MockServerWebExchange.from(get(""));
+		this.handlerMapping.handleMatch(paths().build(), handlerMethod, exchange);
+		PathPattern pattern = (PathPattern) exchange.getAttributes().get(BEST_MATCHING_PATTERN_ATTRIBUTE);
+		assertEquals("", pattern.getPatternString());
 	}
 
 	@Test

@@ -135,6 +135,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
+		if (patterns.isEmpty()) {
+			return Collections.singleton("");
+		}
 		Set<String> result = new LinkedHashSet<>(patterns.size());
 		for (String pattern : patterns) {
 			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
