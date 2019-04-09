@@ -526,7 +526,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			chain = new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
 		}
 		else {
-			chain.addInterceptor(new CorsInterceptor(config));
+			chain.addInterceptor(0, new CorsInterceptor(config));
 		}
 		return chain;
 	}

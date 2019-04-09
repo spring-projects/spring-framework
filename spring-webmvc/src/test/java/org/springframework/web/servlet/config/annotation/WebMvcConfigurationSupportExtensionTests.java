@@ -86,16 +86,11 @@ import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.util.UrlPathHelper;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static com.fasterxml.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static com.fasterxml.jackson.databind.DeserializationFeature.*;
+import static com.fasterxml.jackson.databind.MapperFeature.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.MediaType.APPLICATION_ATOM_XML;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.*;
 
 /**
  * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that also
@@ -141,9 +136,10 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertNotNull(chain);
 		assertNotNull(chain.getInterceptors());
 		assertEquals(4, chain.getInterceptors().length);
-		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[0].getClass());
-		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
-		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[2].getClass());
+		assertEquals("CorsInterceptor", chain.getInterceptors()[0].getClass().getSimpleName());
+		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[1].getClass());
+		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[2].getClass());
+		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[3].getClass());
 
 		Map<RequestMappingInfo, HandlerMethod> map = rmHandlerMapping.getHandlerMethods();
 		assertEquals(2, map.size());
@@ -185,10 +181,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertNotNull(chain);
 		assertNotNull(chain.getHandler());
 		assertEquals(Arrays.toString(chain.getInterceptors()), 5, chain.getInterceptors().length);
-		// PathExposingHandlerInterceptor at chain.getInterceptors()[0]
-		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[1].getClass());
-		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[2].getClass());
-		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[3].getClass());
+		assertEquals("CorsInterceptor", chain.getInterceptors()[0].getClass().getSimpleName());
+		// PathExposingHandlerInterceptor at chain.getInterceptors()[1]
+		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[2].getClass());
+		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[3].getClass());
+		assertEquals(ResourceUrlProviderExposingInterceptor.class, chain.getInterceptors()[4].getClass());
 
 		handlerMapping = (AbstractHandlerMapping) this.config.defaultServletHandlerMapping();
 		handlerMapping.setApplicationContext(this.context);
