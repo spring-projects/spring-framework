@@ -24,8 +24,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -39,6 +42,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
+import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
@@ -46,9 +50,11 @@ import org.springframework.messaging.handler.invocation.reactive.AbstractEncoder
 import org.springframework.messaging.handler.invocation.reactive.AbstractMethodMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringValueResolver;
 import org.springframework.validation.Validator;
@@ -311,4 +317,19 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		return new AnnotationExceptionHandlerMethodResolver(beanType);
 	}
 
+	@Override
+	protected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message) {
+		Set<String> patterns = mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns();
+		if (!CollectionUtils.isEmpty(patterns)) {
+			String pattern = patterns.iterator().next();
+			String destination = getDestination(message);
+			Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(pattern, destination);
+			if (!CollectionUtils.isEmpty(vars)) {
+				MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
+				Assert.state(mha != null && mha.isMutable(), "Mutable MessageHeaderAccessor required");
+				mha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
+			}
+		}
+		return super.handleMatch(mapping, handlerMethod, message);
+	}
 }

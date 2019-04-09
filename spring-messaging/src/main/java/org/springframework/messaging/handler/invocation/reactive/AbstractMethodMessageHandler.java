@@ -381,7 +381,11 @@ public abstract class AbstractMethodMessageHandler<T>
 			// handleNoMatch would have been invoked already
 			return Mono.empty();
 		}
-		HandlerMethod handlerMethod = match.getHandlerMethod().createWithResolvedBean();
+		return handleMatch(match.mapping, match.handlerMethod, message);
+	}
+
+	protected Mono<Void> handleMatch(T mapping, HandlerMethod handlerMethod, Message<?> message) {
+		handlerMethod = handlerMethod.createWithResolvedBean();
 		return this.invocableHelper.handleMessage(handlerMethod, message);
 	}
 
