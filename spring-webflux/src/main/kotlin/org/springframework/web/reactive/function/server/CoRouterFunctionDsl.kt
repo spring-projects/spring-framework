@@ -27,16 +27,38 @@ import org.springframework.web.reactive.function.server.RouterFunctions.nest
 import java.net.URI
 
 /**
- * Coroutines variant of [router].
+ * Allow to create easily a WebFlux.fn [RouterFunction] with a [Coroutines router Kotlin DSL][CoRouterFunctionDsl].
+ *
+ * Example:
+ *
+ * ```
+ * @Configuration
+ * class RouterConfiguration {
+ *
+ * 	@Bean
+ * 	fun mainRouter(userHandler: UserHandler) = coRouter {
+ * 		accept(TEXT_HTML).nest {
+ * 			(GET("/user/") or GET("/users/")).invoke(userHandler::findAllView)
+ * 			GET("/users/{login}", userHandler::findViewById)
+ * 		}
+ * 		accept(APPLICATION_JSON).nest {
+ * 			(GET("/api/user/") or GET("/api/users/")).invoke(userHandler::findAll)
+ * 			POST("/api/users/", userHandler::create)
+ * 		}
+ * 	}
+ *
+ * }
+ * ```
  *
  * @author Sebastien Deleuze
+ * @see router
  * @since 5.2
  */
 fun coRouter(routes: (CoRouterFunctionDsl.() -> Unit)) =
 		CoRouterFunctionDsl(routes).build()
 
 /**
- * Coroutines variant of [RouterFunctionDsl].
+ * Provide a WebFlux.fn [RouterFunction] Coroutines Kotlin DSL created by [`coRouter { }`][coRouter] in order to be able to write idiomatic Kotlin code.
  *
  * @author Sebastien Deleuze
  * @since 5.2

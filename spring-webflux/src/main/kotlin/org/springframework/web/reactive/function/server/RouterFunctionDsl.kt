@@ -26,18 +26,16 @@ import java.net.URI
 import java.util.function.Supplier
 
 /**
- * Allow to create easily a WebFlux.fn `RouterFunction<ServerResponse>` from a Kotlin
- * router DSL leveraging WebFlux.fn Java API ([RouterFunction], [RequestPredicate],
- * [HandlerFunction]).
+ * Allow to create easily a WebFlux.fn [RouterFunction] with a [Reactive router Kotlin DSL][RouterFunctionDsl].
  *
  * Example:
  *
  * ```
  * @Configuration
- * class ApplicationRoutes(val userHandler: UserHandler) {
+ * class RouterConfiguration {
  *
  * 	@Bean
- * 	fun mainRouter() = router {
+ * 	fun mainRouter(userHandler: UserHandler) = router {
  * 		accept(TEXT_HTML).nest {
  * 			(GET("/user/") or GET("/users/")).invoke(userHandler::findAllView)
  * 			GET("/users/{login}", userHandler::findViewById)
@@ -51,14 +49,13 @@ import java.util.function.Supplier
  * }
  * ```
  * @author Sebastien Deleuze
- * @see RouterFunctionDsl
- * @see RouterFunctions.Builder
+ * @see coRouter
  * @since 5.0
  */
 fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl(routes).build()
 
 /**
- * Provide a [RouterFunction] Kotlin DSL in order to be able to write idiomatic Kotlin code.
+ * Provide a WebFlux.fn [RouterFunction] Reactive Kotlin DSL created by [`router { }`][router] in order to be able to write idiomatic Kotlin code.
  *
  * @author Sebastien Deleuze
  * @author Yevhenii Melnyk

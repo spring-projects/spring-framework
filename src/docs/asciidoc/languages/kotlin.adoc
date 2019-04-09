@@ -229,10 +229,11 @@ which lets you deal with profiles and `Environment` for customizing
 how beans are registered.
 
 In the following example notice that:
- - Type inference usually allows to avoid specifying the type for bean references like `ref("bazBean")`
- - It is possible to use Kotlin top level functions to declare beans using callable references like `bean(::myRouter)` in this example
- - When specifying `bean<Bar>()` or `bean(::myRouter)`, parameters are autowired by type
- - The `FooBar` bean will be registered only if the `foobar` profile is active
+
+* Type inference usually allows to avoid specifying the type for bean references like `ref("bazBean")`
+* It is possible to use Kotlin top level functions to declare beans using callable references like `bean(::myRouter)` in this example
+* When specifying `bean<Bar>()` or `bean(::myRouter)`, parameters are autowired by type
+* The `FooBar` bean will be registered only if the `foobar` profile is active
 
 [source,kotlin,indent=0]
 ----
@@ -290,20 +291,23 @@ for more details and up-to-date information.
 == Web
 
 
+=== Router DSL
 
-=== WebFlux Router DSL
+Spring Framework comes with a Kotlin router DSL available in 3 flavors:
 
-Spring Framework comes with a Kotlin router DSL available in two flavors:
+* WebMvc.fn {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.servlet.function/router.html[router { }]
+* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/router.html[router { }]
+* WebFlux.fn <<Coroutines>> {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
 
- - Reactive with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[router { }]
- - <<Coroutines>>
-
-These DSL let you use the <<web-reactive#webflux-fn, WebFlux functional API>> to write clean
-and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
+These DSL let you write clean and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
 
 [source,kotlin,indent=0]
 ----
-	val myRouter: RouterFunction<ServerResponse> = router {
+@Configuration
+class RouterRouterConfiguration {
+
+	@Bean
+	fun mainRouter(userHandler: UserHandler) = router {
 		accept(TEXT_HTML).nest {
 			GET("/") { ok().render("index") }
 			GET("/sse") { ok().render("sse") }
@@ -319,46 +323,56 @@ and idiomatic Kotlin code to build a `RouterFunction` instance as the following 
 		}
 		resources("/**", ClassPathResource("static/"))
 	}
+}
 ----
 
 NOTE: This DSL is programmatic, meaning that it allows custom registration logic of beans
 through an `if` expression, a `for` loop, or any other Kotlin constructs. That can be useful
 when you need to register routes depending on dynamic data (for example, from a database).
 
-See https://github.com/mixitconf/mixit/tree/dafd5ccc92dfab6d9c306fcb60b28921a1ccbf79/src/main/kotlin/mixit/web/routes[MiXiT project routes]
-for a concrete example.
+See https://github.com/mixitconf/mixit/[MiXiT project] for a concrete example.
 
 
 
 === Coroutines
 
 As of Spring Framework 5.2, https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] support
-is provided via extensions for WebFlux client and server functional API. A dedicated
-{doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-co-router-function-dsl/[`coRouter { }`]
-router DSL is also available.
+is provided via:
+
+* https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-deferred/index.html[Deferred] and https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[Flow] return value support in Spring WebFlux annotated `@Controller`
+* Suspending function support in Spring WebFlux annotated `@Controller`
+* Extensions for WebFlux {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.client/index.html[client] and {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/index.html[server] functional API.
+* WebFlux.fn {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
 
 Coroutines extensions use `await` prefix or `AndAwait` suffix, and most are using similar
-names to their reactive counterparts, except `exchange` in `WebClient.RequestHeadersSpec`
-which translates to `awaitResponse`.
+names to their reactive counterparts.
 
 [source,kotlin,indent=0]
 ----
-fun routes(userHandler: UserHandler): RouterFunction<ServerResponse> = coRouter {
-	GET("/", userHandler::listView)
-	GET("/api/user", userHandler::listApi)
-}
+@Configuration
+class RouterConfiguration {
 
+	@Bean
+	fun mainRouter(userHandler: UserHandler) = coRouter {
+		GET("/", userHandler::listView)
+		GET("/api/user", userHandler::listApi)
+	}
+}
+----
+
+[source,kotlin,indent=0]
+----
 class UserHandler(builder: WebClient.Builder) {
 
 	private val client = builder.baseUrl("...").build()
 
 	suspend fun listView(request: ServerRequest): ServerResponse =
 			ServerResponse.ok().renderAndAwait("users", mapOf("users" to
-			client.get().uri("...").awaitResponse().awaitBody<User>()))
+			client.get().uri("...").awaitExchange().awaitBody<User>()))
 
 	suspend fun listApi(request: ServerRequest): ServerResponse =
 				ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).bodyAndAwait(
-				client.get().uri("...").awaitResponse().awaitBody<User>())
+				client.get().uri("...").awaitExchange().awaitBody<User>())
 }
 ----
 
