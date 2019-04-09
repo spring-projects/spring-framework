@@ -295,9 +295,9 @@ for more details and up-to-date information.
 
 Spring Framework comes with a Kotlin router DSL available in 3 flavors:
 
-* WebMvc.fn {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.servlet.function/router.html[router { }]
-* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/router.html[router { }]
-* WebFlux.fn <<Coroutines>> {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
+* WebMvc.fn DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.servlet.function/router.html[router { }]
+* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/router.html[router { }]
+* WebFlux.fn <<Coroutines>> DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
 
 These DSL let you write clean and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
 
@@ -426,16 +426,17 @@ For return values, the translation from Reactive to Coroutines APIs is the follo
 For input parameters:
 
 * If laziness is not needed, `fun handler(mono: Mono<T>)` becomes `fun handler(value: T)` since a suspending functions can be invoked to get the value parameter.
-* If laziness is needed, `fun handler(mono: Mono<T>)` becomes `fun handler(supplier: () -> T)` or `fun handler(supplier: () -> T?)`
+* If laziness is needed, `fun handler(mono: Mono<T>)` becomes `fun handler(supplier: suspend () -> T)` or `fun handler(supplier: suspend () -> T?)`
 
 https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[`Flow`] is `Flux` equivalent in Coroutines world, suitable for hot or cold stream, finite or infinite streams, with the following main differences:
 
 * `Flow` is push-based while `Flux` is push-pull hybrid
 * Backpressure is implemented via suspending functions
 * `Flow` has only a https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/collect.html[single suspending `collect` method] and operators are implemented as https://kotlinlang.org/docs/reference/extensions.html[extensions]
-* https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-core/common/src/flow/operators[Operators are easy to implement] thanks to Coroutines and extensions allow to add custom ones easily to `Flow`
+* https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-core/common/src/flow/operators[Operators are easy to implement] thanks to Coroutines
+* Extensions allow to add custom operators to `Flow`
 * Collect operations are suspending functions
-* `map` operator supports asynchronous operation (no need for `flatMap`) since it takes a suspending function parameter
+* https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/map.html[`map` operator] supports asynchronous operation (no need for `flatMap`) since it takes a suspending function parameter
 
 Read this blog post about https://medium.com/@elizarov/structured-concurrency-722d765aa952[structured concurrency]
 to understand how to run code concurrently with Coroutines and how are managed exceptions and cancellations.
@@ -508,12 +509,12 @@ class CoroutinesRestController(client: WebClient, banner: Banner) {
 	}
 
 	@GetMapping("/error")
-	suspend fun error(): ServerResponse {
+	suspend fun error() {
 		throw IllegalStateException()
 	}
 
 	@GetMapping("/cancel")
-	suspend fun cancel(): ServerResponse {
+	suspend fun cancel() {
 		throw CancellationException()
 	}
 
