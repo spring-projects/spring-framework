@@ -138,7 +138,7 @@ public class RSocketBufferLeakTests {
 		StepVerifier.create(result).expectErrorMatches(ex -> {
 			String prefix = "Ambiguous handler methods mapped for destination 'A.B':";
 			return ex.getMessage().startsWith(prefix);
-		}).verify();
+		}).verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -147,25 +147,25 @@ public class RSocketBufferLeakTests {
 		StepVerifier.create(result).expectErrorMatches(ex -> {
 			String prefix = "Cannot decode to [org.springframework.core.io.Resource]";
 			return ex.getMessage().contains(prefix);
-		}).verify();
+		}).verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void errorSignalWithExceptionHandler() {
 		Mono<String> result = requester.route("error-signal").data("foo").retrieveMono(String.class);
-		StepVerifier.create(result).expectNext("Handled 'bad input'").verifyComplete();
+		StepVerifier.create(result).expectNext("Handled 'bad input'").expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void ignoreInput() {
 		Flux<String> result = requester.route("ignore-input").data("a").retrieveFlux(String.class);
-		StepVerifier.create(result).expectNext("bar").verifyComplete();
+		StepVerifier.create(result).expectNext("bar").thenCancel().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void retrieveMonoFromFluxResponderMethod() {
 		Mono<String> result = requester.route("request-stream").data("foo").retrieveMono(String.class);
-		StepVerifier.create(result).expectNext("foo-1").verifyComplete();
+		StepVerifier.create(result).expectNext("foo-1").expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 
