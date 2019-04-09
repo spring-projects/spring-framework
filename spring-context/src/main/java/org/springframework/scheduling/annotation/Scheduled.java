@@ -69,12 +69,14 @@ public @interface Scheduled {
 	 * on the second, minute, hour, day of month, month and day of week.
 	 * <p>E.g. {@code "0 * * * * MON-FRI"} means once per minute on weekdays
 	 * (at the top of the minute - the 0th second). The order read from left to right is:
-	 * <li>second
-	 * <li>minute
-	 * <li>hour
-	 * <li>day of month
-	 * <li>month
-	 * <li>day of week
+	 * <ul>
+	 * <li>second</li>
+	 * <li>minute</li>
+	 * <li>hour</li>
+	 * <li>day of month</li>
+	 * <li>month</li>
+	 * <li>day of week</li>
+	 * </ul>
 	 * <p>The special value {@link #CRON_DISABLED "-"} indicates a disabled cron trigger,
 	 * primarily meant for externally specified values resolved by a ${...} placeholder.
 	 * @return an expression that can be parsed to a cron schedule
