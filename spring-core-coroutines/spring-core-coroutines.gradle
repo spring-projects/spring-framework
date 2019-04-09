@@ -20,3 +20,5 @@ eclipse {
 		containers "org.jetbrains.kotlin.core.KOTLIN_CONTAINER"
 	}
 }
+
+configurations.archives.artifacts.clear()
