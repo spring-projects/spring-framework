@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -42,7 +41,6 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
-import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * An extension of {@link RequestMappingInfoHandlerMapping} that creates
@@ -162,15 +160,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			}
 		}
 		return info;
-	}
-
-	/**
-	 * Get the URL path patterns associated with the supplied {@link RequestMappingInfo}.
-	 * @since 5.2
-	 */
-	@Override
-	protected Set<PathPattern> getMappingPathPatterns(RequestMappingInfo info) {
-		return info.getPatternsCondition().getPatterns();
 	}
 
 	/**

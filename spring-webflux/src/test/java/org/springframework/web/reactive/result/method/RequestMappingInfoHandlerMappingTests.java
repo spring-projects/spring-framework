@@ -477,11 +477,6 @@ public class RequestMappingInfoHandlerMappingTests {
 				return null;
 			}
 		}
-
-		@Override
-		protected Set<PathPattern> getMappingPathPatterns(RequestMappingInfo info) {
-			return info.getPatternsCondition().getPatterns();
-		}
 	}
 
 }

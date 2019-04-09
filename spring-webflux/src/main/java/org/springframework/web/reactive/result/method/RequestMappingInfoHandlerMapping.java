@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.web.util.pattern.PathPattern;
  * the mapping between a request and a handler method.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
@@ -66,6 +67,15 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 	}
 
+
+	/**
+	 * Get the URL path patterns associated with the supplied {@link RequestMappingInfo}.
+	 * @since 5.2
+	 */
+	@Override
+	protected Set<PathPattern> getMappingPathPatterns(RequestMappingInfo info) {
+		return info.getPatternsCondition().getPatterns();
+	}
 
 	/**
 	 * Check if the given RequestMappingInfo matches the current request and
