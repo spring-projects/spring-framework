@@ -17,9 +17,7 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Set;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -37,10 +35,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link AbstractHandlerMethodMapping}.
@@ -158,11 +153,6 @@ public class HandlerMethodMappingTests {
 			return methodName.startsWith("handler") ? methodName : null;
 		}
 
-		@Override
-		protected Set<PathPattern> getMappingPathPatterns(String mapping) {
-			return Collections.emptySet();
-		}
-		
 		@Override
 		protected String getMatchingMapping(String pattern, ServerWebExchange exchange) {
 			PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();

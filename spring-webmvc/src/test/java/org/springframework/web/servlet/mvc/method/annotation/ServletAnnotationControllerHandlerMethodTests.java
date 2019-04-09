@@ -2016,7 +2016,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	static class ControllerWithEmptyValueMapping {
 
-		@RequestMapping("/**")
+		@RequestMapping("")
 		public void myPath2(HttpServletResponse response) throws IOException {
 			throw new IllegalStateException("test");
 		}
@@ -2035,7 +2035,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	private static class ControllerWithErrorThrown {
 
-		@RequestMapping("/**")
+		@RequestMapping("")
 		public void myPath2(HttpServletResponse response) throws IOException {
 			throw new AssertionError("test");
 		}
@@ -3629,7 +3629,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	static class HttpHeadersResponseController {
 
-		@RequestMapping(value = "/*", method = RequestMethod.POST)
+		@RequestMapping(value = "", method = RequestMethod.POST)
 		@ResponseStatus(HttpStatus.CREATED)
 		public HttpHeaders create() throws URISyntaxException {
 			HttpHeaders headers = new HttpHeaders();

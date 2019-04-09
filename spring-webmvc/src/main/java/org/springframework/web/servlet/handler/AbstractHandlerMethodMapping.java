@@ -43,7 +43,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -616,15 +615,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		private void validateMethodMapping(HandlerMethod handlerMethod, T mapping) {
-			// Log a warning if the supplied mapping maps the supplied HandlerMethod
-			// only to empty paths.
-			if (logger.isWarnEnabled() && getMappingPathPatterns(mapping).stream().noneMatch(StringUtils::hasText)) {
-				logger.warn(String.format(
-						"Handler method '%s' in bean '%s' is not mapped to an explicit path. " +
-						"If you wish to map to all paths, please map explicitly to \"/**\" or \"**\".",
-						handlerMethod, handlerMethod.getBean()));
-			}
-
 			// Assert that the supplied mapping is unique.
 			HandlerMethod existingHandlerMethod = this.mappingLookup.get(mapping);
 			if (existingHandlerMethod != null && !existingHandlerMethod.equals(handlerMethod)) {

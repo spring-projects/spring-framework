@@ -228,7 +228,7 @@ public class RequestMappingHandlerMappingTests {
 	@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	static class ComposedAnnotationController {
 
-		@RequestMapping("/**")
+		@RequestMapping
 		public void handle() {
 		}
 

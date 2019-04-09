@@ -41,14 +41,12 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.pattern.PathPattern;
 
 /**
  * Abstract base class for {@link HandlerMapping} implementations that define
@@ -416,12 +414,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
-	 * Extract and return the URL path patterns contained in the supplied mapping.
-	 * @since 5.2
-	 */
-	protected abstract Set<PathPattern> getMappingPathPatterns(T mapping);
-
-	/**
 	 * Check if a mapping matches the current request and return a (potentially
 	 * new) mapping with conditions relevant to the current request.
 	 * @param mapping the mapping to get a match for
@@ -507,16 +499,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		private void validateMethodMapping(HandlerMethod handlerMethod, T mapping) {
-			// Log a warning if the supplied mapping maps the supplied HandlerMethod
-			// only to empty paths.
-			if (logger.isWarnEnabled() && getMappingPathPatterns(mapping).stream()
-					.map(PathPattern::getPatternString).noneMatch(StringUtils::hasText)) {
-				logger.warn(String.format(
-						"Handler method '%s' in bean '%s' is not mapped to an explicit path. " +
-						"If you wish to map to all paths, please map explicitly to \"/**\" or \"**\".",
-						handlerMethod, handlerMethod.getBean()));
-			}
-
 			// Assert that the supplied mapping is unique.
 			HandlerMethod existingHandlerMethod = this.mappingLookup.get(mapping);
 			if (existingHandlerMethod != null && !existingHandlerMethod.equals(handlerMethod)) {

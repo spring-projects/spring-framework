@@ -78,7 +78,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private HandlerMethod barMethod;
 
-	private HandlerMethod rootMethod;
+	private HandlerMethod emptyMethod;
 
 
 	@Before
@@ -88,7 +88,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.fooMethod = new HandlerMethod(testController, "foo");
 		this.fooParamMethod = new HandlerMethod(testController, "fooParam");
 		this.barMethod = new HandlerMethod(testController, "bar");
-		this.rootMethod = new HandlerMethod(testController, "root");
+		this.emptyMethod = new HandlerMethod(testController, "empty");
 
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.registerHandler(testController);
@@ -125,12 +125,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		HandlerMethod handlerMethod = getHandler(request);
 
-		assertEquals(this.rootMethod.getMethod(), handlerMethod.getMethod());
+		assertEquals(this.emptyMethod.getMethod(), handlerMethod.getMethod());
 
 		request = new MockHttpServletRequest("GET", "/");
 		handlerMethod = getHandler(request);
 
-		assertEquals(this.rootMethod.getMethod(), handlerMethod.getMethod());
+		assertEquals(this.emptyMethod.getMethod(), handlerMethod.getMethod());
 	}
 
 	@Test
@@ -465,8 +465,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void bar() {
 		}
 
-		@RequestMapping("/")
-		public void root() {
+		@RequestMapping("")
+		public void empty() {
 		}
 
 		@RequestMapping(value = "/person/{id}", method = RequestMethod.PUT, consumes="application/xml")
