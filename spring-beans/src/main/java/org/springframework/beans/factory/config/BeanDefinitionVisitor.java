@@ -94,50 +94,35 @@ public class BeanDefinitionVisitor {
 	protected void visitParentName(BeanDefinition beanDefinition) {
 		String parentName = beanDefinition.getParentName();
 		if (parentName != null) {
-			String resolvedName = resolveStringValue(parentName);
-			if (!parentName.equals(resolvedName)) {
-				beanDefinition.setParentName(resolvedName);
-			}
+			beanDefinition.setParentName(resolveStringValue(parentName));
 		}
 	}
 
 	protected void visitBeanClassName(BeanDefinition beanDefinition) {
 		String beanClassName = beanDefinition.getBeanClassName();
 		if (beanClassName != null) {
-			String resolvedName = resolveStringValue(beanClassName);
-			if (!beanClassName.equals(resolvedName)) {
-				beanDefinition.setBeanClassName(resolvedName);
-			}
+			beanDefinition.setBeanClassName(resolveStringValue(beanClassName));
 		}
 	}
 
 	protected void visitFactoryBeanName(BeanDefinition beanDefinition) {
 		String factoryBeanName = beanDefinition.getFactoryBeanName();
 		if (factoryBeanName != null) {
-			String resolvedName = resolveStringValue(factoryBeanName);
-			if (!factoryBeanName.equals(resolvedName)) {
-				beanDefinition.setFactoryBeanName(resolvedName);
-			}
+			beanDefinition.setFactoryBeanName(resolveStringValue(factoryBeanName));
 		}
 	}
 
 	protected void visitFactoryMethodName(BeanDefinition beanDefinition) {
 		String factoryMethodName = beanDefinition.getFactoryMethodName();
 		if (factoryMethodName != null) {
-			String resolvedName = resolveStringValue(factoryMethodName);
-			if (!factoryMethodName.equals(resolvedName)) {
-				beanDefinition.setFactoryMethodName(resolvedName);
-			}
+			beanDefinition.setFactoryMethodName(resolveStringValue(factoryMethodName));
 		}
 	}
 
 	protected void visitScope(BeanDefinition beanDefinition) {
 		String scope = beanDefinition.getScope();
 		if (scope != null) {
-			String resolvedScope = resolveStringValue(scope);
-			if (!scope.equals(resolvedScope)) {
-				beanDefinition.setScope(resolvedScope);
-			}
+			beanDefinition.setScope(resolveStringValue(scope));
 		}
 	}
 
@@ -214,8 +199,7 @@ public class BeanDefinitionVisitor {
 			TypedStringValue typedStringValue = (TypedStringValue) value;
 			String stringValue = typedStringValue.getValue();
 			if (stringValue != null) {
-				String visitedString = resolveStringValue(stringValue);
-				typedStringValue.setValue(visitedString);
+				typedStringValue.setValue(resolveStringValue(stringValue));
 			}
 		}
 		else if (value instanceof String) {
