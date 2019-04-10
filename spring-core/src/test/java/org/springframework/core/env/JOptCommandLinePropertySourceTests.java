@@ -88,6 +88,7 @@ public class JOptCommandLinePropertySourceTests {
 		CommandLinePropertySource<?> ps = new JOptCommandLinePropertySource(options);
 		assertEquals(Arrays.asList("bar","baz","biz"), ps.getOptionValues("foo"));
 		assertThat(ps.getProperty("foo"), equalTo("bar,baz,biz"));
+		assertEquals(1, ps.getPropertyNames().length);
 	}
 
 	@Test
@@ -158,6 +159,19 @@ public class JOptCommandLinePropertySourceTests {
 		assertThat(ps.containsProperty("o2"), is(true));
 		String nonOptionArgs = ps.getProperty("NOA");
 		assertThat(nonOptionArgs, equalTo("noa1,noa2"));
+	}
+
+	@Test
+	public void withMultipleOptionAliases() {
+		OptionParser parser = new OptionParser();
+		parser.acceptsAll(Arrays.asList("u", "username", "user"));
+		parser.acceptsAll(Arrays.asList( "MN", "NM"));
+		parser.acceptsAll(Arrays.asList("A", "CBA", "B", "ABC", "BCA", "AB", "BA"));
+
+		OptionSet optionSet = parser.parse("-u", "-ABC", "-MN");
+		EnumerablePropertySource<?> ps = new JOptCommandLinePropertySource(optionSet);
+
+		assertArrayEquals(new String[]{"username", "ABC", "MN"},  ps.getPropertyNames());
 	}
 
 	@Test

@@ -88,10 +88,19 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	public String[] getPropertyNames() {
 		List<String> names = new ArrayList<>();
 		for (OptionSpec<?> spec : this.source.specs()) {
-			String lastOption = CollectionUtils.lastElement(spec.options());
-			if (lastOption != null) {
-				// Only the longest name is used for enumerating
-				names.add(lastOption);
+			List<String> aliases = new ArrayList<>(spec.options());
+			String longestAliase = "";
+			for (String aliase : aliases) {
+				if (aliase.length() > longestAliase.length()) {
+					// Only the longest name is used for enumerating.
+					// If more than one name have the same longest length,
+					// the first one(alphabetically) will be used.
+					longestAliase = aliase;
+				}
+			}
+			if (!"".equals(longestAliase) && !names.contains(longestAliase)) {
+				// The names are not added repeatedly.
+				names.add(longestAliase);
 			}
 		}
 		return StringUtils.toStringArray(names);
