@@ -131,8 +131,13 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 					});
 		}
 
-		return (isStreamingMediaType(contentType) ?
-				message.writeAndFlushWith(body.map(Flux::just)) : message.writeWith(body));
+		if (isStreamingMediaType(contentType)) {
+			return message.writeAndFlushWith(body.map(buffer ->
+					Mono.fromCallable(() -> buffer)
+							.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release)));
+		}
+
+		return message.writeWith(body);
 	}
 
 	@Nullable
