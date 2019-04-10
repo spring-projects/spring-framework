@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,16 +76,16 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<? extends ResourceRegion> inputStream,
+	public Flux<DataBuffer> encode(Publisher<? extends ResourceRegion> input,
 			DataBufferFactory bufferFactory, ResolvableType elementType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
 
-		Assert.notNull(inputStream, "'inputStream' must not be null");
+		Assert.notNull(input, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
-		if (inputStream instanceof Mono) {
-			return Mono.from(inputStream)
+		if (input instanceof Mono) {
+			return Mono.from(input)
 					.flatMapMany(region -> {
 						if (!region.getResource().isReadable()) {
 							return Flux.error(new EncodingException(
@@ -96,32 +96,25 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		}
 		else {
 			final String boundaryString = Hints.getRequiredHint(hints, BOUNDARY_STRING_HINT);
-			byte[] startBoundary = getAsciiBytes("\r\n--" + boundaryString + "\r\n");
-			byte[] contentType = mimeType != null ? getAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0];
+			byte[] startBoundary = toAsciiBytes("\r\n--" + boundaryString + "\r\n");
+			byte[] contentType = mimeType != null ? toAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0];
 
-			return Flux.from(inputStream).
-					concatMap(region -> {
+			return Flux.from(input)
+					.concatMap(region -> {
 						if (!region.getResource().isReadable()) {
 							return Flux.error(new EncodingException(
 									"Resource " + region.getResource() + " is not readable"));
 						}
-						else {
-							return Flux.concat(
-									getRegionPrefix(bufferFactory, startBoundary, contentType, region),
-									writeResourceRegion(region, bufferFactory, hints));
-						}
+						Flux<DataBuffer> prefix = Flux.just(
+								bufferFactory.wrap(startBoundary),
+								bufferFactory.wrap(contentType),
+								bufferFactory.wrap(getContentRangeHeader(region))); // only wrapping, no allocation
+
+						return prefix.concatWith(writeResourceRegion(region, bufferFactory, hints));
 					})
-					.concatWith(getRegionSuffix(bufferFactory, boundaryString));
+					.concatWithValues(getRegionSuffix(bufferFactory, boundaryString));
 		}
-	}
-
-	private Flux<DataBuffer> getRegionPrefix(DataBufferFactory bufferFactory, byte[] startBoundary,
-			byte[] contentType, ResourceRegion region) {
-
-		return Flux.just(
-				bufferFactory.wrap(startBoundary),
-				bufferFactory.wrap(contentType),
-				bufferFactory.wrap(getContentRangeHeader(region))); // only wrapping, no allocation
+		// No doOnDiscard (no caching after DataBufferUtils#read)
 	}
 
 	private Flux<DataBuffer> writeResourceRegion(
@@ -140,12 +133,12 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		return DataBufferUtils.takeUntilByteCount(in, count);
 	}
 
-	private Flux<DataBuffer> getRegionSuffix(DataBufferFactory bufferFactory, String boundaryString) {
-		byte[] endBoundary = getAsciiBytes("\r\n--" + boundaryString + "--");
-		return Flux.just(bufferFactory.wrap(endBoundary));
+	private DataBuffer getRegionSuffix(DataBufferFactory bufferFactory, String boundaryString) {
+		byte[] endBoundary = toAsciiBytes("\r\n--" + boundaryString + "--");
+		return bufferFactory.wrap(endBoundary);
 	}
 
-	private byte[] getAsciiBytes(String in) {
+	private byte[] toAsciiBytes(String in) {
 		return in.getBytes(StandardCharsets.US_ASCII);
 	}
 
@@ -155,10 +148,10 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		OptionalLong contentLength = contentLength(region.getResource());
 		if (contentLength.isPresent()) {
 			long length = contentLength.getAsLong();
-			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + length + "\r\n\r\n");
+			return toAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + length + "\r\n\r\n");
 		}
 		else {
-			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + "\r\n\r\n");
+			return toAsciiBytes("Content-Range: bytes " + start + '-' + end + "\r\n\r\n");
 		}
 	}
 

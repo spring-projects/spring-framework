@@ -35,7 +35,6 @@ import com.fasterxml.aalto.stax.InputFactoryImpl;
 import org.reactivestreams.Publisher;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
@@ -97,30 +96,32 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // on JDK 9 where XMLEventReader is Iterator<Object> instead of simply Iterator
-	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public Flux<XMLEvent> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<DataBuffer> flux = Flux.from(inputStream);
 		if (this.useAalto) {
-			AaltoDataBufferToXmlEvent aaltoMapper = new AaltoDataBufferToXmlEvent();
-			return flux.flatMap(aaltoMapper)
-					.doFinally(signalType -> aaltoMapper.endOfInput());
+			AaltoDataBufferToXmlEvent mapper = new AaltoDataBufferToXmlEvent();
+			return Flux.from(input)
+					.flatMapIterable(mapper)
+					.doFinally(signalType -> mapper.endOfInput());
 		}
 		else {
-			Mono<DataBuffer> singleBuffer = DataBufferUtils.join(flux);
-			return singleBuffer.flatMapIterable(dataBuffer -> {
-				InputStream is = dataBuffer.asInputStream();
-				return () -> {
-					try {
-						// Explicit cast to (Iterator) is necessary on JDK 9+ since XMLEventReader
-						// now extends Iterator<Object> instead of simply Iterator
-						return (Iterator) inputFactory.createXMLEventReader(is);
-					}
-					catch (XMLStreamException ex) {
-						throw Exceptions.propagate(ex);
-					}
-				};
-			});
+			return DataBufferUtils.join(input).
+					flatMapIterable(buffer -> {
+						try {
+							InputStream is = buffer.asInputStream();
+							Iterator eventReader = inputFactory.createXMLEventReader(is);
+							List<XMLEvent> result = new ArrayList<>();
+							eventReader.forEachRemaining(event -> result.add((XMLEvent) event));
+							return result;
+						}
+						catch (XMLStreamException ex) {
+							throw Exceptions.propagate(ex);
+						}
+						finally {
+							DataBufferUtils.release(buffer);
+						}
+					});
 		}
 	}
 
@@ -128,7 +129,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 	/*
 	 * Separate static class to isolate Aalto dependency.
 	 */
-	private static class AaltoDataBufferToXmlEvent implements Function<DataBuffer, Publisher<? extends XMLEvent>> {
+	private static class AaltoDataBufferToXmlEvent implements Function<DataBuffer, List<? extends XMLEvent>> {
 
 		private static final AsyncXMLInputFactory inputFactory =
 				StaxUtils.createDefensiveInputFactory(InputFactoryImpl::new);
@@ -140,7 +141,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 		@Override
-		public Publisher<? extends XMLEvent> apply(DataBuffer dataBuffer) {
+		public List<? extends XMLEvent> apply(DataBuffer dataBuffer) {
 			try {
 				this.streamReader.getInputFeeder().feedInput(dataBuffer.asByteBuffer());
 				List<XMLEvent> events = new ArrayList<>();
@@ -157,10 +158,10 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 						}
 					}
 				}
-				return Flux.fromIterable(events);
+				return events;
 			}
 			catch (XMLStreamException ex) {
-				return Mono.error(ex);
+				throw Exceptions.propagate(ex);
 			}
 			finally {
 				DataBufferUtils.release(dataBuffer);
