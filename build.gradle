@@ -17,7 +17,7 @@ plugins {
 }
 
 ext {
-	linkHomepage = "https://projects.spring.io/spring-framework"
+	linkHomepage = "https://spring.io/projects/spring-framework"
 	linkCi = "https://build.spring.io/browse/SPR"
 	linkIssue = "https://github.com/spring-projects/spring-framework/issues"
 	linkScmUrl = "https://github.com/spring-projects/spring-framework"
