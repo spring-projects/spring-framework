@@ -99,16 +99,16 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 
 	@Override
 	public DataBuffer allocateBuffer() {
-		return allocateBufferInternal(this.delegate.allocateBuffer());
+		return createLeakAwareDataBuffer(this.delegate.allocateBuffer());
 	}
 
 	@Override
 	public DataBuffer allocateBuffer(int initialCapacity) {
-		return allocateBufferInternal(this.delegate.allocateBuffer(initialCapacity));
+		return createLeakAwareDataBuffer(this.delegate.allocateBuffer(initialCapacity));
 	}
 
 	@NotNull
-	private DataBuffer allocateBufferInternal(DataBuffer delegateBuffer) {
+	private DataBuffer createLeakAwareDataBuffer(DataBuffer delegateBuffer) {
 		LeakAwareDataBuffer dataBuffer = new LeakAwareDataBuffer(delegateBuffer, this);
 		this.created.add(dataBuffer);
 		return dataBuffer;
