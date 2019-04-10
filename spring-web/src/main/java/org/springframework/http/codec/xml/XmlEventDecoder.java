@@ -95,7 +95,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // on JDK 9 where XMLEventReader is Iterator<Object> instead of simply Iterator
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
