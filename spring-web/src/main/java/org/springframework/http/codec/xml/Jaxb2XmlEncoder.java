@@ -111,13 +111,13 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 		return Flux.defer(() -> {
 			boolean release = true;
 			DataBuffer buffer = bufferFactory.allocateBuffer(1024);
-			OutputStream outputStream = buffer.asOutputStream();
-			Class<?> clazz = ClassUtils.getUserClass(value);
 			try {
+				OutputStream outputStream = buffer.asOutputStream();
+				Class<?> clazz = ClassUtils.getUserClass(value);
 				Marshaller marshaller = initMarshaller(clazz);
 				marshaller.marshal(value, outputStream);
 				release = false;
-				return Mono.fromCallable(() -> buffer);  // Rely on doOnDiscard in base class
+				return Mono.fromCallable(() -> buffer);  // relying on doOnDiscard in base class
 			}
 			catch (MarshalException ex) {
 				return Flux.error(new EncodingException(

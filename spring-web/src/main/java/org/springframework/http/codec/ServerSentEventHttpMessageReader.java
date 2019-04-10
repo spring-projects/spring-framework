@@ -164,8 +164,8 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 		}
 
 		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
-		Mono<DataBuffer> input = Mono.just(bufferFactory.wrap(bytes));
-		return this.decoder.decodeToMono(input, dataType, MediaType.TEXT_EVENT_STREAM, hints);
+		DataBuffer buffer = bufferFactory.wrap(bytes);  // wrapping only, no allocation
+		return this.decoder.decodeToMono(Mono.just(buffer), dataType, MediaType.TEXT_EVENT_STREAM, hints);
 	}
 
 	@Override

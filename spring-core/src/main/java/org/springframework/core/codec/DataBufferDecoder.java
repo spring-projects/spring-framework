@@ -57,10 +57,10 @@ public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 	}
 
 	@Override
-	public Flux<DataBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public Flux<DataBuffer> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux.from(inputStream);
+		return Flux.from(input);
 	}
 
 	@Override
