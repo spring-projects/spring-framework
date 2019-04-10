@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 
 	private List<HttpMessageReader<?>> messageReaders = Collections.emptyList();
 
+	private List<ServerRequestTransformer> requestTransformers = Collections.emptyList();
 
 	/**
 	 * Create an empty {@code RouterFunctionMapping}.
@@ -102,6 +103,15 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (this.routerFunction == null) {
 			initRouterFunctions();
 		}
+
+		if(CollectionUtils.isEmpty(requestTransformers)) {
+			initRequestTransformers();
+		}
+	}
+
+	private void initRequestTransformers() {
+		requestTransformers = obtainApplicationContext()
+				.getBeanProvider(ServerRequestTransformer.class).stream().collect(Collectors.toList());
 	}
 
 	/**
@@ -117,7 +127,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		List<RouterFunction<?>> functions = obtainApplicationContext()
 				.getBeanProvider(RouterFunction.class)
 				.orderedStream()
-				.map(router -> (RouterFunction<?>)router)
+				.map(router -> (RouterFunction<?>) router)
 				.collect(Collectors.toList());
 		return (!CollectionUtils.isEmpty(functions) ? functions : Collections.emptyList());
 	}
@@ -144,13 +154,21 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	@Override
 	protected Mono<?> getHandlerInternal(ServerWebExchange exchange) {
 		if (this.routerFunction != null) {
-			ServerRequest request = ServerRequest.create(exchange, this.messageReaders);
+			ServerRequest request = getServerRequest(exchange);
 			return this.routerFunction.route(request)
 					.doOnNext(handler -> setAttributes(exchange.getAttributes(), request, handler));
 		}
 		else {
 			return Mono.empty();
 		}
+	}
+
+	private ServerRequest getServerRequest(ServerWebExchange exchange) {
+		ServerRequest request = ServerRequest.create(exchange, this.messageReaders);
+		for (ServerRequestTransformer serverRequestTransformer : requestTransformers) {
+			request = serverRequestTransformer.apply(request);
+		}
+		return request;
 	}
 
 	@SuppressWarnings("unchecked")

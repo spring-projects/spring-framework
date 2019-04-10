@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +59,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	private List<HttpMessageConverter<?>> messageConverters = Collections.emptyList();
 
 	private boolean detectHandlerFunctionsInAncestorContexts = false;
+
+	private List<ServerRequestTransformer> requestTransformers = Collections.emptyList();
 
 
 
@@ -121,6 +125,14 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (CollectionUtils.isEmpty(this.messageConverters)) {
 			initMessageConverters();
 		}
+		if(CollectionUtils.isEmpty(requestTransformers)) {
+			initRequestTransformers();
+		}
+	}
+
+	private void initRequestTransformers() {
+		requestTransformers = obtainApplicationContext()
+				.getBeanProvider(ServerRequestTransformer.class).stream().collect(Collectors.toList());
 	}
 
 	/**
@@ -171,13 +183,23 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	@Override
 	protected Object getHandlerInternal(@NotNull HttpServletRequest servletRequest) throws Exception {
 		if (this.routerFunction != null) {
-			ServerRequest request = ServerRequest.create(servletRequest, this.messageConverters);
+			ServerRequest request = getServerRequest(servletRequest);
 			servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);
 			return this.routerFunction.route(request).orElse(null);
 		}
 		else {
 			return null;
 		}
+	}
+
+	@NotNull
+	private ServerRequest getServerRequest(@NotNull HttpServletRequest servletRequest) {
+		ServerRequest request = ServerRequest.create(servletRequest, this.messageConverters);
+
+		for (ServerRequestTransformer serverRequestTransformer : requestTransformers) {
+			request = serverRequestTransformer.apply(request);
+		}
+		return request;
 	}
 
 }
