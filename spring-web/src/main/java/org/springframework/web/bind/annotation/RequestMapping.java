@@ -95,7 +95,7 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
 	 * <p><strong>NOTE</strong>: A handler method that is not mapped to any path
-	 * explicitly, is effectively mapped to an empty path.
+	 * explicitly is effectively mapped to an empty path.
 	 */
 	@AliasFor("path")
 	String[] value() default {};
@@ -110,7 +110,7 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
 	 * <p><strong>NOTE</strong>: A handler method that is not mapped to any path
-	 * explicitly, is effectively mapped to an empty path.
+	 * explicitly is effectively mapped to an empty path.
 	 * @since 4.2
 	 */
 	@AliasFor("value")
