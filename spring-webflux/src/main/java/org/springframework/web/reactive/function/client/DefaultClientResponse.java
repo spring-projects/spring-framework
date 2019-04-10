@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,12 +56,17 @@ class DefaultClientResponse implements ClientResponse {
 
 	private final String logPrefix;
 
+	private final String requestDescription;
 
-	public DefaultClientResponse(ClientHttpResponse response, ExchangeStrategies strategies, String logPrefix) {
+
+	public DefaultClientResponse(ClientHttpResponse response, ExchangeStrategies strategies,
+			String logPrefix, String requestDescription) {
+
 		this.response = response;
 		this.strategies = strategies;
 		this.headers = new DefaultHeaders();
 		this.logPrefix = logPrefix;
+		this.requestDescription = requestDescription;
 	}
 
 
@@ -90,22 +95,35 @@ class DefaultClientResponse implements ClientResponse {
 		return this.response.getCookies();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ClientHttpResponse> extractor) {
-		return extractor.extract(this.response, new BodyExtractor.Context() {
+		T result = extractor.extract(this.response, new BodyExtractor.Context() {
 			@Override
 			public List<HttpMessageReader<?>> messageReaders() {
 				return strategies.messageReaders();
 			}
+
 			@Override
 			public Optional<ServerHttpResponse> serverResponse() {
 				return Optional.empty();
 			}
+
 			@Override
 			public Map<String, Object> hints() {
 				return Hints.from(Hints.LOG_PREFIX_HINT, logPrefix);
 			}
 		});
+		String description = "Body from " + this.requestDescription + " [DefaultClientResponse]";
+		if (result instanceof Mono) {
+			return (T) ((Mono<?>) result).checkpoint(description);
+		}
+		else if (result instanceof Flux) {
+			return (T) ((Flux<?>) result).checkpoint(description);
+		}
+		else {
+			return result;
+		}
 	}
 
 	@Override

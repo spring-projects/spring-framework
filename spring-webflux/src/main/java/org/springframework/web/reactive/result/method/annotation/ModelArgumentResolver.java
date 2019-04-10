@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,11 @@ import org.springframework.web.server.ServerWebExchange;
  * Resolver for a controller method argument of type {@link Model} that can
  * also be resolved as a {@link java.util.Map}.
  *
+ * <p>A Map return value can be interpreted in more than one ways depending
+ * on the presence of annotations like {@code @ModelAttribute} or
+ * {@code @ResponseBody}. As of 5.2 this resolver returns false if a
+ * parameter of type {@code Map} is also annotated.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
@@ -42,9 +47,10 @@ public class ModelArgumentResolver extends HandlerMethodArgumentResolverSupport
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return checkParameterTypeNoReactiveWrapper(parameter,
-				type -> Model.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type));
+	public boolean supportsParameter(MethodParameter param) {
+		return checkParameterTypeNoReactiveWrapper(param, type ->
+				Model.class.isAssignableFrom(type) ||
+						(Map.class.isAssignableFrom(type) && param.getParameterAnnotations().length == 0));
 	}
 
 	@Override

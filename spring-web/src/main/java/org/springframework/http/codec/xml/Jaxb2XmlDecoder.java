@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.http.codec.xml;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
@@ -35,6 +36,7 @@ import javax.xml.stream.events.XMLEvent;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
@@ -224,11 +226,11 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 * </ol>
 	 */
 	Flux<List<XMLEvent>> split(Flux<XMLEvent> xmlEventFlux, QName desiredName) {
-		return xmlEventFlux.flatMap(new SplitFunction(desiredName));
+		return xmlEventFlux.handle(new SplitHandler(desiredName));
 	}
 
 
-	private static class SplitFunction implements Function<XMLEvent, Publisher<? extends List<XMLEvent>>> {
+	private static class SplitHandler implements BiConsumer<XMLEvent, SynchronousSink<List<XMLEvent>>> {
 
 		private final QName desiredName;
 
@@ -239,12 +241,12 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 		private int barrier = Integer.MAX_VALUE;
 
-		public SplitFunction(QName desiredName) {
+		public SplitHandler(QName desiredName) {
 			this.desiredName = desiredName;
 		}
 
 		@Override
-		public Publisher<? extends List<XMLEvent>> apply(XMLEvent event) {
+		public void accept(XMLEvent event, SynchronousSink<List<XMLEvent>> sink) {
 			if (event.isStartElement()) {
 				if (this.barrier == Integer.MAX_VALUE) {
 					QName startElementName = event.asStartElement().getName();
@@ -264,10 +266,9 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 				if (this.elementDepth == this.barrier) {
 					this.barrier = Integer.MAX_VALUE;
 					Assert.state(this.events != null, "No XMLEvent List");
-					return Mono.just(this.events);
+					sink.next(this.events);
 				}
 			}
-			return Mono.empty();
 		}
 	}
 

@@ -26,33 +26,34 @@ management that delivers the following benefits:
 
 * A consistent programming model across different transaction APIs, such as Java
   Transaction API (JTA), JDBC, Hibernate, and the Java Persistence API (JPA).
-* Support for <<transaction-declarative,declarative transaction management>>.
-* A simpler API for <<transaction-programmatic,programmatic>> transaction management than
-  complex transaction APIs, such as JTA.
+* Support for <<transaction-declarative, declarative transaction management>>.
+* A simpler API for <<transaction-programmatic, programmatic>> transaction management
+  than complex transaction APIs, such as JTA.
 * Excellent integration with Spring's data access abstractions.
 
 The following sections describe the Spring Framework's transaction features and
 technologies:
 
-* <<transaction-motivation,Advantages of the Spring Framework's transaction support
+* <<transaction-motivation, Advantages of the Spring Framework's transaction support
   model>> describes why you would use the Spring Framework's transaction abstraction
   instead of EJB Container-Managed Transactions (CMT) or choosing to drive local
   transactions through a proprietary API, such as Hibernate.
-* <<transaction-strategies,Understanding the Spring Framework transaction abstraction>>
+* <<transaction-strategies, Understanding the Spring Framework transaction abstraction>>
   outlines the core classes and describes how to configure and obtain `DataSource`
   instances from a variety of sources.
-* <<tx-resource-synchronization,Synchronizing resources with transactions>> describes
+* <<tx-resource-synchronization, Synchronizing resources with transactions>> describes
   how the application code ensures that resources are created, reused, and cleaned up
   properly.
-* <<transaction-declarative,Declarative transaction management>> describes support for
+* <<transaction-declarative, Declarative transaction management>> describes support for
   declarative transaction management.
-* <<transaction-programmatic,Programmatic transaction management>> covers support for
+* <<transaction-programmatic, Programmatic transaction management>> covers support for
   programmatic (that is, explicitly coded) transaction management.
-* <<transaction-event,Transaction bound event>> describes how you could use application
+* <<transaction-event, Transaction bound event>> describes how you could use application
   events within a transaction.
 
-(The chapter also includes discussions of best practices, <<transaction-application-server-integration,application
-server integration>>, and <<transaction-solutions-to-common-problems,solutions to common problems>>.)
+The chapter also includes discussions of best practices,
+<<transaction-application-server-integration, application server integration>>,
+and <<transaction-solutions-to-common-problems, solutions to common problems>>.
 
 
 
@@ -132,7 +133,7 @@ Typically, you need an application server's JTA capability only if your applicat
 to handle transactions across multiple resources, which is not a requirement for many
 applications. Many high-end applications use a single, highly scalable database (such as
 Oracle RAC) instead. Stand-alone transaction managers (such as
-http://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM])
+https://www.atomikos.com/[Atomikos Transactions] and http://jotm.objectweb.org/[JOTM])
 are other options. Of course, you may need other application server capabilities, such as
 Java Message Service (JMS) and Java EE Connector Architecture (JCA).
 
@@ -167,7 +168,7 @@ strategy. A transaction strategy is defined by the
 ----
 
 This is primarily a service provider interface (SPI), although you can use it
-<<transaction-programmatic-ptm,programmatically>> from your application code. Because
+<<transaction-programmatic-ptm, programmatically>> from your application code. Because
 `PlatformTransactionManager` is an interface, it can be easily mocked or stubbed as
 necessary. It is not tied to a lookup strategy, such as JNDI.
 `PlatformTransactionManager` implementations are defined like any other object (or bean)
@@ -284,9 +285,9 @@ and JNDI lookup version would look like:
 		xmlns:jee="http://www.springframework.org/schema/jee"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/jee
-			http://www.springframework.org/schema/jee/spring-jee.xsd">
+			https://www.springframework.org/schema/jee/spring-jee.xsd">
 
 		<jee:jndi-lookup id="dataSource" jndi-name="jdbc/jpetstore"/>
 
@@ -301,8 +302,8 @@ The `JtaTransactionManager` does not need to know about the `DataSource` (or any
 specific resources) because it uses the container's global transaction management
 infrastructure.
 
-NOTE: The preceding definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from the
-`jee` namespace. For more information see
+NOTE: The preceding definition of the `dataSource` bean uses the `<jndi-lookup/>` tag
+from the `jee` namespace. For more information see
 <<integration.adoc#xsd-schemas-jee, The JEE Schema>>.
 
 You can also use easily Hibernate local transactions, as shown in the following
@@ -312,9 +313,9 @@ which your application code can use to obtain Hibernate `Session` instances.
 The `DataSource` bean definition is similar to the local JDBC example shown
 previously and, thus, is not shown in the following example.
 
-NOTE: If the `DataSource` (used by any non-JTA transaction manager) is looked up through JNDI and
-managed by a Java EE container, it should be non-transactional, because the Spring
-Framework (rather than the Java EE container) manages the transactions.
+NOTE: If the `DataSource` (used by any non-JTA transaction manager) is looked up through
+JNDI and managed by a Java EE container, it should be non-transactional, because the
+Spring Framework (rather than the Java EE container) manages the transactions.
 
 The `txManager` bean in this case is of the `HibernateTransactionManager` type. In the
 same way as the `DataSourceTransactionManager` needs a reference to the `DataSource`,
@@ -472,7 +473,7 @@ necessary. The differences between the two types of transaction management are:
 * You can apply the Spring Framework declarative transaction management to any class,
   not merely special classes such as EJBs.
 * The Spring Framework offers declarative
-  <<transaction-declarative-rolling-back,rollback rules>>, a feature with no EJB
+  <<transaction-declarative-rolling-back, rollback rules>>, a feature with no EJB
   equivalent. Both programmatic and declarative support for rollback rules is provided.
 * The Spring Framework lets you customize transactional behavior by using AOP.
   For example, you can insert custom behavior in the case of transaction rollback. You
@@ -483,16 +484,6 @@ necessary. The differences between the two types of transaction management are:
   remote calls, as high-end application servers do. If you need this feature, we
   recommend that you use EJB. However, consider carefully before using such a feature,
   because, normally, one does not want transactions to span remote calls.
-
-.Where is TransactionProxyFactoryBean?
-****
-Declarative transaction configuration in versions of Spring 2.0 and above differs
-considerably from previous versions of Spring. The main difference is that there is no
-longer any need to configure `TransactionProxyFactoryBean` beans.
-
-The pre-Spring 2.0 configuration style is still 100% valid configuration. Think of the
-new `<tx:tags/>` as defining `TransactionProxyFactoryBean` beans on your behalf.
-****
 
 The concept of rollback rules is important. They let you specify which exceptions
 (and throwables) should cause automatic rollback. You can specify this declaratively, in
@@ -522,7 +513,7 @@ transaction infrastructure in the event of transaction-related issues.
 
 The most important concepts to grasp with regard to the Spring Framework's declarative
 transaction support are that this support is enabled
-<<core.adoc#aop-understanding-aop-proxies,via AOP proxies>> and that the transactional
+<<core.adoc#aop-understanding-aop-proxies, via AOP proxies>> and that the transactional
 advice is driven by metadata (currently XML- or annotation-based). The combination of
 AOP with transactional metadata yields an AOP proxy that uses a `TransactionInterceptor`
 in conjunction with an appropriate `PlatformTransactionManager` implementation to drive
@@ -611,11 +602,11 @@ configuration is explained in detail in the next few paragraphs:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- this is the service object that we want to make transactional -->
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
@@ -673,13 +664,14 @@ attribute explicitly, as in the preceding example.
 
 The `<aop:config/>` definition ensures that the transactional advice defined by the
 `txAdvice` bean executes at the appropriate points in the program. First, you define a
-pointcut that matches the execution of any operation defined in the `FooService`
-interface ( `fooServiceOperation`). Then you associate the pointcut with the `txAdvice`
-by using an advisor. The result indicates that, at the execution of a `fooServiceOperation`,
+pointcut that matches the execution of any operation defined in the `FooService` interface
+(`fooServiceOperation`). Then you associate the pointcut with the `txAdvice` by using an
+advisor. The result indicates that, at the execution of a `fooServiceOperation`,
 the advice defined by `txAdvice` is run.
 
 The expression defined within the `<aop:pointcut/>` element is an AspectJ pointcut
-expression. See <<core.adoc#aop, the AOP section>> for more details on pointcut expressions in Spring.
+expression. See <<core.adoc#aop, the AOP section>> for more details on pointcut
+expressions in Spring.
 
 A common requirement is to make an entire service layer transactional. The best way to
 do this is to change the pointcut expression to match any operation in your
@@ -694,18 +686,18 @@ service layer. The following example shows how to do so:
 	</aop:config>
 ----
 
-NOTE: In the preceding example, it is assumed that all your service interfaces are defined in the
-`x.y.service` package. See <<core.adoc#aop, the AOP section>> for more details.
+NOTE: In the preceding example, it is assumed that all your service interfaces are defined
+in the `x.y.service` package. See <<core.adoc#aop, the AOP section>> for more details.
 
 Now that we have analyzed the configuration, you may be asking yourself,
 "`What does all this configuration actually do?`"
 
 The configuration shown earlier is used to create a transactional proxy around the object
 that is created from the `fooService` bean definition. The proxy is configured with
-the transactional advice so that, when an appropriate method is invoked on the
-proxy, a transaction is started, suspended, marked as read-only, and so on, depending
-on the transaction configuration associated with that method. Consider the following
-program that test drives the configuration shown earlier:
+the transactional advice so that, when an appropriate method is invoked on the proxy,
+a transaction is started, suspended, marked as read-only, and so on, depending on the
+transaction configuration associated with that method. Consider the following program
+that test drives the configuration shown earlier:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -870,11 +862,11 @@ the default transactional configuration, you could write the following:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<aop:config>
 
@@ -918,11 +910,11 @@ transactional settings:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<aop:config>
 
@@ -969,7 +961,7 @@ transactional settings:
 This section summarizes the various transactional settings that you can specify by using
 the `<tx:advice/>` tag. The default `<tx:advice/>` settings are:
 
-* The <<tx-propagation,propagation setting>> is `REQUIRED.`
+* The <<tx-propagation, propagation setting>> is `REQUIRED.`
 * The isolation level is `DEFAULT.`
 * The transaction is read-write.
 * The transaction timeout defaults to the default timeout of the underlying transaction
@@ -1047,7 +1039,7 @@ Consider the following class definition:
 [subs="verbatim,quotes"]
 ----
 	// the service class that we want to make transactional
-	**@Transactional**
+	@Transactional
 	public class DefaultFooService implements FooService {
 
 		Foo getFoo(String fooName);
@@ -1085,11 +1077,11 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- this is the service object that we want to make transactional -->
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
@@ -1184,7 +1176,7 @@ modified) to turn `@Transactional` into runtime behavior on any kind of method.
   for classes annotated with the `@Transactional` annotation. If the
   `proxy-target-class` attribute is set to `true`, class-based proxies are created.
   If `proxy-target-class` is `false` or if the attribute is omitted, then standard JDK
-  interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying mechanisms>>
+  interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying Mechanisms>>
   for a detailed examination of the different proxy types.)
 
 | `order`
@@ -1192,7 +1184,7 @@ modified) to turn `@Transactional` into runtime behavior on any kind of method.
 | `Ordered.LOWEST_PRECEDENCE`
 | Defines the order of the transaction advice that is applied to beans annotated with
   `@Transactional`. (For more information about the rules related to ordering of AOP
-  advice, see <<core.adoc#aop-ataspectj-advice-ordering,Advice Ordering>>.)
+  advice, see <<core.adoc#aop-ataspectj-advice-ordering, Advice Ordering>>.)
   No specified ordering means that the AOP subsystem determines the order of the advice.
 |===
 
@@ -1357,7 +1349,7 @@ specifically qualified `PlatformTransactionManager` bean is found.
 ===== Custom Shortcut Annotations
 
 If you find you repeatedly use the same attributes with `@Transactional` on many different
-methods, <<core.adoc#beans-meta-annotations,Spring's meta-annotation support>> lets you
+methods, <<core.adoc#beans-meta-annotations, Spring's meta-annotation support>> lets you
 define custom shortcut annotations for your specific use cases. For example, consider the
 following annotation definitions:
 
@@ -1510,7 +1502,7 @@ The following code shows the simple profiling aspect discussed earlier:
 			this.order = order;
 		}
 
-		// this method *is* the around advice
+		// this method is the around advice
 		public Object profile(ProceedingJoinPoint call) throws Throwable {
 			Object returnValue;
 			StopWatch clock = new StopWatch(getClass().getName());
@@ -1543,11 +1535,11 @@ transactional aspects applied to it in the desired order:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
 
@@ -1598,11 +1590,11 @@ declarative approach:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
 
@@ -1694,7 +1686,7 @@ regardless of visibility.
 
 To weave your applications with the `AnnotationTransactionAspect`, you must either build
 your application with AspectJ (see the
-http://www.eclipse.org/aspectj/doc/released/devguide/index.html[AspectJ Development
+https://www.eclipse.org/aspectj/doc/released/devguide/index.html[AspectJ Development
 Guide]) or use load-time weaving. See <<core.adoc#aop-aj-ltw,Load-time weaving with
 AspectJ in the Spring Framework>> for a discussion of load-time weaving with AspectJ.
 
@@ -1765,7 +1757,7 @@ with an anonymous class, as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	transactionTemplate.execute(new **TransactionCallbackWithoutResult**() {
+	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 		protected void doInTransactionWithoutResult(TransactionStatus status) {
 			updateOperation1();
 			updateOperation2();
@@ -1786,7 +1778,7 @@ Code within the callback can roll the transaction back by calling the
 				updateOperation1();
 				updateOperation2();
 			} catch (SomeBusinessException ex) {
-				**status.setRollbackOnly();**
+				status.setRollbackOnly();
 			}
 		}
 	});
@@ -2012,12 +2004,12 @@ treats them as errors.
 
 For more information about the Spring Framework's transaction support, see:
 
-* http://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
+* https://www.javaworld.com/javaworld/jw-01-2009/jw-01-spring-transactions.html[Distributed
   transactions in Spring, with and without XA] is a JavaWorld presentation in which
   Spring's David Syer guides you through seven patterns for distributed
   transactions in Spring applications, three of them with XA and four without.
-* http://www.infoq.com/minibooks/JTDS[_Java Transaction Design Strategies_] is a book
-  available from http://www.infoq.com/[InfoQ] that provides a well-paced introduction
+* https://www.infoq.com/minibooks/JTDS[_Java Transaction Design Strategies_] is a book
+  available from https://www.infoq.com/[InfoQ] that provides a well-paced introduction
   to transactions in Java. It also includes side-by-side examples of how to configure
   and use transactions with both the Spring Framework and EJB3.
 
@@ -2488,7 +2480,7 @@ The following example invokes a stored procedure:
 			Long.valueOf(unionId));
 ----
 
-More sophisticated stored procedure support is <<jdbc-StoredProcedure,covered later>>.
+More sophisticated stored procedure support is <<jdbc-StoredProcedure, covered later>>.
 
 [[jdbc-JdbcTemplate-idioms]]
 ===== `JdbcTemplate` Best Practices
@@ -2500,7 +2492,7 @@ The `JdbcTemplate` is stateful, in that it maintains a reference to a `DataSourc
 this state is not conversational state.
 
 A common practice when using the `JdbcTemplate` class (and the associated
-<<jdbc-NamedParameterJdbcTemplate,`NamedParameterJdbcTemplate`>> class) is to
+<<jdbc-NamedParameterJdbcTemplate, `NamedParameterJdbcTemplate`>> class) is to
 configure a `DataSource` in your Spring configuration file and then dependency-inject
 that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is created in
 the setter for the `DataSource`. This leads to DAOs that resemble the following:
@@ -2513,7 +2505,7 @@ the setter for the `DataSource`. This leads to DAOs that resemble the following:
 		private JdbcTemplate jdbcTemplate;
 
 		public void setDataSource(DataSource dataSource) {
-			**this.jdbcTemplate = new JdbcTemplate(dataSource);**
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
 		}
 
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
@@ -2531,9 +2523,9 @@ The following example shows the corresponding XML configuration:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<bean id="corporateEventDao" class="com.example.JdbcCorporateEventDao">
 			<property name="dataSource" ref="dataSource"/>
@@ -2588,9 +2580,9 @@ The following example shows the corresponding XML configuration:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<!-- Scans within the base package of the application for @Component classes to configure as beans -->
 		<context:component-scan base-package="org.springframework.docs.test" />
@@ -2692,7 +2684,7 @@ are the parameter names and the values are the parameter values.
 
 Another `SqlParameterSource` implementation is the `BeanPropertySqlParameterSource`
 class. This class wraps an arbitrary JavaBean (that is, an instance of a class that
-adheres to http://www.oracle.com/technetwork/java/javase/documentation/spec-136004.html[the
+adheres to https://www.oracle.com/technetwork/java/javase/documentation/spec-136004.html[the
 JavaBean conventions]) and uses the properties of the wrapped JavaBean as the source
 of named parameter values.
 
@@ -3748,7 +3740,7 @@ returned `out` parameters.
 Earlier in this chapter, we described how parameters are deduced from metadata, but you can declare them
 explicitly if you wish. You can do so by creating and configuring `SimpleJdbcCall` with
 the `declareParameters` method, which takes a variable number of `SqlParameter` objects
-as input. See the <<jdbc-params,next section>> for details on how to define an `SqlParameter`.
+as input. See the <<jdbc-params, next section>> for details on how to define an `SqlParameter`.
 
 NOTE: Explicit declarations are necessary if the database you use is not a Spring-supported
 database. Currently, Spring supports metadata lookup of stored procedure calls for the
@@ -4567,7 +4559,7 @@ it with values from the Java `ARRAY`, as the following example shows:
 
 The `org.springframework.jdbc.datasource.embedded` package provides support for embedded
 Java database engines. Support for http://www.hsqldb.org[HSQL],
-http://www.h2database.com[H2], and http://db.apache.org/derby[Derby] is provided
+https://www.h2database.com[H2], and https://db.apache.org/derby[Derby] is provided
 natively. You can also use an extensible API to plug in new embedded database types and
 `DataSource` implementations.
 
@@ -4691,12 +4683,12 @@ call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY
 
 Embedded databases provide a lightweight way to test data access code. The next example is a
 data access integration test template that uses an embedded database. Using such a template
-can be useful for one-offs when the embedded database does not need to be
-reused across test classes. However, if you wish to create an embedded database that is
-shared within a test suite, consider using the <<testing.adoc#testcontext-framework,Spring TestContext
-Framework>> and configuring the embedded database as a bean in the Spring
-`ApplicationContext` as described in <<jdbc-embedded-database-xml>> and
-<<jdbc-embedded-database-java>>. The following listing shows the test template:
+can be useful for one-offs when the embedded database does not need to be reused across test
+classes. However, if you wish to create an embedded database that is shared within a test suite,
+consider using the <<testing.adoc#testcontext-framework, Spring TestContext Framework>> and
+configuring the embedded database as a bean in the Spring `ApplicationContext` as described
+in <<jdbc-embedded-database-xml>> and <<jdbc-embedded-database-java>>. The following listing
+shows the test template:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4836,7 +4828,7 @@ errors in the SQL it executes from the scripts, as the following example shows:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<jdbc:initialize-database data-source="dataSource" **ignore-failures="DROPS"**>
+	<jdbc:initialize-database data-source="dataSource" ignore-failures="DROPS">
 		<jdbc:script location="..."/>
 	</jdbc:initialize-database>
 ----
@@ -4983,18 +4975,17 @@ The benefits of using the Spring Framework to create your ORM DAOs include:
   aspect-oriented programming (AOP) style method interceptor either through the
   `@Transactional` annotation or by explicitly configuring the transaction AOP advice in
   an XML configuration file. In both cases, transaction semantics and exception handling
-  (rollback and so on) are handled for you. As discussed in
-  <<orm-resource-mngmnt>>, you can also swap various
-  transaction managers, without affecting your ORM-related code. For example, you can
-  swap between local transactions and JTA, with the same full services (such as
-  declarative transactions) available in both scenarios. Additionally, JDBC-related code
-  can fully integrate transactionally with the code you use to do ORM. This is useful
-  for data access that is not suitable for ORM (such as batch processing and BLOB
-  streaming) but that still needs to share common transactions with ORM operations.
+  (rollback and so on) are handled for you. As discussed in <<orm-resource-mngmnt>>,
+  you can also swap various transaction managers, without affecting your ORM-related code.
+  For example, you can swap between local transactions and JTA, with the same full services
+  (such as declarative transactions) available in both scenarios. Additionally,
+  JDBC-related code can fully integrate transactionally with the code you use to do ORM.
+  This is useful for data access that is not suitable for ORM (such as batch processing and
+  BLOB streaming) but that still needs to share common transactions with ORM operations.
 
 TIP: For more comprehensive ORM support, including support for alternative database
 technologies such as MongoDB, you might want to check out the
-http://projects.spring.io/spring-data/[Spring Data] suite of projects. If you are
+https://projects.spring.io/spring-data/[Spring Data] suite of projects. If you are
 a JPA user, the https://spring.io/guides/gs/accessing-data-jpa/[Getting Started Accessing
 Data with JPA] guide from https://spring.io provides a great introduction.
 
@@ -5003,8 +4994,8 @@ Data with JPA] guide from https://spring.io provides a great introduction.
 [[orm-general]]
 === General ORM Integration Considerations
 
-This section highlights considerations that apply to all ORM technologies. The
-<<orm-hibernate>> section provides more details and also show these features and
+This section highlights considerations that apply to all ORM technologies.
+The <<orm-hibernate>> section provides more details and also show these features and
 configurations in a concrete context.
 
 The major goal of Spring's ORM integration is clear application layering (with any data
@@ -5033,10 +5024,11 @@ interceptors for the ORM technologies.
 The infrastructure provides proper resource handling and appropriate conversion of
 specific API exceptions to an unchecked infrastructure exception hierarchy. Spring
 introduces a DAO exception hierarchy, applicable to any data access strategy. For direct
-JDBC, the `JdbcTemplate` class mentioned in a <<jdbc-JdbcTemplate,previous section>> provides connection
-handling and proper conversion of `SQLException` to the `DataAccessException` hierarchy,
-including translation of database-specific SQL error codes to meaningful exception
-classes. For ORM technologies, see the <<orm-exception-translation,next section>> for how to get the same exception
+JDBC, the `JdbcTemplate` class mentioned in a <<jdbc-JdbcTemplate, previous section>>
+provides connection handling and proper conversion of `SQLException` to the
+`DataAccessException` hierarchy, including translation of database-specific SQL error
+codes to meaningful exception classes. For ORM technologies, see the
+<<orm-exception-translation, next section>> for how to get the same exception
 translation benefits.
 
 When it comes to transaction management, the `JdbcTemplate` class hooks in to the Spring
@@ -5101,7 +5093,7 @@ exception hierarchies.
 [[orm-hibernate]]
 === Hibernate
 
-We start with a coverage of http://www.hibernate.org/[Hibernate 5] in a Spring
+We start with a coverage of https://hibernate.org/[Hibernate 5] in a Spring
 environment, using it to demonstrate the approach that Spring takes towards integrating
 OR mappers. This section covers many issues in detail and shows different variations
 of DAO implementations and transaction demarcation. Most of these patterns can be
@@ -5121,7 +5113,7 @@ To avoid tying application objects to hard-coded resource lookups, you can defin
 resources (such as a JDBC `DataSource` or a Hibernate `SessionFactory`) as beans in the
 Spring container. Application objects that need to access resources receive references
 to such predefined instances through bean references, as illustrated in the DAO
-definition in the <<orm-hibernate-straight,next section>>.
+definition in the <<orm-hibernate-straight, next section>>.
 
 The following excerpt from an XML application context definition shows how to set up a
 JDBC `DataSource` and a Hibernate `SessionFactory` on top of it:
@@ -5185,7 +5177,7 @@ property. On the programmatic `LocalSessionFactoryBuilder`, there is an overload
 
 As of Spring Framework 5.1, such a native Hibernate setup can also expose a JPA
 `EntityManagerFactory` for standard JPA interaction next to native Hibernate access.
-See <<orm-jpa-hibernate,Native Hibernate Setup for JPA>> for details.
+See <<orm-jpa-hibernate, Native Hibernate Setup for JPA>> for details.
 ====
 
 
@@ -5321,11 +5313,11 @@ processing at runtime. The following example shows how to do so:
 		xmlns:tx="http://www.springframework.org/schema/tx"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
+			https://www.springframework.org/schema/tx/spring-tx.xsd
 			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- SessionFactory, DataSource, etc. omitted -->
 
@@ -5566,7 +5558,7 @@ following events occur when a JTA transaction commits:
 
 The Spring JPA, available under the `org.springframework.orm.jpa` package, offers
 comprehensive support for the
-http://www.oracle.com/technetwork/articles/javaee/jpa-137156.html[Java Persistence
+https://www.oracle.com/technetwork/articles/javaee/jpa-137156.html[Java Persistence
 API] in a manner similar to the integration with Hibernate while being aware of
 the underlying implementation in order to provide additional features.
 
@@ -5657,7 +5649,7 @@ NOTE: If you want to specifically configure a Hibernate setup, an immediate alte
 to go with Hibernate 5.2 or 5.3 and set up a native Hibernate `LocalSessionFactoryBean`
 instead of a plain JPA `LocalContainerEntityManagerFactoryBean`, letting it interact
 with JPA access code as well as native Hibernate access code.
-See <<orm-jpa-hibernate,Native Hibernate setup for JPA interaction>> for details.
+See <<orm-jpa-hibernate, Native Hibernate setup for JPA interaction>> for details.
 
 The `LocalContainerEntityManagerFactoryBean` gives full control over
 `EntityManagerFactory` configuration and is appropriate for environments where
@@ -5730,7 +5722,7 @@ The `LoadTimeWeaver` interface is a Spring-provided class that lets JPA
 `ClassTransformer` instances be plugged in a specific manner, depending on whether the
 environment is a web container or application server. Hooking `ClassTransformers`
 through an
-http://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html[agent]
+https://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html[agent]
 is typically not efficient. The agents work against the entire virtual machine and
 inspect every class that is loaded, which is usually undesirable in a production
 server environment.
@@ -5739,18 +5731,17 @@ Spring provides a number of `LoadTimeWeaver` implementations for various environ
 letting `ClassTransformer` instances be applied only for each class loader and not
 for each VM.
 
-See <<core.adoc#aop-aj-ltw-spring,Spring configuration>> in the AOP chapter for
+See the <<core.adoc#aop-aj-ltw-spring, Spring configuration>> in the AOP chapter for
 more insight regarding the `LoadTimeWeaver` implementations and their setup, either
-generic or customized to various platforms (such as Tomcat, WebLogic, GlassFish,
-Resin, and JBoss).
+generic or customized to various platforms (such as Tomcat, JBoss and WebSphere).
 
-As described in <<core.adoc#aop-aj-ltw-spring,Spring configuration>>, you can configure a context-wide
-`LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation of the
-`context:load-time-weaver` XML element. Such a global weaver is automatically picked up by all JPA
-`LocalContainerEntityManagerFactoryBean` instances. The following example shows the preferred way of
-setting up a load-time weaver, delivering auto-detection of the platform (WebLogic,
-GlassFish, Tomcat, Resin, JBoss, or VM agent) and automatic propagation of the weaver to
-all weaver-aware beans:
+As described in <<core.adoc#aop-aj-ltw-spring, Spring configuration>>, you can configure
+a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation of the
+`context:load-time-weaver` XML element. Such a global weaver is automatically picked u
+by all JPA `LocalContainerEntityManagerFactoryBean` instances. The following example
+shows the preferred way of setting up a load-time weaver, delivering auto-detection
+of the platform (e.g. Tomcat's weaving-capable class loader or Spring's JVM agent)
+and automatic propagation of the weaver to all weaver-aware beans:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -5976,8 +5967,8 @@ Even though the new DAO implementation uses method-level
 injection of an `EntityManager` instead of an `EntityManagerFactory`, no change is
 required in the application context XML, due to annotation usage.
 
-The main advantage of this DAO style is that it depends only on the Java Persistence API. No
-import of any Spring class is required. Moreover, as the JPA annotations are understood,
+The main advantage of this DAO style is that it depends only on the Java Persistence API.
+No import of any Spring class is required. Moreover, as the JPA annotations are understood,
 the injections are applied automatically by the Spring container. This is appealing from
 a non-invasiveness perspective and can feel more natural to JPA developers.
 
@@ -5985,8 +5976,8 @@ a non-invasiveness perspective and can feel more natural to JPA developers.
 [[orm-jpa-tx]]
 ==== Spring-driven JPA transactions
 
-NOTE: We strongly encourage you to read <<transaction-declarative>>, if you have not already done
-so, to get more detailed coverage of Spring's declarative transaction support.
+NOTE: We strongly encourage you to read <<transaction-declarative>>, if you have not
+already done so, to get more detailed coverage of Spring's declarative transaction support.
 
 The recommended strategy for JPA is local transactions through JPA's native transaction
 support. Spring's `JpaTransactionManager` provides many capabilities known from local
@@ -5997,13 +5988,13 @@ Spring JPA also lets a configured `JpaTransactionManager` expose a JPA transacti
 to JDBC access code that accesses the same `DataSource`, provided that the registered
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`.
 Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
-See the <<orm-jpa-dialect,next section>> for details on the `JpaDialect` mechanism.
+See the <<orm-jpa-dialect, next section>> for details on the `JpaDialect` mechanism.
 
 NOTE: As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
 of interacting with JPA access code as of Spring Framework 5.1 and Hibernate 5.2/5.3,
 adapting to several Hibernate specifics and providing JDBC interaction.
 This makes particular sense in combination with `LocalSessionFactoryBean` setup.
-See <<orm-jpa-hibernate,Native Hibernate Setup for JPA Interaction>> for details.
+See <<orm-jpa-hibernate, Native Hibernate Setup for JPA Interaction>> for details.
 
 
 [[orm-jpa-dialect]]
@@ -6100,7 +6091,7 @@ seamlessly integrating with `@Bean` style configuration (no `FactoryBean` involv
 ====
 `LocalSessionFactoryBean` and `LocalSessionFactoryBuilder` support background
 bootstrapping, just as the JPA `LocalContainerEntityManagerFactoryBean` does.
-See <<orm-jpa-setup-background,Background Bootstrapping>> for an introduction.
+See <<orm-jpa-setup-background, Background Bootstrapping>> for an introduction.
 
 On `LocalSessionFactoryBean`, this is available through the `bootstrapExecutor`
 property. On the programmatic `LocalSessionFactoryBuilder`, an overloaded
@@ -6169,8 +6160,8 @@ These runtime exceptions wrap the original exception so that no information is l
 [[oxm-marshaller-unmarshaller]]
 === `Marshaller` and `Unmarshaller`
 
-As stated in the <<oxm-introduction,introduction>>, a marshaller serializes an object to XML, and an
-unmarshaller deserializes XML stream to an object. This section describes
+As stated in the <<oxm-introduction, introduction>>, a marshaller serializes an object
+to XML, and an unmarshaller deserializes XML stream to an object. This section describes
 the two Spring interfaces used for this purpose.
 
 
@@ -6405,8 +6396,8 @@ preamble of the XML configuration file. The following example shows how to do so
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:oxm="http://www.springframework.org/schema/oxm" <1>
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd
-      http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
+      https://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/oxm https://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
 ----
 <1> Reference the `oxm` schema.
 <2> Specify the `oxm` schema location.
@@ -6586,7 +6577,7 @@ The following table describes the available attributes:
 XStream is a simple library to serialize objects to XML and back again. It does not
 require any mapping and generates clean XML.
 
-For more information on XStream, see the http://x-stream.github.io/[XStream
+For more information on XStream, see the https://x-stream.github.io/[XStream
 web site]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
 

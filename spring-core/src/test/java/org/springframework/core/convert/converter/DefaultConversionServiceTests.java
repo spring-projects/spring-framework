@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -531,7 +531,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertStringToCollectionWithElementConversion() throws Exception {
-		List<?> result = (List) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
+		List<?> result = (List<?>) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
 				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(3, result.size());
 		assertEquals(1, result.get(0));

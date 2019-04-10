@@ -17,6 +17,9 @@ configurations {
 	jarjar
 	cglib
 	objenesis
+	coroutines {
+		transitive = false
+	}
 }
 
 task cglibRepackJar(type: Jar) { repackJar ->
@@ -65,10 +68,12 @@ dependencies {
 	cglib("cglib:cglib:${cglibVersion}@jar")
 	objenesis("org.objenesis:objenesis:${objenesisVersion}@jar")
 	jarjar("org.pantsbuild:jarjar:1.7.2")
+	coroutines(project(":spring-core-coroutines"))
 
 	compile(files(cglibRepackJar))
 	compile(files(objenesisRepackJar))
 	compile(project(":spring-jcl"))
+	compileOnly(project(":spring-core-coroutines"))
 	optional("net.sf.jopt-simple:jopt-simple:5.0.4")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -80,11 +85,13 @@ dependencies {
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	testCompile("com.google.code.findbugs:jsr305:3.0.2")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
 	testCompile("javax.xml.bind:jaxb-api:2.3.1")
 	testCompile("com.fasterxml.woodstox:woodstox-core:5.2.0") {
 		exclude group: "stax", module: "stax-api"
 	}
+	testCompile(project(":spring-core-coroutines"))
 }
 
 jar {
@@ -105,4 +112,6 @@ jar {
 	from(zipTree(objenesisRepackJar.archivePath)) {
 		include "org/springframework/objenesis/**"
 	}
+
+	from { configurations.coroutines.collect { it.isDirectory() ? it : zipTree(it) } }
 }

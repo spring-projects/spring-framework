@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -82,6 +82,17 @@ public class DefaultWebClientTests {
 
 		ClientRequest request = verifyAndGetRequest();
 		assertEquals("/base/path?q=12", request.url().toString());
+	}
+
+	@Test // gh-22705
+	public void uriBuilderWithUriTemplate() {
+		this.builder.build().get()
+					.uri("/path/{id}", builder -> builder.queryParam("q", "12").build("identifier"))
+					.exchange().block(Duration.ofSeconds(10));
+
+		ClientRequest request = verifyAndGetRequest();
+		assertEquals("/base/path/identifier?q=12", request.url().toString());
+		assertEquals("/path/{id}", request.attribute(WebClient.class.getName() + ".uriTemplate").get());
 	}
 
 	@Test
@@ -167,7 +178,7 @@ public class DefaultWebClientTests {
 		Mono<Void> mono = Mono.empty();
 		WebClient client = this.builder.build();
 
-		client.post().uri("http://example.com").syncBody(mono);
+		client.post().uri("https://example.com").syncBody(mono);
 	}
 
 	@Test

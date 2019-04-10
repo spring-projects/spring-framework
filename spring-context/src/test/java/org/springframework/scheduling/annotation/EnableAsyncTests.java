@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -45,6 +46,7 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
@@ -53,10 +55,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -188,7 +187,7 @@ public class EnableAsyncTests {
 	}
 
 	/**
-	 * Fails with classpath errors on trying to classload AnnotationAsyncExecutionAspect
+	 * Fails with classpath errors on trying to classload AnnotationAsyncExecutionAspect.
 	 */
 	@Test(expected = BeanDefinitionStoreException.class)
 	public void aspectModeAspectJAttemptsToRegisterAsyncAspect() {
@@ -199,7 +198,7 @@ public class EnableAsyncTests {
 	}
 
 	@Test
-	public void customExecutorBean() throws InterruptedException {
+	public void customExecutorBean() {
 		// Arrange
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(CustomExecutorBean.class);
@@ -256,7 +255,7 @@ public class EnableAsyncTests {
 	}
 
 	@Test
-	public void customExecutorBeanConfig() throws InterruptedException {
+	public void customExecutorBeanConfig() {
 		// Arrange
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(CustomExecutorBeanConfig.class, ExecutorPostProcessor.class);
@@ -295,7 +294,7 @@ public class EnableAsyncTests {
 	}
 
 	@Test  // SPR-14949
-	public void findOnInterfaceWithInterfaceProxy() throws InterruptedException {
+	public void findOnInterfaceWithInterfaceProxy() {
 		// Arrange
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigA.class);
 		AsyncInterface asyncBean = ctx.getBean(AsyncInterface.class);
@@ -311,7 +310,7 @@ public class EnableAsyncTests {
 	}
 
 	@Test  // SPR-14949
-	public void findOnInterfaceWithCglibProxy() throws InterruptedException {
+	public void findOnInterfaceWithCglibProxy() {
 		// Arrange
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Spr14949ConfigB.class);
 		AsyncInterface asyncBean = ctx.getBean(AsyncInterface.class);
@@ -324,6 +323,21 @@ public class EnableAsyncTests {
 					.until(()-> asyncBean.getThreadOfExecution() != null);
 		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
 		ctx.close();
+	}
+
+	@Test
+	public void exceptionThrownWithBeanNotOfRequiredTypeRootCause() {
+		try {
+			new AnnotationConfigApplicationContext(JdkProxyConfiguration.class);
+			fail("Should have thrown exception");
+		}
+		catch (Throwable ex) {
+			ex.printStackTrace();
+			while (ex.getCause() != null) {
+				ex = ex.getCause();
+			}
+			Assert.assertThat(ex, instanceOf(BeanNotOfRequiredTypeException.class));
+		}
 	}
 
 
@@ -641,6 +655,28 @@ public class EnableAsyncTests {
 		@Override
 		public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
 			return null;
+		}
+	}
+
+
+	@Configuration
+	@EnableAsync
+	@Import(UserConfiguration.class)
+	static class JdkProxyConfiguration {
+
+		@Bean
+		public AsyncBeanWithInterface asyncBean() {
+			return new AsyncBeanWithInterface();
+		}
+	}
+
+
+	@Configuration
+	static class UserConfiguration {
+
+		@Bean
+		public AsyncBeanUser user(AsyncBeanWithInterface bean) {
+			return new AsyncBeanUser(bean);
 		}
 	}
 

@@ -4,7 +4,7 @@
 Spring WebFlux includes a reactive, non-blocking `WebClient` for HTTP requests. The client
 has a functional, fluent API with reactive types for declarative composition, see
 <<web-reactive.adoc#webflux-reactive-libraries>>. WebFlux client and server rely on the
-same non-blocking <<web-reactive.adoc#webflux-codecs,codecs>> to encode and decode request
+same non-blocking <<web-reactive.adoc#webflux-codecs, codecs>> to encode and decode request
 and response content.
 
 Internally `WebClient` delegates to an HTTP client library. By default, it uses
@@ -36,7 +36,7 @@ You can also use `WebClient.builder()` with further options:
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
 
-The following example configures <<web-reactive.adoc#webflux-codecs,HTTP codecs>>:
+The following example configures <<web-reactive.adoc#webflux-codecs, HTTP codecs>>:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -234,7 +234,7 @@ The following example shows how to do so:
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-	WebClient client = WebClient.create("http://example.org");
+	WebClient client = WebClient.create("https://example.org");
 
 	Mono<Person> result = client.get()
 			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
@@ -436,7 +436,7 @@ through the `syncBody` method, as the following example shows:
 
 	Mono<Void> result = client.post()
 			.uri("/path", id)
-			.syncBody(**builder.build()**)
+			.syncBody(builder.build())
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
@@ -513,7 +513,7 @@ WebClient client = WebClient.builder()
 		})
 		.build();
 
-client.get().uri("http://example.org/")
+client.get().uri("https://example.org/")
 		.attribute("myAttribute", "...")
 		.retrieve()
 		.bodyToMono(Void.class);

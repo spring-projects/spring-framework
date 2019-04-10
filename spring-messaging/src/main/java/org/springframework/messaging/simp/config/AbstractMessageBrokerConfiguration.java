@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,18 +67,20 @@ import org.springframework.validation.Validator;
  * protocols such as STOMP.
  *
  * <p>{@link #clientInboundChannel()} and {@link #clientOutboundChannel()} deliver
- * messages to and from remote clients to several message handlers such as
+ * messages to and from remote clients to several message handlers such as the
+ * following.
  * <ul>
  * <li>{@link #simpAnnotationMethodMessageHandler()}</li>
  * <li>{@link #simpleBrokerMessageHandler()}</li>
  * <li>{@link #stompBrokerRelayMessageHandler()}</li>
  * <li>{@link #userDestinationMessageHandler()}</li>
  * </ul>
- * while {@link #brokerChannel()} delivers messages from within the application to the
+ *
+ * <p>{@link #brokerChannel()} delivers messages from within the application to the
  * the respective message handlers. {@link #brokerMessagingTemplate()} can be injected
  * into any application component to send messages.
  *
- * <p>Subclasses are responsible for the part of the configuration that feed messages
+ * <p>Subclasses are responsible for the parts of the configuration that feed messages
  * to and from the client inbound/outbound channels (e.g. STOMP over WebSocket).
  *
  * @author Rossen Stoyanchev
@@ -403,7 +405,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Override this method to add custom message converters.
 	 * @param messageConverters the list to add converters to, initially empty
 	 * @return {@code true} if default message converters should be added to list,
-	 * {@code false} if no more converters should be added.
+	 * {@code false} if no more converters should be added
 	 */
 	protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 		return true;
@@ -448,9 +450,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected abstract SimpUserRegistry createLocalUserRegistry(@Nullable Integer order);
 
 	/**
-	 * Return a {@link org.springframework.validation.Validator
-	 * org.springframework.validation.Validators} instance for validating
-	 * {@code @Payload} method arguments.
+	 * Return an {@link org.springframework.validation.Validator} instance for
+	 * validating {@code @Payload} method arguments.
 	 * <p>In order, this method tries to get a Validator instance:
 	 * <ul>
 	 * <li>delegating to getValidator() first</li>

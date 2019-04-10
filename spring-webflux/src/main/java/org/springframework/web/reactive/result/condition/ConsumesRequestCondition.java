@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,8 @@ import java.util.Set;
 
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -43,7 +45,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 
-	private static final ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
+	private static final ConsumesRequestCondition EMPTY_CONDITION = new ConsumesRequestCondition();
 
 
 	private final List<ConsumeMediaTypeExpression> expressions;
@@ -68,15 +70,16 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * @param headers as described in {@link RequestMapping#headers()}
 	 */
 	public ConsumesRequestCondition(String[] consumes, String[] headers) {
-		this(parseExpressions(consumes, headers));
+		this.expressions = new ArrayList<>(parseExpressions(consumes, headers));
+		Collections.sort(this.expressions);
 	}
 
 	/**
-	 * Private constructor accepting parsed media type expressions.
+	 * Private constructor for internal when creating matching conditions.
+	 * Note the expressions List is neither sorted nor deep copied.
 	 */
-	private ConsumesRequestCondition(Collection<ConsumeMediaTypeExpression> expressions) {
-		this.expressions = new ArrayList<>(expressions);
-		Collections.sort(this.expressions);
+	private ConsumesRequestCondition(List<ConsumeMediaTypeExpression> expressions) {
+		this.expressions = expressions;
 	}
 
 
@@ -161,14 +164,25 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	@Override
 	public ConsumesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
-			return PRE_FLIGHT_MATCH;
+			return EMPTY_CONDITION;
 		}
 		if (isEmpty()) {
 			return this;
 		}
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
-		result.removeIf(expression -> !expression.match(exchange));
-		return (!result.isEmpty() ? new ConsumesRequestCondition(result) : null);
+		List<ConsumeMediaTypeExpression> result = getMatchingExpressions(exchange);
+		return !CollectionUtils.isEmpty(result) ? new ConsumesRequestCondition(result) : null;
+	}
+
+	@Nullable
+	private List<ConsumeMediaTypeExpression> getMatchingExpressions(ServerWebExchange exchange) {
+		List<ConsumeMediaTypeExpression> result = null;
+		for (ConsumeMediaTypeExpression expression : this.expressions) {
+			if (expression.match(exchange)) {
+				result = result != null ? result : new ArrayList<>();
+				result.add(expression);
+			}
+		}
+		return result;
 	}
 
 	/**

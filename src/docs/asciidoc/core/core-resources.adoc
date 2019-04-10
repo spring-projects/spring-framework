@@ -278,7 +278,7 @@ prefixes:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
+	Resource template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt");
 ----
 
 The following table summarizes the strategy for converting `String` objects to `Resource` objects:
@@ -297,7 +297,7 @@ The following table summarizes the strategy for converting `String` objects to `
 | Loaded as a `URL` from the filesystem. See also <<resources-filesystemresource-caveats>>.
 
 | http:
-| `http://myserver/logo.png`
+| `https://myserver/logo.png`
 | Loaded as a `URL`.
 
 | (none)
@@ -337,10 +337,10 @@ interface if that is all you need. The code would be coupled only to the resourc
 interface (which can be considered a utility interface) and not to the whole Spring
 `ApplicationContext` interface.
 
-As of Spring 2.5, you can rely upon autowiring of the `ResourceLoader` as an alternative
-to implementing the `ResourceLoaderAware` interface. The "`traditional`" `constructor` and
-`byType` autowiring modes (as described in <<beans-factory-autowire>>) are now capable of
-providing a dependency of type `ResourceLoader` for either a constructor argument or a
+In application components, you may also rely upon autowiring of the `ResourceLoader` as
+an alternative to implementing the `ResourceLoaderAware` interface. The "`traditional`"
+`constructor` and `byType` autowiring modes (as described in <<beans-factory-autowire>>)
+are capable of providing a `ResourceLoader` for either a constructor argument or a
 setter method parameter, respectively. For more flexibility (including the ability to
 autowire fields and multiple parameter methods), consider using the annotation-based
 autowiring features. In that case, the `ResourceLoader` is autowired into a field,
@@ -614,7 +614,7 @@ entries in the classpath. When you build JARs with Ant, do not activate the file
 switch of the JAR task. Also, classpath directories may not get exposed based on security
 policies in some environments -- for example, stand-alone applications on JDK 1.7.0_45
 and higher (which requires 'Trusted-Library' to be set up in your manifests. See
-http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+https://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
 
 On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
 Putting resources into a dedicated directory is highly recommendable here as well,

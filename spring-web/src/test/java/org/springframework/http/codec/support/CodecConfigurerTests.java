@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,7 +32,6 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.CodecConfigurer;
@@ -41,6 +40,7 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageReader;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -76,7 +76,7 @@ public class CodecConfigurerTests {
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
-		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(ResourceHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertStringDecoder(getNextDecoder(readers), true);
 		assertEquals(ProtobufDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
@@ -125,20 +125,20 @@ public class CodecConfigurerTests {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 
 		assertEquals(15, readers.size());
+		assertSame(customDecoder1, getNextDecoder(readers));
+		assertSame(customReader1, readers.get(this.index.getAndIncrement()));
 		assertEquals(ByteArrayDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ByteBufferDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(DataBufferDecoder.class, getNextDecoder(readers).getClass());
-		assertEquals(ResourceDecoder.class, getNextDecoder(readers).getClass());
+		assertEquals(ResourceHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
 		assertEquals(StringDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(ProtobufDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(FormHttpMessageReader.class, readers.get(this.index.getAndIncrement()).getClass());
-		assertSame(customDecoder1, getNextDecoder(readers));
-		assertSame(customReader1, readers.get(this.index.getAndIncrement()));
+		assertSame(customDecoder2, getNextDecoder(readers));
+		assertSame(customReader2, readers.get(this.index.getAndIncrement()));
 		assertEquals(Jackson2JsonDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jackson2SmileDecoder.class, getNextDecoder(readers).getClass());
 		assertEquals(Jaxb2XmlDecoder.class, getNextDecoder(readers).getClass());
-		assertSame(customDecoder2, getNextDecoder(readers));
-		assertSame(customReader2, readers.get(this.index.getAndIncrement()));
 		assertEquals(StringDecoder.class, getNextDecoder(readers).getClass());
 	}
 
@@ -165,19 +165,19 @@ public class CodecConfigurerTests {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 
 		assertEquals(14, writers.size());
+		assertSame(customEncoder1, getNextEncoder(writers));
+		assertSame(customWriter1, writers.get(this.index.getAndIncrement()));
 		assertEquals(ByteArrayEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ByteBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(DataBufferEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ResourceHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
 		assertEquals(CharSequenceEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(ProtobufHttpMessageWriter.class, writers.get(index.getAndIncrement()).getClass());
-		assertSame(customEncoder1, getNextEncoder(writers));
-		assertSame(customWriter1, writers.get(this.index.getAndIncrement()));
+		assertSame(customEncoder2, getNextEncoder(writers));
+		assertSame(customWriter2, writers.get(this.index.getAndIncrement()));
 		assertEquals(Jackson2JsonEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jackson2SmileEncoder.class, getNextEncoder(writers).getClass());
 		assertEquals(Jaxb2XmlEncoder.class, getNextEncoder(writers).getClass());
-		assertSame(customEncoder2, getNextEncoder(writers));
-		assertSame(customWriter2, writers.get(this.index.getAndIncrement()));
 		assertEquals(CharSequenceEncoder.class, getNextEncoder(writers).getClass());
 	}
 

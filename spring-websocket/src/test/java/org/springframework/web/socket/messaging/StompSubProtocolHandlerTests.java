@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -289,7 +289,7 @@ public class StompSubProtocolHandlerTests {
 	@Test
 	public void handleMessageFromClient() {
 
-		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).headers(
+		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.STOMP).headers(
 				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
 
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
@@ -307,7 +307,7 @@ public class StompSubProtocolHandlerTests {
 		assertArrayEquals(new long[] {10000, 10000}, SimpMessageHeaderAccessor.getHeartbeat(actual.getHeaders()));
 
 		StompHeaderAccessor stompAccessor = StompHeaderAccessor.wrap(actual);
-		assertEquals(StompCommand.CONNECT, stompAccessor.getCommand());
+		assertEquals(StompCommand.STOMP, stompAccessor.getCommand());
 		assertEquals("guest", stompAccessor.getLogin());
 		assertEquals("guest", stompAccessor.getPasscode());
 		assertArrayEquals(new long[] {10000, 10000}, stompAccessor.getHeartbeat());

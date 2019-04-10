@@ -11,11 +11,11 @@ difference between two public Java APIs.
 
 The file jdiff.html contains the reference page for JDiff.  The latest
 version of JDiff can be downloaded at:
-http://sourceforge.net/projects/javadiff
+https://sourceforge.net/projects/javadiff
 
 To use the Ant task on your own project, see example.xml. More examples
 of using JDiff to compare the public APIs of J2SE1.3 and J2SE1.4 can
-be seen at http://www.jdiff.org
+be seen at http://javadiff.sourceforge.net/
 
 For an example with the source distribution, run "ant" and
 look at the HTML output in ./build/reports/example/changes.html 
@@ -40,7 +40,7 @@ Acknowledgements
 JDiff uses Stuart D. Gathman's Java translation of Gene Myers' O(ND) 
 difference algorithm.
 
-JDiff uses Xerces 1.4.2 from http://www.apache.org.
+JDiff uses Xerces 1.4.2 from https://www.apache.org.
 
 JDiff also includes a script to use the classdoc application from
 http://classdoc.sourceforge.net or http://www.jensgulden.de, by Jens
@@ -56,4 +56,4 @@ much of this work.
 Footnote:
 
 If you are looking for a generalized diff tool for XML, try diffmk from
-http://wwws.sun.com/software/xml/developers/diffmk/
+https://wwws.sun.com/software/xml/developers/diffmk/

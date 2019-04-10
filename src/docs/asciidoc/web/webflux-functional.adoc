@@ -64,7 +64,7 @@ public class PersonHandler {
 ----
 
 One way to run a `RouterFunction` is to turn it into an `HttpHandler` and install it
-through one of the built-in <<web-reactive.adoc#webflux-httphandler,server adapters>>:
+through one of the built-in <<web-reactive.adoc#webflux-httphandler, server adapters>>:
 
 * `RouterFunctions.toHttpHandler(RouterFunction)`
 * `RouterFunctions.toHttpHandler(RouterFunction, HandlerStrategies)`
@@ -79,11 +79,11 @@ Most applications can run through the WebFlux Java configuration, see <<webflux-
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
 access to the HTTP request and response.
-Both request and response provide http://www.reactive-streams.org[Reactive Streams] back pressure
+Both request and response provide https://www.reactive-streams.org[Reactive Streams] back pressure
 against the body streams.
 The request body is represented with a Reactor `Flux` or `Mono`.
 The response body is represented with any Reactive Streams `Publisher`, including `Flux` and `Mono`.
-For more on that, see <<web-reactive.adoc#webflux-reactive-libraries,Reactive Libraries>>.
+For more on that, see <<web-reactive.adoc#webflux-reactive-libraries, Reactive Libraries>>.
 
 
 
@@ -137,7 +137,7 @@ The following example shows how to access multiparts, one at a time, in streamin
 
 [source,java]
 ----
-Flux<Part> parts = request.body(BodyExtractos.toParts());
+Flux<Part> parts = request.body(BodyExtractors.toParts());
 ----
 
 
@@ -233,9 +233,9 @@ found. If it is not found, we use `switchIfEmpty(Mono<T>)` to return a 404 Not F
 [[webflux-fn-handler-validation]]
 === Validation
 
-A functional endpoint can use Spring's <<core.adoc#validation,validation facilities>> to
+A functional endpoint can use Spring's <<core.adoc#validation, validation facilities>> to
 apply validation to the request body. For example, given a custom Spring
-<<core.adoc#validation,Validator>> implementation for a `Person`:
+<<core.adoc#validation, Validator>> implementation for a `Person`:
 
 ====
 [source,java,indent=0]
@@ -268,7 +268,7 @@ public class PersonHandler {
 
 Handlers can also use the standard bean validation API (JSR-303) by creating and injecting
 a global `Validator` instance based on `LocalValidatorFactoryBean`.
-See <<core.adoc#validation-beanvalidation,Spring Validation>>.
+See <<core.adoc#validation-beanvalidation, Spring Validation>>.
 
 
 
@@ -424,10 +424,10 @@ function to an `HttpHandler` by using one of the following:
 * `RouterFunctions.toHttpHandler(RouterFunction, HandlerStrategies)`
 
 You can then use the returned `HttpHandler` with a number of server adapters by following
-<<web-reactive.adoc#webflux-httphandler,HttpHandler>> for server-specific instructions.
+<<web-reactive.adoc#webflux-httphandler, HttpHandler>> for server-specific instructions.
 
 A more typical option, also used by Spring Boot, is to run with a
-<<web-reactive.adoc#webflux-dispatcher-handler,`DispatcherHandler`>>-based setup through the
+<<web-reactive.adoc#webflux-dispatcher-handler, `DispatcherHandler`>>-based setup through the
 <<web-reactive.adoc#webflux-config>>, which uses Spring configuration to declare the
 components required to process requests. The WebFlux Java configuration declares the following
 infrastructure components to support functional endpoints:
@@ -446,7 +446,7 @@ any are declared. It is also how functional endpoints are enabled by the Spring 
 starter.
 
 The following example shows a WebFlux Java configuration (see
-<<web-reactive.adoc#webflux-dispatcher-handler,DispatcherHandler>> for how to run it):
+<<web-reactive.adoc#webflux-dispatcher-handler, DispatcherHandler>> for how to run it):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -555,4 +555,5 @@ We allow only the handler function to be executed when access is allowed.
 Besides using the `filter` method on the router function builder, it is possible to apply a
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.
 
-NOTE: CORS support for functional endpoints is provided through a dedicated <<webflux-cors-webfilter,`CorsWebFilter`>>.
+NOTE: CORS support for functional endpoints is provided through a dedicated
+<<webflux-cors-webfilter, `CorsWebFilter`>>.

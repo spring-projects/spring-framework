@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,10 +35,10 @@ import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
 import org.springframework.util.MimeType;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.io.buffer.DataBufferUtils.release;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.io.buffer.DataBufferUtils.*;
 
 /**
  * Unit tests for {@link ProtobufDecoder}.
@@ -223,11 +223,11 @@ public class ProtobufDecoderTests extends AbstractDecoderTestCase<ProtobufDecode
 	}
 
 	private Mono<DataBuffer> dataBuffer(Msg msg) {
-		return Mono.defer(() -> {
+		return Mono.fromCallable(() -> {
 			byte[] bytes = msg.toByteArray();
 			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
 			buffer.write(bytes);
-			return Mono.just(buffer);
+			return buffer;
 		});
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write <a href="http://cbor.io/">CBOR</a> data format using
+ * that can read and write <a href="https://cbor.io/">CBOR</a> data format using
  * <a href="https://github.com/FasterXML/jackson-dataformats-binary/tree/master/cbor">
  * the dedicated Jackson 2.x extension</a>.
  *

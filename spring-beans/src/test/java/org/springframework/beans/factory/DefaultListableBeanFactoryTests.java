@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -1456,6 +1456,24 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testGetFactoryBeanByTypeWithPrimary() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(NullTestBeanFactoryBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(NullTestBeanFactoryBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		NullTestBeanFactoryBean factoryBeanByType = lbf.getBean(NullTestBeanFactoryBean.class);
+		NullTestBeanFactoryBean bd1FactoryBean = (NullTestBeanFactoryBean)lbf.getBean("&bd1");
+		NullTestBeanFactoryBean bd2FactoryBean = (NullTestBeanFactoryBean)lbf.getBean("&bd2");
+		assertNotNull(factoryBeanByType);
+		assertNotNull(bd1FactoryBean);
+		assertNotNull(bd2FactoryBean);
+		assertNotEquals(factoryBeanByType, bd1FactoryBean);
+		assertEquals(factoryBeanByType, bd2FactoryBean);
+	}
+
+	@Test
 	public void testGetBeanByTypeWithMultiplePrimary() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
@@ -1853,7 +1871,7 @@ public class DefaultListableBeanFactoryTests {
 	/**
 	 * Verifies that a dependency on a {@link FactoryBean} can be autowired
 	 * <em>by type</em>, specifically addressing the JIRA issue raised in <a
-	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4040"
+	 * href="https://opensource.atlassian.com/projects/spring/browse/SPR-4040"
 	 * target="_blank">SPR-4040</a>.
 	 */
 	@Test
@@ -1867,6 +1885,24 @@ public class DefaultListableBeanFactoryTests {
 				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 		assertEquals("The FactoryBeanDependentBean should have been autowired 'by type' with the LazyInitFactory.",
 				factoryBean, bean.getFactoryBean());
+	}
+
+	@Test
+	public void testAutowireBeanWithFactoryBeanByTypeWithPrimary() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(LazyInitFactory.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(LazyInitFactory.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		LazyInitFactory bd1FactoryBean = (LazyInitFactory) lbf.getBean("&bd1");
+		LazyInitFactory bd2FactoryBean = (LazyInitFactory) lbf.getBean("&bd2");
+		assertNotNull(bd1FactoryBean);
+		assertNotNull(bd2FactoryBean);
+		FactoryBeanDependentBean bean = (FactoryBeanDependentBean) lbf.autowire(FactoryBeanDependentBean.class,
+				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+		assertNotEquals(bd1FactoryBean, bean.getFactoryBean());
+		assertEquals(bd2FactoryBean, bean.getFactoryBean());
 	}
 
 	@Test
@@ -2351,6 +2387,27 @@ public class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class));
 		lbf.preInstantiateSingletons();
+	}
+
+	@Test
+	public void testLazyInitFlag() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setLazyInit(true);
+		factory.registerBeanDefinition("tb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setLazyInit(false);
+		factory.registerBeanDefinition("tb2", bd2);
+		factory.registerBeanDefinition("tb3", new RootBeanDefinition(TestBean.class));
+
+		assertEquals(Boolean.TRUE, ((AbstractBeanDefinition) factory.getMergedBeanDefinition("tb1")).getLazyInit());
+		assertEquals(Boolean.FALSE, ((AbstractBeanDefinition) factory.getMergedBeanDefinition("tb2")).getLazyInit());
+		assertNull(((AbstractBeanDefinition) factory.getMergedBeanDefinition("tb3")).getLazyInit());
+
+		factory.preInstantiateSingletons();
+		assertFalse(factory.containsSingleton("tb1"));
+		assertTrue(factory.containsSingleton("tb2"));
+		assertTrue(factory.containsSingleton("tb3"));
 	}
 
 	@Test
@@ -2877,8 +2934,8 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testInitSecurityAwarePrototypeBean() {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestSecuredBean.class);
@@ -2889,12 +2946,7 @@ public class DefaultListableBeanFactoryTests {
 		subject.getPrincipals().add(new TestPrincipal("user1"));
 
 		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
-				new PrivilegedAction() {
-					@Override
-					public Object run() {
-						return lbf.getBean("test");
-					}
-				}, null);
+				(PrivilegedAction) () -> lbf.getBean("test"), null);
 		assertNotNull(bean);
 		assertEquals("user1", bean.getUserName());
 	}

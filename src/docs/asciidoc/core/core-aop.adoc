@@ -2,33 +2,31 @@
 = Aspect Oriented Programming with Spring
 
 Aspect-oriented Programming (AOP) complements Object-oriented Programming (OOP) by
-providing another way of thinking about program structure. The key unit of modularity in
-OOP is the class, whereas in AOP the unit of modularity is the aspect. Aspects
+providing another way of thinking about program structure. The key unit of modularity
+in OOP is the class, whereas in AOP the unit of modularity is the aspect. Aspects
 enable the modularization of concerns (such as transaction management) that cut across
-multiple types and objects. (Such concerns are often termed "`crosscutting`" concerns in
-AOP literature.)
+multiple types and objects. (Such concerns are often termed "`crosscutting`" concerns
+in AOP literature.)
 
 One of the key components of Spring is the AOP framework. While the Spring IoC
 container does not depend on AOP (meaning you do not need to use AOP if you don't want
 to), AOP complements Spring IoC to provide a very capable middleware solution.
 
-.Spring 2.0+ AOP
+.Spring AOP with AspectJ pointcuts
 ****
-Spring 2.0 introduced a simpler and more powerful way of writing custom aspects by using
-either a <<aop-schema,schema-based approach>> or the <<aop-ataspectj,@AspectJ annotation
-style>>. Both of these styles offer fully typed advice and use of the AspectJ pointcut
-language while still using Spring AOP for weaving.
+Spring provides simple and powerful ways of writing custom aspects by using either a
+<<aop-schema, schema-based approach>> or the <<aop-ataspectj, @AspectJ annotation style>>.
+Both of these styles offer fully typed advice and use of the AspectJ pointcut language
+while still using Spring AOP for weaving.
 
-This chapter discusses the Spring 2.0+ schema- and @AspectJ-based AOP support.
-The lower-level AOP support, as commonly exposed in Spring 1.2 applications, is
-discussed in <<aop-api,the following chapter>>.
+This chapter discusses the schema- and @AspectJ-based AOP support.
+The lower-level AOP support is discussed in <<aop-api, the following chapter>>.
 ****
 
 AOP is used in the Spring Framework to:
 
-* Provide declarative enterprise services, especially as a replacement for EJB
-  declarative services. The most important such service is
-  <<transaction-declarative,declarative transaction management>>.
+* Provide declarative enterprise services. The most important such service is
+  <<transaction-declarative, declarative transaction management>>.
 * Let users implement custom aspects, complementing their use of OOP with AOP.
 
 NOTE: If you are interested only in generic declarative services or other pre-packaged
@@ -48,7 +46,7 @@ However, it would be even more confusing if Spring used its own terminology.
 * Aspect: A modularization of a concern that cuts across multiple classes.
   Transaction management is a good example of a crosscutting concern in enterprise Java
   applications. In Spring AOP, aspects are implemented by using regular classes
-  (the <<aop-schema,schema-based approach>>) or regular classes annotated with the
+  (the <<aop-schema, schema-based approach>>) or regular classes annotated with the
   `@Aspect` annotation (the <<aop-ataspectj, @AspectJ style>>).
 * Join point: A point during the execution of a program, such as the execution of a
   method or the handling of an exception. In Spring AOP, a join point always
@@ -104,14 +102,14 @@ the same thing. Using the most specific advice type provides a simpler programmi
 with less potential for errors. For example, you do not need to invoke the `proceed()`
 method on the `JoinPoint` used for around advice, and, hence, you cannot fail to invoke it.
 
-In Spring 2.0, all advice parameters are statically typed so that you work with advice
-parameters of the appropriate type (the type of the return value from a method execution
-for example) rather than `Object` arrays.
+All advice parameters are statically typed so that you work with advice parameters of
+the appropriate type (e.g. the type of the return value from a method execution) rather
+than `Object` arrays.
 
 The concept of join points matched by pointcuts is the key to AOP, which distinguishes
 it from older technologies offering only interception. Pointcuts enable advice to be
-targeted independently of the object-oriented hierarchy. For example, you can apply an around advice
-providing declarative transaction management to a set of methods that span
+targeted independently of the object-oriented hierarchy. For example, you can apply an
+around advice providing declarative transaction management to a set of methods that span
 multiple objects (such as all business operations in the service layer).
 
 
@@ -149,8 +147,8 @@ frameworks such as AspectJ are valuable and that they are complementary, rather 
 competition. Spring seamlessly integrates Spring AOP and IoC with AspectJ, to enable
 all uses of AOP within a consistent Spring-based application
 architecture. This integration does not affect the Spring AOP API or the AOP Alliance
-API. Spring AOP remains backward-compatible. See <<aop-api,the following chapter>> for a
-discussion of the Spring AOP APIs.
+API. Spring AOP remains backward-compatible. See <<aop-api, the following chapter>>
+for a discussion of the Spring AOP APIs.
 
 [NOTE]
 ====
@@ -171,8 +169,8 @@ configuration-style approach. The fact that this chapter chooses to introduce th
 @AspectJ-style approach first should not be taken as an indication that the Spring team
 favors the @AspectJ annotation-style approach over the Spring XML configuration-style.
 
-See <<aop-choosing>> for a more complete discussion of the "`whys and wherefores`" of each
-style.
+See <<aop-choosing>> for a more complete discussion of the "`whys and wherefores`" of
+each style.
 ====
 
 
@@ -188,7 +186,7 @@ Spring AOP can also use CGLIB proxies. This is necessary to proxy classes rather
 interfaces. By default, CGLIB is used if a business object does not implement an
 interface. As it is good practice to program to interfaces rather than classes, business
 classes normally implement one or more business interfaces. It is possible to
-<<aop-proxying,force the use of CGLIB>>, in those (hopefully rare) cases where you
+<<aop-proxying, force the use of CGLIB>>, in those (hopefully rare) cases where you
 need to advise a method that is not declared on an interface or where you need to
 pass a proxied object to a method as a concrete type.
 
@@ -204,13 +202,13 @@ implementation detail actually means.
 
 @AspectJ refers to a style of declaring aspects as regular Java classes annotated with
 annotations. The @AspectJ style was introduced by the
-http://www.eclipse.org/aspectj[AspectJ project] as part of the AspectJ 5 release. Spring
+https://www.eclipse.org/aspectj[AspectJ project] as part of the AspectJ 5 release. Spring
 interprets the same annotations as AspectJ 5, using a library supplied by AspectJ
 for pointcut parsing and matching. The AOP runtime is still pure Spring AOP, though, and
 there is no dependency on the AspectJ compiler or weaver.
 
-NOTE: Using the AspectJ compiler and weaver enables use of the full AspectJ language and is
-discussed in <<aop-using-aspectj>>.
+NOTE: Using the AspectJ compiler and weaver enables use of the full AspectJ language and
+is discussed in <<aop-using-aspectj>>.
 
 
 
@@ -259,9 +257,9 @@ element, as the following example shows:
 ----
 
 This assumes that you use schema support as described in
-<<core.adoc#xsd-schemas, XML Schema-based configuration>>. See
-<<core.adoc#xsd-schemas-aop, the AOP schema>> for how to import the tags in the `aop`
-namespace.
+<<core.adoc#xsd-schemas, XML Schema-based configuration>>.
+See <<core.adoc#xsd-schemas-aop, the AOP schema>> for how to
+import the tags in the `aop` namespace.
 
 
 
@@ -273,8 +271,8 @@ class that is an @AspectJ aspect (has the `@Aspect` annotation) is automatically
 detected by Spring and used to configure Spring AOP. The next two examples show the
 minimal definition required for a not-very-useful aspect.
 
-The first of the two example shows a regular bean definition in the application context that points to a bean class that has
-the `@Aspect` annotation:
+The first of the two example shows a regular bean definition in the application
+context that points to a bean class that has the `@Aspect` annotation:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -284,8 +282,8 @@ the `@Aspect` annotation:
 	</bean>
 ----
 
-The second of the two examples shows the `NotVeryUsefulAspect` class definition, which is annotated with
-the `org.aspectj.lang.annotation.Aspect` annotation;
+The second of the two examples shows the `NotVeryUsefulAspect` class definition,
+which is annotated with the `org.aspectj.lang.annotation.Aspect` annotation;
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -344,9 +342,9 @@ matches the execution of any method named `transfer`:
 
 The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
 AspectJ 5 pointcut expression. For a full discussion of AspectJ's pointcut language, see
-the http://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
+the https://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
 Programming Guide] (and, for extensions, the
-http://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
+https://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
 Developer's Notebook]) or one of the books on AspectJ (such as _Eclipse AspectJ_, by Colyer
 et. al., or _AspectJ in Action_, by Ramnivas Laddad).
 
@@ -413,7 +411,7 @@ If a pointcut is strictly meant to be public-only, even in a CGLIB proxy scenari
 potential non-public interactions through proxies, it needs to be defined accordingly.
 
 If your interception needs include method calls or even constructors within the target
-class, consider the use of Spring-driven <<aop-aj-ltw,native AspectJ weaving>> instead
+class, consider the use of Spring-driven <<aop-aj-ltw, native AspectJ weaving>> instead
 of Spring's proxy-based AOP framework. This constitutes a different mode of AOP usage
 with different characteristics, so be sure to make yourself familiar with weaving
 before making a decision.
@@ -452,9 +450,8 @@ it is natural and straightforward to identify specific beans by name.
 [[aop-pointcuts-combining]]
 ==== Combining Pointcut Expressions
 
-You can combine pointcut expressions can be combined by using `&&,` `||` and `!`. You can also
-refer to pointcut expressions by name. The following example shows three pointcut
-expressions:
+You can combine pointcut expressions by using `&&,` `||` and `!`. You can also refer to
+pointcut expressions by name. The following example shows three pointcut expressions:
 
 [source,java,indent=0]
 [subs="verbatim"]
@@ -473,7 +470,6 @@ of any public method.
 <2> `inTrading` matches if a method execution is in the trading module.
 <3> `tradingOperation` matches if a method execution represents any public method in the
 trading module.
-
 
 It is a best practice to build more complex pointcut expressions out of smaller named
 components, as shown earlier. When referring to pointcuts by name, normal Java visibility
@@ -603,7 +599,7 @@ method that takes no parameters, whereas `(..)` matches any number (zero or more
 The `({asterisk})` pattern matches a method that takes one parameter of any type.
 `(*,String)` matches a method that takes two parameters. The first can be of any type, while the
 second must be a `String`. Consult the
-http://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html[Language
+https://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html[Language
 Semantics] section of the AspectJ Programming Guide for more information.
 
 The following examples show some common pointcut expressions:
@@ -1032,8 +1028,8 @@ taken by Spring is simpler and a better match to its proxy-based, execution-only
 semantics. You only need to be aware of this difference if you compile @AspectJ
 aspects written for Spring and use `proceed` with arguments with the AspectJ compiler
 and weaver. There is a way to write such aspects that is 100% compatible across both
-Spring AOP and AspectJ, and this is discussed in the <<aop-ataspectj-advice-params,following section on advice
-parameters>>.
+Spring AOP and AspectJ, and this is discussed in the
+<<aop-ataspectj-advice-params, following section on advice parameters>>.
 
 The following example shows how to use around advice:
 
@@ -1236,7 +1232,7 @@ following strategy to determine parameter names:
 ----
 +
 If the first parameter is of the `JoinPoint`, `ProceedingJoinPoint`, or
-`JoinPoint.StaticPart` type, you ca leave out the name of the parameter from the value
+`JoinPoint.StaticPart` type, you can leave out the name of the parameter from the value
 of the `argNames` attribute. For example, if you modify the preceding advice to receive
 the join point object, the `argNames` attribute need not include it:
 +
@@ -1551,8 +1547,7 @@ of advice parameters.
 
 To use the aop namespace tags described in this section, you need to import the
 `spring-aop` schema, as described in <<core.adoc#xsd-schemas,
-XML Schema-based configuration>>.
-See <<core.adoc#xsd-schemas-aop, the AOP schema>>
+XML Schema-based configuration>>. See <<core.adoc#xsd-schemas-aop, the AOP schema>>
 for how to import the tags in the `aop` namespace.
 
 Within your Spring configurations, all aspect and advisor elements must be placed within
@@ -1561,10 +1556,11 @@ application context configuration). An `<aop:config>` element can contain pointc
 advisor, and aspect elements (note that these must be declared in that order).
 
 WARNING: The `<aop:config>` style of configuration makes heavy use of Spring's
-<<aop-autoproxy,auto-proxying>> mechanism. This can cause issues (such as advice not
-being woven) if you already use explicit auto-proxying through the use of
-`BeanNameAutoProxyCreator` or something similar. The recommended usage pattern is to use either
-only the `<aop:config>` style or only the `AutoProxyCreator` style and never mix them.
+<<aop-autoproxy, auto-proxying>> mechanism. This can cause issues (such as advice
+not being woven) if you already use explicit auto-proxying through the use of
+`BeanNameAutoProxyCreator` or something similar. The recommended usage pattern is to
+use either only the `<aop:config>` style or only the `AutoProxyCreator` style and
+never mix them.
 
 
 
@@ -1618,10 +1614,9 @@ be defined as follows:
 ----
 
 Note that the pointcut expression itself is using the same AspectJ pointcut expression
-language as described in <<aop-ataspectj>>. If you use the schema based
-declaration style, you can refer to named pointcuts defined in types
-(@Aspects) within the pointcut expression. Another way of defining the above pointcut
-would be as follows:
+language as described in <<aop-ataspectj>>. If you use the schema based declaration
+style, you can refer to named pointcuts defined in types (@Aspects) within the
+pointcut expression. Another way of defining the above pointcut would be as follows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1695,14 +1690,14 @@ you can use the `and`, `or`, and `not` keywords in place of `&&`, `||`, and `!`,
 respectively. For example, the previous pointcut can be better written as follows:
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<aop:config>
 
 		<aop:aspect id="myAspect" ref="aBean">
 
 			<aop:pointcut id="businessService"
-				expression="execution(* com.xyz.myapp.service.*.*(..)) **and** this(service)"/>
+				expression="execution(* com.xyz.myapp.service.*.*(..)) and this(service)"/>
 
 			<aop:before pointcut-ref="businessService" method="monitor"/>
 
@@ -2026,8 +2021,8 @@ preceding advice for a particular join point:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- this is the object that will be proxied by Spring's AOP infrastructure -->
 		<bean id="personService" class="x.y.service.DefaultPersonService"/>
@@ -2350,7 +2345,7 @@ simple method executions (for example, field get or set join points and so on).
 When you use AspectJ, you have the choice of the AspectJ language syntax (also known as
 the "`code style`") or the @AspectJ annotation style. Clearly, if you do not use Java
 5+, the choice has been made for you: Use the code style. If aspects play a large
-role in your design, and you are able to use the http://www.eclipse.org/ajdt/[AspectJ
+role in your design, and you are able to use the https://www.eclipse.org/ajdt/[AspectJ
 Development Tools (AJDT)] plugin for Eclipse, the AspectJ language syntax is the
 preferred option. It is cleaner and simpler because the language was purposefully
 designed for writing aspects. If you do not use Eclipse or have only a few aspects
@@ -2413,11 +2408,11 @@ The downside of the XML approach is that you cannot define the
 
 The @AspectJ style supports additional instantiation models and richer pointcut
 composition. It has the advantage of keeping the aspect as a modular unit. It also has
-the advantage that the @AspectJ aspects can be understood (and thus consumed) both by Spring
-AOP and by AspectJ. So, if you later decide you need the capabilities of AspectJ to
-implement additional requirements, you can easily migrate to an AspectJ-based
-approach. On balance, the Spring team prefers the @AspectJ style whenever you have aspects
-that do more than simple configuration of enterprise services.
+the advantage that the @AspectJ aspects can be understood (and thus consumed) both by
+Spring AOP and by AspectJ. So, if you later decide you need the capabilities of AspectJ
+to implement additional requirements, you can easily migrate to a classic AspectJ setup.
+On balance, the Spring team prefers the @AspectJ style for custom aspects beyond simple
+configuration of enterprise services.
 
 
 
@@ -2426,10 +2421,9 @@ that do more than simple configuration of enterprise services.
 == Mixing Aspect Types
 
 It is perfectly possible to mix @AspectJ style aspects by using the auto-proxying support,
-schema-defined `<aop:aspect>` aspects, `<aop:advisor>` declared advisors, and even
-proxies and interceptors defined with the Spring 1.2 style in the same configuration.
-All of these are implemented by using the same underlying support mechanism and can
-co-exist without any difficulty.
+schema-defined `<aop:aspect>` aspects, `<aop:advisor>` declared advisors, and even proxies
+and interceptors in other styles in the same configuration. All of these are implemented
+by using the same underlying support mechanism and can co-exist without any difficulty.
 
 
 
@@ -2438,29 +2432,26 @@ co-exist without any difficulty.
 == Proxying Mechanisms
 
 Spring AOP uses either JDK dynamic proxies or CGLIB to create the proxy for a given
-target object. (JDK dynamic proxies are preferred whenever you have a choice).
+target object. JDK dynamic proxies are built into the JDK, whereas CGLIB is a common
+open-source class definition library (repackaged into `spring-core`).
 
 If the target object to be proxied implements at least one interface, a JDK dynamic
-proxy is used. All of the interfaces implemented by the target type are
-proxied. If the target object does not implement any interfaces, a CGLIB proxy is
-created.
+proxy is used. All of the interfaces implemented by the target type are proxied.
+If the target object does not implement any interfaces, a CGLIB proxy is created.
 
 If you want to force the use of CGLIB proxying (for example, to proxy every method
-defined for the target object, not only those implemented by its interfaces), you can do
-so. However, you should consider the following issues:
+defined for the target object, not only those implemented by its interfaces),
+you can do so. However, you should consider the following issues:
 
-* `final` methods cannot be advised, as they cannot be overridden.
-* As of Spring 3.2, it is no longer necessary to add CGLIB to your project classpath, as
-  CGLIB classes are repackaged under `org.springframework` and included directly in the
-  spring-core JAR. This means that CGLIB-based proxy support "`just works`", in the same
-  way that JDK dynamic proxies always have.
-* As of Spring 4.0, the constructor of your proxied object is NOT called twice
-  any more, since the CGLIB proxy instance is created through Objenesis. Only if your
-  JVM does not allow for constructor bypassing, you might see double invocations and
+* With CGLIB, `final` methods cannot be advised, as they cannot be overridden in
+  runtime-generated subclasses.
+* As of Spring 4.0, the constructor of your proxied object is NOT called twice anymore,
+  since the CGLIB proxy instance is created through Objenesis. Only if your JVM does
+  not allow for constructor bypassing, you might see double invocations and
   corresponding debug log entries from Spring's AOP support.
 
-To force the use of CGLIB proxies, set the value of the `proxy-target-class` attribute of
-the `<aop:config>` element to true, as follows:
+To force the use of CGLIB proxies, set the value of the `proxy-target-class` attribute
+of the `<aop:config>` element to true, as follows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2471,8 +2462,8 @@ the `<aop:config>` element to true, as follows:
 ----
 
 To force CGLIB proxying when you use the @AspectJ auto-proxy support, set the
-`proxy-target-class` attribute of the `<aop:aspectj-autoproxy>` element to `true`, as
-follows:
+`proxy-target-class` attribute of the `<aop:aspectj-autoproxy>` element to `true`,
+as follows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2533,9 +2524,7 @@ image::images/aop-proxy-plain-pojo-call.png[]
 	public class Main {
 
 		public static void main(String[] args) {
-
 			Pojo pojo = new SimplePojo();
-
 			// this is a direct method call on the 'pojo' reference
 			pojo.foo();
 		}
@@ -2553,36 +2542,33 @@ image::images/aop-proxy-call.png[]
 	public class Main {
 
 		public static void main(String[] args) {
-
 			ProxyFactory factory = new ProxyFactory(new SimplePojo());
 			factory.addInterface(Pojo.class);
 			factory.addAdvice(new RetryAdvice());
 
 			Pojo pojo = (Pojo) factory.getProxy();
-
 			// this is a method call on the proxy!
 			pojo.foo();
 		}
 	}
 ----
 
-The key thing to understand here is that the client code inside the `main(..)` method of the
-`Main` class has a reference to the proxy. This means that method calls on that
-object reference are calls on the proxy. As a result, the proxy can
-delegate to all of the interceptors (advice) that are relevant to that particular method
-call. However, once the call has finally reached the target object (the `SimplePojo`,
-reference in this case), any method calls that it may make on itself, such as
-`this.bar()` or `this.foo()`, are going to be invoked against the `this` reference,
-and not the proxy. This has important implications. It means that self-invocation is
-not going to result in the advice associated with a method invocation getting a
-chance to execute.
+The key thing to understand here is that the client code inside the `main(..)` method
+of the `Main` class has a reference to the proxy. This means that method calls on that
+object reference are calls on the proxy. As a result, the proxy can delegate to all of
+the interceptors (advice) that are relevant to that particular method call. However,
+once the call has finally reached the target object (the `SimplePojo`, reference in
+this case), any method calls that it may make on itself, such as `this.bar()` or
+`this.foo()`, are going to be invoked against the `this` reference, and not the proxy.
+This has important implications. It means that self-invocation is not going to result
+in the advice associated with a method invocation getting a chance to execute.
 
-Okay, so what is to be done about this? The best approach (the term, "`best,`" is used loosely
-here) is to refactor your code such that the self-invocation does not happen.
+Okay, so what is to be done about this? The best approach (the term, "`best,`" is used
+loosely here) is to refactor your code such that the self-invocation does not happen.
 This does entail some work on your part, but it is the best, least-invasive approach.
-The next approach is absolutely horrendous, and we hesitate to point it out,
-precisely because it is so horrendous. You can (painful as it is to us) totally tie the logic within
-your class to Spring AOP, as the following example shows:
+The next approach is absolutely horrendous, and we hesitate to point it out, precisely
+because it is so horrendous. You can (painful as it is to us) totally tie the logic
+within your class to Spring AOP, as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2611,14 +2597,12 @@ following example shows:
 	public class Main {
 
 		public static void main(String[] args) {
-
 			ProxyFactory factory = new ProxyFactory(new SimplePojo());
 			factory.adddInterface(Pojo.class);
 			factory.addAdvice(new RetryAdvice());
 			factory.setExposeProxy(true);
 
 			Pojo pojo = (Pojo) factory.getProxy();
-
 			// this is a method call on the proxy!
 			pojo.foo();
 		}
@@ -2634,11 +2618,11 @@ it is not a proxy-based AOP framework.
 [[aop-aspectj-programmatic]]
 == Programmatic Creation of @AspectJ Proxies
 
-In addition to declaring aspects in your configuration by using either `<aop:config>` or
-`<aop:aspectj-autoproxy>`, it is also possible to programmatically create proxies that
-advise target objects. For the full details of Spring's AOP API, see the <<aop-api,next chapter>>.
-Here, we want to focus on the ability to automatically create proxies by using @AspectJ
-aspects.
+In addition to declaring aspects in your configuration by using either `<aop:config>`
+or `<aop:aspectj-autoproxy>`, it is also possible to programmatically create proxies
+that advise target objects. For the full details of Spring's AOP API, see the
+<<aop-api, next chapter>>. Here, we want to focus on the ability to automatically
+create proxies by using @AspectJ aspects.
 
 You can use the `org.springframework.aop.aspectj.annotation.AspectJProxyFactory` class
 to create a proxy for a target object that is advised by one or more @AspectJ aspects.
@@ -2748,13 +2732,12 @@ Spring now looks for a bean definition named `account` and uses that as the
 definition to configure new `Account` instances.
 
 You can also use autowiring to avoid having to specify a dedicated bean definition at
-all. To have Spring apply autowiring, use the `autowire` property of the
-`@Configurable` annotation. You can specify either `@Configurable(autowire=Autowire.BY_TYPE)` or
+all. To have Spring apply autowiring, use the `autowire` property of the `@Configurable`
+annotation. You can specify either `@Configurable(autowire=Autowire.BY_TYPE)` or
 `@Configurable(autowire=Autowire.BY_NAME` for autowiring by type or by name,
-respectively. As an alternative, as of Spring 2.5, it is preferable to specify explicit,
-annotation-driven dependency injection for your `@Configurable` beans by using
-`@Autowired` or `@Inject` at the field or method level (see <<beans-annotation-config>>
-for further details).
+respectively. As an alternative, it is preferable to specify explicit, annotation-driven
+dependency injection for your `@Configurable` beans through `@Autowired` or `@Inject`
+at the field or method level (see <<beans-annotation-config>> for further details).
 
 Finally, you can enable Spring dependency checking for the object references in the newly
 created and configured object by using the `dependencyCheck` attribute (for example,
@@ -2764,13 +2747,13 @@ are not primitives or collections) have been set.
 
 Note that using the annotation on its own does nothing. It is the
 `AnnotationBeanConfigurerAspect` in `spring-aspects.jar` that acts on the presence of
-the annotation. In essence, the aspect says, "`after returning from the initialization of a
-new object of a type annotated with `@Configurable`, configure the newly created object
+the annotation. In essence, the aspect says, "`after returning from the initialization of
+a new object of a type annotated with `@Configurable`, configure the newly created object
 using Spring in accordance with the properties of the annotation`". In this context,
-"`initialization`" refers to newly instantiated objects (for example, objects instantiated with
-the `new` operator) as well as to `Serializable` objects that are undergoing
+"`initialization`" refers to newly instantiated objects (for example, objects instantiated
+with the `new` operator) as well as to `Serializable` objects that are undergoing
 deserialization (for example, through
-http://docs.oracle.com/javase/6/docs/api/java/io/Serializable.html[readResolve()]).
+https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html[readResolve()]).
 
 [NOTE]
 =====
@@ -2786,19 +2769,19 @@ available for use in the body of the constructors, you need to define this on th
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Configurable(preConstruction=true)
+	@Configurable(preConstruction = true)
 ----
 
 You can find more information about the language semantics of the various pointcut
 types in AspectJ
-http://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
-appendix] of the http://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
+https://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
+appendix] of the https://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
 Programming Guide].
 =====
 
 For this to work, the annotated types must be woven with the AspectJ weaver. You can
 either use a build-time Ant or Maven task to do this (see, for example, the
-http://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html[AspectJ Development
+https://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html[AspectJ Development
 Environment Guide]) or load-time weaving (see <<aop-aj-ltw>>). The
 `AnnotationBeanConfigurerAspect` itself needs to be configured by Spring (in order to obtain
 a reference to the bean factory that is to be used to configure new objects). If you
@@ -2811,7 +2794,6 @@ use Java-based configuration, you can add `@EnableSpringConfigured` to any
 	@Configuration
 	@EnableSpringConfigured
 	public class AppConfig {
-
 	}
 ----
 
@@ -2943,7 +2925,6 @@ fully qualified class names:
 			initialization(new(..)) &&
 			SystemArchitecture.inDomainModel() &&
 			this(beanInstance);
-
 	}
 ----
 
@@ -3015,7 +2996,7 @@ The focus of this section is on configuring and using LTW in the specific contex
 Spring Framework. This section is not a general introduction to LTW. For full details on
 the specifics of LTW and configuring LTW with only AspectJ (with Spring not being
 involved at all), see the
-http://www.eclipse.org/aspectj/doc/released/devguide/ltw.html[LTW section of the AspectJ
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw.html[LTW section of the AspectJ
 Development Environment Guide].
 
 The value that the Spring Framework brings to AspectJ LTW is in enabling much
@@ -3027,14 +3008,12 @@ per-`ClassLoader` basis, which is more fine-grained and which can make more
 sense in a 'single-JVM-multiple-application' environment (such as is found in a typical
 application server environment).
 
-Further, <<aop-aj-ltw-environments,in certain environments>>, this support enables
+Further, <<aop-aj-ltw-environments, in certain environments>>, this support enables
 load-time weaving without making any modifications to the application server's launch
-script that is needed to add `-javaagent:path/to/aspectjweaver.jar` or (as we
-describe later in this section)
-`-javaagent:path/to/org.springframework.instrument-{version}.jar` (previously named
-`spring-agent.jar`). Developers modify one or more files that form the
-application context to enable load-time weaving instead of relying on administrators who
-typically are in charge of the deployment configuration, such as the launch script.
+script that is needed to add `-javaagent:path/to/aspectjweaver.jar` or (as we describe
+later in this section) `-javaagent:path/to/spring-instrument.jar`. Developers configure
+the application context to enable load-time weaving instead of relying on administrators
+who typically are in charge of the deployment configuration, such as the launch script.
 
 Now that the sales pitch is over, let us first walk through a quick example of AspectJ
 LTW that uses Spring, followed by detailed specifics about elements introduced in the
@@ -3046,18 +3025,18 @@ https://github.com/spring-projects/spring-petclinic[Petclinic sample application
 ==== A First Example
 
 Assume that you are an application developer who has been tasked with diagnosing
-the cause of some performance problems in a system. Rather than break out a profiling
-tool,  we are going to switch on a simple profiling aspect that lets us
-quickly get some performance metrics. We can then apply a finer-grained
-profiling tool to that specific area immediately afterwards.
+the cause of some performance problems in a system. Rather than break out a
+profiling tool, we are going to switch on a simple profiling aspect that lets us
+quickly get some performance metrics. We can then apply a finer-grained profiling
+tool to that specific area immediately afterwards.
 
-NOTE: The example presented here uses XML configuration. You can also
-configure and use @AspectJ with <<beans-java,Java configuration>>.
-Specifically, you can use the `@EnableLoadTimeWeaving` annotation as an alternative to
-`<context:load-time-weaver/>` (see <<aop-aj-ltw-spring,below>> for details).
+NOTE: The example presented here uses XML configuration. You can also configure and
+use @AspectJ with <<beans-java, Java configuration>>. Specifically, you can use the
+`@EnableLoadTimeWeaving` annotation as an alternative to `<context:load-time-weaver/>`
+(see <<aop-aj-ltw-spring, below>> for details).
 
-The following example shows the profiling aspect, which is not fancy -- it is a time-based
-profiler that uses the @AspectJ-style of aspect declaration:
+The following example shows the profiling aspect, which is not fancy.
+It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
 
 [source,java,indent=0]
 [subs="verbatim"]
@@ -3091,15 +3070,15 @@ profiler that uses the @AspectJ-style of aspect declaration:
 	}
 ----
 
-We also need to create an `META-INF/aop.xml` file, to inform the AspectJ weaver
-that we want to weave our `ProfilingAspect` into our classes. This file convention,
-namely the presence of a file (or files) on the Java classpath called
-`META-INF/aop.xml` is standard AspectJ. The following example shows the `aop.xml` file:
+We also need to create an `META-INF/aop.xml` file, to inform the AspectJ weaver that
+we want to weave our `ProfilingAspect` into our classes. This file convention, namely
+the presence of a file (or files) on the Java classpath called `META-INF/aop.xml` is
+standard AspectJ. The following example shows the `aop.xml` file:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 	<aspectj>
 
 		<weaver>
@@ -3115,12 +3094,13 @@ namely the presence of a file (or files) on the Java classpath called
 	</aspectj>
 ----
 
-Now we can move on to the Spring-specific portion of the configuration. We need to configure a
-`LoadTimeWeaver` (explained later). This load-time
-weaver is the essential component responsible for weaving the aspect configuration in
-one or more `META-INF/aop.xml` files into the classes in your application. The good
-thing is that it does not require a lot of configuration (there
-are some more options that you can specify, but these are detailed later), as can be seen in the following example:
+Now we can move on to the Spring-specific portion of the configuration. We need
+to configure a `LoadTimeWeaver` (explained later). This load-time weaver is the
+essential component responsible for weaving the aspect configuration in one or
+more `META-INF/aop.xml` files into the classes in your application. The good
+thing is that it does not require a lot of configuration (there are some more
+options that you can specify, but these are detailed later), as can be seen in
+the following example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -3131,22 +3111,22 @@ are some more options that you can specify, but these are detailed later), as ca
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<!-- a service object; we will be profiling its methods -->
 		<bean id="entitlementCalculationService"
 				class="foo.StubEntitlementCalculationService"/>
 
 		<!-- this switches on the load-time weaving -->
-		**<context:load-time-weaver/>**
+		<context:load-time-weaver/>
 	</beans>
 ----
 
 Now that all the required artifacts (the aspect, the `META-INF/aop.xml`
-file, and the Spring configuration) are in place, we can create the following driver class with a
-`main(..)` method to demonstrate the LTW in action:
+file, and the Spring configuration) are in place, we can create the following
+driver class with a `main(..)` method to demonstrate the LTW in action:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3158,11 +3138,10 @@ file, and the Spring configuration) are in place, we can create the following dr
 	public final class Main {
 
 		public static void main(String[] args) {
-
 			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml", Main.class);
 
-			EntitlementCalculationService entitlementCalculationService
-				= (EntitlementCalculationService) ctx.getBean("entitlementCalculationService");
+			EntitlementCalculationService entitlementCalculationService =
+					(EntitlementCalculationService) ctx.getBean("entitlementCalculationService");
 
 			// the profiling aspect is 'woven' around this method execution
 			entitlementCalculationService.calculateEntitlement();
@@ -3172,8 +3151,8 @@ file, and the Spring configuration) are in place, we can create the following dr
 
 We have one last thing to do. The introduction to this section did say that one could
 switch on LTW selectively on a per-`ClassLoader` basis with Spring, and this is true.
-However, for this example, we use a Java agent (supplied with Spring)
-to switch on the LTW. We use the following command to run the `Main` class shown earlier:
+However, for this example, we use a Java agent (supplied with Spring) to switch on LTW.
+We use the following command to run the `Main` class shown earlier:
 
 [literal]
 [subs="verbatim,quotes"]
@@ -3182,7 +3161,7 @@ java -javaagent:C:/projects/foo/lib/global/spring-instrument.jar foo.Main
 ----
 
 The `-javaagent` is a flag for specifying and enabling
-http://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html[agents
+https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html[agents
 to instrument programs that run on the JVM]. The Spring Framework ships with such an
 agent, the `InstrumentationSavingAgent`, which is packaged in the
 `spring-instrument.jar` that was supplied as the value of the `-javaagent` argument in
@@ -3220,11 +3199,10 @@ result:
 	public final class Main {
 
 		public static void main(String[] args) {
-
 			new ClassPathXmlApplicationContext("beans.xml", Main.class);
 
 			EntitlementCalculationService entitlementCalculationService =
-				new StubEntitlementCalculationService();
+					new StubEntitlementCalculationService();
 
 			// the profiling aspect will be 'woven' around this method execution
 			entitlementCalculationService.calculateEntitlement();
@@ -3261,8 +3239,9 @@ Furthermore, the compiled aspect classes need to be available on the classpath.
 The AspectJ LTW infrastructure is configured by using one or more `META-INF/aop.xml`
 files that are on the Java classpath (either directly or, more typically, in jar files).
 
-The structure and contents of this file is detailed in the LTW part http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
-documentation]. Because the aop.xml file is 100% AspectJ, we do not describe it further here.
+The structure and contents of this file is detailed in the LTW part of the
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
+documentation]. Because the `aop.xml` file is 100% AspectJ, we do not describe it further here.
 
 
 [[aop-aj-ltw-libraries]]
@@ -3271,10 +3250,10 @@ documentation]. Because the aop.xml file is 100% AspectJ, we do not describe it 
 At minimum, you need the following libraries to use the Spring Framework's support
 for AspectJ LTW:
 
-* `spring-aop.jar` (version 2.5 or later, plus all mandatory dependencies)
-* `aspectjweaver.jar` (version 1.6.8 or later)
+* `spring-aop.jar`
+* `aspectjweaver.jar`
 
-If you use the <<aop-aj-ltw-environment-generic,Spring-provided agent to enable
+If you use the <<aop-aj-ltw-environment-generic, Spring-provided agent to enable
 instrumentation>>, you also need:
 
 * `spring-instrument.jar`
@@ -3309,7 +3288,6 @@ which typically is done by using the `@EnableLoadTimeWeaving` annotation, as fol
 	@Configuration
 	@EnableLoadTimeWeaving
 	public class AppConfig {
-
 	}
 ----
 
@@ -3326,59 +3304,59 @@ Alternatively, if you prefer XML-based configuration, use the
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:load-time-weaver/>
 
 	</beans>
 ----
 
-The preceding configuration automatically defines and registers a number of LTW-specific infrastructure
-beans, such as a `LoadTimeWeaver` and an `AspectJWeavingEnabler`, for you.
+The preceding configuration automatically defines and registers a number of LTW-specific
+infrastructure beans, such as a `LoadTimeWeaver` and an `AspectJWeavingEnabler`, for you.
 The default `LoadTimeWeaver` is the `DefaultContextLoadTimeWeaver` class, which attempts
-to decorate an automatically detected `LoadTimeWeaver`. The exact type of
-`LoadTimeWeaver` that is "`automatically detected`" is dependent upon your runtime
-environment. The following table summarizes various `LoadTimeWeaver` implementations:
+to decorate an automatically detected `LoadTimeWeaver`. The exact type of `LoadTimeWeaver`
+that is "`automatically detected`" is dependent upon your runtime environment.
+The following table summarizes various `LoadTimeWeaver` implementations:
 
 [[aop-aj-ltw-spring-env-impls]]
 .DefaultContextLoadTimeWeaver LoadTimeWeavers
 |===
 | Runtime Environment| `LoadTimeWeaver` implementation
 
-| Running in Oracle's
-  http://www.oracle.com/technetwork/middleware/weblogic/overview/index-085209.html[WebLogic]
-| `WebLogicLoadTimeWeaver`
-
-| Running in Oracle's http://glassfish.dev.java.net/[GlassFish]
-| `GlassFishLoadTimeWeaver`
-
-| Running in http://tomcat.apache.org/[Apache Tomcat]
+| Running in https://tomcat.apache.org/[Apache Tomcat]
 | `TomcatLoadTimeWeaver`
 
-| Running in Red Hat's http://www.jboss.org/jbossas/[JBoss AS] or http://www.wildfly.org/[WildFly]
+| Running in https://glassfish.dev.java.net/[GlassFish] (limited to EAR deployments)
+| `GlassFishLoadTimeWeaver`
+
+| Running in Red Hat's https://www.jboss.org/jbossas/[JBoss AS] or https://www.wildfly.org/[WildFly]
 | `JBossLoadTimeWeaver`
 
-| Running in IBM's http://www-01.ibm.com/software/webservers/appserv/was/[WebSphere]
+| Running in IBM's https://www-01.ibm.com/software/webservers/appserv/was/[WebSphere]
 | `WebSphereLoadTimeWeaver`
 
-| JVM started with Spring `InstrumentationSavingAgent` (`java
-  -javaagent:path/to/spring-instrument.jar`)
+| Running in Oracle's
+  https://www.oracle.com/technetwork/middleware/weblogic/overview/index-085209.html[WebLogic]
+| `WebLogicLoadTimeWeaver`
+
+| JVM started with Spring `InstrumentationSavingAgent`
+  (`java -javaagent:path/to/spring-instrument.jar`)
 | `InstrumentationLoadTimeWeaver`
 
-| Fallback, expecting the underlying ClassLoader to follow common conventions (for example
-  applicable to `TomcatInstrumentableClassLoader` and http://www.caucho.com/[Resin])
+| Fallback, expecting the underlying ClassLoader to follow common conventions
+  (namely `addTransformer` and optionally a `getThrowawayClassLoader` method)
 | `ReflectiveLoadTimeWeaver`
 |===
 
-Note that the table lists only the `LoadTimeWeavers` that are autodetected when you use the
-`DefaultContextLoadTimeWeaver`. You can specify exactly which
-`LoadTimeWeaver` implementation to use.
+Note that the table lists only the `LoadTimeWeavers` that are autodetected when you
+use the `DefaultContextLoadTimeWeaver`. You can specify exactly which `LoadTimeWeaver`
+implementation to use.
 
 To specify a specific `LoadTimeWeaver` with Java configuration, implement the
-`LoadTimeWeavingConfigurer` interface and override the `getLoadTimeWeaver()` method. The
-following example specifies a `ReflectiveLoadTimeWeaver`:
+`LoadTimeWeavingConfigurer` interface and override the `getLoadTimeWeaver()` method.
+The following example specifies a `ReflectiveLoadTimeWeaver`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3407,9 +3385,9 @@ element. Again, the following example specifies a `ReflectiveLoadTimeWeaver`:
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
+			https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd">
+			https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<context:load-time-weaver
 				weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/>
@@ -3426,10 +3404,9 @@ the `org.aspectj.weaver.loadtime` package) class. See the class-level javadoc of
 `ClassPreProcessorAgentAdapter` class for further details, because the specifics of how
 the weaving is actually effected is beyond the scope of this document.
 
-There is one final attribute of the configuration left to discuss: the
-`aspectjWeaving` attribute (or `aspectj-weaving` if you use XML). This
-attribute controls whether LTW is enabled or not.
-It accepts one of three possible values, with the default value being
+There is one final attribute of the configuration left to discuss: the `aspectjWeaving`
+attribute (or `aspectj-weaving` if you use XML). This attribute controls whether LTW
+is enabled or not. It accepts one of three possible values, with the default value being
 `autodetect` if the attribute is not present. The following table summarizes the three
 possible values:
 
@@ -3460,69 +3437,17 @@ This last section contains any additional settings and configuration that you ne
 when you use Spring's LTW support in environments such as application servers and web
 containers.
 
-[[aop-aj-ltw-environment-tomcat]]
-===== Tomcat
+[[aop-aj-ltw-environments-tomcat-jboss-etc]]
+===== Tomcat, JBoss, WebSphere, WebLogic
 
-Historically, http://tomcat.apache.org/[Apache Tomcat]'s default class loader did not
-support class transformation, which is why Spring provides an enhanced implementation
-that addresses this need. Named `TomcatInstrumentableClassLoader`, the loader works on
-Tomcat 6.0 and above.
+Tomcat, JBoss/WildFly, IBM WebSphere Application Server and Oracle WebLogic Server all
+provide a general app `ClassLoader` that is capable of local instrumentation. Spring's
+native LTW may leverage those ClassLoader implementations to provide AspectJ weaving.
+You can simply enable load-time weaving, as <<aop-using-aspectj, described earlier>>.
+Specifically, you do not need to modify the JVM launch script to add
+`-javaagent:path/to/spring-instrument.jar`.
 
-TIP: Do not define `TomcatInstrumentableClassLoader` on Tomcat 8.0 and higher.
-Instead, let Spring automatically use Tomcat's new native `InstrumentableClassLoader`
-facility through the `TomcatLoadTimeWeaver` strategy.
-
-If you still need to use `TomcatInstrumentableClassLoader`, you can register it
-individually for each web application as follows:
-
-. Copy `org.springframework.instrument.tomcat.jar` into `$CATALINA_HOME/lib`, where
-  `$CATALINA_HOME` represents the root of the Tomcat installation
-. Instruct Tomcat to use the custom class loader (instead of the default) by editing the
-  web application context file, as the following example shows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<Context path="/myWebApp" docBase="/my/webApp/location">
-		<Loader
-			loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
-	</Context>
-----
-
-Apache Tomcat 6.0+ supports several context locations:
-
-* Server configuration file: `$CATALINA_HOME/conf/server.xml`
-* Default context configuration: `$CATALINA_HOME/conf/context.xml`, which affects all
-  deployed web applications
-* A per-web application configuration, which can be deployed either on the server-side at
-  `$CATALINA_HOME/conf/[enginename]/[hostname]/[webapp]-context.xml` or embedded
-  inside the web-app archive at `META-INF/context.xml`
-
-For efficiency, we recommend the embedded per-web application configuration style, because it
-impacts only applications that use the custom class loader and does not require any
-changes to the server configuration. See the Tomcat 6.0.x
-http://tomcat.apache.org/tomcat-6.0-doc/config/context.html[documentation] for more
-details about available context locations.
-
-Alternatively, consider using the Spring-provided generic VM agent, to be specified
-in Tomcat's launch script (described earlier in this section). This makes instrumentation available to all
-deployed web applications, no matter the `ClassLoader` on which they happen to run.
-
-[[aop-aj-ltw-environments-weblogic-oc4j-resin-glassfish-jboss]]
-===== WebLogic, WebSphere, Resin, GlassFish, and JBoss
-
-Recent versions of WebLogic Server (version 10 and above), IBM WebSphere Application
-Server (version 7 and above), Resin (version 3.1 and above), and JBoss (version 6.x or above) provide a
-`ClassLoader` that is capable of local instrumentation. Spring's native LTW leverages such
-ClassLoader implementations to enable AspectJ weaving. You can enable LTW by activating
-load-time weaving, as <<aop-using-aspectj,described earlier>>. Specifically, you do not need to modify the
-launch script to add `-javaagent:path/to/spring-instrument.jar`.
-
-Note that the GlassFish instrumentation-capable `ClassLoader` is available only in its EAR
-environment. For GlassFish web applications, follow the Tomcat setup instructions
-<<aop-aj-ltw-environment-tomcat,outlined earlier>>.
-
-Note that, on JBoss 6.x, you need to disable the app server scanning to prevent it from
+Note that on JBoss, you may need to disable the app server scanning to prevent it from
 loading the classes before the application actually starts. A quick workaround is to add
 to your artifact a file named `WEB-INF/jboss-scanning.xml` with the following content:
 
@@ -3532,31 +3457,28 @@ to your artifact a file named `WEB-INF/jboss-scanning.xml` with the following co
 	<scanning xmlns="urn:jboss:scanning:1.0"/>
 ----
 
-[[aop-aj-ltw-environment-generic]]
+[[aop-aj-ltw-environments-generic]]
 ===== Generic Java Applications
 
-When class instrumentation is required in environments that do not support or are not
-supported by the existing `LoadTimeWeaver` implementations, a JDK agent can be the only
-solution. For such cases, Spring provides `InstrumentationLoadTimeWeaver`, which
-requires a Spring-specific (but very general) VM agent,
-`org.springframework.instrument-{version}.jar` (previously named `spring-agent.jar`).
+When class instrumentation is required in environments that are not supported by
+specific `LoadTimeWeaver` implementations, a JVM agent is the general solution.
+For such cases, Spring provides `InstrumentationLoadTimeWeaver` which requires a
+Spring-specific (but very general) JVM agent, `spring-instrument.jar`, autodetected
+by common `@EnableLoadTimeWeaving` and `<context:load-time-weaver/>` setups.
 
-To use it, you must start the virtual machine with the Spring agent by supplying the
-following JVM options:
+To use it, you must start the virtual machine with the Spring agent by supplying
+the following JVM options:
 
 [literal]
 [subs="verbatim,quotes"]
 ----
--javaagent:/path/to/org.springframework.instrument-{version}.jar
+-javaagent:/path/to/spring-instrument.jar
 ----
 
-Note that this requires modification of the VM launch script, which may prevent you from
-using this in application server environments (depending on your operation policies).
-Additionally, the JDK agent instruments the entire VM, which can be expensive.
-
-For performance reasons, we recommend that you use this configuration only if your target
-environment (such as http://www.eclipse.org/jetty/[Jetty]) does not have (or does not
-support) a dedicated LTW.
+Note that this requires modification of the JVM launch script, which may prevent you
+from using this in application server environments (depending on your server and your
+operation policies). That said, for one-app-per-JVM deployments such as standalone
+Spring Boot applications, you typically control the entire JVM setup in any case.
 
 
 
@@ -3564,7 +3486,7 @@ support) a dedicated LTW.
 [[aop-resources]]
 == Further Resources
 
-More information on AspectJ can be found on the http://www.eclipse.org/aspectj[AspectJ website].
+More information on AspectJ can be found on the https://www.eclipse.org/aspectj[AspectJ website].
 
 _Eclipse AspectJ_ by Adrian Colyer et. al. (Addison-Wesley, 2005) provides a
 comprehensive introduction and reference for the AspectJ language.

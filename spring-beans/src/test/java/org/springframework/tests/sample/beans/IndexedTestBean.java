@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,6 +66,7 @@ public class IndexedTestBean {
 		TestBean tb5 = new TestBean("name5", 0);
 		TestBean tb6 = new TestBean("name6", 0);
 		TestBean tb7 = new TestBean("name7", 0);
+		TestBean tb8 = new TestBean("name8", 0);
 		TestBean tbX = new TestBean("nameX", 0);
 		TestBean tbY = new TestBean("nameY", 0);
 		this.array = new TestBean[] {tb0, tb1};
@@ -83,6 +84,7 @@ public class IndexedTestBean {
 		list.add(tbX);
 		list.add(tbY);
 		this.map.put("key4", list);
+		this.map.put("key5[foo]", tb8);
 	}
 
 

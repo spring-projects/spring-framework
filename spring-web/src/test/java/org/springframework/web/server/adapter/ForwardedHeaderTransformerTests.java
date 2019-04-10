@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
  */
 public class ForwardedHeaderTransformerTests {
 
-	private static final String BASE_URL = "http://example.com/path";
+	private static final String BASE_URL = "https://example.com/path";
 
 
 	private final ForwardedHeaderTransformer requestMutator = new ForwardedHeaderTransformer();
@@ -85,7 +85,7 @@ public class ForwardedHeaderTransformerTests {
 		headers.add("X-Forwarded-Prefix", "/prefix");
 		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
 
-		assertEquals(new URI("http://example.com/prefix/path"), request.getURI());
+		assertEquals(new URI("https://example.com/prefix/path"), request.getURI());
 		assertEquals("/prefix/path", request.getPath().value());
 		assertForwardedHeadersRemoved(request);
 	}
@@ -96,7 +96,7 @@ public class ForwardedHeaderTransformerTests {
 		headers.add("X-Forwarded-Prefix", "/prefix////");
 		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
 
-		assertEquals(new URI("http://example.com/prefix/path"), request.getURI());
+		assertEquals(new URI("https://example.com/prefix/path"), request.getURI());
 		assertEquals("/prefix/path", request.getPath().value());
 		assertForwardedHeadersRemoved(request);
 	}
@@ -107,7 +107,7 @@ public class ForwardedHeaderTransformerTests {
 		headers.add("Forwarded", "host=84.198.58.199;proto=https");
 
 		ServerHttpRequest request = MockServerHttpRequest
-				.method(HttpMethod.GET, new URI("http://example.com/a%20b?q=a%2Bb"))
+				.method(HttpMethod.GET, new URI("https://example.com/a%20b?q=a%2Bb"))
 				.headers(headers)
 				.build();
 

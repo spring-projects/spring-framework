@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,14 +25,13 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.junit.Assert.*;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
 
 /**
  * Unit tests for {@link ModelArgumentResolver}.
@@ -45,22 +44,27 @@ public class ModelArgumentResolverTests {
 
 	private final ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
-	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
+	private final ResolvableMethod resolvable = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Test
-	public void supportsParameter() throws Exception {
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Model.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Map.class, String.class, Object.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ModelMap.class)));
-		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(Object.class)));
+	public void supportsParameter() {
+
+		assertTrue(this.resolver.supportsParameter(this.resolvable.arg(Model.class)));
+		assertTrue(this.resolver.supportsParameter(this.resolvable.arg(ModelMap.class)));
+		assertTrue(this.resolver.supportsParameter(
+				this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class)));
+
+		assertFalse(this.resolver.supportsParameter(this.resolvable.arg(Object.class)));
+		assertFalse(this.resolver.supportsParameter(
+				this.resolvable.annotPresent(RequestBody.class).arg(Map.class, String.class, Object.class)));
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
-		testResolveArgument(this.testMethod.arg(Model.class));
-		testResolveArgument(this.testMethod.arg(Map.class, String.class, Object.class));
-		testResolveArgument(this.testMethod.arg(ModelMap.class));
+	public void resolveArgument() {
+		testResolveArgument(this.resolvable.arg(Model.class));
+		testResolveArgument(this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class));
+		testResolveArgument(this.resolvable.arg(ModelMap.class));
 	}
 
 	private void testResolveArgument(MethodParameter parameter) {
@@ -69,7 +73,13 @@ public class ModelArgumentResolverTests {
 		assertSame(context.getModel(), result);
 	}
 
+
 	@SuppressWarnings("unused")
-	void handle(Model model, Map<String, Object> map, ModelMap modelMap, Object object) {}
+	void handle(
+			Model model,
+			Map<String, Object> map,
+			@RequestBody Map<String, Object> annotatedMap,
+			ModelMap modelMap,
+			Object object) {}
 
 }

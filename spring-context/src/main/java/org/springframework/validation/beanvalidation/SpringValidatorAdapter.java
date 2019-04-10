@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -148,6 +148,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * @param violations the JSR-303 ConstraintViolation results
 	 * @param errors the Spring errors object to register to
 	 */
+	@SuppressWarnings("serial")
 	protected void processConstraintViolations(Set<ConstraintViolation<Object>> violations, Errors errors) {
 		for (ConstraintViolation<Object> violation : violations) {
 			String field = determineField(violation);
@@ -165,7 +166,12 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						if (nestedField.isEmpty()) {
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
 							ObjectError error = new ObjectError(
-									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());
+									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage()) {
+								@Override
+								public boolean shouldRenderDefaultMessage() {
+									return false;
+								}
+							};
 							error.wrap(violation);
 							bindingResult.addError(error);
 						}
@@ -173,7 +179,12 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 							Object rejectedValue = getRejectedValue(field, violation, bindingResult);
 							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
 							FieldError error = new FieldError(errors.getObjectName(), nestedField,
-									rejectedValue, false, errorCodes, errorArgs, violation.getMessage());
+									rejectedValue, false, errorCodes, errorArgs, violation.getMessage()) {
+								@Override
+								public boolean shouldRenderDefaultMessage() {
+									return false;
+								}
+							};
 							error.wrap(violation);
 							bindingResult.addError(error);
 						}

@@ -13,11 +13,12 @@ dependencies {
 	compile(project(":spring-core"))
 	compile(project(":spring-web"))
 	compile("io.projectreactor:reactor-core")
+	compileOnly(project(":spring-core-coroutines"))
 	optional(project(":spring-context"))
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("javax.servlet:javax.servlet-api:4.0.1")
 	optional("javax.websocket:javax.websocket-api:1.1")
-	optional("org.webjars:webjars-locator-core:0.36")
+	optional("org.webjars:webjars-locator-core:0.37")
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
@@ -34,17 +35,17 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
-	optional("org.apache.httpcomponents:httpclient:4.5.7") {
+	optional("org.apache.httpcomponents:httpclient:4.5.8") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	optional("com.google.protobuf:protobuf-java-util:3.6.1")
-	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1")
-	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.1.1")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${coroutinesVersion}")
 	testCompile("javax.xml.bind:jaxb-api:2.3.1")
 	testCompile("com.fasterxml:aalto-xml:1.1.1")
-	testCompile("org.hibernate:hibernate-validator:6.0.15.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.16.Final")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
@@ -52,12 +53,13 @@ dependencies {
 	testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
-	testCompile("org.eclipse.jetty:jetty-reactive-httpclient:1.0.2")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.12.1")
+	testCompile("org.eclipse.jetty:jetty-reactive-httpclient:1.0.3")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.14.0")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
+	testCompile(project(":spring-core-coroutines"))
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
-	testRuntime("org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}")
-	testRuntime("org.jruby:jruby:9.2.5.0")
+	testRuntime("org.jetbrains.kotlin:kotlin-compiler-embeddable:${kotlinVersion}")
+	testRuntime("org.jruby:jruby:9.2.6.0")
 	testRuntime("org.python:jython-standalone:2.7.1")
 	testRuntime("org.synchronoss.cloud:nio-multipart-parser:1.1.0")
 	testRuntime("org.webjars:underscorejs:1.8.3")

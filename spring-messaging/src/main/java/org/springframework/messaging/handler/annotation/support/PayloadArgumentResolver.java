@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,6 +55,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 
 	private final MessageConverter converter;
 
+	@Nullable
 	private final Validator validator;
 
 	private final boolean useDefaultResolution;
@@ -76,7 +77,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	 * @param messageConverter the MessageConverter to use (required)
 	 * @param validator the Validator to use (optional)
 	 */
-	public PayloadArgumentResolver(MessageConverter messageConverter, Validator validator) {
+	public PayloadArgumentResolver(MessageConverter messageConverter, @Nullable Validator validator) {
 		this(messageConverter, validator, true);
 	}
 
@@ -89,7 +90,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	 * all parameters; if "false" then only arguments with the {@code @Payload}
 	 * annotation are supported.
 	 */
-	public PayloadArgumentResolver(MessageConverter messageConverter, Validator validator,
+	public PayloadArgumentResolver(MessageConverter messageConverter, @Nullable Validator validator,
 			boolean useDefaultResolution) {
 
 		Assert.notNull(messageConverter, "MessageConverter must not be null");

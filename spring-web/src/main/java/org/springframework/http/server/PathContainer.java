@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +36,7 @@ import org.springframework.util.MultiValueMap;
 public interface PathContainer {
 
 	/**
-	 * The original path that was parsed.
+	 * The original (raw, encoded) path that this instance was parsed from.
 	 */
 	String value();
 
@@ -83,7 +83,7 @@ public interface PathContainer {
 	interface Element {
 
 		/**
-		 * Return the original, raw (encoded) value for the path component.
+		 * Return the original (raw, encoded) value of this path element.
 		 */
 		String value();
 	}

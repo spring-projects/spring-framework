@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -305,11 +305,15 @@ public final class MockRestServiceServer {
 		}
 
 		@Override
-		public org.springframework.http.client.AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
+		public org.springframework.http.client.AsyncClientHttpRequest createAsyncRequest(
+				URI uri, HttpMethod httpMethod) {
+
 			return createRequestInternal(uri, httpMethod);
 		}
 
-		private org.springframework.mock.http.client.MockAsyncClientHttpRequest createRequestInternal(URI uri, HttpMethod method) {
+		private org.springframework.mock.http.client.MockAsyncClientHttpRequest createRequestInternal(
+				URI uri, HttpMethod method) {
+
 			Assert.notNull(uri, "'uri' must not be null");
 			Assert.notNull(method, "'httpMethod' must not be null");
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@ import javax.transaction.Transactional;
 
 /**
  * Test candidate for {@link Transactional}. This verifies that the annotation processor
- * can process an annotation that declares itself an annotation that is not on the
+ * can process an annotation that declares itself with an annotation that is not on the
  * classpath.
  *
  * @author Vedran Pavic

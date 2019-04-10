@@ -1,32 +1,34 @@
 [[kotlin]]
 = Kotlin
 
-https://kotlinlang.org[Kotlin] is a statically typed language that targets the JVM (and other platforms),
-which allows writing concise and elegant code while providing very good
-https://kotlinlang.org/docs/reference/java-interop.html[interoperability] with
-existing libraries written in Java.
+https://kotlinlang.org[Kotlin] is a statically typed language that targets the JVM
+(and other platforms), which allows writing concise and elegant code while providing
+very good https://kotlinlang.org/docs/reference/java-interop.html[interoperability]
+with existing libraries written in Java.
 
 The Spring Framework provides first-class support for Kotlin that lets developers write
 Kotlin applications almost as if the Spring Framework were a native Kotlin framework.
 
 The easiest way to learn about Spring and Kotlin is to follow
-https://spring.io/guides/tutorials/spring-boot-kotlin/[this comprehensive tutorial]. Feel
-free to join the #spring channel of http://slack.kotlinlang.org/[Kotlin Slack] or ask a
-question with `spring` and `kotlin` as tags on
+https://spring.io/guides/tutorials/spring-boot-kotlin/[this comprehensive tutorial].
+Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Slack]
+or ask a question with `spring` and `kotlin` as tags on
 https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you need support.
+
 
 
 
 [[kotlin-requirements]]
 == Requirements
 
-The Spring Framework supports Kotlin 1.3+ and requires
+Spring Framework 5.2 supports Kotlin 1.3+ and requires
 https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib[`kotlin-stdlib`]
-(or one of its variants, such as
-https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jdk8[`kotlin-stdlib-jdk8`])
+(or one of its variants, such as https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jre8[`kotlin-stdlib-jre8`]
+or https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-stdlib-jdk8[`kotlin-stdlib-jdk8`])
 and https://bintray.com/bintray/jcenter/org.jetbrains.kotlin%3Akotlin-reflect[`kotlin-reflect`]
 to be present on the classpath. They are provided by default if you bootstrap a Kotlin project on
 https://start.spring.io/#!language=kotlin[start.spring.io].
+
 
 
 
@@ -75,6 +77,7 @@ for shorter syntax.
 
 
 
+
 [[kotlin-null-safety]]
 == Null-safety
 
@@ -83,10 +86,10 @@ which cleanly deals with `null` values at compile time rather than bumping into 
 `NullPointerException` at runtime. This makes applications safer through nullability
 declarations and expressing "`value or no value`" semantics without paying the cost of wrappers, such as `Optional`.
 (Kotlin allows using functional constructs with nullable values. See this
-http://www.baeldung.com/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
+https://www.baeldung.com/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
 
 Although Java does not let you express null-safety in its type-system, the Spring Framework
-provides <<core#null-safety,null-safety of the whole Spring Framework API>>
+provides <<core#null-safety, null-safety of the whole Spring Framework API>>
 via tooling-friendly annotations declared in the `org.springframework.lang` package.
 By default, types from Java APIs used in Kotlin are recognized as
 https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types[platform types],
@@ -112,6 +115,7 @@ for up-to-date information.
 
 
 
+
 [[kotlin-classes-interfaces]]
 == Classes and Interfaces
 
@@ -131,6 +135,7 @@ detected without the Jackson Kotlin module being present.
 You can declare configuration classes as
 https://kotlinlang.org/docs/reference/nested-classes.html[top level or nested but not inner],
 since the later requires a reference to the outer class.
+
 
 
 
@@ -162,6 +167,7 @@ https://stackoverflow.com/a/35853200/1092077[this Stack Overflow response].
 
 
 
+
 [[kotlin-bean-definition-dsl]]
 == Bean Definition DSL
 
@@ -174,10 +180,18 @@ In Java, you can, for example, write the following:
 
 [source,java,indent=0]
 ----
+	class Foo {}
+
+	class Bar {
+		private final Foo foo;
+		public Bar(Foo foo) {
+			this.foo = foo;
+		}
+	}
+
 	GenericApplicationContext context = new GenericApplicationContext();
 	context.registerBean(Foo.class);
-	context.registerBean(Bar.class, () -> new Bar(context.getBean(Foo.class))
-);
+	context.registerBean(Bar.class, () -> new Bar(context.getBean(Foo.class)));
 ----
 
 In Kotlin, with reified type parameters and `GenericApplicationContext` Kotlin extensions,
@@ -185,6 +199,10 @@ you can instead write the following:
 
 [source,kotlin,indent=0]
 ----
+	class Foo
+
+	class Bar(private val foo: Foo)
+
 	val context = GenericApplicationContext().apply {
 		registerBean<Foo>()
 		registerBean { Bar(it.getBean()) }
@@ -192,7 +210,7 @@ you can instead write the following:
 ----
 ====
 
-If the class `Bar` has a single constructor, you can even just specify the bean class,
+When the class `Bar` has a single constructor, you can even just specify the bean class,
 the constructor parameters will be autowired by type:
 
 ====
@@ -208,10 +226,22 @@ In order to allow a more declarative approach and cleaner syntax, Spring Framewo
 a {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.context.support/-bean-definition-dsl/[Kotlin bean definition DSL]
 It declares an `ApplicationContextInitializer` through a clean declarative API,
 which lets you deal with profiles and `Environment` for customizing
-how beans are registered. The following example creates a `Play` profile:
+how beans are registered.
+
+In the following example notice that:
+
+* Type inference usually allows to avoid specifying the type for bean references like `ref("bazBean")`
+* It is possible to use Kotlin top level functions to declare beans using callable references like `bean(::myRouter)` in this example
+* When specifying `bean<Bar>()` or `bean(::myRouter)`, parameters are autowired by type
+* The `FooBar` bean will be registered only if the `foobar` profile is active
 
 [source,kotlin,indent=0]
 ----
+	class Foo
+	class Bar(private val foo: Foo)
+	class Baz(var message: String = "")
+	class FooBar(private val baz: Baz)
+
 	val myBeans = beans {
 		bean<Foo>()
 		bean<Bar>()
@@ -223,6 +253,11 @@ how beans are registered. The following example creates a `Play` profile:
 		profile("foobar") {
 			bean { FooBar(ref("bazBean")) }
 		}
+		bean(::myRouter)
+	}
+
+	fun myRouter(foo: Foo, bar: Bar, baz: Baz) = router {
+		// ...
 	}
 ----
 
@@ -251,23 +286,28 @@ for more details and up-to-date information.
 
 
 
+
 [[kotlin-web]]
 == Web
 
 
-=== WebFlux router DSL
+=== Router DSL
 
-Spring Framework comes with a Kotlin router DSL available in 2 flavors:
+Spring Framework comes with a Kotlin router DSL available in 3 flavors:
 
- - Reactive with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[router { }]
- - <<Coroutines>>
+* WebMvc.fn DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.servlet.function/router.html[router { }]
+* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/router.html[router { }]
+* WebFlux.fn <<Coroutines>> DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
 
-These DSL let you use the <<web-reactive#webflux-fn,WebFlux functional API>> to write clean and idiomatic Kotlin code
-to build a `RouterFunction` instance as the following example shows:
+These DSL let you write clean and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
 
 [source,kotlin,indent=0]
 ----
-	val routes: RouterFunction<ServerResponse> = router {
+@Configuration
+class RouterRouterConfiguration {
+
+	@Bean
+	fun mainRouter(userHandler: UserHandler) = router {
 		accept(TEXT_HTML).nest {
 			GET("/") { ok().render("index") }
 			GET("/sse") { ok().render("sse") }
@@ -283,53 +323,47 @@ to build a `RouterFunction` instance as the following example shows:
 		}
 		resources("/**", ClassPathResource("static/"))
 	}
+}
 ----
 
 NOTE: This DSL is programmatic, meaning that it allows custom registration logic of beans
-through an `if` expression, a `for` loop, or any other Kotlin constructs. That can be useful when you need to register routes
-depending on dynamic data (for example, from a database).
+through an `if` expression, a `for` loop, or any other Kotlin constructs. That can be useful
+when you need to register routes depending on dynamic data (for example, from a database).
 
-See https://github.com/mixitconf/mixit/tree/dafd5ccc92dfab6d9c306fcb60b28921a1ccbf79/src/main/kotlin/mixit/web/routes[MiXiT project routes]
-for a concrete example.
+See https://github.com/mixitconf/mixit/[MiXiT project] for a concrete example.
 
-=== Coroutines
 
-As of Spring Framework 5.2, https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] support
-is provided via extensions for WebFlux client and server functional API. A dedicated
-{doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-co-router-function-dsl/[`coRouter { }`]
-router DSL is also available.
+=== MockMvc DSL
 
-Coroutines extensions use `await` prefix or `AndAwait` suffix, and most are using similar names to their Reactive
-counterparts, except `exchange` in `WebClient.RequestHeadersSpec` which translates to `awaitResponse`.
+A Kotlin DSL is provided via `MockMvc` Kotlin extensions in order to provide a more
+idiomatic Kotlin API and to allow better discoverability (no usage of static methods).
 
 [source,kotlin,indent=0]
 ----
-fun routes(userHandler: UserHandler): RouterFunction<ServerResponse> = coRouter {
-	GET("/", userHandler::listView)
-	GET("/api/user", userHandler::listApi)
-}
-
-class UserHandler(builder: WebClient.Builder) {
-
-	private val client = builder.baseUrl("...").build()
-
-	suspend fun listView(request: ServerRequest): ServerResponse =
-			ServerResponse.ok().renderAndAwait("users", mapOf("users" to
-			client.get().uri("...").awaitResponse().awaitBody<User>()))
-
-	suspend fun listApi(request: ServerRequest): ServerResponse =
-				ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).bodyAndAwait(
-				client.get().uri("...").awaitResponse().awaitBody<User>())
+val mockMvc: MockMvc = ...
+mockMvc.get("/person/{name}", "Lee") {
+	secure = true
+	accept = APPLICATION_JSON
+	headers {
+		contentLanguage = Locale.FRANCE
+	}
+	principal = Principal { "foo" }
+}.andExpect {
+	status { isOk }
+	content { contentType(APPLICATION_JSON_UTF8) }
+	jsonPath("$.name") { value("Lee") }
+	content { json("""{"someBoolean": false}""", false) }
+}.andDo {
+	print()
 }
 ----
 
-Read this blog post about https://medium.com/@elizarov/structured-concurrency-722d765aa952[structured concurrency]
-to understand how to run code concurrently with Coroutines.
+
 
 === Kotlin Script Templates
 
 As of version 4.3, Spring Framework provides a
-http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
+https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
 to render templates by using script engines. It supports
 https://www.jcp.org/en/jsr/detail?id=223[JSR-223].
 Spring Framework 5 goes even further by extending this feature to WebFlux and supporting
@@ -358,35 +392,205 @@ refactoring support in a supported IDE, as the following example shows:
 	"""
 ----
 
-NOTE: Kotlin Script Templates are not compatible yet with Spring Boot fatjar mechanism, see related
+WARNING: Kotlin Script Templates support is experimental and not compatible yet with Spring Boot fatjar mechanism, see related
 https://youtrack.jetbrains.com/issue/KT-21443[KT-21443] and https://youtrack.jetbrains.com/issue/KT-27956[KT-27956]
 issues.
 
 See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
 
+== Coroutines
+
+Kotlin https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] are Kotlin
+lightweight threads allowing to write non-blocking code in an imperative way. On language side,
+suspending functions provides an abstraction for asynchronous operations while on library side
+https://github.com/Kotlin/kotlinx.coroutines[kotlinx.coroutines] provides functions likes
+https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html[`async { }`]
+and types like https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[`Flow`].
+
+Spring Framework provides support for Coroutines on the following scope:
+
+* https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-deferred/index.html[Deferred] and https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[Flow] return values support in Spring WebFlux annotated `@Controller`
+* Suspending function support in Spring WebFlux annotated `@Controller`
+* Extensions for WebFlux {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.client/index.html[client] and {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/index.html[server] functional API.
+* WebFlux.fn {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL
+
+=== How Reactive translates to Coroutines?
+
+For return values, the translation from Reactive to Coroutines APIs is the following:
+
+* `fun handler(): Mono<Void>` becomes `suspend fun handler()`
+* `fun handler(): Mono<T>` becomes `suspend fun handler(): T` or `suspend fun handler(): T?` depending on if the `Mono` can be empty or not (with the advantage of beeing more statically typed)
+* `fun handler(): Flux<T>` becomes `fun handler(): Flow<T>`
+
+For input parameters:
+
+* If laziness is not needed, `fun handler(mono: Mono<T>)` becomes `fun handler(value: T)` since a suspending functions can be invoked to get the value parameter.
+* If laziness is needed, `fun handler(mono: Mono<T>)` becomes `fun handler(supplier: suspend () -> T)` or `fun handler(supplier: suspend () -> T?)`
+
+https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[`Flow`] is `Flux` equivalent in Coroutines world, suitable for hot or cold stream, finite or infinite streams, with the following main differences:
+
+* `Flow` is push-based while `Flux` is push-pull hybrid
+* Backpressure is implemented via suspending functions
+* `Flow` has only a https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/collect.html[single suspending `collect` method] and operators are implemented as https://kotlinlang.org/docs/reference/extensions.html[extensions]
+* https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-core/common/src/flow/operators[Operators are easy to implement] thanks to Coroutines
+* Extensions allow to add custom operators to `Flow`
+* Collect operations are suspending functions
+* https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/map.html[`map` operator] supports asynchronous operation (no need for `flatMap`) since it takes a suspending function parameter
+
+Read this blog post about https://medium.com/@elizarov/structured-concurrency-722d765aa952[structured concurrency]
+to understand how to run code concurrently with Coroutines and how are managed exceptions and cancellations.
+
+=== Controllers
+
+Here is an example of a Coroutines `@RestController`.
+
+[source,kotlin,indent=0]
+----
+@RestController
+class CoroutinesRestController(client: WebClient, banner: Banner) {
+
+	@GetMapping("/suspend")
+	suspend fun suspendingEndpoint(): Banner {
+		delay(10)
+		return banner
+	}
+
+	@GetMapping("/flow")
+	fun flowEndpoint() = flow {
+		delay(10)
+		emit(banner)
+		delay(10)
+		emit(banner)
+	}
+
+	@GetMapping("/deferred")
+	fun deferredEndpoint() = GlobalScope.async {
+		delay(10)
+		banner
+	}
+
+	@GetMapping("/sequential")
+	suspend fun sequential(): List<Banner> {
+		val banner1 = client
+				.get()
+				.uri("/suspend")
+				.accept(MediaType.APPLICATION_JSON)
+				.awaitExchange()
+				.awaitBody<Banner>()
+		val banner2 = client
+				.get()
+				.uri("/suspend")
+				.accept(MediaType.APPLICATION_JSON)
+				.awaitExchange()
+				.awaitBody<Banner>()
+		return listOf(banner1, banner2)
+	}
+
+	@GetMapping("/parallel")
+	suspend fun parallel(): List<Banner> = coroutineScope {
+		val deferredBanner1: Deferred<Banner> = async {
+			client
+					.get()
+					.uri("/suspend")
+					.accept(MediaType.APPLICATION_JSON)
+					.awaitExchange()
+					.awaitBody<Banner>()
+		}
+		val deferredBanner2: Deferred<Banner> = async {
+			client
+					.get()
+					.uri("/suspend")
+					.accept(MediaType.APPLICATION_JSON)
+					.awaitExchange()
+					.awaitBody<Banner>()
+		}
+		listOf(deferredBanner1.await(), deferredBanner2.await())
+	}
+
+	@GetMapping("/error")
+	suspend fun error() {
+		throw IllegalStateException()
+	}
+
+	@GetMapping("/cancel")
+	suspend fun cancel() {
+		throw CancellationException()
+	}
+
+}
+----
+
+View rendering with a `@Controller` is also supported.
+
+[source,kotlin,indent=0]
+----
+@Controller
+class CoroutinesViewController(banner: Banner) {
+
+	@GetMapping("/")
+	suspend fun render(model: Model): String {
+		delay(10)
+		model["banner"] = banner
+		return "index"
+	}
+}
+----
+
+=== WebFlux.fn
+
+Here is an example of Coroutines router definined via the {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
+
+[source,kotlin,indent=0]
+----
+@Configuration
+class RouterConfiguration {
+
+	@Bean
+	fun mainRouter(userHandler: UserHandler) = coRouter {
+		GET("/", userHandler::listView)
+		GET("/api/user", userHandler::listApi)
+	}
+}
+----
+
+[source,kotlin,indent=0]
+----
+class UserHandler(builder: WebClient.Builder) {
+
+	private val client = builder.baseUrl("...").build()
+
+	suspend fun listView(request: ServerRequest): ServerResponse =
+			ServerResponse.ok().renderAndAwait("users", mapOf("users" to
+			client.get().uri("...").awaitExchange().awaitBody<User>()))
+
+	suspend fun listApi(request: ServerRequest): ServerResponse =
+				ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).bodyAndAwait(
+				client.get().uri("...").awaitExchange().awaitBody<User>())
+}
+----
+
+
 
 [[kotlin-spring-projects-in-kotlin]]
 == Spring Projects in Kotlin
 
-This section provides some specific hints and recommendations worth
-for developing Spring projects in Kotlin.
+This section provides some specific hints and recommendations worth for developing Spring projects
+in Kotlin.
 
 
 
 === Final by Default
 
 By default, https://discuss.kotlinlang.org/t/classes-final-by-default/166[all classes in Kotlin are `final`].
-The `open` modifier on a class is the opposite of Java's `final`: It allows others to
-inherit from this class. This also applies to member functions, in that they need to be marked as `open` to
-be overridden.
+The `open` modifier on a class is the opposite of Java's `final`: It allows others to inherit from this
+class. This also applies to member functions, in that they need to be marked as `open` to be overridden.
 
-While Kotlin's JVM-friendly design is generally frictionless with Spring,
-this specific Kotlin feature can prevent the application from starting, if this fact is not taken into
-consideration. This is because Spring beans
-(such as `@Configuration` classes which need to be inherited at runtime for technical reasons) are normally proxied by CGLIB.
-The workaround was to add an `open` keyword on each class and member
-function of Spring beans that are proxied by CGLIB (such as `@Configuration` classes), which can
+While Kotlin's JVM-friendly design is generally frictionless with Spring, this specific Kotlin feature
+can prevent the application from starting, if this fact is not taken into consideration. This is because
+Spring beans (such as `@Configuration` classes which need to be inherited at runtime for technical
+reasons) are normally proxied by CGLIB. The workaround was to add an `open` keyword on each class and
+member function of Spring beans that are proxied by CGLIB (such as `@Configuration` classes), which can
 quickly become painful and is against the Kotlin principle of keeping code concise and predictable.
 
 Fortunately, Kotlin now provides a
@@ -404,7 +608,7 @@ Meta-annotations support means that types annotated with `@Configuration`, `@Con
 `@RestController`, `@Service`, or `@Repository` are automatically opened since these
 annotations are meta-annotated with `@Component`.
 
-http://start.spring.io/#!language=kotlin[start.spring.io] enables it by default, so, in practice,
+https://start.spring.io/#!language=kotlin[start.spring.io] enables it by default, so, in practice,
 you can write your Kotlin beans without any additional `open` keyword, as in Java.
 
 
@@ -449,15 +653,16 @@ the https://kotlinlang.org/docs/reference/compiler-plugins.html#how-to-use-no-ar
 plugin.
 
 NOTE: As of the Kay release train, Spring Data supports Kotlin immutable class instances and
-does not require the `kotlin-noarg` plugin if the module uses Spring Data object
-mappings (such as MongoDB, Redis, Cassandra, and others).
+does not require the `kotlin-noarg` plugin if the module uses Spring Data object mappings
+(such as MongoDB, Redis, Cassandra, and others).
 
 
 
 === Injecting Dependencies
 
-Our recommendation is to try and favor constructor injection with `val` read-only (and non-nullable when possible)
-https://kotlinlang.org/docs/reference/properties.html[properties], as the following example shows:
+Our recommendation is to try and favor constructor injection with `val` read-only (and
+non-nullable when possible) https://kotlinlang.org/docs/reference/properties.html[properties],
+as the following example shows:
 
 [source,kotlin,indent=0]
 ----
@@ -468,9 +673,9 @@ https://kotlinlang.org/docs/reference/properties.html[properties], as the follow
 	)
 ----
 
-NOTE: As of Spring Framework 4.3, classes with a single constructor have their
-parameters automatically autowired, that's why there is no need for an
-explicit `@Autowired constructor` in the example shown above.
+NOTE: As of Spring Framework 4.3, classes with a single constructor have their parameters
+automatically autowired, that's why there is no need for an explicit `@Autowired constructor`
+in the example shown above.
 
 If you really need to use field injection, you can use the `lateinit var` construct,
 as the following example shows:
@@ -493,13 +698,14 @@ as the following example shows:
 === Injecting Configuration Properties
 
 In Java, you can inject configuration properties by using annotations (such as `@Value("${property}")`).
-However, in Kotlin, `$` is a reserved character that is used for https://kotlinlang.org/docs/reference/idioms.html#string-interpolation[string interpolation].
+However, in Kotlin, `$` is a reserved character that is used for
+https://kotlinlang.org/docs/reference/idioms.html#string-interpolation[string interpolation].
 
 Therefore, if you wish to use the `@Value` annotation in Kotlin, you need to escape the `$`
 character by writing `@Value("\${property}")`.
 
-As an alternative, you can customize the properties placeholder prefix by declaring
-the following configuration beans:
+As an alternative, you can customize the properties placeholder prefix by declaring the
+following configuration beans:
 
 [source,kotlin,indent=0]
 ----
@@ -509,8 +715,8 @@ the following configuration beans:
 	}
 ----
 
-You can customize existing code (such as Spring Boot actuators or `@LocalServerPort`) that uses the `${...}` syntax,
-with configuration beans, as the following example shows:
+You can customize existing code (such as Spring Boot actuators or `@LocalServerPort`)
+that uses the `${...}` syntax, with configuration beans, as the following example shows:
 
 [source,kotlin,indent=0]
 ----
@@ -526,35 +732,38 @@ with configuration beans, as the following example shows:
 
 NOTE: If you use Spring Boot, you can use
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]
-instead of `@Value` annotations. However, currently, this only works with `lateinit` or nullable `var`
-properties (we recommended the former), since immutable classes initialized by
-constructors are not yet supported.
-See these issues about https://github.com/spring-projects/spring-boot/issues/8762[`@ConfigurationProperties` binding for immutable POJOs]
+instead of `@Value` annotations. However, currently, this only works with `lateinit` or
+nullable `var` properties (we recommended the former), since immutable classes initialized
+by constructors are not yet supported. See these issues about
+https://github.com/spring-projects/spring-boot/issues/8762[`@ConfigurationProperties` binding for immutable POJOs]
 and https://github.com/spring-projects/spring-boot/issues/1254[`@ConfigurationProperties` binding on interfaces]
 for more details.
 
 
+
 === Checked Exceptions
 
-Java and https://kotlinlang.org/docs/reference/exceptions.html[Kotlin exception handling] are pretty close, with the main
-difference being that Kotlin treats all exceptions as unchecked exceptions. However, when using proxied objects
-(for example classes or methods annotated with `@Transactional`), checked exceptions thrown will be wrapped by default in
+Java and https://kotlinlang.org/docs/reference/exceptions.html[Kotlin exception handling]
+are pretty close, with the main difference being that Kotlin treats all exceptions as
+unchecked exceptions. However, when using proxied objects (for example classes or methods
+annotated with `@Transactional`), checked exceptions thrown will be wrapped by default in
 an `UndeclaredThrowableException`.
 
-To get the original exception thrown like in Java, methods should be annotated with https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-throws/index.html[`@Throws`]
+To get the original exception thrown like in Java, methods should be annotated with
+https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-throws/index.html[`@Throws`]
 to specify explicitly the checked exceptions thrown (for example `@Throws(IOException::class)`).
+
 
 
 === Annotation Array Attributes
 
 Kotlin annotations are mostly similar to Java annotations, but array attributes (which are
 extensively used in Spring) behave differently. As explained in
-https://kotlinlang.org/docs/reference/annotations.html[Kotlin documentation]
-you can omit the `value` attribute name, unlike other attributes, and
-specify it as a `vararg` parameter.
+https://kotlinlang.org/docs/reference/annotations.html[Kotlin documentation] you can omit
+the `value` attribute name, unlike other attributes, and specify it as a `vararg` parameter.
 
-To understand what that means, consider `@RequestMapping` (which is one
-of the most widely used Spring annotations) as an example. This Java annotation is declared as follows:
+To understand what that means, consider `@RequestMapping` (which is one of the most widely
+used Spring annotations) as an example. This Java annotation is declared as follows:
 
 [source,java,indent=0]
 ----
@@ -573,14 +782,14 @@ of the most widely used Spring annotations) as an example. This Java annotation 
 ----
 
 The typical use case for `@RequestMapping` is to map a handler method to a specific path
-and method. In Java, you can specify a single value for the
-annotation array attribute, and it is automatically converted to an array.
+and method. In Java, you can specify a single value for the annotation array attribute,
+and it is automatically converted to an array.
 
 That is why one can write
 `@RequestMapping(value = "/toys", method = RequestMethod.GET)` or
 `@RequestMapping(path = "/toys", method = RequestMethod.GET)`.
 
-However, in Kotlin 1.2+, you must write `@RequestMapping("/toys", method = [RequestMethod.GET])`
+However, in Kotlin, you must write `@RequestMapping("/toys", method = [RequestMethod.GET])`
 or `@RequestMapping(path = ["/toys"], method = [RequestMethod.GET])` (square brackets need
 to be specified with named array attributes).
 
@@ -594,14 +803,16 @@ all HTTP methods will be matched, not only the `GET` one.
 
 === Testing
 
-This section addresses testing with the combination of Kotlin and Spring Framework. The recommended testing framework
-is https://junit.org/junit5/[JUnit 5], as well as https://mockk.io/[Mockk] for mocking.
+This section addresses testing with the combination of Kotlin and Spring Framework.
+The recommended testing framework is https://junit.org/junit5/[JUnit 5], as well as
+https://mockk.io/[Mockk] for mocking.
 
 
 ==== Constructor injection
 
-As described in the <<testing#testcontext-junit-jupiter-di#spring-web-reactive,dedicated section>>, JUnit 5 allows
-constructor injection of beans which is pretty useful with Kotlin in order to use `val` instead of `lateinit var`.
+As described in the <<testing#testcontext-junit-jupiter-di#spring-web-reactive, dedicated section>>,
+JUnit 5 allows constructor injection of beans which is pretty useful with Kotlin
+in order to use `val` instead of `lateinit var`.
 
 
 ====
@@ -636,12 +847,11 @@ class OrderServiceIntegrationTests @Autowired constructor(
 
 Kotlin lets you specify meaningful test function names between backticks (```).
 As of JUnit 5, Kotlin test classes can use the `@TestInstance(TestInstance.Lifecycle.PER_CLASS)`
-annotation to enable a single instantiation of test classes, which allows the use of `@BeforeAll` and `@AfterAll`
-annotations on non-static methods, which is a good fit for Kotlin.
+annotation to enable a single instantiation of test classes, which allows the use of `@BeforeAll`
+and `@AfterAll` annotations on non-static methods, which is a good fit for Kotlin.
 
-You can also change the default behavior to `PER_CLASS` thanks to a
-`junit-platform.properties` file with a
-`junit.jupiter.testinstance.lifecycle.default = per_class` property.
+You can also change the default behavior to `PER_CLASS` thanks to a `junit-platform.properties`
+file with a `junit.jupiter.testinstance.lifecycle.default = per_class` property.
 
 The following example demonstrates `@BeforeAll` and `@AfterAll` annotations on non-static methods:
 
@@ -676,7 +886,6 @@ class IntegrationTests {
 ----
 
 
-
 ==== Specification-like Tests
 
 You can create specification-like tests with JUnit 5 and Kotlin.
@@ -707,15 +916,15 @@ class SpecificationLikeTests {
 ----
 
 
-
 [[kotlin-webtestclient-issue]]
 ==== `WebTestClient` Type Inference Issue in Kotlin
 
 Due to a https://youtrack.jetbrains.com/issue/KT-5464[type inference issue], you must
-use the Kotlin `expectBody` extension (such as `.expectBody<String>().isEqualTo("toys")`), since it
-provides a workaround for the Kotlin issue with the Java API.
+use the Kotlin `expectBody` extension (such as `.expectBody<String>().isEqualTo("toys")`),
+since it provides a workaround for the Kotlin issue with the Java API.
 
 See also the related https://jira.spring.io/browse/SPR-16057[SPR-16057] issue.
+
 
 
 
@@ -726,16 +935,18 @@ The easiest way to learn how to build a Spring application with Kotlin is to fol
 https://spring.io/guides/tutorials/spring-boot-kotlin/[the dedicated tutorial].
 
 
+
 === `start.spring.io`
 
 The easiest way to start a new Spring Framework 5 project in Kotlin is to create a new Spring
 Boot 2 project on https://start.spring.io/#!language=kotlin[start.spring.io].
 
 
+
 === Choosing the Web Flavor
 
-Spring Framework now comes with two different web stacks: <<web#mvc,Spring MVC>> and
-<<web-reactive#spring-web-reactive,Spring WebFlux>>.
+Spring Framework now comes with two different web stacks: <<web#mvc, Spring MVC>> and
+<<web-reactive#spring-web-reactive, Spring WebFlux>>.
 
 Spring WebFlux is recommended if you want to create applications that will deal with latency,
 long-lived connections, streaming scenarios or if you want to use the web functional
@@ -746,18 +957,20 @@ MVC and its annotation-based programming model is the recommended choice.
 
 
 
+
 [[kotlin-resources]]
 == Resources
 
 We recommend the following resources for people learning how to build applications with
 Kotlin and the Spring Framework:
 
-* http://kotlinlang.org/docs/reference/[Kotlin language reference]
-* http://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
+* https://kotlinlang.org/docs/reference/[Kotlin language reference]
+* https://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
 * https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow, with `spring` and `kotlin` tags]
 * https://try.kotlinlang.org/[Try Kotlin in your browser]
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]
 * https://kotlin.link/[Awesome Kotlin]
+
 
 
 === Examples
@@ -794,4 +1007,3 @@ The following list categorizes the pending issues related to Spring and Kotlin s
 ** https://youtrack.jetbrains.com/issue/KT-14984[Impossible to pass not all SAM argument as function]
 ** https://youtrack.jetbrains.com/issue/KT-15125[Support JSR 223 bindings directly via script variables]
 ** https://youtrack.jetbrains.com/issue/KT-6653[Kotlin properties do not override Java-style getters and setters]
-

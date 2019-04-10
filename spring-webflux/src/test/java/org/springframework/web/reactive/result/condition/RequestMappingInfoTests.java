@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
 
 import static java.util.Arrays.asList;
@@ -61,7 +62,8 @@ public class RequestMappingInfoTests {
 	public void createEmpty() {
 		RequestMappingInfo info = paths().build();
 
-		assertEquals(0, info.getPatternsCondition().getPatterns().size());
+		PathPattern emptyPattern = (new PathPatternParser()).parse("");
+		assertEquals(Collections.singleton(emptyPattern), info.getPatternsCondition().getPatterns());
 		assertEquals(0, info.getMethodsCondition().getMethods().size());
 		assertEquals(true, info.getConsumesCondition().isEmpty());
 		assertEquals(true, info.getProducesCondition().isEmpty());
@@ -283,7 +285,7 @@ public class RequestMappingInfoTests {
 	@Ignore
 	public void preFlightRequest() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("/foo")
-				.header("Origin", "http://domain.com")
+				.header("Origin", "https://domain.com")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "POST")
 				);
 

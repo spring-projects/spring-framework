@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.http.converter.json;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -62,6 +63,8 @@ import org.springframework.http.HttpLogging;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
@@ -614,8 +617,8 @@ public class Jackson2ObjectMapperBuilder {
 		ObjectMapper mapper;
 		if (this.createXmlMapper) {
 			mapper = (this.defaultUseWrapper != null ?
-					new XmlObjectMapperInitializer().create(this.defaultUseWrapper) :
-					new XmlObjectMapperInitializer().create());
+					new XmlObjectMapperInitializer().create(this.defaultUseWrapper, this.factory) :
+					new XmlObjectMapperInitializer().create(this.factory));
 		}
 		else {
 			mapper = (this.factory != null ? new ObjectMapper(this.factory) : new ObjectMapper());
@@ -632,21 +635,27 @@ public class Jackson2ObjectMapperBuilder {
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
+		MultiValueMap<Object, Module> modulesToRegister = new LinkedMultiValueMap<>();
 		if (this.findModulesViaServiceLoader) {
-			objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
+			ObjectMapper.findModules(this.moduleClassLoader).forEach(module -> registerModule(module, modulesToRegister));
 		}
 		else if (this.findWellKnownModules) {
-			registerWellKnownModulesIfAvailable(objectMapper);
+			registerWellKnownModulesIfAvailable(modulesToRegister);
 		}
 
 		if (this.modules != null) {
-			objectMapper.registerModules(this.modules);
+			this.modules.forEach(module -> registerModule(module, modulesToRegister));
 		}
 		if (this.moduleClasses != null) {
-			for (Class<? extends Module> module : this.moduleClasses) {
-				objectMapper.registerModule(BeanUtils.instantiateClass(module));
+			for (Class<? extends Module> moduleClass : this.moduleClasses) {
+				registerModule(BeanUtils.instantiateClass(moduleClass), modulesToRegister);
 			}
 		}
+		List<Module> modules = new ArrayList<>();
+		for (List<Module> nestedModules : modulesToRegister.values()) {
+			modules.addAll(nestedModules);
+		}
+		objectMapper.registerModules(modules);
 
 		if (this.dateFormat != null) {
 			objectMapper.setDateFormat(this.dateFormat);
@@ -698,6 +707,15 @@ public class Jackson2ObjectMapperBuilder {
 		}
 	}
 
+	private void registerModule(Module module, MultiValueMap<Object, Module> modulesToRegister) {
+		if (module.getTypeId() == null) {
+			modulesToRegister.add(SimpleModule.class.getName(), module);
+		}
+		else {
+			modulesToRegister.set(module.getTypeId(), module);
+		}
+	}
+
 
 	// Any change to this method should be also applied to spring-jms and spring-messaging
 	// MappingJackson2MessageConverter default constructors
@@ -744,20 +762,22 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void registerWellKnownModulesIfAvailable(ObjectMapper objectMapper) {
+	private void registerWellKnownModulesIfAvailable(MultiValueMap<Object, Module> modulesToRegister) {
 		try {
-			Class<? extends Module> jdk8Module = (Class<? extends Module>)
+			Class<? extends Module> jdk8ModuleClass = (Class<? extends Module>)
 					ClassUtils.forName("com.fasterxml.jackson.datatype.jdk8.Jdk8Module", this.moduleClassLoader);
-			objectMapper.registerModule(BeanUtils.instantiateClass(jdk8Module));
+			Module jdk8Module = BeanUtils.instantiateClass(jdk8ModuleClass);
+			modulesToRegister.set(jdk8Module.getTypeId(), jdk8Module);
 		}
 		catch (ClassNotFoundException ex) {
 			// jackson-datatype-jdk8 not available
 		}
 
 		try {
-			Class<? extends Module> javaTimeModule = (Class<? extends Module>)
+			Class<? extends Module> javaTimeModuleClass = (Class<? extends Module>)
 					ClassUtils.forName("com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", this.moduleClassLoader);
-			objectMapper.registerModule(BeanUtils.instantiateClass(javaTimeModule));
+			Module javaTimeModule = BeanUtils.instantiateClass(javaTimeModuleClass);
+			modulesToRegister.set(javaTimeModule.getTypeId(), javaTimeModule);
 		}
 		catch (ClassNotFoundException ex) {
 			// jackson-datatype-jsr310 not available
@@ -766,9 +786,10 @@ public class Jackson2ObjectMapperBuilder {
 		// Joda-Time present?
 		if (ClassUtils.isPresent("org.joda.time.LocalDate", this.moduleClassLoader)) {
 			try {
-				Class<? extends Module> jodaModule = (Class<? extends Module>)
+				Class<? extends Module> jodaModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.joda.JodaModule", this.moduleClassLoader);
-				objectMapper.registerModule(BeanUtils.instantiateClass(jodaModule));
+				Module jodaModule = BeanUtils.instantiateClass(jodaModuleClass);
+				modulesToRegister.set(jodaModule.getTypeId(), jodaModule);
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-joda not available
@@ -778,9 +799,10 @@ public class Jackson2ObjectMapperBuilder {
 		// Kotlin present?
 		if (KotlinDetector.isKotlinPresent()) {
 			try {
-				Class<? extends Module> kotlinModule = (Class<? extends Module>)
+				Class<? extends Module> kotlinModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);
-				objectMapper.registerModule(BeanUtils.instantiateClass(kotlinModule));
+				Module kotlinModule = BeanUtils.instantiateClass(kotlinModuleClass);
+				modulesToRegister.set(kotlinModule.getTypeId(), kotlinModule);
 			}
 			catch (ClassNotFoundException ex) {
 				if (!kotlinWarningLogged) {
@@ -832,14 +854,24 @@ public class Jackson2ObjectMapperBuilder {
 
 	private static class XmlObjectMapperInitializer {
 
-		public ObjectMapper create() {
-			return new XmlMapper(StaxUtils.createDefensiveInputFactory());
+		public ObjectMapper create(@Nullable JsonFactory factory) {
+			if (factory != null) {
+				return new XmlMapper((XmlFactory) factory);
+			}
+			else {
+				return new XmlMapper(StaxUtils.createDefensiveInputFactory());
+			}
 		}
 
-		public ObjectMapper create(boolean defaultUseWrapper) {
+		public ObjectMapper create(boolean defaultUseWrapper, @Nullable JsonFactory factory) {
 			JacksonXmlModule module = new JacksonXmlModule();
 			module.setDefaultUseWrapper(defaultUseWrapper);
-			return new XmlMapper(new XmlFactory(StaxUtils.createDefensiveInputFactory()), module);
+			if (factory != null) {
+				return new XmlMapper((XmlFactory) factory, module);
+			}
+			else {
+				return new XmlMapper(new XmlFactory(StaxUtils.createDefensiveInputFactory()), module);
+			}
 		}
 	}
 

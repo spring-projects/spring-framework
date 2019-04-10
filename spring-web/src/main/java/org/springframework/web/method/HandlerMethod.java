@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -89,6 +90,8 @@ public class HandlerMethod {
 	@Nullable
 	private volatile List<Annotation[][]> interfaceParameterAnnotations;
 
+	private final String description;
+
 
 	/**
 	 * Create an instance from a bean instance and a method.
@@ -103,6 +106,7 @@ public class HandlerMethod {
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
+		this.description = initDescription(this.beanType, this.method);
 	}
 
 	/**
@@ -119,6 +123,7 @@ public class HandlerMethod {
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
+		this.description = initDescription(this.beanType, this.method);
 	}
 
 	/**
@@ -141,6 +146,7 @@ public class HandlerMethod {
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
+		this.description = initDescription(this.beanType, this.method);
 	}
 
 	/**
@@ -156,6 +162,7 @@ public class HandlerMethod {
 		this.parameters = handlerMethod.parameters;
 		this.responseStatus = handlerMethod.responseStatus;
 		this.responseStatusReason = handlerMethod.responseStatusReason;
+		this.description = handlerMethod.description;
 		this.resolvedFromHandlerMethod = handlerMethod.resolvedFromHandlerMethod;
 	}
 
@@ -174,6 +181,7 @@ public class HandlerMethod {
 		this.responseStatus = handlerMethod.responseStatus;
 		this.responseStatusReason = handlerMethod.responseStatusReason;
 		this.resolvedFromHandlerMethod = handlerMethod;
+		this.description = handlerMethod.description;
 	}
 
 	private MethodParameter[] initMethodParameters() {
@@ -196,6 +204,14 @@ public class HandlerMethod {
 			this.responseStatus = annotation.code();
 			this.responseStatusReason = annotation.reason();
 		}
+	}
+
+	private static String initDescription(Class<?> beanType, Method method) {
+		StringJoiner joiner = new StringJoiner(", ", "(", ")");
+		for (Class<?> paramType : method.getParameterTypes()) {
+			joiner.add(paramType.getSimpleName());
+		}
+		return beanType.getName() + "#" + method.getName() + joiner.toString();
 	}
 
 
@@ -389,7 +405,7 @@ public class HandlerMethod {
 
 	@Override
 	public String toString() {
-		return this.method.toGenericString();
+		return this.description;
 	}
 
 

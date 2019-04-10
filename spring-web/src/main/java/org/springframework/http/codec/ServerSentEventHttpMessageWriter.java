@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -143,30 +143,32 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				sb.append("data:");
 			}
 
-			return Flux.concat(encodeText(sb, mediaType, factory),
+			Flux<DataBuffer> flux = Flux.concat(
+					encodeText(sb, mediaType, factory),
 					encodeData(data, valueType, mediaType, factory, hints),
-					encodeText("\n", mediaType, factory))
-					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+					encodeText("\n", mediaType, factory));
+
+			return flux.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		});
 	}
 
-	private void writeField(String fieldName, Object fieldValue, StringBuilder stringBuilder) {
-		stringBuilder.append(fieldName);
-		stringBuilder.append(':');
-		stringBuilder.append(fieldValue.toString());
-		stringBuilder.append("\n");
+	private void writeField(String fieldName, Object fieldValue, StringBuilder sb) {
+		sb.append(fieldName);
+		sb.append(':');
+		sb.append(fieldValue.toString());
+		sb.append("\n");
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> encodeData(@Nullable T data, ResolvableType valueType,
+	private <T> Flux<DataBuffer> encodeData(@Nullable T dataValue, ResolvableType valueType,
 			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
-		if (data == null) {
+		if (dataValue == null) {
 			return Flux.empty();
 		}
 
-		if (data instanceof String) {
-			String text = (String) data;
+		if (dataValue instanceof String) {
+			String text = (String) dataValue;
 			return Flux.from(encodeText(StringUtils.replace(text, "\n", "\ndata:") + "\n", mediaType, factory));
 		}
 
@@ -175,15 +177,14 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 		}
 
 		return ((Encoder<T>) this.encoder)
-				.encode(Mono.just(data), factory, valueType, mediaType, hints)
+				.encode(Mono.just(dataValue), factory, valueType, mediaType, hints)
 				.concatWith(encodeText("\n", mediaType, factory));
 	}
 
 	private Mono<DataBuffer> encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
 		Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
 		byte[] bytes = text.toString().getBytes(mediaType.getCharset());
-		return Mono.defer(() ->
-				Mono.just(bufferFactory.allocateBuffer(bytes.length).write(bytes)));
+		return Mono.just(bufferFactory.wrap(bytes)); // wrapping, not allocating
 	}
 
 	@Override

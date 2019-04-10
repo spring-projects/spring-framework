@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.List;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
@@ -62,6 +63,22 @@ public class PathResourceResolverTests {
 		Resource actual = this.resolver.resolveResource(null, path, locations, null).block(TIMEOUT);
 
 		assertNotNull(actual);
+	}
+
+	@Test // gh-22272
+	public void resolveWithEncodedPath() throws IOException {
+		Resource classpathLocation = new ClassPathResource("test/", PathResourceResolver.class);
+		testWithEncodedPath(classpathLocation);
+		testWithEncodedPath(new FileUrlResource(classpathLocation.getURL()));
+	}
+
+	private void testWithEncodedPath(Resource location) throws IOException {
+		String path = "foo%20foo.txt";
+		List<Resource> locations = singletonList(location);
+		Resource actual = this.resolver.resolveResource(null, path, locations, null).block(TIMEOUT);
+
+		assertNotNull(actual);
+		assertEquals("foo foo.txt", actual.getFile().getName());
 	}
 
 	@Test

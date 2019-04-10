@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -94,8 +94,8 @@ public class UriUtilsTests {
 	@Test
 	public void encode() {
 		assertEquals("Invalid encoded result", "foo", UriUtils.encode("foo", CHARSET));
-		assertEquals("Invalid encoded result", "http%3A%2F%2Fexample.com%2Ffoo%20bar",
-				UriUtils.encode("http://example.com/foo bar", CHARSET));
+		assertEquals("Invalid encoded result", "https%3A%2F%2Fexample.com%2Ffoo%20bar",
+				UriUtils.encode("https://example.com/foo bar", CHARSET));
 	}
 
 	@Test

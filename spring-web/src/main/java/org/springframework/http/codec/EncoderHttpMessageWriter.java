@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
@@ -124,12 +125,19 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 					}))
 					.flatMap(buffer -> {
 						headers.setContentLength(buffer.readableByteCount());
-						return message.writeWith(Mono.just(buffer));
+						return message.writeWith(
+								Mono.fromCallable(() -> buffer)
+										.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release));
 					});
 		}
 
-		return (isStreamingMediaType(contentType) ?
-				message.writeAndFlushWith(body.map(Flux::just)) : message.writeWith(body));
+		if (isStreamingMediaType(contentType)) {
+			return message.writeAndFlushWith(body.map(buffer ->
+					Mono.fromCallable(() -> buffer)
+							.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release)));
+		}
+
+		return message.writeWith(body);
 	}
 
 	@Nullable
@@ -160,10 +168,16 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	}
 
 	private boolean isStreamingMediaType(@Nullable MediaType contentType) {
-		return (contentType != null && this.encoder instanceof HttpMessageEncoder &&
-				((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes().stream()
-						.anyMatch(streamingMediaType -> contentType.isCompatibleWith(streamingMediaType) &&
-								contentType.getParameters().entrySet().containsAll(streamingMediaType.getParameters().keySet())));
+		if (contentType == null || !(this.encoder instanceof HttpMessageEncoder)) {
+			return false;
+		}
+		for (MediaType mediaType : ((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes()) {
+			if (contentType.isCompatibleWith(mediaType) &&
+					contentType.getParameters().entrySet().containsAll(mediaType.getParameters().keySet())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -86,7 +86,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, true);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
+				Flux.from(input), this.jsonFactory, getObjectMapper(), true);
 		return decodeInternal(tokens, elementType, mimeType, hints);
 	}
 
@@ -94,7 +95,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, false);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
+				Flux.from(input), this.jsonFactory, getObjectMapper(), false);
 		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
 	}
 
@@ -113,7 +115,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 				getObjectMapper().readerWithView(jsonView).forType(javaType) :
 				getObjectMapper().readerFor(javaType));
 
-		return tokens.flatMap(tokenBuffer -> {
+		return tokens.handle((tokenBuffer, sink) -> {
 			try {
 				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
 				if (!Hints.isLoggingSuppressed(hints)) {
@@ -122,16 +124,18 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 						return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
 					});
 				}
-				return Mono.justOrEmpty(value);
+				if (value != null) {
+					sink.next(value);
+				}
 			}
 			catch (InvalidDefinitionException ex) {
-				return Mono.error(new CodecException("Type definition error: " + ex.getType(), ex));
+				sink.error(new CodecException("Type definition error: " + ex.getType(), ex));
 			}
 			catch (JsonProcessingException ex) {
-				return Mono.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
+				sink.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
 			}
 			catch (IOException ex) {
-				return Mono.error(new DecodingException("I/O error while parsing input stream", ex));
+				sink.error(new DecodingException("I/O error while parsing input stream", ex));
 			}
 		});
 	}

@@ -5,6 +5,7 @@
 
 
 
+
 [[xsd-schemas]]
 == XML Schemas
 
@@ -27,14 +28,15 @@ correct schema so that the tags in the `util` namespace are available to you):
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:util="http://www.springframework.org/schema/util"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"__>
+		xmlns:util="http://www.springframework.org/schema/util"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
 			<!-- bean definitions here -->
+
 	</beans>
 ----
-
 
 
 [[xsd-schemas-util-constant]]
@@ -71,8 +73,6 @@ developer's intent ("`inject this constant value`"), and it reads better:
 		</property>
 	</bean>
 ----
-
-
 
 [[xsd-schemas-util-frfb]]
 ===== Setting a Bean Property or Constructor Argument from a Field Value
@@ -127,10 +127,9 @@ described in the API documentation for the
 class.
 
 Injecting enumeration values into beans as either property or constructor arguments is
-easy to do in Spring. You do not actually have to do anything or know
-anything about the Spring internals (or even about classes such as the
-`FieldRetrievingFactoryBean`). The following example enumeration shows how easy injecting an
-enum value is:
+easy to do in Spring. You do not actually have to do anything or know anything about
+the Spring internals (or even about classes such as the `FieldRetrievingFactoryBean`).
+The following example enumeration shows how easy injecting an enum value is:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -168,7 +167,6 @@ Now consider the following setter of type `PersistenceContextType` and the corre
 		<property name="persistenceContextType" value="TRANSACTION"/>
 	</bean>
 ----
-
 
 
 [[xsd-schemas-util-property-path]]
@@ -327,7 +325,6 @@ The following example uses a `util:properties` element to make a more concise re
 ----
 
 
-
 [[xsd-schemas-util-list]]
 ==== Using `<util:list/>`
 
@@ -386,7 +383,6 @@ following configuration:
 If no `list-class` attribute is supplied, the container chooses a `List` implementation.
 
 
-
 [[xsd-schemas-util-map]]
 ==== Using `<util:map/>`
 
@@ -443,7 +439,6 @@ following configuration:
 ----
 
 If no `'map-class'` attribute is supplied, the container chooses a `Map` implementation.
-
 
 
 [[xsd-schemas-util-set]]
@@ -524,11 +519,13 @@ are available to you):
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:aop="http://www.springframework.org/schema/aop"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"__>
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- bean definitions here -->
+
 	</beans>
 ----
 
@@ -549,78 +546,75 @@ available to you:
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:context="http://www.springframework.org/schema/context"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"__>
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
 		<!-- bean definitions here -->
+
 	</beans>
 ----
-
 
 
 [[xsd-schemas-context-pphc]]
 ==== Using `<property-placeholder/>`
 
 This element activates the replacement of `${...}` placeholders, which are resolved against a
-specified properties file (as a <<core.adoc#resources,Spring resource location>>). This element
+specified properties file (as a <<core.adoc#resources, Spring resource location>>). This element
 is a convenience mechanism that sets up a <<core.adoc#beans-factory-placeholderconfigurer,
-`PropertySourcesPlaceholderConfigurer`>> for you. If you need more control over the
-`PropertySourcesPlaceholderConfigurer`, you can explicitly define one yourself.
-
+`PropertySourcesPlaceholderConfigurer`>> for you. If you need more control over the specific
+`PropertySourcesPlaceholderConfigurer` setup, you can explicitly define it as a bean yourself.
 
 
 [[xsd-schemas-context-ac]]
 ==== Using `<annotation-config/>`
 
-This element activates the Spring infrastructure to detect annotations in bean
-classes:
+This element activates the Spring infrastructure to detect annotations in bean classes:
 
-* Spring's <<core.adoc#beans-required-annotation, `@Required`>> and
-<<core.adoc#beans-annotation-config, `@Autowired`>>
-* JSR 250's `@PostConstruct`,
-`@PreDestroy` and `@Resource` (if available)
-* JPA's `@PersistenceContext` and
-`@PersistenceUnit` (if available).
+* Spring's <<core.adoc#beans-factory-metadata, `@Configuration`>> model
+* <<core.adoc#beans-annotation-config, `@Autowired`/`@Inject`>> and `@Value`
+* JSR-250's `@Resource`, `@PostConstruct` and `@PreDestroy` (if available)
+* JPA's `@PersistenceContext` and `@PersistenceUnit` (if available)
+* Spring's <<core.adoc#context-functionality-events-annotation, `@EventListener`>>
 
-Alternatively, you can choose to explicitly activate the
-individual `BeanPostProcessors` for those annotations.
+Alternatively, you can choose to explicitly activate the individual `BeanPostProcessors`
+for those annotations.
 
 NOTE: This element does not activate processing of Spring's
-<<data-access.adoc#transaction-declarative-annotations, `@Transactional`>> annotation. You can use the
-<<data-access.adoc#tx-decl-explained, `<tx:annotation-driven/>`>> element for that purpose.
-
+<<data-access.adoc#transaction-declarative-annotations, `@Transactional`>> annotation;
+you can use the <<data-access.adoc#tx-decl-explained, `<tx:annotation-driven/>`>>
+element for that purpose. Similarly, Spring's
+<<integration.adoc#cache-annotations, caching annotations>> need to be explicitly
+<<integration.adoc#cache-annotation-enable, enabled>> as well.
 
 
 [[xsd-schemas-context-component-scan]]
 ==== Using `<component-scan/>`
 
-This element is detailed in <<core.adoc#beans-annotation-config,
-Annotation-based container configuration>>.
-
+This element is detailed in the section on <<core.adoc#beans-annotation-config,
+annotation-based container configuration>>.
 
 
 [[xsd-schemas-context-ltw]]
 ==== Using `<load-time-weaver/>`
 
-This element is detailed in <<core.adoc#aop-aj-ltw,
-Load-time weaving with AspectJ in the Spring Framework>>.
-
+This element is detailed in the section on <<core.adoc#aop-aj-ltw,
+load-time weaving with AspectJ in the Spring Framework>>.
 
 
 [[xsd-schemas-context-sc]]
 ==== Using `<spring-configured/>`
 
-This element is detailed in <<core.adoc#aop-atconfigurable,
-Using AspectJ to dependency inject domain objects with Spring>>.
-
+This element is detailed in the section on <<core.adoc#aop-atconfigurable,
+using AspectJ to dependency inject domain objects with Spring>>.
 
 
 [[xsd-schemas-context-mbe]]
 ==== Using `<mbean-export/>`
 
-This element is detailed in <<integration.adoc#jmx-context-mbeanexport,
-Configuring annotation based MBean export>>.
+This element is detailed in the section on <<integration.adoc#jmx-context-mbeanexport,
+configuring annotation-based MBean export>>.
 
 
 
@@ -630,8 +624,8 @@ Configuring annotation based MBean export>>.
 Last but not least, we have the elements in the `beans` schema. These elements
 have been in Spring since the very dawn of the framework. Examples of the various elements
 in the `beans` schema are not shown here because they are quite comprehensively covered
-in <<core.adoc#beans-factory-properties-detailed,Dependencies and configuration in detail>>
-(and, indeed, in that entire <<core.adoc#beans,chapter>>).
+in <<core.adoc#beans-factory-properties-detailed, dependencies and configuration in detail>>
+(and, indeed, in that entire <<core.adoc#beans, chapter>>).
 
 Note that you can add zero or more key-value pairs to `<bean/>` XML definitions.
 What, if anything, is done with this extra metadata is totally up to your own custom
@@ -649,7 +643,7 @@ as it stands).
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 		<bean id="foo" class="x.y.Foo">
 			<meta key="cacheName" value="foo"/> <1>
@@ -660,10 +654,9 @@ as it stands).
 ----
 <1> This is the example `meta` element
 
+In the case of the preceding example, you could assume that there is some logic that consumes
+the bean definition and sets up some caching infrastructure that uses the supplied metadata.
 
-In the case of the preceding example, you could assume that there is some logic that
-consumes the bean definition and sets up some caching infrastructure that uses the supplied
-metadata.
 
 
 
@@ -683,11 +676,11 @@ Spring distribution, you should first read the appendix entitled <<xsd-config>>.
 
 To create new XML configuration extensions:
 
-. <<xsd-custom-schema,Author>> an XML schema to describe your custom element(s).
-. <<xsd-custom-namespacehandler,Code>> a custom `NamespaceHandler` implementation.
-. <<xsd-custom-parser,Code>> one or more `BeanDefinitionParser` implementations
+. <<xsd-custom-schema, Author>> an XML schema to describe your custom element(s).
+. <<xsd-custom-namespacehandler, Code>> a custom `NamespaceHandler` implementation.
+. <<xsd-custom-parser, Code>> one or more `BeanDefinitionParser` implementations
   (this is where the real work is done).
-. <<xsd-custom-registration,Register>> your new artifacts with Spring.
+. <<xsd-custom-registration, Register>> your new artifacts with Spring.
 
 For a unified example, we create an
 XML extension (a custom XML element) that lets us configure objects of the type
@@ -801,7 +794,7 @@ The `NamespaceHandler` interface features three methods:
 * `BeanDefinitionHolder decorate(Node, BeanDefinitionHolder, ParserContext)`: Called
   when Spring encounters an attribute or nested element of a different namespace.
   The decoration of one or more bean definitions is used (for example) with the
-  <<core.adoc#beans-factory-scopes,scopes that Spring supports>>.
+  <<core.adoc#beans-factory-scopes, scopes that Spring supports>>.
   We start by highlighting a simple example, without using decoration, after which
   we show decoration in a somewhat more advanced example.
 
@@ -823,7 +816,7 @@ use the `NamespaceHandlerSupport` class:
 	public class MyNamespaceHandler extends NamespaceHandlerSupport {
 
 		public void init() {
-			**registerBeanDefinitionParser("dateformat", new SimpleDateFormatBeanDefinitionParser());**
+			registerBeanDefinitionParser("dateformat", new SimpleDateFormatBeanDefinitionParser());
 		}
 
 	}
@@ -889,7 +882,6 @@ the basic grunt work of creating a single `BeanDefinition`.
 <2> We supply the `AbstractSingleBeanDefinitionParser` superclass with the type that our
 single `BeanDefinition` represents.
 
-
 In this simple case, this is all that we need to do. The creation of our single
 `BeanDefinition` is handled by the `AbstractSingleBeanDefinitionParser` superclass, as
 is the extraction and setting of the bean definition's unique identifier.
@@ -898,6 +890,7 @@ is the extraction and setting of the bean definition's unique identifier.
 
 [[xsd-custom-registration]]
 === Registering the Handler and the Schema
+
 The coding is finished. All that remains to be done is to make the Spring XML
 parsing infrastructure aware of our custom element. We do so by registering our custom
 `namespaceHandler` and custom XSD file in two special-purpose properties files. These
@@ -905,7 +898,6 @@ properties files are both placed in a `META-INF` directory in your application a
 can, for example, be distributed alongside your binary classes in a JAR file. The Spring
 XML parsing infrastructure automatically picks up your new extension by consuming
 these special properties files, the formats of which are detailed in the next two sections.
-
 
 
 [[xsd-custom-registration-spring-handlers]]
@@ -926,7 +918,6 @@ http\://www.mycompany.com/schema/myns=org.springframework.samples.xml.MyNamespac
 The first part (the key) of the key-value pair is the URI associated with your custom
 namespace extension and needs to exactly match exactly the value of the `targetNamespace`
 attribute, as specified in your custom XSD schema.
-
 
 
 [[xsd-custom-registration-spring-schemas]]
@@ -970,7 +961,7 @@ in a Spring XML configuration file:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:myns="http://www.mycompany.com/schema/myns"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.xsd">
 
 		<!-- as a top-level bean -->
@@ -995,7 +986,6 @@ in a Spring XML configuration file:
 This section presents some more detailed examples of custom XML extensions.
 
 
-
 [[xsd-custom-custom-nested]]
 ==== Nesting Custom Elements within Custom Elements
 
@@ -1010,7 +1000,7 @@ to satisfy a target of the following configuration:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:foo="http://www.foo.com/schema/component"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 			http://www.foo.com/schema/component http://www.foo.com/schema/component/component.xsd">
 
 		<foo:component id="bionic-family" name="Bionic-1">
@@ -1060,14 +1050,12 @@ The following listing shows the `Component` class:
 		public void setName(String name) {
 			this.name = name;
 		}
-
 	}
 ----
 
 The typical solution to this issue is to create a custom `FactoryBean` that exposes a
 setter property for the `components` property. The following listing shows such a custom
 `FactoryBean`:
-
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1107,15 +1095,14 @@ setter property for the `components` property. The following listing shows such 
 		public boolean isSingleton() {
 			return true;
 		}
-
 	}
 ----
 
-This works nicely, but it exposes a lot of Spring plumbing to the
-end user. What we are going to do is write a custom extension that hides away all of
-this Spring plumbing. If we stick to <<xsd-custom-introduction,the steps described
-previously>>, we start off by creating the XSD schema to define the structure of our
-custom tag, as the following listing shows:
+This works nicely, but it exposes a lot of Spring plumbing to the end user. What we are
+going to do is write a custom extension that hides away all of this Spring plumbing.
+If we stick to <<xsd-custom-introduction, the steps described previously>>, we start off
+by creating the XSD schema to define the structure of our custom tag, as the following
+listing shows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1141,7 +1128,8 @@ custom tag, as the following listing shows:
 	</xsd:schema>
 ----
 
-Again following <<xsd-custom-introduction,the process described earlier>>, we then create a custom `NamespaceHandler`:
+Again following <<xsd-custom-introduction, the process described earlier>>,
+we then create a custom `NamespaceHandler`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1155,13 +1143,12 @@ Again following <<xsd-custom-introduction,the process described earlier>>, we th
 		public void init() {
 			registerBeanDefinitionParser("component", new ComponentBeanDefinitionParser());
 		}
-
 	}
 ----
 
 Next up is the custom `BeanDefinitionParser`. Remember that we are creating
-`BeanDefinition` that describes a `ComponentFactoryBean`. The following listing shows our
-custom `BeanDefinitionParser`:
+a `BeanDefinition` that describes a `ComponentFactoryBean`. The following
+listing shows our custom `BeanDefinitionParser` implementation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1210,7 +1197,6 @@ custom `BeanDefinitionParser`:
 			}
 			factory.addPropertyValue("children", children);
 		}
-
 	}
 ----
 
@@ -1232,21 +1218,20 @@ http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd
 ----
 
 
-
 [[xsd-custom-custom-just-attributes]]
 ==== Custom Attributes on "`Normal`" Elements
 
-Writing your own custom parser and the associated artifacts is not hard. However, it is sometimes
-not the right thing to do. Consider a scenario where you need to add metadata to
-already existing bean definitions. In this case, you certainly do not want to have to
-write your own entire custom extension. Rather, you merely want to add an
-additional attribute to the existing bean definition element.
+Writing your own custom parser and the associated artifacts is not hard. However,
+it is sometimes not the right thing to do. Consider a scenario where you need to
+add metadata to already existing bean definitions. In this case, you certainly
+do not want to have to write your own entire custom extension. Rather, you merely
+want to add an additional attribute to the existing bean definition element.
 
-By way of another example, suppose that you define a bean
-definition for a service object that (unknown to it) accesses a clustered
-http://jcp.org/en/jsr/detail?id=107[JCache], and you want to ensure that the named
-JCache instance is eagerly started within the surrounding cluster. The following
-listing shows such a definition:
+By way of another example, suppose that you define a bean definition for a
+service object that (unknown to it) accesses a clustered
+https://jcp.org/en/jsr/detail?id=107[JCache], and you want to ensure that the
+named JCache instance is eagerly started within the surrounding cluster.
+The following listing shows such a definition:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1279,12 +1264,11 @@ JCache-initializing `BeanDefinition`. The following listing shows our `JCacheIni
 		public void initialize() {
 			// lots of JCache API calls to initialize the named cache...
 		}
-
 	}
 ----
 
-Now we can move onto the custom extension. First, we need to author the XSD schema that describes the
-custom attribute, as follows:
+Now we can move onto the custom extension. First, we need to author
+the XSD schema that describes the custom attribute, as follows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1320,9 +1304,9 @@ Next, we need to create the associated `NamespaceHandler`, as follows:
 	}
 ----
 
-Next, we need to create the parser. Note that, in this case, because we are going to parse an XML
-attribute, we write a `BeanDefinitionDecorator` rather than a `BeanDefinitionParser`.
-The following listing shows our `BeanDefinitionDecorator`:
+Next, we need to create the parser. Note that, in this case, because we are going to parse
+an XML attribute, we write a `BeanDefinitionDecorator` rather than a `BeanDefinitionParser`.
+The following listing shows our `BeanDefinitionDecorator` implementation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1376,7 +1360,6 @@ The following listing shows our `BeanDefinitionDecorator`:
 			}
 			return beanName;
 		}
-
 	}
 ----
 

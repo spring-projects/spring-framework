@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,12 +24,8 @@ import org.junit.Test;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.junit.Assert.*;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
 
 /**
  * Unit tests for {@link ProducesRequestCondition}.
@@ -84,6 +80,29 @@ public class ProducesRequestConditionTests {
 		assertNull(condition.getMatchingCondition(exchange));
 	}
 
+	@Test // gh-21670
+	public void matchWithParameters() {
+		String base = "application/atom+xml";
+		ProducesRequestCondition condition = new ProducesRequestCondition(base + ";type=feed");
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
+		assertNotNull("Declared parameter value must match if present in request",
+				condition.getMatchingCondition(exchange));
+
+		condition = new ProducesRequestCondition(base + ";type=feed");
+		exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=entry"));
+		assertNull("Declared parameter value must match if present in request",
+				condition.getMatchingCondition(exchange));
+
+		condition = new ProducesRequestCondition(base + ";type=feed");
+		exchange = MockServerWebExchange.from(get("/").header("Accept", base));
+		assertNotNull("Declared parameter has no impact if not present in request",
+				condition.getMatchingCondition(exchange));
+
+		condition = new ProducesRequestCondition(base);
+		exchange = MockServerWebExchange.from(get("/").header("Accept", base + ";type=feed"));
+		assertNotNull("No impact from other parameters in request", condition.getMatchingCondition(exchange));
+	}
+
 	@Test
 	public void matchParseError() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "bogus"));
@@ -117,7 +136,8 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition xml = new ProducesRequestCondition("application/xml");
 		ProducesRequestCondition none = new ProducesRequestCondition();
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "application/xml, text/html"));
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
+				.header("Accept", "application/xml, text/html"));
 
 		assertTrue(html.compareTo(xml, exchange) > 0);
 		assertTrue(xml.compareTo(html, exchange) < 0);
@@ -135,8 +155,8 @@ public class ProducesRequestConditionTests {
 		exchange = MockServerWebExchange.from(
 				get("/").header("Accept", "application/pdf"));
 
-		assertTrue(html.compareTo(xml, exchange) == 0);
-		assertTrue(xml.compareTo(html, exchange) == 0);
+		assertEquals(0, html.compareTo(xml, exchange));
+		assertEquals(0, xml.compareTo(html, exchange));
 
 		// See SPR-7000
 		exchange = MockServerWebExchange.from(

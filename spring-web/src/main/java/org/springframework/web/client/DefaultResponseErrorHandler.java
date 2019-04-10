@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -72,14 +72,14 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	/**
 	 * Template method called from {@link #hasError(ClientHttpResponse)}.
 	 * <p>The default implementation checks if the given status code is
-	 * {@code HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
-	 * {@code HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
+	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR} or
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
 	 * @param unknownStatusCode the HTTP status code as raw value
 	 * @return {@code true} if the response indicates an error; {@code false} otherwise
 	 * @since 4.3.21
-	 * @see HttpStatus.Series#CLIENT_ERROR
-	 * @see HttpStatus.Series#SERVER_ERROR
+	 * @see org.springframework.http.HttpStatus.Series#CLIENT_ERROR
+	 * @see org.springframework.http.HttpStatus.Series#SERVER_ERROR
 	 */
 	protected boolean hasError(int unknownStatusCode) {
 		HttpStatus.Series series = HttpStatus.Series.resolve(unknownStatusCode);
@@ -105,9 +105,10 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	/**
 	 * Handle the error in the given response with the given resolved status code.
 	 * <p>The default implementation throws an {@link HttpClientErrorException}
-	 * if the status code is {@link HttpStatus.Series#CLIENT_ERROR}, an
-	 * {@link HttpServerErrorException} if it is {@link HttpStatus.Series#SERVER_ERROR},
-	 * and an {@link UnknownHttpStatusCodeException} in other cases.
+	 * if the status code is {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR
+	 * CLIENT_ERROR}, an {@link HttpServerErrorException} if it is
+	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR},
+	 * or an {@link UnknownHttpStatusCodeException} in other cases.
 	 * @since 5.0
 	 * @see HttpClientErrorException#create
 	 * @see HttpServerErrorException#create

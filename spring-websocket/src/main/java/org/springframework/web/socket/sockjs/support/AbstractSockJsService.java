@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
@@ -48,7 +49,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsService;
@@ -306,7 +306,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * are disabled. As a consequence, IE 6 to 9 are not supported when origins
 	 * are restricted.
 	 * <p>Each provided allowed origin must have a scheme, and optionally a port
-	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
+	 * (e.g. "https://example.org", "https://example.org:9090"). An allowed origin
 	 * string may also be "*" in which case all origins are allowed.
 	 * @since 4.1.2
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
@@ -495,7 +495,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		if (!this.suppressCors && CorsUtils.isCorsRequest(request)) {
+		if (!this.suppressCors && (request.getHeader(HttpHeaders.ORIGIN) != null)) {
 			CorsConfiguration config = new CorsConfiguration();
 			config.setAllowedOrigins(new ArrayList<>(this.allowedOrigins));
 			config.addAllowedMethod("*");

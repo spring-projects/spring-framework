@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.springframework.beans;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -40,32 +41,44 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
+ * @author Sebastien Deleuze
  * @since 19.05.2003
  */
 public class BeanUtilsTests {
 
-	@Test
-	public void testInstantiateClass() {
-		// give proper class
-		BeanUtils.instantiateClass(ArrayList.class);
+	@Test(expected = FatalBeanException.class)
+	public void testInstantiateClassGivenInterface() {
+		BeanUtils.instantiateClass(List.class);
+	}
 
-		try {
-			// give interface
-			BeanUtils.instantiateClass(List.class);
-			fail("Should have thrown FatalBeanException");
-		}
-		catch (FatalBeanException ex) {
-			// expected
-		}
+	@Test(expected = FatalBeanException.class)
+	public void testInstantiateClassGivenClassWithoutDefaultConstructor() {
+		BeanUtils.instantiateClass(CustomDateEditor.class);
+	}
 
-		try {
-			// give class without default constructor
-			BeanUtils.instantiateClass(CustomDateEditor.class);
-			fail("Should have thrown FatalBeanException");
-		}
-		catch (FatalBeanException ex) {
-			// expected
-		}
+	@Test  // gh-22531
+	public void testInstantiateClassWithOptionalNullableType() throws NoSuchMethodException {
+		Constructor<BeanWithNullableTypes> ctor = BeanWithNullableTypes.class.getDeclaredConstructor(
+				Integer.class, Boolean.class, String.class);
+		BeanWithNullableTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
+		assertNull(bean.getCounter());
+		assertNull(bean.isFlag());
+		assertEquals("foo", bean.getValue());
+	}
+
+	@Test  // gh-22531
+	public void testInstantiateClassWithOptionalPrimitiveType() throws NoSuchMethodException {
+		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
+		BeanWithPrimitiveTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
+		assertEquals(0, bean.getCounter());
+		assertEquals(false, bean.isFlag());
+		assertEquals("foo", bean.getValue());
+	}
+
+	@Test(expected = BeanInstantiationException.class)  // gh-22531
+	public void testInstantiateClassWithMoreArgsThanParameters() throws NoSuchMethodException {
+		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
+		BeanUtils.instantiateClass(ctor, null, null, "foo", null);
 	}
 
 	@Test
@@ -205,23 +218,14 @@ public class BeanUtilsTests {
 		assertSignatureEquals(desiredMethod, "doSomething()");
 	}
 
-	@Test
-	public void testResolveInvalidSignature() throws Exception {
-		try {
-			BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class);
-			fail("Should not be able to parse with opening but no closing paren.");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void testResolveInvalidSignatureEndParen() {
+		BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class);
+	}
 
-		try {
-			BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class);
-			fail("Should not be able to parse with closing but no opening paren.");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void testResolveInvalidSignatureStartParen() {
+		BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class);
 	}
 
 	@Test
@@ -445,16 +449,61 @@ public class BeanUtilsTests {
 		}
 	}
 
-	private static class BeanWithSingleNonDefaultConstructor {
+	private static class BeanWithNullableTypes {
 
-		private final String name;
+		private Integer counter;
 
-		public BeanWithSingleNonDefaultConstructor(String name) {
-			this.name = name;
+		private Boolean flag;
+
+		private String value;
+
+		@SuppressWarnings("unused")
+		public BeanWithNullableTypes(@Nullable Integer counter, @Nullable Boolean flag, String value) {
+			this.counter = counter;
+			this.flag = flag;
+			this.value = value;
 		}
 
-		public String getName() {
-			return name;
+		@Nullable
+		public Integer getCounter() {
+			return counter;
+		}
+
+		@Nullable
+		public Boolean isFlag() {
+			return flag;
+		}
+
+		public String getValue() {
+			return value;
+		}
+	}
+
+	private static class BeanWithPrimitiveTypes {
+
+		private int counter;
+
+		private boolean flag;
+
+		private String value;
+
+		@SuppressWarnings("unused")
+		public BeanWithPrimitiveTypes(int counter, boolean flag, String value) {
+			this.counter = counter;
+			this.flag = flag;
+			this.value = value;
+		}
+
+		public int getCounter() {
+			return counter;
+		}
+
+		public boolean isFlag() {
+			return flag;
+		}
+
+		public String getValue() {
+			return value;
 		}
 	}
 

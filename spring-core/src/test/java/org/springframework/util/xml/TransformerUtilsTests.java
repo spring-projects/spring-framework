@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link TransformerUtils}.
+ *
  * @author Rick Evans
  * @author Arjen Poutsma
  */
@@ -42,7 +44,7 @@ public class TransformerUtilsTests {
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
 		assertNotNull(indent);
 		assertEquals("yes", indent);
-		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xslt}indent-amount");
+		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
 		assertNotNull(indentAmount);
 		assertEquals(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT), indentAmount);
 	}
@@ -55,7 +57,7 @@ public class TransformerUtilsTests {
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
 		assertNotNull(indent);
 		assertEquals("yes", indent);
-		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xslt}indent-amount");
+		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
 		assertNotNull(indentAmount);
 		assertEquals(indentAmountProperty, indentAmount);
 	}
