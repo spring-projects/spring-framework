@@ -143,20 +143,27 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(input).map(dataBuffer -> {
-			try {
-				Iterator eventReader = inputFactory.createXMLEventReader(dataBuffer.asInputStream());
-				List<XMLEvent> events = new ArrayList<>();
-				eventReader.forEachRemaining(event -> events.add((XMLEvent) event));
-				return unmarshal(events, elementType.toClass());
-			}
-			catch (XMLStreamException ex) {
-				throw Exceptions.propagate(ex);
-			}
-			finally {
-				DataBufferUtils.release(dataBuffer);
-			}
-		});
+		return DataBufferUtils.join(input)
+				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+	}
+
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
+	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
+
+		try {
+			Iterator eventReader = inputFactory.createXMLEventReader(dataBuffer.asInputStream());
+			List<XMLEvent> events = new ArrayList<>();
+			eventReader.forEachRemaining(event -> events.add((XMLEvent) event));
+			return unmarshal(events, targetType.toClass());
+		}
+		catch (XMLStreamException ex) {
+			throw Exceptions.propagate(ex);
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
 	}
 
 	private Object unmarshal(List<XMLEvent> events, Class<?> outputClass) {

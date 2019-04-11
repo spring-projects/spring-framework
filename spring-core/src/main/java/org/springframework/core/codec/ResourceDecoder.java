@@ -64,7 +64,7 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 	}
 
 	@Override
-	protected Resource decodeDataBuffer(DataBuffer dataBuffer, ResolvableType elementType,
+	public Resource decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		byte[] bytes = new byte[dataBuffer.readableByteCount()];

@@ -127,25 +127,31 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	public Mono<Message> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(inputStream).map(dataBuffer -> {
-					try {
-						Message.Builder builder = getMessageBuilder(elementType.toClass());
-						ByteBuffer buffer = dataBuffer.asByteBuffer();
-						builder.mergeFrom(CodedInputStream.newInstance(buffer), this.extensionRegistry);
-						return builder.build();
-					}
-					catch (IOException ex) {
-						throw new DecodingException("I/O error while parsing input stream", ex);
-					}
-					catch (Exception ex) {
-						throw new DecodingException("Could not read Protobuf message: " + ex.getMessage(), ex);
-					}
-					finally {
-						DataBufferUtils.release(dataBuffer);
-					}
-				}
-		);
+		return DataBufferUtils.join(inputStream)
+				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
 	}
+
+	@Override
+	public Message decode(DataBuffer dataBuffer, ResolvableType targetType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
+
+		try {
+			Message.Builder builder = getMessageBuilder(targetType.toClass());
+			ByteBuffer buffer = dataBuffer.asByteBuffer();
+			builder.mergeFrom(CodedInputStream.newInstance(buffer), this.extensionRegistry);
+			return builder.build();
+		}
+		catch (IOException ex) {
+			throw new DecodingException("I/O error while parsing input stream", ex);
+		}
+		catch (Exception ex) {
+			throw new DecodingException("Could not read Protobuf message: " + ex.getMessage(), ex);
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
+	}
+
 
 	/**
 	 * Create a new {@code Message.Builder} instance for the given class.

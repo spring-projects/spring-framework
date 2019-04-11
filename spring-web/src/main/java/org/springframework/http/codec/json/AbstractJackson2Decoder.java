@@ -110,20 +110,26 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(input).map(dataBuffer -> {
-			try {
-				ObjectReader objectReader = getObjectReader(elementType, hints);
-				Object value = objectReader.readValue(dataBuffer.asInputStream());
-				logValue(value, hints);
-				return value;
-			}
-			catch (IOException ex) {
-				throw processException(ex);
-			}
-			finally {
-				DataBufferUtils.release(dataBuffer);
-			}
-		});
+		return DataBufferUtils.join(input)
+				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+	}
+
+	@Override
+	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
+
+		try {
+			ObjectReader objectReader = getObjectReader(targetType, hints);
+			Object value = objectReader.readValue(dataBuffer.asInputStream());
+			logValue(value, hints);
+			return value;
+		}
+		catch (IOException ex) {
+			throw processException(ex);
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
 	}
 
 	private ObjectReader getObjectReader(ResolvableType elementType, @Nullable Map<String, Object> hints) {
