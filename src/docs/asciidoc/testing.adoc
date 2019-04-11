@@ -77,11 +77,15 @@ out-of-container tests for code that depends on environment-specific properties.
 [[mock-objects-jndi]]
 ==== JNDI
 
-The `org.springframework.mock.jndi` package contains an implementation of the JNDI SPI,
-which you can use to set up a simple JNDI environment for test suites or stand-alone
+The `org.springframework.mock.jndi` package contains a partial implementation of the JNDI
+SPI, which you can use to set up a simple JNDI environment for test suites or stand-alone
 applications. If, for example, JDBC `DataSource` instances get bound to the same JNDI
 names in test code as they do in a Java EE container, you can reuse both application code
 and configuration in testing scenarios without modification.
+
+WARNING: The mock JNDI support in the `org.springframework.mock.jndi` package is
+officially deprecated as of Spring Framework 5.2 in favor of complete solutions from third
+parties such as https://github.com/h-thurow/Simple-JNDI[Simple-JNDI].
 
 
 [[mock-objects-servlet]]
