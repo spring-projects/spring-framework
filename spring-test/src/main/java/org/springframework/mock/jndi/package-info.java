@@ -10,7 +10,6 @@
  * same JNDI names as within a Java EE container, both application code and
  * configuration can be reused without changes.
  */
-@Deprecated
 @NonNullApi
 @NonNullFields
 package org.springframework.mock.jndi;
