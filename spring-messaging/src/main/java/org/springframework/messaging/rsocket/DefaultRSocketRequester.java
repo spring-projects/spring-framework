@@ -244,8 +244,8 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			}
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
-			return (Mono<T>) decoder.decodeToMono(
-					payloadMono.map(this::retainDataAndReleasePayload), elementType, dataMimeType, EMPTY_HINTS);
+			return (Mono<T>) payloadMono.map(this::retainDataAndReleasePayload)
+					.map(dataBuffer -> decoder.decode(dataBuffer, elementType, dataMimeType, EMPTY_HINTS));
 		}
 
 		@SuppressWarnings("unchecked")
@@ -261,8 +261,8 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
 
-			return payloadFlux.map(this::retainDataAndReleasePayload).concatMap(dataBuffer ->
-					(Mono<T>) decoder.decodeToMono(Mono.just(dataBuffer), elementType, dataMimeType, EMPTY_HINTS));
+			return payloadFlux.map(this::retainDataAndReleasePayload).map(dataBuffer ->
+					(T) decoder.decode(dataBuffer, elementType, dataMimeType, EMPTY_HINTS));
 		}
 
 		private DataBuffer retainDataAndReleasePayload(Payload payload) {
