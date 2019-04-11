@@ -52,15 +52,21 @@ public class ByteArrayEncoder extends AbstractEncoder<byte[]> {
 			DataBufferFactory bufferFactory, ResolvableType elementType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
 
-		// The following (byte[] bytes) lambda signature declaration is necessary for Eclipse.
-		return Flux.from(inputStream).map((byte[] bytes) -> {
-			DataBuffer dataBuffer = bufferFactory.wrap(bytes);
-			if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
-				String logPrefix = Hints.getLogPrefix(hints);
-				logger.debug(logPrefix + "Writing " + dataBuffer.readableByteCount() + " bytes");
-			}
-			return dataBuffer;
-		});
+		// Use (byte[] bytes) for Eclipse
+		return Flux.from(inputStream).map((byte[] bytes) ->
+				encodeValue(bytes, bufferFactory, elementType, mimeType, hints));
+	}
+
+	@Override
+	public DataBuffer encodeValue(byte[] bytes, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		DataBuffer dataBuffer = bufferFactory.wrap(bytes);
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
+			String logPrefix = Hints.getLogPrefix(hints);
+			logger.debug(logPrefix + "Writing " + dataBuffer.readableByteCount() + " bytes");
+		}
+		return dataBuffer;
 	}
 
 }

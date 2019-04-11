@@ -441,6 +441,10 @@ public abstract class DataBufferUtils {
 	public static Mono<DataBuffer> join(Publisher<DataBuffer> dataBuffers) {
 		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
 
+		if (dataBuffers instanceof Mono) {
+			return (Mono<DataBuffer>) dataBuffers;
+		}
+
 		return Flux.from(dataBuffers)
 				.collectList()
 				.filter(list -> !list.isEmpty())

@@ -99,7 +99,15 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 
 	@Override
 	protected Flux<DataBuffer> encode(Object value, DataBufferFactory bufferFactory,
-			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		// we're relying on doOnDiscard in base class
+		return Mono.fromCallable(() -> encodeValue(value, bufferFactory, valueType, mimeType, hints)).flux();
+	}
+
+	@Override
+	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		if (!Hints.isLoggingSuppressed(hints)) {
 			LogFormatUtils.traceDebug(logger, traceOn -> {
@@ -108,30 +116,27 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 			});
 		}
 
-		return Flux.defer(() -> {
-			boolean release = true;
-			DataBuffer buffer = bufferFactory.allocateBuffer(1024);
-			try {
-				OutputStream outputStream = buffer.asOutputStream();
-				Class<?> clazz = ClassUtils.getUserClass(value);
-				Marshaller marshaller = initMarshaller(clazz);
-				marshaller.marshal(value, outputStream);
-				release = false;
-				return Mono.fromCallable(() -> buffer);  // relying on doOnDiscard in base class
+		boolean release = true;
+		DataBuffer buffer = bufferFactory.allocateBuffer(1024);
+		try {
+			OutputStream outputStream = buffer.asOutputStream();
+			Class<?> clazz = ClassUtils.getUserClass(value);
+			Marshaller marshaller = initMarshaller(clazz);
+			marshaller.marshal(value, outputStream);
+			release = false;
+			return buffer;
+		}
+		catch (MarshalException ex) {
+			throw new EncodingException("Could not marshal " + value.getClass() + " to XML", ex);
+		}
+		catch (JAXBException ex) {
+			throw new CodecException("Invalid JAXB configuration", ex);
+		}
+		finally {
+			if (release) {
+				DataBufferUtils.release(buffer);
 			}
-			catch (MarshalException ex) {
-				return Flux.error(new EncodingException(
-						"Could not marshal " + value.getClass() + " to XML", ex));
-			}
-			catch (JAXBException ex) {
-				return Flux.error(new CodecException("Invalid JAXB configuration", ex));
-			}
-			finally {
-				if (release) {
-					DataBufferUtils.release(buffer);
-				}
-			}
-		});
+		}
 	}
 
 	private Marshaller initMarshaller(Class<?> clazz) throws JAXBException {
