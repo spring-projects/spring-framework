@@ -38,6 +38,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -88,56 +89,79 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
 				Flux.from(input), this.jsonFactory, getObjectMapper(), true);
-		return decodeInternal(tokens, elementType, mimeType, hints);
+
+		ObjectReader reader = getObjectReader(elementType, hints);
+
+		return tokens.handle((tokenBuffer, sink) -> {
+			try {
+				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				logValue(value, hints);
+				if (value != null) {
+					sink.next(value);
+				}
+			}
+			catch (IOException ex) {
+				sink.error(processException(ex));
+			}
+		});
 	}
 
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				Flux.from(input), this.jsonFactory, getObjectMapper(), false);
-		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
+		return DataBufferUtils.join(input)
+				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
 	}
 
-	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+	@Override
+	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
-		Assert.notNull(tokens, "'tokens' must not be null");
+		try {
+			ObjectReader objectReader = getObjectReader(targetType, hints);
+			Object value = objectReader.readValue(dataBuffer.asInputStream());
+			logValue(value, hints);
+			return value;
+		}
+		catch (IOException ex) {
+			throw processException(ex);
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
+	}
+
+	private ObjectReader getObjectReader(ResolvableType elementType, @Nullable Map<String, Object> hints) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-
 		MethodParameter param = getParameter(elementType);
 		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
-
-		ObjectReader reader = (jsonView != null ?
+		return jsonView != null ?
 				getObjectMapper().readerWithView(jsonView).forType(javaType) :
-				getObjectMapper().readerFor(javaType));
+				getObjectMapper().readerFor(javaType);
+	}
 
-		return tokens.handle((tokenBuffer, sink) -> {
-			try {
-				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
-				if (!Hints.isLoggingSuppressed(hints)) {
-					LogFormatUtils.traceDebug(logger, traceOn -> {
-						String formatted = LogFormatUtils.formatValue(value, !traceOn);
-						return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
-					});
-				}
-				if (value != null) {
-					sink.next(value);
-				}
-			}
-			catch (InvalidDefinitionException ex) {
-				sink.error(new CodecException("Type definition error: " + ex.getType(), ex));
-			}
-			catch (JsonProcessingException ex) {
-				sink.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
-			}
-			catch (IOException ex) {
-				sink.error(new DecodingException("I/O error while parsing input stream", ex));
-			}
-		});
+	private void logValue(@Nullable Object value, @Nullable Map<String, Object> hints) {
+		if (!Hints.isLoggingSuppressed(hints)) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+			});
+		}
+	}
+
+	private CodecException processException(IOException ex) {
+		if (ex instanceof InvalidDefinitionException) {
+			JavaType type = ((InvalidDefinitionException) ex).getType();
+			return new CodecException("Type definition error: " + type, ex);
+		}
+		if (ex instanceof JsonProcessingException) {
+			String originalMessage = ((JsonProcessingException) ex).getOriginalMessage();
+			return new DecodingException("JSON decoding error: " + originalMessage, ex);
+		}
+		return new DecodingException("I/O error while parsing input stream", ex);
 	}
 
 

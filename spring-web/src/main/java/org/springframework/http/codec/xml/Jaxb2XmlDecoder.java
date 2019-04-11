@@ -17,6 +17,7 @@
 package org.springframework.http.codec.xml;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -31,9 +32,12 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
 import org.reactivestreams.Publisher;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SynchronousSink;
@@ -44,6 +48,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -71,6 +76,8 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 * @see XmlType#namespace()
 	 */
 	private static final String JAXB_DEFAULT_ANNOTATION_VALUE = "##default";
+
+	private static final XMLInputFactory inputFactory = StaxUtils.createDefensiveInputFactory();
 
 
 	private final XmlEventDecoder xmlEventDecoder = new XmlEventDecoder();
@@ -132,10 +139,31 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
+	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return decode(inputStream, elementType, mimeType, hints).singleOrEmpty();
+		return DataBufferUtils.join(input)
+				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+	}
+
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
+	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
+
+		try {
+			Iterator eventReader = inputFactory.createXMLEventReader(dataBuffer.asInputStream());
+			List<XMLEvent> events = new ArrayList<>();
+			eventReader.forEachRemaining(event -> events.add((XMLEvent) event));
+			return unmarshal(events, targetType.toClass());
+		}
+		catch (XMLStreamException ex) {
+			throw Exceptions.propagate(ex);
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
 	}
 
 	private Object unmarshal(List<XMLEvent> events, Class<?> outputClass) {
