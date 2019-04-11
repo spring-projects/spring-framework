@@ -81,7 +81,7 @@ public class MessageMappingMessageHandlerTests {
 	@Test
 	public void handleFluxString() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
-		messsageHandler.handleMessage(message("fluxString", "abc\ndef\nghi")).block(Duration.ofSeconds(5));
+		messsageHandler.handleMessage(message("fluxString", "abc", "def", "ghi")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Arrays.asList("abc::response", "def::response", "ghi::response"));
 	}
 

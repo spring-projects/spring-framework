@@ -33,7 +33,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -148,7 +147,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 
 		Encoder<?> encoder = getEncoder(elementType, mimeType);
 
-		return Flux.from((Publisher) publisher).concatMap(value ->
+		return Flux.from((Publisher) publisher).map(value ->
 				encodeValue(value, elementType, encoder, bufferFactory, mimeType, hints));
 	}
 
@@ -176,7 +175,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Mono<DataBuffer> encodeValue(
+	private <T> DataBuffer encodeValue(
 			Object element, ResolvableType elementType, @Nullable Encoder<T> encoder,
 			DataBufferFactory bufferFactory, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
@@ -184,13 +183,11 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		if (encoder == null) {
 			encoder = getEncoder(ResolvableType.forInstance(element), mimeType);
 			if (encoder == null) {
-				return Mono.error(new MessagingException(
-						"No encoder for " + elementType + ", current value type is " + element.getClass()));
+				throw new MessagingException(
+						"No encoder for " + elementType + ", current value type is " + element.getClass());
 			}
 		}
-		Mono<T> mono = Mono.just((T) element);
-		Flux<DataBuffer> dataBuffers = encoder.encode(mono, bufferFactory, elementType, mimeType, hints);
-		return DataBufferUtils.join(dataBuffers);
+		return encoder.encodeValue((T) element, bufferFactory, elementType, mimeType, hints);
 	}
 
 	/**

@@ -129,9 +129,10 @@ public class PayloadMethodArgumentResolverTests {
 
 	@Test
 	public void validateStringMono() {
+		TestValidator validator = new TestValidator();
 		ResolvableType type = ResolvableType.forClassWithGenerics(Mono.class, String.class);
 		MethodParameter param = this.testMethod.arg(type);
-		Mono<Object> mono = resolveValue(param, Mono.just(toDataBuffer("12345")), new TestValidator());
+		Mono<Object> mono = resolveValue(param, Mono.just(toDataBuffer("12345")), validator);
 
 		StepVerifier.create(mono).expectNextCount(0)
 				.expectError(MethodArgumentNotValidException.class).verify();
@@ -139,9 +140,11 @@ public class PayloadMethodArgumentResolverTests {
 
 	@Test
 	public void validateStringFlux() {
+		TestValidator validator = new TestValidator();
 		ResolvableType type = ResolvableType.forClassWithGenerics(Flux.class, String.class);
 		MethodParameter param = this.testMethod.arg(type);
-		Flux<Object> flux = resolveValue(param, Mono.just(toDataBuffer("12345678\n12345")), new TestValidator());
+		Flux<DataBuffer> content = Flux.just(toDataBuffer("12345678"), toDataBuffer("12345"));
+		Flux<Object> flux = resolveValue(param, content, validator);
 
 		StepVerifier.create(flux)
 				.expectNext("12345678")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ServerSentEventHttpMessageWriter}.
@@ -88,9 +88,8 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		testWrite(source, outputMessage, ServerSentEvent.class);
 
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(stringConsumer("id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:"))
-				.consumeNextWith(stringConsumer("bar\n"))
-				.consumeNextWith(stringConsumer("\n"))
+				.consumeNextWith(stringConsumer(
+						"id:c42\nevent:foo\nretry:123\n:bla\n:bla bla\n:bla bla bla\ndata:bar\n\n"))
 				.expectComplete()
 				.verify();
 	}
@@ -101,12 +100,8 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		testWrite(source, outputMessage, String.class);
 
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("foo\n"))
-				.consumeNextWith(stringConsumer("\n"))
-				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("bar\n"))
-				.consumeNextWith(stringConsumer("\n"))
+				.consumeNextWith(stringConsumer("data:foo\n\n"))
+				.consumeNextWith(stringConsumer("data:bar\n\n"))
 				.expectComplete()
 				.verify();
 	}
@@ -117,12 +112,8 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		testWrite(source, outputMessage, String.class);
 
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("foo\ndata:bar\n"))
-				.consumeNextWith(stringConsumer("\n"))
-				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("foo\ndata:baz\n"))
-				.consumeNextWith(stringConsumer("\n"))
+				.consumeNextWith(stringConsumer("data:foo\ndata:bar\n\n"))
+				.consumeNextWith(stringConsumer("data:foo\ndata:baz\n\n"))
 				.expectComplete()
 				.verify();
 	}
@@ -136,14 +127,11 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 		assertEquals(mediaType, outputMessage.getHeaders().getContentType());
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(stringConsumer("data:"))
 				.consumeNextWith(dataBuffer -> {
-					String value =
-							DataBufferTestUtils.dumpString(dataBuffer, charset);
+					String value = DataBufferTestUtils.dumpString(dataBuffer, charset);
 					DataBufferUtils.release(dataBuffer);
-					assertEquals("\u00A3\n", value);
+					assertEquals("data:\u00A3\n\n", value);
 				})
-				.consumeNextWith(stringConsumer("\n"))
 				.expectComplete()
 				.verify();
 	}
@@ -154,14 +142,8 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		testWrite(source, outputMessage, Pojo.class);
 
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"))
-				.consumeNextWith(stringConsumer("\n"))
-				.consumeNextWith(stringConsumer("\n"))
-				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"))
-				.consumeNextWith(stringConsumer("\n"))
-				.consumeNextWith(stringConsumer("\n"))
+				.consumeNextWith(stringConsumer("data:{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n\n"))
+				.consumeNextWith(stringConsumer("data:{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n\n"))
 				.expectComplete()
 				.verify();
 	}
@@ -175,18 +157,12 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		testWrite(source, outputMessage, Pojo.class);
 
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\n" +
+				.consumeNextWith(stringConsumer("data:{\n" +
 						"data:  \"foo\" : \"foofoo\",\n" +
-						"data:  \"bar\" : \"barbar\"\n" + "data:}"))
-				.consumeNextWith(stringConsumer("\n"))
-				.consumeNextWith(stringConsumer("\n"))
-				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\n" +
+						"data:  \"bar\" : \"barbar\"\n" + "data:}\n\n"))
+				.consumeNextWith(stringConsumer("data:{\n" +
 						"data:  \"foo\" : \"foofoofoo\",\n" +
-						"data:  \"bar\" : \"barbarbar\"\n" + "data:}"))
-				.consumeNextWith(stringConsumer("\n"))
-				.consumeNextWith(stringConsumer("\n"))
+						"data:  \"bar\" : \"barbarbar\"\n" + "data:}\n\n"))
 				.expectComplete()
 				.verify();
 	}
@@ -200,28 +176,10 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 		assertEquals(mediaType, outputMessage.getHeaders().getContentType());
 		StepVerifier.create(outputMessage.getBody())
-				.consumeNextWith(dataBuffer1 -> {
-					String value1 =
-							DataBufferTestUtils.dumpString(dataBuffer1, charset);
-					DataBufferUtils.release(dataBuffer1);
-					assertEquals("data:", value1);
-				})
 				.consumeNextWith(dataBuffer -> {
 					String value = DataBufferTestUtils.dumpString(dataBuffer, charset);
 					DataBufferUtils.release(dataBuffer);
-					assertEquals("{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}", value);
-				})
-				.consumeNextWith(dataBuffer2 -> {
-					String value2 =
-							DataBufferTestUtils.dumpString(dataBuffer2, charset);
-					DataBufferUtils.release(dataBuffer2);
-					assertEquals("\n", value2);
-				})
-				.consumeNextWith(dataBuffer3 -> {
-					String value3 =
-							DataBufferTestUtils.dumpString(dataBuffer3, charset);
-					DataBufferUtils.release(dataBuffer3);
-					assertEquals("\n", value3);
+					assertEquals("data:{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}\n\n", value);
 				})
 				.expectComplete()
 				.verify();
