@@ -11,7 +11,7 @@ buildscript {
 // 3rd party plugin repositories can be configured in settings.gradle
 plugins {
 	id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
-	id "org.jetbrains.kotlin.jvm" version "1.3.21" apply false
+	id "org.jetbrains.kotlin.jvm" version "1.3.30" apply false
 	id "org.jetbrains.dokka" version "0.9.18"
 	id "org.asciidoctor.convert" version "1.5.8"
 }
@@ -36,10 +36,9 @@ ext {
 	jackson2Version      = "2.9.8"
 	jettyVersion         = "9.4.15.v20190215"
 	junit5Version        = "5.4.2"
-	kotlinVersion        = "1.3.21"
+	kotlinVersion        = "1.3.30"
 	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.34.Final"
-	quartzVersion        = "2.3.1"
 	reactorVersion       = "Californium-BUILD-SNAPSHOT"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
@@ -158,12 +157,12 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:4.12") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.26.0") {
+		testCompile("org.mockito:mockito-core:2.27.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("io.mockk:mockk:1.9.1")
+		testCompile("io.mockk:mockk:1.9.3")
 		testCompile("org.hamcrest:hamcrest-all:1.3")
-		testCompile("org.assertj:assertj-core:3.11.0")
+		testCompile("org.assertj:assertj-core:3.12.2")
 		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
