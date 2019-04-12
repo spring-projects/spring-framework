@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ public class MockCookieTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+
 	@Test
 	public void constructCookie() {
 		MockCookie cookie = new MockCookie("SESSION", "123");
@@ -57,9 +58,7 @@ public class MockCookieTests {
 
 	@Test
 	public void parseHeaderWithoutAttributes() {
-		MockCookie cookie;
-
-		cookie = MockCookie.parse("SESSION=123");
+		MockCookie cookie = MockCookie.parse("SESSION=123");
 		assertCookie(cookie, "SESSION", "123");
 
 		cookie = MockCookie.parse("SESSION=123;");
@@ -78,6 +77,11 @@ public class MockCookieTests {
 		assertTrue(cookie.getSecure());
 		assertTrue(cookie.isHttpOnly());
 		assertEquals("Lax", cookie.getSameSite());
+	}
+
+	private void assertCookie(MockCookie cookie, String name, String value) {
+		assertEquals(name, cookie.getName());
+		assertEquals(value, cookie.getValue());
 	}
 
 	@Test
@@ -103,9 +107,18 @@ public class MockCookieTests {
 		MockCookie.parse(header);
 	}
 
-	private void assertCookie(MockCookie cookie, String name, String value) {
-		assertEquals(name, cookie.getName());
-		assertEquals(value, cookie.getValue());
+	@Test
+	public void parseHeaderWithAttributesCaseSensitivity() {
+		MockCookie cookie = MockCookie.parse(
+				"SESSION=123; domain=example.com; max-age=60; path=/; secure; httponly; samesite=Lax");
+
+		assertCookie(cookie, "SESSION", "123");
+		assertEquals("example.com", cookie.getDomain());
+		assertEquals(60, cookie.getMaxAge());
+		assertEquals("/", cookie.getPath());
+		assertTrue(cookie.getSecure());
+		assertTrue(cookie.isHttpOnly());
+		assertEquals("Lax", cookie.getSameSite());
 	}
 
 }
