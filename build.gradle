@@ -28,7 +28,7 @@ ext {
 		!it.name.equals("spring-build-src") && !it.name.equals("spring-framework-bom")
 	}
 
-	aspectjVersion       = "1.9.2"
+	aspectjVersion       = "1.9.3"
 	freemarkerVersion    = "2.3.28"
 	groovyVersion        = "2.5.6"
 	hsqldbVersion        = "2.4.1"
@@ -157,7 +157,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:4.12") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.26.0") {
+		testCompile("org.mockito:mockito-core:2.27.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 		testCompile("com.nhaarman:mockito-kotlin:1.6.0") {
