@@ -28,7 +28,7 @@ ext {
 		(it.name != "spring-build-src") && (it.name != "spring-framework-bom") && (it.name != "spring-core-coroutines")
 	}
 
-	aspectjVersion       = "1.9.2"
+	aspectjVersion       = "1.9.3"
 	coroutinesVersion    = "1.2.0-alpha-2"
 	freemarkerVersion    = "2.3.28"
 	groovyVersion        = "2.5.6"

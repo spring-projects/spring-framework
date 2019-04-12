@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import javax.servlet.http.Cookie;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Extension of {@code Cookie} with extra attributes, as defined in
  * <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>.
  *
  * @author Vedran Pavic
+ * @author Juergen Hoeller
  * @since 5.1
  */
 public class MockCookie extends Cookie {
@@ -39,7 +41,7 @@ public class MockCookie extends Cookie {
 
 	/**
 	 * Constructor with the cookie name and value.
-	 * @param name  the name
+	 * @param name the name
 	 * @param value the value
 	 * @see Cookie#Cookie(String, String)
 	 */
@@ -86,22 +88,22 @@ public class MockCookie extends Cookie {
 
 		MockCookie cookie = new MockCookie(name, value);
 		for (String attribute : attributes) {
-			if (attribute.startsWith("Domain")) {
+			if (StringUtils.startsWithIgnoreCase(attribute, "Domain")) {
 				cookie.setDomain(extractAttributeValue(attribute, setCookieHeader));
 			}
-			else if (attribute.startsWith("Max-Age")) {
+			else if (StringUtils.startsWithIgnoreCase(attribute, "Max-Age")) {
 				cookie.setMaxAge(Integer.parseInt(extractAttributeValue(attribute, setCookieHeader)));
 			}
-			else if (attribute.startsWith("Path")) {
+			else if (StringUtils.startsWithIgnoreCase(attribute, "Path")) {
 				cookie.setPath(extractAttributeValue(attribute, setCookieHeader));
 			}
-			else if (attribute.startsWith("Secure")) {
+			else if (StringUtils.startsWithIgnoreCase(attribute, "Secure")) {
 				cookie.setSecure(true);
 			}
-			else if (attribute.startsWith("HttpOnly")) {
+			else if (StringUtils.startsWithIgnoreCase(attribute, "HttpOnly")) {
 				cookie.setHttpOnly(true);
 			}
-			else if (attribute.startsWith("SameSite")) {
+			else if (StringUtils.startsWithIgnoreCase(attribute, "SameSite")) {
 				cookie.setSameSite(extractAttributeValue(attribute, setCookieHeader));
 			}
 		}
