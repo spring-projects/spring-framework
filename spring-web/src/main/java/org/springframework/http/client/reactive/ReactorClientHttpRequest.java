@@ -81,8 +81,10 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return doCommit(() -> {
-			Flux<ByteBuf> byteBufFlux = Flux.from(body).map(NettyDataBufferFactory::toByteBuf);
-			return this.outbound.send(byteBufFlux).then();
+			if (body instanceof Mono) {
+				return this.outbound.send(Mono.from(body).map(NettyDataBufferFactory::toByteBuf)).then();
+			}
+			return this.outbound.send(Flux.from(body).map(NettyDataBufferFactory::toByteBuf)).then();
 		});
 	}
 

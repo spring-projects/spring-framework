@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpStatus;
@@ -173,6 +174,11 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+		if (body instanceof Mono) {
+			return Mono.from(body)
+			           .flatMap(data -> doCommit(() -> writeWithInternal(Mono.just(data))))
+			           .doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release);
+		}
 		return new ChannelSendOperator<>(body,
 				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)))
 				.doOnError(t -> removeContentLength());

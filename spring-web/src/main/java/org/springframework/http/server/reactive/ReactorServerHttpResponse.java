@@ -83,6 +83,9 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<? extends DataBuffer> publisher) {
+		if (publisher instanceof Mono) {
+			return this.response.send(Mono.from(publisher).map(NettyDataBufferFactory::toByteBuf)).then();
+		}
 		return this.response.send(toByteBufs(publisher)).then();
 	}
 
