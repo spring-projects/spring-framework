@@ -179,6 +179,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		try {
 			JsonGenerator generator = getObjectMapper().getFactory().createGenerator(outputStream, encoding);
 			writer.writeValue(generator, value);
+			generator.flush();
 			release = false;
 		}
 		catch (InvalidDefinitionException ex) {
