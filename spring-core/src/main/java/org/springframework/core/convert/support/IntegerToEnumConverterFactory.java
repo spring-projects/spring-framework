@@ -35,7 +35,7 @@ final class IntegerToEnumConverterFactory implements ConverterFactory<Integer, E
 	}
 
 
-	private class IntegerToEnum<T extends Enum> implements Converter<Integer, T> {
+	private static class IntegerToEnum<T extends Enum> implements Converter<Integer, T> {
 
 		private final Class<T> enumType;
 
