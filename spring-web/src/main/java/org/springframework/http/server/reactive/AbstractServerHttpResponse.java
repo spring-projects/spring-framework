@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpStatus;
@@ -173,9 +175,16 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		return new ChannelSendOperator<>(body,
-				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)))
+		// Write as Mono if possible as an optimization hint to Reactor Netty
+		// ChannelSendOperator not necessary for Mono
+		if (body instanceof Mono) {
+			return ((Mono<? extends DataBuffer>) body).flatMap(buffer ->
+					doCommit(() -> writeWithInternal(Mono.just(buffer)))
+							.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+		}
+		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
 				.doOnError(t -> removeContentLength());
 	}
 
