@@ -108,7 +108,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 			});
 		}
 
-		return Flux.defer(() -> {
+		return Mono.fromCallable(() -> {
 			boolean release = true;
 			DataBuffer buffer = bufferFactory.allocateBuffer(1024);
 			try {
@@ -117,21 +117,21 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 				Marshaller marshaller = initMarshaller(clazz);
 				marshaller.marshal(value, outputStream);
 				release = false;
-				return Mono.fromCallable(() -> buffer);  // relying on doOnDiscard in base class
+				return buffer;  // relying on doOnDiscard in base class
 			}
 			catch (MarshalException ex) {
-				return Flux.error(new EncodingException(
-						"Could not marshal " + value.getClass() + " to XML", ex));
+				throw new EncodingException(
+						"Could not marshal " + value.getClass() + " to XML", ex);
 			}
 			catch (JAXBException ex) {
-				return Flux.error(new CodecException("Invalid JAXB configuration", ex));
+				throw new CodecException("Invalid JAXB configuration", ex);
 			}
 			finally {
 				if (release) {
 					DataBufferUtils.release(buffer);
 				}
 			}
-		});
+		}).flux();
 	}
 
 	private Marshaller initMarshaller(Class<?> clazz) throws JAXBException {
