@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,16 @@ package org.springframework.core.codec;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -61,10 +59,8 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_HTML));
 		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.APPLICATION_JSON));
 		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.parseMimeType("text/plain;charset=utf-8")));
-		assertFalse(this.decoder.canDecode(
-				ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(
-				ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Override
@@ -76,24 +72,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 		String s = String.format("%s\n%s\n%s", u, e, o);
 		Flux<DataBuffer> input = toDataBuffers(s, 1, UTF_8);
 
-		testDecodeAll(input, ResolvableType.forClass(String.class), step -> step
-				.expectNext(u, e, o)
-				.verifyComplete(), null, null);
-	}
-
-	@Override
-	protected void testDecodeError(Publisher<DataBuffer> input, ResolvableType outputType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
-		input = Flux.concat(
-				Flux.from(input).take(1),
-				Flux.error(new InputException()));
-
-		Flux<String> result = this.decoder.decode(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.expectError(InputException.class)
-				.verify();
+		testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
 	}
 
 	@Test
@@ -105,21 +84,21 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 		Flux<DataBuffer> source = toDataBuffers(s, 2, UTF_16BE);
 		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain;charset=utf-16be");
 
-		testDecode(source, TYPE, step -> step
-				.expectNext(u, e, o)
-				.verifyComplete(), mimeType, null);
+		testDecode(source, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), mimeType, null);
 	}
 
 	private Flux<DataBuffer> toDataBuffers(String s, int length, Charset charset) {
 		byte[] bytes = s.getBytes(charset);
-
-		List<DataBuffer> dataBuffers = new ArrayList<>();
+		List<byte[]> chunks = new ArrayList<>();
 		for (int i = 0; i < bytes.length; i += length) {
-			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(length);
-			dataBuffer.write(bytes, i, length);
-			dataBuffers.add(dataBuffer);
+			chunks.add(Arrays.copyOfRange(bytes, i, i + length));
 		}
-		return Flux.fromIterable(dataBuffers);
+		return Flux.fromIterable(chunks)
+				.map(chunk -> {
+					DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(length);
+					dataBuffer.write(chunk, 0, chunk.length);
+					return dataBuffer;
+				});
 	}
 
 	@Test

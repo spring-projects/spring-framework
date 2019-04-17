@@ -63,6 +63,11 @@ class LeakAwareDataBuffer implements PooledDataBuffer {
 		return this.leakError;
 	}
 
+
+	public DataBuffer getDelegate() {
+		return this.delegate;
+	}
+
 	@Override
 	public boolean isAllocated() {
 		return this.delegate instanceof PooledDataBuffer &&

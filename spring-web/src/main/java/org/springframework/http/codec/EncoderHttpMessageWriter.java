@@ -125,16 +125,14 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 					}))
 					.flatMap(buffer -> {
 						headers.setContentLength(buffer.readableByteCount());
-						return message.writeWith(
-								Mono.fromCallable(() -> buffer)
-										.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release));
+						return message.writeWith(Mono.just(buffer)
+								.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release));
 					});
 		}
 
 		if (isStreamingMediaType(contentType)) {
 			return message.writeAndFlushWith(body.map(buffer ->
-					Mono.fromCallable(() -> buffer)
-							.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release)));
+					Mono.just(buffer).doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release)));
 		}
 
 		return message.writeWith(body);

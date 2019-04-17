@@ -25,6 +25,7 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -61,8 +62,11 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 	public MockServerHttpResponse(DataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
 		this.writeHandler = body -> {
-			this.body = body.cache();
-			return this.body.then();
+			// Avoid .then() which causes data buffers to be released
+			MonoProcessor<Void> completion = MonoProcessor.create();
+			this.body = body.doOnComplete(completion::onComplete).doOnError(completion::onError).cache();
+			this.body.subscribe();
+			return completion;
 		};
 	}
 

@@ -19,7 +19,6 @@ package org.springframework.core.codec;
 import java.util.Collections;
 import java.util.function.Consumer;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import org.junit.After;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
@@ -34,7 +33,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.util.MimeType;
@@ -51,8 +49,7 @@ public class ResourceRegionEncoderTests  {
 
 	private ResourceRegionEncoder encoder = new ResourceRegionEncoder();
 
-	private LeakAwareDataBufferFactory bufferFactory =
-			new LeakAwareDataBufferFactory(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT));
+	private LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
 
 	@After

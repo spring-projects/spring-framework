@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,7 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 
 		String expected = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		StepVerifier.create(response.getBody())
-				.consumeNextWith(stringConsumer(
-						expected))
+				.consumeNextWith(stringConsumer(expected))
 				.expectComplete()
 				.verify();
 		HttpHeaders headers = response.getHeaders();
@@ -96,8 +95,7 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 
 	private Consumer<DataBuffer> stringConsumer(String expected) {
 		return dataBuffer -> {
-			String value =
-					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
+			String value = DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
 			DataBufferUtils.release(dataBuffer);
 			assertEquals(expected, value);
 		};
