@@ -122,7 +122,9 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 	}
 
 	private Publisher<ByteBuf> toByteBufs(Publisher<? extends DataBuffer> dataBuffers) {
-		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
+		return dataBuffers instanceof Mono ?
+				Mono.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf) :
+				Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
 	}
 
 }
