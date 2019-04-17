@@ -105,6 +105,14 @@ public interface RSocketStrategies {
 		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder();
 	}
 
+	/**
+	 * Return a builder to create a new {@link RSocketStrategies} instance
+	 * replicated from the current instance.
+	 */
+	default Builder mutate() {
+		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder(this);
+	}
+
 
 	/**
 	 * The builder options for creating {@code RSocketStrategies}.
@@ -118,15 +126,15 @@ public interface RSocketStrategies {
 		Builder encoder(Encoder<?>... encoder);
 
 		/**
+		 * Access and manipulate the list of configured {@link #encoder encoders}.
+		 */
+		Builder encoders(Consumer<List<Encoder<?>>> consumer);
+
+		/**
 		 * Add decoders for de-serializing Objects.
 		 * <p>By default this is empty.
 		 */
 		Builder decoder(Decoder<?>... decoder);
-
-		/**
-		 * Access and manipulate the list of configured {@link #encoder encoders}.
-		 */
-		Builder encoders(Consumer<List<Encoder<?>>> consumer);
 
 		/**
 		 * Access and manipulate the list of configured {@link #encoder decoders}.
@@ -137,7 +145,7 @@ public interface RSocketStrategies {
 		 * Configure the registry for reactive type support. This can be used to
 		 * to adapt to, and/or determine the semantics of a given
 		 * {@link org.reactivestreams.Publisher Publisher}.
-		 * <p>By default this {@link ReactiveAdapterRegistry#sharedInstance}.
+		 * <p>By default this {@link ReactiveAdapterRegistry#getSharedInstance()}.
 		 * @param registry the registry to use
 		 */
 		Builder reactiveAdapterStrategy(ReactiveAdapterRegistry registry);

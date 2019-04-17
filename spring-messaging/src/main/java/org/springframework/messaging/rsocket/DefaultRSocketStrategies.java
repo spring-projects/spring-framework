@@ -94,6 +94,17 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		private DataBufferFactory dataBufferFactory;
 
 
+		public DefaultRSocketStrategiesBuilder() {
+		}
+
+		public DefaultRSocketStrategiesBuilder(RSocketStrategies other) {
+			this.encoders.addAll(other.encoders());
+			this.decoders.addAll(other.decoders());
+			this.adapterRegistry = other.reactiveAdapterRegistry();
+			this.dataBufferFactory = other.dataBufferFactory();
+		}
+
+
 		@Override
 		public Builder encoder(Encoder<?>... encoders) {
 			this.encoders.addAll(Arrays.asList(encoders));
