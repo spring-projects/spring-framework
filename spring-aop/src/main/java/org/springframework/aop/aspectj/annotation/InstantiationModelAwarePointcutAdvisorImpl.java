@@ -263,7 +263,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 	 * Note that this is a <i>dynamic</i> pointcut; otherwise it might be optimized out
 	 * if it does not at first match statically.
 	 */
-	private final class PerTargetInstantiationModelPointcut extends DynamicMethodMatcherPointcut {
+	private static final class PerTargetInstantiationModelPointcut extends DynamicMethodMatcherPointcut {
 
 		private final AspectJExpressionPointcut declaredPointcut;
 
