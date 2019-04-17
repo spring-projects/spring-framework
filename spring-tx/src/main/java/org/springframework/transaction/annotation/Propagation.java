@@ -40,7 +40,7 @@ public enum Propagation {
 	 * Support a current transaction, execute non-transactionally if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p>Note: For transaction managers with transaction synchronization,
-	 * PROPAGATION_SUPPORTS is slightly different from no transaction at all,
+	 * SUPPORTS is slightly different from no transaction at all,
 	 * as it defines a transaction scope that synchronization will apply for.
 	 * As a consequence, the same resources (JDBC Connection, Hibernate Session, etc)
 	 * will be shared for the entire specified scope. Note that this depends on
@@ -87,7 +87,7 @@ public enum Propagation {
 
 	/**
 	 * Execute within a nested transaction if a current transaction exists,
-	 * behave like PROPAGATION_REQUIRED else. There is no analogous feature in EJB.
+	 * behave like REQUIRED else. There is no analogous feature in EJB.
 	 * <p>Note: Actual creation of a nested transaction will only work on specific
 	 * transaction managers. Out of the box, this only applies to the JDBC
 	 * DataSourceTransactionManager when working on a JDBC 3.0 driver.
