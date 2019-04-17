@@ -17,7 +17,6 @@ package org.springframework.web.reactive.result.view;
 
 import java.util.function.Supplier;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
@@ -26,7 +25,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -47,8 +45,7 @@ public class ZeroDemandResponse implements ServerHttpResponse {
 
 
 	public ZeroDemandResponse() {
-		NettyDataBufferFactory delegate = new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
-		this.bufferFactory = new LeakAwareDataBufferFactory(delegate);
+		this.bufferFactory = new LeakAwareDataBufferFactory();
 	}
 
 
