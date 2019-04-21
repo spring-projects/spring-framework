@@ -148,6 +148,13 @@ public class MergedAnnotationsTests {
 	}
 
 	@Test
+	public void getParent() {
+		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
+		assertThat(annotations.get(TransactionalComponent.class).getParent().getType())
+				.isEqualTo(ComposedTransactionalComponent.class);
+	}
+
+	@Test
 	public void collectMultiValueMapFromNonAnnotatedClass() {
 		MultiValueMap<String, Object> map = MergedAnnotations.from(
 				NonAnnotatedClass.class).stream(Transactional.class).collect(
