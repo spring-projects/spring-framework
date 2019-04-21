@@ -36,6 +36,7 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
@@ -557,6 +558,36 @@ public class HttpHeadersTests {
 		headers.setBearerAuth(token);
 		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
 		assertEquals("Bearer foo", authorization);
+	}
+
+	@Test
+	@Ignore("Disabled until gh-22821 is resolved")
+	public void removalFromKeySetRemovesEntryFromUnderlyingMap() {
+		String headerName = "MyHeader";
+		String headerValue = "value";
+
+		assertTrue(headers.isEmpty());
+		headers.add(headerName, headerValue);
+		assertTrue(headers.containsKey(headerName));
+		headers.keySet().removeIf(key -> key.equals(headerName));
+		assertTrue(headers.isEmpty());
+		headers.add(headerName, headerValue);
+		assertEquals(headerValue, headers.get(headerName));
+	}
+
+	@Test
+	@Ignore("Disabled until gh-22821 is resolved")
+	public void removalFromEntrySetRemovesEntryFromUnderlyingMap() {
+		String headerName = "MyHeader";
+		String headerValue = "value";
+
+		assertTrue(headers.isEmpty());
+		headers.add(headerName, headerValue);
+		assertTrue(headers.containsKey(headerName));
+		headers.entrySet().removeIf(entry -> entry.getKey().equals(headerName));
+		assertTrue(headers.isEmpty());
+		headers.add(headerName, headerValue);
+		assertEquals(headerValue, headers.get(headerName));
 	}
 
 	@Test
