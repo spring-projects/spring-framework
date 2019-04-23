@@ -68,6 +68,21 @@ public interface RSocketRequester {
 		return new DefaultRSocketRequesterBuilder();
 	}
 
+	// For now we treat metadata as a simple string that is the route.
+	// This will change after the resolution of:
+	// https://github.com/rsocket/rsocket-java/issues/568
+
+	/**
+	 * Entry point to prepare a new request to the given route.
+	 *
+	 * <p>For requestChannel interactions, i.e. Flux-to-Flux the metadata is
+	 * attached to the first request payload.
+	 *
+	 * @param route the routing destination
+	 * @return a spec for further defining and executing the reuqest
+	 */
+	RequestSpec route(String route);
+
 	/**
 	 * A mutable builder for creating a client {@link RSocketRequester}.
 	 */
@@ -90,7 +105,7 @@ public interface RSocketRequester {
 
 		/**
 		 * Configure the {@code ClientTransport} for the RSocket connection
-		 * and connect to the RSocket server
+		 * and connect to the RSocket server.
 		 * @param transport the chosen client transport
 		 * @return a mono containing the connected {@code RSocketRequester}
 		 */
@@ -98,7 +113,7 @@ public interface RSocketRequester {
 
 		/**
 		 * Connect to the RSocket server over TCP transport using the
-		 * provided connection parameters
+		 * provided connection parameters.
 		 * @param host the RSocket server host
 		 * @param port the RSocket server port
 		 * @param dataMimeType the data MimeType
@@ -108,7 +123,7 @@ public interface RSocketRequester {
 
 		/**
 		 * Connect to the RSocket server over WebSocket transport using the
-		 * provided connection parameters
+		 * provided connection parameters.
 		 * @param uri the RSocket server endpoint URI
 		 * @param dataMimeType the data MimeType
 		 * @return a mono containing the connected {@code RSocketRequester}
@@ -116,21 +131,6 @@ public interface RSocketRequester {
 		Mono<RSocketRequester> connectWebSocket(URI uri, MimeType dataMimeType);
 
 	}
-
-	// For now we treat metadata as a simple string that is the route.
-	// This will change after the resolution of:
-	// https://github.com/rsocket/rsocket-java/issues/568
-
-	/**
-	 * Entry point to prepare a new request to the given route.
-	 *
-	 * <p>For requestChannel interactions, i.e. Flux-to-Flux the metadata is
-	 * attached to the first request payload.
-	 *
-	 * @param route the routing destination
-	 * @return a spec for further defining and executing the reuqest
-	 */
-	RequestSpec route(String route);
 
 
 	/**
