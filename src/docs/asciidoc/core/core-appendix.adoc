@@ -714,10 +714,10 @@ to configure `SimpleDateFormat` objects:
 	<!-- myns.xsd (inside package org/springframework/samples/xml) -->
 
 	<?xml version="1.0" encoding="UTF-8"?>
-	<xsd:schema xmlns="http://www.mycompany.com/schema/myns"
+	<xsd:schema xmlns="http://www.mycompany.example/schema/myns"
 			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 			xmlns:beans="http://www.springframework.org/schema/beans"
-			targetNamespace="http://www.mycompany.com/schema/myns"
+			targetNamespace="http://www.mycompany.example/schema/myns"
 			elementFormDefault="qualified"
 			attributeFormDefault="unqualified">
 
@@ -909,7 +909,7 @@ namespace handler classes. For our example, we need to write the following:
 [literal]
 [subs="verbatim,quotes"]
 ----
-http\://www.mycompany.com/schema/myns=org.springframework.samples.xml.MyNamespaceHandler
+http\://www.mycompany.example/schema/myns=org.springframework.samples.xml.MyNamespaceHandler
 ----
 
 (The `:` character is a valid delimiter in the Java properties format, so
@@ -935,7 +935,7 @@ The following snippet shows the line we need to add for our custom schema:
 [literal]
 [subs="verbatim,quotes"]
 ----
-http\://www.mycompany.com/schema/myns/myns.xsd=org/springframework/samples/xml/myns.xsd
+http\://www.mycompany.example/schema/myns/myns.xsd=org/springframework/samples/xml/myns.xsd
 ----
 
 (Remember that the `:` character must be escaped.)
@@ -959,10 +959,10 @@ in a Spring XML configuration file:
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:myns="http://www.mycompany.com/schema/myns"
+		xmlns:myns="http://www.mycompany.example/schema/myns"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.xsd">
+			http://www.mycompany.example/schema/myns http://www.mycompany.com/schema/myns/myns.xsd">
 
 		<!-- as a top-level bean -->
 		<myns:dateformat id="defaultDateFormat" pattern="yyyy-MM-dd HH:mm" lenient="true"/> <1>
@@ -998,10 +998,10 @@ to satisfy a target of the following configuration:
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:foo="http://www.foo.com/schema/component"
+		xmlns:foo="http://www.foo.example/schema/component"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.foo.com/schema/component http://www.foo.com/schema/component/component.xsd">
+			http://www.foo.example/schema/component http://www.foo.example/schema/component/component.xsd">
 
 		<foo:component id="bionic-family" name="Bionic-1">
 			<foo:component name="Mother-1">
@@ -1109,9 +1109,9 @@ listing shows:
 ----
 	<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-	<xsd:schema xmlns="http://www.foo.com/schema/component"
+	<xsd:schema xmlns="http://www.foo.example/schema/component"
 			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-			targetNamespace="http://www.foo.com/schema/component"
+			targetNamespace="http://www.foo.example/schema/component"
 			elementFormDefault="qualified"
 			attributeFormDefault="unqualified">
 
@@ -1207,14 +1207,14 @@ by modifying the `META-INF/spring.handlers` and `META-INF/spring.schemas` files,
 [subs="verbatim,quotes"]
 ----
 # in 'META-INF/spring.handlers'
-http\://www.foo.com/schema/component=com.foo.ComponentNamespaceHandler
+http\://www.foo.example/schema/component=com.foo.ComponentNamespaceHandler
 ----
 
 [literal]
 [subs="verbatim,quotes"]
 ----
 # in 'META-INF/spring.schemas'
-http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd
+http\://www.foo.example/schema/component/component.xsd=com/foo/component.xsd
 ----
 
 
@@ -1275,9 +1275,9 @@ the XSD schema that describes the custom attribute, as follows:
 ----
 	<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-	<xsd:schema xmlns="http://www.foo.com/schema/jcache"
+	<xsd:schema xmlns="http://www.foo.example/schema/jcache"
 			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-			targetNamespace="http://www.foo.com/schema/jcache"
+			targetNamespace="http://www.foo.example/schema/jcache"
 			elementFormDefault="qualified">
 
 		<xsd:attribute name="cache-name" type="xsd:string"/>
@@ -1370,12 +1370,12 @@ by modifying the `META-INF/spring.handlers` and `META-INF/spring.schemas` files,
 [subs="verbatim,quotes"]
 ----
 # in 'META-INF/spring.handlers'
-http\://www.foo.com/schema/jcache=com.foo.JCacheNamespaceHandler
+http\://www.foo.example/schema/jcache=com.foo.JCacheNamespaceHandler
 ----
 
 [literal]
 [subs="verbatim,quotes"]
 ----
 # in 'META-INF/spring.schemas'
-http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd
+http\://www.foo.example/schema/jcache/jcache.xsd=com/foo/jcache.xsd
 ----

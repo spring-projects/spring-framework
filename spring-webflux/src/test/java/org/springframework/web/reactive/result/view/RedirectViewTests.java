@@ -97,13 +97,13 @@ public class RedirectViewTests {
 
 		assertThat(view.isRemoteHost("https://url.somewhere.com")).isFalse();
 		assertThat(view.isRemoteHost("/path")).isFalse();
-		assertThat(view.isRemoteHost("http://url.somewhereelse.com")).isFalse();
+		assertThat(view.isRemoteHost("http://somewhereelse.example")).isFalse();
 
 		view.setHosts("url.somewhere.com");
 
 		assertThat(view.isRemoteHost("https://url.somewhere.com")).isFalse();
 		assertThat(view.isRemoteHost("/path")).isFalse();
-		assertThat(view.isRemoteHost("http://url.somewhereelse.com")).isTrue();
+		assertThat(view.isRemoteHost("http://somewhereelse.example")).isTrue();
 	}
 
 	@Test

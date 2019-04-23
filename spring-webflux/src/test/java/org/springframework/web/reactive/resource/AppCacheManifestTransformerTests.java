@@ -107,13 +107,13 @@ public class AppCacheManifestTransformerTests {
 
 		assertThat(content).as("not rewrite external resources")
 				.contains("//example.org/style.css")
-				.contains("http://example.org/image.png");
+				.contains("https://example.org/image.png");
 
 		// Not the same hash as Spring MVC
 		// Hash is computed from links, and not from the linked content
 
 		assertThat(content).as("generate fingerprint")
-				.contains("# Hash: 8eefc904df3bd46537fa7bdbbc5ab9fb");
+				.contains("# Hash: d4437f1d7ae9530ab3ae71d5375b46ff");
 	}
 
 	private Resource getResource(String filePath) {
