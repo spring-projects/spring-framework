@@ -31,14 +31,14 @@ public class HostRequestMatcherTests extends AbstractWebRequestMatcherTests {
 	public void localhost() throws Exception {
 		WebRequestMatcher matcher = new HostRequestMatcher("localhost");
 		assertMatches(matcher, "http://localhost/jquery-1.11.0.min.js");
-		assertDoesNotMatch(matcher, "http://example.com/jquery-1.11.0.min.js");
+		assertDoesNotMatch(matcher, "http://company.example/jquery-1.11.0.min.js");
 	}
 
 	@Test
 	public void multipleHosts() throws Exception {
 		WebRequestMatcher matcher = new HostRequestMatcher("localhost", "example.com");
 		assertMatches(matcher, "http://localhost/jquery-1.11.0.min.js");
-		assertMatches(matcher, "http://example.com/jquery-1.11.0.min.js");
+		assertMatches(matcher, "https://example.com/jquery-1.11.0.min.js");
 	}
 
 	@Test

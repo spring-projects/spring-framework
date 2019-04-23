@@ -5650,12 +5650,12 @@ The following example shows the bean definitions for the preceding code:
 [subs="verbatim,quotes"]
 ----
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host" value="mail.mycompany.com"/>
+		<property name="host" value="mail.mycompany.example"/>
 	</bean>
 
 	<!-- this is a template message that we can pre-load with default state -->
 	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
-		<property name="from" value="customerservice@mycompany.com"/>
+		<property name="from" value="customerservice@mycompany.example"/>
 		<property name="subject" value="Your order"/>
 	</bean>
 
@@ -5702,7 +5702,7 @@ callback interface. In the following example, the `mailSender` property is of ty
 				public void prepare(MimeMessage mimeMessage) throws Exception {
 					mimeMessage.setRecipient(Message.RecipientType.TO,
 							new InternetAddress(order.getCustomer().getEmailAddress()));
-					mimeMessage.setFrom(new InternetAddress("mail@mycompany.com"));
+					mimeMessage.setFrom(new InternetAddress("mail@mycompany.example"));
 					mimeMessage.setText("Dear " + order.getCustomer().getFirstName() + " " +
 							order.getCustomer().getLastName() + ", thanks for your order. " +
 							"Your order number is " + order.getOrderNumber() + ".");

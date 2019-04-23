@@ -41,11 +41,11 @@ import com.gargoylesoftware.htmlunit.WebRequest;
  * <p>Alternatively, one can also specify the port. For example, the following would match
  * any request to the host {@code "code.jquery.com"} with the port of {@code 80}.
  *
- * <pre class="code">WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com:80");</pre>
+ * <pre class="code">WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.example:80");</pre>
  *
- * <p>The above {@code cdnMatcher} would match {@code "http://code.jquery.com/jquery.js"}
- * which has a default port of {@code 80} and {@code "http://code.jquery.com:80/jquery.js"}.
- * However, it would not match {@code "https://code.jquery.com/jquery.js"}
+ * <p>The above {@code cdnMatcher} would match {@code "http://code.jquery.example/jquery.js"}
+ * which has a default port of {@code 80} and {@code "http://code.jquery.example:80/jquery.js"}.
+ * However, it would not match {@code "https://code.jquery.example/jquery.js"}
  * which has a default port of {@code 443}.
  *
  * @author Rob Winch
