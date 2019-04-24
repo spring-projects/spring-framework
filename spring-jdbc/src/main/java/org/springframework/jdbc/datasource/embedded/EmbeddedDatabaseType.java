@@ -21,6 +21,7 @@ package org.springframework.jdbc.datasource.embedded;
  *
  * @author Keith Donald
  * @author Oliver Gierke
+ * @author Juliano Alves
  * @since 3.0
  */
 public enum EmbeddedDatabaseType {
@@ -32,6 +33,8 @@ public enum EmbeddedDatabaseType {
 	H2,
 
 	/** The <a href="https://db.apache.org/derby">Apache Derby</a> Embedded SQL Database. */
-	DERBY
+	DERBY,
 
+	/** The <a href="https://www.mysql.com/">MySQL</a> Embedded SQL Database. */
+	MYSQL
 }

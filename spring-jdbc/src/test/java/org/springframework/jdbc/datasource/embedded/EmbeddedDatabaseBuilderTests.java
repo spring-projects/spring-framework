@@ -161,6 +161,20 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	@Test
+	public void setTypeToMysql() throws Exception {
+		doTwice(new Runnable() {
+			@Override
+			public void run() {
+				EmbeddedDatabase db = builder
+				.setType(MYSQL)
+				.addScripts("db-schema-mysql.sql", "db-test-data.sql")
+				.build();
+				assertDatabaseCreatedAndShutdown(db);
+			}
+		});
+	}
+
+	@Test
 	public void createSameSchemaTwiceWithoutUniqueDbNames() throws Exception {
 		EmbeddedDatabase db1 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))//
 		.addScripts("db-schema-without-dropping.sql").build();

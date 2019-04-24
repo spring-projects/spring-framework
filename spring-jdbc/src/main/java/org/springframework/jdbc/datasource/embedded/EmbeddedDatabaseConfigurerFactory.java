@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Oliver Gierke
  * @author Sam Brannen
+ * @author Juliano Alves
  * @since 3.0
  */
 final class EmbeddedDatabaseConfigurerFactory {
@@ -49,6 +50,8 @@ final class EmbeddedDatabaseConfigurerFactory {
 					return H2EmbeddedDatabaseConfigurer.getInstance();
 				case DERBY:
 					return DerbyEmbeddedDatabaseConfigurer.getInstance();
+				case MYSQL:
+					return MysqlEmbeddedDatabaseConfigurer.getInstance();
 				default:
 					throw new UnsupportedOperationException("Embedded database type [" + type + "] is not supported");
 			}
