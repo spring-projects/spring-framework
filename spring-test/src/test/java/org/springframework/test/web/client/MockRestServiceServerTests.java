@@ -126,6 +126,7 @@ public class MockRestServiceServerTests {
 
 		try {
 			this.restTemplate.getForEntity("/some-service/some-endpoint", String.class);
+			fail("Expected exception to be thrown.");
 		}
 		catch (Exception ex) {
 			this.restTemplate.postForEntity("/reporting-service/report-error", ex.toString(), String.class);
@@ -142,6 +143,7 @@ public class MockRestServiceServerTests {
 		this.restTemplate.postForEntity("/remoteurl", null, String.class);
 		try {
 			this.restTemplate.postForEntity("/remoteurl", null, String.class);
+			fail("Expected error to be thrown.");
 		}
 		catch (AssertionError error) {
 			assertThat(error.getMessage()).startsWith("No further requests expected");
