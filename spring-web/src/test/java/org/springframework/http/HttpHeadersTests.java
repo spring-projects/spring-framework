@@ -562,7 +562,6 @@ public class HttpHeadersTests {
 	}
 
 	@Test
-	@Ignore("Disabled until gh-22821 is resolved")
 	public void removalFromKeySetRemovesEntryFromUnderlyingMap() {
 		String headerName = "MyHeader";
 		String headerValue = "value";
@@ -573,11 +572,10 @@ public class HttpHeadersTests {
 		headers.keySet().removeIf(key -> key.equals(headerName));
 		assertTrue(headers.isEmpty());
 		headers.add(headerName, headerValue);
-		assertEquals(headerValue, headers.get(headerName));
+		assertEquals(headerValue, headers.get(headerName).get(0));
 	}
 
 	@Test
-	@Ignore("Disabled until gh-22821 is resolved")
 	public void removalFromEntrySetRemovesEntryFromUnderlyingMap() {
 		String headerName = "MyHeader";
 		String headerValue = "value";
@@ -588,7 +586,7 @@ public class HttpHeadersTests {
 		headers.entrySet().removeIf(entry -> entry.getKey().equals(headerName));
 		assertTrue(headers.isEmpty());
 		headers.add(headerName, headerValue);
-		assertEquals(headerValue, headers.get(headerName));
+		assertEquals(headerValue, headers.get(headerName).get(0));
 	}
 
 }
