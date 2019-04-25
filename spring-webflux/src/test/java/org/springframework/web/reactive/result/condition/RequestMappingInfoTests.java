@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
 
 import static java.util.Arrays.asList;
@@ -61,7 +62,8 @@ public class RequestMappingInfoTests {
 	public void createEmpty() {
 		RequestMappingInfo info = paths().build();
 
-		assertEquals(0, info.getPatternsCondition().getPatterns().size());
+		PathPattern emptyPattern = (new PathPatternParser()).parse("");
+		assertEquals(Collections.singleton(emptyPattern), info.getPatternsCondition().getPatterns());
 		assertEquals(0, info.getMethodsCondition().getMethods().size());
 		assertEquals(true, info.getConsumesCondition().isEmpty());
 		assertEquals(true, info.getProducesCondition().isEmpty());

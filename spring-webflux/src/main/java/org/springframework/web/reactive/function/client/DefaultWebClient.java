@@ -185,6 +185,12 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
+		public RequestBodySpec uri(String uriTemplate, Function<UriBuilder, URI> uriFunction) {
+			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+			return uri(uriFunction.apply(uriBuilderFactory.uriString(uriTemplate)));
+		}
+
+		@Override
 		public RequestBodySpec uri(Function<UriBuilder, URI> uriFunction) {
 			return uri(uriFunction.apply(uriBuilderFactory.builder()));
 		}
@@ -441,13 +447,13 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
 			return this.responseMono.flatMapMany(response ->
-					handleBody(response, response.bodyToFlux(elementType), mono -> mono.flatMapMany(Flux::error)));
+					handleBody(response, response.bodyToFlux(elementType), mono -> mono.handle((t, sink) -> sink.error(t))));
 		}
 
 		@Override
 		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementType) {
 			return this.responseMono.flatMapMany(response ->
-					handleBody(response, response.bodyToFlux(elementType), mono -> mono.flatMapMany(Flux::error)));
+					handleBody(response, response.bodyToFlux(elementType), mono -> mono.handle((t, sink) -> sink.error(t))));
 		}
 
 		private <T extends Publisher<?>> T handleBody(ClientResponse response,

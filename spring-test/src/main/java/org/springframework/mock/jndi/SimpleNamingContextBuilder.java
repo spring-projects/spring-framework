@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,10 @@ import org.springframework.util.ReflectionUtils;
  * @see SimpleNamingContext
  * @see org.springframework.jdbc.datasource.SingleConnectionDataSource
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
+ * @deprecated Deprecated as of Spring Framework 5.2 in favor of complete solutions from
+ * third parties such as <a href="https://github.com/h-thurow/Simple-JNDI">Simple-JNDI</a>
  */
+@Deprecated
 public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder {
 
 	/** An instance of this class bound to JNDI. */

@@ -227,23 +227,23 @@ public class AnnotatedElementUtilsTests {
 	 * If the "value" entry contains both "DerivedTxConfig" AND "TxConfig", then
 	 * the algorithm is accidentally picking up shadowed annotations of the same
 	 * type within the class hierarchy. Such undesirable behavior would cause the
-	 * logic in {@link org.springframework.context.annotation.ProfileCondition}
+	 * logic in {@code org.springframework.context.annotation.ProfileCondition}
 	 * to fail.
-	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
 	 */
 	@Test
 	public void getAllAnnotationAttributesOnClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
+		// See org.springframework.core.env.EnvironmentSystemIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(DerivedTxConfig.class, TX_NAME);
 		assertNotNull("Annotation attributes map for @Transactional on DerivedTxConfig", attributes);
 		assertEquals("value for DerivedTxConfig", asList("DerivedTxConfig"), attributes.get("value"));
 	}
 
 	/**
-	 * Note: this functionality is required by {@link org.springframework.context.annotation.ProfileCondition}.
-	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests
+	 * Note: this functionality is required by {@code org.springframework.context.annotation.ProfileCondition}.
 	 */
 	@Test
 	public void getAllAnnotationAttributesOnClassWithMultipleComposedAnnotations() {
+		// See org.springframework.core.env.EnvironmentSystemIntegrationTests
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxFromMultipleComposedAnnotations.class, TX_NAME);
 		assertNotNull("Annotation attributes map for @Transactional on TxFromMultipleComposedAnnotations", attributes);
 		assertEquals("value for TxFromMultipleComposedAnnotations.", asList("TxInheritedComposed", "TxComposed"),

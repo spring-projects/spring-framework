@@ -31,7 +31,6 @@ import org.springframework.core.annotation.AliasFor;
  * <p>Specifically, {@code @GetMapping} is a <em>composed annotation</em> that
  * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.GET)}.
  *
- *
  * @author Sam Brannen
  * @since 4.3
  * @see PostMapping

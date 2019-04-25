@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,14 +29,16 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Signal;
+import reactor.test.StepVerifier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
@@ -50,9 +54,6 @@ public class ChannelSendOperatorTests {
 		this.writer = new OneByOneAsyncWriter();
 	}
 
-	private <T> Mono<Void> sendOperator(Publisher<String> source){
-		return new ChannelSendOperator<>(source, writer::send);
-	}
 
 	@Test
 	public void errorBeforeFirstItem() throws Exception {
@@ -130,6 +131,92 @@ public class ChannelSendOperatorTests {
 		assertSame(error, this.writer.error);
 	}
 
+	@Test // gh-22720
+	public void cancelWhileItemCached() {
+		LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+
+		ChannelSendOperator<DataBuffer> operator = new ChannelSendOperator<>(
+				Mono.fromCallable(() -> {
+					DataBuffer dataBuffer = bufferFactory.allocateBuffer();
+					dataBuffer.write("foo", StandardCharsets.UTF_8);
+					return dataBuffer;
+				}),
+				publisher -> {
+					ZeroDemandSubscriber subscriber = new ZeroDemandSubscriber();
+					publisher.subscribe(subscriber);
+					return Mono.never();
+				});
+
+		BaseSubscriber<Void> subscriber = new BaseSubscriber<Void>() {};
+		operator.subscribe(subscriber);
+		subscriber.cancel();
+
+		bufferFactory.checkForLeaks();
+	}
+
+	@Test // gh-22720
+	public void errorFromWriteSourceWhileItemCached() {
+
+		// 1. First item received
+		// 2. writeFunction applied and writeCompletionBarrier subscribed to it
+		// 3. Write Publisher fails right after that and before request(n) from server
+
+		LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+		ZeroDemandSubscriber writeSubscriber = new ZeroDemandSubscriber();
+
+		ChannelSendOperator<DataBuffer> operator = new ChannelSendOperator<>(
+				Flux.create(sink -> {
+					DataBuffer dataBuffer = bufferFactory.allocateBuffer();
+					dataBuffer.write("foo", StandardCharsets.UTF_8);
+					sink.next(dataBuffer);
+					sink.error(new IllegalStateException("err"));
+				}),
+				publisher -> {
+					publisher.subscribe(writeSubscriber);
+					return Mono.never();
+				});
+
+
+		operator.subscribe(new BaseSubscriber<Void>() {});
+		try {
+			writeSubscriber.signalDemand(1);  // Let cached signals ("foo" and error) be published..
+		}
+		catch (Throwable ex) {
+			assertNotNull(ex.getCause());
+			assertEquals("err", ex.getCause().getMessage());
+		}
+
+		bufferFactory.checkForLeaks();
+	}
+
+	@Test // gh-22720
+	public void errorFromWriteFunctionWhileItemCached() {
+
+		// 1. First item received
+		// 2. writeFunction applied and writeCompletionBarrier subscribed to it
+		// 3. writeFunction fails, e.g. to flush status and headers, before request(n) from server
+
+		LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+
+		ChannelSendOperator<DataBuffer> operator = new ChannelSendOperator<>(
+				Flux.create(sink -> {
+					DataBuffer dataBuffer = bufferFactory.allocateBuffer();
+					dataBuffer.write("foo", StandardCharsets.UTF_8);
+					sink.next(dataBuffer);
+				}),
+				publisher -> {
+					publisher.subscribe(new ZeroDemandSubscriber());
+					return Mono.error(new IllegalStateException("err"));
+				});
+
+		StepVerifier.create(operator).expectErrorMessage("err").verify(Duration.ofSeconds(5));
+		bufferFactory.checkForLeaks();
+	}
+
+	private <T> Mono<Void> sendOperator(Publisher<String> source){
+		return new ChannelSendOperator<>(source, writer::send);
+	}
+
 
 	private static class OneByOneAsyncWriter {
 
@@ -179,6 +266,20 @@ public class ChannelSendOperatorTests {
 				completed = true;
 				this.subscriber.onComplete();
 			}
+		}
+	}
+
+
+	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
+
+
+		@Override
+		protected void hookOnSubscribe(Subscription subscription) {
+			// Just subscribe without requesting
+		}
+
+		public void signalDemand(long demand) {
+			upstream().request(demand);
 		}
 	}
 

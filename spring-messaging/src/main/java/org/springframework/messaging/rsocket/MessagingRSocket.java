@@ -180,6 +180,7 @@ class MessagingRSocket extends AbstractRSocket {
 
 	private MessageHeaders createHeaders(String destination, @Nullable MonoProcessor<?> replyMono) {
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
+		headers.setLeaveMutable(true);
 		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, destination);
 		if (this.dataMimeType != null) {
 			headers.setContentType(this.dataMimeType);

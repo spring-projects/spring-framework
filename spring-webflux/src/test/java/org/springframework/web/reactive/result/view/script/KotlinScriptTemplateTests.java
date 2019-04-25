@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -40,6 +41,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class KotlinScriptTemplateTests {
 
+	@Ignore
 	@Test
 	public void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
@@ -49,6 +51,7 @@ public class KotlinScriptTemplateTests {
 		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>", response.getBodyAsString().block());
 	}
 
+	@Ignore
 	@Test
 	public void renderTemplateWithEnglishLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
@@ -58,6 +61,7 @@ public class KotlinScriptTemplateTests {
 		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>", response.getBodyAsString().block());
 	}
 
+	@Ignore
 	@Test
 	public void renderTemplateWithoutRenderFunction() throws Exception {
 		Map<String, Object> model = new HashMap<>();

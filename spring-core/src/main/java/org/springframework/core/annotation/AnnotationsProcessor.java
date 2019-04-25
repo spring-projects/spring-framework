@@ -58,7 +58,7 @@ interface AnnotationsProcessor<C, R> {
 	R doWithAnnotations(C context, int aggregateIndex, @Nullable Object source, Annotation[] annotations);
 
 	/**
-	 * Return the final result to be returned. By default this method returns
+	 * Get the final result to be returned. By default this method returns
 	 * the last process result.
 	 * @param result the last early exit result, or {@code null} if none
 	 * @return the final result to be returned to the caller

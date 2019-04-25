@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 import org.springframework.lang.Nullable;
 
 /**
- * A {@link AbstractMergedAnnotation} used as the implementation of
+ * An {@link AbstractMergedAnnotation} used as the implementation of
  * {@link MergedAnnotation#missing()}.
  *
  * @author Phillip Webb
@@ -108,12 +108,17 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
-	public Map<String, Object> asMap(MapValues... options) {
+	public AnnotationAttributes asAnnotationAttributes(Adapt... adaptations) {
+		return new AnnotationAttributes();
+	}
+
+	@Override
+	public Map<String, Object> asMap(Adapt... adaptations) {
 		return Collections.emptyMap();
 	}
 
 	@Override
-	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, MapValues... options) {
+	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations) {
 		return factory.apply(this);
 	}
 

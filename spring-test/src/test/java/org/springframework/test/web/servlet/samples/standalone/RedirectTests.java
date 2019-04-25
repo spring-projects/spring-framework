@@ -115,7 +115,7 @@ public class RedirectTests {
 			return "persons/index";
 		}
 
-		@PostMapping
+		@PostMapping("/persons")
 		public String save(@Valid Person person, Errors errors, RedirectAttributes redirectAttrs) {
 			if (errors.hasErrors()) {
 				return "persons/add";

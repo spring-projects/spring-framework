@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -49,6 +50,13 @@ class ServerRequestExtensionsTests {
 	@Test
 	fun `bodyToFlux with reified type parameters`() {
 		request.bodyToFlux<List<Foo>>()
+		verify { request.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	@FlowPreview
+	fun `bodyToFlow with reified type parameters`() {
+		request.bodyToFlow<List<Foo>>()
 		verify { request.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
@@ -91,7 +99,7 @@ class ServerRequestExtensionsTests {
 		val principal = mockk<Principal>()
 		every { request.principal() } returns Mono.just(principal)
 		runBlocking {
-			assertEquals(principal, request.awaitPrincipal())
+			assertEquals(principal, request.awaitPrincipalOrNull())
 		}
 	}
 

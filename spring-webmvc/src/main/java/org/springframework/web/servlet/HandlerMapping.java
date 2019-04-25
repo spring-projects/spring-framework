@@ -64,6 +64,15 @@ public interface HandlerMapping {
 
 	/**
 	 * Name of the {@link HttpServletRequest} attribute that contains the path
+	 * used to look up the matching handler, which depending on the configured
+	 * {@link org.springframework.web.util.UrlPathHelper} could be the full path
+	 * or without the context path, decoded or not, etc.
+	 * @since 5.2
+	 */
+	String LOOKUP_PATH = HandlerMapping.class.getName() + ".lookupPath";
+
+	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains the path
 	 * within the handler mapping, in case of a pattern match, or the full
 	 * relevant URI (typically within the DispatcherServlet's mapping) else.
 	 * <p>Note: This attribute is not required to be supported by all

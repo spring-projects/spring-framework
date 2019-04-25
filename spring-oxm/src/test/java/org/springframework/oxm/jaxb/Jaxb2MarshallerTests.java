@@ -327,7 +327,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		final javax.xml.bind.Unmarshaller unmarshaller = mock(javax.xml.bind.Unmarshaller.class);
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
 			@Override
-			protected javax.xml.bind.Unmarshaller createUnmarshaller() {
+			public javax.xml.bind.Unmarshaller createUnmarshaller() {
 				return unmarshaller;
 			}
 		};
@@ -361,7 +361,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		final javax.xml.bind.Unmarshaller unmarshaller = mock(javax.xml.bind.Unmarshaller.class);
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
 			@Override
-			protected javax.xml.bind.Unmarshaller createUnmarshaller() {
+			public javax.xml.bind.Unmarshaller createUnmarshaller() {
 				return unmarshaller;
 			}
 		};

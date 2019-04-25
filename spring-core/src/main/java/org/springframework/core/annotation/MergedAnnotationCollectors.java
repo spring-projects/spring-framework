@@ -26,13 +26,13 @@ import java.util.function.IntFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collector.Characteristics;
 
-import org.springframework.core.annotation.MergedAnnotation.MapValues;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
  * Collector implementations that provide various reduction operations for
- * {@link MergedAnnotation MergedAnnotations}.
+ * {@link MergedAnnotation} instances.
  *
  * @author Phillip Webb
  * @since 5.2
@@ -49,8 +49,8 @@ public abstract class MergedAnnotationCollectors {
 
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to a
-	 * {@link LinkedHashSet} containing {@link MergedAnnotation#synthesize()
+	 * Create a new {@link Collector} that accumulates merged annotations to a
+	 * {@link LinkedHashSet} containing {@linkplain MergedAnnotation#synthesize()
 	 * synthesized} versions.
 	 * @param <A> the annotation type
 	 * @return a {@link Collector} which collects and synthesizes the
@@ -62,8 +62,8 @@ public abstract class MergedAnnotationCollectors {
 	}
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to an
-	 * {@link Annotation} array containing {@link MergedAnnotation#synthesize()
+	 * Create a new {@link Collector} that accumulates merged annotations to an
+	 * {@link Annotation} array containing {@linkplain MergedAnnotation#synthesize()
 	 * synthesized} versions.
 	 * @param <A> the annotation type
 	 * @return a {@link Collector} which collects and synthesizes the
@@ -75,8 +75,8 @@ public abstract class MergedAnnotationCollectors {
 	}
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to an
-	 * {@link Annotation} array containing {@link MergedAnnotation#synthesize()
+	 * Create a new {@link Collector} that accumulates merged annotations to an
+	 * {@link Annotation} array containing {@linkplain MergedAnnotation#synthesize()
 	 * synthesized} versions.
 	 * @param <A> the annotation type
 	 * @param <R> the resulting array type
@@ -94,42 +94,42 @@ public abstract class MergedAnnotationCollectors {
 	}
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to an
-	 * {@link MultiValueMap} with items {@link MultiValueMap#add(Object, Object)
+	 * Create a new {@link Collector} that accumulates merged annotations to an
+	 * {@link MultiValueMap} with items {@linkplain MultiValueMap#add(Object, Object)
 	 * added} from each merged annotation
-	 * {@link MergedAnnotation#asMap(MapValues...) as a map}.
+	 * {@link MergedAnnotation#asMap(Adapt...) as a map}.
 	 * @param <A> the annotation type
-	 * @param options the map conversion options
+	 * @param adaptations adaptations that should be applied to the annotation values
 	 * @return a {@link Collector} which collects and synthesizes the
 	 * annotations into a {@link LinkedMultiValueMap}
-	 * @see #toMultiValueMap(Function, MergedAnnotation.MapValues...)
+	 * @see #toMultiValueMap(Function, MergedAnnotation.Adapt...)
 	 */
 	public static <A extends Annotation> Collector<MergedAnnotation<A>, ?, MultiValueMap<String, Object>> toMultiValueMap(
-			MapValues... options) {
+			Adapt... adaptations) {
 
-		return toMultiValueMap(Function.identity(), options);
+		return toMultiValueMap(Function.identity(), adaptations);
 	}
 
 	/**
-	 * Returns a new {@link Collector} that accumulates merged annotations to an
-	 * {@link MultiValueMap} with items {@link MultiValueMap#add(Object, Object)
+	 * Create a new {@link Collector} that accumulates merged annotations to an
+	 * {@link MultiValueMap} with items {@linkplain MultiValueMap#add(Object, Object)
 	 * added} from each merged annotation
-	 * {@link MergedAnnotation#asMap(MapValues...) as a map}.
+	 * {@link MergedAnnotation#asMap(Adapt...) as a map}.
 	 * @param <A> the annotation type
-	 * @param options the map conversion options
+	 * @param adaptations adaptations that should be applied to the annotation values
 	 * @param finisher the finisher function for the new {@link MultiValueMap}
 	 * @return a {@link Collector} which collects and synthesizes the
 	 * annotations into a {@link LinkedMultiValueMap}
-	 * @see #toMultiValueMap(MergedAnnotation.MapValues...)
+	 * @see #toMultiValueMap(MergedAnnotation.Adapt...)
 	 */
 	public static <A extends Annotation> Collector<MergedAnnotation<A>, ?, MultiValueMap<String, Object>> toMultiValueMap(
 			Function<MultiValueMap<String, Object>, MultiValueMap<String, Object>> finisher,
-			MapValues... options) {
+			Adapt... adaptations) {
 
 		Characteristics[] characteristics = (isSameInstance(finisher, Function.identity()) ?
 				IDENTITY_FINISH_CHARACTERISTICS : NO_CHARACTERISTICS);
 		return Collector.of(LinkedMultiValueMap::new,
-				(map, annotation) -> annotation.asMap(options).forEach(map::add),
+				(map, annotation) -> annotation.asMap(adaptations).forEach(map::add),
 				MergedAnnotationCollectors::merge, finisher, characteristics);
 	}
 

@@ -18,8 +18,10 @@ package org.springframework.test.context;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
@@ -41,7 +43,27 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
  * @see TestContextManager
  * @see TestExecutionListener
  */
+// Suppression required due to bug in javac in Java 8: presence of default method in a Serializable interface
+@SuppressWarnings("serial")
 public interface TestContext extends AttributeAccessor, Serializable {
+
+	/**
+	 * Determine if the {@linkplain ApplicationContext application context} for
+	 * this test context is known to be available.
+	 * <p>If this method returns {@code true}, a subsequent invocation of
+	 * {@link #getApplicationContext()} should succeed.
+	 * <p>The default implementation of this method always returns {@code false}.
+	 * Custom {@code TestContext} implementations are therefore highly encouraged
+	 * to override this method with a more meaningful implementation. Note that
+	 * the standard {@code TestContext} implementation in Spring overrides this
+	 * method appropriately.
+	 * @return {@code true} if the application context has already been loaded
+	 * @since 5.2
+	 * @see #getApplicationContext()
+	 */
+	default boolean hasApplicationContext() {
+		return false;
+	}
 
 	/**
 	 * Get the {@linkplain ApplicationContext application context} for this
@@ -52,8 +74,26 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @return the application context (never {@code null})
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
+	 * @see #hasApplicationContext()
 	 */
 	ApplicationContext getApplicationContext();
+
+	/**
+	 * Publish the {@link ApplicationEvent} created by the given {@code eventFactory}
+	 * to the {@linkplain ApplicationContext application context} for this
+	 * test context.
+	 * <p>The {@code ApplicationEvent} will only be published if the application
+	 * context for this test context {@linkplain #hasApplicationContext() is available}.
+	 * @param eventFactory factory for lazy creation of the {@code ApplicationEvent}
+	 * @since 5.2
+	 * @see #hasApplicationContext()
+	 * @see #getApplicationContext()
+	 */
+	default void publishEvent(Function<TestContext, ? extends ApplicationEvent> eventFactory) {
+		if (hasApplicationContext()) {
+			getApplicationContext().publishEvent(eventFactory.apply(this));
+		}
+	}
 
 	/**
 	 * Get the {@linkplain Class test class} for this test context.

@@ -151,7 +151,8 @@ public class RSocketServerToClientIntegrationTests {
 						.expectNext("Hello 1")
 						.expectNext("Hello 2")
 						.expectNext("Hello 3")
-						.verifyComplete();
+						.expectComplete()
+						.verify(Duration.ofSeconds(5));
 			});
 		}
 
@@ -165,7 +166,8 @@ public class RSocketServerToClientIntegrationTests {
 						.expectNext("Hello 1 async")
 						.expectNext("Hello 2 async")
 						.expectNext("Hello 3 async")
-						.verifyComplete();
+						.expectComplete()
+						.verify(Duration.ofSeconds(5));
 			});
 		}
 
@@ -180,7 +182,7 @@ public class RSocketServerToClientIntegrationTests {
 						.expectNext("Hello 6")
 						.expectNext("Hello 7")
 						.thenCancel()
-						.verify();
+						.verify(Duration.ofSeconds(5));
 			});
 		}
 
@@ -196,7 +198,8 @@ public class RSocketServerToClientIntegrationTests {
 						.expectNextCount(7)
 						.expectNext("Hello 9 async")
 						.expectNext("Hello 10 async")
-						.verifyComplete();
+						.thenCancel()  // https://github.com/rsocket/rsocket-java/issues/613
+						.verify(Duration.ofSeconds(5));
 			});
 		}
 

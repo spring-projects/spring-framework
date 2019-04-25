@@ -39,10 +39,13 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.invocation.reactive.TestEncoderMethodReturnValueHandler;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import static java.nio.charset.StandardCharsets.*;
@@ -78,7 +81,7 @@ public class MessageMappingMessageHandlerTests {
 	@Test
 	public void handleFluxString() {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
-		messsageHandler.handleMessage(message("fluxString", "abc\ndef\nghi")).block(Duration.ofSeconds(5));
+		messsageHandler.handleMessage(message("fluxString", "abc", "def", "ghi")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Arrays.asList("abc::response", "def::response", "ghi::response"));
 	}
 
@@ -87,6 +90,13 @@ public class MessageMappingMessageHandlerTests {
 		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
 		messsageHandler.handleMessage(message("path123", "abcdef")).block(Duration.ofSeconds(5));
 		verifyOutputContent(Collections.singletonList("abcdef::response"));
+	}
+
+	@Test
+	public void handleWithDestinationVariable() {
+		MessageMappingMessageHandler messsageHandler = initMesssageHandler();
+		messsageHandler.handleMessage(message("destination.test", "abcdef")).block(Duration.ofSeconds(5));
+		verifyOutputContent(Collections.singletonList("test::abcdef::response"));
 	}
 
 	@Test
@@ -143,9 +153,11 @@ public class MessageMappingMessageHandlerTests {
 	}
 
 	private Message<?> message(String destination, String... content) {
-		return new GenericMessage<>(
-				Flux.fromIterable(Arrays.asList(content)).map(payload -> toDataBuffer(payload)),
-				Collections.singletonMap(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, destination));
+		Flux<DataBuffer> payload = Flux.fromIterable(Arrays.asList(content)).map(parts -> toDataBuffer(parts));
+		MessageHeaderAccessor headers = new MessageHeaderAccessor();
+		headers.setLeaveMutable(true);
+		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, destination);
+		return MessageBuilder.createMessage(payload, headers.getMessageHeaders());
 	}
 
 	private DataBuffer toDataBuffer(String payload) {
@@ -179,6 +191,11 @@ public class MessageMappingMessageHandlerTests {
 		@MessageMapping("${path}")
 		String handleWithPlaceholder(String payload) {
 			return payload + "::response";
+		}
+
+		@MessageMapping("destination.{variable}")
+		String handleWithDestinationVariable(@DestinationVariable String variable, String payload) {
+			return variable + "::" + payload + "::response";
 		}
 
 		@MessageMapping("exception")

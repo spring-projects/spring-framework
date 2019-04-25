@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.netty.buffer.PooledByteBufAllocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +56,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 	 * {@link DefaultDataBufferFactory}.
 	 */
 	public LeakAwareDataBufferFactory() {
-		this(new DefaultDataBufferFactory());
+		this(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT));
 	}
 
 	/**
@@ -66,6 +67,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 		Assert.notNull(delegate, "Delegate must not be null");
 		this.delegate = delegate;
 	}
+
 
 	/**
 	 * Checks whether all of the data buffers allocated by this factory have also been released.
@@ -99,16 +101,16 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 
 	@Override
 	public DataBuffer allocateBuffer() {
-		return allocateBufferInternal(this.delegate.allocateBuffer());
+		return createLeakAwareDataBuffer(this.delegate.allocateBuffer());
 	}
 
 	@Override
 	public DataBuffer allocateBuffer(int initialCapacity) {
-		return allocateBufferInternal(this.delegate.allocateBuffer(initialCapacity));
+		return createLeakAwareDataBuffer(this.delegate.allocateBuffer(initialCapacity));
 	}
 
 	@NotNull
-	private DataBuffer allocateBufferInternal(DataBuffer delegateBuffer) {
+	private DataBuffer createLeakAwareDataBuffer(DataBuffer delegateBuffer) {
 		LeakAwareDataBuffer dataBuffer = new LeakAwareDataBuffer(delegateBuffer, this);
 		this.created.add(dataBuffer);
 		return dataBuffer;
@@ -126,6 +128,10 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 
 	@Override
 	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
+		// Remove LeakAwareDataBuffer wrapper so delegate can find native buffers
+		dataBuffers = dataBuffers.stream()
+				.map(o -> o instanceof LeakAwareDataBuffer ? ((LeakAwareDataBuffer) o).getDelegate() : o)
+				.collect(Collectors.toList());
 		return new LeakAwareDataBuffer(this.delegate.join(dataBuffers), this);
 	}
 

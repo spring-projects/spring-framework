@@ -61,6 +61,37 @@ public class DefaultCorsProcessorTests {
 
 
 	@Test
+	public void requestWithoutOriginHeader() throws Exception {
+		MockServerHttpRequest request = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://domain1.com/test.html")
+				.build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		this.processor.process(this.conf, exchange);
+
+		ServerHttpResponse response = exchange.getResponse();
+		assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertThat(response.getHeaders().get(VARY), contains(ORIGIN,
+				ACCESS_CONTROL_REQUEST_METHOD, ACCESS_CONTROL_REQUEST_HEADERS));
+		assertNull(response.getStatusCode());
+	}
+
+	@Test
+	public void sameOriginRequest() throws Exception {
+		MockServerHttpRequest request = MockServerHttpRequest
+				.method(HttpMethod.GET, "http://domain1.com/test.html")
+				.header(HttpHeaders.ORIGIN, "http://domain1.com")
+				.build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
+		this.processor.process(this.conf, exchange);
+
+		ServerHttpResponse response = exchange.getResponse();
+		assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertThat(response.getHeaders().get(VARY), contains(ORIGIN,
+				ACCESS_CONTROL_REQUEST_METHOD, ACCESS_CONTROL_REQUEST_HEADERS));
+		assertNull(response.getStatusCode());
+	}
+
+	@Test
 	public void actualRequestWithOriginHeader() throws Exception {
 		ServerWebExchange exchange = actualRequest();
 		this.processor.process(this.conf, exchange);

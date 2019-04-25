@@ -29,11 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
-import org.springframework.core.annotation.MergedAnnotation.MapValues;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -376,7 +375,7 @@ public abstract class AnnotationUtils {
 		RepeatableContainers repeatableContainers = (containerAnnotationType != null ?
 				RepeatableContainers.of(annotationType, containerAnnotationType) :
 				RepeatableContainers.standardRepeatables());
-		return MergedAnnotations.from(annotatedElement, SearchStrategy.SUPER_CLASS,
+		return MergedAnnotations.from(annotatedElement, SearchStrategy.SUPERCLASS,
 						repeatableContainers, AnnotationFilter.PLAIN)
 				.stream(annotationType)
 				.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
@@ -600,7 +599,7 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 
-		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPER_CLASS)
+		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS)
 				.get(annotationType, MergedAnnotation::isDirectlyPresent)
 				.getSource();
 	}
@@ -637,7 +636,7 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 
-		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPER_CLASS)
+		return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS)
 				.stream()
 				.filter(MergedAnnotationPredicates.typeIn(annotationTypes).and(MergedAnnotation::isDirectlyPresent))
 				.map(MergedAnnotation::getSource)
@@ -857,14 +856,11 @@ public abstract class AnnotationUtils {
 			@Nullable AnnotatedElement annotatedElement, Annotation annotation,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		MapValues[] mapValues = MapValues.of(classValuesAsString, nestedAnnotationsAsMap);
+		Adapt[] adaptations = Adapt.values(classValuesAsString, nestedAnnotationsAsMap);
 		return MergedAnnotation.from(annotatedElement, annotation)
 				.withNonMergedAttributes()
-				.asMap(getAnnotationAttributesFactory(), mapValues);
-	}
-
-	private static Function<MergedAnnotation<?>, AnnotationAttributes> getAnnotationAttributesFactory() {
-		return (annotation -> new AnnotationAttributes(annotation.getType(), true));
+				.asMap(mergedAnnotation ->
+						new AnnotationAttributes(mergedAnnotation.getType(), true), adaptations);
 	}
 
 	/**
@@ -910,7 +906,8 @@ public abstract class AnnotationUtils {
 		else {
 			// If we have nested annotations, we need them as nested maps
 			AnnotationAttributes attributes = MergedAnnotation.from(annotationType)
-					.asMap(getAnnotationAttributesFactory(), MapValues.ANNOTATION_TO_MAP);
+					.asMap(annotation ->
+							new AnnotationAttributes(annotation.getType(), true), Adapt.ANNOTATION_TO_MAP);
 			for (Map.Entry<String, Object> element : attributes.entrySet()) {
 				result.put(element.getKey(), new DefaultValueHolder(element.getValue()));
 			}

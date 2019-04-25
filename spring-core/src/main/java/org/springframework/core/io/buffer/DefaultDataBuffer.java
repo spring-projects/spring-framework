@@ -80,10 +80,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	/**
-	 * Directly exposes the native {@code ByteBuffer} that this buffer is based on.
+	 * Directly exposes the native {@code ByteBuffer} that this buffer is based
+	 * on also updating the {@code ByteBuffer's} position and limit to match
+	 * the current {@link #readPosition()} and {@link #readableByteCount()}.
 	 * @return the wrapped byte buffer
 	 */
 	public ByteBuffer getNativeBuffer() {
+		this.byteBuffer.position(this.readPosition);
+		this.byteBuffer.limit(readableByteCount());
 		return this.byteBuffer;
 	}
 

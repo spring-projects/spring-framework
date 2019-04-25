@@ -138,7 +138,7 @@ public class RSocketBufferLeakTests {
 		StepVerifier.create(result).expectErrorMatches(ex -> {
 			String prefix = "Ambiguous handler methods mapped for destination 'A.B':";
 			return ex.getMessage().startsWith(prefix);
-		}).verify();
+		}).verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -147,25 +147,25 @@ public class RSocketBufferLeakTests {
 		StepVerifier.create(result).expectErrorMatches(ex -> {
 			String prefix = "Cannot decode to [org.springframework.core.io.Resource]";
 			return ex.getMessage().contains(prefix);
-		}).verify();
+		}).verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void errorSignalWithExceptionHandler() {
 		Mono<String> result = requester.route("error-signal").data("foo").retrieveMono(String.class);
-		StepVerifier.create(result).expectNext("Handled 'bad input'").verifyComplete();
+		StepVerifier.create(result).expectNext("Handled 'bad input'").expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void ignoreInput() {
 		Flux<String> result = requester.route("ignore-input").data("a").retrieveFlux(String.class);
-		StepVerifier.create(result).expectNext("bar").verifyComplete();
+		StepVerifier.create(result).expectNext("bar").thenCancel().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void retrieveMonoFromFluxResponderMethod() {
 		Mono<String> result = requester.route("request-stream").data("foo").retrieveMono(String.class);
-		StepVerifier.create(result).expectNext("foo-1").verifyComplete();
+		StepVerifier.create(result).expectNext("foo-1").expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 
@@ -238,9 +238,10 @@ public class RSocketBufferLeakTests {
 
 
 	/**
-	 * Similar {@link org.springframework.core.io.buffer.LeakAwareDataBufferFactory}
-	 * but extends {@link NettyDataBufferFactory} rather than rely on
-	 * decoration, since {@link PayloadUtils} does instanceof checks.
+	 * Unlike {@link org.springframework.core.io.buffer.LeakAwareDataBufferFactory}
+	 * this one is an instance of {@link NettyDataBufferFactory} which is necessary
+	 * since {@link PayloadUtils} does instanceof checks, and that also allows
+	 * intercepting {@link NettyDataBufferFactory#wrap(ByteBuf)}.
 	 */
 	private static class LeakAwareNettyDataBufferFactory extends NettyDataBufferFactory {
 
@@ -277,32 +278,33 @@ public class RSocketBufferLeakTests {
 
 		@Override
 		public NettyDataBuffer allocateBuffer() {
-			return (NettyDataBuffer) record(super.allocateBuffer());
+			return (NettyDataBuffer) recordHint(super.allocateBuffer());
 		}
 
 		@Override
 		public NettyDataBuffer allocateBuffer(int initialCapacity) {
-			return (NettyDataBuffer) record(super.allocateBuffer(initialCapacity));
+			return (NettyDataBuffer) recordHint(super.allocateBuffer(initialCapacity));
 		}
 
 		@Override
 		public NettyDataBuffer wrap(ByteBuf byteBuf) {
 			NettyDataBuffer dataBuffer = super.wrap(byteBuf);
 			if (byteBuf != Unpooled.EMPTY_BUFFER) {
-				record(dataBuffer);
+				recordHint(dataBuffer);
 			}
 			return dataBuffer;
 		}
 
 		@Override
 		public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
-			return record(super.join(dataBuffers));
+			return recordHint(super.join(dataBuffers));
 		}
 
-		private DataBuffer record(DataBuffer buffer) {
-			this.created.add(new DataBufferLeakInfo(buffer, new AssertionError(String.format(
+		private DataBuffer recordHint(DataBuffer buffer) {
+			AssertionError error = new AssertionError(String.format(
 					"DataBuffer leak: {%s} {%s} not released.%nStacktrace at buffer creation: ", buffer,
-					ObjectUtils.getIdentityHexString(((NettyDataBuffer) buffer).getNativeBuffer())))));
+					ObjectUtils.getIdentityHexString(((NettyDataBuffer) buffer).getNativeBuffer())));
+			this.created.add(new DataBufferLeakInfo(buffer, error));
 			return buffer;
 		}
 	}

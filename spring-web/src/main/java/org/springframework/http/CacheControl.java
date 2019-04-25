@@ -77,6 +77,7 @@ public class CacheControl {
 	@Nullable
 	private Duration sMaxAge;
 
+
 	/**
 	 * Create an empty CacheControl instance.
 	 * @see #empty()

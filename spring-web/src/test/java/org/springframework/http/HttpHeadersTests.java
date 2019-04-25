@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
@@ -47,6 +48,7 @@ import static org.junit.Assert.*;
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class HttpHeadersTests {
 
@@ -514,10 +516,11 @@ public class HttpHeadersTests {
 		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
 
 		headers.clear();
-		ZonedDateTime otherDate = ZonedDateTime.of(2010, 12, 18, 10, 20, 0, 0, ZoneId.of("GMT"));
 		headers.add(HttpHeaders.DATE, "Fri, 02 Jun 2017 02:22:00 GMT");
 		headers.add(HttpHeaders.DATE, "Sat, 18 Dec 2010 10:20:00 GMT");
 		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
+		assertEquals(Arrays.asList("Fri, 02 Jun 2017 02:22:00 GMT",
+				"Sat, 18 Dec 2010 10:20:00 GMT"), headers.get(HttpHeaders.DATE));
 
 		// obsolete RFC 850 format
 		headers.clear();
@@ -556,6 +559,36 @@ public class HttpHeadersTests {
 		headers.setBearerAuth(token);
 		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
 		assertEquals("Bearer foo", authorization);
+	}
+
+	@Test
+	@Ignore("Disabled until gh-22821 is resolved")
+	public void removalFromKeySetRemovesEntryFromUnderlyingMap() {
+		String headerName = "MyHeader";
+		String headerValue = "value";
+
+		assertTrue(headers.isEmpty());
+		headers.add(headerName, headerValue);
+		assertTrue(headers.containsKey(headerName));
+		headers.keySet().removeIf(key -> key.equals(headerName));
+		assertTrue(headers.isEmpty());
+		headers.add(headerName, headerValue);
+		assertEquals(headerValue, headers.get(headerName));
+	}
+
+	@Test
+	@Ignore("Disabled until gh-22821 is resolved")
+	public void removalFromEntrySetRemovesEntryFromUnderlyingMap() {
+		String headerName = "MyHeader";
+		String headerValue = "value";
+
+		assertTrue(headers.isEmpty());
+		headers.add(headerName, headerValue);
+		assertTrue(headers.containsKey(headerName));
+		headers.entrySet().removeIf(entry -> entry.getKey().equals(headerName));
+		assertTrue(headers.isEmpty());
+		headers.add(headerName, headerValue);
+		assertEquals(headerValue, headers.get(headerName));
 	}
 
 }

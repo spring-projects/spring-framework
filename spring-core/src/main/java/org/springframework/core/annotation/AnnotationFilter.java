@@ -35,7 +35,7 @@ public interface AnnotationFilter {
 
 	/**
 	 * {@link AnnotationFilter} that matches annotations in the
-	 * {@code java.*}/{@code javax.*} namespaces.
+	 * {@code java.*} and {@code javax.*} namespaces.
 	 */
 	AnnotationFilter JAVA = packages("java", "javax");
 
@@ -75,14 +75,14 @@ public interface AnnotationFilter {
 
 	/**
 	 * Test if the given type name matches the filter.
-	 * @param typeName the annotation type to test
+	 * @param typeName the fully qualified class name of the annotation type to test
 	 * @return {@code true} if the annotation matches
 	 */
 	boolean matches(String typeName);
 
 
 	/**
-	 * Return a new {@link AnnotationFilter} that matches annotations in the
+	 * Create a new {@link AnnotationFilter} that matches annotations in the
 	 * specified packages.
 	 * @param packages the annotation packages that should match
 	 * @return a new {@link AnnotationFilter} instance

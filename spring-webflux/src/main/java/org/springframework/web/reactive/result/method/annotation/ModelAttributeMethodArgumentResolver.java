@@ -135,8 +135,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						BindingResult errors = binder.getBindingResult();
 						if (adapter != null) {
 							return adapter.fromPublisher(errors.hasErrors() ?
-									Mono.error(new WebExchangeBindException(parameter, errors)) :
-									valueMono);
+									Mono.error(new WebExchangeBindException(parameter, errors)) : valueMono);
 						}
 						else {
 							if (errors.hasErrors() && !hasErrorsArgument(parameter)) {

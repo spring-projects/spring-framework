@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -46,6 +47,13 @@ class ClientResponseExtensionsTests {
 	@Test
 	fun `bodyToFlux with reified type parameters`() {
 		response.bodyToFlux<List<Foo>>()
+		verify { response.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	@FlowPreview
+	fun `bodyToFlow with reified type parameters`() {
+		response.bodyToFlow<List<Foo>>()
 		verify { response.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 

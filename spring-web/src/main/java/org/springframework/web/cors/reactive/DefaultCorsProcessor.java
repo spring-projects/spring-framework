@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  * <p>Note that when input {@link CorsConfiguration} is {@code null}, this
  * implementation does not reject simple or actual requests outright but simply
  * avoid adding CORS headers to the response. CORS processing is also skipped
- * if the response already contains CORS headers, or if the request is detected
- * as a same-origin one.
+ * if the response already contains CORS headers.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -51,24 +50,23 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 	private static final Log logger = LogFactory.getLog(DefaultCorsProcessor.class);
 
+	private static final List<String> VARY_HEADERS = Arrays.asList(
+			HttpHeaders.ORIGIN, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+
 
 	@Override
 	public boolean process(@Nullable CorsConfiguration config, ServerWebExchange exchange) {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
+		response.getHeaders().addAll(HttpHeaders.VARY, VARY_HEADERS);
 
 		if (!CorsUtils.isCorsRequest(request)) {
 			return true;
 		}
 
-		if (responseHasCors(response)) {
+		if (response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {
 			logger.trace("Skip: response already contains \"Access-Control-Allow-Origin\"");
-			return true;
-		}
-
-		if (CorsUtils.isSameOrigin(request)) {
-			logger.trace("Skip: request is from same origin");
 			return true;
 		}
 
@@ -84,10 +82,6 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		}
 
 		return handleInternal(exchange, config, preFlightRequest);
-	}
-
-	private boolean responseHasCors(ServerHttpResponse response) {
-		return response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null;
 	}
 
 	/**
@@ -106,9 +100,6 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 		HttpHeaders responseHeaders = response.getHeaders();
-
-		response.getHeaders().addAll(HttpHeaders.VARY, Arrays.asList(HttpHeaders.ORIGIN,
-				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS));
 
 		String requestOrigin = request.getHeaders().getOrigin();
 		String allowOrigin = checkOrigin(config, requestOrigin);

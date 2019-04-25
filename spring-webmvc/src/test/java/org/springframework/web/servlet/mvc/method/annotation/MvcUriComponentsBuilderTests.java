@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hamcrest.Matchers;
@@ -262,6 +263,15 @@ public class MvcUriComponentsBuilderTests {
 				"methodWithOptionalParam", new Object[] {null}).build();
 
 		assertThat(uriComponents.toUriString(), is("http://localhost/something/optional-param"));
+	}
+
+	@Test  // gh-22656
+	public void fromMethodNameWithOptionalNamedParam() {
+		UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
+				"methodWithOptionalNamedParam", Optional.of("foo")).build();
+
+		assertThat(uriComponents.toUriString(),
+				is("http://localhost/something/optional-param-with-name?search=foo"));
 	}
 
 	@Test
@@ -531,6 +541,11 @@ public class MvcUriComponentsBuilderTests {
 
 		@RequestMapping("/optional-param")
 		HttpEntity<Void> methodWithOptionalParam(@RequestParam(defaultValue = "") String q) {
+			return null;
+		}
+
+		@GetMapping("/optional-param-with-name")
+		HttpEntity<Void> methodWithOptionalNamedParam(@RequestParam("search") Optional<String> q) {
 			return null;
 		}
 	}

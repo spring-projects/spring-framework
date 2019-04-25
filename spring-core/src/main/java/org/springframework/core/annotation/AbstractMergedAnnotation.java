@@ -167,6 +167,11 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 	}
 
 	@Override
+	public AnnotationAttributes asAnnotationAttributes(Adapt... adaptations) {
+		return asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType()), adaptations);
+	}
+
+	@Override
 	public Optional<A> synthesize(Predicate<? super MergedAnnotation<A>> condition)
 			throws NoSuchElementException {
 
@@ -199,7 +204,7 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 	 * Get the underlying attribute value.
 	 * @param attributeName the attribute name
 	 * @param type the type to return (see {@link MergedAnnotation} class
-	 * documentation for details).
+	 * documentation for details)
 	 * @return the attribute value or {@code null} if the value is not found and
 	 * is not required
 	 * @throws IllegalArgumentException if the source type is not compatible

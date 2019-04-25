@@ -11,7 +11,7 @@ dependencies {
 	optional("javax.cache:cache-api:1.1.0")
 	optional("com.github.ben-manes.caffeine:caffeine:2.7.0")
 	optional("net.sf.ehcache:ehcache:2.10.4")
-	optional("org.quartz-scheduler:quartz:${quartzVersion}")
+	optional("org.quartz-scheduler:quartz:2.3.1")
 	optional("org.codehaus.fabric3.api:commonj:1.1.0")
 	optional("org.freemarker:freemarker:${freemarkerVersion}")
 	testCompile(project(":spring-context"))

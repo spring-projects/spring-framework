@@ -40,7 +40,7 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.MergedAnnotation.MapValues;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.lang.Nullable;
@@ -148,6 +148,13 @@ public class MergedAnnotationsTests {
 	}
 
 	@Test
+	public void getParent() {
+		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
+		assertThat(annotations.get(TransactionalComponent.class).getParent().getType())
+				.isEqualTo(ComposedTransactionalComponent.class);
+	}
+
+	@Test
 	public void collectMultiValueMapFromNonAnnotatedClass() {
 		MultiValueMap<String, Object> map = MergedAnnotations.from(
 				NonAnnotatedClass.class).stream(Transactional.class).collect(
@@ -196,7 +203,7 @@ public class MergedAnnotationsTests {
 	 * the algorithm is accidentally picking up shadowed annotations of the same
 	 * type within the class hierarchy. Such undesirable behavior would cause
 	 * the logic in
-	 * {@link org.springframework.context.annotation.ProfileCondition} to fail.
+	 * {@code org.springframework.context.annotation.ProfileCondition} to fail.
 	 */
 	@Test
 	public void collectMultiValueMapFromClassWithLocalAnnotationThatShadowsAnnotationFromSuperclass() {
@@ -208,7 +215,7 @@ public class MergedAnnotationsTests {
 
 	/**
 	 * Note: this functionality is required by
-	 * {@link org.springframework.context.annotation.ProfileCondition}.
+	 * {@code org.springframework.context.annotation.ProfileCondition}.
 	 */
 	@Test
 	public void collectMultiValueMapFromClassWithMultipleComposedAnnotations() {
@@ -936,39 +943,39 @@ public class MergedAnnotationsTests {
 	public void getSuperClassForAllScenarios() {
 		// no class-level annotation
 		assertThat(MergedAnnotations.from(NonAnnotatedInterface.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isNull();
 		assertThat(MergedAnnotations.from(NonAnnotatedClass.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isNull();
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertThat(MergedAnnotations.from(InheritedAnnotationInterface.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isEqualTo(
 								InheritedAnnotationInterface.class);
 		assertThat(MergedAnnotations.from(SubInheritedAnnotationInterface.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isNull();
 		assertThat(MergedAnnotations.from(InheritedAnnotationClass.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isEqualTo(
 								InheritedAnnotationClass.class);
 		assertThat(MergedAnnotations.from(SubInheritedAnnotationClass.class,
-				SearchStrategy.SUPER_CLASS).get(
+				SearchStrategy.SUPERCLASS).get(
 						Transactional.class).getSource()).isEqualTo(
 								InheritedAnnotationClass.class);
 		// non-inherited class-level annotation; note: @Order is not inherited,
 		// but we should still find it on classes.
 		assertThat(MergedAnnotations.from(NonInheritedAnnotationInterface.class,
-				SearchStrategy.SUPER_CLASS).get(Order.class).getSource()).isEqualTo(
+				SearchStrategy.SUPERCLASS).get(Order.class).getSource()).isEqualTo(
 						NonInheritedAnnotationInterface.class);
 		assertThat(MergedAnnotations.from(SubNonInheritedAnnotationInterface.class,
-				SearchStrategy.SUPER_CLASS).get(Order.class).getSource()).isNull();
+				SearchStrategy.SUPERCLASS).get(Order.class).getSource()).isNull();
 		assertThat(MergedAnnotations.from(NonInheritedAnnotationClass.class,
-				SearchStrategy.SUPER_CLASS).get(Order.class).getSource()).isEqualTo(
+				SearchStrategy.SUPERCLASS).get(Order.class).getSource()).isEqualTo(
 						NonInheritedAnnotationClass.class);
 		assertThat(MergedAnnotations.from(SubNonInheritedAnnotationClass.class,
-				SearchStrategy.SUPER_CLASS).get(Order.class).getSource()).isEqualTo(
+				SearchStrategy.SUPERCLASS).get(Order.class).getSource()).isEqualTo(
 						NonInheritedAnnotationClass.class);
 	}
 
@@ -1045,7 +1052,7 @@ public class MergedAnnotationsTests {
 
 	private Object getSuperClassSourceWithTypeIn(Class<?> clazz,
 			List<Class<? extends Annotation>> annotationTypes) {
-		return MergedAnnotations.from(clazz, SearchStrategy.SUPER_CLASS).stream().filter(
+		return MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS).stream().filter(
 				MergedAnnotationPredicates.typeIn(annotationTypes).and(
 						MergedAnnotation::isDirectlyPresent)).map(
 								MergedAnnotation::getSource).findFirst().orElse(null);
@@ -1279,7 +1286,7 @@ public class MergedAnnotationsTests {
 		Class<?> element = MyRepeatableClass.class;
 		String[] expectedValuesJava = { "A", "B", "C" };
 		String[] expectedValuesSpring = { "A", "B", "C", "meta1" };
-		testRepeatables(SearchStrategy.SUPER_CLASS, element, expectedValuesJava,
+		testRepeatables(SearchStrategy.SUPERCLASS, element, expectedValuesJava,
 				expectedValuesSpring);
 	}
 
@@ -1288,7 +1295,7 @@ public class MergedAnnotationsTests {
 		Class<?> element = SubMyRepeatableClass.class;
 		String[] expectedValuesJava = { "A", "B", "C" };
 		String[] expectedValuesSpring = { "A", "B", "C", "meta1" };
-		testRepeatables(SearchStrategy.SUPER_CLASS, element, expectedValuesJava,
+		testRepeatables(SearchStrategy.SUPERCLASS, element, expectedValuesJava,
 				expectedValuesSpring);
 	}
 
@@ -1297,7 +1304,7 @@ public class MergedAnnotationsTests {
 		Class<?> element = SubMyRepeatableWithAdditionalLocalDeclarationsClass.class;
 		String[] expectedValuesJava = { "X", "Y", "Z" };
 		String[] expectedValuesSpring = { "X", "Y", "Z", "meta2" };
-		testRepeatables(SearchStrategy.SUPER_CLASS, element, expectedValuesJava,
+		testRepeatables(SearchStrategy.SUPERCLASS, element, expectedValuesJava,
 				expectedValuesSpring);
 	}
 
@@ -1306,7 +1313,7 @@ public class MergedAnnotationsTests {
 		Class<?> element = SubSubMyRepeatableWithAdditionalLocalDeclarationsClass.class;
 		String[] expectedValuesJava = { "X", "Y", "Z" };
 		String[] expectedValuesSpring = { "X", "Y", "Z", "meta2" };
-		testRepeatables(SearchStrategy.SUPER_CLASS, element, expectedValuesJava,
+		testRepeatables(SearchStrategy.SUPERCLASS, element, expectedValuesJava,
 				expectedValuesSpring);
 	}
 
@@ -1665,7 +1672,7 @@ public class MergedAnnotationsTests {
 		assertThat(componentScan.value().pattern()).isEqualTo("*Foo");
 		Map<String, Object> map = MergedAnnotation.from(componentScan).asMap(
 				annotation -> new LinkedHashMap<String, Object>(),
-				MapValues.ANNOTATION_TO_MAP);
+				Adapt.ANNOTATION_TO_MAP);
 		Map<String, Object> filterMap = (Map<String, Object>) map.get("value");
 		assertThat(filterMap.get("pattern")).isEqualTo("*Foo");
 		filterMap.put("pattern", "newFoo");
@@ -1685,7 +1692,7 @@ public class MergedAnnotationsTests {
 		assertThat(componentScan).isNotNull();
 		Map<String, Object> map = MergedAnnotation.from(componentScan).asMap(
 				annotation -> new LinkedHashMap<String, Object>(),
-				MapValues.ANNOTATION_TO_MAP);
+				Adapt.ANNOTATION_TO_MAP);
 		Map<String, Object>[] filters = (Map[]) map.get("excludeFilters");
 		List<String> patterns = Arrays.stream(filters).map(
 				m -> (String) m.get("pattern")).collect(Collectors.toList());
@@ -2051,6 +2058,17 @@ public class MergedAnnotationsTests {
 				ValueAttributeMetaMetaClass.class).get(ValueAttribute.class);
 		assertThat(annotation.getStringArray(MergedAnnotation.VALUE)).containsExactly(
 				"FromValueAttributeMeta");
+	}
+
+	@Test
+	public void asAnnotationAttributesReturnsPopulatedAnnotationAttributes() {
+		MergedAnnotation<?> annotation = MergedAnnotations.from(
+				SpringApplicationConfigurationClass.class).get(
+						SpringApplicationConfiguration.class);
+		AnnotationAttributes attributes = annotation.asAnnotationAttributes(
+				Adapt.CLASS_TO_STRING);
+		assertThat(attributes).containsEntry("classes", new String[] { Number.class.getName() });
+		assertThat(attributes.annotationType()).isEqualTo(SpringApplicationConfiguration.class);
 	}
 
 	// @formatter:off

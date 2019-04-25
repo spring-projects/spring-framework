@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
 import reactor.util.context.Context;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -287,12 +289,19 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 		}
 
 		private boolean emitCachedSignals() {
-			if (this.item != null) {
-				requiredWriteSubscriber().onNext(this.item);
-			}
 			if (this.error != null) {
-				requiredWriteSubscriber().onError(this.error);
+				try {
+					requiredWriteSubscriber().onError(this.error);
+				}
+				finally {
+					releaseCachedItem();
+				}
 				return true;
+			}
+			T item = this.item;
+			this.item = null;
+			if (item != null) {
+				requiredWriteSubscriber().onNext(item);
 			}
 			if (this.completed) {
 				requiredWriteSubscriber().onComplete();
@@ -306,7 +315,22 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 			Subscription s = this.subscription;
 			if (s != null) {
 				this.subscription = null;
-				s.cancel();
+				try {
+					s.cancel();
+				}
+				finally {
+					releaseCachedItem();
+				}
+			}
+		}
+
+		private void releaseCachedItem() {
+			synchronized (this) {
+				Object item = this.item;
+				if (item instanceof DataBuffer) {
+					DataBufferUtils.release((DataBuffer) item);
+				}
+				this.item = null;
 			}
 		}
 
@@ -378,7 +402,12 @@ class ChannelSendOperator<T> extends Mono<Void> implements Scannable {
 
 		@Override
 		public void onError(Throwable ex) {
-			this.completionSubscriber.onError(ex);
+			try {
+				this.completionSubscriber.onError(ex);
+			}
+			finally {
+				this.writeBarrier.releaseCachedItem();
+			}
 		}
 
 		@Override

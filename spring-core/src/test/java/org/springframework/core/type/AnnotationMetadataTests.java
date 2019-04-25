@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -52,7 +53,7 @@ import static org.junit.Assert.*;
 public class AnnotationMetadataTests {
 
 	@Test
-	public void standardAnnotationMetadata() throws Exception {
+	public void standardAnnotationMetadata() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponent.class, true);
 		doTestAnnotationInfo(metadata);
 		doTestMethodAnnotationInfo(metadata);
@@ -68,7 +69,7 @@ public class AnnotationMetadataTests {
 	}
 
 	@Test
-	public void standardAnnotationMetadataForSubclass() throws Exception {
+	public void standardAnnotationMetadataForSubclass() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponentSubClass.class, true);
 		doTestSubClassAnnotationInfo(metadata);
 	}
@@ -104,7 +105,7 @@ public class AnnotationMetadataTests {
 	}
 
 	@Test
-	public void standardAnnotationMetadataForInterface() throws Exception {
+	public void standardAnnotationMetadataForInterface() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotationMetadata.class, true);
 		doTestMetadataForInterfaceClass(metadata);
 	}
@@ -132,7 +133,7 @@ public class AnnotationMetadataTests {
 	}
 
 	@Test
-	public void standardAnnotationMetadataForAnnotation() throws Exception {
+	public void standardAnnotationMetadataForAnnotation() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(Component.class, true);
 		doTestMetadataForAnnotationClass(metadata);
 	}
@@ -172,7 +173,7 @@ public class AnnotationMetadataTests {
 	 * 'true' as is done in the main test above.
 	 */
 	@Test
-	public void standardAnnotationMetadata_nestedAnnotationsAsMap_false() throws Exception {
+	public void standardAnnotationMetadata_nestedAnnotationsAsMap_false() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponent.class);
 		AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(SpecialAttr.class.getName());
 		Annotation[] nestedAnnoArray = (Annotation[]) specialAttrs.get("nestedAnnoArray");
@@ -205,19 +206,13 @@ public class AnnotationMetadataTests {
 		assertThat("length of basePackageClasses[]", basePackageClasses.length, is(0));
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-11649
-	 */
-	@Test
+	@Test  // SPR-11649
 	public void multipleAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedAnnotationsClass.class);
 		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-11649
-	 */
-	@Test
+	@Test  // SPR-11649
 	public void multipleAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedAnnotationsClass.class.getName());
@@ -225,24 +220,32 @@ public class AnnotationMetadataTests {
 		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-11649
-	 */
-	@Test
+	@Test  // SPR-11649
 	public void composedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedComposedAnnotationClass.class);
 		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
 	}
 
-	/**
-	 * https://jira.spring.io/browse/SPR-11649
-	 */
-	@Test
+	@Test  // SPR-11649
 	public void composedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedComposedAnnotationClass.class.getName());
 		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
 		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
+
+	@Test
+	public void inheritedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
+		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedComposedAnnotationExtended.class);
+		assertFalse(metadata.hasAnnotation(NamedComposedAnnotation.class.getName()));
+	}
+
+	@Test
+	public void inheritedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedComposedAnnotationExtended.class.getName());
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		assertFalse(metadata.hasAnnotation(NamedComposedAnnotation.class.getName()));
 	}
 
 
@@ -557,11 +560,15 @@ public class AnnotationMetadataTests {
 	@NamedAnnotation3(name = "name 3")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
+	@Inherited
 	public @interface NamedComposedAnnotation {
 	}
 
 	@NamedComposedAnnotation
 	public static class NamedComposedAnnotationClass {
+	}
+
+	public static class NamedComposedAnnotationExtended extends NamedComposedAnnotationClass {
 	}
 
 }

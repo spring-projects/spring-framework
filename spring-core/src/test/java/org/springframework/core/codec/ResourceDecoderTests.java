@@ -19,25 +19,20 @@ package org.springframework.core.codec;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Map;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.lang.Nullable;
-import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * @author Arjen Poutsma
@@ -67,9 +62,7 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 	@Override
 	@Test
 	public void decode() {
-		Flux<DataBuffer> input = Flux.concat(
-				dataBuffer(this.fooBytes),
-				dataBuffer(this.barBytes));
+		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
 
 		testDecodeAll(input, Resource.class, step -> step
 				.consumeNextWith(resource -> {
@@ -83,21 +76,6 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 				})
 				.expectComplete()
 				.verify());
-	}
-
-	@Override
-	protected void testDecodeError(Publisher<DataBuffer> input, ResolvableType outputType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
-
-		input = Flux.concat(
-				Flux.from(input).take(1),
-				Flux.error(new InputException()));
-
-		Flux<Resource> result = this.decoder.decode(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.expectError(InputException.class)
-				.verify();
 	}
 
 	@Override

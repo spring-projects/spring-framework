@@ -24,6 +24,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -62,6 +63,8 @@ import org.springframework.util.StringUtils;
  * <li>{@link #add(String, String)} adds a header value to the list of values for a header name</li>
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
+ *
+ * <p>Note that {@code HttpHeaders} generally treats header names in a case-insensitive manner.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -415,6 +418,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Construct a new, empty instance of the {@code HttpHeaders} object.
+	 * <p>This is the common constructor, using a case-insensitive map structure.
 	 */
 	public HttpHeaders() {
 		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)));
@@ -422,6 +426,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Construct a new {@code HttpHeaders} instance backed by an existing map.
+	 * <p>This constructor is available as an optimization for adapting to existing
+	 * headers map structures, primarily for internal use within the framework.
+	 * @param headers the headers map (expected to operate with case-insensitive keys)
 	 * @since 5.1
 	 */
 	public HttpHeaders(MultiValueMap<String, String> headers) {
@@ -586,6 +593,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public List<String> getAccessControlExposeHeaders() {
 		return getValuesAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Max-Age} response header.
+	 * @since 5.2
+	 */
+	public void setAccessControlMaxAge(Duration maxAge) {
+		set(ACCESS_CONTROL_MAX_AGE, Long.toString(maxAge.getSeconds()));
 	}
 
 	/**
@@ -931,6 +946,24 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the date and time at which the message was created, as specified
 	 * by the {@code Date} header.
+	 * @since 5.2
+	 */
+	public void setDate(ZonedDateTime date) {
+		setZonedDateTime(DATE, date);
+	}
+
+	/**
+	 * Set the date and time at which the message was created, as specified
+	 * by the {@code Date} header.
+	 * @since 5.2
+	 */
+	public void setDate(Instant date) {
+		setInstant(DATE, date);
+	}
+
+	/**
+	 * Set the date and time at which the message was created, as specified
+	 * by the {@code Date} header.
 	 * <p>The date should be specified as the number of milliseconds since
 	 * January 1, 1970 GMT.
 	 */
@@ -979,6 +1012,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setExpires(ZonedDateTime expires) {
 		setZonedDateTime(EXPIRES, expires);
+	}
+
+	/**
+	 * Set the date and time at which the message is no longer valid,
+	 * as specified by the {@code Expires} header.
+	 * @since 5.2
+	 */
+	public void setExpires(Instant expires) {
+		setInstant(EXPIRES, expires);
 	}
 
 	/**

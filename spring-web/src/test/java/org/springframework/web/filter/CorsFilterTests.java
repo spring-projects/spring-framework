@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,36 @@ public class CorsFilterTests {
 		config.setMaxAge(123L);
 		config.setAllowCredentials(false);
 		filter = new CorsFilter(r -> config);
+	}
+
+	@Test
+	public void nonCorsRequest() throws ServletException, IOException {
+
+		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.GET.name(), "/test.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = (filterRequest, filterResponse) -> {
+			assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+			assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
+		};
+		filter.doFilter(request, response, filterChain);
+	}
+
+	@Test
+	public void sameOriginRequest() throws ServletException, IOException {
+
+		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.GET.name(), "https://domain1.com/test.html");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain1.com");
+		request.setScheme("https");
+		request.setServerName("domain1.com");
+		request.setServerPort(443);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = (filterRequest, filterResponse) -> {
+			assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+			assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
+		};
+		filter.doFilter(request, response, filterChain);
 	}
 
 	@Test

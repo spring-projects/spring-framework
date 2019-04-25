@@ -16,7 +16,10 @@
 
 package org.springframework.web.reactive.function.server
 
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactive.flow.asPublisher
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
@@ -74,6 +77,19 @@ fun ServerResponse.BodyBuilder.html() = contentType(MediaType.TEXT_HTML)
 suspend fun ServerResponse.HeadersBuilder<out ServerResponse.HeadersBuilder<*>>.buildAndAwait(): ServerResponse =
 		build().awaitSingle()
 
+
+/**
+ * Coroutines [Flow] based extension for [ServerResponse.BodyBuilder.body] providing a
+ * `body(Flow<T>)` variant. This extension is not subject to type erasure and retains
+ * actual generic type arguments.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0
+ */
+@FlowPreview
+suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyAndAwait(flow: Flow<T>): ServerResponse =
+		body(flow.asPublisher(), object : ParameterizedTypeReference<T>() {}).awaitSingle()
+
 /**
  * Coroutines variant of [ServerResponse.BodyBuilder.syncBody].
  *
@@ -82,6 +98,18 @@ suspend fun ServerResponse.HeadersBuilder<out ServerResponse.HeadersBuilder<*>>.
  */
 suspend fun ServerResponse.BodyBuilder.bodyAndAwait(body: Any): ServerResponse =
 		syncBody(body).awaitSingle()
+
+/**
+ * Coroutines [Flow] based extension for [ServerResponse.BodyBuilder.body] providing a
+ * `bodyToServerSentEvents(Flow<T>)` variant. This extension is not subject to type
+ * erasure and retains actual generic type arguments.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.0
+ */
+@FlowPreview
+suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyToServerSentEventsAndAwait(flow: Flow<T>): ServerResponse =
+		contentType(MediaType.TEXT_EVENT_STREAM).body(flow.asPublisher(), object : ParameterizedTypeReference<T>() {}).awaitSingle()
 
 
 /**

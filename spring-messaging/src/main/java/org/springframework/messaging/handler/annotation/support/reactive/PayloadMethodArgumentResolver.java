@@ -232,26 +232,26 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 			if (decoder.canDecode(elementType, mimeType)) {
 				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux = content
-							.concatMap(buffer -> decoder.decode(Mono.just(buffer), elementType, mimeType, hints))
+							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
 							.onErrorResume(ex -> Flux.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
 						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(parameter, message)));
 					}
 					if (validator != null) {
-						flux = flux.doOnNext(validator::accept);
+						flux = flux.doOnNext(validator);
 					}
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
 					// Single-value (with or without reactive type wrapper)
-					Mono<?> mono = decoder
-							.decodeToMono(content.next(), targetType, mimeType, hints)
+					Mono<?> mono = content.next()
+							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
 							.onErrorResume(ex -> Mono.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
 						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(parameter, message)));
 					}
 					if (validator != null) {
-						mono = mono.doOnNext(validator::accept);
+						mono = mono.doOnNext(validator);
 					}
 					return (adapter != null ? Mono.just(adapter.fromPublisher(mono)) : Mono.from(mono));
 				}

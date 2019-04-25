@@ -229,10 +229,11 @@ which lets you deal with profiles and `Environment` for customizing
 how beans are registered.
 
 In the following example notice that:
- - Type inference usually allows to avoid specifying the type for bean references like `ref("bazBean")`
- - It is possible to use Kotlin top level functions to declare beans using callable references like `bean(::myRouter)` in this example
- - When specifying `bean<Bar>()` or `bean(::myRouter)`, parameters are autowired by type
- - The `FooBar` bean will be registered only if the `foobar` profile is active
+
+* Type inference usually allows to avoid specifying the type for bean references like `ref("bazBean")`
+* It is possible to use Kotlin top level functions to declare beans using callable references like `bean(::myRouter)` in this example
+* When specifying `bean<Bar>()` or `bean(::myRouter)`, parameters are autowired by type
+* The `FooBar` bean will be registered only if the `foobar` profile is active
 
 [source,kotlin,indent=0]
 ----
@@ -290,20 +291,23 @@ for more details and up-to-date information.
 == Web
 
 
+=== Router DSL
 
-=== WebFlux Router DSL
+Spring Framework comes with a Kotlin router DSL available in 3 flavors:
 
-Spring Framework comes with a Kotlin router DSL available in two flavors:
+* WebMvc.fn DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.servlet.function/router.html[router { }]
+* WebFlux.fn <<web-reactive#webflux-fn, Reactive>> DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/router.html[router { }]
+* WebFlux.fn <<Coroutines>> DSL with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }]
 
- - Reactive with {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-router-function-dsl/[router { }]
- - <<Coroutines>>
-
-These DSL let you use the <<web-reactive#webflux-fn, WebFlux functional API>> to write clean
-and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
+These DSL let you write clean and idiomatic Kotlin code to build a `RouterFunction` instance as the following example shows:
 
 [source,kotlin,indent=0]
 ----
-	val myRouter: RouterFunction<ServerResponse> = router {
+@Configuration
+class RouterRouterConfiguration {
+
+	@Bean
+	fun mainRouter(userHandler: UserHandler) = router {
 		accept(TEXT_HTML).nest {
 			GET("/") { ok().render("index") }
 			GET("/sse") { ok().render("sse") }
@@ -319,52 +323,14 @@ and idiomatic Kotlin code to build a `RouterFunction` instance as the following 
 		}
 		resources("/**", ClassPathResource("static/"))
 	}
+}
 ----
 
 NOTE: This DSL is programmatic, meaning that it allows custom registration logic of beans
 through an `if` expression, a `for` loop, or any other Kotlin constructs. That can be useful
 when you need to register routes depending on dynamic data (for example, from a database).
 
-See https://github.com/mixitconf/mixit/tree/dafd5ccc92dfab6d9c306fcb60b28921a1ccbf79/src/main/kotlin/mixit/web/routes[MiXiT project routes]
-for a concrete example.
-
-
-
-=== Coroutines
-
-As of Spring Framework 5.2, https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] support
-is provided via extensions for WebFlux client and server functional API. A dedicated
-{doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/-co-router-function-dsl/[`coRouter { }`]
-router DSL is also available.
-
-Coroutines extensions use `await` prefix or `AndAwait` suffix, and most are using similar
-names to their reactive counterparts, except `exchange` in `WebClient.RequestHeadersSpec`
-which translates to `awaitResponse`.
-
-[source,kotlin,indent=0]
-----
-fun routes(userHandler: UserHandler): RouterFunction<ServerResponse> = coRouter {
-	GET("/", userHandler::listView)
-	GET("/api/user", userHandler::listApi)
-}
-
-class UserHandler(builder: WebClient.Builder) {
-
-	private val client = builder.baseUrl("...").build()
-
-	suspend fun listView(request: ServerRequest): ServerResponse =
-			ServerResponse.ok().renderAndAwait("users", mapOf("users" to
-			client.get().uri("...").awaitResponse().awaitBody<User>()))
-
-	suspend fun listApi(request: ServerRequest): ServerResponse =
-				ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).bodyAndAwait(
-				client.get().uri("...").awaitResponse().awaitBody<User>())
-}
-----
-
-Read this blog post about https://medium.com/@elizarov/structured-concurrency-722d765aa952[structured concurrency]
-to understand how to run code concurrently with Coroutines.
-
+See https://github.com/mixitconf/mixit/[MiXiT project] for a concrete example.
 
 
 === MockMvc DSL
@@ -426,13 +392,183 @@ refactoring support in a supported IDE, as the following example shows:
 	"""
 ----
 
-NOTE: Kotlin Script Templates are not compatible yet with Spring Boot fatjar mechanism, see related
+WARNING: Kotlin Script Templates support is experimental and not compatible yet with Spring Boot fatjar mechanism, see related
 https://youtrack.jetbrains.com/issue/KT-21443[KT-21443] and https://youtrack.jetbrains.com/issue/KT-27956[KT-27956]
 issues.
 
 See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
 
+== Coroutines
+
+Kotlin https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] are Kotlin
+lightweight threads allowing to write non-blocking code in an imperative way. On language side,
+suspending functions provides an abstraction for asynchronous operations while on library side
+https://github.com/Kotlin/kotlinx.coroutines[kotlinx.coroutines] provides functions likes
+https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/async.html[`async { }`]
+and types like https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[`Flow`].
+
+Spring Framework provides support for Coroutines on the following scope:
+
+* https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-deferred/index.html[Deferred] and https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[Flow] return values support in Spring WebFlux annotated `@Controller`
+* Suspending function support in Spring WebFlux annotated `@Controller`
+* Extensions for WebFlux {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.client/index.html[client] and {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/index.html[server] functional API.
+* WebFlux.fn {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL
+
+=== How Reactive translates to Coroutines?
+
+For return values, the translation from Reactive to Coroutines APIs is the following:
+
+* `fun handler(): Mono<Void>` becomes `suspend fun handler()`
+* `fun handler(): Mono<T>` becomes `suspend fun handler(): T` or `suspend fun handler(): T?` depending on if the `Mono` can be empty or not (with the advantage of beeing more statically typed)
+* `fun handler(): Flux<T>` becomes `fun handler(): Flow<T>`
+
+For input parameters:
+
+* If laziness is not needed, `fun handler(mono: Mono<T>)` becomes `fun handler(value: T)` since a suspending functions can be invoked to get the value parameter.
+* If laziness is needed, `fun handler(mono: Mono<T>)` becomes `fun handler(supplier: suspend () -> T)` or `fun handler(supplier: suspend () -> T?)`
+
+https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/index.html[`Flow`] is `Flux` equivalent in Coroutines world, suitable for hot or cold stream, finite or infinite streams, with the following main differences:
+
+* `Flow` is push-based while `Flux` is push-pull hybrid
+* Backpressure is implemented via suspending functions
+* `Flow` has only a https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/collect.html[single suspending `collect` method] and operators are implemented as https://kotlinlang.org/docs/reference/extensions.html[extensions]
+* https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-core/common/src/flow/operators[Operators are easy to implement] thanks to Coroutines
+* Extensions allow to add custom operators to `Flow`
+* Collect operations are suspending functions
+* https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/map.html[`map` operator] supports asynchronous operation (no need for `flatMap`) since it takes a suspending function parameter
+
+Read this blog post about https://medium.com/@elizarov/structured-concurrency-722d765aa952[structured concurrency]
+to understand how to run code concurrently with Coroutines and how are managed exceptions and cancellations.
+
+=== Controllers
+
+Here is an example of a Coroutines `@RestController`.
+
+[source,kotlin,indent=0]
+----
+@RestController
+class CoroutinesRestController(client: WebClient, banner: Banner) {
+
+	@GetMapping("/suspend")
+	suspend fun suspendingEndpoint(): Banner {
+		delay(10)
+		return banner
+	}
+
+	@GetMapping("/flow")
+	fun flowEndpoint() = flow {
+		delay(10)
+		emit(banner)
+		delay(10)
+		emit(banner)
+	}
+
+	@GetMapping("/deferred")
+	fun deferredEndpoint() = GlobalScope.async {
+		delay(10)
+		banner
+	}
+
+	@GetMapping("/sequential")
+	suspend fun sequential(): List<Banner> {
+		val banner1 = client
+				.get()
+				.uri("/suspend")
+				.accept(MediaType.APPLICATION_JSON)
+				.awaitExchange()
+				.awaitBody<Banner>()
+		val banner2 = client
+				.get()
+				.uri("/suspend")
+				.accept(MediaType.APPLICATION_JSON)
+				.awaitExchange()
+				.awaitBody<Banner>()
+		return listOf(banner1, banner2)
+	}
+
+	@GetMapping("/parallel")
+	suspend fun parallel(): List<Banner> = coroutineScope {
+		val deferredBanner1: Deferred<Banner> = async {
+			client
+					.get()
+					.uri("/suspend")
+					.accept(MediaType.APPLICATION_JSON)
+					.awaitExchange()
+					.awaitBody<Banner>()
+		}
+		val deferredBanner2: Deferred<Banner> = async {
+			client
+					.get()
+					.uri("/suspend")
+					.accept(MediaType.APPLICATION_JSON)
+					.awaitExchange()
+					.awaitBody<Banner>()
+		}
+		listOf(deferredBanner1.await(), deferredBanner2.await())
+	}
+
+	@GetMapping("/error")
+	suspend fun error() {
+		throw IllegalStateException()
+	}
+
+	@GetMapping("/cancel")
+	suspend fun cancel() {
+		throw CancellationException()
+	}
+
+}
+----
+
+View rendering with a `@Controller` is also supported.
+
+[source,kotlin,indent=0]
+----
+@Controller
+class CoroutinesViewController(banner: Banner) {
+
+	@GetMapping("/")
+	suspend fun render(model: Model): String {
+		delay(10)
+		model["banner"] = banner
+		return "index"
+	}
+}
+----
+
+=== WebFlux.fn
+
+Here is an example of Coroutines router definined via the {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
+
+[source,kotlin,indent=0]
+----
+@Configuration
+class RouterConfiguration {
+
+	@Bean
+	fun mainRouter(userHandler: UserHandler) = coRouter {
+		GET("/", userHandler::listView)
+		GET("/api/user", userHandler::listApi)
+	}
+}
+----
+
+[source,kotlin,indent=0]
+----
+class UserHandler(builder: WebClient.Builder) {
+
+	private val client = builder.baseUrl("...").build()
+
+	suspend fun listView(request: ServerRequest): ServerResponse =
+			ServerResponse.ok().renderAndAwait("users", mapOf("users" to
+			client.get().uri("...").awaitExchange().awaitBody<User>()))
+
+	suspend fun listApi(request: ServerRequest): ServerResponse =
+				ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).bodyAndAwait(
+				client.get().uri("...").awaitExchange().awaitBody<User>())
+}
+----
 
 
 

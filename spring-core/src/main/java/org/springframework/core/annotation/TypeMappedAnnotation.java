@@ -41,7 +41,7 @@ import org.springframework.util.ReflectionUtils;
  * {@code BiFunction}. This allows various different annotation models to be
  * supported by the same class. For example, the attributes source might be an
  * actual {@link Annotation} instance where methods on the annotation instance
- * are {@link ReflectionUtils#invokeMethod(Method, Object) invoked} to extract
+ * are {@linkplain ReflectionUtils#invokeMethod(Method, Object) invoked} to extract
  * values. Equally, the source could be a simple {@link Map} with values
  * extracted using {@link Map#get(Object)}.
  *
@@ -49,12 +49,12 @@ import org.springframework.util.ReflectionUtils;
  * return type, namely:
  *
  * <p><table border="1">
- * <tr><th>Return Type</th><th >Extracted Type</th></tr>
+ * <tr><th>Return Type</th><th>Extracted Type</th></tr>
  * <tr><td>Class</td><td>Class or String</td></tr>
  * <tr><td>Class[]</td><td>Class[] or String[]</td></tr>
- * <tr><td>Annotation</td><td>Annotation, Map or Object compatible with the value
+ * <tr><td>Annotation</td><td>Annotation, Map, or Object compatible with the value
  * extractor</td></tr>
- * <tr><td>Annotation[]</td><td>Annotation[], Map[] or Object[] where elements are
+ * <tr><td>Annotation[]</td><td>Annotation[], Map[], or Object[] where elements are
  * compatible with the value extractor</td></tr>
  * <tr><td>Other types</td><td>An exact match or the appropriate primitive wrapper</td></tr>
  * </table>
@@ -233,50 +233,50 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
-	public Map<String, Object> asMap(MapValues... options) {
-		return Collections.unmodifiableMap(asMap(mergedAnnotation -> new LinkedHashMap<>(), options));
+	public Map<String, Object> asMap(Adapt... adaptations) {
+		return Collections.unmodifiableMap(asMap(mergedAnnotation -> new LinkedHashMap<>(), adaptations));
 	}
 
 	@Override
-	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, MapValues... options) {
+	public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations) {
 		T map = factory.apply(this);
 		Assert.state(map != null, "Factory used to create MergedAnnotation Map must not return null");
 		AttributeMethods attributes = this.mapping.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
 			Method attribute = attributes.get(i);
 			Object value = (isFiltered(attribute.getName()) ? null :
-					getValue(i, getTypeForMapOptions(attribute, options)));
+					getValue(i, getTypeForMapOptions(attribute, adaptations)));
 			if (value != null) {
 				map.put(attribute.getName(),
-						adaptValueForMapOptions(attribute, value, map.getClass(), factory, options));
+						adaptValueForMapOptions(attribute, value, map.getClass(), factory, adaptations));
 			}
 		}
 		return map;
 	}
 
-	private Class<?> getTypeForMapOptions(Method attribute, MapValues[] options) {
+	private Class<?> getTypeForMapOptions(Method attribute, Adapt[] adaptations) {
 		Class<?> attributeType = attribute.getReturnType();
 		Class<?> componentType = (attributeType.isArray() ? attributeType.getComponentType() : attributeType);
-		if (MapValues.CLASS_TO_STRING.isIn(options) && componentType == Class.class) {
+		if (Adapt.CLASS_TO_STRING.isIn(adaptations) && componentType == Class.class) {
 			return (attributeType.isArray() ? String[].class : String.class);
 		}
 		return Object.class;
 	}
 
 	private <T extends Map<String, Object>> Object adaptValueForMapOptions(Method attribute, Object value,
-			Class<?> mapType, Function<MergedAnnotation<?>, T> factory, MapValues[] options) {
+			Class<?> mapType, Function<MergedAnnotation<?>, T> factory, Adapt[] adaptations) {
 
 		if (value instanceof MergedAnnotation) {
 			MergedAnnotation<?> annotation = (MergedAnnotation<?>) value;
-			return (MapValues.ANNOTATION_TO_MAP.isIn(options) ?
-					annotation.asMap(factory, options) : annotation.synthesize());
+			return (Adapt.ANNOTATION_TO_MAP.isIn(adaptations) ?
+					annotation.asMap(factory, adaptations) : annotation.synthesize());
 		}
 		if (value instanceof MergedAnnotation[]) {
 			MergedAnnotation<?>[] annotations = (MergedAnnotation<?>[]) value;
-			if (MapValues.ANNOTATION_TO_MAP.isIn(options)) {
+			if (Adapt.ANNOTATION_TO_MAP.isIn(adaptations)) {
 				Object result = Array.newInstance(mapType, annotations.length);
 				for (int i = 0; i < annotations.length; i++) {
-					Array.set(result, i, annotations[i].asMap(factory, options));
+					Array.set(result, i, annotations[i].asMap(factory, adaptations));
 				}
 				return result;
 			}

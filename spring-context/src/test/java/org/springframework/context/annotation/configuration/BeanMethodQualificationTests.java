@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,6 +127,16 @@ public class BeanMethodQualificationTests {
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBeanX"));
 		CustomPojo pojo = ctx.getBean(CustomPojo.class);
 		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+	}
+
+	@Test
+	public void testBeanNamesForAnnotation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(StandardConfig.class);
+		assertArrayEquals(new String[] {"beanMethodQualificationTests.StandardConfig"},
+				ctx.getBeanNamesForAnnotation(Configuration.class));
+		assertArrayEquals(new String[] {}, ctx.getBeanNamesForAnnotation(Scope.class));
+		assertArrayEquals(new String[] {"testBean1"}, ctx.getBeanNamesForAnnotation(Lazy.class));
+		assertArrayEquals(new String[] {"testBean2"}, ctx.getBeanNamesForAnnotation(Boring.class));
 	}
 
 

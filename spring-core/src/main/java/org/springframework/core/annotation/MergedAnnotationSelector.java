@@ -31,7 +31,7 @@ import java.lang.annotation.Annotation;
 public interface MergedAnnotationSelector<A extends Annotation> {
 
 	/**
-	 * Return {@code true} if the existing annotation is known to be the best
+	 * Determine if the existing annotation is known to be the best
 	 * candidate and any subsequent selections may be skipped.
 	 * @param annotation the annotation to check
 	 * @return {@code true} if the annotation is known to be the best candidate

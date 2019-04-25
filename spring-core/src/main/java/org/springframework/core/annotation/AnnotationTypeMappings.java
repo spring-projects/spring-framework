@@ -33,7 +33,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * root {@link Annotation}.
  *
  * <p>Supports convention based merging of meta-annotations as well as implicit
- * and explicit {@link AliasFor @AliasFor} aliases. Also provide information
+ * and explicit {@link AliasFor @AliasFor} aliases. Also provides information
  * about mirrored attributes.
  *
  * <p>This class is designed to be cached so that meta-annotations only need to
@@ -136,7 +136,7 @@ final class AnnotationTypeMappings {
 	}
 
 	/**
-	 * Return the total number of contained mappings.
+	 * Get the total number of contained mappings.
 	 * @return the total number of mappings
 	 */
 	int size() {
@@ -144,9 +144,9 @@ final class AnnotationTypeMappings {
 	}
 
 	/**
-	 * Return an individual mapping from this instance. Index {@code 0} will
-	 * always be return the root mapping, higer indexes will return
-	 * meta-annotation mappings.
+	 * Get an individual mapping from this instance.
+	 * <p>Index {@code 0} will always return the root mapping; higher indexes
+	 * will return meta-annotation mappings.
 	 * @param index the index to return
 	 * @return the {@link AnnotationTypeMapping}
 	 * @throws IndexOutOfBoundsException if the index is out of range
@@ -158,7 +158,7 @@ final class AnnotationTypeMappings {
 
 
 	/**
-	 * Return {@link AnnotationTypeMappings} for the specified annotation type.
+	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
 	 * @param annotationType the source annotation type
 	 * @return type mappings for the annotation type
 	 */
@@ -167,7 +167,7 @@ final class AnnotationTypeMappings {
 	}
 
 	/**
-	 * Return {@link AnnotationTypeMappings} for the specified annotation type.
+	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
 	 * @param annotationType the source annotation type
 	 * @param annotationFilter the annotation filter used to limit which
 	 * annotations are considered

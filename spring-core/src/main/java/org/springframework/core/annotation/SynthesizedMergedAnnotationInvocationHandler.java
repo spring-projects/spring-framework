@@ -41,7 +41,6 @@ import org.springframework.util.ReflectionUtils;
  * @since 5.2
  * @param <A> the annotation type
  * @see Annotation
- * @see AnnotationAttributeExtractor
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
  */
 final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> implements InvocationHandler {

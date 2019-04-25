@@ -305,11 +305,15 @@ public final class MockRestServiceServer {
 		}
 
 		@Override
-		public org.springframework.http.client.AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
+		public org.springframework.http.client.AsyncClientHttpRequest createAsyncRequest(
+				URI uri, HttpMethod httpMethod) {
+
 			return createRequestInternal(uri, httpMethod);
 		}
 
-		private org.springframework.mock.http.client.MockAsyncClientHttpRequest createRequestInternal(URI uri, HttpMethod method) {
+		private org.springframework.mock.http.client.MockAsyncClientHttpRequest createRequestInternal(
+				URI uri, HttpMethod method) {
+
 			Assert.notNull(uri, "'uri' must not be null");
 			Assert.notNull(method, "'httpMethod' must not be null");
 

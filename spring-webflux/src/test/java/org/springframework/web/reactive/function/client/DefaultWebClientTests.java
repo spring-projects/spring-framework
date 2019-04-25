@@ -84,6 +84,17 @@ public class DefaultWebClientTests {
 		assertEquals("/base/path?q=12", request.url().toString());
 	}
 
+	@Test // gh-22705
+	public void uriBuilderWithUriTemplate() {
+		this.builder.build().get()
+					.uri("/path/{id}", builder -> builder.queryParam("q", "12").build("identifier"))
+					.exchange().block(Duration.ofSeconds(10));
+
+		ClientRequest request = verifyAndGetRequest();
+		assertEquals("/base/path/identifier?q=12", request.url().toString());
+		assertEquals("/path/{id}", request.attribute(WebClient.class.getName() + ".uriTemplate").get());
+	}
+
 	@Test
 	public void uriBuilderWithPathOverride() {
 		this.builder.build().get()

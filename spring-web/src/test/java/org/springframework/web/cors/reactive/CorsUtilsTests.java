@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class CorsUtilsTests {
 
 	@Test
 	public void isCorsRequest() {
-		ServerHttpRequest request = get("/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
+		ServerHttpRequest request = get("http://domain.com/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
 		assertTrue(CorsUtils.isCorsRequest(request));
 	}
 
@@ -64,9 +64,6 @@ public class CorsUtilsTests {
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 
 		request = options("/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
-		assertFalse(CorsUtils.isPreFlightRequest(request));
-
-		request = options("/").header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET").build();
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 	}
 

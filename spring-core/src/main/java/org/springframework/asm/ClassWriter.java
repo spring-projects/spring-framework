@@ -298,7 +298,7 @@ public class ClassWriter extends ClassVisitor {
   }
 
   @Override
-  public void visitNestHost(final String nestHost) {
+  public final void visitNestHost(final String nestHost) {
     nestHostClassIndex = symbolTable.addConstantClass(nestHost).index;
   }
 
@@ -344,7 +344,7 @@ public class ClassWriter extends ClassVisitor {
   }
 
   @Override
-  public void visitNestMember(final String nestMember) {
+  public final void visitNestMember(final String nestMember) {
     if (nestMemberClasses == null) {
       nestMemberClasses = new ByteVector();
     }

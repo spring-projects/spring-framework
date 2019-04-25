@@ -255,7 +255,7 @@ public abstract class MetaAnnotationUtils {
 	 * <li>composedAnnotation: {@code null}</li>
 	 * <li>annotation: instance of the {@code Transactional} annotation</li>
 	 * </ul>
-	 * <pre style="code">
+	 * <p><pre style="code">
 	 * &#064;Transactional
 	 * &#064;ContextConfiguration({"/test-datasource.xml", "/repository-config.xml"})
 	 * public class TransactionalTests { }
@@ -269,7 +269,7 @@ public abstract class MetaAnnotationUtils {
 	 * <li>composedAnnotation: instance of the {@code RepositoryTests} annotation</li>
 	 * <li>annotation: instance of the {@code Transactional} annotation</li>
 	 * </ul>
-	 * <pre style="code">
+	 * <p><pre style="code">
 	 * &#064;Transactional
 	 * &#064;ContextConfiguration({"/test-datasource.xml", "/repository-config.xml"})
 	 * &#064;Retention(RetentionPolicy.RUNTIME)

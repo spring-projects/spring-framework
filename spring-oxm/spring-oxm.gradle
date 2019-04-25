@@ -86,7 +86,7 @@ if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
 						classname: "org.jibx.binding.ant.CompileTask",
 						classpath: configurations.jibx.asPath)
 
-				jibx(verbose: true, load: true, binding: bindingXml) {
+				jibx(verbose: false, load: true, binding: bindingXml) {
 					classpathset(dir: sourceSets.test.java.outputDir) {
 						include(name: "**/jibx/**/*")
 					}

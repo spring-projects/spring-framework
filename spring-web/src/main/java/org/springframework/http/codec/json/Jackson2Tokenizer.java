@@ -27,7 +27,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.async.ByteArrayFeeder;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.codec.DecodingException;
@@ -74,7 +77,7 @@ final class Jackson2Tokenizer {
 	}
 
 
-	private Flux<TokenBuffer> tokenize(DataBuffer dataBuffer) {
+	private List<TokenBuffer> tokenize(DataBuffer dataBuffer) {
 		byte[] bytes = new byte[dataBuffer.readableByteCount()];
 		dataBuffer.read(bytes);
 		DataBufferUtils.release(dataBuffer);
@@ -84,27 +87,29 @@ final class Jackson2Tokenizer {
 			return parseTokenBufferFlux();
 		}
 		catch (JsonProcessingException ex) {
-			return Flux.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
+			throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
 		}
 		catch (IOException ex) {
-			return Flux.error(ex);
+			throw Exceptions.propagate(ex);
 		}
 	}
 
 	private Flux<TokenBuffer> endOfInput() {
-		this.inputFeeder.endOfInput();
-		try {
-			return parseTokenBufferFlux();
-		}
-		catch (JsonProcessingException ex) {
-			return Flux.error(new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex));
-		}
-		catch (IOException ex) {
-			return Flux.error(ex);
-		}
+		return Flux.defer(() -> {
+			this.inputFeeder.endOfInput();
+			try {
+				return Flux.fromIterable(parseTokenBufferFlux());
+			}
+			catch (JsonProcessingException ex) {
+				throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
+			}
+			catch (IOException ex) {
+				throw Exceptions.propagate(ex);
+			}
+		});
 	}
 
-	private Flux<TokenBuffer> parseTokenBufferFlux() throws IOException {
+	private List<TokenBuffer> parseTokenBufferFlux() throws IOException {
 		List<TokenBuffer> result = new ArrayList<>();
 
 		while (true) {
@@ -122,7 +127,7 @@ final class Jackson2Tokenizer {
 				processTokenArray(token, result);
 			}
 		}
-		return Flux.fromIterable(result);
+		return result;
 	}
 
 	private void updateDepth(JsonToken token) {
@@ -174,17 +179,23 @@ final class Jackson2Tokenizer {
 	 * Tokenize the given {@code Flux<DataBuffer>} into {@code Flux<TokenBuffer>}.
 	 * @param dataBuffers the source data buffers
 	 * @param jsonFactory the factory to use
+	 * @param objectMapper the current mapper instance
 	 * @param tokenizeArrayElements if {@code true} and the "top level" JSON object is
 	 * an array, each element is returned individually immediately after it is received
 	 * @return the resulting token buffers
 	 */
 	public static Flux<TokenBuffer> tokenize(Flux<DataBuffer> dataBuffers, JsonFactory jsonFactory,
-			DeserializationContext deserializationContext, boolean tokenizeArrayElements) {
+			ObjectMapper objectMapper, boolean tokenizeArrayElements) {
 
 		try {
 			JsonParser parser = jsonFactory.createNonBlockingByteArrayParser();
-			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(parser, deserializationContext, tokenizeArrayElements);
-			return dataBuffers.flatMap(tokenizer::tokenize, Flux::error, tokenizer::endOfInput);
+			DeserializationContext context = objectMapper.getDeserializationContext();
+			if (context instanceof DefaultDeserializationContext) {
+				context = ((DefaultDeserializationContext) context).createInstance(
+						objectMapper.getDeserializationConfig(), parser, objectMapper.getInjectableValues());
+			}
+			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(parser, context, tokenizeArrayElements);
+			return dataBuffers.concatMapIterable(tokenizer::tokenize).concatWith(tokenizer.endOfInput());
 		}
 		catch (IOException ex) {
 			return Flux.error(ex);

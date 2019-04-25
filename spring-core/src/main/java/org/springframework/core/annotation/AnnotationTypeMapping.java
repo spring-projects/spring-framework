@@ -42,6 +42,7 @@ import org.springframework.util.StringUtils;
  * the context of a root annotation type.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2
  * @see AnnotationTypeMappings
  */
@@ -339,7 +340,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the root mapping.
+	 * Get the root mapping.
 	 * @return the root mapping
 	 */
 	AnnotationTypeMapping getRoot() {
@@ -347,7 +348,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the parent mapping or {@code null}.
+	 * Get the parent mapping or {@code null}.
 	 * @return the parent mapping
 	 */
 	@Nullable
@@ -356,7 +357,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the depth of this mapping.
+	 * Get the depth of this mapping.
 	 * @return the depth of the mapping
 	 */
 	int getDepth() {
@@ -364,7 +365,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the type of the mapped annotation.
+	 * Get the type of the mapped annotation.
 	 * @return the annotation type
 	 */
 	Class<? extends Annotation> getAnnotationType() {
@@ -372,7 +373,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the source annotation for this mapping. This will be the
+	 * Get the source annotation for this mapping. This will be the
 	 * meta-annotation, or {@code null} if this is the root mapping.
 	 * @return the source annotation of the mapping
 	 */
@@ -382,7 +383,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the annotation attributes for the mapping annotation type.
+	 * Get the annotation attributes for the mapping annotation type.
 	 * @return the attribute methods
 	 */
 	AttributeMethods getAttributes() {
@@ -390,7 +391,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the related index of an alias mapped attribute, or {@code -1} if
+	 * Get the related index of an alias mapped attribute, or {@code -1} if
 	 * there is no mapping. The resulting value is the index of the attribute on
 	 * the root annotation that can be invoked in order to obtain the actual
 	 * value.
@@ -402,7 +403,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the related index of a convention mapped attribute, or {@code -1}
+	 * Get the related index of a convention mapped attribute, or {@code -1}
 	 * if there is no mapping. The resulting value is the index of the attribute
 	 * on the root annotation that can be invoked in order to obtain the actual
 	 * value.
@@ -414,7 +415,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return a mapped attribute value from the most suitable
+	 * Get a mapped attribute value from the most suitable
 	 * {@link #getAnnotation() meta-annotation}. The resulting value is obtained
 	 * from the closest meta-annotation, taking into consideration both
 	 * convention and alias based mapping rules. For root mappings, this method
@@ -433,7 +434,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return if the specified value is equivalent to the default value of the
+	 * Determine if the specified value is equivalent to the default value of the
 	 * attribute at the given index.
 	 * @param attributeIndex the attribute index of the source attribute
 	 * @param value the value to check
@@ -449,7 +450,7 @@ final class AnnotationTypeMapping {
 	}
 
 	/**
-	 * Return the mirror sets for this type mapping.
+	 * Get the mirror sets for this type mapping.
 	 * @return the mirrorSets the attribute mirror sets.
 	 */
 	MirrorSets getMirrorSets() {

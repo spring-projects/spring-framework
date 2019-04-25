@@ -119,7 +119,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		if (inputStream instanceof Mono) {
 			return Mono.from(inputStream).map(value ->
-					encodeValue(value, mimeType, bufferFactory, elementType, hints, encoding)).flux();
+					encodeValue(value, bufferFactory, elementType, mimeType, hints, encoding)).flux();
 		}
 		else {
 			return this.streamingMediaTypes.stream()
@@ -129,7 +129,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 						byte[] separator = STREAM_SEPARATORS.getOrDefault(mediaType, NEWLINE_SEPARATOR);
 						return Flux.from(inputStream).map(value -> {
 							DataBuffer buffer = encodeValue(
-									value, mimeType, bufferFactory, elementType, hints, encoding);
+									value, bufferFactory, elementType, mimeType, hints, encoding);
 							if (separator != null) {
 								buffer.write(separator);
 							}
@@ -139,13 +139,20 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 					.orElseGet(() -> {
 						ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
 						return Flux.from(inputStream).collectList().map(list ->
-								encodeValue(list, mimeType, bufferFactory, listType, hints, encoding)).flux();
+								encodeValue(list, bufferFactory, listType, mimeType, hints, encoding)).flux();
 					});
 		}
 	}
 
-	private DataBuffer encodeValue(Object value, @Nullable MimeType mimeType, DataBufferFactory bufferFactory,
-			ResolvableType elementType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
+	@Override
+	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		return encodeValue(value, bufferFactory, valueType, mimeType, hints, getJsonEncoding(mimeType));
+	}
+
+	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType valueType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints, JsonEncoding encoding) {
 
 		if (!Hints.isLoggingSuppressed(hints)) {
 			LogFormatUtils.traceDebug(logger, traceOn -> {
@@ -154,7 +161,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			});
 		}
 
-		JavaType javaType = getJavaType(elementType.getType(), null);
+		JavaType javaType = getJavaType(valueType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
 				getObjectMapper().writerWithView(jsonView) : getObjectMapper().writer());
@@ -163,7 +170,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			writer = writer.forType(javaType);
 		}
 
-		writer = customizeWriter(writer, mimeType, elementType, hints);
+		writer = customizeWriter(writer, mimeType, valueType, hints);
 
 		DataBuffer buffer = bufferFactory.allocateBuffer();
 		boolean release = true;
@@ -172,6 +179,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		try {
 			JsonGenerator generator = getObjectMapper().getFactory().createGenerator(outputStream, encoding);
 			writer.writeValue(generator, value);
+			generator.flush();
 			release = false;
 		}
 		catch (InvalidDefinitionException ex) {

@@ -140,6 +140,19 @@ public class PatternsRequestConditionTests {
 		assertNull(match);
 	}
 
+	@Test // gh-22543
+	public void matchWithEmptyPatterns() {
+		PatternsRequestCondition condition = new PatternsRequestCondition();
+		assertEquals(new PatternsRequestCondition(this.parser.parse("")), condition);
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get(""))));
+		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/anything"))));
+
+		condition = condition.combine(new PatternsRequestCondition());
+		assertEquals(new PatternsRequestCondition(this.parser.parse("")), condition);
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(get(""))));
+		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(get("/anything"))));
+	}
+
 	@Test
 	public void compareToConsistentWithEquals() throws Exception {
 		PatternsRequestCondition c1 = createPatternsCondition("/foo*");

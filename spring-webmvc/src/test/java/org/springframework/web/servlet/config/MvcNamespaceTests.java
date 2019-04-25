@@ -169,7 +169,7 @@ public class MvcNamespaceTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		TestMockServletContext servletContext = new TestMockServletContext();
 		appContext = new XmlWebApplicationContext();
 		appContext.setServletContext(servletContext);
@@ -889,7 +889,7 @@ public class MvcNamespaceTests {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertNotNull(handlerMapping);
 			DirectFieldAccessor accessor = new DirectFieldAccessor(handlerMapping);
-			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource)accessor
+			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource) accessor
 					.getPropertyValue("corsConfigurationSource")).getCorsConfigurations();
 			assertNotNull(configs);
 			assertEquals(1, configs.size());
@@ -914,7 +914,7 @@ public class MvcNamespaceTests {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertNotNull(handlerMapping);
 			DirectFieldAccessor accessor = new DirectFieldAccessor(handlerMapping);
-			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource)accessor
+			Map<String, CorsConfiguration> configs = ((UrlBasedCorsConfigurationSource) accessor
 					.getPropertyValue("corsConfigurationSource")).getCorsConfigurations();
 			assertNotNull(configs);
 			assertEquals(2, configs.size());

@@ -19,10 +19,8 @@ package org.springframework.messaging.rsocket;
 import java.time.Duration;
 
 import io.netty.buffer.PooledByteBufAllocator;
-import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
 import io.rsocket.frame.decoder.PayloadDecoder;
-import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
 import org.junit.AfterClass;
@@ -59,8 +57,6 @@ public class RSocketClientToServerIntegrationTests {
 
 	private static FireAndForgetCountingInterceptor interceptor = new FireAndForgetCountingInterceptor();
 
-	private static RSocket client;
-
 	private static RSocketRequester requester;
 
 
@@ -77,20 +73,19 @@ public class RSocketClientToServerIntegrationTests {
 				.start()
 				.block();
 
-		client = RSocketFactory.connect()
-				.dataMimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
-				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.transport(TcpClientTransport.create("localhost", 7000))
-				.start()
+		requester = RSocketRequester.builder()
+				.rsocketFactory(factory -> factory.frameDecoder(PayloadDecoder.ZERO_COPY))
+				.rsocketStrategies(strategies -> strategies
+						.decoder(StringDecoder.allMimeTypes())
+						.encoder(CharSequenceEncoder.allMimeTypes())
+						.dataBufferFactory(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT)))
+				.connectTcp("localhost", 7000, MimeTypeUtils.TEXT_PLAIN)
 				.block();
-
-		requester = RSocketRequester.create(
-				client, MimeTypeUtils.TEXT_PLAIN, context.getBean(RSocketStrategies.class));
 	}
 
 	@AfterClass
 	public static void tearDownOnce() {
-		client.dispose();
+		requester.rsocket().dispose();
 		server.dispose();
 	}
 
@@ -121,7 +116,8 @@ public class RSocketClientToServerIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectNext("Hello 1").expectNext("Hello 2").expectNext("Hello 3")
-				.verifyComplete();
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -131,7 +127,8 @@ public class RSocketClientToServerIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectNext("Hello 1 async").expectNext("Hello 2 async").expectNext("Hello 3 async")
-				.verifyComplete();
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -141,7 +138,7 @@ public class RSocketClientToServerIntegrationTests {
 		StepVerifier.create(result)
 				.expectNext("Hello 0").expectNextCount(6).expectNext("Hello 7")
 				.thenCancel()
-				.verify();
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -152,37 +149,46 @@ public class RSocketClientToServerIntegrationTests {
 
 		StepVerifier.create(result)
 				.expectNext("Hello 1 async").expectNextCount(8).expectNext("Hello 10 async")
-				.verifyComplete();
+				.thenCancel()  // https://github.com/rsocket/rsocket-java/issues/613
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void voidReturnValue() {
 		Flux<String> result = requester.route("void-return-value").data("Hello").retrieveFlux(String.class);
-		StepVerifier.create(result).verifyComplete();
+		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void voidReturnValueFromExceptionHandler() {
 		Flux<String> result = requester.route("void-return-value").data("bad").retrieveFlux(String.class);
-		StepVerifier.create(result).verifyComplete();
+		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void handleWithThrownException() {
 		Mono<String> result = requester.route("thrown-exception").data("a").retrieveMono(String.class);
-		StepVerifier.create(result).expectNext("Invalid input error handled").verifyComplete();
+		StepVerifier.create(result)
+				.expectNext("Invalid input error handled")
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void handleWithErrorSignal() {
 		Mono<String> result = requester.route("error-signal").data("a").retrieveMono(String.class);
-		StepVerifier.create(result).expectNext("Invalid input error handled").verifyComplete();
+		StepVerifier.create(result)
+				.expectNext("Invalid input error handled")
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
 	public void noMatchingRoute() {
 		Mono<String> result = requester.route("invalid").data("anything").retrieveMono(String.class);
-		StepVerifier.create(result).verifyErrorMessage("No handler for destination 'invalid'");
+		StepVerifier.create(result)
+				.expectErrorMessage("No handler for destination 'invalid'")
+				.verify(Duration.ofSeconds(5));
 	}
 
 

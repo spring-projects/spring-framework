@@ -35,7 +35,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 	}
 
 
-	private class StringToEnum<T extends Enum> implements Converter<String, T> {
+	private static class StringToEnum<T extends Enum> implements Converter<String, T> {
 
 		private final Class<T> enumType;
 

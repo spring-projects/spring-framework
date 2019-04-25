@@ -26,18 +26,16 @@ import java.net.URI
 import java.util.function.Supplier
 
 /**
- * Allow to create easily a `RouterFunction<ServerResponse>` from a Kotlin router DSL based
- * on the same building blocks as the Java one ([RouterFunction], [RequestPredicate],
- * [HandlerFunction]).
+ * Allow to create easily a WebFlux.fn [RouterFunction] with a [Reactive router Kotlin DSL][RouterFunctionDsl].
  *
  * Example:
  *
  * ```
  * @Configuration
- * class ApplicationRoutes(val userHandler: UserHandler) {
+ * class RouterConfiguration {
  *
  * 	@Bean
- * 	fun mainRouter() = router {
+ * 	fun mainRouter(userHandler: UserHandler) = router {
  * 		accept(TEXT_HTML).nest {
  * 			(GET("/user/") or GET("/users/")).invoke(userHandler::findAllView)
  * 			GET("/users/{login}", userHandler::findViewById)
@@ -51,20 +49,19 @@ import java.util.function.Supplier
  * }
  * ```
  * @author Sebastien Deleuze
- * @see RouterFunctionDsl
- * @see RouterFunctions.Builder
+ * @see coRouter
  * @since 5.0
  */
-fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl(routes).invoke()
+fun router(routes: RouterFunctionDsl.() -> Unit) = RouterFunctionDsl(routes).build()
 
 /**
- * Provide a [RouterFunction] Kotlin DSL in order to be able to write idiomatic Kotlin code.
+ * Provide a WebFlux.fn [RouterFunction] Reactive Kotlin DSL created by [`router { }`][router] in order to be able to write idiomatic Kotlin code.
  *
  * @author Sebastien Deleuze
  * @author Yevhenii Melnyk
  * @since 5.0
  */
-open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : () -> RouterFunction<ServerResponse> {
+class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) {
 
 	private val builder = RouterFunctions.route()
 
@@ -136,7 +133,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RouterFunctions.nest
 	 */
 	fun RequestPredicate.nest(init: RouterFunctionDsl.() -> Unit) {
-		builder.nest(this, Supplier { RouterFunctionDsl(init).invoke() })
+		builder.nest(this, Supplier { RouterFunctionDsl(init).build() })
 	}
 
 	/**
@@ -148,7 +145,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * @see RequestPredicates.path
 	*/
 	fun String.nest(init: RouterFunctionDsl.() -> Unit) {
-		builder.path(this, Supplier { RouterFunctionDsl(init).invoke() })
+		builder.path(this, Supplier { RouterFunctionDsl(init).build() })
 	}
 
 	/**
@@ -545,7 +542,7 @@ open class RouterFunctionDsl(private val init: RouterFunctionDsl.() -> Unit) : (
 	 * Return a composed routing function created from all the registered routes.
 	 * @since 5.1
 	 */
-	override fun invoke(): RouterFunction<ServerResponse> {
+	internal fun build(): RouterFunction<ServerResponse> {
 		init()
 		return builder.build()
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,14 +75,10 @@ public class CorsWebFilter implements WebFilter {
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 		ServerHttpRequest request = exchange.getRequest();
-		if (CorsUtils.isCorsRequest(request)) {
-			CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(exchange);
-			if (corsConfiguration != null) {
-				boolean isValid = this.processor.process(corsConfiguration, exchange);
-				if (!isValid || CorsUtils.isPreFlightRequest(request)) {
-					return Mono.empty();
-				}
-			}
+		CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(exchange);
+		boolean isValid = this.processor.process(corsConfiguration, exchange);
+		if (!isValid || CorsUtils.isPreFlightRequest(request)) {
+			return Mono.empty();
 		}
 		return chain.filter(exchange);
 	}

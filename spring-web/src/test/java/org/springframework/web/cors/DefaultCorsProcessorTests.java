@@ -51,13 +51,35 @@ public class DefaultCorsProcessorTests {
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 		this.request.setRequestURI("/test.html");
-		this.request.setRemoteHost("domain1.com");
+		this.request.setServerName("domain1.com");
 		this.conf = new CorsConfiguration();
 		this.response = new MockHttpServletResponse();
 		this.response.setStatus(HttpServletResponse.SC_OK);
 		this.processor = new DefaultCorsProcessor();
 	}
 
+	@Test
+	public void requestWithoutOriginHeader() throws Exception {
+		this.request.setMethod(HttpMethod.GET.name());
+
+		this.processor.processRequest(this.conf, this.request, this.response);
+		assertFalse(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertThat(this.response.getHeaders(HttpHeaders.VARY), contains(HttpHeaders.ORIGIN,
+				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS));
+		assertEquals(HttpServletResponse.SC_OK, this.response.getStatus());
+	}
+
+	@Test
+	public void sameOriginRequest() throws Exception {
+		this.request.setMethod(HttpMethod.GET.name());
+		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain1.com");
+
+		this.processor.processRequest(this.conf, this.request, this.response);
+		assertFalse(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertThat(this.response.getHeaders(HttpHeaders.VARY), contains(HttpHeaders.ORIGIN,
+				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS));
+		assertEquals(HttpServletResponse.SC_OK, this.response.getStatus());
+	}
 
 	@Test
 	public void actualRequestWithOriginHeader() throws Exception {
