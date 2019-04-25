@@ -16,12 +16,16 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import kotlin.reflect.KFunction;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -47,6 +51,8 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public abstract class AbstractMessageWriterResultHandler extends HandlerResultHandlerSupport {
+
+	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 	private final List<HttpMessageWriter<?>> messageWriters;
 
@@ -110,7 +116,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 * @return indicates completion or error
 	 * @since 5.0.2
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"unchecked", "rawtypes", "ConstantConditions"})
 	protected Mono<Void> writeBody(@Nullable Object body, MethodParameter bodyParameter,
 			@Nullable MethodParameter actualParam, ServerWebExchange exchange) {
 
@@ -122,7 +128,11 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		ResolvableType elementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
-			ResolvableType genericType = bodyType.getGeneric();
+			boolean isUnwrapped = KotlinDetector.isKotlinReflectPresent() &&
+					KotlinDetector.isKotlinType(bodyParameter.getContainingClass()) &&
+					KotlinDelegate.isSuspend(bodyParameter.getMethod()) &&
+					!COROUTINES_FLOW_CLASS_NAME.equals(bodyType.toClass().getName());
+			ResolvableType genericType = isUnwrapped ? bodyType : bodyType.getGeneric();
 			elementType = getElementType(adapter, genericType);
 		}
 		else {
@@ -181,6 +191,17 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 		}
 		return writableMediaTypes;
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		static private boolean isSuspend(Method method) {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			return function != null && function.isSuspend();
+		}
 	}
 
 }

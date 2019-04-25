@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URL;
+import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -584,7 +585,7 @@ public abstract class BeanUtils {
 	/**
 	 * Check if the given type represents a "simple" property:
 	 * a primitive, a String or other CharSequence, a Number, a Date,
-	 * a URI, a URL, a Locale, a Class, or a corresponding array.
+	 * a Temporal, a URI, a URL, a Locale, a Class, or a corresponding array.
 	 * <p>Used to determine properties to check for a "simple" dependency-check.
 	 * @param clazz the type to check
 	 * @return whether the given type represents a "simple" property
@@ -599,7 +600,7 @@ public abstract class BeanUtils {
 	/**
 	 * Check if the given type represents a "simple" value type:
 	 * a primitive, an enum, a String or other CharSequence, a Number, a Date,
-	 * a URI, a URL, a Locale or a Class.
+	 * a Temporal, a URI, a URL, a Locale or a Class.
 	 * @param clazz the type to check
 	 * @return whether the given type represents a "simple" value type
 	 */
@@ -609,6 +610,7 @@ public abstract class BeanUtils {
 				CharSequence.class.isAssignableFrom(clazz) ||
 				Number.class.isAssignableFrom(clazz) ||
 				Date.class.isAssignableFrom(clazz) ||
+				Temporal.class.isAssignableFrom(clazz) ||
 				URI.class == clazz || URL.class == clazz ||
 				Locale.class == clazz || Class.class == clazz);
 	}
