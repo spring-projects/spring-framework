@@ -38,7 +38,7 @@ dependencies {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
 	optional("org.eclipse.jetty:jetty-reactive-httpclient:1.0.3")
-	optional("com.squareup.okhttp3:okhttp:3.14.0")
+	optional("com.squareup.okhttp3:okhttp:3.14.1")
 	optional("org.apache.httpcomponents:httpclient:4.5.8") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
@@ -75,7 +75,7 @@ dependencies {
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.14.0")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.14.1")
 	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	testCompile("org.skyscreamer:jsonassert:1.5.0")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
