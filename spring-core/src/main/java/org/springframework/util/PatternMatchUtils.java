@@ -47,11 +47,11 @@ public abstract class PatternMatchUtils {
 			if (pattern.length() == 1) {
 				return true;
 			}
-			int nextIndex = pattern.indexOf('*', firstIndex +1);
+			int nextIndex = pattern.indexOf('*', firstIndex + 1);
 			if (nextIndex == -1) {
-				return str.endsWith(pattern.substring(firstIndex +1));
+				return str.endsWith(pattern.substring(firstIndex + 1));
 			}
-			String part = pattern.substring(firstIndex +1, nextIndex);
+			String part = pattern.substring(firstIndex + 1, nextIndex);
 			if (part.isEmpty()) {
 				return simpleMatch(pattern.substring(nextIndex), str);
 			}
