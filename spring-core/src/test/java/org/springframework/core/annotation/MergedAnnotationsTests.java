@@ -155,6 +155,22 @@ public class MergedAnnotationsTests {
 	}
 
 	@Test
+	public void getRootWhenNotDirect() {
+		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
+		MergedAnnotation<?> annotation = annotations.get(TransactionalComponent.class);
+		assertThat(annotation.getDepth()).isGreaterThan(0);
+		assertThat(annotation.getRoot().getType()).isEqualTo(ComposedTransactionalComponent.class);
+	}
+
+	@Test
+	public void getRootWhenDirect() {
+		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
+		MergedAnnotation<?> annotation = annotations.get(ComposedTransactionalComponent.class);
+		assertThat(annotation.getDepth()).isEqualTo(0);
+		assertThat(annotation.getRoot()).isSameAs(annotation);
+	}
+
+	@Test
 	public void collectMultiValueMapFromNonAnnotatedClass() {
 		MultiValueMap<String, Object> map = MergedAnnotations.from(
 				NonAnnotatedClass.class).stream(Transactional.class).collect(

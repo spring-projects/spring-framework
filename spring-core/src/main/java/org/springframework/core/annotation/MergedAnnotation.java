@@ -141,6 +141,13 @@ public interface MergedAnnotation<A extends Annotation> {
 	MergedAnnotation<?> getParent();
 
 	/**
+	 * Get the root annotation, i.e. the {@link #getDepth() depth} {@code 0}
+	 * annotation as directly declared on the source.
+	 * @return the root annotation
+	 */
+	MergedAnnotation<?> getRoot();
+
+	/**
 	 * Determine if the specified attribute name has a non-default value when
 	 * compared to the annotation declaration.
 	 * @param attributeName the attribute name

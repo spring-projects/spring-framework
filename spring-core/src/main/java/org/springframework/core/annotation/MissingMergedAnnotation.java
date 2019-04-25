@@ -67,6 +67,11 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
+	public MergedAnnotation<?> getRoot() {
+		return this;
+	}
+
+	@Override
 	public int getDepth() {
 		return -1;
 	}

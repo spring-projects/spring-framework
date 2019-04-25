@@ -172,6 +172,16 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
+	public MergedAnnotation<?> getRoot() {
+		if (getDepth() == 0) {
+			return this;
+		}
+		AnnotationTypeMapping rootMapping = this.mapping.getRoot();
+		return new TypeMappedAnnotation<>(rootMapping, this.source, this.rootAttributes,
+				this.valueExtractor, this.aggregateIndex, this.resolvedRootMirrors);
+	}
+
+	@Override
 	public boolean hasDefaultValue(String attributeName) {
 		int attributeIndex = getAttributeIndex(attributeName, true);
 		Object value = getValue(attributeIndex, true, false);

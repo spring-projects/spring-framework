@@ -79,6 +79,11 @@ public class MissingMergedAnnotationTests {
 	}
 
 	@Test
+	public void getRootReturnsEmptyAnnotation() {
+		assertThat(this.missing.getRoot()).isSameAs(this.missing);
+	}
+
+	@Test
 	public void hasNonDefaultValueThrowsNoSuchElementException() {
 		assertThatNoSuchElementException().isThrownBy(
 				() -> this.missing.hasNonDefaultValue("value"));
