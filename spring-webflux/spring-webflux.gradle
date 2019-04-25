@@ -54,7 +54,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("org.eclipse.jetty:jetty-reactive-httpclient:1.0.3")
-	testCompile("com.squareup.okhttp3:mockwebserver:3.14.0")
+	testCompile("com.squareup.okhttp3:mockwebserver:3.14.1")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 	testCompile(project(":spring-core-coroutines"))
 	testRuntime("org.jetbrains.kotlin:kotlin-script-util:${kotlinVersion}")
