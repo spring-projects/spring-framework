@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -554,8 +554,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	/**
 	 * Determine whether the given model element value is eligible for exposure.
-	 * <p>The default implementation considers primitives, Strings, Numbers, Dates,
-	 * URIs, URLs and Locale objects as eligible. This can be overridden in subclasses.
+	 * <p>The default implementation considers primitives, strings, numbers, dates,
+	 * URIs, URLs etc as eligible, according to {@link BeanUtils#isSimpleValueType}.
+	 * This can be overridden in subclasses.
 	 * @param value the model element value
 	 * @return whether the element value is eligible
 	 * @see BeanUtils#isSimpleValueType
@@ -572,7 +573,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @return the encoded output String
 	 * @throws UnsupportedEncodingException if thrown by the JDK URLEncoder
 	 * @see java.net.URLEncoder#encode(String, String)
-	 * @see java.net.URLEncoder#encode(String)
 	 */
 	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
 		return URLEncoder.encode(input, encodingScheme);
