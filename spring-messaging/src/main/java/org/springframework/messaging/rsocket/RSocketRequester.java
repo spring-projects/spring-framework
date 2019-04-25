@@ -16,7 +16,12 @@
 
 package org.springframework.messaging.rsocket;
 
+import java.net.URI;
+import java.util.function.Consumer;
+
 import io.rsocket.RSocket;
+import io.rsocket.RSocketFactory;
+import io.rsocket.transport.ClientTransport;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,6 +37,7 @@ import org.springframework.util.MimeType;
  * methods specify routing and other metadata.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.2
  */
 public interface RSocketRequester {
@@ -55,6 +61,12 @@ public interface RSocketRequester {
 		return new DefaultRSocketRequester(rsocket, dataMimeType, strategies);
 	}
 
+	/**
+	 * Obtain a {@code RSocketRequester} builder.
+	 */
+	static RSocketRequester.Builder builder() {
+		return new DefaultRSocketRequesterBuilder();
+	}
 
 	// For now we treat metadata as a simple string that is the route.
 	// This will change after the resolution of:
@@ -70,6 +82,55 @@ public interface RSocketRequester {
 	 * @return a spec for further defining and executing the reuqest
 	 */
 	RequestSpec route(String route);
+
+	/**
+	 * A mutable builder for creating a client {@link RSocketRequester}.
+	 */
+	interface Builder {
+
+		/**
+		 * Configure the client {@code RSocketFactory}. This is useful for
+		 * customizing protocol options and add RSocket plugins.
+		 * @param configurer the configurer to apply
+		 */
+		RSocketRequester.Builder rsocketFactory(
+				Consumer<RSocketFactory.ClientRSocketFactory> configurer);
+
+		/**
+		 * Configure the builder for {@link RSocketStrategies}.
+		 * <p>The builder starts with an empty {@code RSocketStrategies}.
+		 * @param configurer the configurer to apply
+		 */
+		RSocketRequester.Builder rsocketStrategies(Consumer<RSocketStrategies.Builder> configurer);
+
+		/**
+		 * Configure the {@code ClientTransport} for the RSocket connection
+		 * and connect to the RSocket server.
+		 * @param transport the chosen client transport
+		 * @return a mono containing the connected {@code RSocketRequester}
+		 */
+		Mono<RSocketRequester> connect(ClientTransport transport, MimeType dataMimeType);
+
+		/**
+		 * Connect to the RSocket server over TCP transport using the
+		 * provided connection parameters.
+		 * @param host the RSocket server host
+		 * @param port the RSocket server port
+		 * @param dataMimeType the data MimeType
+		 * @return a mono containing the connected {@code RSocketRequester}
+		 */
+		Mono<RSocketRequester> connectTcp(String host, int port, MimeType dataMimeType);
+
+		/**
+		 * Connect to the RSocket server over WebSocket transport using the
+		 * provided connection parameters.
+		 * @param uri the RSocket server endpoint URI
+		 * @param dataMimeType the data MimeType
+		 * @return a mono containing the connected {@code RSocketRequester}
+		 */
+		Mono<RSocketRequester> connectWebSocket(URI uri, MimeType dataMimeType);
+
+	}
 
 
 	/**

@@ -935,7 +935,7 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return null;
 		}
-		return new DefaultVariableResolver();
+		return new DefaultVariableResolver(this);
 	}
 
 	/**
@@ -1452,17 +1452,23 @@ public class ResolvableType implements Serializable {
 
 
 	@SuppressWarnings("serial")
-	private class DefaultVariableResolver implements VariableResolver {
+	private static class DefaultVariableResolver implements VariableResolver {
+
+		private final ResolvableType source;
+
+		DefaultVariableResolver(ResolvableType resolvableType) {
+			this.source = resolvableType;
+		}
 
 		@Override
 		@Nullable
 		public ResolvableType resolveVariable(TypeVariable<?> variable) {
-			return ResolvableType.this.resolveVariable(variable);
+			return this.source.resolveVariable(variable);
 		}
 
 		@Override
 		public Object getSource() {
-			return ResolvableType.this;
+			return this.source;
 		}
 	}
 
