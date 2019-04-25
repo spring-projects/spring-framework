@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,17 @@
 
 package org.springframework.util;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 /**
+ * Tests for {@link LinkedCaseInsensitiveMap}.
+ *
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
 public class LinkedCaseInsensitiveMapTests {
 
@@ -125,6 +130,91 @@ public class LinkedCaseInsensitiveMapTests {
 		assertEquals("value2", copy.get("key"));
 		assertEquals("value2", copy.get("KEY"));
 		assertEquals("value2", copy.get("Key"));
+	}
+
+
+	@Test
+	public void clearFromKeySet() {
+		map.put("key", "value");
+		map.keySet().clear();
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	@Test
+	public void removeFromKeySet() {
+		map.put("key", "value");
+		map.keySet().remove("key");
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	@Test
+	public void removeFromKeySetViaIterator() {
+		map.put("key", "value");
+		nextAndRemove(map.keySet().iterator());
+		assertEquals(0, map.size());
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	@Test
+	public void clearFromValues() {
+		map.put("key", "value");
+		map.values().clear();
+		assertEquals(0, map.size());
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	@Test
+	public void removeFromValues() {
+		map.put("key", "value");
+		map.values().remove("value");
+		assertEquals(0, map.size());
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	@Test
+	public void removeFromValuesViaIterator() {
+		map.put("key", "value");
+		nextAndRemove(map.values().iterator());
+		assertEquals(0, map.size());
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	@Test
+	public void clearFromEntrySet() {
+		map.put("key", "value");
+		map.entrySet().clear();
+		assertEquals(0, map.size());
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	@Test
+	public void removeFromEntrySet() {
+		map.put("key", "value");
+		map.entrySet().remove(map.entrySet().iterator().next());
+		assertEquals(0, map.size());
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	@Test
+	public void removeFromEntrySetViaIterator() {
+		map.put("key", "value");
+		nextAndRemove(map.entrySet().iterator());
+		assertEquals(0, map.size());
+		map.computeIfAbsent("key", k -> "newvalue");
+		assertEquals("newvalue", map.get("key"));
+	}
+
+	private void nextAndRemove(Iterator<?> iterator) {
+		iterator.next();
+		iterator.remove();
 	}
 
 }
