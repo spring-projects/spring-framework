@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 	private static final Object NO_VALUE = new Object();
 
 
-	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
+	private final ReactiveAdapterRegistry adapterRegistry;
 
 	private final List<MediaType> mediaTypes = new ArrayList<>(4);
 
@@ -78,7 +78,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 	}
 
 	public AbstractView(ReactiveAdapterRegistry reactiveAdapterRegistry) {
-		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
+		this.adapterRegistry = reactiveAdapterRegistry;
 		this.mediaTypes.add(ViewResolverSupport.DEFAULT_CONTENT_TYPE);
 	}
 
@@ -240,7 +240,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 			if (value == null) {
 				continue;
 			}
-			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(null, value);
+			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(null, value);
 			if (adapter != null) {
 				names.add(entry.getKey());
 				if (adapter.isMultiValue()) {

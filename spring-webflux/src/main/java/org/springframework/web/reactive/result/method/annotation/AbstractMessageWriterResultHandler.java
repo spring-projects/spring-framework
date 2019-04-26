@@ -33,8 +33,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -145,10 +143,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			return Mono.from((Publisher<Void>) publisher);
 		}
 
-		ServerHttpRequest request = exchange.getRequest();
-		ServerHttpResponse response = exchange.getResponse();
-		List<MediaType> writableMediaTypes = getMediaTypesFor(elementType);
-		MediaType bestMediaType = selectMediaType(exchange, () -> writableMediaTypes);
+		MediaType bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType));
 		if (bestMediaType != null) {
 			String logPrefix = exchange.getLogPrefix();
 			if (logger.isDebugEnabled()) {
@@ -157,18 +152,18 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 			for (HttpMessageWriter<?> writer : getMessageWriters()) {
 				if (writer.canWrite(elementType, bestMediaType)) {
-					return writer.write((Publisher) publisher, actualType, elementType, bestMediaType,
-							request, response, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix));
+					return writer.write((Publisher) publisher, actualType, elementType,
+							bestMediaType, exchange.getRequest(), exchange.getResponse(),
+							Hints.from(Hints.LOG_PREFIX_HINT, logPrefix));
 				}
 			}
 		}
-		else {
-			if (writableMediaTypes.isEmpty()) {
-				return Mono.error(new IllegalStateException("No writer for : " + elementType));
-			}
-		}
 
-		return Mono.error(new NotAcceptableStatusException(writableMediaTypes));
+		List<MediaType> mediaTypes = getMediaTypesFor(elementType);
+		if (bestMediaType == null && mediaTypes.isEmpty()) {
+			return Mono.error(new IllegalStateException("No HttpMessageWriter for " + elementType));
+		}
+		return Mono.error(new NotAcceptableStatusException(mediaTypes));
 	}
 
 	private ResolvableType getElementType(ReactiveAdapter adapter, ResolvableType genericType) {
@@ -192,6 +187,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		}
 		return writableMediaTypes;
 	}
+
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.

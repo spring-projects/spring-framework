@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,6 @@ public class HandlerMethod {
 	public static final Log defaultLogger = LogFactory.getLog(HandlerMethod.class);
 
 
-	protected Log logger = defaultLogger;
-
 	private final Object bean;
 
 	@Nullable
@@ -75,6 +73,8 @@ public class HandlerMethod {
 
 	@Nullable
 	private HandlerMethod resolvedFromHandlerMethod;
+
+	protected Log logger = defaultLogger;
 
 
 	/**
