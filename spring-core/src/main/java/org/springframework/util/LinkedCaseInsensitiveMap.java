@@ -55,10 +55,13 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 	private final Locale locale;
 
+	@Nullable
 	private transient Set<String> keySet;
 
+	@Nullable
 	private transient Collection<V> values;
 
+	@Nullable
 	private transient Set<Entry<String, V>> entrySet;
 
 
@@ -320,6 +323,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		return false;
 	}
 
+	@Nullable
 	private String removeCaseInsensitiveKey(String key) {
 		return this.caseInsensitiveKeys.remove(convertKey(key));
 	}
@@ -329,11 +333,9 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		private final Set<String> delegate;
 
-
 		KeySet(Set<String> delegate) {
 			this.delegate = delegate;
 		}
-
 
 		@Override
 		public int size() {
@@ -369,7 +371,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		public void forEach(Consumer<? super String> action) {
 			this.delegate.forEach(action);
 		}
-
 	}
 
 
@@ -377,11 +378,9 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		private final Collection<V> delegate;
 
-
 		Values(Collection<V> delegate) {
 			this.delegate = delegate;
 		}
-
 
 		@Override
 		public int size() {
@@ -412,7 +411,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		public void forEach(Consumer<? super V> action) {
 			this.delegate.forEach(action);
 		}
-
 	}
 
 
@@ -420,11 +418,9 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		private final Set<Entry<String, V>> delegate;
 
-
 		public EntrySet(Set<Entry<String, V>> delegate) {
 			this.delegate = delegate;
 		}
-
 
 		@Override
 		public int size() {
@@ -441,7 +437,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 			return new EntrySetIterator();
 		}
 
-
 		@Override
 		@SuppressWarnings("unchecked")
 		public boolean remove(Object o) {
@@ -451,7 +446,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 			}
 			return false;
 		}
-
 
 		@Override
 		public void clear() {
@@ -468,7 +462,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		public void forEach(Consumer<? super Entry<String, V>> action) {
 			this.delegate.forEach(action);
 		}
-
 	}
 
 
@@ -476,6 +469,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		private final Iterator<Entry<String, V>> delegate;
 
+		@Nullable
 		private Entry<String, V> last;
 
 		public EntryIterator() {
@@ -494,12 +488,11 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 		public void remove() {
 			this.delegate.remove();
-			if(this.last != null) {
+			if (this.last != null) {
 				removeCaseInsensitiveKey(this.last.getKey());
 				this.last = null;
 			}
 		}
-
 	}
 
 
@@ -509,7 +502,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		public String next() {
 			return nextEntry().getKey();
 		}
-
 	}
 
 
@@ -519,7 +511,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		public V next() {
 			return nextEntry().getValue();
 		}
-
 	}
 
 
@@ -529,7 +520,6 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 		public Entry<String, V> next() {
 			return nextEntry();
 		}
-
 	}
 
 }
