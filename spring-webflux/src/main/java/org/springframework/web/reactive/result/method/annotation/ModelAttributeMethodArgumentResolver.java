@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,10 +160,10 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			return createAttribute(attributeName, attributeType.toClass(), context, exchange);
 		}
 
-		ReactiveAdapter adapterFrom = getAdapterRegistry().getAdapter(null, attribute);
-		if (adapterFrom != null) {
-			Assert.isTrue(!adapterFrom.isMultiValue(), "Data binding only supports single-value async types");
-			return Mono.from(adapterFrom.toPublisher(attribute));
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, attribute);
+		if (adapter != null) {
+			Assert.isTrue(!adapter.isMultiValue(), "Data binding only supports single-value async types");
+			return Mono.from(adapter.toPublisher(attribute));
 		}
 		else {
 			return Mono.justOrEmpty(attribute);

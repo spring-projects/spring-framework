@@ -415,7 +415,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Indicates whether DTD parsing should be supported.
+	 * Indicate whether DTD parsing should be supported.
 	 * <p>Default is {@code false} meaning that DTD is disabled.
 	 */
 	public void setSupportDtd(boolean supportDtd) {
@@ -423,14 +423,14 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
-	 * Whether DTD parsing is supported.
+	 * Return whether DTD parsing is supported.
 	 */
 	public boolean isSupportDtd() {
 		return this.supportDtd;
 	}
 
 	/**
-	 * Indicates whether external XML entities are processed when unmarshalling.
+	 * Indicate whether external XML entities are processed when unmarshalling.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
 	 * Note that processing of external entities will only be enabled/disabled when the
 	 * {@code Source} passed to {@link #unmarshal(Source)} is a {@link SAXSource} or
@@ -442,12 +442,12 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
 		if (processExternalEntities) {
-			setSupportDtd(true);
+			this.supportDtd = true;
 		}
 	}
 
 	/**
-	 * Returns the configured value for whether XML external entities are allowed.
+	 * Return whether XML external entities are allowed.
 	 */
 	public boolean isProcessExternalEntities() {
 		return this.processExternalEntities;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,17 +77,17 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	/**
 	 * Complete constructor with pluggable "reactive" type support.
 	 * @param messageConverters converters to write emitted objects with
-	 * @param reactiveRegistry for reactive return value type support
+	 * @param registry for reactive return value type support
 	 * @param executor for blocking I/O writes of items emitted from reactive types
 	 * @param manager for detecting streaming media types
 	 * @since 5.0
 	 */
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters,
-			ReactiveAdapterRegistry reactiveRegistry, TaskExecutor executor, ContentNegotiationManager manager) {
+			ReactiveAdapterRegistry registry, TaskExecutor executor, ContentNegotiationManager manager) {
 
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
 		this.messageConverters = messageConverters;
-		this.reactiveHandler = new ReactiveTypeHandler(reactiveRegistry, executor, manager);
+		this.reactiveHandler = new ReactiveTypeHandler(registry, executor, manager);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,38 +63,43 @@ final class CompositeLog implements Log {
 	}
 
 	private static Log initLogger(List<Log> loggers, Predicate<Log> predicate) {
-		return loggers.stream().filter(predicate).findFirst().orElse(NO_OP_LOG);
+		for (Log logger : loggers) {
+			if (predicate.test(logger)) {
+				return logger;
+			}
+		}
+		return NO_OP_LOG;
 	}
 
 
 	@Override
 	public boolean isFatalEnabled() {
-		return this.fatalLogger != NO_OP_LOG;
+		return (this.fatalLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isErrorEnabled() {
-		return this.errorLogger != NO_OP_LOG;
+		return (this.errorLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isWarnEnabled() {
-		return this.warnLogger != NO_OP_LOG;
+		return (this.warnLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isInfoEnabled() {
-		return this.infoLogger != NO_OP_LOG;
+		return (this.infoLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isDebugEnabled() {
-		return this.debugLogger != NO_OP_LOG;
+		return (this.debugLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isTraceEnabled() {
-		return this.traceLogger != NO_OP_LOG;
+		return (this.traceLogger != NO_OP_LOG);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -29,8 +29,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -135,8 +133,6 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			return Mono.from((Publisher<Void>) publisher);
 		}
 
-		ServerHttpRequest request = exchange.getRequest();
-		ServerHttpResponse response = exchange.getResponse();
 		MediaType bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType));
 		if (bestMediaType != null) {
 			String logPrefix = exchange.getLogPrefix();
@@ -146,18 +142,18 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 			for (HttpMessageWriter<?> writer : getMessageWriters()) {
 				if (writer.canWrite(elementType, bestMediaType)) {
-					return writer.write((Publisher) publisher, actualType, elementType, bestMediaType,
-							request, response, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix));
+					return writer.write((Publisher) publisher, actualType, elementType,
+							bestMediaType, exchange.getRequest(), exchange.getResponse(),
+							Hints.from(Hints.LOG_PREFIX_HINT, logPrefix));
 				}
 			}
 		}
-		else {
-			if (getMediaTypesFor(elementType).isEmpty()) {
-				return Mono.error(new IllegalStateException("No writer for : " + elementType));
-			}
-		}
 
-		return Mono.error(new NotAcceptableStatusException(getMediaTypesFor(elementType)));
+		List<MediaType> mediaTypes = getMediaTypesFor(elementType);
+		if (bestMediaType == null && mediaTypes.isEmpty()) {
+			return Mono.error(new IllegalStateException("No HttpMessageWriter for " + elementType));
+		}
+		return Mono.error(new NotAcceptableStatusException(mediaTypes));
 	}
 
 	private ResolvableType getElementType(ReactiveAdapter adapter, ResolvableType genericType) {
@@ -173,10 +169,13 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	}
 
 	private List<MediaType> getMediaTypesFor(ResolvableType elementType) {
-		return getMessageWriters().stream()
-				.filter(converter -> converter.canWrite(elementType, null))
-				.flatMap(converter -> converter.getWritableMediaTypes().stream())
-				.collect(Collectors.toList());
+		List<MediaType> writableMediaTypes = new ArrayList<>();
+		for (HttpMessageWriter<?> converter : getMessageWriters()) {
+			if (converter.canWrite(elementType, null)) {
+				writableMediaTypes.addAll(converter.getWritableMediaTypes());
+			}
+		}
+		return writableMediaTypes;
 	}
 
 }
