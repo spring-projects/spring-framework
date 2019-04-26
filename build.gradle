@@ -10,7 +10,7 @@ buildscript {
 
 // 3rd party plugin repositories can be configured in settings.gradle
 plugins {
-	id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
+	id "io.spring.dependency-management" version "1.0.7.RELEASE" apply false
 	id "org.jetbrains.kotlin.jvm" version "1.3.31" apply false
 	id "org.jetbrains.dokka" version "0.9.18"
 	id "org.asciidoctor.convert" version "1.5.8"
