@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,10 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 	}
 
 	/**
-	 * Constructor for when requested Content-Type is not supported.
+	 * Constructor for when the requested Content-Type is not supported.
 	 */
 	public NotAcceptableStatusException(List<MediaType> supportedMediaTypes) {
-		super(HttpStatus.NOT_ACCEPTABLE, "Could not find acceptable representation", null);
+		super(HttpStatus.NOT_ACCEPTABLE, "Could not find acceptable representation");
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
 	}
 
