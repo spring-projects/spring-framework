@@ -47,8 +47,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 	private final DataBufferFactory bufferFactory;
 
 
-	private DefaultRSocketStrategies(
-			List<Encoder<?>> encoders, List<Decoder<?>> decoders,
+	private DefaultRSocketStrategies(List<Encoder<?>> encoders, List<Decoder<?>> decoders,
 			ReactiveAdapterRegistry adapterRegistry, DataBufferFactory bufferFactory) {
 
 		this.encoders = Collections.unmodifiableList(encoders);
@@ -93,7 +92,6 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		@Nullable
 		private DataBufferFactory dataBufferFactory;
 
-
 		public DefaultRSocketStrategiesBuilder() {
 		}
 
@@ -103,7 +101,6 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			this.adapterRegistry = other.reactiveAdapterRegistry();
 			this.dataBufferFactory = other.dataBufferFactory();
 		}
-
 
 		@Override
 		public Builder encoder(Encoder<?>... encoders) {

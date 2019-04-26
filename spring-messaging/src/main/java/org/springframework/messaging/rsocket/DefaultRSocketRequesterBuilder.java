@@ -27,7 +27,6 @@ import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
@@ -38,11 +37,10 @@ import org.springframework.util.MimeType;
  */
 final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
-	@Nullable
 	private List<Consumer<RSocketFactory.ClientRSocketFactory>> factoryConfigurers = new ArrayList<>();
 
-	@Nullable
 	private List<Consumer<RSocketStrategies.Builder>> strategiesConfigurers = new ArrayList<>();
+
 
 	@Override
 	public RSocketRequester.Builder rsocketFactory(Consumer<RSocketFactory.ClientRSocketFactory> configurer) {

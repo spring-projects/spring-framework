@@ -42,11 +42,23 @@ import org.springframework.util.MimeType;
  */
 public interface RSocketRequester {
 
-
 	/**
 	 * Return the underlying RSocket used to make requests.
 	 */
 	RSocket rsocket();
+
+	// For now we treat metadata as a simple string that is the route.
+	// This will change after the resolution of:
+	// https://github.com/rsocket/rsocket-java/issues/568
+
+	/**
+	 * Entry point to prepare a new request to the given route.
+	 * <p>For requestChannel interactions, i.e. Flux-to-Flux the metadata is
+	 * attached to the first request payload.
+	 * @param route the routing destination
+	 * @return a spec for further defining and executing the reuqest
+	 */
+	RequestSpec route(String route);
 
 
 	/**
@@ -68,20 +80,6 @@ public interface RSocketRequester {
 		return new DefaultRSocketRequesterBuilder();
 	}
 
-	// For now we treat metadata as a simple string that is the route.
-	// This will change after the resolution of:
-	// https://github.com/rsocket/rsocket-java/issues/568
-
-	/**
-	 * Entry point to prepare a new request to the given route.
-	 *
-	 * <p>For requestChannel interactions, i.e. Flux-to-Flux the metadata is
-	 * attached to the first request payload.
-	 *
-	 * @param route the routing destination
-	 * @return a spec for further defining and executing the reuqest
-	 */
-	RequestSpec route(String route);
 
 	/**
 	 * A mutable builder for creating a client {@link RSocketRequester}.
@@ -129,7 +127,6 @@ public interface RSocketRequester {
 		 * @return a mono containing the connected {@code RSocketRequester}
 		 */
 		Mono<RSocketRequester> connectWebSocket(URI uri, MimeType dataMimeType);
-
 	}
 
 

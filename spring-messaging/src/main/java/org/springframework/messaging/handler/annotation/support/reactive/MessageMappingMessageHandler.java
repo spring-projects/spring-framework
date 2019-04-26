@@ -323,6 +323,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		if (!CollectionUtils.isEmpty(patterns)) {
 			String pattern = patterns.iterator().next();
 			String destination = getDestination(message);
+			Assert.state(destination != null, "Missing destination header");
 			Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(pattern, destination);
 			if (!CollectionUtils.isEmpty(vars)) {
 				MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
@@ -332,4 +333,5 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		}
 		return super.handleMatch(mapping, handlerMethod, message);
 	}
+
 }

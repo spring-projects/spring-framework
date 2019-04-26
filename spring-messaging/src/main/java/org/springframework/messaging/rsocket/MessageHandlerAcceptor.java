@@ -59,6 +59,7 @@ public final class MessageHandlerAcceptor extends RSocketMessageHandler
 	@Override
 	public Mono<RSocket> accept(ConnectionSetupPayload setupPayload, RSocket sendingRSocket) {
 		MessagingRSocket rsocket = createRSocket(sendingRSocket);
+
 		// Allow handling of the ConnectionSetupPayload via @MessageMapping methods.
 		// However, if the handling is to make requests to the client, it's expected
 		// it will do so decoupled from the handling, e.g. via .subscribe().
@@ -71,8 +72,7 @@ public final class MessageHandlerAcceptor extends RSocketMessageHandler
 	}
 
 	private MessagingRSocket createRSocket(RSocket rsocket) {
-		return new MessagingRSocket(
-				this::handleMessage, rsocket, this.defaultDataMimeType, getRSocketStrategies());
+		return new MessagingRSocket(this::handleMessage, rsocket, this.defaultDataMimeType, getRSocketStrategies());
 	}
 
 }

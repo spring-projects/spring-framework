@@ -79,7 +79,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 
 	private static boolean isVoid(ResolvableType elementType) {
-		return Void.class.equals(elementType.resolve()) || void.class.equals(elementType.resolve());
+		return (Void.class.equals(elementType.resolve()) || void.class.equals(elementType.resolve()));
 	}
 
 
@@ -87,11 +87,9 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 		private final String route;
 
-
 		DefaultRequestSpec(String route) {
 			this.route = route;
 		}
-
 
 		@Override
 		public ResponseSpec data(Object data) {
@@ -195,7 +193,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		@Nullable
 		private final Flux<Payload> payloadFlux;
 
-
 		DefaultResponseSpec(Mono<Payload> payloadMono) {
 			this.payloadMono = payloadMono;
 			this.payloadFlux = null;
@@ -206,10 +203,9 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			this.payloadFlux = payloadFlux;
 		}
 
-
 		@Override
 		public Mono<Void> send() {
-			Assert.notNull(this.payloadMono, "No RSocket interaction model for one-way send with Flux.");
+			Assert.state(this.payloadMono != null, "No RSocket interaction model for one-way send with Flux");
 			return this.payloadMono.flatMap(rsocket::fireAndForget);
 		}
 
@@ -235,9 +231,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 		@SuppressWarnings("unchecked")
 		private <T> Mono<T> retrieveMono(ResolvableType elementType) {
-			Assert.notNull(this.payloadMono,
-					"No RSocket interaction model for Flux request to Mono response.");
-
+			Assert.notNull(this.payloadMono, "No RSocket interaction model for Flux request to Mono response.");
 			Mono<Payload> payloadMono = this.payloadMono.flatMap(rsocket::requestResponse);
 
 			if (isVoid(elementType)) {
@@ -251,7 +245,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 		@SuppressWarnings("unchecked")
 		private <T> Flux<T> retrieveFlux(ResolvableType elementType) {
-
 			Flux<Payload> payloadFlux = this.payloadMono != null ?
 					this.payloadMono.flatMapMany(rsocket::requestStream) :
 					rsocket.requestChannel(this.payloadFlux);
@@ -261,7 +254,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			}
 
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
-
 			return payloadFlux.map(this::retainDataAndReleasePayload).map(dataBuffer ->
 					(T) decoder.decode(dataBuffer, elementType, dataMimeType, EMPTY_HINTS));
 		}
