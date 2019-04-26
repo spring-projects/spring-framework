@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import org.springframework.core.MethodParameter;
  * For example custom (async) handlers, by default ordered after built-in
  * handlers, should take precedence over {@code @ResponseBody} or
  * {@code @ModelAttribute} handling, which should occur once the async value is
- * ready.
+ * ready. By contrast, built-in (async) handlers are already ordered ahead of
+ * sync handlers.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -36,9 +37,9 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 
 	/**
 	 * Whether the given return value represents asynchronous computation.
-	 * @param returnValue the return value
+	 * @param returnValue the value returned from the handler method
 	 * @param returnType the return type
-	 * @return {@code true} if the return value is asynchronous.
+	 * @return {@code true} if the return value type represents an async value
 	 */
 	boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType);
 
