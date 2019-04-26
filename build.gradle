@@ -29,7 +29,7 @@ ext {
 	}
 
 	aspectjVersion       = "1.9.3"
-	coroutinesVersion    = "1.2.0"
+	coroutinesVersion    = "1.2.1"
 	freemarkerVersion    = "2.3.28"
 	groovyVersion        = "2.5.6"
 	hsqldbVersion        = "2.4.1"
