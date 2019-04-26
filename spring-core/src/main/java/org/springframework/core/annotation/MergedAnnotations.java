@@ -138,8 +138,9 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	<A extends Annotation> boolean isPresent(Class<A> annotationType);
 
 	/**
-	 * Determine if the specified annotation is directly present.
-	 * <p>Equivalent to calling {@code get(annotationType).isDirectlyPresent()}.
+	 * Determine if the specified annotation is either directly present or
+	 * meta-present.
+	 * <p>Equivalent to calling {@code get(annotationType).isPresent()}.
 	 * @param annotationType the fully qualified class name of the annotation type
 	 * to check
 	 * @return {@code true} if the annotation is present
@@ -155,9 +156,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	<A extends Annotation> boolean isDirectlyPresent(Class<A> annotationType);
 
 	/**
-	 * Determine if the specified annotation is either directly present or
-	 * meta-present.
-	 * <p>Equivalent to calling {@code get(annotationType).isPresent()}.
+	 * Determine if the specified annotation is directly present.
+	 * <p>Equivalent to calling {@code get(annotationType).isDirectlyPresent()}.
 	 * @param annotationType the fully qualified class name of the annotation type
 	 * to check
 	 * @return {@code true} if the annotation is present
