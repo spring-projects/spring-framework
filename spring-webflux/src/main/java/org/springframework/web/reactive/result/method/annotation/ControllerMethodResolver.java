@@ -54,8 +54,9 @@ import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod
 /**
  * Package-private class to assist {@link RequestMappingHandlerAdapter} with
  * resolving, initializing, and caching annotated methods declared in
- * {@code @Controller} and {@code @ControllerAdvice} components. Assists with
- * the following annotations:
+ * {@code @Controller} and {@code @ControllerAdvice} components.
+ *
+ * <p>Assists with the following annotations:
  * <ul>
  * <li>{@code @InitBinder}
  * <li>{@code @ModelAttribute}
@@ -336,7 +337,6 @@ class ControllerMethodResolver {
 	 */
 	@Nullable
 	public InvocableHandlerMethod getExceptionHandlerMethod(Throwable ex, HandlerMethod handlerMethod) {
-
 		Class<?> handlerType = handlerMethod.getBeanType();
 
 		// Controller-local first...
