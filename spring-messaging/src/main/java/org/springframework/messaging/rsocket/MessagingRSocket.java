@@ -61,18 +61,18 @@ class MessagingRSocket extends AbstractRSocket {
 	@Nullable
 	private MimeType dataMimeType;
 
-	private final RSocketStrategies strategies;
+	private final DataBufferFactory bufferFactory;
 
 
-	MessagingRSocket(Function<Message<?>, Mono<Void>> handler, RSocket sendingRSocket,
-			@Nullable MimeType defaultDataMimeType, RSocketStrategies strategies) {
+	MessagingRSocket(Function<Message<?>, Mono<Void>> handler, RSocketRequester requester,
+			@Nullable MimeType defaultDataMimeType, DataBufferFactory bufferFactory) {
 
 		Assert.notNull(handler, "'handler' is required");
-		Assert.notNull(sendingRSocket, "'sendingRSocket' is required");
+		Assert.notNull(requester, "'requester' is required");
 		this.handler = handler;
-		this.requester = RSocketRequester.create(sendingRSocket, defaultDataMimeType, strategies);
+		this.requester = requester;
 		this.dataMimeType = defaultDataMimeType;
-		this.strategies = strategies;
+		this.bufferFactory = bufferFactory;
 	}
 
 
@@ -175,7 +175,7 @@ class MessagingRSocket extends AbstractRSocket {
 	}
 
 	private DataBuffer retainDataAndReleasePayload(Payload payload) {
-		return PayloadUtils.retainDataAndReleasePayload(payload, this.strategies.dataBufferFactory());
+		return PayloadUtils.retainDataAndReleasePayload(payload, this.bufferFactory);
 	}
 
 	private MessageHeaders createHeaders(String destination, @Nullable MonoProcessor<?> replyMono) {
@@ -189,8 +189,7 @@ class MessagingRSocket extends AbstractRSocket {
 		if (replyMono != null) {
 			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, replyMono);
 		}
-		DataBufferFactory bufferFactory = this.strategies.dataBufferFactory();
-		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, bufferFactory);
+		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, this.bufferFactory);
 		return headers.getMessageHeaders();
 	}
 

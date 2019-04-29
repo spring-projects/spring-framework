@@ -72,7 +72,10 @@ public final class MessageHandlerAcceptor extends RSocketMessageHandler
 	}
 
 	private MessagingRSocket createRSocket(RSocket rsocket) {
-		return new MessagingRSocket(this::handleMessage, rsocket, this.defaultDataMimeType, getRSocketStrategies());
+		return new MessagingRSocket(this::handleMessage,
+				RSocketRequester.wrap(rsocket, this.defaultDataMimeType, getRSocketStrategies()),
+				this.defaultDataMimeType,
+				getRSocketStrategies().dataBufferFactory());
 	}
 
 }

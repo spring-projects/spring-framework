@@ -72,13 +72,29 @@ public interface RSocketRequester {
 	}
 
 	/**
+	 * Wrap an existing {@link RSocket}. Typically used in a client or server
+	 * responder to wrap the remote {@code RSocket}.
+	 * @param rsocket the RSocket to wrap
+	 * @param dataMimeType the data MimeType, obtained from the
+	 * {@link io.rsocket.ConnectionSetupPayload} (server) or the
+	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory} (client)
+	 * @param strategies the strategies to use
+	 * @return the created RSocketRequester
+	 */
+	static RSocketRequester wrap(RSocket rsocket, @Nullable MimeType dataMimeType, RSocketStrategies strategies) {
+		return new DefaultRSocketRequester(rsocket, dataMimeType, strategies);
+	}
+
+	/**
 	 * Create a new {@code RSocketRequester} from the given {@link RSocket} and
 	 * strategies for encoding and decoding request and response payloads.
 	 * @param rsocket the sending RSocket to use
 	 * @param dataMimeType the MimeType for data (from the SETUP frame)
 	 * @param strategies encoders, decoders, and others
 	 * @return the created RSocketRequester wrapper
+	 * @deprecated use {@link #wrap(RSocket, MimeType, RSocketStrategies)} instead
 	 */
+	@Deprecated
 	static RSocketRequester create(RSocket rsocket, @Nullable MimeType dataMimeType, RSocketStrategies strategies) {
 		return new DefaultRSocketRequester(rsocket, dataMimeType, strategies);
 	}

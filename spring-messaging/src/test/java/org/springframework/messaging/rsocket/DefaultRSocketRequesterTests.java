@@ -70,7 +70,7 @@ public class DefaultRSocketRequesterTests {
 				.encoder(CharSequenceEncoder.allMimeTypes())
 				.build();
 		this.rsocket = new TestRSocket();
-		this.requester = RSocketRequester.create(rsocket, MimeTypeUtils.TEXT_PLAIN, strategies);
+		this.requester = RSocketRequester.wrap(this.rsocket, MimeTypeUtils.TEXT_PLAIN, strategies);
 	}
 
 

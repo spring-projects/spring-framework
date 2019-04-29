@@ -87,7 +87,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 			this.factoryConfigurers.forEach(configurer -> configurer.accept(factory));
 
 			return factory.transport(transport).start()
-					.map(rsocket -> RSocketRequester.create(rsocket, dataMimeType, strategies));
+					.map(rsocket -> new DefaultRSocketRequester(rsocket, dataMimeType, strategies));
 		});
 	}
 
