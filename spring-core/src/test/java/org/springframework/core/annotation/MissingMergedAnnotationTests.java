@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,11 @@ public class MissingMergedAnnotationTests {
 	@Test
 	public void getTypeThrowsNoSuchElementException() {
 		assertThatNoSuchElementException().isThrownBy(() -> this.missing.getType());
+	}
+
+	@Test
+	public void getTypeHierarchyReturnsEmptyList() {
+		assertThat(this.missing.getTypeHierarchy()).isEmpty();
 	}
 
 	@Test

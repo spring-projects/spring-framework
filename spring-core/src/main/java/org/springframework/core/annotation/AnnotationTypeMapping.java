@@ -57,6 +57,8 @@ final class AnnotationTypeMapping {
 
 	private final Class<? extends Annotation> annotationType;
 
+	private final List<Class<? extends Annotation>> annotationTypeHierarchy;
+
 	@Nullable
 	private final Annotation annotation;
 
@@ -84,6 +86,9 @@ final class AnnotationTypeMapping {
 		this.root = (parent != null ? parent.getRoot() : this);
 		this.depth = (parent == null ? 0 : parent.getDepth() + 1);
 		this.annotationType = annotationType;
+		this.annotationTypeHierarchy = merge(
+				parent != null ? parent.getAnnotationTypeHierarchy() : null,
+				annotationType);
 		this.annotation = annotation;
 		this.attributes = AttributeMethods.forAnnotationType(annotationType);
 		this.mirrorSets = new MirrorSets();
@@ -97,6 +102,16 @@ final class AnnotationTypeMapping {
 		addConventionAnnotationValues();
 	}
 
+
+	private static <T> List<T> merge(@Nullable List<T> existing, T element) {
+		if (existing == null) {
+			return Collections.singletonList(element);
+		}
+		List<T> merged = new ArrayList<>(existing.size() + 1);
+		merged.addAll(existing);
+		merged.add(element);
+		return Collections.unmodifiableList(merged);
+	}
 
 	private Map<Method, List<Method>> resolveAliasedForTargets() {
 		Map<Method, List<Method>> aliasedBy = new HashMap<>();
@@ -370,6 +385,10 @@ final class AnnotationTypeMapping {
 	 */
 	Class<? extends Annotation> getAnnotationType() {
 		return this.annotationType;
+	}
+
+	List<Class<? extends Annotation>> getAnnotationTypeHierarchy() {
+		return this.annotationTypeHierarchy;
 	}
 
 	/**

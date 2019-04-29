@@ -502,7 +502,7 @@ public abstract class AnnotatedElementUtils {
 
 		Adapt[] adaptations = Adapt.values(classValuesAsString, nestedAnnotationsAsMap);
 		return getAnnotations(element).stream(annotationName)
-				.filter(MergedAnnotationPredicates.unique(AnnotatedElementUtils::parentAndType))
+				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getTypeHierarchy))
 				.map(MergedAnnotation::withNonMergedAttributes)
 				.collect(MergedAnnotationCollectors.toMultiValueMap(AnnotatedElementUtils::nullIfEmpty, adaptations));
 	}
@@ -773,13 +773,6 @@ public abstract class AnnotatedElementUtils {
 		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
 		return MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE,
 				repeatableContainers, AnnotationFilter.PLAIN);
-	}
-
-	private static Object parentAndType(MergedAnnotation<Annotation> annotation) {
-		if (annotation.getParent() == null) {
-			return annotation.getType().getName();
-		}
-		return annotation.getParent().getType().getName() + ":" + annotation.getParent().getType().getName();
 	}
 
 	@Nullable

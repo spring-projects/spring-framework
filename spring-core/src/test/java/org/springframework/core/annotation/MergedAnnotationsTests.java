@@ -171,6 +171,15 @@ public class MergedAnnotationsTests {
 	}
 
 	@Test
+	public void getTypeHierarchy() {
+		MergedAnnotation<?> annotation = MergedAnnotations.from(
+				ComposedTransactionalComponentClass.class).get(
+						TransactionalComponent.class);
+		assertThat(annotation.getTypeHierarchy()).containsExactly(
+				ComposedTransactionalComponent.class, TransactionalComponent.class);
+	}
+
+	@Test
 	public void collectMultiValueMapFromNonAnnotatedClass() {
 		MultiValueMap<String, Object> map = MergedAnnotations.from(
 				NonAnnotatedClass.class).stream(Transactional.class).collect(
