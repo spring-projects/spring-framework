@@ -55,19 +55,6 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	}
 
 	@Override
-	public Mono<RSocketRequester> connect(ClientTransport transport, MimeType dataMimeType) {
-		return Mono.defer(() -> {
-			RSocketStrategies.Builder strategiesBuilder = RSocketStrategies.builder();
-			this.strategiesConfigurers.forEach(configurer -> configurer.accept(strategiesBuilder));
-			RSocketFactory.ClientRSocketFactory clientFactory = RSocketFactory.connect()
-					.dataMimeType(dataMimeType.toString());
-			this.factoryConfigurers.forEach(configurer -> configurer.accept(clientFactory));
-			return clientFactory.transport(transport).start()
-					.map(rsocket -> RSocketRequester.create(rsocket, dataMimeType, strategiesBuilder.build()));
-		});
-	}
-
-	@Override
 	public Mono<RSocketRequester> connectTcp(String host, int port, MimeType dataMimeType) {
 		return connect(TcpClientTransport.create(host, port), dataMimeType);
 	}
@@ -75,6 +62,21 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	@Override
 	public Mono<RSocketRequester> connectWebSocket(URI uri, MimeType dataMimeType) {
 		return connect(WebsocketClientTransport.create(uri), dataMimeType);
+	}
+
+	@Override
+	public Mono<RSocketRequester> connect(ClientTransport transport, MimeType dataMimeType) {
+		return Mono.defer(() -> {
+			String mimeType = dataMimeType.toString();
+			RSocketFactory.ClientRSocketFactory factory = RSocketFactory.connect().dataMimeType(mimeType);
+			this.factoryConfigurers.forEach(configurer -> configurer.accept(factory));
+
+			RSocketStrategies.Builder builder = RSocketStrategies.builder();
+			this.strategiesConfigurers.forEach(configurer -> configurer.accept(builder));
+
+			return factory.transport(transport).start()
+					.map(rsocket -> RSocketRequester.create(rsocket, dataMimeType, builder.build()));
+		});
 	}
 
 }
