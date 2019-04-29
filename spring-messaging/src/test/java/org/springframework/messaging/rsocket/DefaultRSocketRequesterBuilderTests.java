@@ -28,14 +28,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.util.MimeTypeUtils;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link DefaultRSocketRequesterBuilder}.
@@ -45,6 +39,7 @@ import static org.mockito.Mockito.when;
 public class DefaultRSocketRequesterBuilderTests {
 
 	private ClientTransport transport;
+
 
 	@Before
 	public void setup() {
@@ -57,10 +52,10 @@ public class DefaultRSocketRequesterBuilderTests {
 	public void shouldApplyCustomizationsAtSubscription() {
 		Consumer<RSocketFactory.ClientRSocketFactory> factoryConfigurer = mock(Consumer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
-		Mono<RSocketRequester> requester = RSocketRequester.builder()
+		RSocketRequester.builder()
 				.rsocketFactory(factoryConfigurer)
 				.rsocketStrategies(strategiesConfigurer)
-				.connect(this.transport, MimeTypeUtils.APPLICATION_JSON);
+				.connect(this.transport);
 		verifyZeroInteractions(this.transport, factoryConfigurer, strategiesConfigurer);
 	}
 
@@ -69,10 +64,10 @@ public class DefaultRSocketRequesterBuilderTests {
 	public void shouldApplyCustomizations() {
 		Consumer<RSocketFactory.ClientRSocketFactory> factoryConfigurer = mock(Consumer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
-		RSocketRequester requester = RSocketRequester.builder()
+		RSocketRequester.builder()
 				.rsocketFactory(factoryConfigurer)
 				.rsocketStrategies(strategiesConfigurer)
-				.connect(this.transport, MimeTypeUtils.APPLICATION_JSON)
+				.connect(this.transport)
 				.block();
 		verify(this.transport).connect(anyInt());
 		verify(factoryConfigurer).accept(any(RSocketFactory.ClientRSocketFactory.class));

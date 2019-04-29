@@ -91,15 +91,25 @@ public interface RSocketRequester {
 	interface Builder {
 
 		/**
-		 * Configure the {@code ClientRSocketFactory} to customize protocol
-		 * options, register RSocket plugins (interceptors), and more.
+		 * Configure the {@code ClientRSocketFactory}.
+		 * <p>Note there is typically no need to set a data MimeType explicitly.
+		 * By default a data MimeType is picked by taking the first concrete
+		 * MimeType supported by the configured encoders and decoders.
 		 * @param configurer the configurer to apply
 		 */
 		RSocketRequester.Builder rsocketFactory(Consumer<RSocketFactory.ClientRSocketFactory> configurer);
 
 		/**
-		 * Configure the builder for {@link RSocketStrategies}.
-		 * <p>The builder starts with an empty {@code RSocketStrategies}.
+		 * Set the {@link RSocketStrategies} instance.
+		 * @param strategies the strategies to use
+		 */
+		RSocketRequester.Builder rsocketStrategies(@Nullable RSocketStrategies strategies);
+
+		/**
+		 * Customize the {@link RSocketStrategies}.
+		 * <p>By default this starts out with an empty builder, i.e.
+		 * {@link RSocketStrategies#builder()}, but the strategies can also be
+		 * set via {@link #rsocketStrategies(RSocketStrategies)}.
 		 * @param configurer the configurer to apply
 		 */
 		RSocketRequester.Builder rsocketStrategies(Consumer<RSocketStrategies.Builder> configurer);
@@ -108,25 +118,23 @@ public interface RSocketRequester {
 		 * Connect to the RSocket server over TCP.
 		 * @param host the server host
 		 * @param port the server port
-		 * @param dataMimeType the data MimeType for the connection
 		 * @return an {@code RSocketRequester} for the connection
 		 */
-		Mono<RSocketRequester> connectTcp(String host, int port, MimeType dataMimeType);
+		Mono<RSocketRequester> connectTcp(String host, int port);
 
 		/**
 		 * Connect to the RSocket server over WebSocket.
 		 * @param uri the RSocket server endpoint URI
-		 * @param dataMimeType the data MimeType
 		 * @return an {@code RSocketRequester} for the connection
 		 */
-		Mono<RSocketRequester> connectWebSocket(URI uri, MimeType dataMimeType);
+		Mono<RSocketRequester> connectWebSocket(URI uri);
 
 		/**
 		 * Connect to the RSocket server with the given {@code ClientTransport}.
 		 * @param transport the client transport to use
 		 * @return an {@code RSocketRequester} for the connection
 		 */
-		Mono<RSocketRequester> connect(ClientTransport transport, MimeType dataMimeType);
+		Mono<RSocketRequester> connect(ClientTransport transport);
 
 	}
 

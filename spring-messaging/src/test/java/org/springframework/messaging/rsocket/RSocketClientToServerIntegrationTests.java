@@ -40,7 +40,6 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.*;
 
@@ -75,11 +74,8 @@ public class RSocketClientToServerIntegrationTests {
 
 		requester = RSocketRequester.builder()
 				.rsocketFactory(factory -> factory.frameDecoder(PayloadDecoder.ZERO_COPY))
-				.rsocketStrategies(strategies -> strategies
-						.decoder(StringDecoder.allMimeTypes())
-						.encoder(CharSequenceEncoder.allMimeTypes())
-						.dataBufferFactory(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT)))
-				.connectTcp("localhost", 7000, MimeTypeUtils.TEXT_PLAIN)
+				.rsocketStrategies(context.getBean(RSocketStrategies.class))
+				.connectTcp("localhost", 7000)
 				.block();
 	}
 
