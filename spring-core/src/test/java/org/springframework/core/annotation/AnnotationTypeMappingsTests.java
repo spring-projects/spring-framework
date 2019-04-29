@@ -246,6 +246,15 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
+	public void getAnnotationTypeHierarchyReturnsTypeHierarchy() {
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
+				ThreeDeepA.class);
+		AnnotationTypeMapping mappingC = mappings.get(2);
+		assertThat(mappingC.getAnnotationTypeHierarchy()).containsExactly(
+				ThreeDeepA.class, ThreeDeepB.class, ThreeDeepC.class);
+	}
+
+	@Test
 	public void getAnnotationWhenRootReturnsNull() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class);

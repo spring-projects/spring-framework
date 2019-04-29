@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -137,6 +138,11 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@SuppressWarnings("unchecked")
 	public Class<A> getType() {
 		return (Class<A>) this.mapping.getAnnotationType();
+	}
+
+	@Override
+	public List<Class<? extends Annotation>> getTypeHierarchy() {
+		return this.mapping.getAnnotationTypeHierarchy();
 	}
 
 	@Override

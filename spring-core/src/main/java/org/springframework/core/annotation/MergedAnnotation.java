@@ -21,6 +21,7 @@ import java.lang.annotation.Inherited;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Proxy;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -71,6 +72,15 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * @return the annotation type
 	 */
 	Class<A> getType();
+
+	/**
+	 * Return a complete type hierarchy from this annotation to the
+	 * {@link #getRoot() root}. Provides a useful way to uniquely identify a
+	 * merged annotation instance.
+	 * @return the type heirarchy for the annotation
+	 * @see MergedAnnotationPredicates#unique(Function)
+	 */
+	List<Class<? extends Annotation>> getTypeHierarchy();
 
 	/**
 	 * Determine if the annotation is present on the source. Considers

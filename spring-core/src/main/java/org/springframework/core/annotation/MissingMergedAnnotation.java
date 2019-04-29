@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -47,6 +48,11 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	@Override
 	public Class<A> getType() {
 		throw new NoSuchElementException("Unable to get type for missing annotation");
+	}
+
+	@Override
+	public List<Class<? extends Annotation>> getTypeHierarchy() {
+		return Collections.emptyList();
 	}
 
 	@Override

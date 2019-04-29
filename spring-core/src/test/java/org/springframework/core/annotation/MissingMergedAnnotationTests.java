@@ -45,6 +45,11 @@ public class MissingMergedAnnotationTests {
 	}
 
 	@Test
+	public void getTypeHierarchyReturnsEmptyList() {
+		assertThat(this.missing.getTypeHierarchy()).isEmpty();
+	}
+
+	@Test
 	public void isPresentReturnsFalse() {
 		assertThat(this.missing.isPresent()).isFalse();
 	}
