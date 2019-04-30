@@ -377,8 +377,7 @@ public interface ServerResponse {
 		BodyBuilder hint(String key, Object value);
 
 		/**
-		 * Manipulate serialization hint with the given consumer.
-		 *
+		 * Customize the serialization hints with the given consumer.
 		 * @param hintsConsumer a function that consumes the hints
 		 * @return this builder
 		 * @since 5.1.6
