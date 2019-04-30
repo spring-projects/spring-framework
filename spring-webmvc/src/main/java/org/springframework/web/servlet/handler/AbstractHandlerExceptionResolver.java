@@ -109,7 +109,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setWarnLogCategory(String loggerName) {
-		this.warnLogger = !StringUtils.isEmpty(loggerName) ? LogFactory.getLog(loggerName) : null;
+		this.warnLogger = (!StringUtils.isEmpty(loggerName) ? LogFactory.getLog(loggerName) : null);
 	}
 
 	/**
@@ -138,11 +138,11 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			prepareResponse(ex, response);
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
-				// Print warn message when warn logger is not enabled...
+				// Print debug message when warn logger is not enabled.
 				if (logger.isDebugEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
 					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
 				}
-				// warnLogger with full stack trace (requires explicit config)
+				// Explicitly configured warn logger in logException method.
 				logException(ex, request);
 			}
 			return result;
