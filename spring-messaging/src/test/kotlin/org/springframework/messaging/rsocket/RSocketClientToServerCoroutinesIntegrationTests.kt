@@ -32,7 +32,6 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 import reactor.core.publisher.Flux
-import reactor.core.publisher.ReplayProcessor
 import reactor.test.StepVerifier
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
@@ -110,8 +109,6 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Controller
 	class ServerController {
 
-		val fireForgetPayloads = ReplayProcessor.create<String>()
-
 		@MessageMapping("echo-async")
 		suspend fun echoAsync(payload: String): String {
 			delay(10)
@@ -135,6 +132,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 			"$it async"
 		}
 
+		@Suppress("UNUSED_PARAMETER")
 		@MessageMapping("thrown-exception")
 		suspend fun handleAndThrow(payload: String): String {
 			delay(10)
@@ -151,6 +149,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 			return  "${ex.message} handled"
 		}
 
+		@Suppress("UNUSED_PARAMETER")
 		@MessageExceptionHandler
 		suspend fun handleExceptionWithVoidReturnValue(ex: IllegalStateException) {
 			delay(10)
@@ -161,6 +160,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Configuration
 	open class ServerConfig {
 
+		@FlowPreview
 		@Bean
 		open fun controller(): ServerController {
 			return ServerController()
