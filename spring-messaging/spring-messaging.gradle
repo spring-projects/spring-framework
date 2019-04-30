@@ -12,6 +12,7 @@ def rsocketVersion = "0.12.2-RC3-SNAPSHOT"
 dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
+	compileOnly(project(":spring-core-coroutines"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
 	optional("io.projectreactor.netty:reactor-netty")
@@ -35,6 +36,7 @@ dependencies {
 	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
+	testCompile(project(":spring-core-coroutines"))
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
 	testRuntime("com.sun.activation:javax.activation:1.2.0")

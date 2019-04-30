@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.convert.ConversionService;
@@ -237,6 +238,11 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
 		resolvers.add(new HeadersMethodArgumentResolver());
 		resolvers.add(new DestinationVariableMethodArgumentResolver(this.conversionService));
+
+		// Type-based...
+		if (KotlinDetector.isKotlinPresent()) {
+			resolvers.add(new ContinuationHandlerMethodArgumentResolver());
+		}
 
 		// Custom resolvers
 		resolvers.addAll(getArgumentResolverConfigurer().getCustomResolvers());

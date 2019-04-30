@@ -26,7 +26,9 @@ import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
@@ -125,13 +127,20 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return a Mono with the result from the invocation.
 	 */
+	@SuppressWarnings("KotlinInternalInJava")
 	public Mono<Object> invoke(Message<?> message, Object... providedArgs) {
 
 		return getMethodArgumentValues(message, providedArgs).flatMap(args -> {
 			Object value;
 			try {
-				ReflectionUtils.makeAccessible(getBridgedMethod());
-				value = getBridgedMethod().invoke(getBean(), args);
+				Method method = getBridgedMethod();
+				ReflectionUtils.makeAccessible(method);
+				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+					value = CoroutinesUtils.invokeHandlerMethod(method, getBean(), args);
+				}
+				else {
+					value = method.invoke(getBean(), args);
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				assertTargetBean(getBridgedMethod(), getBean(), args);

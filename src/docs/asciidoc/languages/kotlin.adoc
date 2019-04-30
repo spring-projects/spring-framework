@@ -414,6 +414,8 @@ Spring Framework provides support for Coroutines on the following scope:
 * Suspending function support in Spring WebFlux annotated `@Controller`
 * Extensions for WebFlux {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.client/index.html[client] and {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/index.html[server] functional API.
 * WebFlux.fn {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL
+* Suspending function and `Flow` support in RSocket `@MessageMapping` annotated methods
+* Extensions for {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.messaging.rsocket/index.html[`RSocketRequester`]
 
 === How Reactive translates to Coroutines?
 
