@@ -48,11 +48,11 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyToServerSentEvents(p
 		contentType(MediaType.TEXT_EVENT_STREAM).body(publisher, object : ParameterizedTypeReference<T>() {})
 
 /**
- * Shortcut for setting [MediaType.APPLICATION_JSON_UTF8] `Content-Type` header.
+ * Shortcut for setting [MediaType.APPLICATION_JSON] `Content-Type` header.
  * @author Sebastien Deleuze
  * @since 5.1
  */
-fun ServerResponse.BodyBuilder.json() = contentType(MediaType.APPLICATION_JSON_UTF8)
+fun ServerResponse.BodyBuilder.json() = contentType(MediaType.APPLICATION_JSON)
 
 /**
  * Shortcut for setting [MediaType.APPLICATION_XML] `Content-Type` header.

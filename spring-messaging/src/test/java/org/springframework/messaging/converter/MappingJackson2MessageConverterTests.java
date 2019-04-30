@@ -48,7 +48,7 @@ public class MappingJackson2MessageConverterTests {
 	public void defaultConstructor() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		assertThat(converter.getSupportedMimeTypes(),
-				contains(new MimeType("application", "json", StandardCharsets.UTF_8)));
+				contains(new MimeType("application", "json")));
 		assertFalse(converter.getObjectMapper().getDeserializationConfig()
 				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
@@ -183,7 +183,7 @@ public class MappingJackson2MessageConverterTests {
 		assertTrue(actual.contains("\"array\":[\"Foo\",\"Bar\"]"));
 		assertTrue(actual.contains("\"bool\":true"));
 		assertTrue(actual.contains("\"bytes\":\"AQI=\""));
-		assertEquals("Invalid content-type", new MimeType("application", "json", StandardCharsets.UTF_8),
+		assertEquals("Invalid content-type", new MimeType("application", "json"),
 				message.getHeaders().get(MessageHeaders.CONTENT_TYPE, MimeType.class));
 	}
 

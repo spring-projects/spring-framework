@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class JsonContentTests {
 	@Test
 	public void jsonContent() {
 		this.client.get().uri("/persons")
-				.accept(MediaType.APPLICATION_JSON_UTF8)
+				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody().json("[{\"name\":\"Jane\"},{\"name\":\"Jason\"},{\"name\":\"John\"}]");
@@ -57,7 +57,7 @@ public class JsonContentTests {
 	@Test
 	public void jsonPathIsEqualTo() {
 		this.client.get().uri("/persons")
-				.accept(MediaType.APPLICATION_JSON_UTF8)
+				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
@@ -69,7 +69,7 @@ public class JsonContentTests {
 	@Test
 	public void jsonPathMatches() {
 		this.client.get().uri("/persons/John")
-				.accept(MediaType.APPLICATION_JSON_UTF8)
+				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
@@ -79,7 +79,7 @@ public class JsonContentTests {
 	@Test
 	public void postJsonContent() {
 		this.client.post().uri("/persons")
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.contentType(MediaType.APPLICATION_JSON)
 				.syncBody("{\"name\":\"John\"}")
 				.exchange()
 				.expectStatus().isCreated()

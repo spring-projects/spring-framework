@@ -72,7 +72,6 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 	@Test
 	public void canDecode() {
 		assertTrue(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON));
-		assertTrue(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON_UTF8));
 		assertTrue(decoder.canDecode(forClass(Pojo.class), APPLICATION_STREAM_JSON));
 		assertTrue(decoder.canDecode(forClass(Pojo.class), null));
 

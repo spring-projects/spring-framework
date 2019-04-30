@@ -350,7 +350,7 @@ mockMvc.get("/person/{name}", "Lee") {
 	principal = Principal { "foo" }
 }.andExpect {
 	status { isOk }
-	content { contentType(APPLICATION_JSON_UTF8) }
+	content { contentType(APPLICATION_JSON) }
 	jsonPath("$.name") { value("Lee") }
 	content { json("""{"someBoolean": false}""", false) }
 }.andDo {
@@ -567,7 +567,7 @@ class UserHandler(builder: WebClient.Builder) {
 			client.get().uri("...").awaitExchange().awaitBody<User>()))
 
 	suspend fun listApi(request: ServerRequest): ServerResponse =
-				ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).bodyAndAwait(
+				ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyAndAwait(
 				client.get().uri("...").awaitExchange().awaitBody<User>())
 }
 ----

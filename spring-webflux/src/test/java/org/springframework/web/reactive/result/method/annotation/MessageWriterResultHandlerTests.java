@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
@@ -56,7 +57,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.web.method.ResolvableMethod.on;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
@@ -108,7 +108,7 @@ public class MessageWriterResultHandlerTests {
 		MethodParameter type = on(TestController.class).resolveReturnType(String.class);
 		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON_UTF8, this.exchange.getResponse().getHeaders().getContentType());
+		assertEquals(MediaType.parseMediaType("application/json;charset=UTF-8"), this.exchange.getResponse().getHeaders().getContentType());
 	}
 
 	@Test
@@ -155,7 +155,7 @@ public class MessageWriterResultHandlerTests {
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
 		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON_UTF8, this.exchange.getResponse().getHeaders().getContentType());
+		assertEquals(APPLICATION_JSON, this.exchange.getResponse().getHeaders().getContentType());
 		assertResponseBody("[{\"type\":\"foo\",\"parentProperty\":\"foo\"}," +
 				"{\"type\":\"bar\",\"parentProperty\":\"bar\"}]");
 	}
@@ -166,7 +166,7 @@ public class MessageWriterResultHandlerTests {
 		MethodParameter type = on(TestController.class).resolveReturnType(Identifiable.class);
 		this.resultHandler.writeBody(body, type, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON_UTF8, this.exchange.getResponse().getHeaders().getContentType());
+		assertEquals(APPLICATION_JSON, this.exchange.getResponse().getHeaders().getContentType());
 		assertResponseBody("{\"id\":123,\"name\":\"foo\"}");
 	}
 
@@ -178,7 +178,7 @@ public class MessageWriterResultHandlerTests {
 		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
 		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(APPLICATION_JSON_UTF8, this.exchange.getResponse().getHeaders().getContentType());
+		assertEquals(APPLICATION_JSON, this.exchange.getResponse().getHeaders().getContentType());
 		assertResponseBody("[{\"id\":123,\"name\":\"foo\"},{\"id\":456,\"name\":\"bar\"}]");
 	}
 

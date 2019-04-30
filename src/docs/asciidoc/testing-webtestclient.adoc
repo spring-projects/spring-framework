@@ -141,10 +141,10 @@ Typically, you start by asserting the response status and headers, as follows:
 [subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
-			.accept(MediaType.APPLICATION_JSON_UTF8)
+			.accept(MediaType.APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isOk()
-			.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+			.expectHeader().contentType(MediaType.APPLICATION_JSON)
 			// ...
 ----
 

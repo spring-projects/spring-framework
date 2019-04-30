@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class ErrorTests {
 	public void badRequestBeforeRequestBodyConsumed() {
 		EntityExchangeResult<Void> result = this.client.post()
 				.uri("/post")
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.contentType(MediaType.APPLICATION_JSON)
 				.syncBody(new Person("Dan"))
 				.exchange()
 				.expectStatus().isBadRequest()

@@ -63,7 +63,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class).isEqualTo(new Person("John"));
 	}
 
@@ -72,7 +72,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class).value(Person::getName, startsWith("Joh"));
 	}
 
@@ -81,7 +81,7 @@ public class ResponseEntityTests {
 		this.client.get().uri("/John")
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class)
 				.consumeWith(result -> assertEquals(new Person("John"), result.getResponseBody()));
 	}
@@ -95,7 +95,7 @@ public class ResponseEntityTests {
 		this.client.get()
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBodyList(Person.class).isEqualTo(expected);
 	}
 
@@ -105,7 +105,7 @@ public class ResponseEntityTests {
 		this.client.get()
 				.exchange()
 				.expectStatus().isOk()
-				.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBodyList(Person.class).value(people -> {
 					MatcherAssert.assertThat(people, hasItem(new Person("Jason")));
 				});

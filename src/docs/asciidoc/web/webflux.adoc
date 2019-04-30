@@ -1342,7 +1342,7 @@ content types that a controller method produces, as the following example shows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping(path = "/pets/{petId}", produces = "application/json;charset=UTF-8")
+	@GetMapping(path = "/pets/{petId}", produces = "application/json")
 	@ResponseBody
 	public Pet getPet(@PathVariable String petId) {
 		// ...
@@ -1352,17 +1352,12 @@ content types that a controller method produces, as the following example shows:
 The media type can specify a character set. Negated expressions are supported -- for example,
 `!text/plain` means any content type other than `text/plain`.
 
-NOTE: For JSON content type, you should specify the UTF-8 `charset` even if
-https://tools.ietf.org/html/rfc7159#section-11[RFC7159]
-clearly states that "`no charset parameter is defined for this registration,`" because some
-browsers require it to correctly interpret UTF-8 special characters.
-
 You can declare a shared `produces` attribute at the class level. Unlike most other request
 mapping attributes, however, when used at the class level, a method-level `produces` attribute
 overrides rather than extend the class level declaration.
 
 TIP: `MediaType` provides constants for commonly used media types -- e.g.
-`APPLICATION_JSON_UTF8_VALUE`, `APPLICATION_XML_VALUE`.
+`APPLICATION_JSON_VALUE`, `APPLICATION_XML_VALUE`.
 
 
 [[webflux-ann-requestmapping-params-and-headers]]

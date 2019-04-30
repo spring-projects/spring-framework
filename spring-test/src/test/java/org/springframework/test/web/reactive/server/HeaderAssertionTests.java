@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class HeaderAssertionTests {
 	@Test
 	public void valueMatches() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
 		HeaderAssertions assertions = headerAssertions(headers);
 
 		// Success
@@ -139,7 +139,7 @@ public class HeaderAssertionTests {
 	@Test
 	public void exists() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		headers.setContentType(MediaType.APPLICATION_JSON);
 		HeaderAssertions assertions = headerAssertions(headers);
 
 		// Success
@@ -159,7 +159,7 @@ public class HeaderAssertionTests {
 	@Test
 	public void doesNotExist() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
 		HeaderAssertions assertions = headerAssertions(headers);
 
 		// Success

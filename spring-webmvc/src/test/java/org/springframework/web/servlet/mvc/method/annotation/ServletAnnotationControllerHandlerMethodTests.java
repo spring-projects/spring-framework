@@ -1205,7 +1205,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals(500, response.getStatus());
-		assertEquals("application/problem+json;charset=UTF-8", response.getContentType());
+		assertEquals("application/problem+json", response.getContentType());
 		assertEquals("{\"reason\":\"error\"}", response.getContentAsString());
 	}
 

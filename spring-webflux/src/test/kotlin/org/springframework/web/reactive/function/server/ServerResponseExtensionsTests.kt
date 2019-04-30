@@ -26,9 +26,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.*
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -58,7 +56,7 @@ class ServerResponseExtensionsTests {
 	@Test
 	fun `BodyBuilder#json`() {
 		bodyBuilder.json()
-		verify { bodyBuilder.contentType(APPLICATION_JSON_UTF8) }
+		verify { bodyBuilder.contentType(APPLICATION_JSON) }
 	}
 
 	@Test

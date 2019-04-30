@@ -102,7 +102,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 		bodyBuilder.part("name 2", "value 2+2");
 		bodyBuilder.part("logo", logo);
 		bodyBuilder.part("utf8", utf8);
-		bodyBuilder.part("json", new Foo("bar"), MediaType.APPLICATION_JSON_UTF8);
+		bodyBuilder.part("json", new Foo("bar"), MediaType.APPLICATION_JSON);
 		bodyBuilder.asyncPart("publisher", publisher, String.class);
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
@@ -144,7 +144,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 
 		part = requestParts.getFirst("json");
 		assertEquals("json", part.name());
-		assertEquals(MediaType.APPLICATION_JSON_UTF8, part.headers().getContentType());
+		assertEquals(MediaType.APPLICATION_JSON, part.headers().getContentType());
 
 		String value = StringDecoder.textPlainOnly(false).decodeToMono(part.content(),
 				ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN,

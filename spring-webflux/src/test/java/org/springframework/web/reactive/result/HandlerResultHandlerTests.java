@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.http.MediaType.IMAGE_GIF;
 import static org.springframework.http.MediaType.IMAGE_JPEG;
@@ -76,10 +76,10 @@ public class HandlerResultHandlerTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path")
 				.header("Accept", "text/plain; q=0.5, application/json"));
 
-		List<MediaType> mediaTypes = Arrays.asList(TEXT_PLAIN, APPLICATION_JSON_UTF8);
+		List<MediaType> mediaTypes = Arrays.asList(TEXT_PLAIN, APPLICATION_JSON);
 		MediaType actual = this.resultHandler.selectMediaType(exchange, () -> mediaTypes);
 
-		assertEquals(APPLICATION_JSON_UTF8, actual);
+		assertEquals(APPLICATION_JSON, actual);
 	}
 
 	@Test

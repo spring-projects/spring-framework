@@ -48,6 +48,7 @@ import org.springframework.util.StringUtils;
  * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
+@SuppressWarnings("deprecation")
 public class MediaType extends MimeType implements Serializable {
 
 	private static final long serialVersionUID = 2069937152339670231L;
@@ -84,7 +85,6 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json}.
-	 * @see #APPLICATION_JSON_UTF8
 	 */
 	public static final MediaType APPLICATION_JSON;
 
@@ -96,24 +96,24 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json;charset=UTF-8}.
-	 *
-	 * <p>This {@link MediaType#APPLICATION_JSON} variant should be used to set JSON
-	 * content type because while
-	 * <a href="https://tools.ietf.org/html/rfc7159#section-11">RFC7159</a>
-	 * clearly states that "no charset parameter is defined for this registration", some
-	 * browsers require it for interpreting correctly UTF-8 special characters.
+	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_JSON}
+	 * since major browsers like Chrome
+	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
+	 * now comply with the specification</a> and interpret correctly UTF-8 special
+	 * characters without requiring a {@code charset=UTF-8} parameter.
 	 */
+	@Deprecated
 	public static final MediaType APPLICATION_JSON_UTF8;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
-	 *
-	 * <p>This {@link MediaType#APPLICATION_JSON_VALUE} variant should be used to set JSON
-	 * content type because while
-	 * <a href="https://tools.ietf.org/html/rfc7159#section-11">RFC7159</a>
-	 * clearly states that "no charset parameter is defined for this registration", some
-	 * browsers require it for interpreting correctly UTF-8 special characters.
+	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_JSON_VALUE}
+	 * since major browsers like Chrome
+	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
+	 * now comply with the specification</a> and interpret correctly UTF-8 special
+	 * characters without requiring a {@code charset=UTF-8} parameter.
 	 */
+	@Deprecated
 	public static final String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
 	/**
@@ -157,13 +157,25 @@ public class MediaType extends MimeType implements Serializable {
 	 * @since 5.0
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
+	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON}
+	 * since major browsers like Chrome
+	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
+	 * now comply with the specification</a> and interpret correctly UTF-8 special
+	 * characters without requiring a {@code charset=UTF-8} parameter.
 	 */
+	@Deprecated
 	public static final MediaType APPLICATION_PROBLEM_JSON_UTF8;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON_UTF8}.
 	 * @since 5.0
+	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON_VALUE}
+	 * since major browsers like Chrome
+	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
+	 * now comply with the specification</a> and interpret correctly UTF-8 special
+	 * characters without requiring a {@code charset=UTF-8} parameter.
 	 */
+	@Deprecated
 	public static final String APPLICATION_PROBLEM_JSON_UTF8_VALUE = "application/problem+json;charset=UTF-8";
 
 	/**

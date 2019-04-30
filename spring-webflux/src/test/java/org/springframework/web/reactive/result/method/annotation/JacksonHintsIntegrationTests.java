@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,39 +56,39 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 	@Test
 	public void jsonViewResponse() throws Exception {
 		String expected = "{\"withView1\":\"with\"}";
-		assertEquals(expected, performGet("/response/raw", MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+		assertEquals(expected, performGet("/response/raw", MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 	@Test
 	public void jsonViewWithMonoResponse() throws Exception {
 		String expected = "{\"withView1\":\"with\"}";
-		assertEquals(expected, performGet("/response/mono", MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+		assertEquals(expected, performGet("/response/mono", MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 	@Test  // SPR-16098
 	public void jsonViewWithMonoResponseEntity() throws Exception {
 		String expected = "{\"withView1\":\"with\"}";
-		assertEquals(expected, performGet("/response/entity", MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+		assertEquals(expected, performGet("/response/entity", MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 	@Test
 	public void jsonViewWithFluxResponse() throws Exception {
 		String expected = "[{\"withView1\":\"with\"},{\"withView1\":\"with\"}]";
-		assertEquals(expected, performGet("/response/flux", MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+		assertEquals(expected, performGet("/response/flux", MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 	@Test
 	public void jsonViewWithRequest() throws Exception {
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
 		assertEquals(expected, performPost("/request/raw", MediaType.APPLICATION_JSON,
-				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 	@Test
 	public void jsonViewWithMonoRequest() throws Exception {
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
 		assertEquals(expected, performPost("/request/mono", MediaType.APPLICATION_JSON,
-				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 	@Test  // SPR-16098
@@ -96,7 +96,7 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
 		assertEquals(expected, performPost("/request/entity/mono", MediaType.APPLICATION_JSON,
 				new JacksonViewBean("with", "with", "without"),
-				MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+				MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 	@Test  // SPR-16098
@@ -107,7 +107,7 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 		assertEquals(expected, performPost("/request/entity/flux", MediaType.APPLICATION_JSON,
 				Arrays.asList(new JacksonViewBean("with", "with", "without"),
 						new JacksonViewBean("with", "with", "without")),
-				MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+				MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 				new JacksonViewBean("with", "with", "without"),
 				new JacksonViewBean("with", "with", "without"));
 		assertEquals(expected, performPost("/request/flux", MediaType.APPLICATION_JSON, beans,
-				MediaType.APPLICATION_JSON_UTF8, String.class).getBody());
+				MediaType.APPLICATION_JSON, String.class).getBody());
 	}
 
 
