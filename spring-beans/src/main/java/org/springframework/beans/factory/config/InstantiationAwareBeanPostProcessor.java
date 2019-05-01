@@ -54,7 +54,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * {@link #postProcessAfterInitialization} callback from the configured
 	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>This callback will only be applied to bean definitions with a bean class.
-	 * In particular, it will not be applied to beans with a "factory-method".
+	 * It will also be applied to beans with a "factory-method".
 	 * <p>Post-processors may implement the extended
 	 * {@link SmartInstantiationAwareBeanPostProcessor} interface in order
 	 * to predict the type of the bean object that they are going to return here.
