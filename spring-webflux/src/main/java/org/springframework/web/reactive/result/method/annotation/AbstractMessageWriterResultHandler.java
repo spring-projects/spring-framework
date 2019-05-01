@@ -124,6 +124,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 
 		Publisher<?> publisher;
 		ResolvableType elementType;
+		ResolvableType actualElementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
 			boolean isUnwrapped = KotlinDetector.isKotlinReflectPresent() &&
@@ -132,11 +133,12 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 					!COROUTINES_FLOW_CLASS_NAME.equals(bodyType.toClass().getName());
 			ResolvableType genericType = isUnwrapped ? bodyType : bodyType.getGeneric();
 			elementType = getElementType(adapter, genericType);
+			actualElementType = elementType;
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
-			elementType = (bodyType.toClass() == Object.class && body != null ?
-					ResolvableType.forInstance(body) : bodyType);
+			actualElementType = body != null ? ResolvableType.forInstance(body) : bodyType;
+			elementType = (bodyType.toClass() == Object.class && body != null ? actualElementType : bodyType);
 		}
 
 		if (elementType.resolve() == void.class || elementType.resolve() == Void.class) {
@@ -151,7 +153,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 						(publisher instanceof Mono ? "0..1" : "0..N") + " [" + elementType + "]");
 			}
 			for (HttpMessageWriter<?> writer : getMessageWriters()) {
-				if (writer.canWrite(elementType, bestMediaType)) {
+				if (writer.canWrite(actualElementType, bestMediaType)) {
 					return writer.write((Publisher) publisher, actualType, elementType,
 							bestMediaType, exchange.getRequest(), exchange.getResponse(),
 							Hints.from(Hints.LOG_PREFIX_HINT, logPrefix));
