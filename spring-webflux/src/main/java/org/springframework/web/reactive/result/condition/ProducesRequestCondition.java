@@ -185,8 +185,11 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	@Override
 	@Nullable
 	public ProducesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		if (isEmpty() || CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return EMPTY_CONDITION;
+		}
+		if (isEmpty()) {
+			return this;
 		}
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
 		result.removeIf(expression -> !expression.match(exchange));

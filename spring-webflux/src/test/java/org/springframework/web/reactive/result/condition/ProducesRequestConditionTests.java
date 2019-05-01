@@ -21,15 +21,14 @@ import java.util.Collections;
 
 import org.junit.Test;
 
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.junit.Assert.*;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
 
 /**
  * Unit tests for {@link ProducesRequestCondition}.
@@ -110,6 +109,23 @@ public class ProducesRequestConditionTests {
 		assertNotNull(condition.getMatchingCondition(exchange));
 	}
 
+	@Test // gh-22853
+	public void matchAndCompare() {
+		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
+		builder.headerResolver();
+		builder.fixedResolver(MediaType.TEXT_HTML);
+		RequestedContentTypeResolver resolver = builder.build();
+
+		ProducesRequestCondition none = new ProducesRequestCondition(new String[0], null, resolver);
+		ProducesRequestCondition html = new ProducesRequestCondition(new String[] {"text/html"}, null, resolver);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/").header("Accept", "*/*"));
+
+		ProducesRequestCondition noneMatch = none.getMatchingCondition(exchange);
+		ProducesRequestCondition htmlMatch = html.getMatchingCondition(exchange);
+
+		assertEquals(1, noneMatch.compareTo(htmlMatch, exchange));
+	}
 
 	@Test
 	public void compareTo() {

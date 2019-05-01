@@ -185,10 +185,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	@Override
 	@Nullable
 	public ProducesRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (isEmpty() || CorsUtils.isPreFlightRequest(request)) {
+		if (CorsUtils.isPreFlightRequest(request)) {
 			return EMPTY_CONDITION;
 		}
-
+		if (isEmpty()) {
+			return this;
+		}
 		List<MediaType> acceptedMediaTypes;
 		try {
 			acceptedMediaTypes = getAcceptedMediaTypes(request);
@@ -196,7 +198,6 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		catch (HttpMediaTypeException ex) {
 			return null;
 		}
-
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
 		result.removeIf(expression -> !expression.match(acceptedMediaTypes));
 		if (!result.isEmpty()) {
