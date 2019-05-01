@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -93,6 +94,10 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				String requestUri = pathHelper.getRequestUri(this);
 				String lookupPath = pathHelper.getLookupPathForRequest(this);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
+				Assert.isTrue(this.indexLookupPath != -1,
+						"Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + ". " +
+						"Does the path have invalid encoded characters " +
+								"for characterEncoding=" + getRequest().getCharacterEncoding() + "?");
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
 					String contextPath = pathHelper.getContextPath(this);
