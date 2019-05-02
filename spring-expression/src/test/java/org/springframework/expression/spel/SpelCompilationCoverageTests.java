@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -4946,6 +4946,91 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	public void testNullComparison_SPR22358() {
+		SpelParserConfiguration configuration = new SpelParserConfiguration(SpelCompilerMode.OFF, null);
+		SpelExpressionParser parser = new SpelExpressionParser(configuration);
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setRootObject(new Reg(1));
+		verifyCompilationAndBehaviourWithNull("value>1", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("value<1", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("value>=1", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("value<=1", parser, ctx );
+
+		verifyCompilationAndBehaviourWithNull2("value>value2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("value<value2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("value>=value2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("value<=value2", parser, ctx );
+
+		verifyCompilationAndBehaviourWithNull("valueD>1.0d", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueD<1.0d", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueD>=1.0d", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueD<=1.0d", parser, ctx );
+
+		verifyCompilationAndBehaviourWithNull2("valueD>valueD2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("valueD<valueD2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("valueD>=valueD2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("valueD<=valueD2", parser, ctx );
+
+		verifyCompilationAndBehaviourWithNull("valueL>1L", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueL<1L", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueL>=1L", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueL<=1L", parser, ctx );
+
+		verifyCompilationAndBehaviourWithNull2("valueL>valueL2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("valueL<valueL2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("valueL>=valueL2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull2("valueL<=valueL2", parser, ctx );
+
+		verifyCompilationAndBehaviourWithNull("valueF>1.0f", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueF<1.0f", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueF>=1.0f", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueF<=1.0f", parser, ctx );
+
+		verifyCompilationAndBehaviourWithNull("valueF>valueF2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueF<valueF2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueF>=valueF2", parser, ctx );
+		verifyCompilationAndBehaviourWithNull("valueF<=valueF2", parser, ctx );
+	}
+
+	private void verifyCompilationAndBehaviourWithNull(String expressionText, SpelExpressionParser parser, StandardEvaluationContext ctx) {
+		Reg r = (Reg)ctx.getRootObject().getValue();
+		r.setValue2(1);  // having a value in value2 fields will enable compilation to succeed, then can switch it to null
+		SpelExpression fast = (SpelExpression) parser.parseExpression(expressionText);
+		SpelExpression slow = (SpelExpression) parser.parseExpression(expressionText);
+		fast.getValue(ctx);
+		assertTrue(fast.compileExpression());
+		r.setValue2(null);
+		// try the numbers 0,1,2,null
+		for (int i=0;i<4;i++) {
+			r.setValue(i<3?i:null);
+			boolean slowResult = (Boolean)slow.getValue(ctx);
+			boolean fastResult = (Boolean)fast.getValue(ctx);
+			// System.out.println("Trying "+expressionText+" with value="+r.getValue()+" result is "+slowResult);
+			assertEquals(" Differing results: expression="+expressionText+
+					" value="+r.getValue()+" slow="+slowResult+" fast="+fastResult,
+					slowResult,fastResult);
+		}
+	}
+
+	private void verifyCompilationAndBehaviourWithNull2(String expressionText, SpelExpressionParser parser, StandardEvaluationContext ctx) {
+		SpelExpression fast = (SpelExpression) parser.parseExpression(expressionText);
+		SpelExpression slow = (SpelExpression) parser.parseExpression(expressionText);
+		fast.getValue(ctx);
+		assertTrue(fast.compileExpression());
+		Reg r = (Reg)ctx.getRootObject().getValue();
+		// try the numbers 0,1,2,null
+		for (int i=0;i<4;i++) {
+			r.setValue(i<3?i:null);
+			boolean slowResult = (Boolean)slow.getValue(ctx);
+			boolean fastResult = (Boolean)fast.getValue(ctx);
+			// System.out.println("Trying "+expressionText+" with value="+r.getValue()+" result is "+slowResult);
+			assertEquals(" Differing results: expression="+expressionText+
+					" value="+r.getValue()+" slow="+slowResult+" fast="+fastResult,
+					slowResult,fastResult);
+		}
+	}
+
+	@Test
 	public void ternaryOperator_SPR15192() {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
 		Expression exp;
@@ -5039,7 +5124,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	// helper methods
+	// Helper methods
 
 	private SpelNodeImpl getAst() {
 		SpelExpression spelExpression = (SpelExpression) expression;
@@ -5111,7 +5196,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	// nested types
+	// Nested types
 
 	public interface Message<T> {
 
@@ -6127,6 +6212,68 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	public static class LongHolder {
 
 		public Long someLong = 3L;
+	}
+
+
+	public class Reg {
+
+		private Integer _value,_value2;
+		private Long _valueL,_valueL2;
+		private Double _valueD,_valueD2;
+		private Float _valueF,_valueF2;
+
+		public Reg(int v) {
+			this._value  = v;
+			this._valueL = new Long(v);
+			this._valueD = new Double(v);
+			this._valueF = new Float(v);
+		}
+
+		public Integer getValue() {
+			return _value;
+		}
+
+		public Long getValueL() {
+			return _valueL;
+		}
+
+		public Double getValueD() {
+			return _valueD;
+		}
+
+		public Float getValueF() {
+			return _valueF;
+		}
+
+		public Integer getValue2() {
+			return _value2;
+		}
+
+		public Long getValueL2() {
+			return _valueL2;
+		}
+
+		public Double getValueD2() {
+			return _valueD2;
+		}
+
+		public Float getValueF2() {
+			return _valueF2;
+		}
+
+		public void setValue(Integer value) {
+			_value  = value;
+			_valueL = value==null?null:new Long(value);
+			_valueD = value==null?null:new Double(value);
+			_valueF = value==null?null:new Float(value);
+		}
+
+		public void setValue2(Integer value) {
+			_value2  = value;
+			_valueL2 = value==null?null:new Long(value);
+			_valueD2 = value==null?null:new Double(value);
+			_valueF2 = value==null?null:new Float(value);
+		}
 	}
 
 }
