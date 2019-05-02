@@ -211,15 +211,16 @@ final class ConfigurationClass {
 	}
 
 	public void validate(ProblemReporter problemReporter) {
-		// A configuration class may not be final (CGLIB limitation)
-		if (getMetadata().isAnnotated(Configuration.class.getName())) {
-			if (getMetadata().isFinal()) {
+		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
+		String annotationName = Configuration.class.getName();
+		if (this.metadata.isAnnotated(annotationName) &&
+				(Boolean) this.metadata.getAnnotationAttributes(annotationName).get("proxyBeanMethods")) {
+			if (this.metadata.isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}
-		}
-
-		for (BeanMethod beanMethod : this.beanMethods) {
-			beanMethod.validate(problemReporter);
+			for (BeanMethod beanMethod : this.beanMethods) {
+				beanMethod.validate(problemReporter);
+			}
 		}
 	}
 
