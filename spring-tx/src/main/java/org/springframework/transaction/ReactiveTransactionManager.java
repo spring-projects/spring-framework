@@ -27,9 +27,8 @@ import reactor.core.publisher.Mono;
  * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.2
- * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
-public interface ReactiveTransactionManager {
+public interface ReactiveTransactionManager extends TransactionManager {
 
 	/**
 	 * Emit a currently active reactive transaction or create a new one, according to
