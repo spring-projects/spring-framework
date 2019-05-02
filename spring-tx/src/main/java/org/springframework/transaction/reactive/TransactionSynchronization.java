@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
  * Interface for reactive transaction synchronization callbacks.
  * Supported by {@link AbstractReactiveTransactionManager}.
  *
- * <p>ReactiveTransactionSynchronization implementations can implement the
+ * <p>TransactionSynchronization implementations can implement the
  * {@link org.springframework.core.Ordered} interface to influence their execution order.
  * A synchronization that does not implement the {@link org.springframework.core.Ordered}
  * interface is appended to the end of the synchronization chain.
@@ -31,11 +31,12 @@ import reactor.core.publisher.Mono;
  * allowing for fine-grained interaction with their execution order (if necessary).
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
- * @see ReactiveTransactionSynchronizationManager
+ * @see TransactionSynchronizationManager
  * @see AbstractReactiveTransactionManager
  */
-public interface ReactiveTransactionSynchronization {
+public interface TransactionSynchronization {
 
 	/** Completion status in case of proper commit. */
 	int STATUS_COMMITTED = 0;
@@ -50,7 +51,7 @@ public interface ReactiveTransactionSynchronization {
 	/**
 	 * Suspend this synchronization.
 	 * Supposed to unbind resources from TransactionSynchronizationManager if managing any.
-	 * @see ReactiveTransactionSynchronizationManager#unbindResource
+	 * @see TransactionSynchronizationManager#unbindResource
 	 */
 	default Mono<Void> suspend() {
 		return Mono.empty();
@@ -59,7 +60,7 @@ public interface ReactiveTransactionSynchronization {
 	/**
 	 * Resume this synchronization.
 	 * Supposed to rebind resources to TransactionSynchronizationManager if managing any.
-	 * @see ReactiveTransactionSynchronizationManager#bindResource
+	 * @see TransactionSynchronizationManager#bindResource
 	 */
 	default Mono<Void> resume() {
 		return Mono.empty();

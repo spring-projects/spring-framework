@@ -17,20 +17,14 @@
 package org.springframework.transaction;
 
 /**
- * Representation of the status of a transaction exposing a reactive
- * interface.
+ * Common representation of the current state of a transaction.
+ * Serves as base interface for {@link TransactionStatus} as well as
+ * {@link ReactiveTransaction}.
  *
- * <p>Transactional code can use this to retrieve status information,
- * and to programmatically request a rollback (instead of throwing
- * an exception that causes an implicit rollback).
- *
- * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.2
- * @see #setRollbackOnly()
- * @see ReactiveTransactionManager#getTransaction
  */
-public interface ReactiveTransactionStatus {
+public interface TransactionExecution {
 
 	/**
 	 * Return whether the present transaction is new; otherwise participating
@@ -43,12 +37,6 @@ public interface ReactiveTransactionStatus {
 	 * Set the transaction rollback-only. This instructs the transaction manager
 	 * that the only possible outcome of the transaction may be a rollback, as
 	 * alternative to throwing an exception which would in turn trigger a rollback.
-	 * <p>This is mainly intended for transactions managed by
-	 * {@link org.springframework.transaction.reactive.TransactionalOperator} or
-	 * {@link org.springframework.transaction.interceptor.TransactionInterceptor},
-	 * where the actual commit/rollback decision is made by the container.
-	 * @see org.springframework.transaction.reactive.ReactiveTransactionCallback#doInTransaction
-	 * @see org.springframework.transaction.interceptor.TransactionAttribute#rollbackOn
 	 */
 	void setRollbackOnly();
 
@@ -61,8 +49,6 @@ public interface ReactiveTransactionStatus {
 	/**
 	 * Return whether this transaction is completed, that is,
 	 * whether it has already been committed or rolled back.
-	 * @see ReactiveTransactionManager#commit
-	 * @see ReactiveTransactionManager#rollback
 	 */
 	boolean isCompleted();
 

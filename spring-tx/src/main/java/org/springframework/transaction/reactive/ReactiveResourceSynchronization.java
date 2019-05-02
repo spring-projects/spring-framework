@@ -18,40 +18,38 @@ package org.springframework.transaction.reactive;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.transaction.support.ResourceHolder;
-
 /**
- * {@link ReactiveTransactionSynchronization} implementation that manages a
- * {@link ResourceHolder} bound through {@link ReactiveTransactionSynchronizationManager}.
+ * {@link TransactionSynchronization} implementation that manages a
+ * resource object bound through {@link TransactionSynchronizationManager}.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
- * @param <H> the resource holder type
+ * @param <O> the resource holder type
  * @param <K> the resource key type
  */
-public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHolder, K>
-		implements ReactiveTransactionSynchronization {
+public abstract class ReactiveResourceSynchronization<O, K> implements TransactionSynchronization {
 
-	private final H resourceHolder;
+	private final O resourceObject;
 
 	private final K resourceKey;
 
-	private final ReactiveTransactionSynchronizationManager synchronizationManager;
+	private final TransactionSynchronizationManager synchronizationManager;
 
 	private volatile boolean holderActive = true;
 
 
 	/**
-	 * Create a new ResourceHolderSynchronization for the given holder.
-	 * @param resourceHolder the ResourceHolder to manage
-	 * @param resourceKey the key to bind the ResourceHolder for
+	 * Create a new ReactiveResourceSynchronization for the given holder.
+	 * @param resourceObject the resource object to manage
+	 * @param resourceKey the key to bind the resource object for
 	 * @param synchronizationManager the synchronization manager bound to the current transaction
-	 * @see ReactiveTransactionSynchronizationManager#bindResource
+	 * @see TransactionSynchronizationManager#bindResource
 	 */
-	public ReactiveResourceHolderSynchronization(
-			H resourceHolder, K resourceKey, ReactiveTransactionSynchronizationManager synchronizationManager) {
+	public ReactiveResourceSynchronization(
+			O resourceObject, K resourceKey, TransactionSynchronizationManager synchronizationManager) {
 
-		this.resourceHolder = resourceHolder;
+		this.resourceObject = resourceObject;
 		this.resourceKey = resourceKey;
 		this.synchronizationManager = synchronizationManager;
 	}
@@ -68,7 +66,7 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	@Override
 	public Mono<Void> resume() {
 		if (this.holderActive) {
-			this.synchronizationManager.bindResource(this.resourceKey, this.resourceHolder);
+			this.synchronizationManager.bindResource(this.resourceKey, this.resourceObject);
 		}
 		return Mono.empty();
 	}
@@ -84,7 +82,7 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 			this.synchronizationManager.unbindResource(this.resourceKey);
 			this.holderActive = false;
 			if (shouldReleaseBeforeCompletion()) {
-				return releaseResource(this.resourceHolder, this.resourceKey);
+				return releaseResource(this.resourceObject, this.resourceKey);
 			}
 		}
 		return Mono.empty();
@@ -93,7 +91,7 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	@Override
 	public Mono<Void> afterCommit() {
 		if (!shouldReleaseBeforeCompletion()) {
-			return processResourceAfterCommit(this.resourceHolder);
+			return processResourceAfterCommit(this.resourceObject);
 		}
 		return Mono.empty();
 	}
@@ -109,21 +107,20 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 					// since afterCompletion might get called from a different thread.
 					this.holderActive = false;
 					this.synchronizationManager.unbindResourceIfPossible(this.resourceKey);
-					this.resourceHolder.unbound();
 					releaseNecessary = true;
 				}
 				else {
-					releaseNecessary = shouldReleaseAfterCompletion(this.resourceHolder);
+					releaseNecessary = shouldReleaseAfterCompletion(this.resourceObject);
 				}
 				if (releaseNecessary) {
-					sync = releaseResource(this.resourceHolder, this.resourceKey);
+					sync = releaseResource(this.resourceObject, this.resourceKey);
 				}
 			}
 			else {
 				// Probably a pre-bound resource...
-				sync = cleanupResource(this.resourceHolder, this.resourceKey, (status == STATUS_COMMITTED));
+				sync = cleanupResource(this.resourceObject, this.resourceKey, (status == STATUS_COMMITTED));
 			}
-			return sync.doFinally(s -> this.resourceHolder.reset());
+			return sync;
 		});
 	}
 
@@ -157,7 +154,7 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	 * releasing after completion if no attempt was made before completion.
 	 * @see #releaseResource
 	 */
-	protected boolean shouldReleaseAfterCompletion(H resourceHolder) {
+	protected boolean shouldReleaseAfterCompletion(O resourceHolder) {
 		return !shouldReleaseBeforeCompletion();
 	}
 
@@ -167,27 +164,27 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	 * ({@link #shouldReleaseBeforeCompletion()}).
 	 * @param resourceHolder the resource holder to process
 	 */
-	protected Mono<Void> processResourceAfterCommit(H resourceHolder) {
+	protected Mono<Void> processResourceAfterCommit(O resourceHolder) {
 		return Mono.empty();
 	}
 
 	/**
 	 * Release the given resource (after it has been unbound from the thread).
 	 * @param resourceHolder the resource holder to process
-	 * @param resourceKey the key that the ResourceHolder was bound for
+	 * @param resourceKey the key that the resource object was bound for
 	 */
-	protected Mono<Void> releaseResource(H resourceHolder, K resourceKey) {
+	protected Mono<Void> releaseResource(O resourceHolder, K resourceKey) {
 		return Mono.empty();
 	}
 
 	/**
 	 * Perform a cleanup on the given resource (which is left bound to the thread).
 	 * @param resourceHolder the resource holder to process
-	 * @param resourceKey the key that the ResourceHolder was bound for
+	 * @param resourceKey the key that the resource object was bound for
 	 * @param committed whether the transaction has committed ({@code true})
 	 * or rolled back ({@code false})
 	 */
-	protected Mono<Void> cleanupResource(H resourceHolder, K resourceKey, boolean committed) {
+	protected Mono<Void> cleanupResource(O resourceHolder, K resourceKey, boolean committed) {
 		return Mono.empty();
 	}
 

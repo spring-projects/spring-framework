@@ -32,7 +32,7 @@ import reactor.core.publisher.Mono;
 public interface ReactiveTransactionManager {
 
 	/**
-	 * Emit a currently active transaction or create a new one, according to
+	 * Emit a currently active reactive transaction or create a new one, according to
 	 * the specified propagation behavior.
 	 * <p>Note that parameters like isolation level or timeout will only be applied
 	 * to new transactions, and thus be ignored when participating in active ones.
@@ -54,7 +54,7 @@ public interface ReactiveTransactionManager {
 	 * @see TransactionDefinition#getTimeout
 	 * @see TransactionDefinition#isReadOnly
 	 */
-	Mono<ReactiveTransactionStatus> getTransaction(TransactionDefinition definition) throws TransactionException;
+	Mono<ReactiveTransaction> getReactiveTransaction(TransactionDefinition definition) throws TransactionException;
 
 	/**
 	 * Commit the given transaction, with regard to its status. If the transaction
@@ -72,7 +72,7 @@ public interface ReactiveTransactionManager {
 	 * database right before commit, with the resulting DataAccessException
 	 * causing the transaction to fail. The original exception will be
 	 * propagated to the caller of this commit method in such a case.
-	 * @param status object returned by the {@code getTransaction} method
+	 * @param transaction object returned by the {@code getTransaction} method
 	 * @throws UnexpectedRollbackException in case of an unexpected rollback
 	 * that the transaction coordinator initiated
 	 * @throws HeuristicCompletionException in case of a transaction failure
@@ -81,9 +81,9 @@ public interface ReactiveTransactionManager {
 	 * (typically caused by fundamental resource failures)
 	 * @throws IllegalTransactionStateException if the given transaction
 	 * is already completed (that is, committed or rolled back)
-	 * @see ReactiveTransactionStatus#setRollbackOnly
+	 * @see ReactiveTransaction#setRollbackOnly
 	 */
-	Mono<Void> commit(ReactiveTransactionStatus status) throws TransactionException;
+	Mono<Void> commit(ReactiveTransaction transaction) throws TransactionException;
 
 	/**
 	 * Perform a rollback of the given transaction.
@@ -95,12 +95,12 @@ public interface ReactiveTransactionManager {
 	 * The transaction will already have been completed and cleaned up when commit
 	 * returns, even in case of a commit exception. Consequently, a rollback call
 	 * after commit failure will lead to an IllegalTransactionStateException.
-	 * @param status object returned by the {@code getTransaction} method
+	 * @param transaction object returned by the {@code getTransaction} method
 	 * @throws TransactionSystemException in case of rollback or system errors
 	 * (typically caused by fundamental resource failures)
 	 * @throws IllegalTransactionStateException if the given transaction
 	 * is already completed (that is, committed or rolled back)
 	 */
-	Mono<Void> rollback(ReactiveTransactionStatus status) throws TransactionException;
+	Mono<Void> rollback(ReactiveTransaction transaction) throws TransactionException;
 
 }

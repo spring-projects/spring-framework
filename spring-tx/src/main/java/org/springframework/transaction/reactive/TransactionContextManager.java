@@ -33,7 +33,7 @@ import org.springframework.transaction.NoTransactionException;
  *
  * @author Mark Paluch
  * @since 5.2
- * @see ReactiveTransactionSynchronization
+ * @see TransactionSynchronization
  */
 public abstract class TransactionContextManager {
 
@@ -80,7 +80,7 @@ public abstract class TransactionContextManager {
 	/**
 	 * Return a {@link Function} to create or associate a new {@link TransactionContext}.
 	 * Interaction with transactional resources through
-	 * {@link ReactiveTransactionSynchronizationManager} requires a TransactionContext
+	 * {@link TransactionSynchronizationManager} requires a TransactionContext
 	 * to be registered in the subscriber context.
 	 * @return functional context registration.
 	 */

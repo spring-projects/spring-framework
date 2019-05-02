@@ -56,7 +56,7 @@ public interface TransactionalOperator {
 	static TransactionalOperator create(
 			ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition){
 
-		return new DefaultTransactionalOperator(transactionManager, transactionDefinition);
+		return new TransactionalOperatorImpl(transactionManager, transactionDefinition);
 	}
 
 
@@ -93,6 +93,6 @@ public interface TransactionalOperator {
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
-	<T> Flux<T> execute(ReactiveTransactionCallback<T> action) throws TransactionException;
+	<T> Flux<T> execute(TransactionCallback<T> action) throws TransactionException;
 
 }

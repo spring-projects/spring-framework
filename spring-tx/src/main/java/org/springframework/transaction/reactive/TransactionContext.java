@@ -45,7 +45,7 @@ public class TransactionContext {
 	private final Map<Object, Object> resources = new LinkedHashMap<>();
 
 	@Nullable
-	private Set<ReactiveTransactionSynchronization> synchronizations;
+	private Set<TransactionSynchronization> synchronizations;
 
 	private volatile @Nullable String currentTransactionName;
 
@@ -85,12 +85,12 @@ public class TransactionContext {
 		return this.resources;
 	}
 
-	public void setSynchronizations(@Nullable Set<ReactiveTransactionSynchronization> synchronizations) {
+	public void setSynchronizations(@Nullable Set<TransactionSynchronization> synchronizations) {
 		this.synchronizations = synchronizations;
 	}
 
 	@Nullable
-	public Set<ReactiveTransactionSynchronization> getSynchronizations() {
+	public Set<TransactionSynchronization> getSynchronizations() {
 		return this.synchronizations;
 	}
 

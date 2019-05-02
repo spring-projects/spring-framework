@@ -21,8 +21,8 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.transaction.ReactiveTransactionManager;
-import org.springframework.transaction.ReactiveTransactionStatus;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
@@ -39,9 +39,9 @@ import org.springframework.util.Assert;
  * @see ReactiveTransactionManager
  */
 @SuppressWarnings("serial")
-final class DefaultTransactionalOperator implements TransactionalOperator {
+final class TransactionalOperatorImpl implements TransactionalOperator {
 
-	private static final Log logger = LogFactory.getLog(DefaultTransactionalOperator.class);
+	private static final Log logger = LogFactory.getLog(TransactionalOperatorImpl.class);
 
 	private final ReactiveTransactionManager transactionManager;
 
@@ -55,7 +55,7 @@ final class DefaultTransactionalOperator implements TransactionalOperator {
 	 * @param transactionDefinition the transaction definition to copy the
 	 * default settings from. Local properties can still be set to change values.
 	 */
-	DefaultTransactionalOperator(ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition) {
+	TransactionalOperatorImpl(ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition) {
 		Assert.notNull(transactionManager, "ReactiveTransactionManager must not be null");
 		Assert.notNull(transactionManager, "TransactionDefinition must not be null");
 		this.transactionManager = transactionManager;
@@ -72,9 +72,9 @@ final class DefaultTransactionalOperator implements TransactionalOperator {
 
 
 	@Override
-	public <T> Flux<T> execute(ReactiveTransactionCallback<T> action) throws TransactionException {
+	public <T> Flux<T> execute(TransactionCallback<T> action) throws TransactionException {
 		return TransactionContextManager.currentContext().flatMapMany(context -> {
-			Mono<ReactiveTransactionStatus> status = this.transactionManager.getTransaction(this.transactionDefinition);
+			Mono<ReactiveTransaction> status = this.transactionManager.getReactiveTransaction(this.transactionDefinition);
 			return status.flatMapMany(it -> {
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
@@ -98,7 +98,7 @@ final class DefaultTransactionalOperator implements TransactionalOperator {
 	 * @param ex the thrown application exception or error
 	 * @throws TransactionException in case of a rollback error
 	 */
-	private Mono<Void> rollbackOnException(ReactiveTransactionStatus status, Throwable ex) throws TransactionException {
+	private Mono<Void> rollbackOnException(ReactiveTransaction status, Throwable ex) throws TransactionException {
 		logger.debug("Initiating transaction rollback on application exception", ex);
 		return this.transactionManager.rollback(status).onErrorMap(ex2 -> {
 					logger.error("Application exception overridden by rollback exception", ex);
@@ -113,8 +113,8 @@ final class DefaultTransactionalOperator implements TransactionalOperator {
 
 	@Override
 	public boolean equals(Object other) {
-		return (this == other || (super.equals(other) && (!(other instanceof DefaultTransactionalOperator) ||
-				getTransactionManager() == ((DefaultTransactionalOperator) other).getTransactionManager())));
+		return (this == other || (super.equals(other) && (!(other instanceof TransactionalOperatorImpl) ||
+				getTransactionManager() == ((TransactionalOperatorImpl) other).getTransactionManager())));
 	}
 
 	@Override

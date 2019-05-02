@@ -67,29 +67,29 @@ import org.springframework.util.Assert;
  * @since 5.2
  * @see #isSynchronizationActive
  * @see #registerSynchronization
- * @see ReactiveTransactionSynchronization
+ * @see TransactionSynchronization
  */
-public class ReactiveTransactionSynchronizationManager {
+public class TransactionSynchronizationManager {
 
-	private static final Log logger = LogFactory.getLog(ReactiveTransactionSynchronizationManager.class);
+	private static final Log logger = LogFactory.getLog(TransactionSynchronizationManager.class);
 
 	private final TransactionContext transactionContext;
 
 
-	public ReactiveTransactionSynchronizationManager(TransactionContext transactionContext) {
+	public TransactionSynchronizationManager(TransactionContext transactionContext) {
 		this.transactionContext = transactionContext;
 	}
 
 
 	/**
-	 * Return the ReactiveTransactionSynchronizationManager of the current transaction.
+	 * Return the TransactionSynchronizationManager of the current transaction.
 	 * Mainly intended for code that wants to bind resources or synchronizations.
 	 * rollback-only but not throw an application exception.
 	 * @throws NoTransactionException if the transaction info cannot be found,
 	 * because the method was invoked outside a managed transaction.
 	 */
-	public static Mono<ReactiveTransactionSynchronizationManager> currentTransaction() {
-		return TransactionContextManager.currentContext().map(ReactiveTransactionSynchronizationManager::new);
+	public static Mono<TransactionSynchronizationManager> currentTransaction() {
+		return TransactionContextManager.currentContext().map(TransactionSynchronizationManager::new);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class ReactiveTransactionSynchronizationManager {
 	 * @return if there is a value bound to the current thread
 	 */
 	public boolean hasResource(Object key) {
-		Object actualKey = ReactiveTransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Object value = doGetResource(actualKey);
 		return (value != null);
 	}
@@ -111,7 +111,7 @@ public class ReactiveTransactionSynchronizationManager {
 	 */
 	@Nullable
 	public Object getResource(Object key) {
-		Object actualKey = ReactiveTransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Object value = doGetResource(actualKey);
 		if (value != null && logger.isTraceEnabled()) {
 			logger.trace("Retrieved value [" + value + "] for key [" + actualKey + "] bound to context [" +
@@ -137,7 +137,7 @@ public class ReactiveTransactionSynchronizationManager {
 	 * @throws IllegalStateException if there is already a value bound to the context
 	 */
 	public void bindResource(Object key, Object value) throws IllegalStateException {
-		Object actualKey = ReactiveTransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Assert.notNull(value, "Value must not be null");
 		Map<Object, Object> map = this.transactionContext.getResources();
 		Object oldValue = map.put(actualKey, value);
@@ -158,7 +158,7 @@ public class ReactiveTransactionSynchronizationManager {
 	 * @throws IllegalStateException if there is no value bound to the context
 	 */
 	public Object unbindResource(Object key) throws IllegalStateException {
-		Object actualKey = ReactiveTransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Object value = doUnbindResource(actualKey);
 		if (value == null) {
 			throw new IllegalStateException(
@@ -174,7 +174,7 @@ public class ReactiveTransactionSynchronizationManager {
 	 */
 	@Nullable
 	public Object unbindResourceIfPossible(Object key) {
-		Object actualKey = ReactiveTransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		return doUnbindResource(actualKey);
 	}
 
@@ -229,11 +229,11 @@ public class ReactiveTransactionSynchronizationManager {
 	 * @throws IllegalStateException if transaction synchronization is not active
 	 * @see org.springframework.core.Ordered
 	 */
-	public void registerSynchronization(ReactiveTransactionSynchronization synchronization)
+	public void registerSynchronization(TransactionSynchronization synchronization)
 			throws IllegalStateException {
 
 		Assert.notNull(synchronization, "TransactionSynchronization must not be null");
-		Set<ReactiveTransactionSynchronization> synchs = this.transactionContext.getSynchronizations();
+		Set<TransactionSynchronization> synchs = this.transactionContext.getSynchronizations();
 		if (synchs == null) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
@@ -245,10 +245,10 @@ public class ReactiveTransactionSynchronizationManager {
 	 * for the current context.
 	 * @return unmodifiable List of TransactionSynchronization instances
 	 * @throws IllegalStateException if synchronization is not active
-	 * @see ReactiveTransactionSynchronization
+	 * @see TransactionSynchronization
 	 */
-	public List<ReactiveTransactionSynchronization> getSynchronizations() throws IllegalStateException {
-		Set<ReactiveTransactionSynchronization> synchs = this.transactionContext.getSynchronizations();
+	public List<TransactionSynchronization> getSynchronizations() throws IllegalStateException {
+		Set<TransactionSynchronization> synchs = this.transactionContext.getSynchronizations();
 		if (synchs == null) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
@@ -260,7 +260,7 @@ public class ReactiveTransactionSynchronizationManager {
 		}
 		else {
 			// Sort lazily here, not in registerSynchronization.
-			List<ReactiveTransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
+			List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
 			AnnotationAwareOrderComparator.sort(sortedSynchs);
 			return Collections.unmodifiableList(sortedSynchs);
 		}
@@ -325,7 +325,7 @@ public class ReactiveTransactionSynchronizationManager {
 	 * to suppress change detection on commit. The present method is meant
 	 * to be used for earlier read-only checks.
 	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly()
-	 * @see ReactiveTransactionSynchronization#beforeCommit(boolean)
+	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 */
 	public boolean isCurrentTransactionReadOnly() {
 		return this.transactionContext.isCurrentTransactionReadOnly();

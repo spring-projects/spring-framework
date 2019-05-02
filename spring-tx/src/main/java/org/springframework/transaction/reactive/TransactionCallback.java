@@ -18,7 +18,7 @@ package org.springframework.transaction.reactive;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.transaction.ReactiveTransactionStatus;
+import org.springframework.transaction.ReactiveTransaction;
 
 /**
  * Callback interface for reactive transactional code. Used with {@link TransactionalOperator}'s
@@ -30,12 +30,13 @@ import org.springframework.transaction.ReactiveTransactionStatus;
  * Spring's {@link org.springframework.transaction.annotation.Transactional} annotation).
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
  * @see TransactionalOperator
  * @param <T> the result type
  */
 @FunctionalInterface
-public interface ReactiveTransactionCallback<T> {
+public interface TransactionCallback<T> {
 
 	/**
 	 * Gets called by {@link TransactionalOperator} within a transactional context.
@@ -46,6 +47,6 @@ public interface ReactiveTransactionCallback<T> {
 	 * @return a result publisher
 	 * @see TransactionalOperator#transactional
 	 */
-	Publisher<T> doInTransaction(ReactiveTransactionStatus status);
+	Publisher<T> doInTransaction(ReactiveTransaction status);
 
 }

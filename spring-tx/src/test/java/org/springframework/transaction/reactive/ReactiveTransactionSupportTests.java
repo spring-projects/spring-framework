@@ -23,7 +23,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.ReactiveTransactionManager;
-import org.springframework.transaction.ReactiveTransactionStatus;
+import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
@@ -34,27 +34,27 @@ import static org.junit.Assert.*;
  *
  * @author Mark Paluch
  */
-public class ReactiveTransactionSupportUnitTests {
+public class ReactiveTransactionSupportTests {
 
 	@Test
 	public void noExistingTransaction() {
 		ReactiveTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 
-		tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
-				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(DefaultReactiveTransactionStatus.class)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
+				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
 				.as(StepVerifier::create).consumeNextWith(actual -> {
 					assertFalse(actual.hasTransaction());
 				}).verifyComplete();
 
-		tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED))
-				.cast(DefaultReactiveTransactionStatus.class).subscriberContext(TransactionContextManager.createTransactionContext())
+		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED))
+				.cast(GenericReactiveTransaction.class).subscriberContext(TransactionContextManager.createTransactionContext())
 				.as(StepVerifier::create).consumeNextWith(actual -> {
 					assertTrue(actual.hasTransaction());
 					assertTrue(actual.isNewTransaction());
 				}).verifyComplete();
 
-		tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY))
-				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(DefaultReactiveTransactionStatus.class)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY))
+				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
 				.as(StepVerifier::create).expectError(IllegalTransactionStateException.class).verify();
 	}
 
@@ -62,22 +62,22 @@ public class ReactiveTransactionSupportUnitTests {
 	public void existingTransaction() {
 		ReactiveTransactionManager tm = new ReactiveTestTransactionManager(true, true);
 
-		tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
-				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(DefaultReactiveTransactionStatus.class)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
+				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
 				.as(StepVerifier::create).consumeNextWith(actual -> {
 					assertNotNull(actual.getTransaction());
 					assertFalse(actual.isNewTransaction());
 				}).verifyComplete();
 
-		tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED))
-				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(DefaultReactiveTransactionStatus.class)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED))
+				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
 				.as(StepVerifier::create).consumeNextWith(actual -> {
 					assertNotNull(actual.getTransaction());
 					assertFalse(actual.isNewTransaction());
 				}).verifyComplete();
 
-		tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY))
-				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(DefaultReactiveTransactionStatus.class)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY))
+				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
 				.as(StepVerifier::create).consumeNextWith(actual -> {
 					assertNotNull(actual.getTransaction());
 					assertFalse(actual.isNewTransaction());
@@ -87,7 +87,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void commitWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
-		tm.getTransaction(new DefaultTransactionDefinition()).flatMap(tm::commit)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition()).flatMap(tm::commit)
 				.subscriberContext(TransactionContextManager.createTransactionContext())
 				.as(StepVerifier::create).verifyComplete();
 
@@ -100,7 +100,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void rollbackWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
-		tm.getTransaction(new DefaultTransactionDefinition()).flatMap(tm::rollback)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition()).flatMap(tm::rollback)
 				.subscriberContext(TransactionContextManager.createTransactionContext()).as(StepVerifier::create)
 				.verifyComplete();
 
@@ -113,7 +113,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void rollbackOnlyWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
-		tm.getTransaction(new DefaultTransactionDefinition()).doOnNext(ReactiveTransactionStatus::setRollbackOnly)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition()).doOnNext(ReactiveTransaction::setRollbackOnly)
 				.flatMap(tm::commit)
 				.subscriberContext(TransactionContextManager.createTransactionContext()).as(StepVerifier::create)
 				.verifyComplete();
@@ -127,7 +127,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void commitWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
-		tm.getTransaction(new DefaultTransactionDefinition()).flatMap(tm::commit)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition()).flatMap(tm::commit)
 				.subscriberContext(TransactionContextManager.createTransactionContext())
 				.as(StepVerifier::create).verifyComplete();
 
@@ -140,7 +140,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void rollbackWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
-		tm.getTransaction(new DefaultTransactionDefinition()).flatMap(tm::rollback)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition()).flatMap(tm::rollback)
 				.subscriberContext(TransactionContextManager.createTransactionContext()).as(StepVerifier::create)
 				.verifyComplete();
 
@@ -153,7 +153,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void rollbackOnlyWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
-		tm.getTransaction(new DefaultTransactionDefinition()).doOnNext(ReactiveTransactionStatus::setRollbackOnly).flatMap(tm::commit)
+		tm.getReactiveTransaction(new DefaultTransactionDefinition()).doOnNext(ReactiveTransaction::setRollbackOnly).flatMap(tm::commit)
 				.subscriberContext(TransactionContextManager.createTransactionContext()).as(StepVerifier::create)
 				.verifyComplete();
 

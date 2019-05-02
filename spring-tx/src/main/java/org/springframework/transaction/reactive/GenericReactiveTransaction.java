@@ -17,11 +17,11 @@
 package org.springframework.transaction.reactive;
 
 import org.springframework.lang.Nullable;
-import org.springframework.transaction.ReactiveTransactionStatus;
+import org.springframework.transaction.ReactiveTransaction;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@link ReactiveTransactionStatus} interface,
+ * Default implementation of the {@link ReactiveTransaction} interface,
  * used by {@link AbstractReactiveTransactionManager}. Based on the concept
  * of an underlying "transaction object".
  *
@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * @see AbstractReactiveTransactionManager
  * @see #getTransaction
  */
-public class DefaultReactiveTransactionStatus extends AbstractReactiveTransactionStatus {
+public class GenericReactiveTransaction implements ReactiveTransaction {
 
 	@Nullable
 	private final Object transaction;
@@ -53,6 +53,10 @@ public class DefaultReactiveTransactionStatus extends AbstractReactiveTransactio
 
 	@Nullable
 	private final Object suspendedResources;
+
+	private boolean rollbackOnly = false;
+
+	private boolean completed = false;
 
 
 	/**
@@ -70,7 +74,7 @@ public class DefaultReactiveTransactionStatus extends AbstractReactiveTransactio
 	 * @param suspendedResources a holder for resources that have been suspended
 	 * for this transaction, if any
 	 */
-	public DefaultReactiveTransactionStatus(
+	public GenericReactiveTransaction(
 			@Nullable Object transaction, boolean newTransaction, boolean newSynchronization,
 			boolean readOnly, boolean debug, @Nullable Object suspendedResources) {
 
@@ -135,6 +139,33 @@ public class DefaultReactiveTransactionStatus extends AbstractReactiveTransactio
 	@Nullable
 	public Object getSuspendedResources() {
 		return this.suspendedResources;
+	}
+
+	@Override
+	public void setRollbackOnly() {
+		this.rollbackOnly = true;
+	}
+
+	/**
+	 * Determine the rollback-only flag via checking this ReactiveTransactionStatus.
+	 * <p>Will only return "true" if the application called {@code setRollbackOnly}
+	 * on this TransactionStatus object.
+	 */
+	@Override
+	public boolean isRollbackOnly() {
+		return this.rollbackOnly;
+	}
+
+	/**
+	 * Mark this transaction as completed, that is, committed or rolled back.
+	 */
+	public void setCompleted() {
+		this.completed = true;
+	}
+
+	@Override
+	public boolean isCompleted() {
+		return this.completed;
 	}
 
 }

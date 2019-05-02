@@ -29,21 +29,21 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Utility methods for triggering specific {@link ReactiveTransactionSynchronization}
+ * Utility methods for triggering specific {@link TransactionSynchronization}
  * callback methods on all currently registered synchronizations.
  *
  * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.2
- * @see ReactiveTransactionSynchronization
- * @see ReactiveTransactionSynchronizationManager#getSynchronizations()
+ * @see TransactionSynchronization
+ * @see TransactionSynchronizationManager#getSynchronizations()
  */
-abstract class ReactiveTransactionSynchronizationUtils {
+abstract class TransactionSynchronizationUtils {
 
-	private static final Log logger = LogFactory.getLog(ReactiveTransactionSynchronizationUtils.class);
+	private static final Log logger = LogFactory.getLog(TransactionSynchronizationUtils.class);
 
 	private static final boolean aopAvailable = ClassUtils.isPresent(
-			"org.springframework.aop.scope.ScopedObject", ReactiveTransactionSynchronizationUtils.class.getClassLoader());
+			"org.springframework.aop.scope.ScopedObject", TransactionSynchronizationUtils.class.getClassLoader());
 
 
 	/**
@@ -68,51 +68,51 @@ abstract class ReactiveTransactionSynchronizationUtils {
 
 	/**
 	 * Actually invoke the {@code triggerBeforeCommit} methods of the
-	 * given Spring ReactiveTransactionSynchronization objects.
-	 * @param synchronizations a List of ReactiveTransactionSynchronization objects
-	 * @see ReactiveTransactionSynchronization#beforeCommit(boolean)
+	 * given Spring TransactionSynchronization objects.
+	 * @param synchronizations a List of TransactionSynchronization objects
+	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 */
-	public static Mono<Void> triggerBeforeCommit(Collection<ReactiveTransactionSynchronization> synchronizations, boolean readOnly) {
+	public static Mono<Void> triggerBeforeCommit(Collection<TransactionSynchronization> synchronizations, boolean readOnly) {
 		return Flux.fromIterable(synchronizations).concatMap(it -> it.beforeCommit(readOnly)).then();
 	}
 
 	/**
 	 * Actually invoke the {@code beforeCompletion} methods of the
-	 * given Spring ReactiveTransactionSynchronization objects.
-	 * @param synchronizations a List of ReactiveTransactionSynchronization objects
-	 * @see ReactiveTransactionSynchronization#beforeCompletion()
+	 * given Spring TransactionSynchronization objects.
+	 * @param synchronizations a List of TransactionSynchronization objects
+	 * @see TransactionSynchronization#beforeCompletion()
 	 */
-	public static Mono<Void> triggerBeforeCompletion(Collection<ReactiveTransactionSynchronization> synchronizations) {
+	public static Mono<Void> triggerBeforeCompletion(Collection<TransactionSynchronization> synchronizations) {
 		return Flux.fromIterable(synchronizations)
-				.concatMap(ReactiveTransactionSynchronization::beforeCompletion).onErrorContinue((t, o) ->
+				.concatMap(TransactionSynchronization::beforeCompletion).onErrorContinue((t, o) ->
 						logger.error("TransactionSynchronization.beforeCompletion threw exception", t)).then();
 	}
 
 	/**
 	 * Actually invoke the {@code afterCommit} methods of the
-	 * given Spring ReactiveTransactionSynchronization objects.
-	 * @param synchronizations a List of ReactiveTransactionSynchronization objects
-	 * @see ReactiveTransactionSynchronization#afterCommit()
+	 * given Spring TransactionSynchronization objects.
+	 * @param synchronizations a List of TransactionSynchronization objects
+	 * @see TransactionSynchronization#afterCommit()
 	 */
-	public static Mono<Void> invokeAfterCommit(Collection<ReactiveTransactionSynchronization> synchronizations) {
+	public static Mono<Void> invokeAfterCommit(Collection<TransactionSynchronization> synchronizations) {
 		return Flux.fromIterable(synchronizations)
-				.concatMap(ReactiveTransactionSynchronization::afterCommit)
+				.concatMap(TransactionSynchronization::afterCommit)
 				.then();
 	}
 
 	/**
 	 * Actually invoke the {@code afterCompletion} methods of the
-	 * given Spring ReactiveTransactionSynchronization objects.
-	 * @param synchronizations a List of ReactiveTransactionSynchronization objects
+	 * given Spring TransactionSynchronization objects.
+	 * @param synchronizations a List of TransactionSynchronization objects
 	 * @param completionStatus the completion status according to the
-	 * constants in the ReactiveTransactionSynchronization interface
-	 * @see ReactiveTransactionSynchronization#afterCompletion(int)
-	 * @see ReactiveTransactionSynchronization#STATUS_COMMITTED
-	 * @see ReactiveTransactionSynchronization#STATUS_ROLLED_BACK
-	 * @see ReactiveTransactionSynchronization#STATUS_UNKNOWN
+	 * constants in the TransactionSynchronization interface
+	 * @see TransactionSynchronization#afterCompletion(int)
+	 * @see TransactionSynchronization#STATUS_COMMITTED
+	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
+	 * @see TransactionSynchronization#STATUS_UNKNOWN
 	 */
 	public static Mono<Void> invokeAfterCompletion(
-			Collection<ReactiveTransactionSynchronization> synchronizations, int completionStatus) {
+			Collection<TransactionSynchronization> synchronizations, int completionStatus) {
 
 		return Flux.fromIterable(synchronizations).concatMap(it -> it.afterCompletion(completionStatus))
 				.onErrorContinue((t, o) -> logger.error("TransactionSynchronization.afterCompletion threw exception", t)).then();
