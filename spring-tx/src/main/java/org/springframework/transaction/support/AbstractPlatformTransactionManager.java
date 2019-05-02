@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -553,7 +553,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
 			return definition.getTimeout();
 		}
-		return this.defaultTimeout;
+		return getDefaultTimeout();
 	}
 
 
@@ -1099,6 +1099,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @param definition a TransactionDefinition instance, describing propagation
 	 * behavior, isolation level, read-only flag, timeout, and transaction name
 	 * @throws TransactionException in case of creation or system errors
+	 * @throws org.springframework.transaction.NestedTransactionNotSupportedException
+	 * if the underlying transaction does not support nesting
 	 */
 	protected abstract void doBegin(Object transaction, TransactionDefinition definition)
 			throws TransactionException;

@@ -87,11 +87,11 @@ public enum Propagation {
 
 	/**
 	 * Execute within a nested transaction if a current transaction exists,
-	 * behave like {@code REQUIRED} else. There is no analogous feature in EJB.
+	 * behave like {@code REQUIRED} otherwise. There is no analogous feature in EJB.
 	 * <p>Note: Actual creation of a nested transaction will only work on specific
 	 * transaction managers. Out of the box, this only applies to the JDBC
-	 * DataSourceTransactionManager when working on a JDBC 3.0 driver.
-	 * Some JTA providers might support nested transactions as well.
+	 * DataSourceTransactionManager. Some JTA providers might support nested
+	 * transactions as well.
 	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
 	 */
 	NESTED(TransactionDefinition.PROPAGATION_NESTED);
