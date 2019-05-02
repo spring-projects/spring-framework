@@ -140,68 +140,68 @@ public abstract class Operator extends SpelNodeImpl {
 		// This code block checks whether the left or right operand is null and handles
 		// those cases before letting the original code (that only handled actual numbers) run
 		Label rightIsNonNull = new Label();
-		mv.visitInsn(DUP); // stack: left/right/right
-		mv.visitJumpInsn(IFNONNULL, rightIsNonNull); // stack: left/right
+		mv.visitInsn(DUP);  // stack: left/right/right
+		mv.visitJumpInsn(IFNONNULL, rightIsNonNull);  // stack: left/right
 		// here: RIGHT==null LEFT==unknown
-		mv.visitInsn(SWAP); // right/left
+		mv.visitInsn(SWAP);  // right/left
 		Label leftNotNullRightIsNull = new Label();
-		mv.visitJumpInsn(IFNONNULL, leftNotNullRightIsNull); // stack: right
+		mv.visitJumpInsn(IFNONNULL, leftNotNullRightIsNull);  // stack: right
 		// here: RIGHT==null LEFT==null
-		mv.visitInsn(POP); // stack: <nothing>
+		mv.visitInsn(POP);  // stack: <nothing>
 		// load 0 or 1 depending on comparison instruction
 		switch (compInstruction1) {
 		case IFGE: // OpLT
 		case IFLE: // OpGT
-			mv.visitInsn(ICONST_0); // false - null is not < or > null
+			mv.visitInsn(ICONST_0);  // false - null is not < or > null
 			break;
 		case IFGT: // OpLE
 		case IFLT: // OpGE
-			mv.visitInsn(ICONST_1); // true - null is <= or >= null
+			mv.visitInsn(ICONST_1);  // true - null is <= or >= null
 			break;
 		default:
-			throw new IllegalStateException("Unsupported: "+compInstruction1);
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
 		}
 		mv.visitJumpInsn(GOTO, endOfIf);
-		mv.visitLabel(leftNotNullRightIsNull); // stack: right
+		mv.visitLabel(leftNotNullRightIsNull);  // stack: right
 		// RIGHT==null LEFT!=null
-		mv.visitInsn(POP); // stack: <nothing>
+		mv.visitInsn(POP);  // stack: <nothing>
 		// load 0 or 1 depending on comparison instruction
 		switch (compInstruction1) {
 		case IFGE: // OpLT
 		case IFGT: // OpLE
-			mv.visitInsn(ICONST_0); // false - something is not < or <= null
+			mv.visitInsn(ICONST_0);  // false - something is not < or <= null
 			break;
 		case IFLE: // OpGT
 		case IFLT: // OpGE
-			mv.visitInsn(ICONST_1); // true - something is > or >= null
+			mv.visitInsn(ICONST_1);  // true - something is > or >= null
 			break;
 		default:
-			throw new IllegalStateException("Unsupported: "+compInstruction1);
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
 		}
 		mv.visitJumpInsn(GOTO, endOfIf);
 
-		mv.visitLabel(rightIsNonNull); // stack: left/right
+		mv.visitLabel(rightIsNonNull);  // stack: left/right
 		// here: RIGHT!=null LEFT==unknown
-		mv.visitInsn(SWAP); // stack: right/left
-		mv.visitInsn(DUP); // stack: right/left/left
+		mv.visitInsn(SWAP);  // stack: right/left
+		mv.visitInsn(DUP);  // stack: right/left/left
 		Label neitherRightNorLeftAreNull = new Label();
-		mv.visitJumpInsn(IFNONNULL, neitherRightNorLeftAreNull); // stack: right/left
+		mv.visitJumpInsn(IFNONNULL, neitherRightNorLeftAreNull);  // stack: right/left
 		// here: RIGHT!=null LEFT==null
-		mv.visitInsn(POP2); // stack: <nothing>
+		mv.visitInsn(POP2);  // stack: <nothing>
 		switch (compInstruction1) {
 		case IFGE: // OpLT
 		case IFGT: // OpLE
-			mv.visitInsn(ICONST_1); // true - null is < or <= something
+			mv.visitInsn(ICONST_1);  // true - null is < or <= something
 			break;
 		case IFLE: // OpGT
 		case IFLT: // OpGE
-			mv.visitInsn(ICONST_0); // false - null is not > or >= something
+			mv.visitInsn(ICONST_0);  // false - null is not > or >= something
 			break;
 		default:
-			throw new IllegalStateException("Unsupported: "+compInstruction1);
+			throw new IllegalStateException("Unsupported: " + compInstruction1);
 		}
 		mv.visitJumpInsn(GOTO, endOfIf);
-		mv.visitLabel(neitherRightNorLeftAreNull); // stack: right/left
+		mv.visitLabel(neitherRightNorLeftAreNull);  // stack: right/left
 		// neither were null so unbox and proceed with numeric comparison
 		if (unboxLeft) {
 			CodeFlow.insertUnboxInsns(mv, targetType, leftDesc);

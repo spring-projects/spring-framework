@@ -4994,7 +4994,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	private void verifyCompilationAndBehaviourWithNull(String expressionText, SpelExpressionParser parser, StandardEvaluationContext ctx) {
 		Reg r = (Reg)ctx.getRootObject().getValue();
-		r.setValue2(1); // having a value in value2 fields will enable compilation to succeed, then can switch it to null
+		r.setValue2(1);  // having a value in value2 fields will enable compilation to succeed, then can switch it to null
 		SpelExpression fast = (SpelExpression) parser.parseExpression(expressionText);
 		SpelExpression slow = (SpelExpression) parser.parseExpression(expressionText);
 		fast.getValue(ctx);
@@ -5124,7 +5124,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	// helper methods
+	// Helper methods
 
 	private SpelNodeImpl getAst() {
 		SpelExpression spelExpression = (SpelExpression) expression;
@@ -5196,69 +5196,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	// nested types
-
-	public class Reg {
-		private Integer _value,_value2;
-		private Long _valueL,_valueL2;
-		private Double _valueD,_valueD2;
-		private Float _valueF,_valueF2;
-
-
-		public Reg(int v) {
-			this._value  = v;
-			this._valueL = new Long(v);
-			this._valueD = new Double(v);
-			this._valueF = new Float(v);
-		}
-
-		public Integer getValue() {
-			return _value;
-		}
-
-		public Long getValueL() {
-			return _valueL;
-		}
-		
-		public Double getValueD() {
-			return _valueD;
-		}
-		
-		public Float getValueF() {
-			return _valueF;
-		}
-
-		public Integer getValue2() {
-			return _value2;
-		}
-
-		public Long getValueL2() {
-			return _valueL2;
-		}
-		
-		public Double getValueD2() {
-			return _valueD2;
-		}
-		
-		public Float getValueF2() {
-			return _valueF2;
-		}
-
-		public void setValue(Integer value) {
-			_value  = value;
-			_valueL = value==null?null:new Long(value);
-			_valueD = value==null?null:new Double(value);
-			_valueF = value==null?null:new Float(value);
-		}
-
-		public void setValue2(Integer value) {
-			_value2  = value;
-			_valueL2 = value==null?null:new Long(value);
-			_valueD2 = value==null?null:new Double(value);
-			_valueF2 = value==null?null:new Float(value);
-		}
-	}
-
+	// Nested types
 
 	public interface Message<T> {
 
@@ -6274,6 +6212,68 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	public static class LongHolder {
 
 		public Long someLong = 3L;
+	}
+
+
+	public class Reg {
+
+		private Integer _value,_value2;
+		private Long _valueL,_valueL2;
+		private Double _valueD,_valueD2;
+		private Float _valueF,_valueF2;
+
+		public Reg(int v) {
+			this._value  = v;
+			this._valueL = new Long(v);
+			this._valueD = new Double(v);
+			this._valueF = new Float(v);
+		}
+
+		public Integer getValue() {
+			return _value;
+		}
+
+		public Long getValueL() {
+			return _valueL;
+		}
+
+		public Double getValueD() {
+			return _valueD;
+		}
+
+		public Float getValueF() {
+			return _valueF;
+		}
+
+		public Integer getValue2() {
+			return _value2;
+		}
+
+		public Long getValueL2() {
+			return _valueL2;
+		}
+
+		public Double getValueD2() {
+			return _valueD2;
+		}
+
+		public Float getValueF2() {
+			return _valueF2;
+		}
+
+		public void setValue(Integer value) {
+			_value  = value;
+			_valueL = value==null?null:new Long(value);
+			_valueD = value==null?null:new Double(value);
+			_valueF = value==null?null:new Float(value);
+		}
+
+		public void setValue2(Integer value) {
+			_value2  = value;
+			_valueL2 = value==null?null:new Long(value);
+			_valueD2 = value==null?null:new Double(value);
+			_valueF2 = value==null?null:new Float(value);
+		}
 	}
 
 }
