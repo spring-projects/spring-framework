@@ -121,15 +121,20 @@ public class PropertyPlaceholderHelper {
 	 */
 	public String replacePlaceholders(String value, PlaceholderResolver placeholderResolver) {
 		Assert.notNull(value, "'value' must not be null");
+		if (!value.contains(this.placeholderPrefix)) {
+			return value;
+		}
 		return parseStringValue(value, placeholderResolver, new HashSet<>());
 	}
 
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
+		int startIndex = value.indexOf(this.placeholderPrefix);
+		if (startIndex == -1) {
+			return value;
+		}
 
 		StringBuilder result = new StringBuilder(value);
-
-		int startIndex = value.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
