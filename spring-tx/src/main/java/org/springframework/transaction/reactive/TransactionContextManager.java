@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.reactive;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
 import java.util.function.Function;
 
 import reactor.core.publisher.Flux;
@@ -27,9 +27,9 @@ import org.springframework.transaction.NoTransactionException;
 
 /**
  * Delegate to register and obtain transactional contexts.
- * <p/>
- * Typically used by components that intercept or orchestrate transactional flows such as AOP interceptors or
- * transactional operators.
+ *
+ * <p>Typically used by components that intercept or orchestrate transactional flows
+ * such as AOP interceptors or transactional operators.
  *
  * @author Mark Paluch
  * @since 5.2
@@ -37,9 +37,8 @@ import org.springframework.transaction.NoTransactionException;
  */
 public abstract class TransactionContextManager {
 
-	 private TransactionContextManager() {
-		/* prevent instantiation */
-	 }
+	private TransactionContextManager() {
+	}
 
 
 	/**
@@ -51,14 +50,11 @@ public abstract class TransactionContextManager {
 	 * or no context found in a holder
 	 */
 	public static Mono<TransactionContext> currentContext() throws NoTransactionException {
-
 		return Mono.subscriberContext().handle((ctx, sink) -> {
-
 			if (ctx.hasKey(TransactionContext.class)) {
 				sink.next(ctx.get(TransactionContext.class));
 				return;
 			}
-
 			if (ctx.hasKey(TransactionContextHolder.class)) {
 				TransactionContextHolder holder = ctx.get(TransactionContextHolder.class);
 				if (holder.hasContext()) {
@@ -66,7 +62,6 @@ public abstract class TransactionContextManager {
 					return;
 				}
 			}
-
 			sink.error(new NoTransactionException("No transaction in context"));
 		});
 	}
@@ -74,9 +69,9 @@ public abstract class TransactionContextManager {
 	/**
 	 * Create a {@link TransactionContext} and register it in the subscriber {@link Context}.
 	 * @return functional context registration.
+	 * @throws IllegalStateException if a transaction context is already associated.
 	 * @see Mono#subscriberContext(Function)
 	 * @see Flux#subscriberContext(Function)
-	 * @throws IllegalStateException if a transaction context is already associated.
 	 */
 	public static Function<Context, Context> createTransactionContext() {
 		return context -> context.put(TransactionContext.class, new TransactionContext());
@@ -91,13 +86,10 @@ public abstract class TransactionContextManager {
 	 */
 	public static Function<Context, Context> getOrCreateContext() {
 		return context -> {
-
 			TransactionContextHolder holder = context.get(TransactionContextHolder.class);
-
 			if (holder.hasContext()) {
 				context.put(TransactionContext.class, holder.currentContext());
 			}
-
 			return context.put(TransactionContext.class, holder.createContext());
 		};
 	}
@@ -111,11 +103,9 @@ public abstract class TransactionContextManager {
 	 * @return functional context registration.
 	 */
 	public static Function<Context, Context> getOrCreateContextHolder() {
-
 		return context -> {
-
 			if (!context.hasKey(TransactionContextHolder.class)) {
-				return context.put(TransactionContextHolder.class, new TransactionContextHolder(new Stack<>()));
+				return context.put(TransactionContextHolder.class, new TransactionContextHolder(new ArrayDeque<>()));
 			}
 			return context;
 		};

@@ -18,8 +18,6 @@ package org.springframework.transaction.reactive;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.transaction.ReactiveTransactionStatus;
-
 /**
  * Interface for reactive transaction synchronization callbacks.
  * Supported by {@link AbstractReactiveTransactionManager}.
@@ -68,16 +66,7 @@ public interface ReactiveTransactionSynchronization {
 	}
 
 	/**
-	 * Flush the underlying session to the datastore, if applicable.
-	 * @see ReactiveTransactionStatus#flush()
-	 */
-	default Mono<Void> flush() {
-		return Mono.empty();
-	}
-
-	/**
 	 * Invoked before transaction commit (before "beforeCompletion").
-	 * Can e.g. flush transactional O/R Mapping sessions to the database.
 	 * <p>This callback does <i>not</i> mean that the transaction will actually be committed.
 	 * A rollback decision can still occur after this method has been called. This callback
 	 * is rather meant to perform work that's only relevant if a commit still has a chance

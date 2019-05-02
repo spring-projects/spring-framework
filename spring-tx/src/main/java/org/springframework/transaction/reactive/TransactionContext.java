@@ -31,17 +31,21 @@ import org.springframework.util.StringUtils;
  * from the subscriber context.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
  * @see TransactionContextManager
  * @see reactor.util.context.Context
  */
 public class TransactionContext {
 
+	private final @Nullable TransactionContext parent;
+
 	private final UUID contextId = UUID.randomUUID();
 
 	private final Map<Object, Object> resources = new LinkedHashMap<>();
 
-	private @Nullable Set<ReactiveTransactionSynchronization> synchronizations;
+	@Nullable
+	private Set<ReactiveTransactionSynchronization> synchronizations;
 
 	private volatile @Nullable String currentTransactionName;
 
@@ -50,8 +54,6 @@ public class TransactionContext {
 	private volatile @Nullable Integer currentTransactionIsolationLevel;
 
 	private volatile boolean actualTransactionActive;
-
-	private final @Nullable TransactionContext parent;
 
 
 	TransactionContext() {
@@ -63,78 +65,76 @@ public class TransactionContext {
 	}
 
 
-	public void clear() {
-
-		synchronizations = null;
-		currentTransactionName = null;
-		currentTransactionReadOnly = false;
-		currentTransactionIsolationLevel = null;
-		actualTransactionActive = false;
+	@Nullable
+	public TransactionContext getParent() {
+		return this.parent;
 	}
 
 	public String getName() {
-
-		if (StringUtils.hasText(currentTransactionName)) {
-			return contextId + ": " + currentTransactionName;
+		if (StringUtils.hasText(this.currentTransactionName)) {
+			return this.contextId + ": " + this.currentTransactionName;
 		}
-
-		return contextId.toString();
+		return this.contextId.toString();
 	}
 
 	public UUID getContextId() {
-		return contextId;
+		return this.contextId;
 	}
 
 	public Map<Object, Object> getResources() {
-		return resources;
+		return this.resources;
 	}
 
-	@Nullable
-	public Set<ReactiveTransactionSynchronization> getSynchronizations() {
-		return synchronizations;
-	}
-
-	public void setSynchronizations(@org.springframework.lang.Nullable Set<ReactiveTransactionSynchronization> synchronizations) {
+	public void setSynchronizations(@Nullable Set<ReactiveTransactionSynchronization> synchronizations) {
 		this.synchronizations = synchronizations;
 	}
 
 	@Nullable
-	public String getCurrentTransactionName() {
-		return currentTransactionName;
+	public Set<ReactiveTransactionSynchronization> getSynchronizations() {
+		return this.synchronizations;
 	}
 
 	public void setCurrentTransactionName(@Nullable String currentTransactionName) {
 		this.currentTransactionName = currentTransactionName;
 	}
 
-	public boolean isCurrentTransactionReadOnly() {
-		return currentTransactionReadOnly;
+	@Nullable
+	public String getCurrentTransactionName() {
+		return this.currentTransactionName;
 	}
 
 	public void setCurrentTransactionReadOnly(boolean currentTransactionReadOnly) {
 		this.currentTransactionReadOnly = currentTransactionReadOnly;
 	}
 
-	@Nullable
-	public Integer getCurrentTransactionIsolationLevel() {
-		return currentTransactionIsolationLevel;
+	public boolean isCurrentTransactionReadOnly() {
+		return this.currentTransactionReadOnly;
 	}
 
 	public void setCurrentTransactionIsolationLevel(@Nullable Integer currentTransactionIsolationLevel) {
 		this.currentTransactionIsolationLevel = currentTransactionIsolationLevel;
 	}
 
-	public boolean isActualTransactionActive() {
-		return actualTransactionActive;
+	@Nullable
+	public Integer getCurrentTransactionIsolationLevel() {
+		return this.currentTransactionIsolationLevel;
 	}
 
 	public void setActualTransactionActive(boolean actualTransactionActive) {
 		this.actualTransactionActive = actualTransactionActive;
 	}
 
-	@Nullable
-	public TransactionContext getParent() {
-		return parent;
+	public boolean isActualTransactionActive() {
+		return this.actualTransactionActive;
+	}
+
+
+	public void clear() {
+		this.synchronizations = null;
+		this.currentTransactionName = null;
+		this.currentTransactionReadOnly = false;
+		this.currentTransactionIsolationLevel = null;
+		this.actualTransactionActive = false;
 	}
 
 }

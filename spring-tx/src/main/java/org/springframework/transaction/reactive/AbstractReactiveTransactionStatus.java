@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.reactive;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.transaction.ReactiveTransactionStatus;
 
 /**
@@ -29,6 +27,7 @@ import org.springframework.transaction.ReactiveTransactionStatus;
  * underlying transaction object, and no transaction synchronization mechanism.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
  * @see #setRollbackOnly()
  * @see #isRollbackOnly()
@@ -53,41 +52,13 @@ public abstract class AbstractReactiveTransactionStatus implements ReactiveTrans
 	}
 
 	/**
-	 * Determine the rollback-only flag via checking both the local rollback-only flag
-	 * of this TransactionStatus and the global rollback-only flag of the underlying
-	 * transaction, if any.
-	 * @see #isLocalRollbackOnly()
-	 * @see #isGlobalRollbackOnly()
-	 */
-	@Override
-	public boolean isRollbackOnly() {
-		return (isLocalRollbackOnly() || isGlobalRollbackOnly());
-	}
-
-	/**
 	 * Determine the rollback-only flag via checking this ReactiveTransactionStatus.
 	 * <p>Will only return "true" if the application called {@code setRollbackOnly}
 	 * on this TransactionStatus object.
 	 */
-	public boolean isLocalRollbackOnly() {
-		return this.rollbackOnly;
-	}
-
-	/**
-	 * Template method for determining the global rollback-only flag of the
-	 * underlying transaction, if any.
-	 * <p>This implementation always returns {@code false}.
-	 */
-	public boolean isGlobalRollbackOnly() {
-		return false;
-	}
-
-	/**
-	 * This implementations is empty, considering flush as a no-op.
-	 */
 	@Override
-	public Mono<Void> flush() {
-		return Mono.empty();
+	public boolean isRollbackOnly() {
+		return this.rollbackOnly;
 	}
 
 	/**

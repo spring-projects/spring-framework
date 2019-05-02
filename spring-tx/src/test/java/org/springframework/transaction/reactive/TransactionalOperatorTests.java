@@ -21,6 +21,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+
 import static org.junit.Assert.*;
 
 /**
@@ -32,57 +34,47 @@ public class TransactionalOperatorTests {
 
 	ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
 
+
 	@Test
 	public void commitWithMono() {
-
-		TransactionalOperator operator = TransactionalOperator.create(tm);
-
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Mono.just(true).as(operator::transactional)
 				.as(StepVerifier::create)
 				.expectNext(true)
 				.verifyComplete();
-
 		assertTrue(tm.commit);
 		assertFalse(tm.rollback);
 	}
 
 	@Test
 	public void rollbackWithMono() {
-
-		TransactionalOperator operator = TransactionalOperator.create(tm);
-
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Mono.error(new IllegalStateException()).as(operator::transactional)
 				.as(StepVerifier::create)
 				.verifyError(IllegalStateException.class);
-
 		assertFalse(tm.commit);
 		assertTrue(tm.rollback);
 	}
 
 	@Test
 	public void commitWithFlux() {
-
-		TransactionalOperator operator = TransactionalOperator.create(tm);
-
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Flux.just(true).as(operator::transactional)
 				.as(StepVerifier::create)
 				.expectNext(true)
 				.verifyComplete();
-
 		assertTrue(tm.commit);
 		assertFalse(tm.rollback);
 	}
 
 	@Test
 	public void rollbackWithFlux() {
-
-		TransactionalOperator operator = TransactionalOperator.create(tm);
-
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Flux.error(new IllegalStateException()).as(operator::transactional)
 				.as(StepVerifier::create)
 				.verifyError(IllegalStateException.class);
-
 		assertFalse(tm.commit);
 		assertTrue(tm.rollback);
 	}
+
 }

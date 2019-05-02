@@ -21,8 +21,8 @@ import org.springframework.transaction.ReactiveTransactionStatus;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@link ReactiveTransactionStatus}
- * interface, used by {@link AbstractReactiveTransactionManager}. Based on the concept
+ * Default implementation of the {@link ReactiveTransactionStatus} interface,
+ * used by {@link AbstractReactiveTransactionManager}. Based on the concept
  * of an underlying "transaction object".
  *
  * <p>Holds all status information that {@link AbstractReactiveTransactionManager}
@@ -33,6 +33,7 @@ import org.springframework.util.Assert;
  * implementations, in particular not for mock transaction managers in testing environments.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
  * @see AbstractReactiveTransactionManager
  * @see #getTransaction
@@ -72,6 +73,7 @@ public class DefaultReactiveTransactionStatus extends AbstractReactiveTransactio
 	public DefaultReactiveTransactionStatus(
 			@Nullable Object transaction, boolean newTransaction, boolean newSynchronization,
 			boolean readOnly, boolean debug, @Nullable Object suspendedResources) {
+
 		this.transaction = transaction;
 		this.newTransaction = newTransaction;
 		this.newSynchronization = newSynchronization;

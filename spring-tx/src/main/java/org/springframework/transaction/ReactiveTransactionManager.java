@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,6 @@ package org.springframework.transaction;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.lang.Nullable;
-
 /**
  * This is the central interface in Spring's reactive transaction infrastructure.
  * Applications can use this directly, but it is not primarily meant as API:
@@ -27,6 +25,7 @@ import org.springframework.lang.Nullable;
  * declarative transaction demarcation through AOP.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
@@ -43,7 +42,7 @@ public interface ReactiveTransactionManager {
 	 * <p>An exception to the above rule is the read-only flag, which should be
 	 * ignored if no explicit read-only mode is supported. Essentially, the
 	 * read-only flag is just a hint for potential optimization.
-	 * @param definition the TransactionDefinition instance (can be empty for defaults),
+	 * @param definition the TransactionDefinition instance,
 	 * describing propagation behavior, isolation level, timeout etc.
 	 * @return transaction status object representing the new or current transaction
 	 * @throws TransactionException in case of lookup, creation, or system errors
@@ -55,7 +54,7 @@ public interface ReactiveTransactionManager {
 	 * @see TransactionDefinition#getTimeout
 	 * @see TransactionDefinition#isReadOnly
 	 */
-	Mono<ReactiveTransactionStatus> getTransaction(@Nullable TransactionDefinition definition) throws TransactionException;
+	Mono<ReactiveTransactionStatus> getTransaction(TransactionDefinition definition) throws TransactionException;
 
 	/**
 	 * Commit the given transaction, with regard to its status. If the transaction

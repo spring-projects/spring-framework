@@ -19,9 +19,9 @@ package org.springframework.transaction.reactive;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.ReactiveTransactionManager;
 
 /**
  * Operator class that simplifies programmatic transaction demarcation and
@@ -38,16 +38,8 @@ import org.springframework.transaction.ReactiveTransactionManager;
  * application services utilizing this class, making calls to the low-level
  * services via an inner-class callback object.
  *
- * <p>Can be used within a service implementation via direct instantiation with
- * a transaction manager reference, or get prepared in an application context
- * and passed to services as bean reference. Note: The transaction manager should
- * always be configured as bean in the application context: in the first case given
- * to the service directly, in the second case given to the prepared template.
- *
- * <p>Supports setting the propagation behavior and the isolation level by name,
- * for convenient configuration in context definitions.
- *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
  * @see #execute
  * @see ReactiveTransactionManager
@@ -55,23 +47,15 @@ import org.springframework.transaction.ReactiveTransactionManager;
 public interface TransactionalOperator {
 
 	/**
-	 * Create a new {@link TransactionalOperator} using {@link ReactiveTransactionManager}.
-	 * @param transactionManager the transaction management strategy to be used
-	 * @return the transactional operator
-	 */
-	static TransactionalOperator create(ReactiveTransactionManager transactionManager){
-		return new DefaultTransactionalOperator(transactionManager);
-	}
-
-	/**
 	 * Create a new {@link TransactionalOperator} using {@link ReactiveTransactionManager}
 	 * and {@link TransactionDefinition}.
-	 *
 	 * @param transactionManager the transaction management strategy to be used
-	 * @param transactionDefinition the transaction definition to apply.
+	 * @param transactionDefinition the transaction definition to apply
 	 * @return the transactional operator
 	 */
-	static TransactionalOperator create(ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition){
+	static TransactionalOperator create(
+			ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition){
+
 		return new DefaultTransactionalOperator(transactionManager, transactionDefinition);
 	}
 

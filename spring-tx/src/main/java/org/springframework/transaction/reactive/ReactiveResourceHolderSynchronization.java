@@ -16,10 +16,9 @@
 
 package org.springframework.transaction.reactive;
 
-import org.springframework.transaction.support.ResourceHolder;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import reactor.core.publisher.Mono;
+
+import org.springframework.transaction.support.ResourceHolder;
 
 /**
  * {@link ReactiveTransactionSynchronization} implementation that manages a
@@ -47,9 +46,11 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	 * @param resourceHolder the ResourceHolder to manage
 	 * @param resourceKey the key to bind the ResourceHolder for
 	 * @param synchronizationManager the synchronization manager bound to the current transaction
-	 * @see TransactionSynchronizationManager#bindResource
+	 * @see ReactiveTransactionSynchronizationManager#bindResource
 	 */
-	public ReactiveResourceHolderSynchronization(H resourceHolder, K resourceKey, ReactiveTransactionSynchronizationManager synchronizationManager) {
+	public ReactiveResourceHolderSynchronization(
+			H resourceHolder, K resourceKey, ReactiveTransactionSynchronizationManager synchronizationManager) {
+
 		this.resourceHolder = resourceHolder;
 		this.resourceKey = resourceKey;
 		this.synchronizationManager = synchronizationManager;
@@ -59,7 +60,7 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	@Override
 	public Mono<Void> suspend() {
 		if (this.holderActive) {
-			synchronizationManager.unbindResource(this.resourceKey);
+			this.synchronizationManager.unbindResource(this.resourceKey);
 		}
 		return Mono.empty();
 	}
@@ -67,14 +68,9 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	@Override
 	public Mono<Void> resume() {
 		if (this.holderActive) {
-			synchronizationManager.bindResource(this.resourceKey, this.resourceHolder);
+			this.synchronizationManager.bindResource(this.resourceKey, this.resourceHolder);
 		}
 		return Mono.empty();
-	}
-
-	@Override
-	public Mono<Void> flush() {
-		return flushResource(this.resourceHolder);
 	}
 
 	@Override
@@ -85,13 +81,12 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	@Override
 	public Mono<Void> beforeCompletion() {
 		if (shouldUnbindAtCompletion()) {
-			synchronizationManager.unbindResource(this.resourceKey);
+			this.synchronizationManager.unbindResource(this.resourceKey);
 			this.holderActive = false;
 			if (shouldReleaseBeforeCompletion()) {
 				return releaseResource(this.resourceHolder, this.resourceKey);
 			}
 		}
-
 		return Mono.empty();
 	}
 
@@ -100,15 +95,12 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 		if (!shouldReleaseBeforeCompletion()) {
 			return processResourceAfterCommit(this.resourceHolder);
 		}
-
 		return Mono.empty();
 	}
 
 	@Override
 	public Mono<Void> afterCompletion(int status) {
-
 		return Mono.defer(() -> {
-
 			Mono<Void> sync = Mono.empty();
 			if (shouldUnbindAtCompletion()) {
 				boolean releaseNecessary = false;
@@ -116,20 +108,21 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 					// The thread-bound resource holder might not be available anymore,
 					// since afterCompletion might get called from a different thread.
 					this.holderActive = false;
-					synchronizationManager.unbindResourceIfPossible(this.resourceKey);
+					this.synchronizationManager.unbindResourceIfPossible(this.resourceKey);
 					this.resourceHolder.unbound();
 					releaseNecessary = true;
-				} else {
+				}
+				else {
 					releaseNecessary = shouldReleaseAfterCompletion(this.resourceHolder);
 				}
 				if (releaseNecessary) {
 					sync = releaseResource(this.resourceHolder, this.resourceKey);
 				}
-			} else {
+			}
+			else {
 				// Probably a pre-bound resource...
 				sync = cleanupResource(this.resourceHolder, this.resourceKey, (status == STATUS_COMMITTED));
 			}
-			;
 			return sync.doFinally(s -> this.resourceHolder.reset());
 		});
 	}
@@ -151,7 +144,6 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	 * <p>Note that resources will only be released when they are
 	 * unbound from the thread ({@link #shouldUnbindAtCompletion()}).
 	 * <p>The default implementation returns {@code true}.
-	 *
 	 * @see #releaseResource
 	 */
 	protected boolean shouldReleaseBeforeCompletion() {
@@ -163,7 +155,6 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	 * transaction completion ({@code true}).
 	 * <p>The default implementation returns {@code !shouldReleaseBeforeCompletion()},
 	 * releasing after completion if no attempt was made before completion.
-	 *
 	 * @see #releaseResource
 	 */
 	protected boolean shouldReleaseAfterCompletion(H resourceHolder) {
@@ -171,19 +162,9 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 	}
 
 	/**
-	 * Flush callback for the given resource holder.
-	 *
-	 * @param resourceHolder the resource holder to flush
-	 */
-	protected Mono<Void> flushResource(H resourceHolder) {
-		return Mono.empty();
-	}
-
-	/**
 	 * After-commit callback for the given resource holder.
 	 * Only called when the resource hasn't been released yet
 	 * ({@link #shouldReleaseBeforeCompletion()}).
-	 *
 	 * @param resourceHolder the resource holder to process
 	 */
 	protected Mono<Void> processResourceAfterCommit(H resourceHolder) {
@@ -192,7 +173,6 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 
 	/**
 	 * Release the given resource (after it has been unbound from the thread).
-	 *
 	 * @param resourceHolder the resource holder to process
 	 * @param resourceKey the key that the ResourceHolder was bound for
 	 */
@@ -202,7 +182,6 @@ public abstract class ReactiveResourceHolderSynchronization<H extends ResourceHo
 
 	/**
 	 * Perform a cleanup on the given resource (which is left bound to the thread).
-	 *
 	 * @param resourceHolder the resource holder to process
 	 * @param resourceKey the key that the ResourceHolder was bound for
 	 * @param committed whether the transaction has committed ({@code true})

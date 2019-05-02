@@ -38,15 +38,10 @@ import org.springframework.transaction.ReactiveTransactionStatus;
 public interface ReactiveTransactionCallback<T> {
 
 	/**
-	 * Gets called by {@link TransactionalOperator#transactional} within a transactional context.
+	 * Gets called by {@link TransactionalOperator} within a transactional context.
 	 * Does not need to care about transactions itself, although it can retrieve and
 	 * influence the status of the current transaction via the given status object,
 	 * e.g. setting rollback-only.
-	 * <p>Allows for returning a result object created within the transaction, i.e. a
-	 * domain object or a collection of domain objects. A RuntimeException thrown by the
-	 * callback is treated as application exception that enforces a rollback. Any such
-	 * exception will be propagated to the caller of the template, unless there is a
-	 * problem rolling back, in which case a TransactionException will be thrown.
 	 * @param status associated transaction status
 	 * @return a result publisher
 	 * @see TransactionalOperator#transactional

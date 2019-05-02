@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,7 +48,6 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 	ReactiveTestTransactionManager(boolean existingTransaction, boolean canCreateTransaction) {
 		this.existingTransaction = existingTransaction;
 		this.canCreateTransaction = canCreateTransaction;
-		setTransactionSynchronization(SYNCHRONIZATION_NEVER);
 	}
 
 
@@ -59,7 +58,7 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 
 	@Override
 	protected boolean isExistingTransaction(Object transaction) {
-		return existingTransaction;
+		return this.existingTransaction;
 	}
 
 	@Override
@@ -96,4 +95,5 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 		}
 		return Mono.fromRunnable(() -> this.rollbackOnly = true);
 	}
+
 }

@@ -13,61 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.transaction.reactive;
 
-import java.util.Stack;
+import java.util.Deque;
 
 import org.springframework.transaction.NoTransactionException;
 
 /**
  * Mutable holder for reactive transaction {@link TransactionContext contexts}.
  * This holder keeps references to individual {@link TransactionContext}s.
+ *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
  * @see TransactionContext
  */
-class TransactionContextHolder {
+final class TransactionContextHolder {
 
-	private final Stack<TransactionContext> transactionStack;
+	private final Deque<TransactionContext> transactionStack;
 
 
-	TransactionContextHolder(Stack<TransactionContext> transactionStack) {
+	TransactionContextHolder(Deque<TransactionContext> transactionStack) {
 		this.transactionStack = transactionStack;
 	}
 
 
 	/**
 	 * Return the current {@link TransactionContext}.
-	 * @return the current {@link TransactionContext}.
-	 * @throws NoTransactionException if no transaction is ongoing.
+	 * @throws NoTransactionException if no transaction is ongoing
 	 */
 	TransactionContext currentContext() {
-		TransactionContext context = (transactionStack.isEmpty() ? null : transactionStack.peek());
-
+		TransactionContext context = this.transactionStack.peek();
 		if (context == null) {
 			throw new NoTransactionException("No transaction in context");
 		}
-
 		return context;
 	}
 
 	/**
 	 * Create a new {@link TransactionContext}.
-	 * @return the new {@link TransactionContext}.
 	 */
 	TransactionContext createContext() {
-		TransactionContext context = (transactionStack.isEmpty() ? null : transactionStack.peek());
-
-		return (context == null ? transactionStack.push(new TransactionContext()) :
-				transactionStack.push(new TransactionContext(context)));
+		TransactionContext context = this.transactionStack.peek();
+		if (context != null) {
+			context = new TransactionContext(context);
+		}
+		else {
+			context = new TransactionContext();
+		}
+		this.transactionStack.push(context);
+		return context;
 	}
 
 	/**
 	 * Check whether the holder has a {@link TransactionContext}.
-	 * @return {@literal true} if a {@link TransactionContext} is associated.
+	 * @return {@literal true} if a {@link TransactionContext} is associated
 	 */
 	boolean hasContext() {
-		return !transactionStack.isEmpty();
+		return !this.transactionStack.isEmpty();
 	}
 
 }

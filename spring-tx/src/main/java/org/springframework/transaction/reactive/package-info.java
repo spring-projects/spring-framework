@@ -1,5 +1,5 @@
 /**
- * Support classes for the org.springframework.transaction.reactive package.
+ * Support classes for reactive transaction management.
  * Provides an abstract base class for reactive transaction manager implementations,
  * and a transactional operator plus callback for transaction demarcation.
  */

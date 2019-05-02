@@ -30,8 +30,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.NoTransactionException;
-import org.springframework.transaction.support.ResourceHolder;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.util.Assert;
 
 /**
@@ -43,9 +41,9 @@ import org.springframework.util.Assert;
  * to be removed before a new one can be set for the same key.
  * Supports a list of transaction synchronizations if synchronization is active.
  *
- * <p>Resource management code should check for context-bound resources, e.g. database
- * connections, via {@code getResource}. Such code is
- * normally not supposed to bind resources to units of work, as this is the responsibility
+ * <p>Resource management code should check for context-bound resources, e.g.
+ * database connections, via {@code getResource}. Such code is normally not
+ * supposed to bind resources to units of work, as this is the responsibility
  * of transaction managers. A further option is to lazily bind on first use if
  * transaction synchronization is active, for performing transactions that span
  * an arbitrary number of resources.
@@ -61,16 +59,15 @@ import org.springframework.util.Assert;
  * isn't active, there is either no current transaction, or the transaction manager
  * doesn't support transaction synchronization.
  *
- * <p>Synchronization is for example used to always return the same resources
- * within a transaction, e.g. a database connection for
- * any given Connectionfactory or DatabaseFactory.
+ * <p>Synchronization is for example used to always return the same resources within
+ * a transaction, e.g. a database connection for any given connection factory.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  * @since 5.2
  * @see #isSynchronizationActive
  * @see #registerSynchronization
- * @see TransactionSynchronization
- * @see AbstractReactiveTransactionManager#setTransactionSynchronization
+ * @see ReactiveTransactionSynchronization
  */
 public class ReactiveTransactionSynchronizationManager {
 
@@ -97,10 +94,8 @@ public class ReactiveTransactionSynchronizationManager {
 
 	/**
 	 * Check if there is a resource for the given key bound to the current thread.
-	 *
 	 * @param key the key to check (usually the resource factory)
 	 * @return if there is a value bound to the current thread
-	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public boolean hasResource(Object key) {
 		Object actualKey = ReactiveTransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
@@ -110,11 +105,9 @@ public class ReactiveTransactionSynchronizationManager {
 
 	/**
 	 * Retrieve a resource for the given key that is bound to the current thread.
-	 *
 	 * @param key the key to check (usually the resource factory)
 	 * @return a value bound to the current thread (usually the active
 	 * resource object), or {@code null} if none
-	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	@Nullable
 	public Object getResource(Object key) {
@@ -122,7 +115,7 @@ public class ReactiveTransactionSynchronizationManager {
 		Object value = doGetResource(actualKey);
 		if (value != null && logger.isTraceEnabled()) {
 			logger.trace("Retrieved value [" + value + "] for key [" + actualKey + "] bound to context [" +
-					transactionContext.getName() + "]");
+					this.transactionContext.getName() + "]");
 		}
 		return value;
 	}
@@ -132,64 +125,50 @@ public class ReactiveTransactionSynchronizationManager {
 	 */
 	@Nullable
 	private Object doGetResource(Object actualKey) {
-		Map<Object, Object> map = transactionContext.getResources();
+		Map<Object, Object> map = this.transactionContext.getResources();
 		Object value = map.get(actualKey);
-		// Transparently remove ResourceHolder that was marked as void...
-		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
-			map.remove(actualKey);
-			value = null;
-		}
 		return value;
 	}
 
 	/**
 	 * Bind the given resource for the given key to the current context.
-	 *
 	 * @param key the key to bind the value to (usually the resource factory)
 	 * @param value the value to bind (usually the active resource object)
 	 * @throws IllegalStateException if there is already a value bound to the context
-	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public void bindResource(Object key, Object value) throws IllegalStateException {
 		Object actualKey = ReactiveTransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Assert.notNull(value, "Value must not be null");
-		Map<Object, Object> map = transactionContext.getResources();
+		Map<Object, Object> map = this.transactionContext.getResources();
 		Object oldValue = map.put(actualKey, value);
-		// Transparently suppress a ResourceHolder that was marked as void...
-		if (oldValue instanceof ResourceHolder && ((ResourceHolder) oldValue).isVoid()) {
-			oldValue = null;
-		}
 		if (oldValue != null) {
 			throw new IllegalStateException("Already value [" + oldValue + "] for key [" +
-					actualKey + "] bound to context [" + transactionContext.getName() + "]");
+					actualKey + "] bound to context [" + this.transactionContext.getName() + "]");
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace("Bound value [" + value + "] for key [" + actualKey + "] to context [" +
-					transactionContext.getName() + "]");
+					this.transactionContext.getName() + "]");
 		}
 	}
 
 	/**
 	 * Unbind a resource for the given key from the current context.
-	 *
 	 * @param key the key to unbind (usually the resource factory)
 	 * @return the previously bound value (usually the active resource object)
 	 * @throws IllegalStateException if there is no value bound to the context
-	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public Object unbindResource(Object key) throws IllegalStateException {
 		Object actualKey = ReactiveTransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Object value = doUnbindResource(actualKey);
 		if (value == null) {
 			throw new IllegalStateException(
-					"No value for key [" + actualKey + "] bound to context [" + transactionContext.getName() + "]");
+					"No value for key [" + actualKey + "] bound to context [" + this.transactionContext.getName() + "]");
 		}
 		return value;
 	}
 
 	/**
 	 * Unbind a resource for the given key from the current context.
-	 *
 	 * @param key the key to unbind (usually the resource factory)
 	 * @return the previously bound value, or {@code null} if none bound
 	 */
@@ -204,18 +183,15 @@ public class ReactiveTransactionSynchronizationManager {
 	 */
 	@Nullable
 	private Object doUnbindResource(Object actualKey) {
-		Map<Object, Object> map = transactionContext.getResources();
+		Map<Object, Object> map = this.transactionContext.getResources();
 		Object value = map.remove(actualKey);
-		// Transparently suppress a ResourceHolder that was marked as void...
-		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
-			value = null;
-		}
 		if (value != null && logger.isTraceEnabled()) {
 			logger.trace("Removed value [" + value + "] for key [" + actualKey + "] from context [" +
-					transactionContext.getName() + "]");
+					this.transactionContext.getName() + "]");
 		}
 		return value;
 	}
+
 
 	//-------------------------------------------------------------------------
 	// Management of transaction synchronizations
@@ -224,17 +200,15 @@ public class ReactiveTransactionSynchronizationManager {
 	/**
 	 * Return if transaction synchronization is active for the current context.
 	 * Can be called before register to avoid unnecessary instance creation.
-	 *
 	 * @see #registerSynchronization
 	 */
 	public boolean isSynchronizationActive() {
-		return (transactionContext.getSynchronizations() != null);
+		return (this.transactionContext.getSynchronizations() != null);
 	}
 
 	/**
 	 * Activate transaction synchronization for the current context.
 	 * Called by a transaction manager on transaction begin.
-	 *
 	 * @throws IllegalStateException if synchronization is already active
 	 */
 	public void initSynchronization() throws IllegalStateException {
@@ -242,7 +216,7 @@ public class ReactiveTransactionSynchronizationManager {
 			throw new IllegalStateException("Cannot activate transaction synchronization - already active");
 		}
 		logger.trace("Initializing transaction synchronization");
-		transactionContext.setSynchronizations(new LinkedHashSet<>());
+		this.transactionContext.setSynchronizations(new LinkedHashSet<>());
 	}
 
 	/**
@@ -251,7 +225,6 @@ public class ReactiveTransactionSynchronizationManager {
 	 * <p>Note that synchronizations can implement the
 	 * {@link org.springframework.core.Ordered} interface.
 	 * They will be executed in an order according to their order value (if any).
-	 *
 	 * @param synchronization the synchronization object to register
 	 * @throws IllegalStateException if transaction synchronization is not active
 	 * @see org.springframework.core.Ordered
@@ -260,22 +233,22 @@ public class ReactiveTransactionSynchronizationManager {
 			throws IllegalStateException {
 
 		Assert.notNull(synchronization, "TransactionSynchronization must not be null");
-		if (!isSynchronizationActive()) {
+		Set<ReactiveTransactionSynchronization> synchs = this.transactionContext.getSynchronizations();
+		if (synchs == null) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
-		transactionContext.getSynchronizations().add(synchronization);
+		synchs.add(synchronization);
 	}
 
 	/**
 	 * Return an unmodifiable snapshot list of all registered synchronizations
 	 * for the current context.
-	 *
 	 * @return unmodifiable List of TransactionSynchronization instances
 	 * @throws IllegalStateException if synchronization is not active
-	 * @see TransactionSynchronization
+	 * @see ReactiveTransactionSynchronization
 	 */
 	public List<ReactiveTransactionSynchronization> getSynchronizations() throws IllegalStateException {
-		Set<ReactiveTransactionSynchronization> synchs = transactionContext.getSynchronizations();
+		Set<ReactiveTransactionSynchronization> synchs = this.transactionContext.getSynchronizations();
 		if (synchs == null) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
@@ -284,7 +257,8 @@ public class ReactiveTransactionSynchronizationManager {
 		// might register further synchronizations.
 		if (synchs.isEmpty()) {
 			return Collections.emptyList();
-		} else {
+		}
+		else {
 			// Sort lazily here, not in registerSynchronization.
 			List<ReactiveTransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
 			AnnotationAwareOrderComparator.sort(sortedSynchs);
@@ -295,7 +269,6 @@ public class ReactiveTransactionSynchronizationManager {
 	/**
 	 * Deactivate transaction synchronization for the current context.
 	 * Called by the transaction manager on transaction cleanup.
-	 *
 	 * @throws IllegalStateException if synchronization is not active
 	 */
 	public void clearSynchronization() throws IllegalStateException {
@@ -303,8 +276,9 @@ public class ReactiveTransactionSynchronizationManager {
 			throw new IllegalStateException("Cannot deactivate transaction synchronization - not active");
 		}
 		logger.trace("Clearing transaction synchronization");
-		transactionContext.setSynchronizations(null);
+		this.transactionContext.setSynchronizations(null);
 	}
+
 
 	//-------------------------------------------------------------------------
 	// Exposure of transaction characteristics
@@ -313,59 +287,53 @@ public class ReactiveTransactionSynchronizationManager {
 	/**
 	 * Expose the name of the current transaction, if any.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 *
 	 * @param name the name of the transaction, or {@code null} to reset it
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
 	public void setCurrentTransactionName(@Nullable String name) {
-		transactionContext.setCurrentTransactionName(name);
+		this.transactionContext.setCurrentTransactionName(name);
 	}
 
 	/**
 	 * Return the name of the current transaction, or {@code null} if none set.
 	 * To be called by resource management code for optimizations per use case,
 	 * for example to optimize fetch strategies for specific named transactions.
-	 *
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
 	@Nullable
 	public String getCurrentTransactionName() {
-		return transactionContext.getCurrentTransactionName();
+		return this.transactionContext.getCurrentTransactionName();
 	}
 
 	/**
 	 * Expose a read-only flag for the current transaction.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 *
 	 * @param readOnly {@code true} to mark the current transaction
 	 * as read-only; {@code false} to reset such a read-only marker
 	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly()
 	 */
 	public void setCurrentTransactionReadOnly(boolean readOnly) {
-		transactionContext.setCurrentTransactionReadOnly(readOnly);
+		this.transactionContext.setCurrentTransactionReadOnly(readOnly);
 	}
 
 	/**
 	 * Return whether the current transaction is marked as read-only.
 	 * To be called by resource management code when preparing a newly
-	 * created resource (for example, a Hibernate Session).
+	 * created resource.
 	 * <p>Note that transaction synchronizations receive the read-only flag
 	 * as argument for the {@code beforeCommit} callback, to be able
 	 * to suppress change detection on commit. The present method is meant
-	 * to be used for earlier read-only checks, for example to set the
-	 * flush mode of a Hibernate Session to "FlushMode.NEVER" upfront.
-	 *
+	 * to be used for earlier read-only checks.
 	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly()
-	 * @see TransactionSynchronization#beforeCommit(boolean)
+	 * @see ReactiveTransactionSynchronization#beforeCommit(boolean)
 	 */
 	public boolean isCurrentTransactionReadOnly() {
-		return transactionContext.isCurrentTransactionReadOnly();
+		return this.transactionContext.isCurrentTransactionReadOnly();
 	}
 
 	/**
 	 * Expose an isolation level for the current transaction.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 *
 	 * @param isolationLevel the isolation level to expose, according to the
 	 * R2DBC Connection constants (equivalent to the corresponding Spring
 	 * TransactionDefinition constants), or {@code null} to reset it
@@ -376,14 +344,13 @@ public class ReactiveTransactionSynchronizationManager {
 	 * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
 	 */
 	public void setCurrentTransactionIsolationLevel(@Nullable Integer isolationLevel) {
-		transactionContext.setCurrentTransactionIsolationLevel(isolationLevel);
+		this.transactionContext.setCurrentTransactionIsolationLevel(isolationLevel);
 	}
 
 	/**
 	 * Return the isolation level for the current transaction, if any.
 	 * To be called by resource management code when preparing a newly
 	 * created resource (for example, a R2DBC Connection).
-	 *
 	 * @return the currently exposed isolation level, according to the
 	 * R2DBC Connection constants (equivalent to the corresponding Spring
 	 * TransactionDefinition constants), or {@code null} if none
@@ -395,18 +362,17 @@ public class ReactiveTransactionSynchronizationManager {
 	 */
 	@Nullable
 	public Integer getCurrentTransactionIsolationLevel() {
-		return transactionContext.getCurrentTransactionIsolationLevel();
+		return this.transactionContext.getCurrentTransactionIsolationLevel();
 	}
 
 	/**
 	 * Expose whether there currently is an actual transaction active.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 *
 	 * @param active {@code true} to mark the current context as being associated
 	 * with an actual transaction; {@code false} to reset that marker
 	 */
 	public void setActualTransactionActive(boolean active) {
-		transactionContext.setActualTransactionActive(active);
+		this.transactionContext.setActualTransactionActive(active);
 	}
 
 	/**
@@ -418,17 +384,15 @@ public class ReactiveTransactionSynchronizationManager {
 	 * resource transaction; also on PROPAGATION_SUPPORTS) and an actual
 	 * transaction being active (with backing resource transaction;
 	 * on PROPAGATION_REQUIRED, PROPAGATION_REQUIRES_NEW, etc).
-	 *
 	 * @see #isSynchronizationActive()
 	 */
 	public boolean isActualTransactionActive() {
-		return transactionContext.isActualTransactionActive();
+		return this.transactionContext.isActualTransactionActive();
 	}
 
 	/**
 	 * Clear the entire transaction synchronization state:
 	 * registered synchronizations as well as the various transaction characteristics.
-	 *
 	 * @see #clearSynchronization()
 	 * @see #setCurrentTransactionName
 	 * @see #setCurrentTransactionReadOnly
@@ -436,11 +400,11 @@ public class ReactiveTransactionSynchronizationManager {
 	 * @see #setActualTransactionActive
 	 */
 	public void clear() {
-		transactionContext.clear();
+		this.transactionContext.clear();
 	}
 
 	private Map<Object, Object> getResources() {
-		return transactionContext.getResources();
+		return this.transactionContext.getResources();
 	}
 
 }

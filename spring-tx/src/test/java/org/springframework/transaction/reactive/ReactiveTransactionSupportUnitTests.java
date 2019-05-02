@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -87,7 +87,8 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void commitWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
-		tm.getTransaction(null).flatMap(tm::commit).subscriberContext(TransactionContextManager.createTransactionContext())
+		tm.getTransaction(new DefaultTransactionDefinition()).flatMap(tm::commit)
+				.subscriberContext(TransactionContextManager.createTransactionContext())
 				.as(StepVerifier::create).verifyComplete();
 
 		assertHasBegan(tm);
@@ -99,7 +100,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void rollbackWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
-		tm.getTransaction(null).flatMap(tm::rollback)
+		tm.getTransaction(new DefaultTransactionDefinition()).flatMap(tm::rollback)
 				.subscriberContext(TransactionContextManager.createTransactionContext()).as(StepVerifier::create)
 				.verifyComplete();
 
@@ -112,7 +113,8 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void rollbackOnlyWithoutExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
-		tm.getTransaction(null).doOnNext(ReactiveTransactionStatus::setRollbackOnly).flatMap(tm::commit)
+		tm.getTransaction(new DefaultTransactionDefinition()).doOnNext(ReactiveTransactionStatus::setRollbackOnly)
+				.flatMap(tm::commit)
 				.subscriberContext(TransactionContextManager.createTransactionContext()).as(StepVerifier::create)
 				.verifyComplete();
 
@@ -125,7 +127,8 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void commitWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
-		tm.getTransaction(null).flatMap(tm::commit).subscriberContext(TransactionContextManager.createTransactionContext())
+		tm.getTransaction(new DefaultTransactionDefinition()).flatMap(tm::commit)
+				.subscriberContext(TransactionContextManager.createTransactionContext())
 				.as(StepVerifier::create).verifyComplete();
 
 		assertHasNotBegan(tm);
@@ -137,7 +140,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void rollbackWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
-		tm.getTransaction(null).flatMap(tm::rollback)
+		tm.getTransaction(new DefaultTransactionDefinition()).flatMap(tm::rollback)
 				.subscriberContext(TransactionContextManager.createTransactionContext()).as(StepVerifier::create)
 				.verifyComplete();
 
@@ -150,7 +153,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void rollbackOnlyWithExistingTransaction() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(true, true);
-		tm.getTransaction(null).doOnNext(ReactiveTransactionStatus::setRollbackOnly).flatMap(tm::commit)
+		tm.getTransaction(new DefaultTransactionDefinition()).doOnNext(ReactiveTransactionStatus::setRollbackOnly).flatMap(tm::commit)
 				.subscriberContext(TransactionContextManager.createTransactionContext()).as(StepVerifier::create)
 				.verifyComplete();
 
@@ -163,7 +166,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void transactionTemplate() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
-		TransactionalOperator operator = TransactionalOperator.create(tm);
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 
 		Flux.just("Walter").as(operator::transactional)
 				.as(StepVerifier::create)
@@ -179,7 +182,7 @@ public class ReactiveTransactionSupportUnitTests {
 	@Test
 	public void transactionTemplateWithException() {
 		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true);
-		TransactionalOperator operator = TransactionalOperator.create(tm);
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		RuntimeException ex = new RuntimeException("Some application exception");
 
 		Mono.error(ex).as(operator::transactional)
