@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,8 +213,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		}
 
 		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
-		String name = (requestParam == null || StringUtils.isEmpty(requestParam.name()) ?
-				parameter.getParameterName() : requestParam.name());
+		String name = (requestParam != null && StringUtils.hasLength(requestParam.name()) ?
+				requestParam.name() : parameter.getParameterName());
 		Assert.state(name != null, "Unresolvable parameter name");
 
 		if (value == null) {

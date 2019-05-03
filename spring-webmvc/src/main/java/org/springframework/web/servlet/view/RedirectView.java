@@ -650,7 +650,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			return false;
 		}
 		String targetHost = UriComponentsBuilder.fromUriString(targetUrl).build().getHost();
-		if (StringUtils.isEmpty(targetHost)) {
+		if (!StringUtils.hasLength(targetHost)) {
 			return false;
 		}
 		for (String host : getHosts()) {

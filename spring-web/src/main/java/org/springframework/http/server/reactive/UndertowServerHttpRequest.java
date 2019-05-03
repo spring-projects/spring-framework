@@ -74,7 +74,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		Assert.notNull(exchange, "HttpServerExchange is required.");
 		String requestURL = exchange.getRequestURL();
 		String query = exchange.getQueryString();
-		String requestUriAndQuery = StringUtils.isEmpty(query) ? requestURL : requestURL + "?" + query;
+		String requestUriAndQuery = (StringUtils.hasLength(query) ? requestURL + "?" + query : requestURL);
 		return new URI(requestUriAndQuery);
 	}
 

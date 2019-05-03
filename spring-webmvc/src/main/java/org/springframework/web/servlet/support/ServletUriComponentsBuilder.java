@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		String extension = null;
 		if (this.originalPath != null) {
 			extension = UriUtils.extractFileExtension(this.originalPath);
-			if (!StringUtils.isEmpty(extension)) {
+			if (StringUtils.hasLength(extension)) {
 				int end = this.originalPath.length() - (extension.length() + 1);
 				replacePath(this.originalPath.substring(0, end));
 			}
