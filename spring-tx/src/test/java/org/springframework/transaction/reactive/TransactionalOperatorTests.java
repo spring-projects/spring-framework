@@ -59,9 +59,9 @@ public class TransactionalOperatorTests {
 	@Test
 	public void commitWithFlux() {
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
-		Flux.just(true).as(operator::transactional)
+		Flux.just(1, 2, 3, 4).as(operator::transactional)
 				.as(StepVerifier::create)
-				.expectNext(true)
+				.expectNextCount(4)
 				.verifyComplete();
 		assertTrue(tm.commit);
 		assertFalse(tm.rollback);
