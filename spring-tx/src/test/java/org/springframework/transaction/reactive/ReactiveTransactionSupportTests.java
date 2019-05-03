@@ -95,6 +95,7 @@ public class ReactiveTransactionSupportTests {
 		assertHasCommitted(tm);
 		assertHasNoRollback(tm);
 		assertHasNotSetRollbackOnly(tm);
+		assertHasCleanedUp(tm);
 	}
 
 	@Test
@@ -108,6 +109,7 @@ public class ReactiveTransactionSupportTests {
 		assertHasNotCommitted(tm);
 		assertHasRolledBack(tm);
 		assertHasNotSetRollbackOnly(tm);
+		assertHasCleanedUp(tm);
 	}
 
 	@Test
@@ -122,6 +124,7 @@ public class ReactiveTransactionSupportTests {
 		assertHasNotCommitted(tm);
 		assertHasRolledBack(tm);
 		assertHasNotSetRollbackOnly(tm);
+		assertHasCleanedUp(tm);
 	}
 
 	@Test
@@ -135,6 +138,7 @@ public class ReactiveTransactionSupportTests {
 		assertHasNotCommitted(tm);
 		assertHasNoRollback(tm);
 		assertHasNotSetRollbackOnly(tm);
+		assertHasNotCleanedUp(tm);
 	}
 
 	@Test
@@ -148,6 +152,7 @@ public class ReactiveTransactionSupportTests {
 		assertHasNotCommitted(tm);
 		assertHasNoRollback(tm);
 		assertHasSetRollbackOnly(tm);
+		assertHasNotCleanedUp(tm);
 	}
 
 	@Test
@@ -161,6 +166,7 @@ public class ReactiveTransactionSupportTests {
 		assertHasNotCommitted(tm);
 		assertHasNoRollback(tm);
 		assertHasSetRollbackOnly(tm);
+		assertHasNotCleanedUp(tm);
 	}
 
 	@Test
@@ -177,6 +183,7 @@ public class ReactiveTransactionSupportTests {
 		assertHasCommitted(tm);
 		assertHasNoRollback(tm);
 		assertHasNotSetRollbackOnly(tm);
+		assertHasCleanedUp(tm);
 	}
 
 	@Test
@@ -194,6 +201,7 @@ public class ReactiveTransactionSupportTests {
 		assertHasNotCommitted(tm);
 		assertHasRolledBack(tm);
 		assertHasNotSetRollbackOnly(tm);
+		assertHasCleanedUp(tm);
 	}
 
 	private void assertHasBegan(ReactiveTestTransactionManager actual) {
@@ -226,6 +234,14 @@ assertFalse("Expected to not call <ReactiveTransactionManager.rollback()> but wa
 
 	private void assertHasNotSetRollbackOnly(ReactiveTestTransactionManager actual) {
 		assertFalse("Expected to not call <ReactiveTransactionManager.setRollbackOnly()> but was <setRollbackOnly()> was called", actual.rollbackOnly);
+	}
+
+	private void assertHasCleanedUp(ReactiveTestTransactionManager actual) {
+		assertTrue("Expected <ReactiveTransactionManager.doCleanupAfterCompletion()> but was <doCleanupAfterCompletion()> was not invoked", actual.cleanup);
+	}
+
+	private void assertHasNotCleanedUp(ReactiveTestTransactionManager actual) {
+		assertFalse("Expected to not call <ReactiveTransactionManager.doCleanupAfterCompletion()> but was <doCleanupAfterCompletion()> was called", actual.cleanup);
 	}
 
 }

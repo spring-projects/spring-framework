@@ -676,17 +676,18 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			if (status.isNewSynchronization()) {
 				synchronizationManager.clear();
 			}
+			Mono<Void> cleanup = Mono.empty();
 			if (status.isNewTransaction()) {
-				doCleanupAfterCompletion(synchronizationManager, status.getTransaction());
+				cleanup = doCleanupAfterCompletion(synchronizationManager, status.getTransaction());
 			}
 			if (status.getSuspendedResources() != null) {
 				if (status.isDebug()) {
 					logger.debug("Resuming suspended transaction after completion of inner transaction");
 				}
 				Object transaction = (status.hasTransaction() ? status.getTransaction() : null);
-				return resume(synchronizationManager, transaction, (SuspendedResourcesHolder) status.getSuspendedResources());
+				return cleanup.then(resume(synchronizationManager, transaction, (SuspendedResourcesHolder) status.getSuspendedResources()));
 			}
-			return Mono.empty();
+			return cleanup;
 		});
 	}
 
