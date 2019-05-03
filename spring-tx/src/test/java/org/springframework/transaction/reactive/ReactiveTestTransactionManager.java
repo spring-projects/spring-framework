@@ -44,6 +44,8 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 
 	protected boolean rollbackOnly = false;
 
+	protected boolean cleanup = false;
+
 
 	ReactiveTestTransactionManager(boolean existingTransaction, boolean canCreateTransaction) {
 		this.existingTransaction = existingTransaction;
@@ -96,4 +98,8 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 		return Mono.fromRunnable(() -> this.rollbackOnly = true);
 	}
 
+	@Override
+	protected Mono<Void> doCleanupAfterCompletion(TransactionSynchronizationManager synchronizationManager, Object transaction) {
+		return Mono.fromRunnable(() -> this.cleanup = true);
+	}
 }
