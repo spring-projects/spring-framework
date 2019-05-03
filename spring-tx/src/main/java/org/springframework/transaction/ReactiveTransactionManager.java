@@ -18,6 +18,8 @@ package org.springframework.transaction;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
+
 /**
  * This is the central interface in Spring's reactive transaction infrastructure.
  * Applications can use this directly, but it is not primarily meant as API:
@@ -27,6 +29,8 @@ import reactor.core.publisher.Mono;
  * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.2
+ * @see org.springframework.transaction.reactive.TransactionalOperator
+ * @see org.springframework.transaction.interceptor.TransactionInterceptor
  */
 public interface ReactiveTransactionManager extends TransactionManager {
 
@@ -53,7 +57,8 @@ public interface ReactiveTransactionManager extends TransactionManager {
 	 * @see TransactionDefinition#getTimeout
 	 * @see TransactionDefinition#isReadOnly
 	 */
-	Mono<ReactiveTransaction> getReactiveTransaction(TransactionDefinition definition) throws TransactionException;
+	Mono<ReactiveTransaction> getReactiveTransaction(@Nullable TransactionDefinition definition)
+			throws TransactionException;
 
 	/**
 	 * Commit the given transaction, with regard to its status. If the transaction

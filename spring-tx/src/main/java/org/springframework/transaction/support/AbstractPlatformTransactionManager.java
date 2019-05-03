@@ -338,45 +338,43 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doBegin
 	 */
 	@Override
-	public final TransactionStatus getTransaction(@Nullable TransactionDefinition definition) throws TransactionException {
+	public final TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
+			throws TransactionException {
+
+		// Use defaults if no transaction definition given.
+		TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
+
 		Object transaction = doGetTransaction();
-
-		// Cache debug flag to avoid repeated checks.
 		boolean debugEnabled = logger.isDebugEnabled();
-
-		if (definition == null) {
-			// Use defaults if no transaction definition given.
-			definition = new DefaultTransactionDefinition();
-		}
 
 		if (isExistingTransaction(transaction)) {
 			// Existing transaction found -> check propagation behavior to find out how to behave.
-			return handleExistingTransaction(definition, transaction, debugEnabled);
+			return handleExistingTransaction(def, transaction, debugEnabled);
 		}
 
 		// Check definition settings for new transaction.
-		if (definition.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
-			throw new InvalidTimeoutException("Invalid transaction timeout", definition.getTimeout());
+		if (def.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
+			throw new InvalidTimeoutException("Invalid transaction timeout", def.getTimeout());
 		}
 
 		// No existing transaction found -> check propagation behavior to find out how to proceed.
-		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
+		if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 			throw new IllegalTransactionStateException(
 					"No existing transaction found for transaction marked with propagation 'mandatory'");
 		}
-		else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
-				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
-				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+		else if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
+				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
+				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			SuspendedResourcesHolder suspendedResources = suspend(null);
 			if (debugEnabled) {
-				logger.debug("Creating new transaction with name [" + definition.getName() + "]: " + definition);
+				logger.debug("Creating new transaction with name [" + def.getName() + "]: " + def);
 			}
 			try {
 				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 				DefaultTransactionStatus status = newTransactionStatus(
-						definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
-				doBegin(transaction, definition);
-				prepareSynchronization(status, definition);
+						def, transaction, true, newSynchronization, debugEnabled, suspendedResources);
+				doBegin(transaction, def);
+				prepareSynchronization(status, def);
 				return status;
 			}
 			catch (RuntimeException | Error ex) {
@@ -386,12 +384,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		else {
 			// Create "empty" transaction: no actual transaction, but potentially synchronization.
-			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT && logger.isWarnEnabled()) {
+			if (def.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT && logger.isWarnEnabled()) {
 				logger.warn("Custom isolation level specified but no actual transaction initiated; " +
-						"isolation level will effectively be ignored: " + definition);
+						"isolation level will effectively be ignored: " + def);
 			}
 			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
-			return prepareTransactionStatus(definition, null, true, newSynchronization, debugEnabled, null);
+			return prepareTransactionStatus(def, null, true, newSynchronization, debugEnabled, null);
 		}
 	}
 

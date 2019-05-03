@@ -47,20 +47,6 @@ import org.springframework.transaction.TransactionException;
 public interface TransactionalOperator {
 
 	/**
-	 * Create a new {@link TransactionalOperator} using {@link ReactiveTransactionManager}
-	 * and {@link TransactionDefinition}.
-	 * @param transactionManager the transaction management strategy to be used
-	 * @param transactionDefinition the transaction definition to apply
-	 * @return the transactional operator
-	 */
-	static TransactionalOperator create(
-			ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition){
-
-		return new TransactionalOperatorImpl(transactionManager, transactionDefinition);
-	}
-
-
-	/**
 	 * Wrap the functional sequence specified by the given Flux within a transaction.
 	 * @param flux the Flux that should be executed within the transaction
 	 * @return a result publisher returned by the callback, or {@code null} if none
@@ -94,5 +80,31 @@ public interface TransactionalOperator {
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
 	<T> Flux<T> execute(TransactionCallback<T> action) throws TransactionException;
+
+
+	// Static builder methods
+
+	/**
+	 * Create a new {@link TransactionalOperator} using {@link ReactiveTransactionManager},
+	 * using a default transaction.
+	 * @param transactionManager the transaction management strategy to be used
+	 * @return the transactional operator
+	 */
+	static TransactionalOperator create(ReactiveTransactionManager transactionManager){
+		return create(transactionManager, TransactionDefinition.withDefaults());
+	}
+
+	/**
+	 * Create a new {@link TransactionalOperator} using {@link ReactiveTransactionManager}
+	 * and {@link TransactionDefinition}.
+	 * @param transactionManager the transaction management strategy to be used
+	 * @param transactionDefinition the transaction definition to apply
+	 * @return the transactional operator
+	 */
+	static TransactionalOperator create(
+			ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition){
+
+		return new TransactionalOperatorImpl(transactionManager, transactionDefinition);
+	}
 
 }
