@@ -187,7 +187,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		String forwardedPrefix = getForwardedPrefix(request);
 		if (forwardedPrefix != null) {
 			String contextPath = request.getContextPath();
-			if (!StringUtils.isEmpty(contextPath) && !contextPath.equals("/") && path.startsWith(contextPath)) {
+			if (StringUtils.hasLength(contextPath) && !contextPath.equals("/") && path.startsWith(contextPath)) {
 				path = path.substring(contextPath.length());
 			}
 			path = forwardedPrefix + path;
@@ -285,7 +285,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		String extension = null;
 		if (this.originalPath != null) {
 			extension = UriUtils.extractFileExtension(this.originalPath);
-			if (!StringUtils.isEmpty(extension)) {
+			if (StringUtils.hasLength(extension)) {
 				int end = this.originalPath.length() - (extension.length() + 1);
 				replacePath(this.originalPath.substring(0, end));
 			}
