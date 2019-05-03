@@ -51,7 +51,7 @@ public interface ExchangeStrategies {
 	// Static builder methods
 
 	/**
-	 * Return a new {@code ExchangeStrategies} with default configuration
+	 * Return an {@code ExchangeStrategies} instance with default configuration
 	 * provided by {@link ClientCodecConfigurer}.
 	 */
 	static ExchangeStrategies withDefaults() {

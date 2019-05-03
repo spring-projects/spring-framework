@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ public abstract class AbstractHttpSendingTransportHandler extends AbstractTransp
 		String query = request.getURI().getQuery();
 		MultiValueMap<String, String> params = UriComponentsBuilder.newInstance().query(query).build().getQueryParams();
 		String value = params.getFirst("c");
-		if (StringUtils.isEmpty(value)) {
+		if (!StringUtils.hasLength(value)) {
 			return null;
 		}
 		String result = UriUtils.decode(value, StandardCharsets.UTF_8);

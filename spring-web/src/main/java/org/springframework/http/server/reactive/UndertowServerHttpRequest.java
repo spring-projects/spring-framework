@@ -71,17 +71,15 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static URI initUri(HttpServerExchange exchange) throws URISyntaxException {
-		Assert.notNull(exchange, "HttpServerExchange is required.");
+		Assert.notNull(exchange, "HttpServerExchange is required");
 		String requestURL = exchange.getRequestURL();
 		String query = exchange.getQueryString();
-		String requestUriAndQuery = StringUtils.isEmpty(query) ? requestURL : requestURL + "?" + query;
+		String requestUriAndQuery = (StringUtils.hasLength(query) ? requestURL + "?" + query : requestURL);
 		return new URI(requestUriAndQuery);
 	}
 
 	private static HttpHeaders initHeaders(HttpServerExchange exchange) {
-		UndertowHeadersAdapter headersMap =
-				new UndertowHeadersAdapter(exchange.getRequestHeaders());
-		return new HttpHeaders(headersMap);
+		return new HttpHeaders(new UndertowHeadersAdapter(exchange.getRequestHeaders()));
 	}
 
 	@Override

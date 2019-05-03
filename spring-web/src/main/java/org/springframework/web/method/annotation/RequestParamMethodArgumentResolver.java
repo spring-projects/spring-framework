@@ -214,8 +214,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		}
 
 		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
-		String name = (requestParam == null || StringUtils.isEmpty(requestParam.name()) ?
-				parameter.getParameterName() : requestParam.name());
+		String name = (requestParam != null && StringUtils.hasLength(requestParam.name()) ?
+				requestParam.name() : parameter.getParameterName());
 		Assert.state(name != null, "Unresolvable parameter name");
 
 		parameter = parameter.nestedIfOptional();

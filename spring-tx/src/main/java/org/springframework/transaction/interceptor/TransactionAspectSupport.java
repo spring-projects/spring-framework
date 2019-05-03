@@ -581,8 +581,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			// The TransactionInfo.hasTransaction() method will return false. We created it only
 			// to preserve the integrity of the ThreadLocal stack maintained in this class.
 			if (logger.isTraceEnabled()) {
-				logger.trace("Don't need to create transaction for [" + joinpointIdentification +
-						"]: This method isn't transactional.");
+				logger.trace("No need to create transaction for [" + joinpointIdentification +
+						"]: This method is not transactional.");
 			}
 		}
 

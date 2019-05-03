@@ -76,15 +76,20 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Check whether the given {@code String} is empty.
+	 * Check whether the given object (possibly a {@code String}) is empty.
+	 * This is effectly a shortcut for {@code !hasLength(String)}.
 	 * <p>This method accepts any Object as an argument, comparing it to
 	 * {@code null} and the empty String. As a consequence, this method
 	 * will never return {@code true} for a non-null non-String object.
 	 * <p>The Object signature is useful for general attribute handling code
 	 * that commonly deals with Strings but generally has to iterate over
 	 * Objects since attributes may e.g. be primitive value objects as well.
-	 * @param str the candidate String
+	 * <p><b>Note: If the object is typed to {@code String} upfront, prefer
+	 * {@link #hasLength(String)} or {@link #hasText(String)} instead.</b>
+	 * @param str the candidate object (possibly a {@code String})
 	 * @since 3.2.1
+	 * @see #hasLength(String)
+	 * @see #hasText(String)
 	 */
 	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
@@ -103,7 +108,8 @@ public abstract class StringUtils {
 	 * </pre>
 	 * @param str the {@code CharSequence} to check (may be {@code null})
 	 * @return {@code true} if the {@code CharSequence} is not {@code null} and has length
-	 * @see #hasText(String)
+	 * @see #hasLength(String)
+	 * @see #hasText(CharSequence)
 	 */
 	public static boolean hasLength(@Nullable CharSequence str) {
 		return (str != null && str.length() > 0);
@@ -137,6 +143,8 @@ public abstract class StringUtils {
 	 * @param str the {@code CharSequence} to check (may be {@code null})
 	 * @return {@code true} if the {@code CharSequence} is not {@code null},
 	 * its length is greater than 0, and it does not contain whitespace only
+	 * @see #hasText(String)
+	 * @see #hasLength(CharSequence)
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable CharSequence str) {
@@ -152,6 +160,8 @@ public abstract class StringUtils {
 	 * @return {@code true} if the {@code String} is not {@code null}, its
 	 * length is greater than 0, and it does not contain whitespace only
 	 * @see #hasText(CharSequence)
+	 * @see #hasLength(String)
+	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable String str) {
 		return (str != null && !str.isEmpty() && containsText(str));

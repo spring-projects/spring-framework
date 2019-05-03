@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -578,7 +578,7 @@ public class MvcUriComponentsBuilder {
 			return "/";
 		}
 		String[] paths = mapping.path();
-		if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
+		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
 			return "/";
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {
@@ -594,7 +594,7 @@ public class MvcUriComponentsBuilder {
 			throw new IllegalArgumentException("No @RequestMapping on: " + method.toGenericString());
 		}
 		String[] paths = requestMapping.path();
-		if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
+		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
 			return "/";
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {

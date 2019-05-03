@@ -429,7 +429,7 @@ public class SubProtocolWebSocketHandler
 		}
 
 		SubProtocolHandler handler;
-		if (!StringUtils.isEmpty(protocol)) {
+		if (StringUtils.hasLength(protocol)) {
 			handler = this.protocolHandlerLookup.get(protocol);
 			if (handler == null) {
 				throw new IllegalStateException(

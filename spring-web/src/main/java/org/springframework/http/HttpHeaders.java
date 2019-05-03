@@ -704,7 +704,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
-		if (!StringUtils.isEmpty(value)) {
+		if (StringUtils.hasLength(value)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
 			List<HttpMethod> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
