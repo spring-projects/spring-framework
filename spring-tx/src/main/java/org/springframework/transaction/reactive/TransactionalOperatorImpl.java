@@ -78,14 +78,11 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 			return status.flatMapMany(it -> {
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
-				Flux<Object> retVal = Flux.from(action.doInTransaction(it));
-				return retVal.onErrorResume(ex -> rollbackOnException(it, ex).
-						then(Mono.error(ex))).materialize().flatMap(signal -> {
-							if (signal.isOnComplete()) {
-								return this.transactionManager.commit(it).materialize();
-							}
-							return Mono.just(signal);
-				}).<T>dematerialize();
+				// Need re-wrapping of ReactiveTransaction until we get hold of the exception
+				// through usingWhen.
+				return Flux.usingWhen(Mono.just(it), action::doInTransaction,
+						this.transactionManager::commit, s -> Mono.empty())
+						.onErrorResume(ex -> rollbackOnException(it, ex).then(Mono.error(ex)));
 			});
 		})
 		.subscriberContext(TransactionContextManager.getOrCreateContext())
