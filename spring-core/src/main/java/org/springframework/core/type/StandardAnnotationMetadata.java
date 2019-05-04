@@ -77,13 +77,18 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public Set<String> getAnnotationTypes() {
 		Set<String> types = new LinkedHashSet<>();
 		for (Annotation ann : this.annotations) {
-			types.add(ann.annotationType().getName());
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(ann.annotationType().getName())) {
+				types.add(ann.annotationType().getName());
+			}
 		}
 		return types;
 	}
 
 	@Override
 	public Set<String> getMetaAnnotationTypes(String annotationName) {
+		if (AnnotationUtils.isInJavaLangAnnotationPackage(annotationName)) {
+			return Collections.emptySet();
+		}
 		return (this.annotations.length > 0 ?
 				AnnotatedElementUtils.getMetaAnnotationTypes(getIntrospectedClass(), annotationName) :
 				Collections.emptySet());
@@ -91,6 +96,9 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	@Override
 	public boolean hasAnnotation(String annotationName) {
+		if (AnnotationUtils.isInJavaLangAnnotationPackage(annotationName)) {
+			return false;
+		}
 		for (Annotation ann : this.annotations) {
 			if (ann.annotationType().getName().equals(annotationName)) {
 				return true;
@@ -101,6 +109,9 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	@Override
 	public boolean hasMetaAnnotation(String annotationName) {
+		if (AnnotationUtils.isInJavaLangAnnotationPackage(annotationName)) {
+			return false;
+		}
 		return (this.annotations.length > 0 &&
 				AnnotatedElementUtils.hasMetaAnnotationTypes(getIntrospectedClass(), annotationName));
 	}
