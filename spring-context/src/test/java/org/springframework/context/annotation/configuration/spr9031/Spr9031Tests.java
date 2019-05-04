@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.context.annotation.configuration.spr9031;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 
@@ -75,5 +78,6 @@ public class Spr9031Tests {
 		@Autowired Spr9031Component scanned;
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MarkerAnnotation {}
 }
