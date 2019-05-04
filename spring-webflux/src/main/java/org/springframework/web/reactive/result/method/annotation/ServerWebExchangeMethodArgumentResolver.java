@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,18 +50,18 @@ import org.springframework.web.util.UriComponentsBuilder;
  * relative to the current request
  * </ul>
  *
- * <p>For the {@code WebSession} see {@link WebSessionArgumentResolver}
- * and for the {@code Principal} see {@link PrincipalArgumentResolver}.
+ * <p>For the {@code WebSession} see {@link WebSessionMethodArgumentResolver}
+ * and for the {@code Principal} see {@link PrincipalMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
- * @since 5.0
- * @see WebSessionArgumentResolver
- * @see PrincipalArgumentResolver
+ * @since 5.2
+ * @see WebSessionMethodArgumentResolver
+ * @see PrincipalMethodArgumentResolver
  */
-public class ServerWebExchangeArgumentResolver extends HandlerMethodArgumentResolverSupport
+public class ServerWebExchangeMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
 		implements SyncHandlerMethodArgumentResolver {
 
-	public ServerWebExchangeArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+	public ServerWebExchangeMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
 	}
 

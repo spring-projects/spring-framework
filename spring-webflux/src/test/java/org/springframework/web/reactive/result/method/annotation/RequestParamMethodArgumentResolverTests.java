@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,9 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
+import static org.springframework.web.method.MvcAnnotationPredicates.*;
 
 /**
  * Unit tests for {@link RequestParamMethodArgumentResolver}.
@@ -118,7 +113,7 @@ public class RequestParamMethodArgumentResolverTests {
 		catch (IllegalStateException ex) {
 			assertTrue("Unexpected error message:\n" + ex.getMessage(),
 					ex.getMessage().startsWith(
-							"RequestParamMethodArgumentResolver doesn't support reactive type wrapper"));
+							"RequestParamMethodArgumentResolver does not support reactive type wrapper"));
 		}
 		try {
 			param = this.testMethod.annotNotPresent(RequestParam.class).arg(Mono.class, String.class);
@@ -128,7 +123,7 @@ public class RequestParamMethodArgumentResolverTests {
 		catch (IllegalStateException ex) {
 			assertTrue("Unexpected error message:\n" + ex.getMessage(),
 					ex.getMessage().startsWith(
-							"RequestParamMethodArgumentResolver doesn't support reactive type wrapper"));
+							"RequestParamMethodArgumentResolver does not support reactive type wrapper"));
 		}
 	}
 

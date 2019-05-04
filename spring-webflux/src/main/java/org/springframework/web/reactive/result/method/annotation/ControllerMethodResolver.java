@@ -178,7 +178,7 @@ class ControllerMethodResolver {
 		result.add(new MatrixVariableMethodArgumentResolver(beanFactory, adapterRegistry));
 		result.add(new MatrixVariableMapMethodArgumentResolver(adapterRegistry));
 		if (!readers.isEmpty()) {
-			result.add(new RequestBodyArgumentResolver(readers, adapterRegistry));
+			result.add(new RequestBodyMethodArgumentResolver(readers, adapterRegistry));
 			result.add(new RequestPartMethodArgumentResolver(readers, adapterRegistry));
 		}
 		if (supportDataBinding) {
@@ -196,18 +196,18 @@ class ControllerMethodResolver {
 			result.add(new ContinuationHandlerMethodArgumentResolver());
 		}
 		if (!readers.isEmpty()) {
-			result.add(new HttpEntityArgumentResolver(readers, adapterRegistry));
+			result.add(new HttpEntityMethodArgumentResolver(readers, adapterRegistry));
 		}
-		result.add(new ModelArgumentResolver(adapterRegistry));
+		result.add(new ModelMethodArgumentResolver(adapterRegistry));
 		if (supportDataBinding) {
 			result.add(new ErrorsMethodArgumentResolver(adapterRegistry));
 		}
-		result.add(new ServerWebExchangeArgumentResolver(adapterRegistry));
-		result.add(new PrincipalArgumentResolver(adapterRegistry));
+		result.add(new ServerWebExchangeMethodArgumentResolver(adapterRegistry));
+		result.add(new PrincipalMethodArgumentResolver(adapterRegistry));
 		if (requestMappingMethod) {
 			result.add(new SessionStatusMethodArgumentResolver());
 		}
-		result.add(new WebSessionArgumentResolver(adapterRegistry));
+		result.add(new WebSessionMethodArgumentResolver(adapterRegistry));
 
 		// Custom...
 		result.addAll(customResolvers.getCustomResolvers());

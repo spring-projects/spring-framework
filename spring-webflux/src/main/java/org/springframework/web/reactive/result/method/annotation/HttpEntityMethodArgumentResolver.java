@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,11 @@ import org.springframework.web.server.ServerWebExchange;
  * {@code HttpMessageReader}.
  *
  * @author Rossen Stoyanchev
- * @since 5.0
+ * @since 5.2
  */
-public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver {
+public class HttpEntityMethodArgumentResolver extends AbstractMessageReaderArgumentResolver {
 
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
+	public HttpEntityMethodArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
 		super(readers, registry);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,8 @@ import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ModelInitializer}.
@@ -71,12 +69,11 @@ public class ModelInitializerTests {
 
 
 	@Before
-	public void setUp() throws Exception {
-
+	public void setup() {
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 		ArgumentResolverConfigurer resolverConfigurer = new ArgumentResolverConfigurer();
-		resolverConfigurer.addCustomResolver(new ModelArgumentResolver(adapterRegistry));
+		resolverConfigurer.addCustomResolver(new ModelMethodArgumentResolver(adapterRegistry));
 
 		ControllerMethodResolver methodResolver = new ControllerMethodResolver(
 				resolverConfigurer, adapterRegistry, new StaticApplicationContext(), Collections.emptyList());
@@ -85,10 +82,8 @@ public class ModelInitializerTests {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void initBinderMethod() throws Exception {
-
+	public void initBinderMethod() {
 		Validator validator = mock(Validator.class);
 
 		TestController controller = new TestController();
@@ -105,7 +100,7 @@ public class ModelInitializerTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void modelAttributeMethods() throws Exception {
+	public void modelAttributeMethods() {
 		TestController controller = new TestController();
 		InitBinderBindingContext context = getBindingContext(controller);
 
@@ -133,7 +128,7 @@ public class ModelInitializerTests {
 	}
 
 	@Test
-	public void saveModelAttributeToSession() throws Exception {
+	public void saveModelAttributeToSession() {
 		TestController controller = new TestController();
 		InitBinderBindingContext context = getBindingContext(controller);
 
@@ -151,7 +146,7 @@ public class ModelInitializerTests {
 	}
 
 	@Test
-	public void retrieveModelAttributeFromSession() throws Exception {
+	public void retrieveModelAttributeFromSession() {
 		WebSession session = this.exchange.getSession().block(Duration.ZERO);
 		assertNotNull(session);
 
@@ -171,7 +166,7 @@ public class ModelInitializerTests {
 	}
 
 	@Test
-	public void requiredSessionAttributeMissing() throws Exception {
+	public void requiredSessionAttributeMissing() {
 		TestController controller = new TestController();
 		InitBinderBindingContext context = getBindingContext(controller);
 
@@ -187,7 +182,7 @@ public class ModelInitializerTests {
 	}
 
 	@Test
-	public void clearModelAttributeFromSession() throws Exception {
+	public void clearModelAttributeFromSession() {
 		WebSession session = this.exchange.getSession().block(Duration.ZERO);
 		assertNotNull(session);
 
@@ -209,7 +204,6 @@ public class ModelInitializerTests {
 
 
 	private InitBinderBindingContext getBindingContext(Object controller) {
-
 		List<SyncInvocableHandlerMethod> binderMethods =
 				MethodIntrospector.selectMethods(controller.getClass(), BINDER_METHODS)
 						.stream()
@@ -294,6 +288,7 @@ public class ModelInitializerTests {
 			return "TestBean[name=" + this.name + "]";
 		}
 	}
+
 
 	private static final ReflectionUtils.MethodFilter BINDER_METHODS = method ->
 			AnnotationUtils.findAnnotation(method, InitBinder.class) != null;

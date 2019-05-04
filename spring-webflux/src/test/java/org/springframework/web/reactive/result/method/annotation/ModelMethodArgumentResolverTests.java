@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
@@ -34,13 +35,14 @@ import static org.junit.Assert.*;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
 
 /**
- * Unit tests for {@link ModelArgumentResolver}.
+ * Unit tests for {@link ModelMethodArgumentResolver}.
+ *
  * @author Rossen Stoyanchev
  */
-public class ModelArgumentResolverTests {
+public class ModelMethodArgumentResolverTests {
 
-	private final ModelArgumentResolver resolver =
-			new ModelArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
+	private final ModelMethodArgumentResolver resolver =
+			new ModelMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
 	private final ServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
@@ -49,7 +51,6 @@ public class ModelArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-
 		assertTrue(this.resolver.supportsParameter(this.resolvable.arg(Model.class)));
 		assertTrue(this.resolver.supportsParameter(this.resolvable.arg(ModelMap.class)));
 		assertTrue(this.resolver.supportsParameter(

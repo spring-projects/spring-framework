@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,23 +45,19 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestBody;
+import static org.junit.Assert.*;
+import static org.springframework.web.method.MvcAnnotationPredicates.*;
 
 /**
- * Unit tests for {@link RequestBodyArgumentResolver}. When adding a test also
+ * Unit tests for {@link RequestBodyMethodArgumentResolver}. When adding a test also
  * consider whether the logic under test is in a parent class, then see:
  * {@link MessageReaderArgumentResolverTests}.
  *
  * @author Rossen Stoyanchev
  */
-public class RequestBodyArgumentResolverTests {
+public class RequestBodyMethodArgumentResolverTests {
 
-	private RequestBodyArgumentResolver resolver;
+	private RequestBodyMethodArgumentResolver resolver;
 
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
@@ -70,12 +66,12 @@ public class RequestBodyArgumentResolverTests {
 	public void setup() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
-		this.resolver = new RequestBodyArgumentResolver(readers, ReactiveAdapterRegistry.getSharedInstance());
+		this.resolver = new RequestBodyMethodArgumentResolver(readers, ReactiveAdapterRegistry.getSharedInstance());
 	}
 
 
 	@Test
-	public void supports() throws Exception {
+	public void supports() {
 		MethodParameter param;
 
 		param = this.testMethod.annot(requestBody()).arg(Mono.class, String.class);
@@ -86,7 +82,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
-	public void stringBody() throws Exception {
+	public void stringBody() {
 		String body = "line1";
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
 		String value = resolveValue(param, body);
@@ -95,13 +91,13 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test(expected = ServerWebInputException.class)
-	public void emptyBodyWithString() throws Exception {
+	public void emptyBodyWithString() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
 		resolveValueWithEmptyBody(param);
 	}
 
 	@Test
-	public void emptyBodyWithStringNotRequired() throws Exception {
+	public void emptyBodyWithStringNotRequired() {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(String.class);
 		String body = resolveValueWithEmptyBody(param);
 
@@ -109,7 +105,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test // SPR-15758
-	public void emptyBodyWithoutContentType() throws Exception {
+	public void emptyBodyWithoutContentType() {
 		MethodParameter param = this.testMethod.annot(requestBody().notRequired()).arg(Map.class);
 		String body = resolveValueWithEmptyBody(param);
 
@@ -118,8 +114,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void emptyBodyWithMono() throws Exception {
-
+	public void emptyBodyWithMono() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Mono.class, String.class);
 		StepVerifier.create((Mono<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
@@ -135,8 +130,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void emptyBodyWithFlux() throws Exception {
-
+	public void emptyBodyWithFlux() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Flux.class, String.class);
 		StepVerifier.create((Flux<Void>) resolveValueWithEmptyBody(param))
 				.expectNextCount(0)
@@ -151,8 +145,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithSingle() throws Exception {
-
+	public void emptyBodyWithSingle() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Single.class, String.class);
 		Single<String> single = resolveValueWithEmptyBody(param);
 		StepVerifier.create(RxReactiveStreams.toPublisher(single))
@@ -169,8 +162,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithMaybe() throws Exception {
-
+	public void emptyBodyWithMaybe() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Maybe.class, String.class);
 		Maybe<String> maybe = resolveValueWithEmptyBody(param);
 		StepVerifier.create(maybe.toFlowable())
@@ -187,8 +179,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithObservable() throws Exception {
-
+	public void emptyBodyWithObservable() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Observable.class, String.class);
 		Observable<String> observable = resolveValueWithEmptyBody(param);
 		StepVerifier.create(RxReactiveStreams.toPublisher(observable))
@@ -205,8 +196,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithCompletableFuture() throws Exception {
-
+	public void emptyBodyWithCompletableFuture() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(CompletableFuture.class, String.class);
 		CompletableFuture<String> future = resolveValueWithEmptyBody(param);
 		future.whenComplete((text, ex) -> {

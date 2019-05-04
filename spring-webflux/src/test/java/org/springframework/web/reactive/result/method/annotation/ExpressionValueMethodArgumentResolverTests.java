@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,7 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.BindingContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ExpressionValueMethodArgumentResolver}.
@@ -68,12 +65,12 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() throws Exception {
+	public void supportsParameter() {
 		assertTrue(this.resolver.supportsParameter(this.paramSystemProperty));
 	}
 
 	@Test
-	public void doesNotSupport() throws Exception {
+	public void doesNotSupport() {
 		assertFalse(this.resolver.supportsParameter(this.paramNotSupported));
 		try {
 			this.resolver.supportsParameter(this.paramAlsoNotSupported);
@@ -82,12 +79,12 @@ public class ExpressionValueMethodArgumentResolverTests {
 		catch (IllegalStateException ex) {
 			assertTrue("Unexpected error message:\n" + ex.getMessage(),
 					ex.getMessage().startsWith(
-							"ExpressionValueMethodArgumentResolver doesn't support reactive type wrapper"));
+							"ExpressionValueMethodArgumentResolver does not support reactive type wrapper"));
 		}
 	}
 
 	@Test
-	public void resolveSystemProperty() throws Exception {
+	public void resolveSystemProperty() {
 		System.setProperty("systemProperty", "22");
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(

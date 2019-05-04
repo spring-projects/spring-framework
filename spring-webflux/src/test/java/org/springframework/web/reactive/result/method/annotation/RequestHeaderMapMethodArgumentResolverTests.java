@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link RequestHeaderMapMethodArgumentResolver}.
@@ -83,12 +80,12 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		catch (IllegalStateException ex) {
 			assertTrue("Unexpected error message:\n" + ex.getMessage(),
 					ex.getMessage().startsWith(
-							"RequestHeaderMapMethodArgumentResolver doesn't support reactive type wrapper"));
+							"RequestHeaderMapMethodArgumentResolver does not support reactive type wrapper"));
 		}
 	}
 
 	@Test
-	public void resolveMapArgument() throws Exception {
+	public void resolveMapArgument() {
 		String name = "foo";
 		String value = "bar";
 		Map<String, String> expected = Collections.singletonMap(name, value);
@@ -103,7 +100,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMultiValueMapArgument() throws Exception {
+	public void resolveMultiValueMapArgument() {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";
@@ -122,7 +119,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveHttpHeadersArgument() throws Exception {
+	public void resolveHttpHeadersArgument() {
 		String name = "foo";
 		String value1 = "bar";
 		String value2 = "baz";

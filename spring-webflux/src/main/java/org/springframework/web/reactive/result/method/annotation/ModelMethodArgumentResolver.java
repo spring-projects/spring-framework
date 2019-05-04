@@ -36,12 +36,12 @@ import org.springframework.web.server.ServerWebExchange;
  * parameter of type {@code Map} is also annotated.
  *
  * @author Rossen Stoyanchev
- * @since 5.0
+ * @since 5.2
  */
-public class ModelArgumentResolver extends HandlerMethodArgumentResolverSupport
+public class ModelMethodArgumentResolver extends HandlerMethodArgumentResolverSupport
 		implements SyncHandlerMethodArgumentResolver {
 
-	public ModelArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
+	public ModelMethodArgumentResolver(ReactiveAdapterRegistry adapterRegistry) {
 		super(adapterRegistry);
 	}
 

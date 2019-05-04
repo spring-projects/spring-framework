@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,8 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestAttribute;
+import static org.junit.Assert.*;
+import static org.springframework.web.method.MvcAnnotationPredicates.*;
 
 /**
  * Unit tests for {@link RequestAttributeMethodArgumentResolver}.
@@ -71,8 +66,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 
 
 	@Test
-	public void supportsParameter() throws Exception {
-
+	public void supportsParameter() {
 		assertTrue(this.resolver.supportsParameter(
 				this.testMethod.annot(requestAttribute().noName()).arg(Foo.class)));
 
@@ -85,7 +79,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolve() throws Exception {
+	public void resolve() {
 		MethodParameter param = this.testMethod.annot(requestAttribute().noName()).arg(Foo.class);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		StepVerifier.create(mono)
@@ -100,7 +94,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithName() throws Exception {
+	public void resolveWithName() {
 		MethodParameter param = this.testMethod.annot(requestAttribute().name("specialFoo")).arg();
 		Foo foo = new Foo();
 		this.exchange.getAttributes().put("specialFoo", foo);
@@ -109,7 +103,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveNotRequired() throws Exception {
+	public void resolveNotRequired() {
 		MethodParameter param = this.testMethod.annot(requestAttribute().name("foo").notRequired()).arg();
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertNull(mono.block());
@@ -121,7 +115,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveOptional() throws Exception {
+	public void resolveOptional() {
 		MethodParameter param = this.testMethod.annot(requestAttribute().name("foo")).arg(Optional.class, Foo.class);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 
@@ -144,8 +138,8 @@ public class RequestAttributeMethodArgumentResolverTests {
 		assertSame(foo, optional.get());
 	}
 
-	@Test // SPR-16158
-	public void resolveMonoParameter() throws Exception {
+	@Test  // SPR-16158
+	public void resolveMonoParameter() {
 		MethodParameter param = this.testMethod.annot(requestAttribute().noName()).arg(Mono.class, Foo.class);
 
 		// Mono attribute
