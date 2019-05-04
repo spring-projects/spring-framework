@@ -24,7 +24,7 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler;
+import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;

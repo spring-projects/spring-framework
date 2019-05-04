@@ -4,7 +4,7 @@
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.messaging.handler.annotation.support.reactive;
+package org.springframework.messaging.handler.annotation.reactive;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

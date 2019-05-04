@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.handler.annotation.support.reactive;
+package org.springframework.messaging.handler.annotation.reactive;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
