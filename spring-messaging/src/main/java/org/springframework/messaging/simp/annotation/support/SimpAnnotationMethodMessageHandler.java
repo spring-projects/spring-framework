@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.messaging.handler.annotation.support.DestinationVaria
 import org.springframework.messaging.handler.annotation.support.HeaderMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.HeadersMethodArgumentResolver;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
-import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
+import org.springframework.messaging.handler.annotation.support.PayloadMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
 import org.springframework.messaging.handler.invocation.CompletableFutureReturnValueHandler;
@@ -238,7 +238,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Set the Validator instance used for validating {@code @Payload} arguments.
 	 * @see org.springframework.validation.annotation.Validated
-	 * @see PayloadArgumentResolver
+	 * @see PayloadMethodArgumentResolver
 	 */
 	public void setValidator(@Nullable Validator validator) {
 		this.validator = validator;
@@ -315,7 +315,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		resolvers.add(new MessageMethodArgumentResolver(this.messageConverter));
 
 		resolvers.addAll(getCustomArgumentResolvers());
-		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));
+		resolvers.add(new PayloadMethodArgumentResolver(this.messageConverter, this.validator));
 
 		return resolvers;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,15 +43,15 @@ import org.springframework.validation.annotation.Validated;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture for {@link PayloadArgumentResolver}.
+ * Test fixture for {@link PayloadMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Stephane Nicoll
  */
-public class PayloadArgumentResolverTests {
+public class PayloadMethodArgumentResolverTests {
 
-	private PayloadArgumentResolver resolver;
+	private PayloadMethodArgumentResolver resolver;
 
 	private MethodParameter paramAnnotated;
 
@@ -74,10 +74,9 @@ public class PayloadArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
+		this.resolver = new PayloadMethodArgumentResolver(new StringMessageConverter(), testValidator());
 
-		this.resolver = new PayloadArgumentResolver(new StringMessageConverter(), testValidator());
-
-		Method payloadMethod = PayloadArgumentResolverTests.class.getDeclaredMethod(
+		Method payloadMethod = PayloadMethodArgumentResolverTests.class.getDeclaredMethod(
 				"handleMessage", String.class, String.class, Locale.class,
 				String.class, String.class, String.class, String.class);
 
@@ -92,12 +91,11 @@ public class PayloadArgumentResolverTests {
 	}
 
 	@Test
-	public void supportsParameter() throws Exception {
-
+	public void supportsParameter() {
 		assertTrue(this.resolver.supportsParameter(this.paramAnnotated));
 		assertTrue(this.resolver.supportsParameter(this.paramNotAnnotated));
 
-		PayloadArgumentResolver strictResolver = new PayloadArgumentResolver(
+		PayloadMethodArgumentResolver strictResolver = new PayloadMethodArgumentResolver(
 				new StringMessageConverter(), testValidator(), false);
 
 		assertTrue(strictResolver.supportsParameter(this.paramAnnotated));
@@ -116,7 +114,7 @@ public class PayloadArgumentResolverTests {
 	public void resolveRequiredEmpty() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("").build();
 
-		thrown.expect(MethodArgumentNotValidException.class); // Required but empty
+		thrown.expect(MethodArgumentNotValidException.class);  // required but empty
 		this.resolver.resolveArgument(paramAnnotated, message);
 	}
 
@@ -124,7 +122,7 @@ public class PayloadArgumentResolverTests {
 	public void resolveRequiredEmptyNonAnnotatedParameter() throws Exception {
 		Message<?> message = MessageBuilder.withPayload("").build();
 
-		thrown.expect(MethodArgumentNotValidException.class); // Required but empty
+		thrown.expect(MethodArgumentNotValidException.class);  // required but empty
 		this.resolver.resolveArgument(this.paramNotAnnotated, message);
 	}
 
