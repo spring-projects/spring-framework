@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -167,7 +168,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		if (!isRequestNotModified(webRequest)) {
 			HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 			Assert.notNull(response, "Expected HttpServletResponse");
-			if (StringUtils.hasText(response.getHeader("ETag"))) {
+			if (StringUtils.hasText(response.getHeader(HttpHeaders.ETAG))) {
 				HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 				Assert.notNull(request, "Expected HttpServletRequest");
 				ShallowEtagHeaderFilter.disableContentCaching(request);
