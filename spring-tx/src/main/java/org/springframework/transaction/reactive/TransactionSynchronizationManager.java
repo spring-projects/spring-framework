@@ -403,8 +403,4 @@ public class TransactionSynchronizationManager {
 		this.transactionContext.clear();
 	}
 
-	private Map<Object, Object> getResources() {
-		return this.transactionContext.getResources();
-	}
-
 }
