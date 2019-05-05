@@ -443,7 +443,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 						return triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_ROLLED_BACK).then(propagateException);
 					}
 					if (ErrorPredicates.TRANSACTION_EXCEPTION.test(ex)) {
-						triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_UNKNOWN).then(propagateException);
+						return triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_UNKNOWN).then(propagateException);
 					}
 					if (ErrorPredicates.RUNTIME_OR_ERROR.test(ex)) {
 						Mono<Void> mono;
