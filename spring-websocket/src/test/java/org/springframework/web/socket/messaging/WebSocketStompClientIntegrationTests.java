@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.socket.messaging;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+package org.springframework.web.socket.messaging;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -50,6 +48,9 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for {@link WebSocketStompClient}.

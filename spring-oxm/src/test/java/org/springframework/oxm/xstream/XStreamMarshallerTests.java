@@ -58,6 +58,7 @@ import org.xmlunit.xpath.JAXPXPathEngine;
 
 import org.springframework.util.xml.StaxUtils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 import static org.xmlunit.matchers.CompareMatcher.*;

@@ -18,7 +18,6 @@ package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.web.socket.sockjs.transport.TransportType;
@@ -29,10 +28,10 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@code SockJsUrlInfo}.
+ *
  * @author Rossen Stoyanchev
  */
 public class SockJsUrlInfoTests {
-
 
 	@Test
 	public void serverId() throws Exception {
@@ -61,7 +60,7 @@ public class SockJsUrlInfoTests {
 
 	private void testInfoUrl(String scheme, String expectedScheme) throws Exception {
 		SockJsUrlInfo info = new SockJsUrlInfo(new URI(scheme + "://example.com"));
-		Assert.assertThat(info.getInfoUrl(), is(equalTo(new URI(expectedScheme + "://example.com/info"))));
+		assertThat(info.getInfoUrl(), is(equalTo(new URI(expectedScheme + "://example.com/info"))));
 	}
 
 	@Test

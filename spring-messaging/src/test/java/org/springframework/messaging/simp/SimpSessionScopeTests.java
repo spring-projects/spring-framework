@@ -25,8 +25,8 @@ import org.mockito.Mockito;
 
 import org.springframework.beans.factory.ObjectFactory;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**

@@ -52,6 +52,7 @@ import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.springframework.http.MediaType.*;

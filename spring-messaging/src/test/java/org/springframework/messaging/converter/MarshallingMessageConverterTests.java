@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.converter;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.xmlunit.diff.ComparisonType.*;
 import static org.xmlunit.diff.DifferenceEvaluators.*;
