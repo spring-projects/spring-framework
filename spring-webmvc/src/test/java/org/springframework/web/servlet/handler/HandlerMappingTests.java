@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -35,6 +34,8 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.support.WebContentGenerator;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Unit tests for
@@ -66,7 +67,7 @@ public class HandlerMappingTests {
 		this.handlerMapping.setInterceptors(mappedInterceptor1, i2, mappedInterceptor3, i4);
 		this.handlerMapping.setApplicationContext(this.context);
 		HandlerExecutionChain chain = this.handlerMapping.getHandlerExecutionChain(new SimpleHandler(), this.request);
-		Assert.assertThat(chain.getInterceptors(), Matchers.arrayContaining(
+		assertThat(chain.getInterceptors(), Matchers.arrayContaining(
 				mappedInterceptor1.getInterceptor(), i2, mappedInterceptor3.getInterceptor(), i4));
 	}
 

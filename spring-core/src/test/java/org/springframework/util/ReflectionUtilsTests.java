@@ -33,6 +33,7 @@ import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.objects.TestObject;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 /**

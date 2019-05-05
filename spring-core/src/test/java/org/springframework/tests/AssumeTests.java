@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.springframework.tests.Assume.*;
 import static org.springframework.tests.TestGroup.*;

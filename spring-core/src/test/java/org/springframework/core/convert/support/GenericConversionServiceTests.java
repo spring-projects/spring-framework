@@ -51,6 +51,7 @@ import org.springframework.util.StringUtils;
 
 import static java.util.Comparator.*;
 import static java.util.stream.Collectors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 

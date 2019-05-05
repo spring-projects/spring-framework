@@ -56,6 +56,7 @@ import org.springframework.tests.TestGroup;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StopWatch;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 

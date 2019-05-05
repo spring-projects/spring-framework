@@ -30,6 +30,7 @@ import javax.xml.stream.events.XMLEvent;
 import org.junit.Test;
 
 import static javax.xml.stream.XMLStreamConstants.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.xmlunit.matchers.CompareMatcher.*;
 

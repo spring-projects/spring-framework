@@ -60,6 +60,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static java.time.Instant.*;
 import static java.time.format.DateTimeFormatter.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.MediaType.*;

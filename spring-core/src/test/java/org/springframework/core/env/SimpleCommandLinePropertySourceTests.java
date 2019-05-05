@@ -21,7 +21,7 @@ import java.util.List;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Unit tests for {@link SimpleCommandLinePropertySource}.
@@ -122,4 +122,5 @@ public class SimpleCommandLinePropertySourceTests {
 		assertThat(nonOptionArgsList.get(0), equalTo("noa1"));
 		assertThat(nonOptionArgsList.get(1), equalTo("noa2"));
 	}
+
 }

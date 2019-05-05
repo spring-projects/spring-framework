@@ -32,6 +32,7 @@ import org.junit.Before;
 
 import org.springframework.http.MediaType;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 /**

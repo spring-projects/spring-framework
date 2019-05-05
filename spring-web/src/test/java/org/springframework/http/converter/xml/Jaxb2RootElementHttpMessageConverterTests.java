@@ -42,6 +42,7 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.xmlunit.diff.ComparisonType.*;
 import static org.xmlunit.diff.DifferenceEvaluators.*;

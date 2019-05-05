@@ -24,7 +24,7 @@ import javax.xml.XMLConstants;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Arjen Poutsma

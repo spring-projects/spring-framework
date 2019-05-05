@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.view.groovy;
 
 import java.io.IOException;
@@ -25,13 +26,13 @@ import groovy.text.TemplateEngine;
 import groovy.text.markup.MarkupTemplateEngine;
 import groovy.text.markup.TemplateConfiguration;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticApplicationContext;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 /**
@@ -134,37 +135,38 @@ public class GroovyMarkupConfigurerTests {
 	@Test
 	public void resolveSampleTemplate() throws Exception {
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "test.tpl");
-		Assert.assertNotNull(url);
+		assertNotNull(url);
 	}
 
 	@Test
 	public void resolveI18nFullLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.GERMANY);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
-		Assert.assertNotNull(url);
-		Assert.assertThat(url.getPath(), Matchers.containsString("i18n_de_DE.tpl"));
+		assertNotNull(url);
+		assertThat(url.getPath(), Matchers.containsString("i18n_de_DE.tpl"));
 	}
 
 	@Test
 	public void resolveI18nPartialLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.FRANCE);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
-		Assert.assertNotNull(url);
-		Assert.assertThat(url.getPath(), Matchers.containsString("i18n_fr.tpl"));
+		assertNotNull(url);
+		assertThat(url.getPath(), Matchers.containsString("i18n_fr.tpl"));
 	}
 
 	@Test
 	public void resolveI18nDefaultLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.US);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
-		Assert.assertNotNull(url);
-		Assert.assertThat(url.getPath(), Matchers.containsString("i18n.tpl"));
+		assertNotNull(url);
+		assertThat(url.getPath(), Matchers.containsString("i18n.tpl"));
 	}
 
 	@Test(expected = IOException.class)
 	public void failMissingTemplate() throws Exception {
 		LocaleContextHolder.setLocale(Locale.US);
 		this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "missing.tpl");
-		Assert.fail();
+		fail();
 	}
+
 }

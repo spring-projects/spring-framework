@@ -19,7 +19,7 @@ package org.springframework.core.type;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Abstract base class for testing implementations of
@@ -73,4 +73,5 @@ public abstract class AbstractClassMetadataMemberClassTests {
 		String[] nestedClasses = metadata.getMemberClassNames();
 		assertThat(nestedClasses, equalTo(new String[]{}));
 	}
+
 }
