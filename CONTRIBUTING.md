@@ -83,7 +83,7 @@ multiple edits or corrections of the same logical change. See
 [Rewriting History section of Pro Git](https://git-scm.com/book/en/Git-Tools-Rewriting-History)
 for an overview of streamlining commit history.
 
-1. Format commit messages using 55 characters for the subject line, 72 lines for the
+1. Format commit messages using 55 characters for the subject line, 72-character lines for the
 description, followed by the issue fixed, e.g. `Fixes #22276`.
 See the
 [Commit Guidelines section of Pro Git](https://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
