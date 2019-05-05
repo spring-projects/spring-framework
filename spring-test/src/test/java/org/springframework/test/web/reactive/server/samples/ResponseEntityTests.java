@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static java.time.Duration.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.springframework.http.MediaType.*;
 
