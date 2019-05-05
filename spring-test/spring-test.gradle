@@ -28,7 +28,7 @@ dependencies {
 	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 	optional("javax.xml.bind:jaxb-api:2.3.1")
 	optional("javax.websocket:javax.websocket-api:1.1")
-	optional("junit:junit:4.12")
+	optional("junit:junit:4.13-beta-3")
 	optional("org.junit.jupiter:junit-jupiter-api")
 	optional("org.testng:testng:6.14.3")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
