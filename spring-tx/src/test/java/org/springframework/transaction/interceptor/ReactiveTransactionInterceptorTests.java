@@ -16,15 +16,10 @@
 
 package org.springframework.transaction.interceptor;
 
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
-
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.transaction.ReactiveTransactionManager;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link TransactionInterceptor} with reactive methods.
@@ -32,10 +27,6 @@ import static org.mockito.Mockito.*;
  * @author Mark Paluch
  */
 public class ReactiveTransactionInterceptorTests extends AbstractReactiveTransactionAspectTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Override
 	protected Object advised(Object target, ReactiveTransactionManager ptm, TransactionAttributeSource[] tas) {
@@ -65,48 +56,6 @@ public class ReactiveTransactionInterceptorTests extends AbstractReactiveTransac
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addAdvice(0, ti);
 		return pf.getProxy();
-	}
-	
-	private TransactionInterceptor createTransactionInterceptor(BeanFactory beanFactory,
-			String transactionManagerName, ReactiveTransactionManager transactionManager) {
-
-		TransactionInterceptor ti = new TransactionInterceptor();
-		if (beanFactory != null) {
-			ti.setBeanFactory(beanFactory);
-		}
-		if (transactionManagerName != null) {
-			ti.setTransactionManagerBeanName(transactionManagerName);
-
-		}
-		if (transactionManager != null) {
-			ti.setTransactionManager(transactionManager);
-		}
-		ti.setTransactionAttributeSource(new NameMatchTransactionAttributeSource());
-		ti.afterPropertiesSet();
-		return ti;
-	}
-	
-		private TransactionInterceptor transactionInterceptorWithTransactionManager(
-			ReactiveTransactionManager transactionManager, BeanFactory beanFactory) {
-
-		return createTransactionInterceptor(beanFactory, null, transactionManager);
-	}
-
-	private TransactionInterceptor transactionInterceptorWithTransactionManagerName(
-			String transactionManagerName, BeanFactory beanFactory) {
-
-		return createTransactionInterceptor(beanFactory, transactionManagerName, null);
-	}
-
-	private TransactionInterceptor simpleTransactionInterceptor(BeanFactory beanFactory) {
-		return createTransactionInterceptor(beanFactory, null, null);
-	}
-
-	private ReactiveTransactionManager associateTransactionManager(BeanFactory beanFactory, String name) {
-		ReactiveTransactionManager transactionManager = mock(ReactiveTransactionManager.class);
-		when(beanFactory.containsBean(name)).thenReturn(true);
-		when(beanFactory.getBean(name, ReactiveTransactionManager.class)).thenReturn(transactionManager);
-		return transactionManager;
 	}
 
 }
