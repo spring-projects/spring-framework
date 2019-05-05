@@ -817,7 +817,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			this.adapter = adapter;
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object invokeWithinTransaction(Method method, @Nullable Class<?> targetClass, InvocationCallback invocation) {
 			// If the transaction attribute is null, the method is non-transactional.
 			TransactionAttributeSource tas = getTransactionAttributeSource();
