@@ -46,14 +46,13 @@ When ready create a ticket in the [GitHub issue tracker](https://github.com/spri
 
 #### Ticket Lifecycle
 
-When an issue is first created, it may not be assigned and will not have a fix version.
-Within a day or two, the issue is assigned to a specific committer and the target
-version is set to "Waiting for Triage". The committer will then review the issue, ask for
-further information if needed, and based on the findings, the issue is either assigned a fix
-version or rejected.
+When an issue is first created, it is flagged `waiting-for-triage` waiting for a team
+member to triage it. Within a day or two, the issue will then be reviewed and the team
+may ask for further information if needed. Based on the findings, the issue is either
+assigned a fix version or declined.
 
-When a fix is ready, the issue is marked "Resolved" and may still be re-opened. Once a fix
-is released, the issue is permanently "Closed". If necessary, you will need to create a new,
+When a fix is ready, the issue is closed and may still be re-opened. Once a fix is
+released, the issue can't be reopened. If necessary, you will need to create a new,
 related ticket with a fresh description.
 
 #### Submit a Pull Request
@@ -84,7 +83,7 @@ multiple edits or corrections of the same logical change. See
 for an overview of streamlining commit history.
 
 1. Format commit messages using 55 characters for the subject line, 72 characters per line
-for the description, followed by the issue fixed, e.g. `Fixes #22276`. See the
+for the description, followed by the issue fixed, e.g. `Closes gh-22276`. See the
 [Commit Guidelines section of Pro Git](https://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
 for best practices around commit messages and use `git log` to see some examples.
 
