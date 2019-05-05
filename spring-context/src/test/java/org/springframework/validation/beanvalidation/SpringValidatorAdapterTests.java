@@ -53,6 +53,7 @@ import org.springframework.validation.FieldError;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.*;
 import static org.hamcrest.core.StringContains.*;
 import static org.junit.Assert.*;

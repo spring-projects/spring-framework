@@ -28,7 +28,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -55,6 +54,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -326,6 +326,7 @@ public class EnableAsyncTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void exceptionThrownWithBeanNotOfRequiredTypeRootCause() {
 		try {
 			new AnnotationConfigApplicationContext(JdkProxyConfiguration.class);
@@ -336,7 +337,7 @@ public class EnableAsyncTests {
 			while (ex.getCause() != null) {
 				ex = ex.getCause();
 			}
-			Assert.assertThat(ex, instanceOf(BeanNotOfRequiredTypeException.class));
+			assertThat(ex, instanceOf(BeanNotOfRequiredTypeException.class));
 		}
 	}
 

@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.ClassUtils;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Unit tests for {@link GenericXmlApplicationContext}.

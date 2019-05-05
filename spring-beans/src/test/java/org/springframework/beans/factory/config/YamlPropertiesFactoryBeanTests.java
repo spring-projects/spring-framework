@@ -29,8 +29,8 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 import static org.springframework.beans.factory.config.YamlProcessor.*;
 
 /**

@@ -34,6 +34,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ResourceTestBean;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 

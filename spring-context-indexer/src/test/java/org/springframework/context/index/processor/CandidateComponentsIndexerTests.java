@@ -30,7 +30,6 @@ import javax.transaction.Transactional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import org.springframework.context.index.sample.AbstractController;
@@ -61,8 +60,8 @@ import org.springframework.context.index.test.TestCompiler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 import static org.springframework.context.index.processor.Metadata.*;
 
 /**
@@ -77,9 +76,6 @@ public class CandidateComponentsIndexerTests {
 
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Before

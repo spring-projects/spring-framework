@@ -68,6 +68,7 @@ import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 /**

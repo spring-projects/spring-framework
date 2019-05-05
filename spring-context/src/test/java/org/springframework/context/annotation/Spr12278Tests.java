@@ -23,8 +23,8 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanCreationException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll

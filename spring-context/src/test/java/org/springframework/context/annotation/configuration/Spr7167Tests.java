@@ -29,9 +29,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ClassUtils;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 public class Spr7167Tests {
+
 	@Test
 	public void test() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
@@ -43,6 +45,7 @@ public class Spr7167Tests {
 		MyConfig config = ctx.getBean(MyConfig.class);
 		assertTrue("Config class was not enhanced", ClassUtils.isCglibProxy(config));
 	}
+
 }
 
 @Configuration

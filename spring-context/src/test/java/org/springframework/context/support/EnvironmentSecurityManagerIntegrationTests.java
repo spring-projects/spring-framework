@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests integration between Environment and SecurityManagers. See SPR-9970.

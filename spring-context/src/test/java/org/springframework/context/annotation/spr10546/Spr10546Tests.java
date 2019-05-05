@@ -26,10 +26,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.spr10546.scanpackage.AEnclosingConfig;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- *
  * @author Rob Winch
  */
 public class Spr10546Tests {
@@ -146,4 +145,5 @@ public class Spr10546Tests {
 		context = new AnnotationConfigApplicationContext(annotatedClasses);
 		assertThat(context.getBean("myBean",String.class), equalTo("myBean"));
 	}
+
 }

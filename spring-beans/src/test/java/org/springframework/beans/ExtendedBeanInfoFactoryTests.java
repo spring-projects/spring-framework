@@ -21,7 +21,7 @@ import java.beans.IntrospectionException;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Unit tests for {@link ExtendedBeanInfoTests}.

@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Ensures that @Configuration is supported properly as a meta-annotation.

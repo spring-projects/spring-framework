@@ -34,6 +34,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
 
 import static java.lang.String.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.util.StringUtils.*;
