@@ -127,10 +127,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @since 5.1.2
 	 */
 	protected Object[] getMethodArgumentValues(Message<?> message, Object... providedArgs) throws Exception {
-		if (ObjectUtils.isEmpty(getMethodParameters())) {
+		MethodParameter[] parameters = getMethodParameters();
+		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
 		}
-		MethodParameter[] parameters = getMethodParameters();
+
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
