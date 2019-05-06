@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -366,6 +367,26 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
 		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, annotationFilter);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotations} instance from the specified
+	 * collection of directly present annotations. This method allows a
+	 * {@link MergedAnnotations} instance to be created from annotations that
+	 * are not necessarily loaded using reflection. The provided annotations
+	 * must all be {@link MergedAnnotation#isDirectlyPresent() directly present}
+	 * and must have a {@link MergedAnnotation#getAggregateIndex() aggregate
+	 * index} of {@code 0}.
+	 * <p>
+	 * The resulting {@link MergedAnnotations} instance will contain both the
+	 * specified annotations, and any meta-annotations that can be read using
+	 * reflection.
+	 * @param annotations the annotations to include
+	 * @return a {@link MergedAnnotations} instance containing the annotations
+	 * @see MergedAnnotation#of(ClassLoader, Object, Class, java.util.Map)
+	 */
+	static MergedAnnotations of(Collection<MergedAnnotation<?>> annotations) {
+		return MergedAnnotationsCollection.of(annotations);
 	}
 
 

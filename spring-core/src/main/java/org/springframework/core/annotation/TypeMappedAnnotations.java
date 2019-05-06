@@ -42,7 +42,10 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 	private static final AnnotationFilter FILTER_ALL = (annotationType -> true);
 
-	private static final MergedAnnotations NONE = new TypeMappedAnnotations(
+	/**
+	 * Shared instance that can be used when there are no annotations.
+	 */
+	static final MergedAnnotations NONE = new TypeMappedAnnotations(
 			null, new Annotation[0], RepeatableContainers.none(), FILTER_ALL);
 
 
