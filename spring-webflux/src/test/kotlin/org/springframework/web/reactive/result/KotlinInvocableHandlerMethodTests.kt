@@ -35,7 +35,6 @@ import org.springframework.web.reactive.result.method.InvocableHandlerMethod
 import org.springframework.web.reactive.result.method.annotation.ContinuationHandlerMethodArgumentResolver
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
-import reactor.test.expectError
 import java.lang.reflect.Method
 import kotlin.reflect.jvm.javaMethod
 
@@ -74,7 +73,7 @@ class KotlinInvocableHandlerMethodTests {
 		val result = invoke(CoroutinesController(), method)
 
 		StepVerifier.create(result)
-				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).expectError(IllegalStateException::class).verify() }
+				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).expectError(IllegalStateException::class.java).verify() }
 				.verifyComplete()
 	}
 
