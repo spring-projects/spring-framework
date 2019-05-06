@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,11 +147,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				args[i] = this.resolvers.resolveArgument(parameter, message);
 			}
 			catch (Exception ex) {
-				// Leave stack trace for later, exception may actually be resolved and handled..
+				// Leave stack trace for later, exception may actually be resolved and handled...
 				if (logger.isDebugEnabled()) {
-					String error = ex.getMessage();
-					if (error != null && !error.contains(parameter.getExecutable().toGenericString())) {
-						logger.debug(formatArgumentError(parameter, error));
+					String exMsg = ex.getMessage();
+					if (exMsg != null && !exMsg.contains(parameter.getExecutable().toGenericString())) {
+						logger.debug(formatArgumentError(parameter, exMsg));
 					}
 				}
 				throw ex;

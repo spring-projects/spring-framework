@@ -200,7 +200,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			try {
 				argMonos.add(this.resolvers.resolveArgument(parameter, bindingContext, exchange)
 						.defaultIfEmpty(NO_ARG_VALUE)
-						.doOnError(cause -> logArgumentErrorIfNecessary(exchange, parameter, cause)));
+						.doOnError(ex -> logArgumentErrorIfNecessary(exchange, parameter, ex)));
 			}
 			catch (Exception ex) {
 				logArgumentErrorIfNecessary(exchange, parameter, ex);
@@ -211,14 +211,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				Stream.of(values).map(o -> o != NO_ARG_VALUE ? o : null).toArray());
 	}
 
-	private void logArgumentErrorIfNecessary(
-			ServerWebExchange exchange, MethodParameter parameter, Throwable cause) {
-
-		// Leave stack trace for later, if error is not handled..
-		String message = cause.getMessage();
-		if (message != null && !message.contains(parameter.getExecutable().toGenericString())) {
+	private void logArgumentErrorIfNecessary(ServerWebExchange exchange, MethodParameter parameter, Throwable ex) {
+		// Leave stack trace for later, if error is not handled...
+		String exMsg = ex.getMessage();
+		if (exMsg != null && !exMsg.contains(parameter.getExecutable().toGenericString())) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, message));
+				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, exMsg));
 			}
 		}
 	}
