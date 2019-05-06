@@ -49,7 +49,7 @@ public abstract class MergedAnnotationSelectors {
 	}
 
 	/**
-	 * Select the first directly declared annotation when possible. If not direct
+	 * Select the first directly declared annotation when possible. If no direct
 	 * annotations are declared then the earliest annotation is selected.
 	 * @return a selector that picks the first directly declared annotation whenever possible
 	 */
