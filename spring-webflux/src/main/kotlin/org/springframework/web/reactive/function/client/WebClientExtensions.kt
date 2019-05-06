@@ -39,7 +39,6 @@ import reactor.core.publisher.Mono
  * @author Sebastien Deleuze
  * @since 5.0
  */
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S): RequestHeadersSpec<*> =
 		body(publisher, object : ParameterizedTypeReference<T>() {})
 
@@ -98,7 +97,7 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlow(batchSize: Int = 
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun WebClient.RequestHeadersSpec<out WebClient.RequestHeadersSpec<*>>.awaitExchange(): ClientResponse =
+suspend fun RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(): ClientResponse =
 		exchange().awaitSingle()
 
 /**
@@ -107,7 +106,7 @@ suspend fun WebClient.RequestHeadersSpec<out WebClient.RequestHeadersSpec<*>>.aw
  * @author Sebastien Deleuze
  * @since 5.2
  */
-inline fun <reified T: Any> WebClient.RequestBodySpec.body(crossinline supplier: suspend () -> T)
+inline fun <reified T: Any> RequestBodySpec.body(crossinline supplier: suspend () -> T)
 		= body(GlobalScope.mono(Dispatchers.Unconfined) { supplier.invoke() })
 
 /**

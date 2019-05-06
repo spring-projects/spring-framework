@@ -47,13 +47,6 @@ class ServerResponseExtensionsTests {
 	}
 
 	@Test
-	fun `BodyBuilder#bodyToServerSentEvents with Publisher and reified type parameters`() {
-		val body = mockk<Publisher<List<Foo>>>()
-		bodyBuilder.bodyToServerSentEvents(body)
-		verify { bodyBuilder.contentType(TEXT_EVENT_STREAM).body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
-	}
-
-	@Test
 	fun `BodyBuilder#json`() {
 		bodyBuilder.json()
 		verify { bodyBuilder.contentType(APPLICATION_JSON) }
@@ -69,6 +62,12 @@ class ServerResponseExtensionsTests {
 	fun `BodyBuilder#html`() {
 		bodyBuilder.html()
 		verify { bodyBuilder.contentType(TEXT_HTML) }
+	}
+
+	@Test
+	fun `BodyBuilder#sse`() {
+		bodyBuilder.sse()
+		verify { bodyBuilder.contentType(TEXT_EVENT_STREAM) }
 	}
 
 	@Test
@@ -96,28 +95,14 @@ class ServerResponseExtensionsTests {
 
 	@Test
 	@FlowPreview
-	fun `BodyBuilder#body with Flow and reified type parameters`() {
+	fun bodyFlowAndAwait() {
 		val response = mockk<ServerResponse>()
 		val body = mockk<Flow<List<Foo>>>()
 		every { bodyBuilder.body(ofType<Publisher<List<Foo>>>()) } returns Mono.just(response)
 		runBlocking {
-			bodyBuilder.bodyAndAwait(body)
+			bodyBuilder.bodyFlowAndAwait(body)
 		}
 		verify { bodyBuilder.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
-	}
-
-	@Test
-	@FlowPreview
-	fun `BodyBuilder#bodyToServerSentEvents with Flow and reified type parameters`() {
-		val response = mockk<ServerResponse>()
-		val body = mockk<Flow<List<Foo>>>()
-		every { bodyBuilder.contentType(ofType()) } returns bodyBuilder
-		every { bodyBuilder.body(ofType<Publisher<List<Foo>>>()) } returns Mono.just(response)
-		runBlocking {
-			bodyBuilder.bodyToServerSentEventsAndAwait(body)
-		}
-		verify { bodyBuilder.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
-		verify { bodyBuilder.contentType(TEXT_EVENT_STREAM) }
 	}
 
 	@Test
