@@ -49,9 +49,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.isA;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -748,6 +746,142 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		StepVerifier.create(result)
 				.thenCancel()
 				.verify();
+	}
+
+	@Test
+	public void matcher() {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+
+		byte[] delims = "ooba".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int result = matcher.match(foo);
+		assertEquals(-1, result);
+		result = matcher.match(bar);
+		assertEquals(1, result);
+
+
+		release(foo, bar);
+	}
+
+	@Test
+	public void matcher2() {
+		DataBuffer foo = stringBuffer("fooobar");
+
+		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int result = matcher.match(foo);
+		assertEquals(2, result);
+		foo.readPosition(2);
+		result = matcher.match(foo);
+		assertEquals(3, result);
+		foo.readPosition(3);
+		result = matcher.match(foo);
+		assertEquals(-1, result);
+
+		release(foo);
+	}
+
+	@Test
+	public void split() {
+		Mono<DataBuffer> source =
+				deferStringBuffer("--foo--bar--baz--");
+
+		byte[] delimiter = "--".getBytes(StandardCharsets.UTF_8);
+
+		Flux<DataBuffer> result = DataBufferUtils.split(source, delimiter);
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer(""))
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.verifyComplete();
+	}
+
+	@Test
+	public void splitIncludeDelimiter() {
+		Mono<DataBuffer> source =
+				deferStringBuffer("--foo--bar--baz--");
+
+		byte[] delimiter = "--".getBytes(StandardCharsets.UTF_8);
+
+		Flux<DataBuffer> result = DataBufferUtils.split(source, delimiter, false);
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("--"))
+				.consumeNextWith(stringConsumer("foo--"))
+				.consumeNextWith(stringConsumer("bar--"))
+				.consumeNextWith(stringConsumer("baz--"))
+				.verifyComplete();
+	}
+
+	@Test
+	public void splitErrors() {
+		Flux<DataBuffer> source = Flux.concat(
+				deferStringBuffer("foo--"),
+				deferStringBuffer("bar--"),
+				Mono.error(new RuntimeException())
+		);
+		byte[] delimiter = "--".getBytes(StandardCharsets.UTF_8);
+
+		Flux<DataBuffer> result = DataBufferUtils.split(source, delimiter);
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.expectError(RuntimeException.class)
+				.verify();
+	}
+
+	@Test
+	public void splitCanceled() {
+		Flux<DataBuffer> source = Flux.concat(
+				deferStringBuffer("foo--"),
+				deferStringBuffer("bar--"),
+				deferStringBuffer("baz")
+		);
+		byte[] delimiter = "--".getBytes(StandardCharsets.UTF_8);
+
+		Flux<DataBuffer> result = DataBufferUtils.split(source, delimiter);
+
+		StepVerifier.create(result)
+				.thenCancel()
+				.verify();
+	}
+
+
+	@Test
+	public void splitWithoutDemand() {
+		Flux<DataBuffer> source = Flux.concat(
+				deferStringBuffer("foo--"),
+				deferStringBuffer("bar--")
+		);
+		byte[] delimiter = "--".getBytes(StandardCharsets.UTF_8);
+
+		Flux<DataBuffer> result = DataBufferUtils.split(source, delimiter);
+
+		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
+		result.subscribe(subscriber);
+		subscriber.cancel();
+	}
+
+	@Test
+	public void splitAcrossBuffer() {
+		Flux<DataBuffer> source = Flux.concat(
+				deferStringBuffer("foo-"),
+				deferStringBuffer("-bar-"),
+				deferStringBuffer("-baz"));
+
+		byte[] delimiter = "--".getBytes(StandardCharsets.UTF_8);
+
+		Flux<DataBuffer> result = DataBufferUtils.split(source, delimiter);
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.verifyComplete();
 	}
 
 
