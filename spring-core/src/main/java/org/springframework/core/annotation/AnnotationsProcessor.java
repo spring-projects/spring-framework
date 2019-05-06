@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable;
  * @param <C> the context type
  * @param <R> the result type
  * @author Phillip Webb
+ * @since 5.2
  * @see AnnotationsScanner
  * @see TypeMappedAnnotations
  */
