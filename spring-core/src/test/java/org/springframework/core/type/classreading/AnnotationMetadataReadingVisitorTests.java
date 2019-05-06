@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.*;
  *
  * @author Phillip Webb
  */
+@SuppressWarnings("deprecation")
 public class AnnotationMetadataReadingVisitorTests
 		extends AbstractAnnotationMetadataTests {
 

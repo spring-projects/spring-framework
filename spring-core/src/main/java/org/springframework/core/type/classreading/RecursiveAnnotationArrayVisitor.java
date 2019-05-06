@@ -34,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 3.1.1
  */
+@Deprecated
 class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor {
 
 	private final String attributeName;

@@ -42,6 +42,7 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 4.0
  */
+@Deprecated
 abstract class AnnotationReadingVisitorUtils {
 
 	public static AnnotationAttributes convertClassValues(Object annotatedElement,

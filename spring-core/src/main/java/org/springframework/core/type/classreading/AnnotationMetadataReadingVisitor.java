@@ -49,6 +49,7 @@ import org.springframework.util.MultiValueMap;
  * @author Sam Brannen
  * @since 2.5
  */
+@Deprecated
 public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
 	@Nullable

@@ -45,6 +45,7 @@ import org.springframework.util.MultiValueMap;
  * @author Phillip Webb
  * @since 3.0
  */
+@Deprecated
 public class MethodMetadataReadingVisitor extends MethodVisitor implements MethodMetadata {
 
 	protected final String methodName;
