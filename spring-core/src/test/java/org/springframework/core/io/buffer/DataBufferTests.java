@@ -579,6 +579,37 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	public void retainedSlice() {
+		DataBuffer buffer = createDataBuffer(3);
+		buffer.write(new byte[]{'a', 'b'});
+
+		DataBuffer slice = buffer.retainedSlice(1, 2);
+		assertEquals(2, slice.readableByteCount());
+		try {
+			slice.write((byte) 0);
+			fail("Exception expected");
+		}
+		catch (Exception ignored) {
+		}
+		buffer.write((byte) 'c');
+
+		assertEquals(3, buffer.readableByteCount());
+		byte[] result = new byte[3];
+		buffer.read(result);
+
+		assertArrayEquals(new byte[]{'a', 'b', 'c'}, result);
+
+		assertEquals(2, slice.readableByteCount());
+		result = new byte[2];
+		slice.read(result);
+
+		assertArrayEquals(new byte[]{'b', 'c'}, result);
+
+
+		release(buffer, slice);
+	}
+
+	@Test
 	public void spr16351() {
 		DataBuffer buffer = createDataBuffer(6);
 		byte[] bytes = {'a', 'b', 'c', 'd', 'e', 'f'};

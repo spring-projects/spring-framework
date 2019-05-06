@@ -262,6 +262,12 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	public NettyDataBuffer retainedSlice(int index, int length) {
+		ByteBuf slice = this.byteBuf.retainedSlice(index, length);
+		return new NettyDataBuffer(slice, this.dataBufferFactory);
+	}
+
+	@Override
 	public ByteBuffer asByteBuffer() {
 		return this.byteBuf.nioBuffer();
 	}
