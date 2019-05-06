@@ -1070,14 +1070,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public void destroySingleton(String beanName) {
 		super.destroySingleton(beanName);
-		this.manualSingletonNames.remove(beanName);
+		if (hasBeanCreationStarted()) {
+			synchronized (this.beanDefinitionMap) {
+				Set<String> updatedSingletons = new LinkedHashSet<>(this.manualSingletonNames);
+				updatedSingletons.remove(beanName);
+				this.manualSingletonNames = updatedSingletons;
+			}
+		} else {
+			this.manualSingletonNames.remove(beanName);
+		}
 		clearByTypeCache();
 	}
 
 	@Override
 	public void destroySingletons() {
 		super.destroySingletons();
-		this.manualSingletonNames.clear();
+		this.manualSingletonNames = Collections.emptySet();
 		clearByTypeCache();
 	}
 
