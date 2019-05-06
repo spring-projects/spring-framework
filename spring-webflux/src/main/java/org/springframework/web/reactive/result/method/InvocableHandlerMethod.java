@@ -113,12 +113,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Configure a reactive registry. This is needed for cases where the response
-	 * is fully handled within the controller in combination with an async void
-	 * return value.
-	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
-	 * default settings.
-	 * @param registry the registry to use
+	 * Configure a reactive registry. This is needed for cases where the response is fully
+	 * handled within the controller in combination with an async void return value.
+	 * <p>By default this is a {@link ReactiveAdapterRegistry} with default settings.
 	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
 		this.reactiveAdapterRegistry = registry;
@@ -181,10 +178,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private Mono<Object[]> getMethodArgumentValues(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
-		if (ObjectUtils.isEmpty(getMethodParameters())) {
+		MethodParameter[] parameters = getMethodParameters();
+		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
 		}
-		MethodParameter[] parameters = getMethodParameters();
+
 		List<Mono<Object>> argMonos = new ArrayList<>(parameters.length);
 		for (MethodParameter parameter : parameters) {
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
@@ -208,7 +206,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return Mono.zip(argMonos, values ->
-				Stream.of(values).map(o -> o != NO_ARG_VALUE ? o : null).toArray());
+				Stream.of(values).map(value -> value != NO_ARG_VALUE ? value : null).toArray());
 	}
 
 	private void logArgumentErrorIfNecessary(ServerWebExchange exchange, MethodParameter parameter, Throwable ex) {
