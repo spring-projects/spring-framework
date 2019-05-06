@@ -28,7 +28,6 @@ import kotlinx.coroutines.reactive.flow.asPublisher
 
 import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Mono
-import reactor.core.publisher.onErrorMap
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import kotlin.reflect.full.callSuspend
@@ -67,7 +66,7 @@ internal fun invokeHandlerMethod(method: Method, bean: Any, vararg args: Any?): 
 		val mono = GlobalScope.mono(Dispatchers.Unconfined) {
 			function.callSuspend(bean, *args.sliceArray(0..(args.size-2)))
 					.let { if (it == Unit) null else it }
-		}.onErrorMap(InvocationTargetException::class) { it.targetException }
+		}.onErrorMap(InvocationTargetException::class.java) { it.targetException }
 		if (function.returnType.classifier == Flow::class) {
 			mono.flatMapMany { (it as Flow<Any>).asPublisher() }
 		}
