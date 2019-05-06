@@ -562,7 +562,26 @@ public interface MergedAnnotation<A extends Annotation> {
 	static <A extends Annotation> MergedAnnotation<A> of(
 			@Nullable AnnotatedElement source, Class<A> annotationType, @Nullable Map<String, ?> attributes) {
 
-		return TypeMappedAnnotation.of(source, annotationType, attributes);
+		return of(null, source, annotationType, attributes);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attributes values supplied by a map.
+	 * @param classLoader the class loader used to resolve class attributes
+	 * @param source the source for the annotation. This source is used only for
+	 * information and logging. It does not need to <em>actually</em> contain
+	 * the specified annotations and it will not be searched.
+	 * @param annotationType the annotation type
+	 * @param attributes the annotation attributes or {@code null} if just default
+	 * values should be used
+	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
+	 */
+	static <A extends Annotation> MergedAnnotation<A> of(
+			@Nullable ClassLoader classLoader, @Nullable Object source,
+			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
+
+		return TypeMappedAnnotation.of(classLoader, source, annotationType, attributes);
 	}
 
 
