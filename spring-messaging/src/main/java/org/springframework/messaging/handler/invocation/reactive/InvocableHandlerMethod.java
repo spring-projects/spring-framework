@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			try {
 				argMonos.add(this.resolvers.resolveArgument(parameter, message)
 						.defaultIfEmpty(NO_ARG_VALUE)
-						.doOnError(cause -> logArgumentErrorIfNecessary(parameter, cause)));
+						.doOnError(ex -> logArgumentErrorIfNecessary(parameter, ex)));
 			}
 			catch (Exception ex) {
 				logArgumentErrorIfNecessary(parameter, ex);
@@ -190,15 +190,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return Mono.zip(argMonos, values ->
-				Stream.of(values).map(o -> o != NO_ARG_VALUE ? o : null).toArray());
+				Stream.of(values).map(value -> value != NO_ARG_VALUE ? value : null).toArray());
 	}
 
-	private void logArgumentErrorIfNecessary(MethodParameter parameter, Throwable cause) {
-		// Leave stack trace for later, if error is not handled..
-		String causeMessage = cause.getMessage();
-		if (!causeMessage.contains(parameter.getExecutable().toGenericString())) {
+	private void logArgumentErrorIfNecessary(MethodParameter parameter, Throwable ex) {
+		// Leave stack trace for later, if error is not handled...
+		String exMsg = ex.getMessage();
+		if (!exMsg.contains(parameter.getExecutable().toGenericString())) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(formatArgumentError(parameter, causeMessage));
+				logger.debug(formatArgumentError(parameter, exMsg));
 			}
 		}
 	}
