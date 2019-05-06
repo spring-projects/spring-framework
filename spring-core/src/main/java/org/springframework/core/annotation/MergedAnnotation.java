@@ -523,34 +523,34 @@ public interface MergedAnnotation<A extends Annotation> {
 	}
 
 	/**
-	 * Create a new {@link MergedAnnotation} instance from the specified
+	 * Create a new {@link MergedAnnotation} instance of the specified
 	 * annotation type. The resulting annotation will not have any attribute
 	 * values but may still be used to query default values.
 	 * @param annotationType the annotation type
 	 * @return a {@link MergedAnnotation} instance for the annotation
 	 */
-	static <A extends Annotation> MergedAnnotation<A> from(Class<A> annotationType) {
-		return from(null, annotationType, null);
+	static <A extends Annotation> MergedAnnotation<A> of(Class<A> annotationType) {
+		return of(null, annotationType, null);
 	}
 
 	/**
-	 * Create a new {@link MergedAnnotation} instance from the specified
-	 * annotation type and attributes map.
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attributes values supplied by a map.
 	 * @param annotationType the annotation type
 	 * @param attributes the annotation attributes or {@code null} if just default
 	 * values should be used
 	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
-	 * @see #from(AnnotatedElement, Class, Map)
+	 * @see #of(AnnotatedElement, Class, Map)
 	 */
-	static <A extends Annotation> MergedAnnotation<A> from(
+	static <A extends Annotation> MergedAnnotation<A> of(
 			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
 
-		return from(null, annotationType, attributes);
+		return of(null, annotationType, attributes);
 	}
 
 	/**
-	 * Create a new {@link MergedAnnotation} instance from the specified
-	 * annotation type and attributes map.
+	 * Create a new {@link MergedAnnotation} instance of the specified
+	 * annotation type with attributes values supplied by a map.
 	 * @param source the source for the annotation. This source is used only for
 	 * information and logging. It does not need to <em>actually</em> contain
 	 * the specified annotations and it will not be searched.
@@ -559,10 +559,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * values should be used
 	 * @return a {@link MergedAnnotation} instance for the annotation and attributes
 	 */
-	static <A extends Annotation> MergedAnnotation<A> from(
+	static <A extends Annotation> MergedAnnotation<A> of(
 			@Nullable AnnotatedElement source, Class<A> annotationType, @Nullable Map<String, ?> attributes) {
 
-		return TypeMappedAnnotation.from(source, annotationType, attributes);
+		return TypeMappedAnnotation.of(source, annotationType, attributes);
 	}
 
 

@@ -547,7 +547,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return new TypeMappedAnnotation<>(mappings.get(0), source, annotation, ReflectionUtils::invokeMethod, 0);
 	}
 
-	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source,
+	static <A extends Annotation> MergedAnnotation<A> of(@Nullable Object source,
 			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");

@@ -905,7 +905,7 @@ public abstract class AnnotationUtils {
 		}
 		else {
 			// If we have nested annotations, we need them as nested maps
-			AnnotationAttributes attributes = MergedAnnotation.from(annotationType)
+			AnnotationAttributes attributes = MergedAnnotation.of(annotationType)
 					.asMap(annotation ->
 							new AnnotationAttributes(annotation.getType(), true), Adapt.ANNOTATION_TO_MAP);
 			for (Map.Entry<String, Object> element : attributes.entrySet()) {
@@ -1151,7 +1151,7 @@ public abstract class AnnotationUtils {
 		if (annotationType == null || !StringUtils.hasText(attributeName)) {
 			return null;
 		}
-		return MergedAnnotation.from(annotationType).getDefaultValue(attributeName).orElse(null);
+		return MergedAnnotation.of(annotationType).getDefaultValue(attributeName).orElse(null);
 	}
 
 	/**
@@ -1232,7 +1232,7 @@ public abstract class AnnotationUtils {
 			Class<A> annotationType, @Nullable AnnotatedElement annotatedElement) {
 
 		try {
-			return MergedAnnotation.from(annotatedElement, annotationType, attributes).synthesize();
+			return MergedAnnotation.of(annotatedElement, annotationType, attributes).synthesize();
 		}
 		catch (NoSuchElementException | IllegalStateException ex) {
 			throw new IllegalArgumentException(ex);
