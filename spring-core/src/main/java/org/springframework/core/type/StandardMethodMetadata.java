@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationFilter;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -40,6 +44,8 @@ public class StandardMethodMetadata implements MethodMetadata {
 	private final Method introspectedMethod;
 
 	private final boolean nestedAnnotationsAsMap;
+
+	private final MergedAnnotations mergedAnnotations;
 
 
 	/**
@@ -65,8 +71,15 @@ public class StandardMethodMetadata implements MethodMetadata {
 		Assert.notNull(introspectedMethod, "Method must not be null");
 		this.introspectedMethod = introspectedMethod;
 		this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
+		this.mergedAnnotations = MergedAnnotations.from(introspectedMethod,
+				SearchStrategy.DIRECT, RepeatableContainers.none(),
+				AnnotationFilter.PLAIN);
 	}
 
+	@Override
+	public MergedAnnotations getAnnotations() {
+		return this.mergedAnnotations;
+	}
 
 	/**
 	 * Return the underlying Method.
@@ -107,17 +120,19 @@ public class StandardMethodMetadata implements MethodMetadata {
 
 	@Override
 	public boolean isOverridable() {
-		return (!isStatic() && !isFinal() && !Modifier.isPrivate(this.introspectedMethod.getModifiers()));
+		return !isStatic() && !isFinal() && !isPrivate();
 	}
 
-	@Override
-	public boolean isAnnotated(String annotationName) {
-		return AnnotatedElementUtils.isAnnotated(this.introspectedMethod, annotationName);
+	private boolean isPrivate() {
+		return Modifier.isPrivate(this.introspectedMethod.getModifiers());
 	}
 
 	@Override
 	@Nullable
 	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		if (this.nestedAnnotationsAsMap) {
+			return MethodMetadata.super.getAnnotationAttributes(annotationName, classValuesAsString);
+		}
 		return AnnotatedElementUtils.getMergedAnnotationAttributes(this.introspectedMethod,
 				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
@@ -125,6 +140,9 @@ public class StandardMethodMetadata implements MethodMetadata {
 	@Override
 	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		if (this.nestedAnnotationsAsMap) {
+			return MethodMetadata.super.getAllAnnotationAttributes(annotationName, classValuesAsString);
+		}
 		return AnnotatedElementUtils.getAllAnnotationAttributes(this.introspectedMethod,
 				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
 	}

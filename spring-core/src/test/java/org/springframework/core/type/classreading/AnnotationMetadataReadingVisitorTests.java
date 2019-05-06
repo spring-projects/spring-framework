@@ -25,7 +25,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AbstractAnnotationMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
 import org.springframework.util.ClassUtils;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link AnnotationMetadataReadingVisitor}.
@@ -56,6 +59,12 @@ public class AnnotationMetadataReadingVisitorTests
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	@Override
+	public void getAnnotationsReturnsDirectAnnotations() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
+				super::getAnnotationsReturnsDirectAnnotations);
 	}
 
 }

@@ -21,6 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.*;
@@ -89,6 +90,16 @@ public abstract class AbstractMethodMetadataTests {
 		assertThat(getTagged(WithStaticMethod.class).isOverridable()).isFalse();
 		assertThat(getTagged(WithFinalMethod.class).isOverridable()).isFalse();
 		assertThat(getTagged(WithPrivateMethod.class).isOverridable()).isFalse();
+	}
+
+	@Test
+	public void getAnnotationsReturnsDirectAnnotations() {
+		MethodMetadata metadata = getTagged(WithDirectAnnotation.class);
+		assertThat(metadata.getAnnotations().stream().filter(
+				MergedAnnotation::isDirectlyPresent).map(
+						a -> a.getType().getName())).containsExactlyInAnyOrder(
+								Tag.class.getName(),
+								DirectAnnotation.class.getName());
 	}
 
 	@Test
