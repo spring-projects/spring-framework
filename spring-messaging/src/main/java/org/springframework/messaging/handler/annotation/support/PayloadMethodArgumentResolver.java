@@ -126,7 +126,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 			}
 		}
 
-		Class<?> targetClass = parameter.getParameterType();
+		Class<?> targetClass = resolveTargetClass(parameter, message);
 		Class<?> payloadClass = payload.getClass();
 		if (ClassUtils.isAssignable(targetClass, payloadClass)) {
 			validate(message, parameter, payload);
@@ -171,6 +171,21 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 		else {
 			return false;
 		}
+	}
+
+	/**
+	 * Resolve the target class to convert the payload to.
+	 * <p>By default this is simply {@link MethodParameter#getParameterType()}
+	 * but that can be overridden to select a more specific target type after
+	 * also taking into account the "Content-Type", e.g. return {@code String}
+	 * if target type is {@code Object} and {@code "Content-Type:text/**"}.
+	 * @param parameter the target method parameter
+	 * @param message the message bring processed
+	 * @return the target type to use
+	 * @since 5.2
+	 */
+	protected Class<?> resolveTargetClass(MethodParameter parameter, Message<?> message) {
+		return parameter.getParameterType();
 	}
 
 	/**
