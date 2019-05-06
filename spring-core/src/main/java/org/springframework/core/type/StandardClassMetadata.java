@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,9 @@ public class StandardClassMetadata implements ClassMetadata {
 	/**
 	 * Create a new StandardClassMetadata wrapper for the given Class.
 	 * @param introspectedClass the Class to introspect
+	 * @deprecated since 5.2 in favor of {@link StandardAnnotationMetadata}
 	 */
+	@Deprecated
 	public StandardClassMetadata(Class<?> introspectedClass) {
 		Assert.notNull(introspectedClass, "Class must not be null");
 		this.introspectedClass = introspectedClass;

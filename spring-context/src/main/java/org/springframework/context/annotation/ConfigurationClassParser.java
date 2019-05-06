@@ -913,7 +913,7 @@ class ConfigurationClassParser {
 		public SourceClass(Object source) {
 			this.source = source;
 			if (source instanceof Class) {
-				this.metadata = new StandardAnnotationMetadata((Class<?>) source, true);
+				this.metadata = AnnotationMetadata.introspect((Class<?>) source);
 			}
 			else {
 				this.metadata = ((MetadataReader) source).getAnnotationMetadata();

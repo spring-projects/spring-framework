@@ -51,7 +51,9 @@ public class StandardMethodMetadata implements MethodMetadata {
 	/**
 	 * Create a new StandardMethodMetadata wrapper for the given Method.
 	 * @param introspectedMethod the Method to introspect
+	 * @deprecated since 5.2 in favor of obtaining instances via {@link AnnotationMetadata}
 	 */
+	@Deprecated
 	public StandardMethodMetadata(Method introspectedMethod) {
 		this(introspectedMethod, false);
 	}
@@ -66,7 +68,9 @@ public class StandardMethodMetadata implements MethodMetadata {
 	 * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
 	 * with ASM-based {@link AnnotationMetadata} implementations
 	 * @since 3.1.1
+	 * @deprecated since 5.2 in favor of obtaining instances via {@link AnnotationMetadata}
 	 */
+	@Deprecated
 	public StandardMethodMetadata(Method introspectedMethod, boolean nestedAnnotationsAsMap) {
 		Assert.notNull(introspectedMethod, "Method must not be null");
 		this.introspectedMethod = introspectedMethod;

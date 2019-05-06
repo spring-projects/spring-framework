@@ -26,6 +26,7 @@ import java.util.Set;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationFilter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
@@ -56,7 +57,9 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	 * Create a new {@code StandardAnnotationMetadata} wrapper for the given Class.
 	 * @param introspectedClass the Class to introspect
 	 * @see #StandardAnnotationMetadata(Class, boolean)
+	 * @deprecated since 5.2 in favor of the factory method {@link AnnotationMetadata#introspect(Class)}
 	 */
+	@Deprecated
 	public StandardAnnotationMetadata(Class<?> introspectedClass) {
 		this(introspectedClass, false);
 	}
@@ -71,7 +74,12 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	 * {@link org.springframework.core.annotation.AnnotationAttributes} for compatibility
 	 * with ASM-based {@link AnnotationMetadata} implementations
 	 * @since 3.1.1
+	 * @deprecated since 5.2 in favor of the factory method {@link AnnotationMetadata#introspect(Class)}.
+	 * Use {@link MergedAnnotation#asMap(org.springframework.core.annotation.MergedAnnotation.Adapt...) MergedAnnotation.asMap}
+	 * from {@link #getAnnotations()} rather than {@link #getAnnotationAttributes(String)}
+	 * if {@code nestedAnnotationsAsMap} is {@code false}
 	 */
+	@Deprecated
 	public StandardAnnotationMetadata(Class<?> introspectedClass, boolean nestedAnnotationsAsMap) {
 		super(introspectedClass);
 		this.mergedAnnotations = MergedAnnotations.from(introspectedClass,
@@ -138,6 +146,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
 		Set<MethodMetadata> annotatedMethods = null;
 		if (AnnotationUtils.isCandidateClass(getIntrospectedClass(), annotationName)) {
@@ -162,6 +171,11 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	private boolean isAnnotatedMethod(Method method, String annotationName) {
 		return !method.isBridge() && method.getAnnotations().length > 0 &&
 				AnnotatedElementUtils.isAnnotated(method, annotationName);
+	}
+
+
+	static AnnotationMetadata from(Class<?> introspectedClass) {
+		return new StandardAnnotationMetadata(introspectedClass, true);
 	}
 
 }

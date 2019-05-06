@@ -25,7 +25,7 @@ public class StandardMethodMetadataTests extends AbstractMethodMetadataTests {
 
 	@Override
 	protected AnnotationMetadata get(Class<?> source) {
-		return new StandardAnnotationMetadata(source);
+		return AnnotationMetadata.introspect(source);
 	}
 
 }
