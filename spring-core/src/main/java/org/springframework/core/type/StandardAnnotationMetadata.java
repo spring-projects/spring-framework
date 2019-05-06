@@ -27,6 +27,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link AnnotationMetadata} implementation that uses standard reflection
@@ -151,7 +152,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	public boolean hasAnnotatedMethods(String annotationName) {
 		if (AnnotationUtils.isCandidateClass(getIntrospectedClass(), annotationName)) {
 			try {
-				Method[] methods = getIntrospectedClass().getDeclaredMethods();
+				Method[] methods = ReflectionUtils.getDeclaredMethods(getIntrospectedClass());
 				for (Method method : methods) {
 					if (!method.isBridge() && method.getAnnotations().length > 0 &&
 							AnnotatedElementUtils.isAnnotated(method, annotationName)) {
