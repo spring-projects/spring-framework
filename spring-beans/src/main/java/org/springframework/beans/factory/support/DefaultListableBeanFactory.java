@@ -40,6 +40,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 
@@ -921,18 +923,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					updatedDefinitions.addAll(this.beanDefinitionNames);
 					updatedDefinitions.add(beanName);
 					this.beanDefinitionNames = updatedDefinitions;
-					if (this.manualSingletonNames.contains(beanName)) {
-						Set<String> updatedSingletons = new LinkedHashSet<>(this.manualSingletonNames);
-						updatedSingletons.remove(beanName);
-						this.manualSingletonNames = updatedSingletons;
-					}
+					removeManualSingletonName(beanName);
 				}
 			}
 			else {
 				// Still in startup registration phase
 				this.beanDefinitionMap.put(beanName, beanDefinition);
 				this.beanDefinitionNames.add(beanName);
-				this.manualSingletonNames.remove(beanName);
+				removeManualSingletonName(beanName);
 			}
 			this.frozenBeanDefinitionNames = null;
 		}
@@ -1020,40 +1018,51 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
 		super.registerSingleton(beanName, singletonObject);
-
-		if (hasBeanCreationStarted()) {
-			// Cannot modify startup-time collection elements anymore (for stable iteration)
-			synchronized (this.beanDefinitionMap) {
-				if (!this.beanDefinitionMap.containsKey(beanName)) {
-					Set<String> updatedSingletons = new LinkedHashSet<>(this.manualSingletonNames.size() + 1);
-					updatedSingletons.addAll(this.manualSingletonNames);
-					updatedSingletons.add(beanName);
-					this.manualSingletonNames = updatedSingletons;
-				}
-			}
-		}
-		else {
-			// Still in startup registration phase
-			if (!this.beanDefinitionMap.containsKey(beanName)) {
-				this.manualSingletonNames.add(beanName);
-			}
-		}
-
-		clearByTypeCache();
-	}
-
-	@Override
-	public void destroySingleton(String beanName) {
-		super.destroySingleton(beanName);
-		this.manualSingletonNames.remove(beanName);
+		updateManualSingletonNames(set -> set.add(beanName), set -> !this.beanDefinitionMap.containsKey(beanName));
 		clearByTypeCache();
 	}
 
 	@Override
 	public void destroySingletons() {
 		super.destroySingletons();
-		this.manualSingletonNames.clear();
+		updateManualSingletonNames(Set::clear, set -> !set.isEmpty());
 		clearByTypeCache();
+	}
+
+	@Override
+	public void destroySingleton(String beanName) {
+		super.destroySingleton(beanName);
+		removeManualSingletonName(beanName);
+		clearByTypeCache();
+	}
+
+	private void removeManualSingletonName(String beanName) {
+		updateManualSingletonNames(set -> set.remove(beanName), set -> set.contains(beanName));
+	}
+
+	/**
+	 * Update the factory's internal set of manual singleton names.
+	 * @param action the modification action
+	 * @param condition a precondition for the modification action
+	 * (if this condition does not apply, the action can be skipped)
+	 */
+	private void updateManualSingletonNames(Consumer<Set<String>> action, Predicate<Set<String>> condition) {
+		if (hasBeanCreationStarted()) {
+			// Cannot modify startup-time collection elements anymore (for stable iteration)
+			synchronized (this.beanDefinitionMap) {
+				if (condition.test(this.manualSingletonNames)) {
+					Set<String> updatedSingletons = new LinkedHashSet<>(this.manualSingletonNames);
+					action.accept(updatedSingletons);
+					this.manualSingletonNames = updatedSingletons;
+				}
+			}
+		}
+		else {
+			// Still in startup registration phase
+			if (condition.test(this.manualSingletonNames)) {
+				action.accept(this.manualSingletonNames);
+			}
+		}
 	}
 
 	/**
