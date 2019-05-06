@@ -21,6 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AbstractAnnotationMetadataTests.TestMemberClass.TestMemberClassInnerClass;
 import org.springframework.core.type.AbstractAnnotationMetadataTests.TestMemberClass.TestMemberClassInnerInterface;
 import org.springframework.util.MultiValueMap;
@@ -135,6 +136,16 @@ public abstract class AbstractAnnotationMetadataTests {
 	@Test
 	public void getMemberClassNamesWhenHasNoMemberClassesReturnsEmptyArray() {
 		assertThat(get(TestClass.class).getMemberClassNames()).isEmpty();
+	}
+
+	@Test
+	public void getAnnotationsReturnsDirectAnnotations() {
+		AnnotationMetadata metadata = get(WithDirectAnnotations.class);
+		assertThat(metadata.getAnnotations().stream().filter(
+				MergedAnnotation::isDirectlyPresent).map(
+						a -> a.getType().getName())).containsExactlyInAnyOrder(
+								DirectAnnotation1.class.getName(),
+								DirectAnnotation2.class.getName());
 	}
 
 	@Test

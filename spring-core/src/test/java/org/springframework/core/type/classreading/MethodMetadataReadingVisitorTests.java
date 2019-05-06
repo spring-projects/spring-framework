@@ -25,13 +25,18 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AbstractMethodMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
+import org.springframework.core.type.classreading.MethodMetadataReadingVisitor;
 import org.springframework.util.ClassUtils;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link MethodMetadataReadingVisitor}.
  *
  * @author Phillip Webb
  */
+@SuppressWarnings("deprecation")
 public class MethodMetadataReadingVisitorTests extends AbstractMethodMetadataTests {
 
 	@Override
@@ -55,6 +60,12 @@ public class MethodMetadataReadingVisitorTests extends AbstractMethodMetadataTes
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	@Override
+	public void getAnnotationsReturnsDirectAnnotations() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
+				super::getAnnotationsReturnsDirectAnnotations);
 	}
 
 }

@@ -27,6 +27,7 @@ import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
@@ -76,6 +77,11 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 		this.methodMetadataSet = methodMetadataSet;
 	}
 
+
+	@Override
+	public MergedAnnotations getAnnotations() {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
