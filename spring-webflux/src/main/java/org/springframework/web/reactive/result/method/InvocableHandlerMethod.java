@@ -216,7 +216,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		// Leave stack trace for later, if error is not handled..
 		String message = cause.getMessage();
-		if (!message.contains(parameter.getExecutable().toGenericString())) {
+		if (message != null && !message.contains(parameter.getExecutable().toGenericString())) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, message));
 			}
