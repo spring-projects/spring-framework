@@ -1262,7 +1262,7 @@ public class MergedAnnotationsTests {
 
 	@Test
 	public void getDefaultValueFromAnnotationType() {
-		MergedAnnotation<?> annotation = MergedAnnotation.from(Order.class);
+		MergedAnnotation<?> annotation = MergedAnnotation.of(Order.class);
 		assertThat(annotation.getDefaultValue("value")).contains(
 				Ordered.LOWEST_PRECEDENCE);
 	}
@@ -1681,7 +1681,7 @@ public class MergedAnnotationsTests {
 		Component component = WebController.class.getAnnotation(Component.class);
 		assertThat(component).isNotNull();
 		Map<String, Object> map = Collections.singletonMap("value", "webController");
-		MergedAnnotation<Component> annotation = MergedAnnotation.from(Component.class,
+		MergedAnnotation<Component> annotation = MergedAnnotation.of(Component.class,
 				map);
 		Component synthesizedComponent = annotation.synthesize();
 		assertThat(synthesizedComponent).isInstanceOf(SynthesizedAnnotation.class);
@@ -1702,7 +1702,7 @@ public class MergedAnnotationsTests {
 		assertThat(filterMap.get("pattern")).isEqualTo("*Foo");
 		filterMap.put("pattern", "newFoo");
 		filterMap.put("enigma", 42);
-		MergedAnnotation<ComponentScanSingleFilter> annotation = MergedAnnotation.from(
+		MergedAnnotation<ComponentScanSingleFilter> annotation = MergedAnnotation.of(
 				ComponentScanSingleFilter.class, map);
 		ComponentScanSingleFilter synthesizedComponentScan = annotation.synthesize();
 		assertThat(synthesizedComponentScan).isInstanceOf(SynthesizedAnnotation.class);
@@ -1726,7 +1726,7 @@ public class MergedAnnotationsTests {
 		filters[0].put("enigma", 42);
 		filters[1].put("pattern", "newBar");
 		filters[1].put("enigma", 42);
-		MergedAnnotation<ComponentScan> annotation = MergedAnnotation.from(
+		MergedAnnotation<ComponentScan> annotation = MergedAnnotation.of(
 				ComponentScan.class, map);
 		ComponentScan synthesizedComponentScan = annotation.synthesize();
 		assertThat(synthesizedComponentScan).isInstanceOf(SynthesizedAnnotation.class);
@@ -1736,7 +1736,7 @@ public class MergedAnnotationsTests {
 
 	@Test
 	public void synthesizeFromDefaultsWithoutAttributeAliases() throws Exception {
-		MergedAnnotation<AnnotationWithDefaults> annotation = MergedAnnotation.from(
+		MergedAnnotation<AnnotationWithDefaults> annotation = MergedAnnotation.of(
 				AnnotationWithDefaults.class);
 		AnnotationWithDefaults synthesized = annotation.synthesize();
 		assertThat(synthesized.text()).isEqualTo("enigma");
@@ -1746,7 +1746,7 @@ public class MergedAnnotationsTests {
 
 	@Test
 	public void synthesizeFromDefaultsWithAttributeAliases() throws Exception {
-		MergedAnnotation<TestConfiguration> annotation = MergedAnnotation.from(
+		MergedAnnotation<TestConfiguration> annotation = MergedAnnotation.of(
 				TestConfiguration.class);
 		TestConfiguration synthesized = annotation.synthesize();
 		assertThat(synthesized.value()).isEqualTo("");
@@ -1764,7 +1764,7 @@ public class MergedAnnotationsTests {
 	public void synthesizeFromMapWithMinimalAttributesWithAttributeAliases()
 			throws Exception {
 		Map<String, Object> map = Collections.singletonMap("location", "test.xml");
-		MergedAnnotation<TestConfiguration> annotation = MergedAnnotation.from(
+		MergedAnnotation<TestConfiguration> annotation = MergedAnnotation.of(
 				TestConfiguration.class, map);
 		TestConfiguration synthesized = annotation.synthesize();
 		assertThat(synthesized.value()).isEqualTo("test.xml");
@@ -1782,7 +1782,7 @@ public class MergedAnnotationsTests {
 
 	private void synthesizeFromMapWithAttributeAliasesThatOverrideArraysWithSingleElements(
 			Map<String, Object> map) {
-		MergedAnnotation<GetMapping> annotation = MergedAnnotation.from(GetMapping.class,
+		MergedAnnotation<GetMapping> annotation = MergedAnnotation.of(GetMapping.class,
 				map);
 		GetMapping synthesized = annotation.synthesize();
 		assertThat(synthesized.value()).isEqualTo("/foo");
@@ -1803,7 +1803,7 @@ public class MergedAnnotationsTests {
 			throws Exception {
 		Map<String, Object> map = Collections.singletonMap(attributeNameAndValue,
 				attributeNameAndValue);
-		MergedAnnotation<ImplicitAliasesTestConfiguration> annotation = MergedAnnotation.from(
+		MergedAnnotation<ImplicitAliasesTestConfiguration> annotation = MergedAnnotation.of(
 				ImplicitAliasesTestConfiguration.class, map);
 		ImplicitAliasesTestConfiguration synthesized = annotation.synthesize();
 		assertThat(synthesized.value()).isEqualTo(attributeNameAndValue);
@@ -1828,7 +1828,7 @@ public class MergedAnnotationsTests {
 
 	private void testMissingTextAttribute(Map<String, Object> attributes) {
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() -> {
-			MergedAnnotation<AnnotationWithoutDefaults> annotation = MergedAnnotation.from(
+			MergedAnnotation<AnnotationWithoutDefaults> annotation = MergedAnnotation.of(
 					AnnotationWithoutDefaults.class, attributes);
 			annotation.synthesize();
 		}).withMessage("No value found for attribute named 'text' in merged annotation "
@@ -1838,7 +1838,7 @@ public class MergedAnnotationsTests {
 	@Test
 	public void synthesizeFromMapWithAttributeOfIncorrectType() throws Exception {
 		Map<String, Object> map = Collections.singletonMap("value", 42L);
-		MergedAnnotation<Component> annotation = MergedAnnotation.from(Component.class,
+		MergedAnnotation<Component> annotation = MergedAnnotation.of(Component.class,
 				map);
 		// annotation.synthesize();
 		assertThatIllegalStateException().isThrownBy(
@@ -1853,7 +1853,7 @@ public class MergedAnnotationsTests {
 		Component component = WebController.class.getAnnotation(Component.class);
 		assertThat(component).isNotNull();
 		Map<String, Object> attributes = MergedAnnotation.from(component).asMap();
-		Component synthesized = MergedAnnotation.from(Component.class,
+		Component synthesized = MergedAnnotation.of(Component.class,
 				attributes).synthesize();
 		assertThat(synthesized).isInstanceOf(SynthesizedAnnotation.class);
 		assertThat(synthesized).isEqualTo(component);
