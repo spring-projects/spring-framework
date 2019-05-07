@@ -24,6 +24,8 @@ import java.util.Map;
  *
  * @author Arjen Poutsma
  * @since 3.0
+ * @param <K> the key type
+ * @param <V> the value element type
  */
 public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 
