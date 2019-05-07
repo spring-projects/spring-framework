@@ -156,9 +156,10 @@ public interface ServerRequest {
 	Map<String, Object> attributes();
 
 	/**
-	 * Get the first query parameter with the given name, if present.
+	 * Get the first parameter with the given name, if present.
 	 * @param name the parameter name
 	 * @return the parameter value
+	 * @see HttpServletRequest#getParameter(String)
 	 */
 	default Optional<String> param(String name) {
 		List<String> paramValues = params().get(name);
@@ -175,7 +176,8 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Get all query parameters for this request.
+	 * Get all parameters for this request.
+	 * @see HttpServletRequest#getParameterMap()
 	 */
 	MultiValueMap<String, String> params();
 
