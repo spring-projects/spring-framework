@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * A mutable builder for multipart form bodies. For example:
@@ -124,7 +125,7 @@ public final class MultipartBodyBuilder {
 		Object partBody;
 		HttpHeaders partHeaders = new HttpHeaders();
 
-		if (filename != null) {
+		if (StringUtils.hasLength(filename)) {
 			partHeaders.setContentDispositionFormData(name, filename);
 		}
 
