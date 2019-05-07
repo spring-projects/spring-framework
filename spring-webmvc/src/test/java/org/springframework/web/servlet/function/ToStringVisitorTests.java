@@ -41,11 +41,11 @@ public class ToStringVisitorTests {
 	public void nested() {
 		HandlerFunction<ServerResponse> handler = new SimpleHandlerFunction();
 		RouterFunction<ServerResponse> routerFunction = route()
-				.path("/foo", builder -> {
+				.path("/foo", builder ->
 					builder.path("/bar", () -> route()
 							.GET("/baz", handler)
-							.build());
-				})
+							.build())
+				)
 				.build();
 
 		ToStringVisitor visitor = new ToStringVisitor();

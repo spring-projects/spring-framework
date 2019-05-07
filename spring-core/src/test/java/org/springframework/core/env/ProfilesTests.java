@@ -124,7 +124,7 @@ public class ProfilesTests {
 		assertFalse(profiles.matches(activeProfiles("spring")));
 		assertTrue(profiles.matches(activeProfiles("framework")));
 	}
-	
+
 	@Test
 	public void ofSingleInvertedExpression() {
 		Profiles profiles = Profiles.of("(!spring)");
@@ -305,7 +305,7 @@ public class ProfilesTests {
 			assertTrue(ex.getMessage().contains("Malformed"));
 		}
 	}
-	
+
 	private static Predicate<String> activeProfiles(String... profiles) {
 		return new MockActiveProfiles(profiles);
 	}

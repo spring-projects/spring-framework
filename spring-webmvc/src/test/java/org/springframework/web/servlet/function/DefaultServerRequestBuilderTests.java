@@ -72,5 +72,4 @@ public class DefaultServerRequestBuilderTests {
 		assertEquals("baz", body);
 	}
 
-
 }

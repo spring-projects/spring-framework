@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,9 +129,9 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 					return session.receive()
 							.doOnNext(s -> logger.debug("inbound " + s))
 							.then()
-							.doFinally(signalType -> {
-								logger.debug("Completed with: " + signalType);
-							});
+							.doFinally(signalType ->
+								logger.debug("Completed with: " + signalType)
+							);
 				})
 				.block(TIMEOUT);
 	}

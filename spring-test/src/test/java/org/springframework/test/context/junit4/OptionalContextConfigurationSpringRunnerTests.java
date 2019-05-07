@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.springframework.context.annotation.Configuration;
 import static org.junit.Assert.assertEquals;
 
 /**
- * JUnit 4 based integration test which verifies that {@link @ContextConfiguration}
- * is optional.
+ * JUnit 4 based integration test which verifies that
+ * {@link ContextConfiguration @ContextConfiguration} is optional.
  *
  * @author Phillip Webb
  * @author Sam Brannen

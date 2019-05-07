@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,11 @@ public class ToStringVisitorTests {
 	public void nested() {
 		HandlerFunction<ServerResponse> handler = new SimpleHandlerFunction();
 		RouterFunction<ServerResponse> routerFunction = route()
-				.path("/foo", builder -> {
+				.path("/foo", builder ->
 					builder.path("/bar", () -> route()
 							.GET("/baz", handler)
-							.build());
-				})
+							.build())
+				)
 				.build();
 
 		ToStringVisitor visitor = new ToStringVisitor();

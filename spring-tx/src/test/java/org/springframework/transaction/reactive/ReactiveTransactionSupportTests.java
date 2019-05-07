@@ -42,9 +42,9 @@ public class ReactiveTransactionSupportTests {
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS))
 				.subscriberContext(TransactionContextManager.createTransactionContext()).cast(GenericReactiveTransaction.class)
-				.as(StepVerifier::create).consumeNextWith(actual -> {
-					assertFalse(actual.hasTransaction());
-				}).verifyComplete();
+				.as(StepVerifier::create).consumeNextWith(actual ->
+					assertFalse(actual.hasTransaction())
+				).verifyComplete();
 
 		tm.getReactiveTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED))
 				.cast(GenericReactiveTransaction.class).subscriberContext(TransactionContextManager.createTransactionContext())

@@ -203,9 +203,9 @@ public class RouterFunctionBuilderTests {
 
 
 		StepVerifier.create(fooResponseMono)
-				.consumeNextWith(serverResponse -> {
-					assertEquals(4, filterCount.get());
-				})
+				.consumeNextWith(serverResponse ->
+					assertEquals(4, filterCount.get())
+				)
 				.verifyComplete();
 
 		filterCount.set(0);

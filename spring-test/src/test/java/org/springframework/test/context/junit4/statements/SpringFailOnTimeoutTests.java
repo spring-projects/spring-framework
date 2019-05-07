@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,10 +77,7 @@ public class SpringFailOnTimeoutTests {
 
 	@Test
 	public void noExceptionThrownIfNoUserExceptionAndTimeoutDoesNotOccur() throws Throwable {
-		doAnswer((Answer<Void>) invocation -> {
-			return null;
-		}).when(statement).evaluate();
-
+		doAnswer((Answer<Void>) invocation -> null).when(statement).evaluate();
 		new SpringFailOnTimeout(statement, 100).evaluate();
 	}
 

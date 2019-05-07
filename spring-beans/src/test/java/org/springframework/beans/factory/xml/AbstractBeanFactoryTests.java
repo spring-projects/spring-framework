@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,7 +232,6 @@ public abstract class AbstractBeanFactoryTests {
 	/**
 	 * Check that we can get the factory bean itself.
 	 * This is only possible if we're dealing with a factory
-	 * @throws Exception
 	 */
 	@Test
 	public void getFactoryItself() throws Exception {
@@ -241,7 +240,6 @@ public abstract class AbstractBeanFactoryTests {
 
 	/**
 	 * Check that afterPropertiesSet gets called on factory
-	 * @throws Exception
 	 */
 	@Test
 	public void factoryIsInitialized() throws Exception {

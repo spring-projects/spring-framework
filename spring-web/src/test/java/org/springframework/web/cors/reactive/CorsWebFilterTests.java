@@ -65,12 +65,13 @@ public class CorsWebFilterTests {
 
 	@Test
 	public void nonCorsRequest() {
-		WebFilterChain filterChain = (filterExchange) -> {
+		WebFilterChain filterChain = filterExchange -> {
 			try {
 				HttpHeaders headers = filterExchange.getResponse().getHeaders();
 				assertNull(headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 				assertNull(headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
-			} catch (AssertionError ex) {
+			}
+			catch (AssertionError ex) {
 				return Mono.error(ex);
 			}
 			return Mono.empty();
@@ -85,12 +86,13 @@ public class CorsWebFilterTests {
 
 	@Test
 	public void sameOriginRequest() {
-		WebFilterChain filterChain = (filterExchange) -> {
+		WebFilterChain filterChain = filterExchange -> {
 			try {
 				HttpHeaders headers = filterExchange.getResponse().getHeaders();
 				assertNull(headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 				assertNull(headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
-			} catch (AssertionError ex) {
+			}
+			catch (AssertionError ex) {
 				return Mono.error(ex);
 			}
 			return Mono.empty();
@@ -105,12 +107,13 @@ public class CorsWebFilterTests {
 
 	@Test
 	public void validActualRequest() {
-		WebFilterChain filterChain = (filterExchange) -> {
+		WebFilterChain filterChain = filterExchange -> {
 			try {
 				HttpHeaders headers = filterExchange.getResponse().getHeaders();
 				assertEquals("https://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 				assertEquals("header3, header4", headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
-			} catch (AssertionError ex) {
+			}
+			catch (AssertionError ex) {
 				return Mono.error(ex);
 			}
 			return Mono.empty();
@@ -134,7 +137,7 @@ public class CorsWebFilterTests {
 						.header(ORIGIN, "https://domain2.com")
 						.header("header2", "foo"));
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
+		WebFilterChain filterChain = filterExchange -> Mono.error(
 				new AssertionError("Invalid requests must not be forwarded to the filter chain"));
 		filter.filter(exchange, filterChain).block();
 		assertNull(exchange.getResponse().getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
@@ -152,7 +155,7 @@ public class CorsWebFilterTests {
 						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2")
 		);
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
+		WebFilterChain filterChain = filterExchange -> Mono.error(
 				new AssertionError("Preflight requests must not be forwarded to the filter chain"));
 		filter.filter(exchange, filterChain).block();
 
@@ -174,7 +177,7 @@ public class CorsWebFilterTests {
 						.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.DELETE.name())
 						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2"));
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
+		WebFilterChain filterChain = filterExchange -> Mono.error(
 				new AssertionError("Preflight requests must not be forwarded to the filter chain"));
 
 		filter.filter(exchange, filterChain).block();

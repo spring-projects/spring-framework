@@ -41,7 +41,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link EventPublishingTestExecutionListener}.
- * 
+ *
  * @author Frank Scheffler
  * @author Sam Brannen
  * @since 5.2

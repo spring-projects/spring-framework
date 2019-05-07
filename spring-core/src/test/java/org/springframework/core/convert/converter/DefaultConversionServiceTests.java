@@ -367,7 +367,7 @@ public class DefaultConversionServiceTests {
 		Stream<Integer> result = (Stream<Integer>) this.conversionService.convert(source,
 				TypeDescriptor.valueOf(String[].class),
 				new TypeDescriptor(getClass().getDeclaredField("genericStream")));
-		assertEquals(8, result.mapToInt((x) -> x).sum());
+		assertEquals(8, result.mapToInt(x -> x).sum());
 	}
 
 	@Test

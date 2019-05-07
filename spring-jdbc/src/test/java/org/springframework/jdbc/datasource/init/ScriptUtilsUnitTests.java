@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,7 +183,7 @@ public class ScriptUtilsUnitTests {
 
 		assertFalse(containsSqlScriptDelimiters("select 1; select '\\n\n';", "\n"));
 		assertTrue(containsSqlScriptDelimiters("select 1\n select 2", "\n"));
-		
+
 		assertFalse(containsSqlScriptDelimiters("select 1\n select 2", "\n\n"));
 		assertTrue(containsSqlScriptDelimiters("select 1\n\n select 2", "\n\n"));
 

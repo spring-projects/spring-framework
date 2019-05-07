@@ -240,7 +240,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 			else {
 				when(rtm.commit(status)).thenReturn(Mono.error(tex));
 			}
-		}else{
+		}
+		else {
 			when(rtm.commit(status)).thenReturn(Mono.empty());
 			when(rtm.rollback(status)).thenReturn(Mono.empty());
 		}
@@ -251,10 +252,10 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		itb.exceptional(ex)
 				.as(StepVerifier::create)
 				.expectErrorSatisfies(actual -> {
-
 					if (rollbackException) {
 						assertThat(actual).isEqualTo(tex);
-					} else {
+					}
+					else {
 						assertThat(actual).isEqualTo(ex);
 					}
 				}).verify();
