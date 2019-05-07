@@ -303,7 +303,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @param mixinSource class (or interface) whose annotations are to be "added"
 	 * to target's annotations as value
 	 * @since 4.1.2
-	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)
 	 */
 	public Jackson2ObjectMapperBuilder mixIn(Class<?> target, Class<?> mixinSource) {
 		this.mixIns.put(target, mixinSource);
@@ -316,7 +316,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * to effectively override as key and mix-in classes (or interface) whose
 	 * annotations are to be "added" to target's annotations as value.
 	 * @since 4.1.2
-	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)
 	 */
 	public Jackson2ObjectMapperBuilder mixIns(Map<Class<?>, Class<?>> mixIns) {
 		this.mixIns.putAll(mixIns);
