@@ -260,7 +260,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @param mixinSource class (or interface) whose annotations are to be "added"
 	 * to target's annotations as value
 	 * @since 4.1.2
-	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)
 	 */
 	public Jackson2ObjectMapperBuilder mixIn(Class<?> target, Class<?> mixinSource) {
 		if (mixinSource != null) {
@@ -271,11 +271,11 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Add mix-in annotations to use for augmenting specified class or interface.
-	 * @param mixIns Map of entries with target classes (or interface) whose annotations
+	 * @param mixIns a Map of entries with target classes (or interface) whose annotations
 	 * to effectively override as key and mix-in classes (or interface) whose
 	 * annotations are to be "added" to target's annotations as value.
 	 * @since 4.1.2
-	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)
 	 */
 	public Jackson2ObjectMapperBuilder mixIns(Map<Class<?>, Class<?>> mixIns) {
 		if (mixIns != null) {
@@ -304,8 +304,8 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Configure a custom serializer for the given type.
-	 * @see #serializers(JsonSerializer...)
 	 * @since 4.1.2
+	 * @see #serializers(JsonSerializer...)
 	 */
 	public Jackson2ObjectMapperBuilder serializerByType(Class<?> type, JsonSerializer<?> serializer) {
 		if (serializer != null) {
@@ -463,6 +463,8 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
+	 * Multiple invocations are not additive, the last one defines the modules to
+	 * register.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
 	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
 	 * As a consequence, specifying an empty list here will suppress any kind of
@@ -478,6 +480,8 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Set a complete list of modules to be registered with the {@link ObjectMapper}.
+	 * Multiple invocations are not additive, the last one defines the modules to
+	 * register.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
 	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
 	 * As a consequence, specifying an empty list here will suppress any kind of
@@ -495,6 +499,8 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
+	 * Multiple invocations are not additive, the last one defines the modules
+	 * to register.
 	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
 	 * finding of modules (see {@link #findModulesViaServiceLoader}),
@@ -511,7 +517,8 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules by class to be registered with
-	 * the {@link ObjectMapper}.
+	 * the {@link ObjectMapper}. Multiple invocations are not additive,
+	 * the last one defines the modules to register.
 	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
 	 * finding of modules (see {@link #findModulesViaServiceLoader}),
@@ -529,7 +536,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Set whether to let Jackson find available modules via the JDK ServiceLoader,
-	 * based on META-INF metadata in the classpath. Requires Jackson 2.2 or higher.
+	 * based on META-INF metadata in the classpath.
 	 * <p>If this mode is not set, Spring's Jackson2ObjectMapperBuilder itself
 	 * will try to find the JSR-310 and Joda-Time support modules on the classpath -
 	 * provided that Java 8 and Joda-Time themselves are available, respectively.
