@@ -254,7 +254,7 @@ public class SubProtocolWebSocketHandler
 	}
 
 	/**
-	 * Return a {@link Stats} object that containers various session counters.
+	 * Return a {@link Stats} object that contains various session counters.
 	 * @since 5.2
 	 */
 	public Stats getStats() {
