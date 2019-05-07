@@ -78,7 +78,7 @@ public final class MultipartBodyBuilder {
 	 * Add a part from an Object.
 	 * @param name the name of the part to add
 	 * @param part the part data
-	 * @param contentType MediaType which is used to determine how to encode the part
+	 * @param contentType used to determine how to encode the part
 	 * @return builder that allows for further customization of part headers
 	 */
 	public PartBuilder part(String name, Object part, MediaType contentType) {
