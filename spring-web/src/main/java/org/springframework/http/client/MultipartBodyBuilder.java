@@ -71,18 +71,42 @@ public final class MultipartBodyBuilder {
 	 * @return builder that allows for further customization of part headers
 	 */
 	public PartBuilder part(String name, Object part) {
-		return part(name, part, null);
+		return part(name, null, part, null);
+	}
+
+	/**
+	 * Add a part from an Object.
+	 * @param name the name of the part to add
+	 * @param part the part data
+	 * @param contentType MediaType which is used to determine how to encode the part
+	 * @return builder that allows for further customization of part headers
+	 */
+	public PartBuilder part(String name, Object part, MediaType contentType) {
+		return part(name, null, part, contentType);
+	}
+
+	/**
+	 * Add a part from an Object.
+	 * @param name the name of the part to add
+	 * @param filename the filename of the part to add
+	 * @param part the part data
+	 * @return builder that allows for further customization of part headers
+	 */
+	public PartBuilder part(String name, String filename, Object part) {
+		return part(name, filename, part, null);
 	}
 
 	/**
 	 * Variant of {@link #part(String, Object)} that also accepts a MediaType
 	 * which is used to determine how to encode the part.
 	 * @param name the name of the part to add
+	 * @param filename the filename of the part to add
 	 * @param part the part data
 	 * @param contentType the media type for the part
 	 * @return builder that allows for further customization of part headers
 	 */
-	public PartBuilder part(String name, Object part, @Nullable MediaType contentType) {
+	public PartBuilder part(
+			String name, @Nullable String filename, Object part, @Nullable MediaType contentType) {
 		Assert.hasLength(name, "'name' must not be empty");
 		Assert.notNull(part, "'part' must not be null");
 
@@ -99,6 +123,10 @@ public final class MultipartBodyBuilder {
 
 		Object partBody;
 		HttpHeaders partHeaders = new HttpHeaders();
+
+		if (filename != null) {
+			partHeaders.setContentDispositionFormData(name, filename);
+		}
 
 		if (part instanceof HttpEntity) {
 			HttpEntity<?> httpEntity = (HttpEntity<?>) part;
@@ -138,6 +166,30 @@ public final class MultipartBodyBuilder {
 	}
 
 	/**
+	 * Add an asynchronous part with {@link Publisher}-based content.
+	 * @param name the name of the part to add
+	 * @param filename the filename of the part to add
+	 * @param publisher the part contents
+	 * @param elementClass the type of elements contained in the publisher
+	 * @return builder that allows for further customization of part headers
+	 */
+	public <T, P extends Publisher<T>> PartBuilder asyncPart(
+			String name, String filename, P publisher, Class<T> elementClass) {
+		Assert.hasLength(name, "'name' must not be empty");
+		Assert.hasLength(filename, "'filename' must not be empty");
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(elementClass, "'elementClass' must not be null");
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentDispositionFormData(name, filename);
+
+		PublisherPartBuilder<T, P> builder = new PublisherPartBuilder<>(headers, publisher, elementClass);
+		this.parts.add(name, builder);
+		return builder;
+
+	}
+
+	/**
 	 * Variant of {@link #asyncPart(String, Publisher, Class)} that accepts a
 	 * {@link ParameterizedTypeReference} for the element type, which allows
 	 * specifying generic type information.
@@ -154,6 +206,32 @@ public final class MultipartBodyBuilder {
 		Assert.notNull(typeReference, "'typeReference' must not be null");
 
 		HttpHeaders headers = new HttpHeaders();
+		PublisherPartBuilder<T, P> builder = new PublisherPartBuilder<>(headers, publisher, typeReference);
+		this.parts.add(name, builder);
+		return builder;
+	}
+
+	/**
+	 * Variant of {@link #asyncPart(String, Publisher, Class)} that accepts a
+	 * {@link ParameterizedTypeReference} for the element type, which allows
+	 * specifying generic type information.
+	 * @param name the name of the part to add
+	 * @param filename the filename of the part to add
+	 * @param publisher the part contents
+	 * @param typeReference the type of elements contained in the publisher
+	 * @return builder that allows for further customization of part headers
+	 */
+	public <T, P extends Publisher<T>> PartBuilder asyncPart(
+			String name, String filename, P publisher, ParameterizedTypeReference<T> typeReference) {
+
+		Assert.hasLength(name, "'name' must not be empty");
+		Assert.hasLength(filename, "'filename' must not be empty");
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(typeReference, "'typeReference' must not be null");
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentDispositionFormData(name, filename);
+
 		PublisherPartBuilder<T, P> builder = new PublisherPartBuilder<>(headers, publisher, typeReference);
 		this.parts.add(name, builder);
 		return builder;

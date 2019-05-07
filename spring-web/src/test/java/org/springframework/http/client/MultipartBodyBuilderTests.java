@@ -48,6 +48,7 @@ public class MultipartBodyBuilderTests {
 
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		builder.part("logo", logo).header("baz", "qux");
+		builder.part("logoFilename", "filename", logo).header("baz", "qux");
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.add("foo", "bar");
@@ -57,10 +58,15 @@ public class MultipartBodyBuilderTests {
 		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
 		builder.asyncPart("publisherClass", publisher, String.class).header("baz", "qux");
 		builder.asyncPart("publisherPtr", publisher, new ParameterizedTypeReference<String>() {}).header("baz", "qux");
+		builder.asyncPart("publisherClassFilename", "filename",
+				publisher, String.class).header("baz", "qux");
+		builder.asyncPart("publisherPtrFilename", "filename",
+				publisher, new ParameterizedTypeReference<String>() {}).header("baz", "qux");
 
 		MultiValueMap<String, HttpEntity<?>> result = builder.build();
 
-		assertEquals(5, result.size());
+		assertEquals(8, result.size());
+
 		HttpEntity<?> resultEntity = result.getFirst("key");
 		assertNotNull(resultEntity);
 		assertEquals(multipartData, resultEntity.getBody());
@@ -70,6 +76,12 @@ public class MultipartBodyBuilderTests {
 		assertNotNull(resultEntity);
 		assertEquals(logo, resultEntity.getBody());
 		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+
+		resultEntity = result.getFirst("logoFilename");
+		assertNotNull(resultEntity);
+		assertEquals(logo, resultEntity.getBody());
+		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+		assertEquals("filename", resultEntity.getHeaders().getContentDisposition().getFilename());
 
 		resultEntity = result.getFirst("entity");
 		assertNotNull(resultEntity);
@@ -90,6 +102,22 @@ public class MultipartBodyBuilderTests {
 		assertEquals(ResolvableType.forClass(String.class),
 				((PublisherEntity<?,?>) resultEntity).getResolvableType());
 		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+
+		resultEntity = result.getFirst("publisherClassFilename");
+		assertNotNull(resultEntity);
+		assertEquals(publisher, resultEntity.getBody());
+		assertEquals(ResolvableType.forClass(String.class),
+				((PublisherEntity<?,?>) resultEntity).getResolvableType());
+		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+		assertEquals("filename", resultEntity.getHeaders().getContentDisposition().getFilename());
+
+		resultEntity = result.getFirst("publisherPtrFilename");
+		assertNotNull(resultEntity);
+		assertEquals(publisher, resultEntity.getBody());
+		assertEquals(ResolvableType.forClass(String.class),
+				((PublisherEntity<?,?>) resultEntity).getResolvableType());
+		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+		assertEquals("filename", resultEntity.getHeaders().getContentDisposition().getFilename());
 	}
 
 	@Test // SPR-16601
