@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.websocket.Session;
 
 import org.junit.Test;
-
 import org.mockito.Mockito;
 
 import org.springframework.http.HttpHeaders;

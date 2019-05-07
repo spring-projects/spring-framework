@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.util.stream.IntStream;
 
 import org.junit.Test;
 
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toCollection;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static java.util.Arrays.*;
+import static java.util.stream.Collectors.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests that verify proper concurrency support between a

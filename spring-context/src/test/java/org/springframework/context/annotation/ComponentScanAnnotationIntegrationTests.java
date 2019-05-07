@@ -33,7 +33,6 @@ import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImp
 import example.scannable_implicitbasepackage.ConfigurableComponent;
 import example.scannable_scoped.CustomScopeAnnotationBean;
 import example.scannable_scoped.MyScope;
-
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;

@@ -26,9 +26,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.TEXT_XML_VALUE;
+import static org.springframework.http.MediaType.*;
 
 /**
  * @author Arjen Poutsma

@@ -18,8 +18,7 @@ package org.springframework.core.annotation;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link PackagesAnnotationFilter}.

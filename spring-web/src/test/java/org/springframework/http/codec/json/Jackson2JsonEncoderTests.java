@@ -38,18 +38,15 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
+import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
-import static java.util.Collections.singletonMap;
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
-import static org.springframework.http.MediaType.APPLICATION_XML;
-import static org.springframework.http.codec.json.Jackson2JsonEncoder.JSON_VIEW_HINT;
-import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
-import static org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
 
 /**
  * @author Sebastien Deleuze

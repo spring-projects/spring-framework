@@ -27,10 +27,9 @@ import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.context.web.WebTestContextBootstrapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.context.BootstrapUtils.*;
 
 /**
  * Unit tests for {@link BootstrapUtils}.

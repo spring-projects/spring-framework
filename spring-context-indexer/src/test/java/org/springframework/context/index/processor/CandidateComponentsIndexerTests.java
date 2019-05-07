@@ -36,6 +36,7 @@ import org.springframework.context.index.sample.AbstractController;
 import org.springframework.context.index.sample.MetaControllerIndexed;
 import org.springframework.context.index.sample.SampleComponent;
 import org.springframework.context.index.sample.SampleController;
+import org.springframework.context.index.sample.SampleEmbedded;
 import org.springframework.context.index.sample.SampleMetaController;
 import org.springframework.context.index.sample.SampleMetaIndexedController;
 import org.springframework.context.index.sample.SampleNonStaticEmbedded;
@@ -47,7 +48,6 @@ import org.springframework.context.index.sample.cdi.SampleNamed;
 import org.springframework.context.index.sample.cdi.SampleTransactional;
 import org.springframework.context.index.sample.jpa.SampleConverter;
 import org.springframework.context.index.sample.jpa.SampleEmbeddable;
-import org.springframework.context.index.sample.SampleEmbedded;
 import org.springframework.context.index.sample.jpa.SampleEntity;
 import org.springframework.context.index.sample.jpa.SampleMappedSuperClass;
 import org.springframework.context.index.sample.type.Repo;
@@ -60,7 +60,7 @@ import org.springframework.context.index.test.TestCompiler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.context.index.processor.Metadata.*;
 

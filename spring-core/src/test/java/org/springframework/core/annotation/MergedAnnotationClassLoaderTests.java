@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import org.springframework.core.OverridingClassLoader;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link MergedAnnotation} to ensure the correct class loader is

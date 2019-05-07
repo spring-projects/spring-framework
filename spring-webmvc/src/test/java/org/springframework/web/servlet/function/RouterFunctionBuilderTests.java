@@ -27,7 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
 import static org.springframework.web.servlet.function.RequestPredicates.HEAD;
 

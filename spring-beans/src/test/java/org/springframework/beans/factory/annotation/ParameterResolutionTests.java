@@ -30,6 +30,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.util.ClassUtils;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**

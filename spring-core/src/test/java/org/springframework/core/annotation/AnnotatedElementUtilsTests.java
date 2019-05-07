@@ -40,6 +40,10 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.core.annotation.AnnotationUtilsTests.ExtendsBaseClassWithGenericAnnotatedMethod;
+import org.springframework.core.annotation.AnnotationUtilsTests.ImplementsInterfaceWithGenericAnnotatedMethod;
+import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
+import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;

@@ -19,7 +19,7 @@ package org.springframework.core.io.buffer;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.io.buffer.DataBufferUtils.release;
+import static org.springframework.core.io.buffer.DataBufferUtils.*;
 
 /**
  * @author Arjen Poutsma

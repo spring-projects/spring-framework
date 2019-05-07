@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.springframework.oxm.AbstractMarshallerTests;
 
 import static org.junit.Assert.*;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import static org.xmlunit.matchers.CompareMatcher.*;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does not occur by

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@
 
 package org.springframework.util.xml;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.w3c.dom.Node;
-import org.xmlunit.util.Predicate;
-
+import java.io.StringReader;
+import java.io.StringWriter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.StringReader;
-import java.io.StringWriter;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import org.junit.Before;
+import org.junit.Test;
+import org.w3c.dom.Node;
+import org.xmlunit.util.Predicate;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
 
 public class XMLEventStreamReaderTests {
 

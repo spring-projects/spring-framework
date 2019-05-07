@@ -33,11 +33,9 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.io.buffer.DataBufferUtils.release;
-import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.junit.Assert.*;
+import static org.springframework.core.io.buffer.DataBufferUtils.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link Jackson2CborEncoder}.

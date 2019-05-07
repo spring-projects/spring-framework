@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,18 @@ import java.util.concurrent.Future;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import static org.mockito.BDDMockito.*;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Unit tests for {@link ScriptTemplateView}.

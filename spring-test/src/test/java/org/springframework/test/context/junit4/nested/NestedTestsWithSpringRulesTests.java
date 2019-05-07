@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.junit4.nested;
 
+import de.bechte.junit.runners.context.HierarchicalContextRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -27,10 +28,7 @@ import org.springframework.test.context.junit4.nested.NestedTestsWithSpringRules
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import de.bechte.junit.runners.context.HierarchicalContextRunner;
+import static org.junit.Assert.*;
 
 /**
  * JUnit 4 based integration tests for <em>nested</em> test classes that are

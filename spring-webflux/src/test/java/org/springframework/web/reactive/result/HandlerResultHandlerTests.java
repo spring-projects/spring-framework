@@ -31,14 +31,8 @@ import org.springframework.web.reactive.accept.FixedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.http.MediaType.ALL;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
-import static org.springframework.http.MediaType.IMAGE_GIF;
-import static org.springframework.http.MediaType.IMAGE_JPEG;
-import static org.springframework.http.MediaType.IMAGE_PNG;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link HandlerResultHandlerSupport}.

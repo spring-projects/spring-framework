@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
 /**

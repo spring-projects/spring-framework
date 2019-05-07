@@ -22,15 +22,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.servlet.function.RequestPredicates.GET;
-import static org.springframework.web.servlet.function.RequestPredicates.accept;
-import static org.springframework.web.servlet.function.RequestPredicates.contentType;
-import static org.springframework.web.servlet.function.RequestPredicates.method;
-import static org.springframework.web.servlet.function.RequestPredicates.methods;
-import static org.springframework.web.servlet.function.RequestPredicates.param;
-import static org.springframework.web.servlet.function.RequestPredicates.path;
-import static org.springframework.web.servlet.function.RequestPredicates.pathExtension;
-import static org.springframework.web.servlet.function.RouterFunctions.route;
+import static org.springframework.web.servlet.function.RequestPredicates.*;
+import static org.springframework.web.servlet.function.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma

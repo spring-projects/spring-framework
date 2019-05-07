@@ -17,7 +17,6 @@
 package org.springframework.jdbc.config;
 
 import java.util.function.Predicate;
-
 import javax.sql.DataSource;
 
 import org.junit.Rule;

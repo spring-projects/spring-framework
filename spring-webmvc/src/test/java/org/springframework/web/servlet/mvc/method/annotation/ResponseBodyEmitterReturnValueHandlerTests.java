@@ -45,6 +45,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.core.ResolvableType.*;
 import static org.springframework.web.method.ResolvableMethod.*;
