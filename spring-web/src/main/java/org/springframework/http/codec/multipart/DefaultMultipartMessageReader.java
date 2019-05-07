@@ -44,6 +44,7 @@ import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -57,8 +58,7 @@ import org.springframework.util.StringUtils;
  * @since 5.2
  * @see MultipartHttpMessageReader
  */
-public class DefaultMultipartMessageReader extends LoggingCodecSupport
-		implements HttpMessageReader<Part> {
+public class DefaultMultipartMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
 
 	private static final byte CR = '\r';
 
@@ -74,8 +74,7 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 
 	private static final String HEADER_SEPARATOR = "\\r\\n";
 
-	private static final DataBufferUtils.Matcher HEADER_MATCHER =
-			DataBufferUtils.matcher(HEADER_BODY_SEPARATOR);
+	private static final DataBufferUtils.Matcher HEADER_MATCHER = DataBufferUtils.matcher(HEADER_BODY_SEPARATOR);
 
 
 	@Override
@@ -85,14 +84,12 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return Part.class.equals(elementType.toClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+		return (Part.class.equals(elementType.toClass()) &&
+				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType)));
 	}
 
 	@Override
-	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message,
-			Map<String, Object> hints) {
-
+	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		byte[] boundary = boundary(message);
 		if (boundary == null) {
 			return Flux.error(new CodecException("No multipart boundary found in Content-Type: \"" +
@@ -126,12 +123,9 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 	 * all data until then. Note that the first boundary of a multipart message does not contain
 	 * the initial \r\n, hence the need for a special boundary matcher.
 	 */
-	private static Flux<DataBuffer> skipUntilFirstBoundary(Flux<DataBuffer> dataBuffers,
-			byte[] boundary) {
-
+	private static Flux<DataBuffer> skipUntilFirstBoundary(Flux<DataBuffer> dataBuffers, byte[] boundary) {
 		byte[] needle = concat(FIRST_BOUNDARY_PREFIX, boundary);
 		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(needle);
-
 		AtomicBoolean found = new AtomicBoolean();
 
 		return dataBuffers.concatMap(dataBuffer -> {
@@ -152,7 +146,6 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 					return Mono.empty();
 				}
 			}
-
 		});
 	}
 
@@ -163,8 +156,7 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 	private static boolean notLastBoundary(DataBuffer dataBuffer) {
 		if (dataBuffer.readableByteCount() >= 2) {
 			int readPosition = dataBuffer.readPosition();
-			if ((dataBuffer.getByte(readPosition) == HYPHEN) &&
-					(dataBuffer.getByte(readPosition + 1) == HYPHEN)) {
+			if (dataBuffer.getByte(readPosition) == HYPHEN && dataBuffer.getByte(readPosition + 1) == HYPHEN) {
 				DataBufferUtils.release(dataBuffer);
 				return false;
 			}
@@ -180,8 +172,7 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 	private static Part toPart(DataBuffer dataBuffer) {
 		int readPosition = dataBuffer.readPosition();
 		if (dataBuffer.readableByteCount() >= 2) {
-			if ( (dataBuffer.getByte(readPosition) == CR) &&
-				(dataBuffer.getByte(readPosition + 1) == LF)) {
+			if (dataBuffer.getByte(readPosition) == CR && dataBuffer.getByte(readPosition + 1) == LF) {
 				dataBuffer.readPosition(readPosition + 2);
 			}
 		}
@@ -191,8 +182,7 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 		DataBuffer body;
 		if (endIdx > 0) {
 			readPosition = dataBuffer.readPosition();
-			int headersLength =
-					endIdx + 1 - (readPosition + HEADER_BODY_SEPARATOR.length);
+			int headersLength = endIdx + 1 - (readPosition + HEADER_BODY_SEPARATOR.length);
 			DataBuffer headersBuffer = dataBuffer.retainedSlice(readPosition, headersLength);
 			int bodyLength = dataBuffer.writePosition() - (1 + endIdx);
 			body = dataBuffer.retainedSlice(endIdx + 1, bodyLength);
@@ -275,7 +265,6 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 
 		protected final DataBuffer body;
 
-
 		public DefaultPart(HttpHeaders headers, DataBuffer body) {
 			this.headers = headers;
 			this.body = body;
@@ -283,7 +272,9 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 
 		@Override
 		public String name() {
-			return headers().getContentDisposition().getName();
+			String name = headers().getContentDisposition().getName();
+			Assert.state(name != null, "No name available");
+			return name;
 		}
 
 		@Override
@@ -295,7 +286,6 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 		public Flux<DataBuffer> content() {
 			return Flux.just(this.body);
 		}
-
 	}
 
 
@@ -342,14 +332,15 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 
 		@Override
 		public String filename() {
-			return headers().getContentDisposition().getFilename();
+			String filename = headers().getContentDisposition().getFilename();
+			Assert.state(filename != null, "No filename available");
+			return filename;
 		}
 
 		@Override
 		public Mono<Void> transferTo(Path dest) {
 			return Mono.using(() -> AsynchronousFileChannel.open(dest, StandardOpenOption.WRITE),
-					this::writeBody,
-					this::close);
+					this::writeBody, this::close);
 		}
 
 		private Mono<Void> writeBody(AsynchronousFileChannel channel) {
@@ -366,4 +357,5 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport
 			}
 		}
 	}
+
 }

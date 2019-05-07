@@ -49,7 +49,7 @@ import org.springframework.util.MimeType;
  * Base class for a return value handler that encodes return values to
  * {@code Flux<DataBuffer>} through the configured {@link Encoder}s.
  *
- * <p>Sub-classes must implement the abstract method
+ * <p>Subclasses must implement the abstract method
  * {@link #handleEncodedContent} to handle the resulting encoded content.
  *
  * <p>This handler should be ordered last since its {@link #supportsReturnType}
@@ -68,7 +68,6 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	private final List<Encoder<?>> encoders;
 
@@ -118,7 +117,6 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 				.getOrDefault(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, this.defaultBufferFactory);
 
 		MimeType mimeType = (MimeType) message.getHeaders().get(MessageHeaders.CONTENT_TYPE);
-
 		Flux<DataBuffer> encodedContent = encodeContent(
 				returnValue, returnType, bufferFactory, mimeType, Collections.emptyMap());
 
@@ -147,8 +145,8 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		}
 		else {
 			publisher = Mono.justOrEmpty(content);
-			elementType = returnValueType.toClass() == Object.class && content != null ?
-					ResolvableType.forInstance(content) : returnValueType;
+			elementType = (returnValueType.toClass() == Object.class && content != null ?
+					ResolvableType.forInstance(content) : returnValueType);
 		}
 
 		if (elementType.resolve() == void.class || elementType.resolve() == Void.class) {
@@ -156,7 +154,6 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		}
 
 		Encoder<?> encoder = getEncoder(elementType, mimeType);
-
 		return Flux.from((Publisher) publisher).map(value ->
 				encodeValue(value, elementType, encoder, bufferFactory, mimeType, hints));
 	}
@@ -201,9 +198,8 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	}
 
 	/**
-	 * Sub-classes implement this method to handle encoded values in some way
+	 * Subclasses implement this method to handle encoded values in some way
 	 * such as creating and sending messages.
-	 *
 	 * @param encodedContent the encoded content; each {@code DataBuffer}
 	 * represents the fully-aggregated, encoded content for one value
 	 * (i.e. payload) returned from the HandlerMethod.
@@ -229,9 +225,12 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	 */
 	private static class KotlinDelegate {
 
-		static private boolean isSuspend(Method method) {
+		static private boolean isSuspend(@Nullable Method method) {
+			if (method == null) {
+				return false;
+			}
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return function != null && function.isSuspend();
+			return (function != null && function.isSuspend());
 		}
 	}
 
