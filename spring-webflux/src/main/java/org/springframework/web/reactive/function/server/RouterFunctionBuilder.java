@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,12 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 			HandlerFunction<ServerResponse> handlerFunction) {
 
 		return add(RequestPredicates.OPTIONS(pattern).and(predicate), handlerFunction);
+	}
+
+	@Override
+	public RouterFunctions.Builder route(RequestPredicate predicate,
+			HandlerFunction<ServerResponse> handlerFunction) {
+		return add(RouterFunctions.route(predicate, handlerFunction));
 	}
 
 	@Override
