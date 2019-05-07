@@ -88,7 +88,7 @@ public abstract class TransactionContextManager {
 		return context -> {
 			TransactionContextHolder holder = context.get(TransactionContextHolder.class);
 			if (holder.hasContext()) {
-				context.put(TransactionContext.class, holder.currentContext());
+				return context.put(TransactionContext.class, holder.currentContext());
 			}
 			return context.put(TransactionContext.class, holder.createContext());
 		};
