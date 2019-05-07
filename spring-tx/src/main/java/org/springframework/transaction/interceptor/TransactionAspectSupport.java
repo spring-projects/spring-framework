@@ -834,15 +834,18 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						try {
 							// This is an around advice: Invoke the next interceptor in the chain.
 							// This will normally result in a target object being invoked.
-							Mono<Object> retVal = (Mono) invocation.proceedWithInvocation();
-							return retVal
-									.onErrorResume(ex -> completeTransactionAfterThrowing(it, ex).then(Mono.error(ex))).materialize()
-									.flatMap(signal -> {
-										if (signal.isOnComplete() || signal.isOnNext()) {
-											return commitTransactionAfterReturning(it).thenReturn(signal);
-										}
-										return Mono.just(signal);
-									}).dematerialize();
+							// Need re-wrapping of ReactiveTransaction until we get hold of the exception
+							// through usingWhen.
+							return Mono.<Object, ReactiveTransactionInfo>usingWhen(Mono.just(it), s -> {
+								try {
+									return (Mono) invocation.proceedWithInvocation();
+								}
+								catch (Throwable throwable) {
+									return Mono.error(throwable);
+								}
+							}, this::commitTransactionAfterReturning, s -> Mono.empty())
+									.onErrorResume(ex -> completeTransactionAfterThrowing(it, ex)
+									.then(Mono.error(ex)));
 						}
 						catch (Throwable ex) {
 							// target invocation exception
@@ -860,15 +863,19 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					try {
 						// This is an around advice: Invoke the next interceptor in the chain.
 						// This will normally result in a target object being invoked.
-						Flux<Object> retVal = Flux.from(this.adapter.toPublisher(invocation.proceedWithInvocation()));
-						return retVal
-								.onErrorResume(ex -> completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)))
-								.materialize().flatMap(signal -> {
-									if (signal.isOnComplete()) {
-										return commitTransactionAfterReturning(it).materialize();
-									}
-									return Mono.just(signal);
-								}).dematerialize();
+						// Need re-wrapping of ReactiveTransaction until we get hold of the exception
+						// through usingWhen.
+						return Flux.usingWhen(Mono.just(it), s -> {
+							try {
+								return this.adapter.toPublisher(
+										invocation.proceedWithInvocation());
+							}
+							catch (Throwable throwable) {
+								return Mono.error(throwable);
+							}
+						}, this::commitTransactionAfterReturning, s -> Mono.empty())
+								.onErrorResume(ex -> completeTransactionAfterThrowing(it, ex)
+								.then(Mono.error(ex)));
 					}
 					catch (Throwable ex) {
 						// target invocation exception

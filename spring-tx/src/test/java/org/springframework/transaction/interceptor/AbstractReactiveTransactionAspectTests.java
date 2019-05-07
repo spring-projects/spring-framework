@@ -33,6 +33,7 @@ import org.springframework.transaction.reactive.TransactionContext;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Fail.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -321,6 +322,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		when(rtm.getReactiveTransaction(txatt)).thenReturn(Mono.just(status));
 		UnexpectedRollbackException ex = new UnexpectedRollbackException("foobar", null);
 		when(rtm.commit(status)).thenReturn(Mono.error(ex));
+		when(rtm.rollback(status)).thenReturn(Mono.empty());
 
 		DefaultTestBean tb = new DefaultTestBean();
 		TestBean itb = (TestBean) advised(tb, rtm, tas);
@@ -329,7 +331,10 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 		Mono.from(itb.setName(name))
 				.as(StepVerifier::create)
-				.expectError(UnexpectedRollbackException.class)
+				.consumeErrorWith(throwable -> {
+					assertEquals(RuntimeException.class, throwable.getClass());
+					assertEquals(ex, throwable.getCause());
+				})
 				.verify();
 
 		// Should have invoked target and changed name
