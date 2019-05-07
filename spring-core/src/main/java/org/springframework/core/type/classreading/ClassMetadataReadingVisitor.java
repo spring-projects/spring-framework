@@ -118,6 +118,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 	@Override
+	@Nullable
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		// no-op
 		return new EmptyAnnotationVisitor();

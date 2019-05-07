@@ -18,11 +18,10 @@ package org.springframework.core.type.classreading;
 
 import org.springframework.core.type.AbstractAnnotationMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
 /**
  * Tests for {@link SimpleAnnotationMetadata} and
- * {@link SimpleAnnotationMetadataReadingVistor}.
+ * {@link SimpleAnnotationMetadataReadingVisitor}.
  *
  * @author Phillip Webb
  */

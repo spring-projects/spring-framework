@@ -138,7 +138,7 @@ public class StandardMethodMetadata implements MethodMetadata {
 			return MethodMetadata.super.getAnnotationAttributes(annotationName, classValuesAsString);
 		}
 		return AnnotatedElementUtils.getMergedAnnotationAttributes(this.introspectedMethod,
-				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
+				annotationName, classValuesAsString, false);
 	}
 
 	@Override
@@ -148,7 +148,7 @@ public class StandardMethodMetadata implements MethodMetadata {
 			return MethodMetadata.super.getAllAnnotationAttributes(annotationName, classValuesAsString);
 		}
 		return AnnotatedElementUtils.getAllAnnotationAttributes(this.introspectedMethod,
-				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
+				annotationName, classValuesAsString, false);
 	}
 
 }

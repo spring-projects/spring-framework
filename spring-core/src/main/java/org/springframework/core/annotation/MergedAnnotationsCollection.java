@@ -43,6 +43,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 
 	private final AnnotationTypeMappings[] mappings;
 
+
 	private MergedAnnotationsCollection(Collection<MergedAnnotation<?>> annotations) {
 		Assert.notNull(annotations, "Annotations must not be null");
 		this.annotations = annotations.toArray(new MergedAnnotation<?>[0]);
@@ -52,10 +53,10 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 			Assert.notNull(annotation, "Annotation must not be null");
 			Assert.isTrue(annotation.isDirectlyPresent(), "Annotation must be directly present");
 			Assert.isTrue(annotation.getAggregateIndex() == 0, "Annotation must have aggregate index of zero");
-			this.mappings[i] = AnnotationTypeMappings.forAnnotationType(
-					annotation.getType());
+			this.mappings[i] = AnnotationTypeMappings.forAnnotationType(annotation.getType());
 		}
 	}
+
 
 	@Override
 	public Iterator<MergedAnnotation<Annotation>> iterator() {
@@ -67,8 +68,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 		return spliterator(null);
 	}
 
-	private <A extends Annotation> Spliterator<MergedAnnotation<A>> spliterator(
-			@Nullable Object annotationType) {
+	private <A extends Annotation> Spliterator<MergedAnnotation<A>> spliterator(@Nullable Object annotationType) {
 		return new AnnotationsSpliterator<>(annotationType);
 	}
 
@@ -128,6 +128,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 	public <A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType,
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate,
 			@Nullable MergedAnnotationSelector<A> selector) {
+
 		MergedAnnotation<A> result = find(annotationType, predicate, selector);
 		return (result != null ? result : MergedAnnotation.missing());
 	}
@@ -154,12 +155,15 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	private <A extends Annotation> MergedAnnotation<A> find(Object requiredType,
-			Predicate<? super MergedAnnotation<A>> predicate,
-			MergedAnnotationSelector<A> selector) {
+			@Nullable Predicate<? super MergedAnnotation<A>> predicate,
+			@Nullable MergedAnnotationSelector<A> selector) {
+
 		if (selector == null) {
 			selector = MergedAnnotationSelectors.nearest();
 		}
+
 		MergedAnnotation<A> result = null;
 		for (int i = 0; i < this.annotations.length; i++) {
 			MergedAnnotation<?> root = this.annotations[i];
@@ -208,7 +212,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 
 	static MergedAnnotations of(Collection<MergedAnnotation<?>> annotations) {
 		Assert.notNull(annotations, "Annotations must not be null");
-		if(annotations.isEmpty()) {
+		if (annotations.isEmpty()) {
 			return TypeMappedAnnotations.NONE;
 		}
 		return new MergedAnnotationsCollection(annotations);
@@ -242,7 +246,8 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 				}
 			}
 			if (annotationResult != -1) {
-				MergedAnnotation<A> mergedAnnotation = createMergedAnnotationIfPossible(annotationResult, this.mappingCursors[annotationResult]);
+				MergedAnnotation<A> mergedAnnotation = createMergedAnnotationIfPossible(
+						annotationResult, this.mappingCursors[annotationResult]);
 				this.mappingCursors[annotationResult]++;
 				if (mergedAnnotation == null) {
 					return tryAdvance(action);
@@ -275,20 +280,19 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 
 		@Nullable
 		@SuppressWarnings("unchecked")
-		private MergedAnnotation<A> createMergedAnnotationIfPossible(
-				int annotationIndex, int mappingIndex) {
+		private MergedAnnotation<A> createMergedAnnotationIfPossible(int annotationIndex, int mappingIndex) {
 			MergedAnnotation<?> root = annotations[annotationIndex];
-			if(mappingIndex == 0) {
+			if (mappingIndex == 0) {
 				return (MergedAnnotation<A>) root;
 			}
-			IntrospectionFailureLogger logger = (this.requiredType != null
-					? IntrospectionFailureLogger.INFO
-					: IntrospectionFailureLogger.DEBUG);
+			IntrospectionFailureLogger logger = (this.requiredType != null ?
+					IntrospectionFailureLogger.INFO : IntrospectionFailureLogger.DEBUG);
 			return TypeMappedAnnotation.createIfPossible(
 					mappings[annotationIndex].get(mappingIndex), root, logger);
 		}
 
 		@Override
+		@Nullable
 		public Spliterator<MergedAnnotation<A>> trySplit() {
 			return null;
 		}
@@ -309,7 +313,6 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 		public int characteristics() {
 			return NONNULL | IMMUTABLE;
 		}
-
 	}
 
 }

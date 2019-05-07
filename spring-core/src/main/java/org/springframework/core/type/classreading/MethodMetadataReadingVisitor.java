@@ -85,6 +85,7 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	}
 
 	@Override
+	@Nullable
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		if (!visible) {
 			return null;

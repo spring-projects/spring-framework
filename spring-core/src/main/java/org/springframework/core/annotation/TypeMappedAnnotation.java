@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -70,8 +69,6 @@ import org.springframework.util.ReflectionUtils;
  * @see TypeMappedAnnotations
  */
 final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnnotation<A> {
-
-	private static final Object[] EMPTY_OBJECT_ARRAY = {};
 
 	private static final Map<Class<?>, Object> EMPTY_ARRAYS;
 	static {
@@ -386,7 +383,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return (attributeIndex != -1 ? getValue(attributeIndex, type) : null);
 	}
 
-	private final Object getRequiredValue(int attributeIndex, String attributeName) {
+	private Object getRequiredValue(int attributeIndex, String attributeName) {
 		Object value = getValue(attributeIndex, Object.class);
 		if (value == null) {
 			throw new NoSuchElementException("No element at attribute index "
@@ -527,7 +524,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 				(attributeType == String[].class && value instanceof Class[])) {
 			return value;
 		}
-		if(attributeType.isArray() && isEmptyObjectArray(value)) {
+		if (attributeType.isArray() && isEmptyObjectArray(value)) {
 			return emptyArray(attributeType.getComponentType());
 		}
 		if (!attributeType.isInstance(value)) {
@@ -540,7 +537,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	private boolean isEmptyObjectArray(Object value) {
-		return value instanceof Object[] && Arrays.equals((Object[]) value, EMPTY_OBJECT_ARRAY);
+		return (value instanceof Object[] && ((Object[]) value).length == 0);
 	}
 
 	private Object emptyArray(Class<?> componentType) {
@@ -556,7 +553,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			return (MergedAnnotation<?>) value;
 		}
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
-		return new TypeMappedAnnotation<>(mapping, null, this.source, value, getValueExtractor(value), this.aggregateIndex);
+		return new TypeMappedAnnotation<>(
+				mapping, null, this.source, value, getValueExtractor(value), this.aggregateIndex);
 	}
 
 	private BiFunction<Method, Object, Object> getValueExtractor(Object value) {
@@ -659,8 +657,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Nullable
-	static <A extends Annotation> TypeMappedAnnotation<A> createIfPossible(
-			AnnotationTypeMapping mapping, @Nullable Object source, Object rootAttribute,
+	private static <A extends Annotation> TypeMappedAnnotation<A> createIfPossible(
+			AnnotationTypeMapping mapping, @Nullable Object source, @Nullable Object rootAttribute,
 			BiFunction<Method, Object, Object> valueExtractor,
 			int aggregateIndex, IntrospectionFailureLogger logger) {
 

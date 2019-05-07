@@ -51,7 +51,9 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	private final boolean nestedAnnotationsAsMap;
 
+	@Nullable
 	private Set<String> annotationTypes;
+
 
 	/**
 	 * Create a new {@code StandardAnnotationMetadata} wrapper for the given Class.
@@ -109,22 +111,20 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	@Nullable
 	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		if (this.nestedAnnotationsAsMap) {
-			return AnnotationMetadata.super.getAnnotationAttributes(annotationName,
-					classValuesAsString);
+			return AnnotationMetadata.super.getAnnotationAttributes(annotationName, classValuesAsString);
 		}
 		return AnnotatedElementUtils.getMergedAnnotationAttributes(
-				getIntrospectedClass(), annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
+				getIntrospectedClass(), annotationName, classValuesAsString, false);
 	}
 
 	@Override
 	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		if (this.nestedAnnotationsAsMap) {
-			return AnnotationMetadata.super.getAllAnnotationAttributes(annotationName,
-					classValuesAsString);
+			return AnnotationMetadata.super.getAllAnnotationAttributes(annotationName, classValuesAsString);
 		}
 		return AnnotatedElementUtils.getAllAnnotationAttributes(
-				getIntrospectedClass(), annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
+				getIntrospectedClass(), annotationName, classValuesAsString, false);
 	}
 
 	@Override

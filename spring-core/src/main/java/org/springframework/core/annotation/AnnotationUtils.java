@@ -898,7 +898,7 @@ public abstract class AnnotationUtils {
 			for (int i = 0; i < methods.size(); i++) {
 				Method method = methods.get(i);
 				Object defaultValue = method.getDefaultValue();
-				if(defaultValue != null) {
+				if (defaultValue != null) {
 					result.put(method.getName(), new DefaultValueHolder(defaultValue));
 				}
 			}

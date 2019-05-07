@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link AnnotationMetadata} created from a
- * {@link SimpleAnnotationMetadataReadingVistor}.
+ * {@link SimpleAnnotationMetadataReadingVisitor}.
  *
  * @author Phillip Webb
  * @since 5.2
@@ -39,8 +39,10 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 	private final int access;
 
+	@Nullable
 	private final String enclosingClassName;
 
+	@Nullable
 	private final String superClassName;
 
 	private final boolean independentInnerClass;
@@ -53,12 +55,14 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 	private final MergedAnnotations annotations;
 
+	@Nullable
 	private Set<String> annotationTypes;
 
-	SimpleAnnotationMetadata(String className, int access, String enclosingClassName,
-			String superClassName, boolean independentInnerClass, String[] interfaceNames,
-			String[] memberClassNames, MethodMetadata[] annotatedMethods,
-			MergedAnnotations annotations) {
+
+	SimpleAnnotationMetadata(String className, int access, @Nullable String enclosingClassName,
+			@Nullable String superClassName, boolean independentInnerClass, String[] interfaceNames,
+			String[] memberClassNames, MethodMetadata[] annotatedMethods, MergedAnnotations annotations) {
+
 		this.className = className;
 		this.access = access;
 		this.enclosingClassName = enclosingClassName;
@@ -97,7 +101,7 @@ final class SimpleAnnotationMetadata implements AnnotationMetadata {
 
 	@Override
 	public boolean isIndependent() {
-		return this.enclosingClassName == null || this.independentInnerClass;
+		return (this.enclosingClassName == null || this.independentInnerClass);
 	}
 
 	@Override

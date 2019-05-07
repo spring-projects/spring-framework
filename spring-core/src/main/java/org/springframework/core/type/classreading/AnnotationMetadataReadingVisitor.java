@@ -91,6 +91,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
+	@Nullable
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		if (!visible) {
 			return null;

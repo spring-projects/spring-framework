@@ -55,15 +55,17 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
-	public MergedAnnotationReadingVisitor(ClassLoader classLoader,
-			@Nullable Object source, Class<A> annotationType,
-			Consumer<MergedAnnotation<A>> consumer) {
+
+	public MergedAnnotationReadingVisitor(@Nullable ClassLoader classLoader, @Nullable Object source,
+			Class<A> annotationType, Consumer<MergedAnnotation<A>> consumer) {
+
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
 		this.source = source;
 		this.annotationType = annotationType;
 		this.consumer = consumer;
 	}
+
 
 	@Override
 	public void visit(String name, Object value) {
@@ -79,9 +81,9 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 	}
 
 	@Override
+	@Nullable
 	public AnnotationVisitor visitAnnotation(String name, String descriptor) {
-		return visitAnnotation(descriptor,
-				annotation -> this.attributes.put(name, annotation));
+		return visitAnnotation(descriptor, annotation -> this.attributes.put(name, annotation));
 	}
 
 	@Override
@@ -91,60 +93,56 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@Override
 	public void visitEnd() {
-		MergedAnnotation<A> annotation = MergedAnnotation.of(this.classLoader,
-				this.source, this.annotationType, this.attributes);
+		MergedAnnotation<A> annotation = MergedAnnotation.of(
+				this.classLoader, this.source, this.annotationType, this.attributes);
 		this.consumer.accept(annotation);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <E extends Enum<E>> void visitEnum(String descriptor, String value,
-			Consumer<E> consumer) {
-
+	public <E extends Enum<E>> void visitEnum(String descriptor, String value, Consumer<E> consumer) {
 		String className = Type.getType(descriptor).getClassName();
 		Class<E> type = (Class<E>) ClassUtils.resolveClassName(className, this.classLoader);
-		E enumValue = Enum.valueOf(type, value);
-		if (enumValue != null) {
-			consumer.accept(enumValue);
-		}
+		consumer.accept(Enum.valueOf(type, value));
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends Annotation> AnnotationVisitor visitAnnotation(String descriptor,
-			Consumer<MergedAnnotation<T>> consumer) {
+	@Nullable
+	private <T extends Annotation> AnnotationVisitor visitAnnotation(
+			String descriptor, Consumer<MergedAnnotation<T>> consumer) {
 
 		String className = Type.getType(descriptor).getClassName();
 		if (AnnotationFilter.PLAIN.matches(className)) {
 			return null;
 		}
-		Class<T> type = (Class<T>) ClassUtils.resolveClassName(className,
-				this.classLoader);
-		return new MergedAnnotationReadingVisitor<>(this.classLoader, this.source, type,
-				consumer);
+		Class<T> type = (Class<T>) ClassUtils.resolveClassName(className, this.classLoader);
+		return new MergedAnnotationReadingVisitor<>(this.classLoader, this.source, type, consumer);
 	}
 
-	@Nullable
 	@SuppressWarnings("unchecked")
+	@Nullable
 	static <A extends Annotation> AnnotationVisitor get(@Nullable ClassLoader classLoader,
 			@Nullable Supplier<Object> sourceSupplier, String descriptor, boolean visible,
 			Consumer<MergedAnnotation<A>> consumer) {
+
 		if (!visible) {
 			return null;
 		}
+
 		String typeName = Type.getType(descriptor).getClassName();
 		if (AnnotationFilter.PLAIN.matches(typeName)) {
 			return null;
 		}
-		Object source = sourceSupplier != null ? sourceSupplier.get() : null;
+
+		Object source = (sourceSupplier != null ? sourceSupplier.get() : null);
 		try {
-			Class<A> annotationType = (Class<A>) ClassUtils.forName(typeName,
-					classLoader);
-			return new MergedAnnotationReadingVisitor<>(classLoader, source,
-					annotationType, consumer);
+			Class<A> annotationType = (Class<A>) ClassUtils.forName(typeName, classLoader);
+			return new MergedAnnotationReadingVisitor<>(classLoader, source, annotationType, consumer);
 		}
 		catch (ClassNotFoundException | LinkageError ex) {
 			return null;
 		}
 	}
+
 
 	/**
 	 * {@link AnnotationVisitor} to deal with array attributes.
@@ -170,21 +168,19 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 		@Override
 		public void visitEnum(String name, String descriptor, String value) {
-			MergedAnnotationReadingVisitor.this.visitEnum(descriptor, value,
-					enumValue -> this.elements.add(enumValue));
+			MergedAnnotationReadingVisitor.this.visitEnum(descriptor, value, this.elements::add);
 		}
 
 		@Override
+		@Nullable
 		public AnnotationVisitor visitAnnotation(String name, String descriptor) {
-			return MergedAnnotationReadingVisitor.this.visitAnnotation(descriptor,
-					annotation -> this.elements.add(annotation));
+			return MergedAnnotationReadingVisitor.this.visitAnnotation(descriptor, this.elements::add);
 		}
 
 		@Override
 		public void visitEnd() {
 			Class<?> componentType = getComponentType();
-			Object[] array = (Object[]) Array.newInstance(componentType,
-					this.elements.size());
+			Object[] array = (Object[]) Array.newInstance(componentType, this.elements.size());
 			this.consumer.accept(this.elements.toArray(array));
 		}
 
@@ -193,12 +189,11 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 				return Object.class;
 			}
 			Object firstElement = this.elements.get(0);
-			if(firstElement instanceof Enum) {
+			if (firstElement instanceof Enum) {
 				return ((Enum<?>) firstElement).getDeclaringClass();
 			}
 			return firstElement.getClass();
 		}
-
 	}
 
 }
