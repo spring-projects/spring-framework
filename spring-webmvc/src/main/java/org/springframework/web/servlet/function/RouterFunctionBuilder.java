@@ -133,6 +133,12 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	}
 
 	@Override
+	public RouterFunctions.Builder route(RequestPredicate predicate,
+			HandlerFunction<ServerResponse> handlerFunction) {
+		return add(RouterFunctions.route(predicate, handlerFunction));
+	}
+
+	@Override
 	public RouterFunctions.Builder OPTIONS(String pattern, RequestPredicate predicate,
 			HandlerFunction<ServerResponse> handlerFunction) {
 

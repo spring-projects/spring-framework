@@ -29,6 +29,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 
 import static java.util.Collections.emptyList;
 import static org.junit.Assert.*;
+import static org.springframework.web.servlet.function.RequestPredicates.HEAD;
 
 /**
  * @author Arjen Poutsma
@@ -41,16 +42,26 @@ public class RouterFunctionBuilderTests {
 				.GET("/foo", request -> ServerResponse.ok().build())
 				.POST("/", RequestPredicates.contentType(MediaType.TEXT_PLAIN),
 						request -> ServerResponse.noContent().build())
+				.route(HEAD("/foo"), request -> ServerResponse.accepted().build())
 				.build();
 
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/foo");
-		ServerRequest fooRequest = new DefaultServerRequest(servletRequest, emptyList());
+		ServerRequest getFooRequest = new DefaultServerRequest(servletRequest, emptyList());
 
-		Optional<Integer> responseStatus = route.route(fooRequest)
-				.map(handlerFunction -> handle(handlerFunction, fooRequest))
+		Optional<Integer> responseStatus = route.route(getFooRequest)
+				.map(handlerFunction -> handle(handlerFunction, getFooRequest))
 				.map(ServerResponse::statusCode)
 				.map(HttpStatus::value);
 		assertEquals(200, responseStatus.get().intValue());
+
+		servletRequest = new MockHttpServletRequest("HEAD", "/foo");
+		ServerRequest headFooRequest = new DefaultServerRequest(servletRequest, emptyList());
+
+		responseStatus = route.route(headFooRequest)
+				.map(handlerFunction -> handle(handlerFunction, getFooRequest))
+				.map(ServerResponse::statusCode)
+				.map(HttpStatus::value);
+		assertEquals(202, responseStatus.get().intValue());
 
 		servletRequest = new MockHttpServletRequest("POST", "/");
 		servletRequest.setContentType("text/plain");

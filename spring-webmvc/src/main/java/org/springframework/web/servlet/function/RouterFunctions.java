@@ -350,6 +350,17 @@ public abstract class RouterFunctions {
 		Builder OPTIONS(String pattern, HandlerFunction<ServerResponse> handlerFunction);
 
 		/**
+		 * Adds a route to the given handler function that handles all requests that match the
+		 * given predicate.
+		 *
+		 * @param predicate the request predicate to match
+		 * @param handlerFunction the handler function to handle all requests that match the predicate
+		 * @return this builder
+		 * @see RequestPredicates
+		 */
+		Builder route(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+
+		/**
 		 * Adds a route to the given handler function that handles all HTTP {@code OPTIONS} requests
 		 * that match the given pattern and predicate.
 		 * @param pattern the pattern to match to
