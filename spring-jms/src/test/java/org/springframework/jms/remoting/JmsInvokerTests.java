@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,7 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
@@ -42,6 +40,7 @@ import org.springframework.remoting.RemoteTimeoutException;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -50,9 +49,6 @@ import static org.mockito.BDDMockito.*;
  * @author Stephane Nicoll
  */
 public class JmsInvokerTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private QueueConnectionFactory mockConnectionFactory;
 
@@ -101,10 +97,10 @@ public class JmsInvokerTests {
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
 
-		thrown.expect(RemoteTimeoutException.class);
-		thrown.expectMessage("1500 ms");
-		thrown.expectMessage("getAge");
-		proxy.getAge();
+		assertThatExceptionOfType(RemoteTimeoutException.class).isThrownBy(() ->
+				proxy.getAge())
+			.withMessageContaining("1500 ms")
+			.withMessageContaining("getAge");
 	}
 
 	private void doTestJmsInvokerProxyFactoryBeanAndServiceExporter(boolean dynamicQueue) throws Throwable {
@@ -146,21 +142,10 @@ public class JmsInvokerTests {
 		assertEquals(50, proxy.getAge());
 		proxy.setStringArray(new String[] {"str1", "str2"});
 		assertTrue(Arrays.equals(new String[] {"str1", "str2"}, proxy.getStringArray()));
-
-		try {
-			proxy.exceptional(new IllegalStateException());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-		try {
-			proxy.exceptional(new IllegalAccessException());
-			fail("Should have thrown IllegalAccessException");
-		}
-		catch (IllegalAccessException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+			proxy.exceptional(new IllegalStateException()));
+		assertThatExceptionOfType(IllegalAccessException.class).isThrownBy(() ->
+				proxy.exceptional(new IllegalAccessException()));
 	}
 
 

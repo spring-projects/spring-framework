@@ -22,9 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -38,6 +36,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
 
 import static java.util.Arrays.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
 
@@ -47,9 +46,6 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
  * @author Rossen Stoyanchev
  */
 public class RequestMappingInfoTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	// TODO: CORS pre-flight (see @Ignore)
 
@@ -70,9 +66,9 @@ public class RequestMappingInfoTests {
 
 	@Test
 	public void throwWhenInvalidPattern() {
-		this.thrown.expect(PatternParseException.class);
-		this.thrown.expectMessage("Expected close capture character after variable name }");
-		paths("/{foo").build();
+		assertThatExceptionOfType(PatternParseException.class).isThrownBy(() ->
+				paths("/{foo").build())
+			.withMessageContaining("Expected close capture character after variable name }");
 	}
 
 	@Test

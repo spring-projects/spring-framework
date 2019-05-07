@@ -36,9 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -60,6 +58,8 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -79,9 +79,6 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  */
 public abstract class AbstractPropertyAccessorTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 
 	protected abstract AbstractPropertyAccessor createAccessor(Object target);
@@ -126,8 +123,8 @@ public abstract class AbstractPropertyAccessorTests {
 	public void isReadablePropertyNull() {
 		AbstractPropertyAccessor accessor = createAccessor(new NoRead());
 
-		thrown.expect(IllegalArgumentException.class);
-		accessor.isReadableProperty(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				accessor.isReadableProperty(null));
 	}
 
 	@Test
@@ -141,8 +138,8 @@ public abstract class AbstractPropertyAccessorTests {
 	public void isWritablePropertyNull() {
 		AbstractPropertyAccessor accessor = createAccessor(new NoRead());
 
-		thrown.expect(IllegalArgumentException.class);
-		accessor.isWritableProperty(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				accessor.isWritableProperty(null));
 	}
 
 	@Test
@@ -290,8 +287,8 @@ public abstract class AbstractPropertyAccessorTests {
 		Person target = createPerson("John", "London", "UK");
 		AbstractPropertyAccessor accessor = createAccessor(target);
 
-		thrown.expect(NotReadablePropertyException.class);
-		accessor.getPropertyValue("address.bar");
+		assertThatExceptionOfType(NotReadablePropertyException.class).isThrownBy(() ->
+				accessor.getPropertyValue("address.bar"));
 	}
 
 	@Test
@@ -1564,8 +1561,8 @@ public abstract class AbstractPropertyAccessorTests {
 		Person target = createPerson("John", "Paris", "FR");
 		AbstractPropertyAccessor accessor = createAccessor(target);
 
-		thrown.expect(NotWritablePropertyException.class);
-		accessor.setPropertyValue("address.bar", "value");
+		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
+				accessor.setPropertyValue("address.bar", "value"));
 	}
 
 	@Test

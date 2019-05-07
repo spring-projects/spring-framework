@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package org.springframework.http.client.support;
 
 import java.net.URI;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.HttpMethod;
@@ -28,6 +26,7 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -39,14 +38,11 @@ import static org.mockito.Mockito.*;
  */
 public class BasicAuthorizationInterceptorTests {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Test
 	public void createWhenUsernameContainsColonShouldThrowException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Username must not contain a colon");
-		new BasicAuthorizationInterceptor("username:", "password");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BasicAuthorizationInterceptor("username:", "password"))
+			.withMessageContaining("Username must not contain a colon");
 	}
 
 	@Test

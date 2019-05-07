@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package org.springframework.validation;
 import java.beans.PropertyEditorSupport;
 import java.util.Map;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -30,6 +28,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.tests.sample.beans.FieldAccessBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 
 /**
@@ -38,9 +37,6 @@ import static org.junit.Assert.*;
  * @since 07.03.2006
  */
 public class DataBinderFieldAccessTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void bindingNoErrors() throws Exception {
@@ -147,8 +143,8 @@ public class DataBinderFieldAccessTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("spouse.name", "Kerry"));
 
-		thrown.expect(NullValueInNestedPathException.class);
-		binder.bind(pvs);
+		assertThatExceptionOfType(NullValueInNestedPathException.class).isThrownBy(() ->
+				binder.bind(pvs));
 	}
 
 	@Test

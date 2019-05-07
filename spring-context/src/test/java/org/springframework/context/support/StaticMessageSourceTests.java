@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
@@ -35,6 +33,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.io.ClassPathResource;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 
 /**
@@ -54,9 +53,6 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 			"This is another test message in the message catalog with no args.";
 
 	protected StaticApplicationContext sac;
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -183,8 +179,8 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		String[] codes4 = new String[] {"message.format.example99", "message.format.example98"};
 		MessageSourceResolvable resolvable4 = new DefaultMessageSourceResolvable(codes4);
 
-		exception.expect(NoSuchMessageException.class);
-		sac.getMessage(resolvable4, Locale.US);
+		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
+				sac.getMessage(resolvable4, Locale.US));
 	}
 
 	@Override

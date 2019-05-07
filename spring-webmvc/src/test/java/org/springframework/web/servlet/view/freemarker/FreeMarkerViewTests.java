@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,7 @@ import freemarker.ext.servlet.AllHttpScopesHashModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -46,7 +44,7 @@ import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -56,10 +54,6 @@ import static org.mockito.BDDMockito.*;
  * @since 14.03.2004
  */
 public class FreeMarkerViewTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	public void noFreeMarkerConfig() throws Exception {
@@ -71,18 +65,18 @@ public class FreeMarkerViewTests {
 
 		fv.setUrl("anythingButNull");
 
-		exception.expect(ApplicationContextException.class);
-		exception.expectMessage(containsString("FreeMarkerConfig"));
-		fv.setApplicationContext(wac);
+		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(() ->
+				fv.setApplicationContext(wac))
+			.withMessageContaining("FreeMarkerConfig");
 	}
 
 	@Test
 	public void noTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(containsString("url"));
-		fv.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				fv.afterPropertiesSet())
+			.withMessageContaining("url");
 	}
 
 	@Test

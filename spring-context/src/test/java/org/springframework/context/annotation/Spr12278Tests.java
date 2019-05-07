@@ -17,12 +17,11 @@
 package org.springframework.context.annotation;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanCreationException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.core.Is.*;
 
@@ -30,9 +29,6 @@ import static org.hamcrest.core.Is.*;
  * @author Stephane Nicoll
  */
 public class Spr12278Tests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private AnnotationConfigApplicationContext context;
 
@@ -59,10 +55,9 @@ public class Spr12278Tests {
 
 	@Test
 	public void componentTwoSpecificConstructorsNoHint() {
-		thrown.expect(BeanCreationException.class);
-		thrown.expectMessage(NoSuchMethodException.class.getName());
-		new AnnotationConfigApplicationContext(BaseConfiguration.class,
-				TwoSpecificConstructorsComponent.class);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(BaseConfiguration.class, TwoSpecificConstructorsComponent.class))
+			.withMessageContaining(NoSuchMethodException.class.getName());
 	}
 
 

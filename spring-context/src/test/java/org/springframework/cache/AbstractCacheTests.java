@@ -22,9 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.*;
@@ -34,9 +32,6 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  */
 public abstract class AbstractCacheTests<T extends Cache> {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	protected final static String CACHE_NAME = "testCache";
 

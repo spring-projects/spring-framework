@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import javax.cache.annotation.CachePut;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 
 /**
@@ -56,8 +58,8 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 		CacheMethodDetails<CachePut> methodDetails = create(CachePut.class,
 				SampleObject.class, "noCacheValue", Long.class);
 
-		thrown.expect(IllegalArgumentException.class);
-		createDefaultOperation(methodDetails);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createDefaultOperation(methodDetails));
 	}
 
 	@Test
@@ -65,16 +67,16 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 		CacheMethodDetails<CachePut> methodDetails = create(CachePut.class,
 				SampleObject.class, "multiCacheValues", Long.class, SampleObject.class, SampleObject.class);
 
-		thrown.expect(IllegalArgumentException.class);
-		createDefaultOperation(methodDetails);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createDefaultOperation(methodDetails));
 	}
 
 	@Test
 	public void invokeWithWrongParameters() {
 		CachePutOperation operation = createSimpleOperation();
 
-		thrown.expect(IllegalStateException.class);
-		operation.getValueParameter(2L);
+		assertThatIllegalStateException().isThrownBy(() ->
+				operation.getValueParameter(2L));
 	}
 
 	@Test

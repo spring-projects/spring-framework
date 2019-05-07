@@ -30,9 +30,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -41,6 +39,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -82,9 +81,6 @@ public class SqlQueryTests  {
 
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
 	private static final int[] COLUMN_TYPES = new int[] {Types.INTEGER, Types.VARCHAR};
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private Connection connection;
 	private DataSource dataSource;
@@ -142,8 +138,8 @@ public class SqlQueryTests  {
 		query.declareParameter(new SqlParameter(COLUMN_NAMES[1], COLUMN_TYPES[1]));
 		query.compile();
 
-		thrown.expect(InvalidDataAccessApiUsageException.class);
-		query.execute();
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(
+				query::execute);
 	}
 
 	@Test
@@ -160,8 +156,8 @@ public class SqlQueryTests  {
 		query.declareParameter(new SqlParameter(COLUMN_NAMES[1], COLUMN_TYPES[1]));
 		query.compile();
 
-		thrown.expect(InvalidDataAccessApiUsageException.class);
-		query.executeByNamedParam(Collections.singletonMap(COLUMN_NAMES[0], "value"));
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				query.executeByNamedParam(Collections.singletonMap(COLUMN_NAMES[0], "value")));
 	}
 
 	@Test
@@ -354,17 +350,13 @@ public class SqlQueryTests  {
 		}
 
 		CustomerQuery query = new CustomerQuery(dataSource);
-		thrown.expect(IncorrectResultSizeDataAccessException.class);
-		try {
-			query.findCustomer("rod");
-		}
-		finally {
-			verify(preparedStatement).setString(1, "rod");
-			verify(connection).prepareStatement(SELECT_ID_FORENAME_WHERE);
-			verify(resultSet).close();
-			verify(preparedStatement).close();
-			verify(connection).close();
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				query.findCustomer("rod"));
+		verify(preparedStatement).setString(1, "rod");
+		verify(connection).prepareStatement(SELECT_ID_FORENAME_WHERE);
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
 	}
 
 	@Test
@@ -510,8 +502,8 @@ public class SqlQueryTests  {
 
 		// Query should not succeed since parameter declaration did not specify parameter name
 		CustomerQuery query = new CustomerQuery(dataSource);
-		thrown.expect(InvalidDataAccessApiUsageException.class);
-		query.findCustomer(1);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				query.findCustomer(1));
 	}
 
 	@Test
@@ -712,8 +704,8 @@ public class SqlQueryTests  {
 		}
 
 		CustomerQuery query = new CustomerQuery(dataSource);
-		thrown.expect(InvalidDataAccessApiUsageException.class);
-		query.findCustomers(1);
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				query.findCustomers(1));
 	}
 
 	@Test

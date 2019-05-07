@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package org.springframework.util;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.util.backoff.ExponentialBackOff;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.*;
 
 /**
@@ -30,9 +29,6 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  */
 public class ExponentialBackOffTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void defaultInstance() {
@@ -109,9 +105,8 @@ public class ExponentialBackOffTests {
 	@Test
 	public void invalidInterval() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
-
-		thrown.expect(IllegalArgumentException.class);
-		backOff.setMultiplier(0.9);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				backOff.setMultiplier(0.9));
 	}
 
 	@Test

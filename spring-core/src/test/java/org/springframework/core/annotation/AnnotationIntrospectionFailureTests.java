@@ -50,8 +50,8 @@ public class AnnotationIntrospectionFailureTests {
 		Method method = annotation.annotationType().getMethod("value");
 		method.setAccessible(true);
 		assertThatExceptionOfType(TypeNotPresentException.class).isThrownBy(() ->
-			ReflectionUtils.invokeMethod(method, annotation)
-		).withCauseInstanceOf(ClassNotFoundException.class);
+				ReflectionUtils.invokeMethod(method, annotation))
+			.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test

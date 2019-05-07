@@ -22,9 +22,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.http.HttpHeaders;
@@ -35,6 +33,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -56,10 +55,6 @@ public class DefaultTransportRequestTests {
 	private TestTransport webSocketTransport;
 
 	private TestTransport xhrTransport;
-
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 
 	@SuppressWarnings("unchecked")
@@ -97,9 +92,9 @@ public class DefaultTransportRequestTests {
 		// Transport error => no more fallback
 		this.xhrTransport.getConnectCallback().onFailure(new IOException("Fake exception 2"));
 		assertTrue(this.connectFuture.isDone());
-		this.thrown.expect(ExecutionException.class);
-		this.thrown.expectMessage("Fake exception 2");
-		this.connectFuture.get();
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				this.connectFuture::get)
+			.withMessageContaining("Fake exception 2");
 	}
 
 	@Test

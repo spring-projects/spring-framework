@@ -21,9 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,7 +30,7 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.web.WebDelegatingSmartContextLoader;
 import org.springframework.test.context.web.WebMergedContextConfiguration;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 
 /**
@@ -42,10 +40,6 @@ import static org.junit.Assert.*;
  * @since 3.1
  */
 public class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUtilsTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	public void buildImplicitMergedConfigWithoutAnnotation() {
@@ -60,11 +54,10 @@ public class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigur
 	 */
 	@Test
 	public void buildMergedConfigWithContextConfigurationWithoutLocationsClassesOrInitializers() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(startsWith("DelegatingSmartContextLoader was unable to detect defaults, "
-				+ "and no ApplicationContextInitializers or ContextCustomizers were declared for context configuration attributes"));
-
-		buildMergedContextConfiguration(MissingContextAttributesTestCase.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				buildMergedContextConfiguration(MissingContextAttributesTestCase.class))
+			.withMessageStartingWith("DelegatingSmartContextLoader was unable to detect defaults, "
+					+ "and no ApplicationContextInitializers or ContextCustomizers were declared for context configuration attributes");
 	}
 
 	@Test

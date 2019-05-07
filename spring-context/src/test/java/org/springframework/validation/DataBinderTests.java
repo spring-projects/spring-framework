@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.InvalidPropertyException;
@@ -69,6 +67,7 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 
 /**
@@ -78,10 +77,6 @@ import static org.junit.Assert.*;
  * @author Kazuki Shimizu
  */
 public class DataBinderTests {
-
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
-
 
 	@Test
 	public void testBindingNoErrors() throws BindException {
@@ -2022,12 +2017,11 @@ public class DataBinderTests {
 
 	@Test  // SPR-14888
 	public void testSetAutoGrowCollectionLimitAfterInitialization() {
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage("DataBinder is already initialized - call setAutoGrowCollectionLimit before other configuration methods");
-
 		DataBinder binder = new DataBinder(new BeanWithIntegerList());
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
-		binder.setAutoGrowCollectionLimit(257);
+		assertThatIllegalStateException().isThrownBy(() ->
+				binder.setAutoGrowCollectionLimit(257))
+			.withMessageContaining("DataBinder is already initialized - call setAutoGrowCollectionLimit before other configuration methods");
 	}
 
 	@Test // SPR-15009
@@ -2092,13 +2086,13 @@ public class DataBinderTests {
 
 	@Test  // SPR-15009
 	public void testCallSetMessageCodesResolverTwice() {
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage("DataBinder is already initialized with MessageCodesResolver");
 
 		TestBean testBean = new TestBean();
 		DataBinder binder = new DataBinder(testBean, "testBean");
 		binder.setMessageCodesResolver(new DefaultMessageCodesResolver());
-		binder.setMessageCodesResolver(new DefaultMessageCodesResolver());
+		assertThatIllegalStateException().isThrownBy(() ->
+				binder.setMessageCodesResolver(new DefaultMessageCodesResolver()))
+			.withMessageContaining("DataBinder is already initialized with MessageCodesResolver");
 
 	}
 

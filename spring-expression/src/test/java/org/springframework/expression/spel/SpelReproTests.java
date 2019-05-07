@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -62,6 +60,7 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -76,9 +75,6 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  */
 public class SpelReproTests extends AbstractExpressionTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -1283,14 +1279,13 @@ public class SpelReproTests extends AbstractExpressionTests {
 		doTestSpr10146(">foo", "EL1070E: Problem parsing left operand");
 		doTestSpr10146("&&foo", "EL1070E: Problem parsing left operand");
 		doTestSpr10146("||foo", "EL1070E: Problem parsing left operand");
-		doTestSpr10146("&foo", "EL1069E: missing expected character '&'");
-		doTestSpr10146("|foo", "EL1069E: missing expected character '|'");
+		doTestSpr10146("|foo", "EL1069E: Missing expected character '|'");
 	}
 
 	private void doTestSpr10146(String expression, String expectedMessage) {
-		thrown.expect(SpelParseException.class);
-		thrown.expectMessage(expectedMessage);
-		new SpelExpressionParser().parseExpression(expression);
+		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseExpression(expression))
+			.withMessageContaining(expectedMessage);
 	}
 
 	@Test
@@ -1314,10 +1309,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR10328() {
-		thrown.expect(SpelParseException.class);
-		thrown.expectMessage("EL1071E: A required selection expression has not been specified");
-		Expression exp = parser.parseExpression("$[]");
-		exp.getValue(Arrays.asList("foo", "bar", "baz"));
+		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() ->
+				parser.parseExpression("$[]"))
+			.withMessageContaining("EL1071E: A required selection expression has not been specified");
 	}
 
 	@Test
@@ -1407,9 +1401,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Spr11142 rootObject = new Spr11142();
 		Expression expression = parser.parseExpression("something");
-		thrown.expect(SpelEvaluationException.class);
-		thrown.expectMessage("'something' cannot be found");
-		expression.getValue(context, rootObject);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expression.getValue(context, rootObject))
+			.withMessageContaining("'something' cannot be found");
 	}
 
 	@Test

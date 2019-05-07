@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
@@ -36,6 +34,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 
 /**
@@ -54,9 +53,6 @@ public class ErrorsMethodArgumentResolverTests {
 			MockServerWebExchange.from(MockServerHttpRequest.post("/path"));
 
 	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
-
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
 
 
 	@Test
@@ -107,22 +103,22 @@ public class ErrorsMethodArgumentResolverTests {
 
 	@Test
 	public void resolveWithMonoOnBindingResultAndModelAttribute() {
-		this.expectedException.expectMessage("An @ModelAttribute and an Errors/BindingResult argument " +
-				"cannot both be declared with an async type wrapper.");
-
 		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
-		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
-				.block(Duration.ofMillis(5000));
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+						.block(Duration.ofMillis(5000)))
+			.withMessageContaining("An @ModelAttribute and an Errors/BindingResult argument " +
+					"cannot both be declared with an async type wrapper.");
 	}
 
 	@Test  // SPR-16187
 	public void resolveWithBindingResultNotFound() {
-		this.expectedException.expectMessage("An Errors/BindingResult argument is expected " +
-				"immediately after the @ModelAttribute argument");
-
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
-		this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
-				.block(Duration.ofMillis(5000));
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
+						.block(Duration.ofMillis(5000)))
+			.withMessageContaining("An Errors/BindingResult argument is expected " +
+					"immediately after the @ModelAttribute argument");
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 
 /**
@@ -32,9 +31,6 @@ import static org.junit.Assert.*;
  * @author Phillip Webb
  */
 public class ComparableComparatorTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testComparableComparator() {
@@ -50,8 +46,8 @@ public class ComparableComparatorTests {
 		Comparator c = new ComparableComparator();
 		Object o1 = new Object();
 		Object o2 = new Object();
-		thrown.expect(ClassCastException.class);
-		c.compare(o1, o2);
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				c.compare(o1, o2));
 	}
 
 }

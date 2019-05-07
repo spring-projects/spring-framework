@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package org.springframework.cache.jcache.config;
 
 import java.util.Arrays;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -46,15 +44,13 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
  */
 public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Override
 	protected ApplicationContext getApplicationContext() {
@@ -116,8 +112,8 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 			service.cache("id");
 
 			// This call requires the cache manager to be set
-			thrown.expect(IllegalStateException.class);
-			service.cacheWithException("test", false);
+			assertThatIllegalStateException().isThrownBy(() ->
+					service.cacheWithException("test", false));
 		}
 		finally {
 			context.close();

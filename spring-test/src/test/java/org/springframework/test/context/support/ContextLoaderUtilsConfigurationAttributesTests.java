@@ -18,16 +18,14 @@ package org.springframework.test.context.support;
 
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.springframework.test.context.support.ContextLoaderUtils.*;
 
@@ -38,10 +36,6 @@ import static org.springframework.test.context.support.ContextLoaderUtils.*;
  * @since 3.1
  */
 public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractContextConfigurationUtilsTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	private void assertLocationsFooAttributes(ContextConfigurationAttributes attributes) {
 		assertAttributes(attributes, LocationsFoo.class, new String[] { "/foo.xml" }, EMPTY_CLASS_ARRAY,
@@ -65,18 +59,12 @@ public class ContextLoaderUtilsConfigurationAttributesTests extends AbstractCont
 
 	@Test
 	public void resolveConfigAttributesWithConflictingLocations() {
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString(ConflictingLocations.class.getName()));
-		exception.expectMessage(either(
-				containsString("attribute 'value' and its alias 'locations'")).or(
-				containsString("attribute 'locations' and its alias 'value'")));
-		exception.expectMessage(either(
-				containsString("values of [{x}] and [{y}]")).or(
-				containsString("values of [{y}] and [{x}]")));
-		exception.expectMessage(either(
-				containsString("Different @AliasFor mirror values")).or(
-				containsString("but only one is permitted")));
-		resolveContextConfigurationAttributes(ConflictingLocations.class);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				resolveContextConfigurationAttributes(ConflictingLocations.class))
+			.withMessageStartingWith("Different @AliasFor mirror values")
+			.withMessageContaining(ConflictingLocations.class.getName())
+			.withMessageContaining("attribute 'locations' and its alias 'value'")
+			.withMessageContaining("values of [{y}] and [{x}]");
 	}
 
 	@Test

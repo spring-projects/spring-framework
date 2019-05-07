@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,13 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.jms.StubTextMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -40,14 +39,11 @@ public class MessagingMessageConverterTests {
 
 	private final MessagingMessageConverter converter = new MessagingMessageConverter();
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void onlyHandlesMessage() throws JMSException {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.converter.toMessage(new Object(), mock(Session.class));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.converter.toMessage(new Object(), mock(Session.class)));
 	}
 
 	@Test

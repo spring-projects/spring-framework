@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,7 @@ import javax.cache.annotation.CacheResult;
 import javax.cache.annotation.CacheValue;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -56,9 +54,6 @@ public class JCacheErrorHandlerTests {
 	private CacheErrorHandler errorHandler;
 
 	private SimpleService simpleService;
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 
 	@Before

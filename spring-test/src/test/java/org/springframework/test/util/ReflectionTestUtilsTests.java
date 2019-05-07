@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package org.springframework.test.util;
 
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
@@ -30,7 +28,7 @@ import org.springframework.test.util.subpackage.Person;
 import org.springframework.test.util.subpackage.PersonEntity;
 import org.springframework.test.util.subpackage.StaticFields;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.springframework.test.util.ReflectionTestUtils.*;
 
@@ -50,9 +48,6 @@ public class ReflectionTestUtilsTests {
 
 	private final LegacyEntity entity = new LegacyEntity();
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Before
 	public void resetStaticFields() {
@@ -61,51 +56,51 @@ public class ReflectionTestUtilsTests {
 
 	@Test
 	public void setFieldWithNullTargetObject() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		setField((Object) null, "id", Long.valueOf(99));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				setField((Object) null, "id", Long.valueOf(99)))
+			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	public void getFieldWithNullTargetObject() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		getField((Object) null, "id");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getField((Object) null, "id"))
+			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	public void setFieldWithNullTargetClass() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		setField((Class<?>) null, "id", Long.valueOf(99));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				setField((Class<?>) null, "id", Long.valueOf(99)))
+			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	public void getFieldWithNullTargetClass() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		getField((Class<?>) null, "id");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getField((Class<?>) null, "id"))
+			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
 	public void setFieldWithNullNameAndNullType() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either name or type"));
-		setField(person, null, Long.valueOf(99), null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				setField(person, null, Long.valueOf(99), null))
+			.withMessageStartingWith("Either name or type");
 	}
 
 	@Test
 	public void setFieldWithBogusName() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Could not find field 'bogus'"));
-		setField(person, "bogus", Long.valueOf(99), long.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				setField(person, "bogus", Long.valueOf(99), long.class))
+			.withMessageStartingWith("Could not find field 'bogus'");
 	}
 
 	@Test
 	public void setFieldWithWrongType() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Could not find field"));
-		setField(person, "id", Long.valueOf(99), String.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				setField(person, "id", Long.valueOf(99), String.class))
+			.withMessageStartingWith("Could not find field");
 	}
 
 	@Test
@@ -363,30 +358,30 @@ public class ReflectionTestUtilsTests {
 
 	@Test
 	public void invokeInitMethodBeforeAutowiring() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(equalTo("number must not be null"));
-		invokeMethod(component, "init");
+		assertThatIllegalStateException().isThrownBy(() ->
+				invokeMethod(component, "init"))
+			.withMessageStartingWith("number must not be null");
 	}
 
 	@Test
 	public void invokeMethodWithIncompatibleArgumentTypes() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(startsWith("Method not found"));
-		invokeMethod(component, "subtract", "foo", 2.0);
+		assertThatIllegalStateException().isThrownBy(() ->
+				invokeMethod(component, "subtract", "foo", 2.0))
+		.withMessageStartingWith("Method not found");
 	}
 
 	@Test
 	public void invokeMethodWithTooFewArguments() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(startsWith("Method not found"));
-		invokeMethod(component, "configure", Integer.valueOf(42));
+		assertThatIllegalStateException().isThrownBy(() ->
+				invokeMethod(component, "configure", Integer.valueOf(42)))
+			.withMessageStartingWith("Method not found");
 	}
 
 	@Test
 	public void invokeMethodWithTooManyArguments() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(startsWith("Method not found"));
-		invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux");
+		assertThatIllegalStateException().isThrownBy(() ->
+				invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux"))
+			.withMessageStartingWith("Method not found");
 	}
 
 	@Test // SPR-14363

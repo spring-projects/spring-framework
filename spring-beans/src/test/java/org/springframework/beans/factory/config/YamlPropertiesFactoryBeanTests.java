@@ -19,9 +19,7 @@ package org.springframework.beans.factory.config;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 import org.yaml.snakeyaml.scanner.ScannerException;
@@ -32,6 +30,7 @@ import org.springframework.beans.factory.config.YamlProcessor.ResolutionMethod;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -42,9 +41,6 @@ import static org.hamcrest.Matchers.*;
  * @author Juergen Hoeller
  */
 public class YamlPropertiesFactoryBeanTests {
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -61,9 +57,9 @@ public class YamlPropertiesFactoryBeanTests {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
 		factory.setResources(new ByteArrayResource(
 				"foo: bar\ncd\nspam:\n  foo: baz".getBytes()));
-		this.exception.expect(ScannerException.class);
-		this.exception.expectMessage("line 3, column 1");
-		factory.getObject();
+		assertThatExceptionOfType(ScannerException.class).isThrownBy(
+				factory::getObject)
+			.withMessageContaining("line 3, column 1");
 	}
 
 	@Test

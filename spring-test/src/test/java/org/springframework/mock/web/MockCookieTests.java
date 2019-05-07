@@ -16,10 +16,9 @@
 
 package org.springframework.mock.web;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.*;
 
 /**
@@ -30,9 +29,6 @@ import static org.junit.Assert.*;
  * @since 5.1
  */
 public class MockCookieTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -86,25 +82,25 @@ public class MockCookieTests {
 
 	@Test
 	public void parseNullHeader() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("Set-Cookie header must not be null");
-		MockCookie.parse(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MockCookie.parse(null))
+			.withMessageContaining("Set-Cookie header must not be null");
 	}
 
 	@Test
 	public void parseInvalidHeader() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("Invalid Set-Cookie header 'BOOM'");
-		MockCookie.parse("BOOM");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MockCookie.parse("BOOM"))
+			.withMessageContaining("Invalid Set-Cookie header 'BOOM'");
 	}
 
 	@Test
 	public void parseInvalidAttribute() {
 		String header = "SESSION=123; Path=";
 
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage("No value in attribute 'Path' for Set-Cookie header '" + header + "'");
-		MockCookie.parse(header);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MockCookie.parse(header))
+			.withMessageContaining("No value in attribute 'Path' for Set-Cookie header '" + header + "'");
 	}
 
 	@Test

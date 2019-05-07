@@ -26,12 +26,11 @@ import java.util.TimeZone;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -44,9 +43,6 @@ import static org.hamcrest.Matchers.*;
 public class DateFormatterTests {
 
 	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -175,9 +171,9 @@ public class DateFormatterTests {
 	public void shouldThrowOnUnsupportedStylePattern() throws Exception {
 		DateFormatter formatter = new DateFormatter();
 		formatter.setStylePattern("OO");
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("Unsupported style pattern 'OO'");
-		formatter.parse("2009", Locale.US);
+		assertThatIllegalStateException().isThrownBy(() ->
+				formatter.parse("2009", Locale.US))
+			.withMessageContaining("Unsupported style pattern 'OO'");
 	}
 
 	@Test

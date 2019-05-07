@@ -29,12 +29,11 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
@@ -46,9 +45,6 @@ import static org.mockito.BDDMockito.*;
  * @since 19.12.2004
  */
 public class JdbcTemplateQueryTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private Connection connection;
 
@@ -148,14 +144,10 @@ public class JdbcTemplateQueryTests {
 		String sql = "select pass from t_account where first_name='Alef'";
 		given(this.resultSet.next()).willReturn(true, true, false);
 		given(this.resultSet.getString(1)).willReturn("pass");
-		this.thrown.expect(IncorrectResultSizeDataAccessException.class);
-		try {
-			this.template.queryForObject(sql, String.class);
-		}
-		finally {
-			verify(this.resultSet).close();
-			verify(this.statement).close();
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				this.template.queryForObject(sql, String.class));
+		verify(this.resultSet).close();
+		verify(this.statement).close();
 	}
 
 	@Test

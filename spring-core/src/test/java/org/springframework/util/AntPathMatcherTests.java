@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 
 /**
@@ -43,9 +41,6 @@ import static org.junit.Assert.*;
 public class AntPathMatcherTests {
 
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -401,9 +396,9 @@ public class AntPathMatcherTests {
 	 */
 	@Test
 	public void extractUriTemplateVarsRegexCapturingGroups() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(containsString("The number of capturing groups in the pattern"));
-		pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar"))
+			.withMessageContaining("The number of capturing groups in the pattern");
 	}
 
 	@Test
@@ -439,8 +434,8 @@ public class AntPathMatcherTests {
 
 	@Test
 	public void combineWithTwoFileExtensionPatterns() {
-		exception.expect(IllegalArgumentException.class);
-		pathMatcher.combine("/*.html", "/*.txt");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pathMatcher.combine("/*.html", "/*.txt"));
 	}
 
 	@Test

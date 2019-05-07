@@ -21,14 +21,14 @@ import java.io.IOException;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openqa.selenium.WebDriverException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.notNullValue;
@@ -50,9 +50,6 @@ public class WebConnectionHtmlUnitDriverTests {
 	@Mock
 	private WebConnection connection;
 
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
 	@Before
 	public void setup() throws Exception {
 		when(this.connection.getResponse(any(WebRequest.class))).thenThrow(new IOException(""));
@@ -66,17 +63,16 @@ public class WebConnectionHtmlUnitDriverTests {
 
 	@Test
 	public void setWebConnectionToNull() {
-		this.exception.expect(IllegalArgumentException.class);
-		this.driver.setWebConnection(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.driver.setWebConnection(null));
 	}
 
 	@Test
 	public void setWebConnection() {
 		this.driver.setWebConnection(this.connection);
 		assertThat(this.driver.getWebConnection(), equalTo(this.connection));
-
-		this.exception.expect(WebDriverException.class);
-		this.driver.get("https://example.com");
+		assertThatExceptionOfType(WebDriverException.class).isThrownBy(() ->
+				this.driver.get("https://example.com"));
 	}
 
 }

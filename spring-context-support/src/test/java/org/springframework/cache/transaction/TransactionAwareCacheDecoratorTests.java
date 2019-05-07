@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.cache.transaction;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -28,6 +26,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.*;
 
 /**
@@ -35,15 +34,12 @@ import static org.junit.Assert.*;
  */
 public class TransactionAwareCacheDecoratorTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private final PlatformTransactionManager txManager = new CallCountingTransactionManager();
 
 	@Test
 	public void createWithNullTarget() {
-		this.thrown.expect(IllegalArgumentException.class);
-		new TransactionAwareCacheDecorator(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new TransactionAwareCacheDecorator(null));
 	}
 
 	@Test

@@ -21,12 +21,11 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.*;
 
 /**
@@ -39,35 +38,32 @@ import static org.junit.Assert.*;
  */
 public class ProfilesTests {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Test
 	public void ofWhenNullThrowsException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Must specify at least one profile");
-		Profiles.of((String[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Profiles.of((String[]) null))
+			.withMessageContaining("Must specify at least one profile");
 	}
 
 	@Test
 	public void ofWhenEmptyThrowsException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Must specify at least one profile");
-		Profiles.of();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Profiles.of())
+			.withMessageContaining("Must specify at least one profile");
 	}
 
 	@Test
 	public void ofNullElement() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("must contain text");
-		Profiles.of((String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Profiles.of((String) null))
+			.withMessageContaining("must contain text");
 	}
 
 	@Test
 	public void ofEmptyElement() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("must contain text");
-		Profiles.of("  ");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Profiles.of("  "))
+			.withMessageContaining("must contain text");
 	}
 
 	@Test

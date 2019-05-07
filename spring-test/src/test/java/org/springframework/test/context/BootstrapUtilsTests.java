@@ -19,14 +19,13 @@ package org.springframework.test.context;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.context.web.WebTestContextBootstrapper;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.context.BootstrapUtils.*;
@@ -42,30 +41,23 @@ public class BootstrapUtilsTests {
 
 	private final CacheAwareContextLoaderDelegate delegate = mock(CacheAwareContextLoaderDelegate.class);
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void resolveTestContextBootstrapperWithEmptyBootstrapWithAnnotation() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(EmptyBootstrapWithAnnotationClass.class, delegate);
-
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Specify @BootstrapWith's 'value' attribute");
-
-		resolveTestContextBootstrapper(bootstrapContext);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolveTestContextBootstrapper(bootstrapContext))
+			.withMessageContaining("Specify @BootstrapWith's 'value' attribute");
 	}
 
 	@Test
 	public void resolveTestContextBootstrapperWithDoubleMetaBootstrapWithAnnotations() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(
 			DoubleMetaAnnotatedBootstrapWithAnnotationClass.class, delegate);
-
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Configuration error: found multiple declarations of @BootstrapWith");
-		exception.expectMessage(FooBootstrapper.class.getName());
-		exception.expectMessage(BarBootstrapper.class.getName());
-
-		resolveTestContextBootstrapper(bootstrapContext);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolveTestContextBootstrapper(bootstrapContext))
+			.withMessageContaining("Configuration error: found multiple declarations of @BootstrapWith")
+			.withMessageContaining(FooBootstrapper.class.getName())
+			.withMessageContaining(BarBootstrapper.class.getName());
 	}
 
 	@Test

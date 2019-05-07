@@ -19,9 +19,7 @@ package org.springframework.context.support;
 import java.util.Optional;
 import java.util.Properties;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -35,6 +33,7 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -46,9 +45,6 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
  * @since 3.1
  */
 public class PropertySourcesPlaceholderConfigurerTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -329,8 +325,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 	@Test
 	public void getAppliedPropertySourcesTooEarly() throws Exception {
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
-		thrown.expect(IllegalStateException.class);
-		ppc.getAppliedPropertySources();
+		assertThatIllegalStateException().isThrownBy(
+				ppc::getAppliedPropertySources);
 	}
 
 	@Test

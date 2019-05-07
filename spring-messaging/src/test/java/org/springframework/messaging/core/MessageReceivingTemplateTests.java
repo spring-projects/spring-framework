@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package org.springframework.messaging.core;
 import java.io.Writer;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.messaging.Message;
@@ -29,7 +27,7 @@ import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 
 /**
@@ -39,9 +37,6 @@ import static org.junit.Assert.*;
  * @see MessageRequestReplyTemplateTests
  */
 public class MessageReceivingTemplateTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private TestMessagingTemplate template;
 
@@ -104,9 +99,9 @@ public class MessageReceivingTemplateTests {
 		this.template.setReceiveMessage(expected);
 		this.template.setMessageConverter(new GenericMessageConverter());
 
-		thrown.expect(MessageConversionException.class);
-		thrown.expectCause(isA(ConversionFailedException.class));
-		this.template.receiveAndConvert("somewhere", Integer.class);
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				this.template.receiveAndConvert("somewhere", Integer.class))
+			.withCauseInstanceOf(ConversionFailedException.class);
 	}
 
 	@Test

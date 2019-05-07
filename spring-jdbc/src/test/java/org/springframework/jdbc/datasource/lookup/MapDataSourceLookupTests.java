@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 
 /**
@@ -34,9 +33,6 @@ public class MapDataSourceLookupTests {
 
 	private static final String DATA_SOURCE_NAME = "dataSource";
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -44,8 +40,8 @@ public class MapDataSourceLookupTests {
 		MapDataSourceLookup lookup = new MapDataSourceLookup();
 		Map dataSources = lookup.getDataSources();
 
-		exception.expect(UnsupportedOperationException.class);
-		dataSources.put("", "");
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				dataSources.put("", ""));
 	}
 
 	@Test
@@ -94,16 +90,16 @@ public class MapDataSourceLookupTests {
 		dataSources.put(DATA_SOURCE_NAME, new Object());
 		MapDataSourceLookup lookup = new MapDataSourceLookup(dataSources);
 
-		exception.expect(ClassCastException.class);
-		lookup.getDataSource(DATA_SOURCE_NAME);
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				lookup.getDataSource(DATA_SOURCE_NAME));
 	}
 
 	@Test
 	public void getDataSourceWhereSuppliedMapHasNoEntryForSpecifiedKey() throws Exception {
 		MapDataSourceLookup lookup = new MapDataSourceLookup();
 
-		exception.expect(DataSourceLookupFailureException.class);
-		lookup.getDataSource(DATA_SOURCE_NAME);
+		assertThatExceptionOfType(DataSourceLookupFailureException.class).isThrownBy(() ->
+				lookup.getDataSource(DATA_SOURCE_NAME));
 	}
 
 }

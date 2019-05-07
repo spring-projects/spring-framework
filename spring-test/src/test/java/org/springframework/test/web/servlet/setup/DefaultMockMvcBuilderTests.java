@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.test.web.servlet.setup;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.StaticApplicationContext;
@@ -29,7 +27,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -45,22 +43,18 @@ public class DefaultMockMvcBuilderTests {
 
 	private final MockServletContext servletContext = new MockServletContext();
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
-
 	@Test
 	public void webAppContextSetupWithNullWac() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(equalTo("WebApplicationContext is required"));
-		webAppContextSetup(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				webAppContextSetup(null))
+			.withMessage("WebApplicationContext is required");
 	}
 
 	@Test
 	public void webAppContextSetupWithNullServletContext() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(equalTo("WebApplicationContext must have a ServletContext"));
-		webAppContextSetup(new StubWebApplicationContext(null));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				webAppContextSetup(new StubWebApplicationContext(null)))
+			.withMessage("WebApplicationContext must have a ServletContext");
 	}
 
 	/**
