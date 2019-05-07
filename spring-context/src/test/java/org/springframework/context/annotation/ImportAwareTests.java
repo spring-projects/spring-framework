@@ -83,6 +83,22 @@ public class ImportAwareTests {
 	}
 
 	@Test
+	public void directlyAnnotatedWithImportLite() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ImportingConfigLite.class);
+		ctx.refresh();
+		assertNotNull(ctx.getBean("importedConfigBean"));
+
+		ImportedConfigLite importAwareConfig = ctx.getBean(ImportedConfigLite.class);
+		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
+		assertThat("import metadata was not injected", importMetadata, notNullValue());
+		assertThat(importMetadata.getClassName(), is(ImportingConfigLite.class.getName()));
+		AnnotationAttributes importAttribs = AnnotationConfigUtils.attributesFor(importMetadata, Import.class);
+		Class<?>[] importedClasses = importAttribs.getClassArray("value");
+		assertThat(importedClasses[0].getName(), is(ImportedConfigLite.class.getName()));
+	}
+
+	@Test
 	public void importRegistrar() {
 		ImportedRegistrar.called = false;
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -135,7 +151,7 @@ public class ImportAwareTests {
 
 
 	@Configuration
-	@EnableImportedConfig(foo="xyz")
+	@EnableImportedConfig(foo = "xyz")
 	static class IndirectlyImportingConfig {
 	}
 
@@ -176,6 +192,34 @@ public class ImportAwareTests {
 		@Bean
 		public String otherImportedConfigBean() {
 			return "";
+		}
+	}
+
+
+	@Configuration
+	@Import(ImportedConfigLite.class)
+	static class ImportingConfigLite {
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	static class ImportedConfigLite implements ImportAware {
+
+		AnnotationMetadata importMetadata;
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.importMetadata = importMetadata;
+		}
+
+		@Bean
+		public BPP importedConfigBean() {
+			return new BPP();
+		}
+
+		@Bean
+		public AsyncAnnotationBeanPostProcessor asyncBPP() {
+			return new AsyncAnnotationBeanPostProcessor();
 		}
 	}
 
@@ -259,6 +303,32 @@ public class ImportAwareTests {
 
 	@Configuration
 	public static class SomeConfiguration implements ImportAware {
+
+		private AnnotationMetadata importMetadata;
+
+		@Override
+		public void setImportMetadata(AnnotationMetadata importMetadata) {
+			this.importMetadata = importMetadata;
+		}
+
+		@Bean
+		public MetadataHolder holder() {
+			return new MetadataHolder(this.importMetadata);
+		}
+	}
+
+
+	@Import(LiteConfiguration.class)
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface EnableLiteConfiguration {
+
+		String value() default "";
+	}
+
+
+	@Configuration(proxyBeanMethods = false)
+	public static class LiteConfiguration implements ImportAware {
 
 		private AnnotationMetadata importMetadata;
 
