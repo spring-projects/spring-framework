@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,11 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
 public class LinkedMultiValueMapTests {
 
-	private final LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+	private final LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 
 
 	@Test
@@ -39,20 +40,10 @@ public class LinkedMultiValueMapTests {
 		map.add("key", "value1");
 		map.add("key", "value2");
 		assertEquals(1, map.size());
-		List<String> expected = new ArrayList<String>(2);
+		List<String> expected = new ArrayList<>(2);
 		expected.add("value1");
 		expected.add("value2");
 		assertEquals(expected, map.get("key"));
-	}
-
-	@Test
-	public void getFirst() {
-		List<String> values = new ArrayList<String>(2);
-		values.add("value1");
-		values.add("value2");
-		map.put("key", values);
-		assertEquals("value1", map.getFirst("key"));
-		assertNull(map.getFirst("other"));
 	}
 
 	@Test
@@ -64,14 +55,50 @@ public class LinkedMultiValueMapTests {
 	}
 
 	@Test
+	public void getFirst() {
+		List<String> values = new ArrayList<>(2);
+		values.add("value1");
+		values.add("value2");
+		map.put("key", values);
+		assertEquals("value1", map.getFirst("key"));
+		assertNull(map.getFirst("other"));
+	}
+
+	@Test
+	public void getFirstWithEmptyList() {
+		map.put("key", Collections.emptyList());
+		assertNull(map.getFirst("key"));
+		assertNull(map.getFirst("other"));
+	}
+
+	@Test
+	public void toSingleValueMap() {
+		List<String> values = new ArrayList<>(2);
+		values.add("value1");
+		values.add("value2");
+		map.put("key", values);
+		Map<String, String> svm = map.toSingleValueMap();
+		assertEquals(1, svm.size());
+		assertEquals("value1", svm.get("key"));
+	}
+
+	@Test
+	public void toSingleValueMapWithEmptyList() {
+		map.put("key", Collections.emptyList());
+		Map<String, String> svm = map.toSingleValueMap();
+		assertEquals(0, svm.size());
+		assertNull(svm.get("key"));
+	}
+
+	@Test
 	public void equals() {
 		map.set("key1", "value1");
 		assertEquals(map, map);
-		MultiValueMap<String, String> o1 = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> o1 = new LinkedMultiValueMap<>();
 		o1.set("key1", "value1");
 		assertEquals(map, o1);
 		assertEquals(o1, map);
-		Map<String, List<String>> o2 = new HashMap<String, List<String>>();
+		Map<String, List<String>> o2 = new HashMap<>();
 		o2.put("key1", Collections.singletonList("value1"));
 		assertEquals(map, o2);
 		assertEquals(o2, map);

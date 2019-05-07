@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import java.util.Set;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
+ * @param <K> the key type
+ * @param <V> the value element type
  */
 public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializable, Cloneable {
 
@@ -74,6 +76,12 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	// MultiValueMap implementation
 
 	@Override
+	public V getFirst(K key) {
+		List<V> values = this.targetMap.get(key);
+		return (values != null && !values.isEmpty() ? values.get(0) : null);
+	}
+
+	@Override
 	public void add(K key, V value) {
 		List<V> values = this.targetMap.get(key);
 		if (values == null) {
@@ -81,12 +89,6 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 			this.targetMap.put(key, values);
 		}
 		values.add(value);
-	}
-
-	@Override
-	public V getFirst(K key) {
-		List<V> values = this.targetMap.get(key);
-		return (values != null ? values.get(0) : null);
 	}
 
 	@Override
@@ -107,7 +109,10 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	public Map<K, V> toSingleValueMap() {
 		LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<K,V>(this.targetMap.size());
 		for (Entry<K, List<V>> entry : this.targetMap.entrySet()) {
-			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
+			List<V> values = entry.getValue();
+			if (values != null && !values.isEmpty()) {
+				singleValueMap.put(entry.getKey(), values.get(0));
+			}
 		}
 		return singleValueMap;
 	}
