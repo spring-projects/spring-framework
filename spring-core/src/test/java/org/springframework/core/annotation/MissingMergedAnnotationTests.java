@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,9 +38,10 @@ public class MissingMergedAnnotationTests {
 
 	private final MergedAnnotation<?> missing = MissingMergedAnnotation.getInstance();
 
+
 	@Test
 	public void getTypeThrowsNoSuchElementException() {
-		assertThatNoSuchElementException().isThrownBy(() -> this.missing.getType());
+		assertThatNoSuchElementException().isThrownBy(this.missing::getType);
 	}
 
 	@Test
@@ -288,17 +289,19 @@ public class MissingMergedAnnotationTests {
 		assertThat(map).isInstanceOf(ConcurrentReferenceHashMap.class);
 	}
 
+
 	private static ThrowableTypeAssert<NoSuchElementException> assertThatNoSuchElementException() {
 		return assertThatExceptionOfType(NoSuchElementException.class);
 	}
 
-	private static enum TestEnum {
+
+	private enum TestEnum {
 		ONE, TWO, THREE
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface TestAnnotation {
 
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface TestAnnotation {
 	}
 
 }

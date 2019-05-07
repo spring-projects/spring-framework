@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,8 +47,9 @@ public class DefaultRSocketRequesterBuilderTests {
 		when(this.transport.connect(anyInt())).thenReturn(Mono.just(new MockConnection()));
 	}
 
-	@SuppressWarnings("unchecked")
+
 	@Test
+	@SuppressWarnings("unchecked")
 	public void shouldApplyCustomizationsAtSubscription() {
 		Consumer<RSocketFactory.ClientRSocketFactory> factoryConfigurer = mock(Consumer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
@@ -59,8 +60,8 @@ public class DefaultRSocketRequesterBuilderTests {
 		verifyZeroInteractions(this.transport, factoryConfigurer, strategiesConfigurer);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings("unchecked")
 	public void shouldApplyCustomizations() {
 		Consumer<RSocketFactory.ClientRSocketFactory> factoryConfigurer = mock(Consumer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
@@ -73,6 +74,7 @@ public class DefaultRSocketRequesterBuilderTests {
 		verify(factoryConfigurer).accept(any(RSocketFactory.ClientRSocketFactory.class));
 		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
 	}
+
 
 	static class MockConnection implements DuplexConnection {
 
