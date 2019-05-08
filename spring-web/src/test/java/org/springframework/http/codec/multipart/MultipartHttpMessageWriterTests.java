@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.UnicastProcessor;
@@ -58,13 +56,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 	private final MultipartHttpMessageWriter writer =
 			new MultipartHttpMessageWriter(ClientCodecConfigurer.create().getWriters());
 
-	private MockServerHttpResponse response;
-
-
-	@Before
-	public void setUp() {
-		this.response = new MockServerHttpResponse(this.bufferFactory);
-	}
+	private final MockServerHttpResponse response = new MockServerHttpResponse(this.bufferFactory);
 
 
 	@Test
@@ -86,7 +78,6 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 
 	@Test
 	public void writeMultipart() throws Exception {
-
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		Resource utf8 = new ClassPathResource("/org/springframework/http/converter/logo.jpg") {
 			@Override
@@ -175,7 +166,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 					Collections.emptyMap()).block(Duration.ZERO);
 	}
 
-	@Test // SPR-16402
+	@Test  // SPR-16402
 	public void singleSubscriberWithResource() throws IOException {
 		UnicastProcessor<Resource> processor = UnicastProcessor.create();
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
@@ -217,7 +208,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 		this.response.getBodyAsString().block(Duration.ofSeconds(5));
 	}
 
-	@Test // SPR-16376
+	@Test  // SPR-16376
 	public void customContentDisposition() throws IOException {
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		Flux<DataBuffer> buffers = DataBufferUtils.read(logo, new DefaultDataBufferFactory(), 1024);
