@@ -149,12 +149,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 */
 	private void initMessageConverters() {
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(4);
-
 		messageConverters.add(new ByteArrayHttpMessageConverter());
-
-		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
-		messageConverters.add(stringHttpMessageConverter);
+		messageConverters.add(new StringHttpMessageConverter());
 
 		try {
 			messageConverters.add(new SourceHttpMessageConverter<>());

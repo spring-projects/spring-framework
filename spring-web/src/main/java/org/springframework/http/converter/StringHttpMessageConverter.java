@@ -52,7 +52,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Nullable
 	private volatile List<Charset> availableCharsets;
 
-	private boolean writeAcceptCharset = true;
+	private boolean writeAcceptCharset = false;
 
 
 	/**
@@ -76,7 +76,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	 * Whether the {@code Accept-Charset} header should be written to any outgoing
 	 * request sourced from the value of {@link Charset#availableCharsets()}.
 	 * The behavior is suppressed if the header has already been set.
-	 * <p>Default is {@code true}.
+	 * <p>As of 5.2, by default is set to {@code false}.
 	 */
 	public void setWriteAcceptCharset(boolean writeAcceptCharset) {
 		this.writeAcceptCharset = writeAcceptCharset;
