@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -59,6 +61,8 @@ import org.springframework.util.StringUtils;
  * @see MultipartHttpMessageReader
  */
 public class DefaultMultipartMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
+
+	private static final Log logger = LogFactory.getLog(DefaultMultipartMessageReader.class);
 
 	private static final byte CR = '\r';
 
@@ -94,6 +98,9 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 		if (boundary == null) {
 			return Flux.error(new CodecException("No multipart boundary found in Content-Type: \"" +
 					message.getHeaders().getContentType() + "\""));
+		}
+		if (logger.isTraceEnabled()) {
+			logger.trace("Boundary: " + toString(boundary));
 		}
 
 		byte[] boundaryNeedle = concat(BOUNDARY_PREFIX, boundary);
@@ -139,6 +146,9 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 					int length = dataBuffer.writePosition() - 1 - endIdx;
 					DataBuffer slice = dataBuffer.retainedSlice(endIdx + 1, length);
 					DataBufferUtils.release(dataBuffer);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Found first boundary at " + endIdx + " in " + toString(dataBuffer));
+					}
 					return Mono.just(slice);
 				}
 				else {
@@ -175,6 +185,10 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 			if (dataBuffer.getByte(readPosition) == CR && dataBuffer.getByte(readPosition + 1) == LF) {
 				dataBuffer.readPosition(readPosition + 2);
 			}
+		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Part data: " + toString(dataBuffer));
 		}
 		int endIdx = HEADER_MATCHER.match(dataBuffer);
 
@@ -236,6 +250,33 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 		}
 		return result;
 	}
+
+
+	private static String toString(DataBuffer dataBuffer) {
+		byte[] bytes = new byte[dataBuffer.readableByteCount()];
+		int j = 0;
+		for (int i = dataBuffer.readPosition(); i < dataBuffer.writePosition(); i++) {
+			bytes[j++] = dataBuffer.getByte(i);
+		}
+		return toString(bytes);
+	}
+
+	private static String toString(byte[] bytes) {
+		StringBuilder builder = new StringBuilder();
+		for (byte b : bytes) {
+			if (b == CR) {
+				builder.append("␍");
+			}
+			else if (b == LF) {
+				builder.append("␤");
+			}
+			else if (b >= 20 && b <= 126) {
+				builder.append((char) b);
+			}
+		}
+		return builder.toString();
+	}
+
 
 	@Override
 	public Mono<Part> readMono(ResolvableType elementType, ReactiveHttpInputMessage message,
