@@ -135,6 +135,17 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
+	 * Get the locations of multiple Hibernate XML config files
+	 *
+	 * @return
+	 */
+	public Resource[] getConfigLocations()
+	{
+		return configLocations;
+	}
+
+
+	/**
 	 * Set the locations of multiple Hibernate XML config files, for example as
 	 * classpath resources "classpath:hibernate.cfg.xml,classpath:extension.cfg.xml".
 	 * <p>Note: Can be omitted when all necessary properties and mapping
@@ -143,6 +154,16 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setConfigLocations(Resource... configLocations) {
 		this.configLocations = configLocations;
+	}
+
+	/**
+	 * Get Hibernate mapping resources to be found in the class path
+	 *
+	 * @return
+	 */
+	public String[] getMappingResources()
+	{
+		return mappingResources;
 	}
 
 	/**
@@ -160,6 +181,15 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
+	 * Get locations of Hibernate mapping files
+	 * @return
+	 */
+	public Resource[] getMappingLocations()
+	{
+		return mappingLocations;
+	}
+
+	/**
 	 * Set locations of Hibernate mapping files, for example as classpath
 	 * resource "classpath:example.hbm.xml". Supports any resource location
 	 * via Spring's resource abstraction, for example relative paths like
@@ -170,6 +200,16 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
+	}
+
+	/**
+	 * Get locations of cacheable Hibernate mapping files
+	 *
+	 * @return
+	 */
+	public Resource[] getCacheableMappingLocations()
+	{
+		return cacheableMappingLocations;
 	}
 
 	/**
@@ -186,6 +226,16 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
+	 * Get locations of jar files that contain Hibernate mapping resources
+	 *
+	 * @return
+	 */
+	public Resource[] getMappingJarLocations()
+	{
+		return mappingJarLocations;
+	}
+
+	/**
 	 * Set locations of jar files that contain Hibernate mapping resources,
 	 * like "WEB-INF/lib/example.hbm.jar".
 	 * <p>Can be used to add to mappings from a Hibernate XML config file,
@@ -194,6 +244,16 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setMappingJarLocations(Resource... mappingJarLocations) {
 		this.mappingJarLocations = mappingJarLocations;
+	}
+
+	/**
+	 * Get locations of directories that contain Hibernate mapping resources
+	 *
+	 * @return
+	 */
+	public Resource[] getMappingDirectoryLocations()
+	{
+		return mappingDirectoryLocations;
 	}
 
 	/**
@@ -273,6 +333,16 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
+	 * Get custom type filters for Spring-based scanning for entity classes
+	 *
+	 * @return
+	 */
+	public TypeFilter[] getEntityTypeFilters()
+	{
+		return entityTypeFilters;
+	}
+
+	/**
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
 	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
@@ -307,11 +377,32 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
+	 * Get annotated entity classes to register with this Hibernate SessionFactory.
+	 *
+	 * @return
+	 */
+	public Class<?>[] getAnnotatedClasses()
+	{
+		return annotatedClasses;
+	}
+
+	/**
 	 * Specify annotated entity classes to register with this Hibernate SessionFactory.
 	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(Class)
 	 */
 	public void setAnnotatedClasses(Class<?>... annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
+	}
+
+	/**
+	 * Get the names of annotated packages, for which package-level
+	 * annotation metadata will be read.
+	 *
+	 * @return
+	 */
+	public String[] getAnnotatedPackages()
+	{
+		return annotatedPackages;
 	}
 
 	/**
@@ -321,6 +412,16 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setAnnotatedPackages(String... annotatedPackages) {
 		this.annotatedPackages = annotatedPackages;
+	}
+
+	/**
+	 * Get packages to search for autodetection of your entity classes in the
+	 * classpath.
+	 * @return
+	 */
+	public String[] getPackagesToScan()
+	{
+		return packagesToScan;
 	}
 
 	/**
