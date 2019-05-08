@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,24 @@ public class ConsumesRequestConditionTests {
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("!text/plain");
 
 		assertNull(condition.getMatchingCondition(exchange));
+	}
+
+	@Test // gh-22010
+	public void consumesNoContent() {
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
+		condition.setBodyRequired(false);
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(request)));
+
+		request = MockServerHttpRequest.get("/").header(HttpHeaders.CONTENT_LENGTH, "0").build();
+		assertNotNull(condition.getMatchingCondition(MockServerWebExchange.from(request)));
+
+		request = MockServerHttpRequest.get("/").header(HttpHeaders.CONTENT_LENGTH, "21").build();
+		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(request)));
+
+		request = MockServerHttpRequest.get("/").header(HttpHeaders.TRANSFER_ENCODING, "chunked").build();
+		assertNull(condition.getMatchingCondition(MockServerWebExchange.from(request)));
 	}
 
 	@Test

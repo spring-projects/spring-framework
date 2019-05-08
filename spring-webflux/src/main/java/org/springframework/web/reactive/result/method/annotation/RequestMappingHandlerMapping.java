@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,6 +26,8 @@ import java.util.function.Predicate;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -32,12 +35,14 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
@@ -252,6 +257,31 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				resolvedPatterns[i] = this.embeddedValueResolver.resolveStringValue(patterns[i]);
 			}
 			return resolvedPatterns;
+		}
+	}
+
+	@Override
+	public void registerMapping(RequestMappingInfo mapping, Object handler, Method method) {
+		super.registerMapping(mapping, handler, method);
+		updateConsumesCondition(mapping, method);
+	}
+
+	@Override
+	protected void registerHandlerMethod(Object handler, Method method, RequestMappingInfo mapping) {
+		super.registerHandlerMethod(handler, method, mapping);
+		updateConsumesCondition(mapping, method);
+	}
+
+	private void updateConsumesCondition(RequestMappingInfo info, Method method) {
+		ConsumesRequestCondition condition = info.getConsumesCondition();
+		if (!condition.isEmpty()) {
+			for (Parameter parameter : method.getParameters()) {
+				MergedAnnotation<RequestBody> annot = MergedAnnotations.from(parameter).get(RequestBody.class);
+				if (annot.isPresent()) {
+					condition.setBodyRequired(annot.getBoolean("required"));
+					break;
+				}
+			}
 		}
 	}
 
