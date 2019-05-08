@@ -239,32 +239,26 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 	@Override
 	public Set<String> keySet() {
-		Set<String> keySet = this.keySet;
-		if (keySet == null) {
-			keySet = new KeySet(this.targetMap.keySet());
-			this.keySet = keySet;
+		if (this.keySet == null) {
+			this.keySet = new KeySet(this.targetMap.keySet());
 		}
-		return keySet;
+		return this.keySet;
 	}
 
 	@Override
 	public Collection<V> values() {
-		Collection<V> values = this.values;
-		if (values == null) {
-			values = new Values(this.targetMap.values());
-			this.values = values;
+		if (this.values == null) {
+			this.values = new Values(this.targetMap.values());
 		}
-		return values;
+		return this.values;
 	}
 
 	@Override
 	public Set<Entry<String, V>> entrySet() {
-		Set<Entry<String, V>> entrySet = this.entrySet;
-		if (entrySet == null) {
-			entrySet = new EntrySet(this.targetMap.entrySet());
-			this.entrySet = entrySet;
+		if (this.entrySet == null) {
+			this.entrySet = new EntrySet(this.targetMap.entrySet());
 		}
-		return entrySet;
+		return this.entrySet;
 	}
 
 	@Override
@@ -465,7 +459,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 
-	private class EntryIterator {
+	private abstract class EntryIterator<T> implements Iterator<T> {
 
 		private final Iterator<Entry<String, V>> delegate;
 
@@ -476,16 +470,18 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 			this.delegate = targetMap.entrySet().iterator();
 		}
 
-		public Entry<String, V> nextEntry() {
+		protected Entry<String, V> nextEntry() {
 			Entry<String, V> entry = this.delegate.next();
 			this.last = entry;
 			return entry;
 		}
 
+		@Override
 		public boolean hasNext() {
 			return this.delegate.hasNext();
 		}
 
+		@Override
 		public void remove() {
 			this.delegate.remove();
 			if (this.last != null) {
@@ -496,7 +492,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 
-	private class KeySetIterator extends EntryIterator implements Iterator<String> {
+	private class KeySetIterator extends EntryIterator<String> {
 
 		@Override
 		public String next() {
@@ -505,7 +501,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 
-	private class ValuesIterator extends EntryIterator implements Iterator<V> {
+	private class ValuesIterator extends EntryIterator<V> {
 
 		@Override
 		public V next() {
@@ -514,7 +510,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	}
 
 
-	private class EntrySetIterator extends EntryIterator implements Iterator<Entry<String, V>> {
+	private class EntrySetIterator extends EntryIterator<Entry<String, V>> {
 
 		@Override
 		public Entry<String, V> next() {
