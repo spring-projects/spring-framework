@@ -165,7 +165,7 @@ public class RequestMappingHandlerMappingTests {
 			RequestMethod requestMethod) throws Exception {
 
 		Class<?> clazz = ComposedAnnotationController.class;
-		Method method = ClassUtils.getMethod(clazz, methodName, null);
+		Method method = ClassUtils.getMethod(clazz, methodName, (Class<?>[]) null);
 		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, clazz);
 
 		assertNotNull(info);
