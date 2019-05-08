@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.mock.web.test.MockServletContext;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Marten Deinum

@@ -40,12 +40,34 @@ import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 
-import static java.util.Arrays.*;
-import static java.util.stream.Collectors.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.core.annotation.AnnotationUtils.*;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.annotation.AnnotationUtils.VALUE;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClassForTypes;
+import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
+import static org.springframework.core.annotation.AnnotationUtils.getAnnotationAttributes;
+import static org.springframework.core.annotation.AnnotationUtils.getDeclaredRepeatableAnnotations;
+import static org.springframework.core.annotation.AnnotationUtils.getDefaultValue;
+import static org.springframework.core.annotation.AnnotationUtils.getRepeatableAnnotations;
+import static org.springframework.core.annotation.AnnotationUtils.getValue;
+import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
+import static org.springframework.core.annotation.AnnotationUtils.isAnnotationInherited;
+import static org.springframework.core.annotation.AnnotationUtils.isAnnotationMetaPresent;
+import static org.springframework.core.annotation.AnnotationUtils.synthesizeAnnotation;
 
 /**
  * Unit tests for {@link AnnotationUtils}.

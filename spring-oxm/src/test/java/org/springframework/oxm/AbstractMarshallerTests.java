@@ -39,7 +39,7 @@ import org.xmlunit.matchers.CompareMatcher;
 import org.springframework.util.xml.StaxUtils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma

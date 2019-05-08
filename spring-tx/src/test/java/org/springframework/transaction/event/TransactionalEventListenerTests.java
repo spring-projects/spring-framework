@@ -46,8 +46,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
-import static org.springframework.transaction.event.TransactionPhase.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMPLETION;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_ROLLBACK;
+import static org.springframework.transaction.event.TransactionPhase.BEFORE_COMMIT;
 
 /**
  * Integration tests for {@link TransactionalEventListener} support

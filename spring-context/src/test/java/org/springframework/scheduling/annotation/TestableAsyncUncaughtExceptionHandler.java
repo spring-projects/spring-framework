@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * An {@link AsyncUncaughtExceptionHandler} implementation used for testing purposes.

@@ -27,7 +27,8 @@ import org.junit.Test;
 
 import org.springframework.util.ConcurrentReferenceHashMap;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link MissingMergedAnnotation}.

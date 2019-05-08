@@ -27,7 +27,7 @@ import org.springframework.core.type.AbstractAnnotationMetadataTests;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link AnnotationMetadataReadingVisitor}.

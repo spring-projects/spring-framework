@@ -35,7 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.junit4.aci.annotation.InitializerConfiguredViaMetaAnnotationTests.ComposedContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Integration test that demonstrates how to register one or more {@code @Configuration}

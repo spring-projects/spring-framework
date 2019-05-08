@@ -29,8 +29,10 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.invocation.ResolvableMethod;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.junit.Assert.*;
-import static org.springframework.messaging.handler.annotation.MessagingPredicates.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.messaging.handler.annotation.MessagingPredicates.destinationVar;
 
 /**
  * Test fixture for {@link DestinationVariableMethodArgumentResolver} tests.

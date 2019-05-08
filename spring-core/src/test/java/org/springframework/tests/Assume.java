@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.junit.AssumptionViolatedException;
 
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Provides utility methods that allow JUnit tests to {@link org.junit.Assume} certain

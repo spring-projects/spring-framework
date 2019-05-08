@@ -19,7 +19,7 @@ package org.springframework.test.util;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.Is.is;
 
 /**
  * Unit tests for {@link JsonPathExpectationsHelper}.

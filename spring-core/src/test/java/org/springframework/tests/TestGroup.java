@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 /**
  * A test group used to limit when certain tests are run.

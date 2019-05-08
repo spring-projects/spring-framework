@@ -33,8 +33,8 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.event.CustomTestEventTests.CustomEventPublishingTestExecutionListener;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.context.TestExecutionListeners.MergeMode.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
 /**
  * Integration tests for custom event publication via

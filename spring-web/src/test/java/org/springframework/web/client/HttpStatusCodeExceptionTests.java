@@ -27,9 +27,9 @@ import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link HttpStatusCodeException} and subclasses.

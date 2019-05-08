@@ -24,8 +24,12 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.EncodedResource;
 
-import static org.junit.Assert.*;
-import static org.springframework.jdbc.datasource.init.ScriptUtils.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.containsSqlScriptDelimiters;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.splitSqlScript;
 
 /**
  * Unit tests for {@link ScriptUtils}.

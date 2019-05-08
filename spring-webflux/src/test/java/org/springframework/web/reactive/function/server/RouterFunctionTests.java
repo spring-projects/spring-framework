@@ -20,8 +20,8 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 /**
  * @author Arjen Poutsma

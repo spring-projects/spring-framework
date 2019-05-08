@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link ContentDisposition}

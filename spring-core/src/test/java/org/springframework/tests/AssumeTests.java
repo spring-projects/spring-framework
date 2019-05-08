@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,16 @@ import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static java.util.stream.Collectors.*;
-import static org.hamcrest.CoreMatchers.*;
+import static java.util.stream.Collectors.joining;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
-import static org.springframework.tests.Assume.*;
-import static org.springframework.tests.TestGroup.*;
+import static org.junit.Assert.fail;
+import static org.springframework.tests.Assume.TEST_GROUPS_SYSTEM_PROPERTY;
+import static org.springframework.tests.TestGroup.CI;
+import static org.springframework.tests.TestGroup.LONG_RUNNING;
+import static org.springframework.tests.TestGroup.PERFORMANCE;
 
 /**
  * Tests for {@link Assume}.

@@ -26,7 +26,8 @@ import org.springframework.core.type.AbstractAnnotationMetadataTests.TestMemberC
 import org.springframework.core.type.AbstractAnnotationMetadataTests.TestMemberClass.TestMemberClassInnerInterface;
 import org.springframework.util.MultiValueMap;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Base class for {@link AnnotationMetadata} tests.

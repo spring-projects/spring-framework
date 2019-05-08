@@ -60,9 +60,10 @@ import org.springframework.context.index.test.TestCompiler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.context.index.processor.Metadata.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.springframework.context.index.processor.Metadata.hasComponent;
 
 /**
  * Tests for {@link CandidateComponentsIndexer}.

@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.util.MultiValueMap;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link MergedAnnotationCollectors}.

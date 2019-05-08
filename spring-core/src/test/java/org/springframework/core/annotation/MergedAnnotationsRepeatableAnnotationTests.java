@@ -31,7 +31,9 @@ import org.junit.Test;
 
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link MergedAnnotations} and {@link RepeatableContainers} that

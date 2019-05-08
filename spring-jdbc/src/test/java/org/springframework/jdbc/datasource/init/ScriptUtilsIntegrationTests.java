@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-import static org.springframework.jdbc.datasource.init.ScriptUtils.*;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.executeSqlScript;
 
 /**
  * Integration tests for {@link ScriptUtils}.

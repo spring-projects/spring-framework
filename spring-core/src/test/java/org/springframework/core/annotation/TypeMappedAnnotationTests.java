@@ -26,8 +26,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link TypeMappedAnnotation}. See also

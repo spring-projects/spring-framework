@@ -30,7 +30,7 @@ import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.core.annotation.MergedAnnotation;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link MergedAnnotationReadingVisitor}.

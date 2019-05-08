@@ -24,9 +24,9 @@ import java.util.HashSet;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.context.index.processor.Metadata.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.context.index.processor.Metadata.hasComponent;
 
 /**
  * Tests for {@link PropertiesMarshaller}.

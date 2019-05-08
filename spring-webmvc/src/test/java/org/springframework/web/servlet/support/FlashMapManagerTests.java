@@ -33,7 +33,11 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 
 /**

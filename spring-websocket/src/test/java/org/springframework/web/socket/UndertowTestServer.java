@@ -39,7 +39,9 @@ import org.xnio.Xnio;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import static io.undertow.servlet.Servlets.*;
+import static io.undertow.servlet.Servlets.defaultContainer;
+import static io.undertow.servlet.Servlets.deployment;
+import static io.undertow.servlet.Servlets.servlet;
 
 /**
  * Undertow-based {@link WebSocketTestServer}.

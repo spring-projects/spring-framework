@@ -23,9 +23,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.BDDMockito.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.BDDMockito.given;
 
 /**
  * Unit tests for {@link JdbcTestUtils}.

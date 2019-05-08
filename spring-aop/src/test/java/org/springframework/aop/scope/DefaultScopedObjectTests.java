@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for the {@link DefaultScopedObject} class.

@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link AnnotationFilter}.

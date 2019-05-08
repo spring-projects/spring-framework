@@ -67,8 +67,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Test access to parts of a multipart request with {@link RequestPart}.

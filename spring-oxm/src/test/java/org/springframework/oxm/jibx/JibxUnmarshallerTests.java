@@ -25,7 +25,8 @@ import org.junit.Test;
 
 import org.springframework.oxm.AbstractUnmarshallerTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does

@@ -33,7 +33,7 @@ import org.springframework.tests.sample.objects.TestObject;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link Conventions}.

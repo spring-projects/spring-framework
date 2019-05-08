@@ -37,7 +37,8 @@ import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.Mirr
 import org.springframework.lang.UsesSunMisc;
 import org.springframework.util.ReflectionUtils;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link AnnotationTypeMappings} and {@link AnnotationTypeMapping}.

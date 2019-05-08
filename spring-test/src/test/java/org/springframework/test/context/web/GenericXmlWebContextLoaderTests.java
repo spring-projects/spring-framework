@@ -18,7 +18,7 @@ package org.springframework.test.context.web;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link GenericXmlWebContextLoader}.

@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link AbstractMethodMessageHandler}.

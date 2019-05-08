@@ -30,11 +30,19 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.context.support.TestPropertySourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.context.support.TestPropertySourceUtils.addInlinedPropertiesToEnvironment;
+import static org.springframework.test.context.support.TestPropertySourceUtils.addPropertiesFilesToEnvironment;
+import static org.springframework.test.context.support.TestPropertySourceUtils.buildMergedTestPropertySources;
+import static org.springframework.test.context.support.TestPropertySourceUtils.convertInlinedPropertiesToMap;
 
 /**
  * Unit tests for {@link TestPropertySourceUtils}.

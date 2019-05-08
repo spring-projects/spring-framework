@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.*;
-import static org.springframework.cache.CacheTestUtils.*;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.cache.CacheTestUtils.assertCacheHit;
+import static org.springframework.cache.CacheTestUtils.assertCacheMiss;
 
 /**
  * Tests that represent real use cases with advanced configuration.

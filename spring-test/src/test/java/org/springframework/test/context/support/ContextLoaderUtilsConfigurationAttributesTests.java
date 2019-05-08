@@ -25,9 +25,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.*;
-import static org.springframework.test.context.support.ContextLoaderUtils.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.test.context.support.ContextLoaderUtils.resolveContextConfigurationAttributes;
 
 /**
  * Unit tests for {@link ContextLoaderUtils} involving {@link ContextConfigurationAttributes}.

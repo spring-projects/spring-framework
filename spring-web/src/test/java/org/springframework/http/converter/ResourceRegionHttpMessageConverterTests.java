@@ -39,8 +39,9 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.StringUtils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link ResourceRegionHttpMessageConverter} class.

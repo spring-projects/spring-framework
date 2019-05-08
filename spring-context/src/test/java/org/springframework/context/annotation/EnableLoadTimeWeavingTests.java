@@ -24,8 +24,10 @@ import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeavi
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Unit tests for @EnableLoadTimeWeaving

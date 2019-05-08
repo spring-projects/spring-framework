@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Stephane Nicoll

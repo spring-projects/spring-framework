@@ -20,8 +20,9 @@ import org.junit.Test;
 
 import org.springframework.test.context.MergedContextConfiguration;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link AnnotationConfigContextLoader}.

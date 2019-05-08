@@ -22,8 +22,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.role.ComponentWithRole;
 import org.springframework.context.annotation.role.ComponentWithoutRole;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests the use of the @Role and @Description annotation on @Bean methods and @Component classes.

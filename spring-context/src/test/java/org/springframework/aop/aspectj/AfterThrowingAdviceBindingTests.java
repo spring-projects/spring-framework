@@ -23,7 +23,8 @@ import org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect.Afte
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for various parameter binding scenarios with before advice.

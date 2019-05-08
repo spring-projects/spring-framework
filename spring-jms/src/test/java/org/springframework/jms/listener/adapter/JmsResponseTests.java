@@ -25,8 +25,9 @@ import org.junit.Test;
 import org.springframework.jms.support.destination.DestinationResolver;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertSame;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Stephane Nicoll

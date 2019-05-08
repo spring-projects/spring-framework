@@ -58,15 +58,25 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.util.pattern.PathPattern;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.*;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-import static org.springframework.web.method.MvcAnnotationPredicates.*;
-import static org.springframework.web.method.ResolvableMethod.*;
-import static org.springframework.web.reactive.HandlerMapping.*;
-import static org.springframework.web.reactive.result.method.RequestMappingInfo.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.method;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
+import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.put;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
+import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
+import static org.springframework.web.method.MvcAnnotationPredicates.getMapping;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestMapping;
+import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE;
+import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.

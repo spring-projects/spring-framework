@@ -43,8 +43,12 @@ import org.springframework.messaging.rsocket.RSocketRequester.RequestSpec;
 import org.springframework.messaging.rsocket.RSocketRequester.ResponseSpec;
 import org.springframework.util.MimeTypeUtils;
 
-import static java.util.concurrent.TimeUnit.*;
-import static org.junit.Assert.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link DefaultRSocketRequester}.

@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.test.context.MergedContextConfiguration;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link GenericPropertiesContextLoader}.

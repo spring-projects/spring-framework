@@ -35,7 +35,9 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**

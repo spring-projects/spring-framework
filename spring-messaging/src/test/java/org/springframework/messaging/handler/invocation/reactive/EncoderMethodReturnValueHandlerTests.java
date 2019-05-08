@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.springframework.messaging.handler.invocation.ResolvableMethod.*;
+import static org.springframework.messaging.handler.invocation.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link AbstractEncoderMethodReturnValueHandler}.

@@ -28,7 +28,8 @@ import org.junit.runner.notification.RunNotifier;
 
 import org.springframework.beans.BeanUtils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Collection of utilities for testing the execution of JUnit 4 based tests.

@@ -18,7 +18,7 @@ package org.springframework.test.util;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link XmlExpectationsHelper}.

@@ -27,7 +27,7 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link ParameterContentTypeResolver}.

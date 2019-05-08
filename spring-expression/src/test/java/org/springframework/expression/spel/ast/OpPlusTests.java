@@ -30,7 +30,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for SpEL's plus operator.

@@ -27,10 +27,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import static java.util.Arrays.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-import static org.springframework.web.servlet.mvc.method.RequestMappingInfo.*;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
+import static org.springframework.web.servlet.mvc.method.RequestMappingInfo.paths;
 
 /**
  * Test fixture for {@link RequestMappingInfo} tests.

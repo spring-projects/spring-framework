@@ -30,8 +30,11 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static java.time.format.DateTimeFormatter.*;
-import static org.junit.Assert.*;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Parameterized tests for {@link ServletWebRequest}.
