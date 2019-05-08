@@ -36,8 +36,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link MultiServerUserRegistry}.
@@ -65,9 +65,9 @@ public class MultiServerUserRegistryTests {
 	public void getUserFromLocalRegistry() throws Exception {
 		SimpUser user = Mockito.mock(SimpUser.class);
 		Set<SimpUser> users = Collections.singleton(user);
-		when(this.localRegistry.getUsers()).thenReturn(users);
-		when(this.localRegistry.getUserCount()).thenReturn(1);
-		when(this.localRegistry.getUser("joe")).thenReturn(user);
+		given(this.localRegistry.getUsers()).willReturn(users);
+		given(this.localRegistry.getUserCount()).willReturn(1);
+		given(this.localRegistry.getUser("joe")).willReturn(user);
 
 		assertEquals(1, this.registry.getUserCount());
 		assertSame(user, this.registry.getUser("joe"));
@@ -81,7 +81,7 @@ public class MultiServerUserRegistryTests {
 		testSession.addSubscriptions(new TestSimpSubscription("remote-sub", "/remote-dest"));
 		testUser.addSessions(testSession);
 		SimpUserRegistry testRegistry = mock(SimpUserRegistry.class);
-		when(testRegistry.getUsers()).thenReturn(Collections.singleton(testUser));
+		given(testRegistry.getUsers()).willReturn(Collections.singleton(testUser));
 		Object registryDto = new MultiServerUserRegistry(testRegistry).getLocalRegistryDto();
 		Message<?> message = this.converter.toMessage(registryDto, null);
 
@@ -120,7 +120,7 @@ public class MultiServerUserRegistryTests {
 		user2.addSessions(session2);
 		user3.addSessions(session3);
 		SimpUserRegistry userRegistry = mock(SimpUserRegistry.class);
-		when(userRegistry.getUsers()).thenReturn(new HashSet<>(Arrays.asList(user1, user2, user3)));
+		given(userRegistry.getUsers()).willReturn(new HashSet<>(Arrays.asList(user1, user2, user3)));
 		Object registryDto = new MultiServerUserRegistry(userRegistry).getLocalRegistryDto();
 		Message<?> message = this.converter.toMessage(registryDto, null);
 
@@ -143,14 +143,14 @@ public class MultiServerUserRegistryTests {
 		TestSimpUser localUser = new TestSimpUser("joe");
 		TestSimpSession localSession = new TestSimpSession("sess123");
 		localUser.addSessions(localSession);
-		when(this.localRegistry.getUser("joe")).thenReturn(localUser);
+		given(this.localRegistry.getUser("joe")).willReturn(localUser);
 
 		// Prepare broadcast message from remote server
 		TestSimpUser remoteUser = new TestSimpUser("joe");
 		TestSimpSession remoteSession = new TestSimpSession("sess456");
 		remoteUser.addSessions(remoteSession);
 		SimpUserRegistry remoteRegistry = mock(SimpUserRegistry.class);
-		when(remoteRegistry.getUsers()).thenReturn(Collections.singleton(remoteUser));
+		given(remoteRegistry.getUsers()).willReturn(Collections.singleton(remoteUser));
 		Object remoteRegistryDto = new MultiServerUserRegistry(remoteRegistry).getLocalRegistryDto();
 		Message<?> message = this.converter.toMessage(remoteRegistryDto, null);
 
@@ -179,7 +179,7 @@ public class MultiServerUserRegistryTests {
 		TestSimpUser testUser = new TestSimpUser("joe");
 		testUser.addSessions(new TestSimpSession("remote-sub"));
 		SimpUserRegistry testRegistry = mock(SimpUserRegistry.class);
-		when(testRegistry.getUsers()).thenReturn(Collections.singleton(testUser));
+		given(testRegistry.getUsers()).willReturn(Collections.singleton(testUser));
 		Object registryDto = new MultiServerUserRegistry(testRegistry).getLocalRegistryDto();
 		Message<?> message = this.converter.toMessage(registryDto, null);
 

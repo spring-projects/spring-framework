@@ -37,8 +37,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.context.support.TestPropertySourceUtils.addInlinedPropertiesToEnvironment;
 import static org.springframework.test.context.support.TestPropertySourceUtils.addPropertiesFilesToEnvironment;
 import static org.springframework.test.context.support.TestPropertySourceUtils.buildMergedTestPropertySources;
@@ -165,7 +165,7 @@ public class TestPropertySourceUtilsTests {
 		String pair = "key = value";
 		ByteArrayResource resource = new ByteArrayResource(pair.getBytes(), "from inlined property: " + pair);
 		ResourceLoader resourceLoader = mock(ResourceLoader.class);
-		when(resourceLoader.getResource(anyString())).thenReturn(resource);
+		given(resourceLoader.getResource(anyString())).willReturn(resource);
 
 		addPropertiesFilesToEnvironment(environment, resourceLoader, FOO_LOCATIONS);
 		assertEquals(1, propertySources.size());

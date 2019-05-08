@@ -36,8 +36,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link MessageMethodArgumentResolver}.
@@ -96,7 +96,7 @@ public class MessageMethodArgumentResolverTests {
 		Message<String> message = MessageBuilder.withPayload("test").build();
 		MethodParameter parameter = new MethodParameter(this.method, 1);
 
-		when(this.converter.fromMessage(message, Integer.class)).thenReturn(4);
+		given(this.converter.fromMessage(message, Integer.class)).willReturn(4);
 
 		@SuppressWarnings("unchecked")
 		Message<Integer> actual = (Message<Integer>) this.resolver.resolveArgument(parameter, message);

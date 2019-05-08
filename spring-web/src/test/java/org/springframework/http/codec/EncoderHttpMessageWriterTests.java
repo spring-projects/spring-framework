@@ -45,7 +45,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.TEXT_HTML;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
@@ -88,7 +88,7 @@ public class EncoderHttpMessageWriterTests {
 	@Test
 	public void canWrite() {
 		HttpMessageWriter<?> writer = getWriter(MimeTypeUtils.TEXT_HTML);
-		when(this.encoder.canEncode(forClass(String.class), TEXT_HTML)).thenReturn(true);
+		given(this.encoder.canEncode(forClass(String.class), TEXT_HTML)).willReturn(true);
 
 		assertTrue(writer.canWrite(forClass(String.class), TEXT_HTML));
 		assertFalse(writer.canWrite(forClass(String.class), TEXT_XML));
@@ -184,8 +184,8 @@ public class EncoderHttpMessageWriterTests {
 
 	private HttpMessageWriter<String> getWriter(Flux<DataBuffer> encodedStream, MimeType... mimeTypes) {
 		List<MimeType> typeList = Arrays.asList(mimeTypes);
-		when(this.encoder.getEncodableMimeTypes()).thenReturn(typeList);
-		when(this.encoder.encode(any(), any(), any(), this.mediaTypeCaptor.capture(), any())).thenReturn(encodedStream);
+		given(this.encoder.getEncodableMimeTypes()).willReturn(typeList);
+		given(this.encoder.encode(any(), any(), any(), this.mediaTypeCaptor.capture(), any())).willReturn(encodedStream);
 		return new EncoderHttpMessageWriter<>(this.encoder);
 	}
 

@@ -44,8 +44,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for {@link MockMvcWebConnectionBuilderSupport}.
@@ -70,7 +70,7 @@ public class MockMvcConnectionBuilderSupportTests {
 
 	@Before
 	public void setup() {
-		when(this.client.getWebConnection()).thenReturn(mock(WebConnection.class));
+		given(this.client.getWebConnection()).willReturn(mock(WebConnection.class));
 		this.builder = new MockMvcWebConnectionBuilderSupport(this.wac) {};
 	}
 

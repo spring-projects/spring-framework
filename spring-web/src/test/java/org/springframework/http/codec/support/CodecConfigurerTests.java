@@ -56,8 +56,8 @@ import org.springframework.util.MimeTypeUtils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link BaseDefaultCodecs}.
@@ -110,14 +110,14 @@ public class CodecConfigurerTests {
 		Decoder<?> customDecoder1 = mock(Decoder.class);
 		Decoder<?> customDecoder2 = mock(Decoder.class);
 
-		when(customDecoder1.canDecode(ResolvableType.forClass(Object.class), null)).thenReturn(false);
-		when(customDecoder2.canDecode(ResolvableType.forClass(Object.class), null)).thenReturn(true);
+		given(customDecoder1.canDecode(ResolvableType.forClass(Object.class), null)).willReturn(false);
+		given(customDecoder2.canDecode(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
 		HttpMessageReader<?> customReader1 = mock(HttpMessageReader.class);
 		HttpMessageReader<?> customReader2 = mock(HttpMessageReader.class);
 
-		when(customReader1.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(false);
-		when(customReader2.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(true);
+		given(customReader1.canRead(ResolvableType.forClass(Object.class), null)).willReturn(false);
+		given(customReader2.canRead(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
 		this.configurer.customCodecs().decoder(customDecoder1);
 		this.configurer.customCodecs().decoder(customDecoder2);
@@ -150,14 +150,14 @@ public class CodecConfigurerTests {
 		Encoder<?> customEncoder1 = mock(Encoder.class);
 		Encoder<?> customEncoder2 = mock(Encoder.class);
 
-		when(customEncoder1.canEncode(ResolvableType.forClass(Object.class), null)).thenReturn(false);
-		when(customEncoder2.canEncode(ResolvableType.forClass(Object.class), null)).thenReturn(true);
+		given(customEncoder1.canEncode(ResolvableType.forClass(Object.class), null)).willReturn(false);
+		given(customEncoder2.canEncode(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
 		HttpMessageWriter<?> customWriter1 = mock(HttpMessageWriter.class);
 		HttpMessageWriter<?> customWriter2 = mock(HttpMessageWriter.class);
 
-		when(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(false);
-		when(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(true);
+		given(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).willReturn(false);
+		given(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
 		this.configurer.customCodecs().encoder(customEncoder1);
 		this.configurer.customCodecs().encoder(customEncoder2);
@@ -189,14 +189,14 @@ public class CodecConfigurerTests {
 		Decoder<?> customDecoder1 = mock(Decoder.class);
 		Decoder<?> customDecoder2 = mock(Decoder.class);
 
-		when(customDecoder1.canDecode(ResolvableType.forClass(Object.class), null)).thenReturn(false);
-		when(customDecoder2.canDecode(ResolvableType.forClass(Object.class), null)).thenReturn(true);
+		given(customDecoder1.canDecode(ResolvableType.forClass(Object.class), null)).willReturn(false);
+		given(customDecoder2.canDecode(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
 		HttpMessageReader<?> customReader1 = mock(HttpMessageReader.class);
 		HttpMessageReader<?> customReader2 = mock(HttpMessageReader.class);
 
-		when(customReader1.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(false);
-		when(customReader2.canRead(ResolvableType.forClass(Object.class), null)).thenReturn(true);
+		given(customReader1.canRead(ResolvableType.forClass(Object.class), null)).willReturn(false);
+		given(customReader2.canRead(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
 		this.configurer.customCodecs().decoder(customDecoder1);
 		this.configurer.customCodecs().decoder(customDecoder2);
@@ -220,14 +220,14 @@ public class CodecConfigurerTests {
 		Encoder<?> customEncoder1 = mock(Encoder.class);
 		Encoder<?> customEncoder2 = mock(Encoder.class);
 
-		when(customEncoder1.canEncode(ResolvableType.forClass(Object.class), null)).thenReturn(false);
-		when(customEncoder2.canEncode(ResolvableType.forClass(Object.class), null)).thenReturn(true);
+		given(customEncoder1.canEncode(ResolvableType.forClass(Object.class), null)).willReturn(false);
+		given(customEncoder2.canEncode(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
 		HttpMessageWriter<?> customWriter1 = mock(HttpMessageWriter.class);
 		HttpMessageWriter<?> customWriter2 = mock(HttpMessageWriter.class);
 
-		when(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(false);
-		when(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).thenReturn(true);
+		given(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).willReturn(false);
+		given(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
 		this.configurer.customCodecs().encoder(customEncoder1);
 		this.configurer.customCodecs().encoder(customEncoder2);

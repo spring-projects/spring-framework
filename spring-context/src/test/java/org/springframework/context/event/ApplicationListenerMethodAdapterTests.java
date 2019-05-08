@@ -36,12 +36,12 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Stephane Nicoll
@@ -312,7 +312,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 	public void beanInstanceRetrievedAtEveryInvocation() {
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "handleGenericString", GenericTestEvent.class);
-		when(this.context.getBean("testBean")).thenReturn(this.sampleEvents);
+		given(this.context.getBean("testBean")).willReturn(this.sampleEvents);
 		ApplicationListenerMethodAdapter listener = new ApplicationListenerMethodAdapter(
 				"testBean", GenericTestEvent.class, method);
 		listener.init(this.context, new EventExpressionEvaluator());

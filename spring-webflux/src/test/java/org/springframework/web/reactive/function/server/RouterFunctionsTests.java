@@ -39,8 +39,8 @@ import org.springframework.web.server.WebFilterChain;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -55,7 +55,7 @@ public class RouterFunctionsTests {
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
-		when(requestPredicate.test(request)).thenReturn(true);
+		given(requestPredicate.test(request)).willReturn(true);
 
 		RouterFunction<ServerResponse>
 				result = RouterFunctions.route(requestPredicate, handlerFunction);
@@ -75,7 +75,7 @@ public class RouterFunctionsTests {
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
-		when(requestPredicate.test(request)).thenReturn(false);
+		given(requestPredicate.test(request)).willReturn(false);
 
 		RouterFunction<ServerResponse> result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
@@ -93,7 +93,7 @@ public class RouterFunctionsTests {
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
-		when(requestPredicate.nest(request)).thenReturn(Optional.of(request));
+		given(requestPredicate.nest(request)).willReturn(Optional.of(request));
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
 		assertNotNull(result);
@@ -112,7 +112,7 @@ public class RouterFunctionsTests {
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
-		when(requestPredicate.nest(request)).thenReturn(Optional.empty());
+		given(requestPredicate.nest(request)).willReturn(Optional.empty());
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
 		assertNotNull(result);

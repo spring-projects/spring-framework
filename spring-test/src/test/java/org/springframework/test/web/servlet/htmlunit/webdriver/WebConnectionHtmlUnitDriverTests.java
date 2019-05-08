@@ -33,7 +33,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
 
 /**
  * Unit tests for {@link WebConnectionHtmlUnitDriver}.
@@ -52,7 +52,7 @@ public class WebConnectionHtmlUnitDriverTests {
 
 	@Before
 	public void setup() throws Exception {
-		when(this.connection.getResponse(any(WebRequest.class))).thenThrow(new IOException(""));
+		given(this.connection.getResponse(any(WebRequest.class))).willThrow(new IOException(""));
 	}
 
 

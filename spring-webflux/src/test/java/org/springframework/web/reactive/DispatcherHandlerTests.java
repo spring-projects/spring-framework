@@ -35,8 +35,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 /**
@@ -53,10 +53,10 @@ public class DispatcherHandlerTests {
 	public void handlerMappingOrder() {
 		HandlerMapping hm1 = mock(HandlerMapping.class, withSettings().extraInterfaces(Ordered.class));
 		HandlerMapping hm2 = mock(HandlerMapping.class, withSettings().extraInterfaces(Ordered.class));
-		when(((Ordered) hm1).getOrder()).thenReturn(1);
-		when(((Ordered) hm2).getOrder()).thenReturn(2);
-		when((hm1).getHandler(any())).thenReturn(Mono.just((Supplier<String>) () -> "1"));
-		when((hm2).getHandler(any())).thenReturn(Mono.just((Supplier<String>) () -> "2"));
+		given(((Ordered) hm1).getOrder()).willReturn(1);
+		given(((Ordered) hm2).getOrder()).willReturn(2);
+		given((hm1).getHandler(any())).willReturn(Mono.just((Supplier<String>) () -> "1"));
+		given((hm2).getHandler(any())).willReturn(Mono.just((Supplier<String>) () -> "2"));
 
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBean("b2", HandlerMapping.class, () -> hm2);

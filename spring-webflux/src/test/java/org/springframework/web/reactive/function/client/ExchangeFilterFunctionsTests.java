@@ -36,8 +36,8 @@ import org.springframework.web.reactive.function.BodyExtractors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ExchangeFilterFunctions}.
@@ -165,7 +165,7 @@ public class ExchangeFilterFunctionsTests {
 	public void statusHandlerMatch() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock(ClientResponse.class);
-		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		given(response.statusCode()).willReturn(HttpStatus.NOT_FOUND);
 
 		ExchangeFunction exchange = r -> Mono.just(response);
 
@@ -183,7 +183,7 @@ public class ExchangeFilterFunctionsTests {
 	public void statusHandlerNoMatch() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = mock(ClientResponse.class);
-		when(response.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		given(response.statusCode()).willReturn(HttpStatus.NOT_FOUND);
 
 		Mono<ClientResponse> result = ExchangeFilterFunctions
 				.statusError(HttpStatus::is5xxServerError, req -> new MyException())

@@ -43,7 +43,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link org.springframework.web.socket.sockjs.client.SockJsClient}.
@@ -182,7 +181,7 @@ public class SockJsClientTests {
 
 	private ArgumentCaptor<HttpHeaders> setupInfoRequest(boolean webSocketEnabled) {
 		ArgumentCaptor<HttpHeaders> headersCaptor = ArgumentCaptor.forClass(HttpHeaders.class);
-		when(this.infoReceiver.executeInfoRequest(any(), headersCaptor.capture())).thenReturn(
+		given(this.infoReceiver.executeInfoRequest(any(), headersCaptor.capture())).willReturn(
 				"{\"entropy\":123," +
 						"\"origins\":[\"*:*\"]," +
 						"\"cookie_needed\":true," +

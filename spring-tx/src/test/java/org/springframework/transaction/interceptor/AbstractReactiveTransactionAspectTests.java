@@ -34,11 +34,11 @@ import org.springframework.transaction.reactive.TransactionContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * Abstract support class to test {@link TransactionAspectSupport} with reactive methods.
@@ -96,8 +96,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		ReactiveTransaction status = mock(ReactiveTransaction.class);
 		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
 		// expect a transaction
-		when(rtm.getReactiveTransaction(txatt)).thenReturn(Mono.just(status));
-		when(rtm.commit(status)).thenReturn(Mono.empty());
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
+		given(rtm.commit(status)).willReturn(Mono.empty());
 
 		DefaultTestBean tb = new DefaultTestBean();
 		TestBean itb = (TestBean) advised(tb, rtm, tas);
@@ -124,8 +124,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		ReactiveTransaction status = mock(ReactiveTransaction.class);
 		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
 		// expect a transaction
-		when(rtm.getReactiveTransaction(txatt)).thenReturn(Mono.just(status));
-		when(rtm.commit(status)).thenReturn(Mono.empty());
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
+		given(rtm.commit(status)).willReturn(Mono.empty());
 
 		DefaultTestBean tb = new DefaultTestBean();
 		TestBean itb = (TestBean) advised(tb, rtm, new TransactionAttributeSource[] {tas1, tas2});
@@ -154,8 +154,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		ReactiveTransaction status = mock(ReactiveTransaction.class);
 		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
 		// expect a transaction
-		when(rtm.getReactiveTransaction(txatt)).thenReturn(Mono.just(status));
-		when(rtm.commit(status)).thenReturn(Mono.empty());
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
+		given(rtm.commit(status)).willReturn(Mono.empty());
 
 		DefaultTestBean tb = new DefaultTestBean();
 		TestBean itb = (TestBean) advised(tb, rtm, tas);
@@ -234,20 +234,20 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
 		// Gets additional call(s) from TransactionControl
 
-		when(rtm.getReactiveTransaction(txatt)).thenReturn(Mono.just(status));
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
 
 		TransactionSystemException tex = new TransactionSystemException("system exception");
 		if (rollbackException) {
 			if (shouldRollback) {
-				when(rtm.rollback(status)).thenReturn(Mono.error(tex));
+				given(rtm.rollback(status)).willReturn(Mono.error(tex));
 			}
 			else {
-				when(rtm.commit(status)).thenReturn(Mono.error(tex));
+				given(rtm.commit(status)).willReturn(Mono.error(tex));
 			}
 		}
 		else {
-			when(rtm.commit(status)).thenReturn(Mono.empty());
-			when(rtm.rollback(status)).thenReturn(Mono.empty());
+			given(rtm.commit(status)).willReturn(Mono.empty());
+			given(rtm.rollback(status)).willReturn(Mono.empty());
 		}
 
 		DefaultTestBean tb = new DefaultTestBean();
@@ -289,7 +289,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
 		// Expect a transaction
 		CannotCreateTransactionException ex = new CannotCreateTransactionException("foobar", null);
-		when(rtm.getReactiveTransaction(txatt)).thenThrow(ex);
+		given(rtm.getReactiveTransaction(txatt)).willThrow(ex);
 
 		DefaultTestBean tb = new DefaultTestBean() {
 			@Override
@@ -324,10 +324,10 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
 
 		ReactiveTransaction status = mock(ReactiveTransaction.class);
-		when(rtm.getReactiveTransaction(txatt)).thenReturn(Mono.just(status));
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
 		UnexpectedRollbackException ex = new UnexpectedRollbackException("foobar", null);
-		when(rtm.commit(status)).thenReturn(Mono.error(ex));
-		when(rtm.rollback(status)).thenReturn(Mono.empty());
+		given(rtm.commit(status)).willReturn(Mono.error(ex));
+		given(rtm.rollback(status)).willReturn(Mono.empty());
 
 		DefaultTestBean tb = new DefaultTestBean();
 		TestBean itb = (TestBean) advised(tb, rtm, tas);

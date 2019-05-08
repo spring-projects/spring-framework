@@ -40,9 +40,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link DefaultWebSessionManager}.
@@ -72,12 +72,12 @@ public class DefaultWebSessionManagerTests {
 	@Before
 	public void setUp() throws Exception {
 
-		when(this.createSession.save()).thenReturn(Mono.empty());
-		when(this.createSession.getId()).thenReturn("create-session-id");
-		when(this.updateSession.getId()).thenReturn("update-session-id");
+		given(this.createSession.save()).willReturn(Mono.empty());
+		given(this.createSession.getId()).willReturn("create-session-id");
+		given(this.updateSession.getId()).willReturn("update-session-id");
 
-		when(this.sessionStore.createWebSession()).thenReturn(Mono.just(this.createSession));
-		when(this.sessionStore.retrieveSession(this.updateSession.getId())).thenReturn(Mono.just(this.updateSession));
+		given(this.sessionStore.createWebSession()).willReturn(Mono.just(this.createSession));
+		given(this.sessionStore.retrieveSession(this.updateSession.getId())).willReturn(Mono.just(this.updateSession));
 
 		this.sessionManager = new DefaultWebSessionManager();
 		this.sessionManager.setSessionIdResolver(this.sessionIdResolver);
@@ -92,7 +92,7 @@ public class DefaultWebSessionManagerTests {
 	@Test
 	public void getSessionSaveWhenCreatedAndNotStartedThenNotSaved() {
 
-		when(this.sessionIdResolver.resolveSessionIds(this.exchange)).thenReturn(Collections.emptyList());
+		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.emptyList());
 		WebSession session = this.sessionManager.getSession(this.exchange).block();
 		this.exchange.getResponse().setComplete().block();
 
@@ -106,12 +106,12 @@ public class DefaultWebSessionManagerTests {
 	@Test
 	public void getSessionSaveWhenCreatedAndStartedThenSavesAndSetsId() {
 
-		when(this.sessionIdResolver.resolveSessionIds(this.exchange)).thenReturn(Collections.emptyList());
+		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.emptyList());
 		WebSession session = this.sessionManager.getSession(this.exchange).block();
 		assertSame(this.createSession, session);
 		String sessionId = this.createSession.getId();
 
-		when(this.createSession.isStarted()).thenReturn(true);
+		given(this.createSession.isStarted()).willReturn(true);
 		this.exchange.getResponse().setComplete().block();
 
 		verify(this.sessionStore).createWebSession();
@@ -123,7 +123,7 @@ public class DefaultWebSessionManagerTests {
 	public void existingSession() {
 
 		String sessionId = this.updateSession.getId();
-		when(this.sessionIdResolver.resolveSessionIds(this.exchange)).thenReturn(Collections.singletonList(sessionId));
+		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.singletonList(sessionId));
 
 		WebSession actual = this.sessionManager.getSession(this.exchange).block();
 		assertNotNull(actual);
@@ -134,9 +134,9 @@ public class DefaultWebSessionManagerTests {
 	public void multipleSessionIds() {
 
 		List<String> ids = Arrays.asList("not-this", "not-that", this.updateSession.getId());
-		when(this.sessionStore.retrieveSession("not-this")).thenReturn(Mono.empty());
-		when(this.sessionStore.retrieveSession("not-that")).thenReturn(Mono.empty());
-		when(this.sessionIdResolver.resolveSessionIds(this.exchange)).thenReturn(ids);
+		given(this.sessionStore.retrieveSession("not-this")).willReturn(Mono.empty());
+		given(this.sessionStore.retrieveSession("not-that")).willReturn(Mono.empty());
+		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(ids);
 		WebSession actual = this.sessionManager.getSession(this.exchange).block();
 
 		assertNotNull(actual);

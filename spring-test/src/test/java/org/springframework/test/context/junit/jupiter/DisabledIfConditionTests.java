@@ -41,8 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link DisabledIfCondition} that verify actual condition evaluation
@@ -124,12 +124,12 @@ class DisabledIfConditionTests {
 		Class<?> testClass = SpringTestCase.class;
 		Method method = ReflectionUtils.findMethod(getClass(), methodName);
 		Store store = mock(Store.class);
-		when(store.getOrComputeIfAbsent(any(), any(), any())).thenReturn(new TestContextManager(testClass));
+		given(store.getOrComputeIfAbsent(any(), any(), any())).willReturn(new TestContextManager(testClass));
 
 		ExtensionContext extensionContext = mock(ExtensionContext.class);
-		when(extensionContext.getTestClass()).thenReturn(Optional.of(testClass));
-		when(extensionContext.getElement()).thenReturn(Optional.of(method));
-		when(extensionContext.getStore(any())).thenReturn(store);
+		given(extensionContext.getTestClass()).willReturn(Optional.of(testClass));
+		given(extensionContext.getElement()).willReturn(Optional.of(method));
+		given(extensionContext.getStore(any())).willReturn(store);
 		return extensionContext;
 	}
 

@@ -55,7 +55,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Stephane Nicoll
@@ -149,7 +148,7 @@ public class MessagingMessageListenerAdapterTests {
 	@Test
 	public void headerConversionLazilyInvoked() throws JMSException {
 		javax.jms.Message jmsMessage = mock(javax.jms.Message.class);
-		when(jmsMessage.getPropertyNames()).thenThrow(new IllegalArgumentException("Header failure"));
+		given(jmsMessage.getPropertyNames()).willThrow(new IllegalArgumentException("Header failure"));
 		MessagingMessageListenerAdapter listener = getSimpleInstance("simple", Message.class);
 		Message<?> message = listener.toMessagingMessage(jmsMessage);
 

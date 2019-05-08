@@ -52,7 +52,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ScriptTemplateView}.
@@ -212,7 +211,7 @@ public class ScriptTemplateViewTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		Map<String, Object> model = new HashMap<>();
 		InvocableScriptEngine engine = mock(InvocableScriptEngine.class);
-		when(engine.invokeFunction(any(), any(), any(), any())).thenReturn("foo");
+		given(engine.invokeFunction(any(), any(), any(), any())).willReturn("foo");
 		this.view.setEngine(engine);
 		this.view.setRenderFunction("render");
 		this.view.setApplicationContext(this.wac);

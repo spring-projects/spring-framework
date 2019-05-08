@@ -33,8 +33,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.support.ServerRequestWrapper;
 
 import static org.junit.Assert.assertSame;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -56,7 +56,7 @@ public class HeadersWrapperTests {
 	@Test
 	public void accept() {
 		List<MediaType> accept = Collections.singletonList(MediaType.APPLICATION_JSON);
-		when(mockHeaders.accept()).thenReturn(accept);
+		given(mockHeaders.accept()).willReturn(accept);
 
 		assertSame(accept, wrapper.accept());
 	}
@@ -64,7 +64,7 @@ public class HeadersWrapperTests {
 	@Test
 	public void acceptCharset() {
 		List<Charset> acceptCharset = Collections.singletonList(StandardCharsets.UTF_8);
-		when(mockHeaders.acceptCharset()).thenReturn(acceptCharset);
+		given(mockHeaders.acceptCharset()).willReturn(acceptCharset);
 
 		assertSame(acceptCharset, wrapper.acceptCharset());
 	}
@@ -72,7 +72,7 @@ public class HeadersWrapperTests {
 	@Test
 	public void contentLength() {
 		OptionalLong contentLength = OptionalLong.of(42L);
-		when(mockHeaders.contentLength()).thenReturn(contentLength);
+		given(mockHeaders.contentLength()).willReturn(contentLength);
 
 		assertSame(contentLength, wrapper.contentLength());
 	}
@@ -80,7 +80,7 @@ public class HeadersWrapperTests {
 	@Test
 	public void contentType() {
 		Optional<MediaType> contentType = Optional.of(MediaType.APPLICATION_JSON);
-		when(mockHeaders.contentType()).thenReturn(contentType);
+		given(mockHeaders.contentType()).willReturn(contentType);
 
 		assertSame(contentType, wrapper.contentType());
 	}
@@ -88,7 +88,7 @@ public class HeadersWrapperTests {
 	@Test
 	public void host() {
 		InetSocketAddress host = InetSocketAddress.createUnresolved("example.com", 42);
-		when(mockHeaders.host()).thenReturn(host);
+		given(mockHeaders.host()).willReturn(host);
 
 		assertSame(host, wrapper.host());
 	}
@@ -96,7 +96,7 @@ public class HeadersWrapperTests {
 	@Test
 	public void range() {
 		List<HttpRange> range = Collections.singletonList(HttpRange.createByteRange(42));
-		when(mockHeaders.range()).thenReturn(range);
+		given(mockHeaders.range()).willReturn(range);
 
 		assertSame(range, wrapper.range());
 	}
@@ -105,7 +105,7 @@ public class HeadersWrapperTests {
 	public void header() {
 		String name = "foo";
 		List<String> value = Collections.singletonList("bar");
-		when(mockHeaders.header(name)).thenReturn(value);
+		given(mockHeaders.header(name)).willReturn(value);
 
 		assertSame(value, wrapper.header(name));
 	}
@@ -113,7 +113,7 @@ public class HeadersWrapperTests {
 	@Test
 	public void asHttpHeaders() {
 		HttpHeaders httpHeaders = new HttpHeaders();
-		when(mockHeaders.asHttpHeaders()).thenReturn(httpHeaders);
+		given(mockHeaders.asHttpHeaders()).willReturn(httpHeaders);
 
 		assertSame(httpHeaders, wrapper.asHttpHeaders());
 	}

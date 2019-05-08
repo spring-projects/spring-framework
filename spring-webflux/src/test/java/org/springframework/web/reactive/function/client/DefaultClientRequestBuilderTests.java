@@ -39,8 +39,8 @@ import org.springframework.web.reactive.function.BodyInserter;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.OPTIONS;
@@ -131,7 +131,7 @@ public class DefaultClientRequestBuilderTests {
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
 		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
-		when(strategies.messageWriters()).thenReturn(messageWriters);
+		given(strategies.messageWriters()).willReturn(messageWriters);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
 		result.writeTo(request, strategies).block();
@@ -153,7 +153,7 @@ public class DefaultClientRequestBuilderTests {
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
 		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
-		when(strategies.messageWriters()).thenReturn(messageWriters);
+		given(strategies.messageWriters()).willReturn(messageWriters);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
 		result.writeTo(request, strategies).block();
@@ -176,7 +176,7 @@ public class DefaultClientRequestBuilderTests {
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
 		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
-		when(strategies.messageWriters()).thenReturn(messageWriters);
+		given(strategies.messageWriters()).willReturn(messageWriters);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
 		result.writeTo(request, strategies).block();

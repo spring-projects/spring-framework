@@ -50,8 +50,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
@@ -253,8 +253,8 @@ public class InvocableHandlerMethodTests {
 
 	private <T> HandlerMethodArgumentResolver stubResolver(Mono<Object> stubValue) {
 		HandlerMethodArgumentResolver resolver = mock(HandlerMethodArgumentResolver.class);
-		when(resolver.supportsParameter(any())).thenReturn(true);
-		when(resolver.resolveArgument(any(), any(), any())).thenReturn(stubValue);
+		given(resolver.supportsParameter(any())).willReturn(true);
+		given(resolver.resolveArgument(any(), any(), any())).willReturn(stubValue);
 		return resolver;
 	}
 

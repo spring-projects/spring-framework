@@ -45,7 +45,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -112,13 +111,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests properties population and autowire behavior.
@@ -134,8 +133,6 @@ import static org.mockito.Mockito.when;
 public class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
-
-
 
 	@Test
 	public void testUnreferencedSingletonWasInstantiated() {
@@ -1240,8 +1237,8 @@ public class DefaultListableBeanFactoryTests {
 	public void testExpressionInStringArray() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		BeanExpressionResolver beanExpressionResolver = mock(BeanExpressionResolver.class);
-		when(beanExpressionResolver.evaluate(eq("#{foo}"), ArgumentMatchers.any(BeanExpressionContext.class)))
-				.thenReturn("classpath:/org/springframework/beans/factory/xml/util.properties");
+		given(beanExpressionResolver.evaluate(eq("#{foo}"), any(BeanExpressionContext.class)))
+				.willReturn("classpath:/org/springframework/beans/factory/xml/util.properties");
 		bf.setBeanExpressionResolver(beanExpressionResolver);
 
 		RootBeanDefinition rbd = new RootBeanDefinition(PropertiesFactoryBean.class);

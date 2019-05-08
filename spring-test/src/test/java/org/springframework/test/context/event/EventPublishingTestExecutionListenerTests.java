@@ -37,11 +37,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willCallRealMethod;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link EventPublishingTestExecutionListener}.
@@ -71,10 +71,10 @@ public class EventPublishingTestExecutionListenerTests {
 	@Before
 	public void configureMock() {
 		// Force Mockito to invoke the interface default method
-		doCallRealMethod().when(testContext).publishEvent(any());
-		when(testContext.getApplicationContext()).thenReturn(applicationContext);
+		willCallRealMethod().given(testContext).publishEvent(any());
+		given(testContext.getApplicationContext()).willReturn(applicationContext);
 		// Only allow events to be published for test methods named "publish*".
-		when(testContext.hasApplicationContext()).thenReturn(testName.getMethodName().startsWith("publish"));
+		given(testContext.hasApplicationContext()).willReturn(testName.getMethodName().startsWith("publish"));
 	}
 
 	@Test

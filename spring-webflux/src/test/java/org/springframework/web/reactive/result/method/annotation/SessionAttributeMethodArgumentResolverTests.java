@@ -46,8 +46,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link SessionAttributeMethodArgumentResolver}.
@@ -90,7 +90,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 		StepVerifier.create(mono).expectError(ServerWebInputException.class).verify();
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(foo);
+		given(this.session.getAttribute("foo")).willReturn(foo);
 		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
@@ -99,7 +99,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	public void resolveWithName() {
 		MethodParameter param = initMethodParameter(1);
 		Foo foo = new Foo();
-		when(this.session.getAttribute("specialFoo")).thenReturn(foo);
+		given(this.session.getAttribute("specialFoo")).willReturn(foo);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
@@ -111,7 +111,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 		assertNull(mono.block());
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(foo);
+		given(this.session.getAttribute("foo")).willReturn(foo);
 		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
@@ -131,7 +131,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 		BindingContext bindingContext = new BindingContext(initializer);
 
 		Foo foo = new Foo();
-		when(this.session.getAttribute("foo")).thenReturn(foo);
+		given(this.session.getAttribute("foo")).willReturn(foo);
 		actual = (Optional<Object>) this.resolver.resolveArgument(param, bindingContext, this.exchange).block();
 
 		assertNotNull(actual);

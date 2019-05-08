@@ -39,8 +39,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ResourceUrlProvider}.
@@ -156,7 +156,7 @@ public class ResourceUrlProviderTests {
 	public void getForLookupPathShouldNotFailIfPathContainsDoubleSlashes() {
 		// given
 		ResourceResolver mockResourceResolver = mock(ResourceResolver.class);
-		when(mockResourceResolver.resolveUrlPath(any(), any(), any())).thenReturn("some-path");
+		given(mockResourceResolver.resolveUrlPath(any(), any(), any())).willReturn("some-path");
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 		handler.getResourceResolvers().add(mockResourceResolver);

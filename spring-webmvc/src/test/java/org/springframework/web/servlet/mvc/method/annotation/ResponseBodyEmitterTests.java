@@ -29,7 +29,7 @@ import org.springframework.http.MediaType;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -150,7 +150,7 @@ public class ResponseBodyEmitterTests {
 		verifyNoMoreInteractions(this.handler);
 
 		IOException failure = new IOException();
-		doThrow(failure).when(this.handler).send("foo", MediaType.TEXT_PLAIN);
+		willThrow(failure).given(this.handler).send("foo", MediaType.TEXT_PLAIN);
 		try {
 			this.emitter.send("foo", MediaType.TEXT_PLAIN);
 			fail("Expected exception");

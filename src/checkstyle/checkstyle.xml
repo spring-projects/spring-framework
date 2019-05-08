@@ -159,6 +159,13 @@
 				value="Please use specialized AssertJ assertThat*Exception method." />
 			<property name="ignoreComments" value="true" />
 		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="maximum" value="0"/>
+		<property name="format" value="org\.mockito\.Mockito\.(when|doThrow|doAnswer)" />
+			<property name="message"
+				value="Please use BDDMockito imports." />
+			<property name="ignoreComments" value="true" />
+		</module>
 
 		<!-- Spring Conventions -->
 		<module name="io.spring.javaformat.checkstyle.check.SpringLambdaCheck">

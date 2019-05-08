@@ -31,7 +31,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -100,7 +100,7 @@ public class SimpleClientHttpResponseTests {
 	public void shouldNotDrainWhenErrorStreamClosed() throws Exception {
 		InputStream is = mock(InputStream.class);
 		given(this.connection.getErrorStream()).willReturn(is);
-		doNothing().when(is).close();
+		willDoNothing().given(is).close();
 		given(is.read(any())).willThrow(new NullPointerException("from HttpURLConnection#ErrorStream"));
 
 		InputStream responseStream = this.response.getBody();

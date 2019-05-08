@@ -33,8 +33,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ParameterResolutionDelegate}.
@@ -128,7 +128,7 @@ public class ParameterResolutionTests {
 		AutowireCapableBeanFactory beanFactory = mock(AutowireCapableBeanFactory.class);
 		// Configure the mocked BeanFactory to return the DependencyDescriptor for convenience and
 		// to avoid using an ArgumentCaptor.
-		when(beanFactory.resolveDependency(any(), isNull())).thenAnswer(invocation -> invocation.getArgument(0));
+		given(beanFactory.resolveDependency(any(), isNull())).willAnswer(invocation -> invocation.getArgument(0));
 
 		Parameter[] parameters = constructor.getParameters();
 		for (int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {

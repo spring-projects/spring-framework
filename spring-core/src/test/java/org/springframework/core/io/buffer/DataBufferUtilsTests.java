@@ -53,9 +53,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -94,14 +94,14 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void readByteChannelError() throws Exception {
 		ReadableByteChannel channel = mock(ReadableByteChannel.class);
-		when(channel.read(any()))
-				.thenAnswer(invocation -> {
+		given(channel.read(any()))
+				.willAnswer(invocation -> {
 					ByteBuffer buffer = invocation.getArgument(0);
 					buffer.put("foo".getBytes(StandardCharsets.UTF_8));
 					buffer.flip();
 					return 3;
 				})
-				.thenThrow(new IOException());
+				.willThrow(new IOException());
 
 		Flux<DataBuffer> result =
 				DataBufferUtils.readByteChannel(() -> channel, this.bufferFactory, 3);
@@ -151,7 +151,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void readAsynchronousFileChannelError() throws Exception {
 		AsynchronousFileChannel channel = mock(AsynchronousFileChannel.class);
-		doAnswer(invocation -> {
+		willAnswer(invocation -> {
 			ByteBuffer byteBuffer = invocation.getArgument(0);
 			byteBuffer.put("foo".getBytes(StandardCharsets.UTF_8));
 			byteBuffer.flip();
@@ -161,13 +161,13 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 			CompletionHandler<Integer, DataBuffer> completionHandler = invocation.getArgument(3);
 			completionHandler.completed(3, dataBuffer);
 			return null;
-		}).doAnswer(invocation -> {
+		}).willAnswer(invocation -> {
 			DataBuffer dataBuffer = invocation.getArgument(2);
 			CompletionHandler<Integer, DataBuffer> completionHandler = invocation.getArgument(3);
 			completionHandler.failed(new IOException(), dataBuffer);
 			return null;
 		})
-		.when(channel).read(any(), anyLong(), any(), any());
+		.given(channel).read(any(), anyLong(), any(), any());
 
 		Flux<DataBuffer> result =
 				DataBufferUtils.readAsynchronousFileChannel(() -> channel, this.bufferFactory, 3);
@@ -318,14 +318,14 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> flux = Flux.just(foo, bar);
 
 		WritableByteChannel channel = mock(WritableByteChannel.class);
-		when(channel.write(any()))
-				.thenAnswer(invocation -> {
+		given(channel.write(any()))
+				.willAnswer(invocation -> {
 					ByteBuffer buffer = invocation.getArgument(0);
 					int written = buffer.remaining();
 					buffer.position(buffer.limit());
 					return written;
 				})
-				.thenThrow(new IOException());
+				.willThrow(new IOException());
 
 		Flux<DataBuffer> writeResult = DataBufferUtils.write(flux, channel);
 		StepVerifier.create(writeResult)
@@ -420,7 +420,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> flux = Flux.just(foo, bar);
 
 		AsynchronousFileChannel channel = mock(AsynchronousFileChannel.class);
-		doAnswer(invocation -> {
+		willAnswer(invocation -> {
 			ByteBuffer buffer = invocation.getArgument(0);
 			long pos = invocation.getArgument(1);
 			CompletionHandler<Integer, ByteBuffer> completionHandler = invocation.getArgument(3);
@@ -433,15 +433,14 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 			return null;
 		})
-				.doAnswer(invocation -> {
-					ByteBuffer buffer = invocation.getArgument(0);
-					CompletionHandler<Integer, ByteBuffer> completionHandler =
-							invocation.getArgument(3);
-					completionHandler.failed(new IOException(), buffer);
-					return null;
-				})
-				.when(channel).write(isA(ByteBuffer.class), anyLong(), isA(ByteBuffer.class),
-				isA(CompletionHandler.class));
+		.willAnswer(invocation -> {
+			ByteBuffer buffer = invocation.getArgument(0);
+			CompletionHandler<Integer, ByteBuffer> completionHandler =
+					invocation.getArgument(3);
+			completionHandler.failed(new IOException(), buffer);
+			return null;
+		})
+		.given(channel).write(isA(ByteBuffer.class), anyLong(), isA(ByteBuffer.class), isA(CompletionHandler.class));
 
 		Flux<DataBuffer> writeResult = DataBufferUtils.write(flux, channel);
 		StepVerifier.create(writeResult)
@@ -684,11 +683,11 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void SPR16070() throws Exception {
 		ReadableByteChannel channel = mock(ReadableByteChannel.class);
-		when(channel.read(any()))
-				.thenAnswer(putByte('a'))
-				.thenAnswer(putByte('b'))
-				.thenAnswer(putByte('c'))
-				.thenReturn(-1);
+		given(channel.read(any()))
+				.willAnswer(putByte('a'))
+				.willAnswer(putByte('b'))
+				.willAnswer(putByte('c'))
+				.willReturn(-1);
 
 		Flux<DataBuffer> read =
 				DataBufferUtils.readByteChannel(() -> channel, this.bufferFactory, 1);

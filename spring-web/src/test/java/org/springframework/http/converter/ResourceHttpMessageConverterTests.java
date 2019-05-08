@@ -41,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -141,7 +141,7 @@ public class ResourceHttpMessageConverterTests {
 		InputStream inputStream = mock(InputStream.class);
 		given(resource.getInputStream()).willReturn(inputStream);
 		given(inputStream.read(any())).willReturn(-1);
-		doThrow(new NullPointerException()).when(inputStream).close();
+		willThrow(new NullPointerException()).given(inputStream).close();
 		converter.write(resource, MediaType.APPLICATION_OCTET_STREAM, outputMessage);
 
 		assertEquals(0, outputMessage.getHeaders().getContentLength());

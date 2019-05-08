@@ -39,7 +39,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
 
 /**
@@ -94,7 +93,7 @@ public class UserDestinationMessageHandlerTests {
 	public void handleMessage() {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
-		when(this.registry.getUser("joe")).thenReturn(simpUser);
+		given(this.registry.getUser("joe")).willReturn(simpUser);
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.handler.handleMessage(createWith(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
 
@@ -130,7 +129,7 @@ public class UserDestinationMessageHandlerTests {
 	public void handleMessageFromBrokerWithActiveSession() {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
-		when(this.registry.getUser("joe")).thenReturn(simpUser);
+		given(this.registry.getUser("joe")).willReturn(simpUser);
 
 		this.handler.setBroadcastDestination("/topic/unresolved");
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);

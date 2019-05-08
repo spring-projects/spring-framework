@@ -47,8 +47,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -139,14 +139,14 @@ public class DefaultRenderingResponseTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 		ViewResolver viewResolver = mock(ViewResolver.class);
 		View view = mock(View.class);
-		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));
-		when(view.render(model, null, exchange)).thenReturn(Mono.empty());
+		given(viewResolver.resolveViewName("view", Locale.ENGLISH)).willReturn(Mono.just(view));
+		given(view.render(model, null, exchange)).willReturn(Mono.empty());
 
 		List<ViewResolver> viewResolvers = new ArrayList<>();
 		viewResolvers.add(viewResolver);
 
 		HandlerStrategies mockConfig = mock(HandlerStrategies.class);
-		when(mockConfig.viewResolvers()).thenReturn(viewResolvers);
+		given(mockConfig.viewResolvers()).willReturn(viewResolvers);
 
 		StepVerifier.create(result)
 				.expectNextMatches(response -> "view".equals(response.name()) &&
@@ -162,13 +162,13 @@ public class DefaultRenderingResponseTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 		TestView view = new TestView();
 		ViewResolver viewResolver = mock(ViewResolver.class);
-		when(viewResolver.resolveViewName(any(), any())).thenReturn(Mono.just(view));
+		given(viewResolver.resolveViewName(any(), any())).willReturn(Mono.just(view));
 
 		List<ViewResolver> viewResolvers = new ArrayList<>();
 		viewResolvers.add(viewResolver);
 
 		ServerResponse.Context context = mock(ServerResponse.Context.class);
-		when(context.viewResolvers()).thenReturn(viewResolvers);
+		given(context.viewResolvers()).willReturn(viewResolvers);
 
 		StepVerifier.create(result.flatMap(response -> response.writeTo(exchange, context)))
 				.verifyComplete();

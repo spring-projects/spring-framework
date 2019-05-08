@@ -36,7 +36,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.web.context.request.async.CallableProcessingInterceptor.RESULT_NONE;
 
 /**
@@ -163,7 +162,7 @@ public class WebAsyncManagerTimeoutTests {
 		Future future = mock(Future.class);
 
 		AsyncTaskExecutor executor = mock(AsyncTaskExecutor.class);
-		when(executor.submit(any(Runnable.class))).thenReturn(future);
+		given(executor.submit(any(Runnable.class))).willReturn(future);
 
 		this.asyncManager.setTaskExecutor(executor);
 		this.asyncManager.startCallableProcessing(callable);

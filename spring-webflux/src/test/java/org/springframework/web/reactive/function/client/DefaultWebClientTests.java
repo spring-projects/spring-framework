@@ -38,10 +38,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link DefaultWebClient}.
@@ -64,7 +64,7 @@ public class DefaultWebClientTests {
 		MockitoAnnotations.initMocks(this);
 		this.exchangeFunction = mock(ExchangeFunction.class);
 		ClientResponse mockResponse = mock(ClientResponse.class);
-		when(this.exchangeFunction.exchange(this.captor.capture())).thenReturn(Mono.just(mockResponse));
+		given(this.exchangeFunction.exchange(this.captor.capture())).willReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction);
 	}
 
@@ -283,7 +283,7 @@ public class DefaultWebClientTests {
 	@Test
 	public void switchToErrorOnEmptyClientResponseMono() {
 		ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
-		when(exchangeFunction.exchange(any())).thenReturn(Mono.empty());
+		given(exchangeFunction.exchange(any())).willReturn(Mono.empty());
 		WebClient.Builder builder = WebClient.builder().baseUrl("/base").exchangeFunction(exchangeFunction);
 		StepVerifier.create(builder.build().get().uri("/path").exchange())
 				.expectErrorMessage("The underlying HTTP client completed without emitting a response.")

@@ -46,13 +46,13 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link SimpleBrokerMessageHandler}.
@@ -186,7 +186,7 @@ public class SimpleBrokerMessageHandlerTests {
 	@Test
 	public void startAndStopWithHeartbeatValue() {
 		ScheduledFuture future = mock(ScheduledFuture.class);
-		when(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(15000L))).thenReturn(future);
+		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(15000L))).willReturn(future);
 
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
 		this.messageHandler.setHeartbeatValue(new long[] {15000, 16000});

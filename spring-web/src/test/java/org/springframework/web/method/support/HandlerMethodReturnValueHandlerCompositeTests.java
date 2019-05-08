@@ -23,10 +23,10 @@ import org.springframework.core.MethodParameter;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * Test fixture with {@link HandlerMethodReturnValueHandlerComposite}.
@@ -53,7 +53,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		this.stringType = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 
 		this.integerHandler = mock(HandlerMethodReturnValueHandler.class);
-		when(this.integerHandler.supportsReturnType(this.integerType)).thenReturn(true);
+		given(this.integerHandler.supportsReturnType(this.integerType)).willReturn(true);
 
 		this.handlers = new HandlerMethodReturnValueHandlerComposite();
 		this.handlers.addHandler(this.integerHandler);
@@ -76,7 +76,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 	@Test
 	public void handleReturnValueWithMultipleHandlers() throws Exception {
 		HandlerMethodReturnValueHandler anotherIntegerHandler = mock(HandlerMethodReturnValueHandler.class);
-		when(anotherIntegerHandler.supportsReturnType(this.integerType)).thenReturn(true);
+		given(anotherIntegerHandler.supportsReturnType(this.integerType)).willReturn(true);
 
 		this.handlers.handleReturnValue(55, this.integerType, this.mavContainer, null);
 
@@ -91,12 +91,12 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		MethodParameter promiseType = new MethodParameter(getClass().getDeclaredMethod("handlePromise"), -1);
 
 		HandlerMethodReturnValueHandler responseBodyHandler = mock(HandlerMethodReturnValueHandler.class);
-		when(responseBodyHandler.supportsReturnType(promiseType)).thenReturn(true);
+		given(responseBodyHandler.supportsReturnType(promiseType)).willReturn(true);
 		this.handlers.addHandler(responseBodyHandler);
 
 		AsyncHandlerMethodReturnValueHandler promiseHandler = mock(AsyncHandlerMethodReturnValueHandler.class);
-		when(promiseHandler.supportsReturnType(promiseType)).thenReturn(true);
-		when(promiseHandler.isAsyncReturnValue(promise, promiseType)).thenReturn(true);
+		given(promiseHandler.supportsReturnType(promiseType)).willReturn(true);
+		given(promiseHandler.isAsyncReturnValue(promise, promiseType)).willReturn(true);
 		this.handlers.addHandler(promiseHandler);
 
 		this.handlers.handleReturnValue(promise, promiseType, this.mavContainer, null);

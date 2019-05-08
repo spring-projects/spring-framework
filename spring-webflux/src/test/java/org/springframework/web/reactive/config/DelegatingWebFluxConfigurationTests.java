@@ -43,7 +43,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -115,11 +115,11 @@ public class DelegatingWebFluxConfigurationTests {
 	@Test
 	public void resourceHandlerMapping() throws Exception {
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));
-		doAnswer(invocation -> {
+		willAnswer(invocation -> {
 			ResourceHandlerRegistry registry = invocation.getArgument(0);
 			registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static");
 			return null;
-		}).when(webFluxConfigurer).addResourceHandlers(any(ResourceHandlerRegistry.class));
+		}).given(webFluxConfigurer).addResourceHandlers(any(ResourceHandlerRegistry.class));
 
 		delegatingConfig.resourceHandlerMapping(delegatingConfig.resourceUrlProvider());
 		verify(webFluxConfigurer).addResourceHandlers(any(ResourceHandlerRegistry.class));

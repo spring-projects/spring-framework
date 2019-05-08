@@ -48,8 +48,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Sebastien Deleuze
@@ -97,7 +97,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 				this.bufferFactory.wrap("Cc".getBytes(StandardCharsets.UTF_8))
 		);
 		Part mockPart = mock(Part.class);
-		when(mockPart.content()).thenReturn(bufferPublisher);
+		given(mockPart.content()).willReturn(bufferPublisher);
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name 1", "value 1");

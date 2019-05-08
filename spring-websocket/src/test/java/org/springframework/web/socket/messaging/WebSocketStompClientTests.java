@@ -54,11 +54,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link WebSocketStompClient}.
@@ -95,8 +95,8 @@ public class WebSocketStompClientTests {
 
 		this.webSocketHandlerCaptor = ArgumentCaptor.forClass(WebSocketHandler.class);
 		this.handshakeFuture = new SettableListenableFuture<>();
-		when(webSocketClient.doHandshake(this.webSocketHandlerCaptor.capture(), any(), any(URI.class)))
-				.thenReturn(this.handshakeFuture);
+		given(webSocketClient.doHandshake(this.webSocketHandlerCaptor.capture(), any(), any(URI.class)))
+				.willReturn(this.handshakeFuture);
 	}
 
 
@@ -303,7 +303,7 @@ public class WebSocketStompClientTests {
 		TcpConnection<byte[]> tcpConnection = getTcpConnection();
 
 		ScheduledFuture future = mock(ScheduledFuture.class);
-		when(this.taskScheduler.scheduleWithFixedDelay(any(), eq(1L))).thenReturn(future);
+		given(this.taskScheduler.scheduleWithFixedDelay(any(), eq(1L))).willReturn(future);
 
 		tcpConnection.onReadInactivity(mock(Runnable.class), 2L);
 		tcpConnection.onWriteInactivity(mock(Runnable.class), 2L);

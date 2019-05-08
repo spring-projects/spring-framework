@@ -44,9 +44,9 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.core.IsNot.not;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit and integration tests for {@link DelegatingWebConnection}.
@@ -92,7 +92,7 @@ public class DelegatingWebConnectionTests {
 
 	@Test
 	public void getResponseDefault() throws Exception {
-		when(defaultConnection.getResponse(request)).thenReturn(expectedResponse);
+		given(defaultConnection.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
 
 		assertThat(response, sameInstance(expectedResponse));
@@ -104,8 +104,8 @@ public class DelegatingWebConnectionTests {
 
 	@Test
 	public void getResponseAllMatches() throws Exception {
-		when(matcher1.matches(request)).thenReturn(true);
-		when(connection1.getResponse(request)).thenReturn(expectedResponse);
+		given(matcher1.matches(request)).willReturn(true);
+		given(connection1.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
 
 		assertThat(response, sameInstance(expectedResponse));
@@ -116,8 +116,8 @@ public class DelegatingWebConnectionTests {
 
 	@Test
 	public void getResponseSecondMatches() throws Exception {
-		when(matcher2.matches(request)).thenReturn(true);
-		when(connection2.getResponse(request)).thenReturn(expectedResponse);
+		given(matcher2.matches(request)).willReturn(true);
+		given(connection2.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
 
 		assertThat(response, sameInstance(expectedResponse));

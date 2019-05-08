@@ -48,8 +48,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ResourceHttpRequestHandler}.
@@ -315,10 +315,10 @@ public class ResourceHttpRequestHandlerTests {
 		// Use mock ResourceResolver: i.e. we're only testing upfront validations...
 
 		Resource resource = mock(Resource.class);
-		when(resource.getFilename()).thenThrow(new AssertionError("Resource should not be resolved"));
-		when(resource.getInputStream()).thenThrow(new AssertionError("Resource should not be resolved"));
+		given(resource.getFilename()).willThrow(new AssertionError("Resource should not be resolved"));
+		given(resource.getInputStream()).willThrow(new AssertionError("Resource should not be resolved"));
 		ResourceResolver resolver = mock(ResourceResolver.class);
-		when(resolver.resolveResource(any(), any(), any(), any())).thenReturn(resource);
+		given(resolver.resolveResource(any(), any(), any(), any())).willReturn(resource);
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));

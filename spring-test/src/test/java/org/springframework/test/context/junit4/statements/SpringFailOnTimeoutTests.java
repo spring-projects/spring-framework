@@ -25,8 +25,8 @@ import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.BDDMockito.willAnswer;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -55,7 +55,7 @@ public class SpringFailOnTimeoutTests {
 
 	@Test
 	public void userExceptionPropagates() throws Throwable {
-		doThrow(new Boom()).when(statement).evaluate();
+		willThrow(new Boom()).given(statement).evaluate();
 
 		assertThatExceptionOfType(Boom.class).isThrownBy(() ->
 				new SpringFailOnTimeout(statement, 1).evaluate());
@@ -63,10 +63,10 @@ public class SpringFailOnTimeoutTests {
 
 	@Test
 	public void timeoutExceptionThrownIfNoUserException() throws Throwable {
-		doAnswer((Answer<Void>) invocation -> {
+		willAnswer((Answer<Void>) invocation -> {
 			TimeUnit.MILLISECONDS.sleep(50);
 			return null;
-		}).when(statement).evaluate();
+		}).given(statement).evaluate();
 
 		assertThatExceptionOfType(TimeoutException.class).isThrownBy(() ->
 		new SpringFailOnTimeout(statement, 1).evaluate());
@@ -74,7 +74,7 @@ public class SpringFailOnTimeoutTests {
 
 	@Test
 	public void noExceptionThrownIfNoUserExceptionAndTimeoutDoesNotOccur() throws Throwable {
-		doAnswer((Answer<Void>) invocation -> null).when(statement).evaluate();
+		willAnswer((Answer<Void>) invocation -> null).given(statement).evaluate();
 		new SpringFailOnTimeout(statement, 100).evaluate();
 	}
 
