@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -72,7 +73,9 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 
 	/**
-	 * Indicates whether the {@code Accept-Charset} should be written to any outgoing request.
+	 * Whether the {@code Accept-Charset} header should be written to any outgoing
+	 * request sourced from the value of {@link Charset#availableCharsets()}.
+	 * The behavior is suppressed if the header has already been set.
 	 * <p>Default is {@code true}.
 	 */
 	public void setWriteAcceptCharset(boolean writeAcceptCharset) {
@@ -99,10 +102,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	@Override
 	protected void writeInternal(String str, HttpOutputMessage outputMessage) throws IOException {
-		if (this.writeAcceptCharset) {
-			outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
+		HttpHeaders headers = outputMessage.getHeaders();
+		if (this.writeAcceptCharset && headers.get(HttpHeaders.ACCEPT_CHARSET) == null) {
+			headers.setAcceptCharset(getAcceptedCharsets());
 		}
-		Charset charset = getContentTypeCharset(outputMessage.getHeaders().getContentType());
+		Charset charset = getContentTypeCharset(headers.getContentType());
 		StreamUtils.copy(str, charset, outputMessage.getBody());
 	}
 
