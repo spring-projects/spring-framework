@@ -17,6 +17,7 @@
 package org.springframework.http.codec.multipart;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sebastien Deleuze
@@ -94,7 +96,13 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 			}
 		};
 
-		Publisher<String> publisher = Flux.just("foo", "bar", "baz");
+		Flux<DataBuffer> bufferPublisher = Flux.just(
+				this.bufferFactory.wrap("Aa".getBytes(StandardCharsets.UTF_8)),
+				this.bufferFactory.wrap("Bb".getBytes(StandardCharsets.UTF_8)),
+				this.bufferFactory.wrap("Cc".getBytes(StandardCharsets.UTF_8))
+		);
+		Part mockPart = mock(Part.class);
+		when(mockPart.content()).thenReturn(bufferPublisher);
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name 1", "value 1");
@@ -103,14 +111,15 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 		bodyBuilder.part("logo", logo);
 		bodyBuilder.part("utf8", utf8);
 		bodyBuilder.part("json", new Foo("bar"), MediaType.APPLICATION_JSON);
-		bodyBuilder.asyncPart("publisher", publisher, String.class);
+		bodyBuilder.asyncPart("publisher", Flux.just("foo", "bar", "baz"), String.class);
+		bodyBuilder.asyncPart("partPublisher", Mono.just(mockPart), Part.class);
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
 		Map<String, Object> hints = Collections.emptyMap();
 		this.writer.write(result, null, MediaType.MULTIPART_FORM_DATA, this.response, hints).block(Duration.ofSeconds(5));
 
 		MultiValueMap<String, Part> requestParts = parse(hints);
-		assertEquals(6, requestParts.size());
+		assertEquals(7, requestParts.size());
 
 		Part part = requestParts.getFirst("name 1");
 		assertTrue(part instanceof FormFieldPart);
@@ -145,21 +154,25 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 		part = requestParts.getFirst("json");
 		assertEquals("json", part.name());
 		assertEquals(MediaType.APPLICATION_JSON, part.headers().getContentType());
-
-		String value = StringDecoder.textPlainOnly(false).decodeToMono(part.content(),
-				ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN,
-				Collections.emptyMap()).block(Duration.ZERO);
-
+		String value = decodeToString(part);
 		assertEquals("{\"bar\":\"bar\"}", value);
 
 		part = requestParts.getFirst("publisher");
 		assertEquals("publisher", part.name());
-
-		value = StringDecoder.textPlainOnly(false).decodeToMono(part.content(),
-				ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN,
-				Collections.emptyMap()).block(Duration.ZERO);
-
+		value = decodeToString(part);
 		assertEquals("foobarbaz", value);
+
+		part = requestParts.getFirst("partPublisher");
+		assertEquals("partPublisher", part.name());
+		value = decodeToString(part);
+		assertEquals("AaBbCc", value);
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	private String decodeToString(Part part) {
+		return StringDecoder.textPlainOnly().decodeToMono(part.content(),
+					ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN,
+					Collections.emptyMap()).block(Duration.ZERO);
 	}
 
 	@Test // SPR-16402
