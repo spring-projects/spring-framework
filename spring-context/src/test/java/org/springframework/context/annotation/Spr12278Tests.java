@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,18 @@
 package org.springframework.context.annotation;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanCreationException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.core.Is.*;
 
 /**
  * @author Stephane Nicoll
  */
 public class Spr12278Tests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private AnnotationConfigApplicationContext context;
 
@@ -59,10 +55,9 @@ public class Spr12278Tests {
 
 	@Test
 	public void componentTwoSpecificConstructorsNoHint() {
-		thrown.expect(BeanCreationException.class);
-		thrown.expectMessage(NoSuchMethodException.class.getName());
-		new AnnotationConfigApplicationContext(BaseConfiguration.class,
-				TwoSpecificConstructorsComponent.class);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(BaseConfiguration.class, TwoSpecificConstructorsComponent.class))
+			.withMessageContaining(NoSuchMethodException.class.getName());
 	}
 
 

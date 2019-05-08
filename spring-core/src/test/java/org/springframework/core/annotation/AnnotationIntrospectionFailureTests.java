@@ -49,9 +49,9 @@ public class AnnotationIntrospectionFailureTests {
 		Annotation annotation = withExampleAnnotation.getAnnotations()[0];
 		Method method = annotation.annotationType().getMethod("value");
 		method.setAccessible(true);
-		assertThatExceptionOfType(TypeNotPresentException.class).isThrownBy(() -> {
-			ReflectionUtils.invokeMethod(method, annotation);
-		}).withCauseInstanceOf(ClassNotFoundException.class);
+		assertThatExceptionOfType(TypeNotPresentException.class).isThrownBy(() ->
+				ReflectionUtils.invokeMethod(method, annotation))
+			.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test

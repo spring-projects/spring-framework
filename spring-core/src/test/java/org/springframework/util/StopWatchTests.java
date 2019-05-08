@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.util;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 
 /**
@@ -30,9 +30,6 @@ import static org.junit.Assert.*;
 public class StopWatchTests {
 
 	private final StopWatch sw = new StopWatch();
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void validUsage() throws Exception {
@@ -122,20 +119,20 @@ public class StopWatchTests {
 		assertFalse(toString.contains(name1));
 		assertFalse(toString.contains(name2));
 
-		exception.expect(UnsupportedOperationException.class);
-		sw.getTaskInfo();
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
+				sw::getTaskInfo);
 	}
 
 	@Test
 	public void failureToStartBeforeGettingTimings() {
-		exception.expect(IllegalStateException.class);
-		sw.getLastTaskTimeMillis();
+		assertThatIllegalStateException().isThrownBy(
+				sw::getLastTaskTimeMillis);
 	}
 
 	@Test
 	public void failureToStartBeforeStop() {
-		exception.expect(IllegalStateException.class);
-		sw.stop();
+		assertThatIllegalStateException().isThrownBy(
+				sw::stop);
 	}
 
 	@Test
@@ -144,8 +141,8 @@ public class StopWatchTests {
 		sw.stop();
 		sw.start("");
 		assertTrue(sw.isRunning());
-		exception.expect(IllegalStateException.class);
-		sw.start("");
+		assertThatIllegalStateException().isThrownBy(() ->
+				sw.start(""));
 	}
 
 }

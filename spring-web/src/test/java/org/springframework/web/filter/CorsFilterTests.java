@@ -21,7 +21,6 @@ import java.util.Arrays;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,6 +29,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.cors.CorsConfiguration;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link CorsFilter}.
@@ -105,9 +106,8 @@ public class CorsFilterTests {
 		request.addHeader("header2", "foo");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		FilterChain filterChain = (filterRequest, filterResponse) -> {
+		FilterChain filterChain = (filterRequest, filterResponse) ->
 			fail("Invalid requests must not be forwarded to the filter chain");
-		};
 		filter.doFilter(request, response, filterChain);
 		assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 	}

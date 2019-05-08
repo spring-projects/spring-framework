@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -287,12 +288,12 @@ public class DefaultWebClientTests {
 	@Test
 	public void shouldApplyFiltersAtSubscription() {
 		WebClient client = this.builder
-				.filter((request, next) -> {
-					return next.exchange(ClientRequest
+				.filter((request, next) ->
+					next.exchange(ClientRequest
 							.from(request)
 							.header("Custom", "value")
-							.build());
-				})
+							.build())
+				)
 				.build();
 		Mono<ClientResponse> exchange = client.get().uri("/path").exchange();
 		verifyZeroInteractions(this.exchangeFunction);

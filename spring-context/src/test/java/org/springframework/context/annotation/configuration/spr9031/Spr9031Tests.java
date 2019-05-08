@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.configuration.spr9031.scanpackage.Spr9031Component;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.*;
 
 /**
  * Unit tests cornering bug SPR-9031.

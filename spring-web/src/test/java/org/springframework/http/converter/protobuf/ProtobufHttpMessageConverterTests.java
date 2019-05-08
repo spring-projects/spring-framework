@@ -32,6 +32,7 @@ import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**

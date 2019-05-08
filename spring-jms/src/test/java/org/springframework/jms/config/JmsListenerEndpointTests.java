@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package org.springframework.jms.config;
 
 import javax.jms.MessageListener;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
@@ -30,6 +28,8 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -37,10 +37,6 @@ import static org.mockito.Mockito.*;
  * @author Stephane Nicoll
  */
 public class JmsListenerEndpointTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void setupJmsMessageContainerFullConfig() {
@@ -99,8 +95,8 @@ public class JmsListenerEndpointTests {
 		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 
-		thrown.expect(IllegalStateException.class);
-		endpoint.setupListenerContainer(container);
+		assertThatIllegalStateException().isThrownBy(() ->
+				endpoint.setupListenerContainer(container));
 	}
 
 	@Test
@@ -109,8 +105,8 @@ public class JmsListenerEndpointTests {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setMessageListener(new MessageListenerAdapter());
 
-		thrown.expect(IllegalArgumentException.class);
-		endpoint.setupListenerContainer(container);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				endpoint.setupListenerContainer(container));
 	}
 
 }

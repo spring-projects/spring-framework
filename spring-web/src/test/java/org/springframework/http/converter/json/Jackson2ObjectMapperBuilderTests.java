@@ -667,7 +667,8 @@ public class Jackson2ObjectMapperBuilderTests {
 			try {
 				return OffsetDateTime.parse(value);
 
-			} catch (DateTimeParseException exception) {
+			}
+			catch (DateTimeParseException exception) {
 				return OffsetDateTime.parse(value + CURRENT_ZONE_OFFSET);
 			}
 		}

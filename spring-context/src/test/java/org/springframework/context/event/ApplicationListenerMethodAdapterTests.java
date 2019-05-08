@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.ApplicationContext;
@@ -33,18 +31,16 @@ import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.ReflectionUtils;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
  * @author Stephane Nicoll
  */
 public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEventListenerTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private final SampleEvents sampleEvents = spy(new SampleEvents());
 
@@ -139,23 +135,23 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 	public void listenerWithTooManyParameters() {
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "tooManyParameters", String.class, String.class);
-		this.thrown.expect(IllegalStateException.class);
-		createTestInstance(method);
+		assertThatIllegalStateException().isThrownBy(() ->
+				createTestInstance(method));
 	}
 
 	@Test
 	public void listenerWithNoParameter() {
 		Method method = ReflectionUtils.findMethod(SampleEvents.class, "noParameter");
-		this.thrown.expect(IllegalStateException.class);
-		createTestInstance(method);
+		assertThatIllegalStateException().isThrownBy(() ->
+				createTestInstance(method));
 	}
 
 	@Test
 	public void listenerWithMoreThanOneParameter() {
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "moreThanOneParameter", String.class, Integer.class);
-		this.thrown.expect(IllegalStateException.class);
-		createTestInstance(method);
+		assertThatIllegalStateException().isThrownBy(() ->
+				createTestInstance(method));
 	}
 
 	@Test
@@ -225,10 +221,10 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 				SampleEvents.class, "generateRuntimeException", GenericTestEvent.class);
 		GenericTestEvent<String> event = createGenericTestEvent("fail");
 
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage("Test exception");
-		this.thrown.expectCause(is((Throwable) isNull()));
-		invokeListener(method, event);
+		assertThatIllegalStateException().isThrownBy(() ->
+				invokeListener(method, event))
+			.withMessageContaining("Test exception")
+			.withNoCause();
 	}
 
 	@Test
@@ -237,9 +233,9 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 				SampleEvents.class, "generateCheckedException", GenericTestEvent.class);
 		GenericTestEvent<String> event = createGenericTestEvent("fail");
 
-		this.thrown.expect(UndeclaredThrowableException.class);
-		this.thrown.expectCause(is(instanceOf(IOException.class)));
-		invokeListener(method, event);
+		assertThatExceptionOfType(UndeclaredThrowableException.class).isThrownBy(() ->
+				invokeListener(method, event))
+			.withCauseInstanceOf(IOException.class);
 	}
 
 	@Test
@@ -254,9 +250,9 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 				InvalidProxyTestBean.class, "handleIt2", ApplicationEvent.class);
 		StaticApplicationListenerMethodAdapter listener =
 				new StaticApplicationListenerMethodAdapter(method, bean);
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage("handleIt2");
-		listener.onApplicationEvent(createGenericTestEvent("test"));
+		assertThatIllegalStateException().isThrownBy(() ->
+				listener.onApplicationEvent(createGenericTestEvent("test")))
+			.withMessageContaining("handleIt2");
 	}
 
 	@Test

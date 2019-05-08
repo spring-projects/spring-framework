@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
@@ -44,7 +42,9 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -59,9 +59,6 @@ public class ScriptTemplateViewTests {
 	private ScriptTemplateConfigurer configurer;
 
 	private StaticWebApplicationContext wac;
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 
 	@Before
@@ -88,9 +85,9 @@ public class ScriptTemplateViewTests {
 
 	@Test
 	public void missingScriptTemplateConfig() throws Exception {
-		this.expectedException.expect(ApplicationContextException.class);
-		this.view.setApplicationContext(new StaticApplicationContext());
-		this.expectedException.expectMessage(contains("ScriptTemplateConfig"));
+		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(() ->
+				this.view.setApplicationContext(new StaticApplicationContext()))
+			.withMessageContaining("ScriptTemplateConfig");
 	}
 
 	@Test
@@ -174,8 +171,8 @@ public class ScriptTemplateViewTests {
 	public void nonInvocableScriptEngineWithRenderFunction() throws Exception {
 		this.view.setEngine(mock(ScriptEngine.class));
 		this.view.setRenderFunction("render");
-		this.expectedException.expect(IllegalArgumentException.class);
-		this.view.setApplicationContext(this.wac);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.view.setApplicationContext(this.wac));
 	}
 
 	@Test
@@ -183,9 +180,9 @@ public class ScriptTemplateViewTests {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setEngineName("test");
 		this.view.setRenderFunction("render");
-		this.expectedException.expect(IllegalArgumentException.class);
-		this.view.setApplicationContext(this.wac);
-		this.expectedException.expectMessage(contains("'engine' or 'engineName'"));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.view.setApplicationContext(this.wac))
+			.withMessageContaining("'engine' or 'engineName'");
 	}
 
 	@Test
@@ -193,9 +190,9 @@ public class ScriptTemplateViewTests {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setRenderFunction("render");
 		this.view.setSharedEngine(false);
-		this.expectedException.expect(IllegalArgumentException.class);
-		this.view.setApplicationContext(this.wac);
-		this.expectedException.expectMessage(contains("sharedEngine"));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.view.setApplicationContext(this.wac))
+			.withMessageContaining("sharedEngine");
 	}
 
 	@Test // SPR-14210

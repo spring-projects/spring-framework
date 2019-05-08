@@ -35,11 +35,13 @@ import javax.annotation.Resource;
 import javax.annotation.meta.When;
 
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
-import org.junit.rules.ExpectedException;
 
+import org.springframework.core.annotation.AnnotationUtilsTests.ExtendsBaseClassWithGenericAnnotatedMethod;
+import org.springframework.core.annotation.AnnotationUtilsTests.ImplementsInterfaceWithGenericAnnotatedMethod;
+import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
+import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -48,8 +50,8 @@ import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.*;
 import static java.util.stream.Collectors.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 import static org.springframework.core.annotation.AnnotationUtilsTests.*;
@@ -68,9 +70,6 @@ import static org.springframework.core.annotation.AnnotationUtilsTests.*;
 public class AnnotatedElementUtilsTests {
 
 	private static final String TX_NAME = Transactional.class.getName();
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -512,16 +511,11 @@ public class AnnotatedElementUtilsTests {
 	@Test
 	public void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
 		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(either(containsString("attribute 'value' and its alias 'locations'")).or(
-				containsString("attribute 'locations' and its alias 'value'")));
-		exception.expectMessage(either(
-				containsString("values of [{duplicateDeclaration}] and [{requiredLocationsDeclaration}]")).or(
-				containsString("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]")));
-		exception.expectMessage(either(
-				containsString("but only one is permitted")).or(
-				containsString("Different @AliasFor mirror values for annotation")));
-		getMergedAnnotationAttributes(element, ContextConfig.class);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				getMergedAnnotationAttributes(element, ContextConfig.class))
+			.withMessageContaining("Different @AliasFor mirror values for annotation")
+			.withMessageContaining("attribute 'locations' and its alias 'value'")
+			.withMessageContaining("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]");
 	}
 
 	@Test

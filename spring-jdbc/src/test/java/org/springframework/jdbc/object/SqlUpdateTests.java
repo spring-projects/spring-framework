@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,14 @@ import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -67,9 +66,6 @@ public class SqlUpdateTests {
 
 	private static final String INSERT_GENERATE_KEYS =
 			"insert into show (name) values(?)";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private DataSource dataSource;
 
@@ -275,8 +271,8 @@ public class SqlUpdateTests {
 
 		MaxRowsUpdater pc = new MaxRowsUpdater();
 
-		thrown.expect(JdbcUpdateAffectedIncorrectNumberOfRowsException.class);
-		pc.run();
+		assertThatExceptionOfType(JdbcUpdateAffectedIncorrectNumberOfRowsException.class).isThrownBy(
+				pc::run);
 	}
 
 	@Test
@@ -294,9 +290,9 @@ public class SqlUpdateTests {
 	public void testNotRequiredRows() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(2);
 		given(connection.prepareStatement(UPDATE)).willReturn(preparedStatement);
-		thrown.expect(JdbcUpdateAffectedIncorrectNumberOfRowsException.class);
 		RequiredRowsUpdater pc = new RequiredRowsUpdater();
-		pc.run();
+		assertThatExceptionOfType(JdbcUpdateAffectedIncorrectNumberOfRowsException.class).isThrownBy(
+				pc::run);
 	}
 
 	private class Updater extends SqlUpdate {

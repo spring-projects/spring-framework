@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,9 +53,9 @@ public class MergedAnnotationsCollectionTests {
 	public void createWhenAnnotationIsNotDirectlyPresentThrowsException() {
 		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
 		given(annotation.isDirectlyPresent()).willReturn(false);
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			MergedAnnotationsCollection.of(Collections.singleton(annotation));
-		}).withMessage("Annotation must be directly present");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MergedAnnotationsCollection.of(Collections.singleton(annotation)))
+			.withMessage("Annotation must be directly present");
 	}
 
 	@Test
@@ -63,9 +63,9 @@ public class MergedAnnotationsCollectionTests {
 		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
 		given(annotation.isDirectlyPresent()).willReturn(true);
 		given(annotation.getAggregateIndex()).willReturn(1);
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			MergedAnnotationsCollection.of(Collections.singleton(annotation));
-		}).withMessage("Annotation must have aggregate index of zero");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MergedAnnotationsCollection.of(Collections.singleton(annotation)))
+			.withMessage("Annotation must have aggregate index of zero");
 	}
 
 	@Test

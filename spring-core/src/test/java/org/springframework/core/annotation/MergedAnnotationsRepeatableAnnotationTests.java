@@ -27,15 +27,11 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Set;
 
 import org.assertj.core.api.ThrowableTypeAssert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link MergedAnnotations} and {@link RepeatableContainers} that
@@ -48,39 +44,35 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 
 	// See SPR-13973
 
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void inheritedAnnotationsWhenNonRepeatableThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> getAnnotations(null, NonRepeatable.class,
-						SearchStrategy.INHERITED_ANNOTATIONS, getClass())).satisfies(
-								this::nonRepeatableRequirements);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getAnnotations(null, NonRepeatable.class, SearchStrategy.INHERITED_ANNOTATIONS, getClass()))
+			.satisfies(this::nonRepeatableRequirements);
 	}
 
 	@Test
 	public void inheritedAnnotationsWhenContainerMissingValueAttributeThrowsException() {
-		assertThatAnnotationConfigurationException().isThrownBy(
-				() -> getAnnotations(ContainerMissingValueAttribute.class,
-						InvalidRepeatable.class, SearchStrategy.INHERITED_ANNOTATIONS,
-						getClass())).satisfies(this::missingValueAttributeRequirements);
+		assertThatAnnotationConfigurationException().isThrownBy(() ->
+				getAnnotations(ContainerMissingValueAttribute.class, InvalidRepeatable.class,
+						SearchStrategy.INHERITED_ANNOTATIONS, getClass()))
+			.satisfies(this::missingValueAttributeRequirements);
 	}
 
 	@Test
 	public void inheritedAnnotationsWhenWhenNonArrayValueAttributeThrowsException() {
-		assertThatAnnotationConfigurationException().isThrownBy(
-				() -> getAnnotations(ContainerWithNonArrayValueAttribute.class,
-						InvalidRepeatable.class, SearchStrategy.INHERITED_ANNOTATIONS,
-						getClass())).satisfies(this::nonArrayValueAttributeRequirements);
+		assertThatAnnotationConfigurationException().isThrownBy(() ->
+				getAnnotations(ContainerWithNonArrayValueAttribute.class, InvalidRepeatable.class,
+						SearchStrategy.INHERITED_ANNOTATIONS, getClass()))
+			.satisfies(this::nonArrayValueAttributeRequirements);
 	}
 
 	@Test
 	public void inheritedAnnotationsWhenWrongComponentTypeThrowsException() {
-		assertThatAnnotationConfigurationException().isThrownBy(() -> getAnnotations(
-				ContainerWithArrayValueAttributeButWrongComponentType.class,
-				InvalidRepeatable.class, SearchStrategy.INHERITED_ANNOTATIONS,
-				getClass())).satisfies(this::wrongComponentTypeRequirements);
+		assertThatAnnotationConfigurationException().isThrownBy(() ->
+				getAnnotations(ContainerWithArrayValueAttributeButWrongComponentType.class,
+						InvalidRepeatable.class, SearchStrategy.INHERITED_ANNOTATIONS, getClass()))
+			.satisfies(this::wrongComponentTypeRequirements);
 	}
 
 	@Test
@@ -142,33 +134,33 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 
 	@Test
 	public void exhaustiveWhenNonRepeatableThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() -> getAnnotations(null,
-				NonRepeatable.class, SearchStrategy.EXHAUSTIVE, getClass())).satisfies(
-						this::nonRepeatableRequirements);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getAnnotations(null, NonRepeatable.class, SearchStrategy.EXHAUSTIVE, getClass()))
+			.satisfies(this::nonRepeatableRequirements);
 	}
 
 	@Test
 	public void exhaustiveWhenContainerMissingValueAttributeThrowsException() {
-		assertThatAnnotationConfigurationException().isThrownBy(
-				() -> getAnnotations(ContainerMissingValueAttribute.class,
-						InvalidRepeatable.class, SearchStrategy.EXHAUSTIVE,
-						getClass())).satisfies(this::missingValueAttributeRequirements);
+		assertThatAnnotationConfigurationException().isThrownBy(() ->
+				getAnnotations(ContainerMissingValueAttribute.class, InvalidRepeatable.class,
+						SearchStrategy.EXHAUSTIVE, getClass()))
+			.satisfies(this::missingValueAttributeRequirements);
 	}
 
 	@Test
 	public void exhaustiveWhenWhenNonArrayValueAttributeThrowsException() {
-		assertThatAnnotationConfigurationException().isThrownBy(
-				() -> getAnnotations(ContainerWithNonArrayValueAttribute.class,
-						InvalidRepeatable.class, SearchStrategy.EXHAUSTIVE,
-						getClass())).satisfies(this::nonArrayValueAttributeRequirements);
+		assertThatAnnotationConfigurationException().isThrownBy(() ->
+				getAnnotations(ContainerWithNonArrayValueAttribute.class, InvalidRepeatable.class,
+						SearchStrategy.EXHAUSTIVE, getClass()))
+			.satisfies(this::nonArrayValueAttributeRequirements);
 	}
 
 	@Test
 	public void exhaustiveWhenWrongComponentTypeThrowsException() {
-		assertThatAnnotationConfigurationException().isThrownBy(() -> getAnnotations(
-				ContainerWithArrayValueAttributeButWrongComponentType.class,
-				InvalidRepeatable.class, SearchStrategy.EXHAUSTIVE,
-				getClass())).satisfies(this::wrongComponentTypeRequirements);
+		assertThatAnnotationConfigurationException().isThrownBy(() ->
+				getAnnotations(ContainerWithArrayValueAttributeButWrongComponentType.class,
+						InvalidRepeatable.class, SearchStrategy.EXHAUSTIVE, getClass()))
+			.satisfies(this::wrongComponentTypeRequirements);
 	}
 
 	@Test
@@ -246,7 +238,6 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	private void missingValueAttributeRequirements(Exception ex) {
-		ex.printStackTrace();
 		assertThat(ex.getMessage()).startsWith(
 				"Invalid declaration of container type").contains(
 						ContainerMissingValueAttribute.class.getName(),

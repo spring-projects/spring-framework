@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,24 +22,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.hamcrest.CoreMatchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link MessageHeaderAccessor}.
@@ -49,10 +42,6 @@ import static org.junit.Assert.assertTrue;
  * @author Juergen Hoeller
  */
 public class MessageHeaderAccessorTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void newEmptyHeaders() {
@@ -217,13 +206,13 @@ public class MessageHeaderAccessorTests {
 		MessageHeaders headers = accessor.getMessageHeaders();
 		Message<?> message = MessageBuilder.createMessage("payload", headers);
 
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage("Already immutable");
-		accessor.setLeaveMutable(true);
+		assertThatIllegalStateException().isThrownBy(() ->
+				accessor.setLeaveMutable(true))
+			.withMessageContaining("Already immutable");
 
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage("Already immutable");
-		accessor.setHeader("foo", "baz");
+		assertThatIllegalStateException().isThrownBy(() ->
+				accessor.setHeader("foo", "baz"))
+			.withMessageContaining("Already immutable");
 
 		assertEquals("bar", headers.get("foo"));
 		assertSame(accessor, MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class));

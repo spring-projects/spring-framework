@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ package org.springframework.context.index;
 import java.io.IOException;
 import java.util.Set;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.io.ClassPathResource;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests for {@link CandidateComponentsIndexLoader}.
@@ -34,10 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * @author Stephane Nicoll
  */
 public class CandidateComponentsIndexLoaderTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void validateIndexIsDisabledByDefault() {
@@ -102,11 +97,10 @@ public class CandidateComponentsIndexLoaderTests {
 	@Test
 	public void loadIndexWithException() throws IOException {
 		final IOException cause = new IOException("test exception");
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage("Unable to load indexes");
-		this.thrown.expectCause(is(cause));
-		CandidateComponentsIndexLoader.loadIndex(new CandidateComponentsTestClassLoader(
-				getClass().getClassLoader(), cause));
+		assertThatIllegalStateException().isThrownBy(() -> {
+				CandidateComponentsTestClassLoader classLoader = new CandidateComponentsTestClassLoader(getClass().getClassLoader(), cause);
+				CandidateComponentsIndexLoader.loadIndex(classLoader);
+			}).withMessageContaining("Unable to load indexes").withCause(cause);
 	}
 
 }

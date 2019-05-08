@@ -474,10 +474,10 @@ public class SpringValidatorAdapterTests {
 								.addPropertyNode(f.getName())
 								.addConstraintViolation();
 					}
-				} catch (IllegalAccessException ex) {
+				}
+				catch (IllegalAccessException ex) {
 					throw new IllegalStateException(ex);
 				}
-
 			});
 			return fieldsErros.isEmpty();
 		}

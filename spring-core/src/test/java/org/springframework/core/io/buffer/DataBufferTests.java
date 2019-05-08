@@ -291,7 +291,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 			int len = inputStream.read(result);
 			assertEquals(3, len);
 			assertArrayEquals(bytes, result);
-		} finally {
+		}
+		finally {
 			inputStream.close();
 		}
 

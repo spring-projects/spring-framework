@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,7 @@ import org.junit.Test;
 import org.springframework.http.server.PathContainer;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Exercise the {@link PathPatternParser}.
@@ -186,7 +182,7 @@ public class PathPatternParserTests {
 		checkStructure("/{f}/");
 		checkStructure("/{foo}/{bar}/{wibble}");
 	}
-	
+
 	@Test
 	public void noEncoding() {
 		// Check no encoding of expressions or constraints
@@ -195,7 +191,7 @@ public class PathPatternParserTests {
 
 		pp = parse("/{var:f o}_");
 		assertEquals("Separator(/) Regex({var:f o}_)",pp.toChainString());
-		
+
 		pp = parse("{foo:f o}_ _{bar:b\\|o}");
 		assertEquals("Regex({foo:f o}_ _{bar:b\\|o})",pp.toChainString());
 	}
@@ -473,7 +469,7 @@ public class PathPatternParserTests {
 	private void assertNoMatch(PathPattern pp, String path) {
 		assertFalse(pp.matches(PathPatternTests.toPathContainer(path)));
 	}
-	
+
 	private PathPattern.PathMatchInfo matchAndExtract(PathPattern pp, String path) {
 		return pp.matchAndExtract(PathPatternTests.toPathContainer(path));
 	}

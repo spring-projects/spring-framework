@@ -320,7 +320,7 @@ public class EnableAsyncTests {
 		Awaitility.await()
 					.atMost(500, TimeUnit.MILLISECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
-					.until(()-> asyncBean.getThreadOfExecution() != null);
+					.until(() -> asyncBean.getThreadOfExecution() != null);
 		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
 		ctx.close();
 	}

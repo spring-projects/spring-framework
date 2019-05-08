@@ -22,10 +22,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hamcrest.Matchers;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +34,9 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -51,9 +50,6 @@ public class HttpMessageConverterExtractorTests {
 	private HttpMessageConverterExtractor<?> extractor;
 
 	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -158,9 +154,8 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(false);
-		exception.expect(RestClientException.class);
-
-		extractor.extractData(response);
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				extractor.extractData(response));
 	}
 
 	@Test
@@ -197,12 +192,10 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(true);
 		given(converter.read(eq(String.class), any(HttpInputMessage.class))).willThrow(IOException.class);
-		exception.expect(RestClientException.class);
-		exception.expectMessage("Error while extracting response for type " +
-				"[class java.lang.String] and content type [text/plain]");
-		exception.expectCause(Matchers.instanceOf(IOException.class));
-
-		extractor.extractData(response);
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				extractor.extractData(response))
+			.withMessageContaining("Error while extracting response for type [class java.lang.String] and content type [text/plain]")
+			.withCauseInstanceOf(IOException.class);
 	}
 
 	@Test  // SPR-13592
@@ -217,12 +210,11 @@ public class HttpMessageConverterExtractorTests {
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willThrow(HttpMessageNotReadableException.class);
-		exception.expect(RestClientException.class);
-		exception.expectMessage("Error while extracting response for type " +
-				"[class java.lang.String] and content type [text/plain]");
-		exception.expectCause(Matchers.instanceOf(HttpMessageNotReadableException.class));
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				extractor.extractData(response))
+			.withMessageContaining("Error while extracting response for type [class java.lang.String] and content type [text/plain]")
+			.withCauseInstanceOf(HttpMessageNotReadableException.class);
 
-		extractor.extractData(response);
 	}
 
 	private List<HttpMessageConverter<?>> createConverterList(HttpMessageConverter<?> converter) {

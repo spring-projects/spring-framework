@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,7 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -38,7 +36,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -46,9 +44,6 @@ import static org.mockito.BDDMockito.*;
  * @author Stephane Nicoll
  */
 public class CacheErrorHandlerTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private Cache cache;
 
@@ -100,8 +95,9 @@ public class CacheErrorHandlerTests {
 
 		this.cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
-		this.thrown.expect(is(exception));
-		this.simpleService.get(0L);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				this.simpleService.get(0L))
+			.withMessage("Test exception on get");
 	}
 
 	@Test
@@ -120,8 +116,9 @@ public class CacheErrorHandlerTests {
 
 		this.cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
-		this.thrown.expect(is(exception));
-		this.simpleService.put(0L);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				this.simpleService.put(0L))
+			.withMessage("Test exception on put");
 	}
 
 	@Test
@@ -140,8 +137,9 @@ public class CacheErrorHandlerTests {
 
 		this.cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
-		this.thrown.expect(is(exception));
-		this.simpleService.evict(0L);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				this.simpleService.evict(0L))
+			.withMessage("Test exception on evict");
 	}
 
 	@Test
@@ -155,13 +153,14 @@ public class CacheErrorHandlerTests {
 
 	@Test
 	public void clearFailProperException() {
-		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on evict");
+		UnsupportedOperationException exception = new UnsupportedOperationException("Test exception on clear");
 		willThrow(exception).given(this.cache).clear();
 
 		this.cacheInterceptor.setErrorHandler(new SimpleCacheErrorHandler());
 
-		this.thrown.expect(is(exception));
-		this.simpleService.clear();
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				this.simpleService.clear())
+			.withMessage("Test exception on clear");
 	}
 
 

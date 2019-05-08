@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,12 @@
 
 package org.springframework.oxm.jaxb;
 
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.oxm.AbstractMarshallerTests;
-import org.springframework.oxm.UncategorizedMappingException;
-import org.springframework.oxm.XmlMappingException;
-import org.springframework.oxm.jaxb.test.FlightType;
-import org.springframework.oxm.jaxb.test.Flights;
-import org.springframework.oxm.jaxb.test.ObjectFactory;
-import org.springframework.oxm.mime.MimeContainer;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.ReflectionUtils;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.Locator;
-import org.xmlunit.diff.DifferenceEvaluator;
-
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Collections;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBElement;
@@ -47,31 +33,35 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.Collections;
+
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xmlunit.diff.DifferenceEvaluator;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.oxm.AbstractMarshallerTests;
+import org.springframework.oxm.UncategorizedMappingException;
+import org.springframework.oxm.XmlMappingException;
+import org.springframework.oxm.jaxb.test.FlightType;
+import org.springframework.oxm.jaxb.test.Flights;
+import org.springframework.oxm.jaxb.test.ObjectFactory;
+import org.springframework.oxm.mime.MimeContainer;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.ReflectionUtils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.inOrder;
-import static org.mockito.BDDMockito.isA;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.reset;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
-import static org.xmlunit.diff.ComparisonType.XML_STANDALONE;
-import static org.xmlunit.diff.DifferenceEvaluators.Default;
-import static org.xmlunit.diff.DifferenceEvaluators.chain;
-import static org.xmlunit.diff.DifferenceEvaluators.downgradeDifferencesToEqual;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+import static org.xmlunit.diff.ComparisonType.*;
+import static org.xmlunit.diff.DifferenceEvaluators.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
 
 /**
  * @author Arjen Poutsma

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
-import static org.springframework.http.HttpHeaders.ORIGIN;
-import static org.springframework.http.HttpHeaders.VARY;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.http.HttpHeaders.*;
 
 /**
  * {@link DefaultCorsProcessor} tests with simple or pre-flight CORS request.

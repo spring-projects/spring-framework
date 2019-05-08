@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,7 @@ package org.springframework.transaction.event;
 
 import java.lang.reflect.Method;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;
@@ -34,10 +32,6 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  */
 public class ApplicationListenerMethodTransactionalAdapterTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void defaultPhase() {

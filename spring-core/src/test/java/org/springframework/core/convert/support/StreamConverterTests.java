@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 
 /**
@@ -41,9 +38,6 @@ import static org.junit.Assert.*;
  * @since 4.2
  */
 public class StreamConverterTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	private final GenericConversionService conversionService = new GenericConversionService();
 
@@ -112,10 +106,9 @@ public class StreamConverterTests {
 	public void convertFromStreamToArrayNoConverter() throws NoSuchFieldException {
 		Stream<Integer> stream = Arrays.asList(1, 2, 3).stream();
 		TypeDescriptor arrayOfLongs = new TypeDescriptor(Types.class.getField("arrayOfLongs"));
-
-		thrown.expect(ConversionFailedException.class);
-		thrown.expectCause(is(instanceOf(ConverterNotFoundException.class)));
-		this.conversionService.convert(stream, arrayOfLongs);
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				this.conversionService.convert(stream, arrayOfLongs))
+			.withCauseInstanceOf(ConverterNotFoundException.class);
 	}
 
 	@Test
@@ -130,7 +123,7 @@ public class StreamConverterTests {
 		assertTrue("Converted object must be a stream", result instanceof Stream);
 		@SuppressWarnings("unchecked")
 		Stream<Integer> content = (Stream<Integer>) result;
-		assertEquals(6, content.mapToInt((x) -> x).sum());
+		assertEquals(6, content.mapToInt(x -> x).sum());
 	}
 
 	@Test
@@ -178,9 +171,10 @@ public class StreamConverterTests {
 
 	@Test
 	public void shouldFailToConvertIfNoStream() throws NoSuchFieldException {
-		thrown.expect(IllegalStateException.class);
-		this.streamConverter.convert(new Object(), new TypeDescriptor(Types.class.getField("listOfStrings")),
-				new TypeDescriptor(Types.class.getField("arrayOfLongs")));
+		TypeDescriptor sourceType = new TypeDescriptor(Types.class.getField("listOfStrings"));
+		TypeDescriptor targetType = new TypeDescriptor(Types.class.getField("arrayOfLongs"));
+		assertThatIllegalStateException().isThrownBy(() ->
+			this.streamConverter.convert(new Object(), sourceType, targetType));
 	}
 
 

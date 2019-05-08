@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -42,10 +41,6 @@ import static org.springframework.util.ObjectUtils.*;
  * @author Sam Brannen
  */
 public class ObjectUtilsTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	public void isCheckedException() {
@@ -170,8 +165,8 @@ public class ObjectUtilsTests {
 
 	@Test
 	public void toObjectArrayWithNonArrayType() {
-		exception.expect(IllegalArgumentException.class);
-		ObjectUtils.toObjectArray("Not an []");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ObjectUtils.toObjectArray("Not an []"));
 	}
 
 	@Test
@@ -808,10 +803,9 @@ public class ObjectUtilsTests {
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "foo"), is(Tropes.FOO));
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR"), is(Tropes.BAR));
 
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(
-				is("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes"));
-		ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus"))
+			.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
 	}
 
 	private void assertEqualHashCodes(int expected, Object array) {

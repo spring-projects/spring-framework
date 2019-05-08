@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
@@ -36,6 +34,7 @@ import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -56,9 +55,6 @@ public class ClientSockJsSessionTests {
 	private WebSocketHandler handler;
 
 	private SettableListenableFuture<WebSocketSession> connectFuture;
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 
 	@Before
@@ -190,17 +186,17 @@ public class ClientSockJsSessionTests {
 	@Test
 	public void closeWithNullStatus() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Invalid close status");
-		this.session.close(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.session.close(null))
+			.withMessageContaining("Invalid close status");
 	}
 
 	@Test
 	public void closeWithStatusOutOfRange() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Invalid close status");
-		this.session.close(new CloseStatus(2999, "reason"));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.session.close(new CloseStatus(2999, "reason")))
+			.withMessageContaining("Invalid close status");
 	}
 
 	@Test

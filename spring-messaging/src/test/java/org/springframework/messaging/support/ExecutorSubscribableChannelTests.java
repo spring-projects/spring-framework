@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package org.springframework.messaging.support;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -33,6 +31,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.MessageHandler;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -44,9 +43,6 @@ import static org.mockito.BDDMockito.*;
  * @author Phillip Webb
  */
 public class ExecutorSubscribableChannelTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
 
@@ -69,9 +65,9 @@ public class ExecutorSubscribableChannelTests {
 
 	@Test
 	public void messageMustNotBeNull() {
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Message must not be null");
-		this.channel.send(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.channel.send(null))
+			.withMessageContaining("Message must not be null");
 	}
 
 	@Test

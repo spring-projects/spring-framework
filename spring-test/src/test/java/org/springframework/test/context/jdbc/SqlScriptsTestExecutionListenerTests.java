@@ -16,10 +16,7 @@
 
 package org.springframework.test.context.jdbc;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import org.mockito.BDDMockito;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -29,8 +26,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -44,9 +41,6 @@ public class SqlScriptsTestExecutionListenerTests {
 	private final SqlScriptsTestExecutionListener listener = new SqlScriptsTestExecutionListener();
 
 	private final TestContext testContext = mock(TestContext.class);
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -73,15 +67,11 @@ public class SqlScriptsTestExecutionListenerTests {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
 
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(either(
-				containsString("attribute 'value' and its alias 'scripts'")).or(
-				containsString("attribute 'scripts' and its alias 'value'")));
-		exception.expectMessage(either(containsString("values of [{foo}] and [{bar}]")).or(
-				containsString("values of [{bar}] and [{foo}]")));
-		exception.expectMessage(either(containsString("but only one is permitted")).or(
-				containsString("Different @AliasFor mirror values")));
-		listener.beforeTestMethod(testContext);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				listener.beforeTestMethod(testContext))
+			.withMessageContaining("Different @AliasFor mirror values")
+			.withMessageContaining("attribute 'scripts' and its alias 'value'")
+			.withMessageContaining("values of [{bar}] and [{foo}]");
 	}
 
 	@Test
@@ -113,14 +103,9 @@ public class SqlScriptsTestExecutionListenerTests {
 	}
 
 	private void assertExceptionContains(String msg) throws Exception {
-		try {
-			listener.beforeTestMethod(testContext);
-			fail("Should have thrown an IllegalStateException.");
-		}
-		catch (IllegalStateException e) {
-			// System.err.println(e.getMessage());
-			assertTrue("Exception message should contain: " + msg, e.getMessage().contains(msg));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				listener.beforeTestMethod(testContext))
+			.withMessageContaining(msg);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImp
 import example.scannable_implicitbasepackage.ConfigurableComponent;
 import example.scannable_scoped.CustomScopeAnnotationBean;
 import example.scannable_scoped.MyScope;
-
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
@@ -393,7 +392,9 @@ class ComponentScanWithCustomTypeFilter {
 	@SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 	public static CustomAutowireConfigurer customAutowireConfigurer() {
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
-		cac.setCustomQualifierTypes(new HashSet() {{ add(ComponentScanParserTests.CustomAnnotation.class); }});
+		cac.setCustomQualifierTypes(new HashSet() {{
+				add(ComponentScanParserTests.CustomAnnotation.class);
+		}});
 		return cac;
 	}
 

@@ -79,9 +79,9 @@ public class DefaultMultipartMessageReaderTests extends AbstractDataBufferAlloca
 		Flux<Part> result = this.reader.read(forClass(Part.class), request, emptyMap());
 
 		StepVerifier.create(result)
-				.consumeNextWith(part -> {
-					part.content().subscribe(DataBufferUtils::release);
-				})
+				.consumeNextWith(part ->
+					part.content().subscribe(DataBufferUtils::release)
+				)
 				.verifyComplete();
 	}
 

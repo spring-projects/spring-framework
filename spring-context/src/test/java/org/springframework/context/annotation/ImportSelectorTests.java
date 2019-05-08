@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -154,7 +156,7 @@ public class ImportSelectorTests {
 		ordered.verify(beanFactory).registerBeanDefinition(eq("e"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 		assertThat(TestImportGroup.instancesCount.get(), equalTo(2));
- 		assertThat(TestImportGroup.imports.size(), equalTo(2));
+		assertThat(TestImportGroup.imports.size(), equalTo(2));
 		assertThat(TestImportGroup.allImports(), hasEntry(
 				is(ParentConfiguration1.class.getName()),
 				IsIterableContainingInOrder.contains(DeferredImportSelector1.class.getName(),
@@ -529,7 +531,7 @@ public class ImportSelectorTests {
 		static Map<String, List<String>> allImports() {
 			return TestImportGroup.imports.entrySet()
 					.stream()
-					.collect(Collectors.toMap((entry) -> entry.getKey().getClassName(),
+					.collect(Collectors.toMap(entry -> entry.getKey().getClassName(),
 							Map.Entry::getValue));
 		}
 		private final List<Entry> instanceImports = new ArrayList<>();

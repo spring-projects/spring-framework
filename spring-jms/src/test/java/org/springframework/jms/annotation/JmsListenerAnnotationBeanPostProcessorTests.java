@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
@@ -47,7 +45,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -56,10 +54,6 @@ import static org.mockito.Mockito.*;
  * @author Juergen Hoeller
  */
 public class JmsListenerAnnotationBeanPostProcessorTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void simpleMessageListener() throws Exception {
@@ -171,10 +165,10 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 	@Test
 	@SuppressWarnings("resource")
 	public void invalidProxy() {
-		thrown.expect(BeanCreationException.class);
-		thrown.expectCause(is(instanceOf(IllegalStateException.class)));
-		thrown.expectMessage("handleIt2");
-		new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, InvalidProxyTestBean.class);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, InvalidProxyTestBean.class))
+			.withCauseInstanceOf(IllegalStateException.class)
+			.withMessageContaining("handleIt2");
 	}
 
 

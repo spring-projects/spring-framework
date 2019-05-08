@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests to ensure back-compatibility with Spring Framework 5.1.

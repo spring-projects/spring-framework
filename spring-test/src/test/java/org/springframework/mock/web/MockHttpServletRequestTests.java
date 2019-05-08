@@ -29,14 +29,13 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.Cookie;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 
 /**
@@ -55,9 +54,6 @@ public class MockHttpServletRequestTests {
 	private static final String HOST = "Host";
 
 	private final MockHttpServletRequest request = new MockHttpServletRequest();
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -104,9 +100,9 @@ public class MockHttpServletRequestTests {
 
 	@Test
 	public void getContentAsStringWithoutSettingCharacterEncoding() throws IOException {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Cannot get content as a String for a null character encoding");
-		request.getContentAsString();
+		assertThatIllegalStateException().isThrownBy(
+				request::getContentAsString)
+			.withMessageContaining("Cannot get content as a String for a null character encoding");
 	}
 
 	@Test
@@ -142,20 +138,18 @@ public class MockHttpServletRequestTests {
 
 	@Test  // SPR-16499
 	public void getReaderAfterGettingInputStream() throws IOException {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(
-				"Cannot call getReader() after getInputStream() has already been called for the current request");
 		request.getInputStream();
-		request.getReader();
+		assertThatIllegalStateException().isThrownBy(
+				request::getReader)
+			.withMessageContaining("Cannot call getReader() after getInputStream() has already been called for the current request");
 	}
 
 	@Test  // SPR-16499
 	public void getInputStreamAfterGettingReader() throws IOException {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(
-				"Cannot call getInputStream() after getReader() has already been called for the current request");
 		request.getReader();
-		request.getInputStream();
+		assertThatIllegalStateException().isThrownBy(
+				request::getInputStream)
+			.withMessageContaining("Cannot call getInputStream() after getReader() has already been called for the current request");
 	}
 
 	@Test

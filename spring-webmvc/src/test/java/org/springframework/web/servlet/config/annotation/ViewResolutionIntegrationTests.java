@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package org.springframework.web.servlet.config.annotation;
 import java.io.IOException;
 import javax.servlet.ServletException;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +38,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for view resolution with {@code @EnableWebMvc}.
@@ -49,10 +48,6 @@ import static org.junit.Assert.assertEquals;
  * @since 4.1
  */
 public class ViewResolutionIntegrationTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void freemarker() throws Exception {
@@ -74,20 +69,23 @@ public class ViewResolutionIntegrationTests {
 
 	@Test
 	public void freemarkerInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a FreeMarker view resolver ");
-		runTest(InvalidFreeMarkerWebConfig.class);
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				runTest(InvalidFreeMarkerWebConfig.class))
+			.withMessageContaining("In addition to a FreeMarker view resolver ");
 	}
 
 	@Test
 	public void tilesInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a Tiles view resolver ");
-		runTest(InvalidTilesWebConfig.class);
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				runTest(InvalidTilesWebConfig.class))
+			.withMessageContaining("In addition to a Tiles view resolver ");
 	}
 
 	@Test
 	public void groovyMarkupInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a Groovy markup view resolver ");
-		runTest(InvalidGroovyMarkupWebConfig.class);
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				runTest(InvalidGroovyMarkupWebConfig.class))
+			.withMessageContaining("In addition to a Groovy markup view resolver ");
 	}
 
 	// SPR-12013

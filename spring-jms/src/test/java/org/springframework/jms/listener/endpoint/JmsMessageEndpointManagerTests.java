@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,17 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.jms.support.QosSettings;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
  */
 public class JmsMessageEndpointManagerTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void isPubSubDomainWithQueue() {
@@ -79,25 +75,25 @@ public class JmsMessageEndpointManagerTests {
 	@Test
 	public void isPubSubDomainWithNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
-
-		this.thrown.expect(IllegalStateException.class); // far from ideal
-		endpoint.isPubSubDomain();
+		// far from ideal
+		assertThatIllegalStateException().isThrownBy(
+				endpoint::isPubSubDomain);
 	}
 
 	@Test
 	public void isReplyPubSubDomainWithNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
-
-		this.thrown.expect(IllegalStateException.class); // far from ideal
-		endpoint.isReplyPubSubDomain();
+		// far from ideal
+		assertThatIllegalStateException().isThrownBy(
+				endpoint::isReplyPubSubDomain);
 	}
 
 	@Test
 	public void getReplyQosSettingsWithNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
-
-		this.thrown.expect(IllegalStateException.class); // far from ideal
-		endpoint.getReplyQosSettings();
+		// far from ideal
+		assertThatIllegalStateException().isThrownBy(
+				endpoint::getReplyQosSettings);
 	}
 
 	@Test

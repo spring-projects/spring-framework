@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,7 @@ import javax.security.auth.Subject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.BeansException;
@@ -102,9 +100,11 @@ import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringValueResolver;
 
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -122,9 +122,6 @@ public class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -1483,9 +1480,9 @@ public class DefaultListableBeanFactoryTests {
 		bd2.setPrimary(true);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
-		thrown.expect(NoUniqueBeanDefinitionException.class);
-		thrown.expectMessage(containsString("more than one 'primary'"));
-		lbf.getBean(TestBean.class);
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(() ->
+				lbf.getBean(TestBean.class))
+			.withMessageContaining("more than one 'primary'");
 	}
 
 	@Test
@@ -1528,10 +1525,10 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd2 = new RootBeanDefinition(HighPriorityTestBean.class);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
-		thrown.expect(NoUniqueBeanDefinitionException.class);
-		thrown.expectMessage(containsString("Multiple beans found with the same priority"));
-		thrown.expectMessage(containsString("5"));  // conflicting priority
-		lbf.getBean(TestBean.class);
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(() ->
+				lbf.getBean(TestBean.class))
+			.withMessageContaining("Multiple beans found with the same priority")
+			.withMessageContaining("5"); // conflicting priority
 	}
 
 	@Test
@@ -1778,9 +1775,9 @@ public class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
 
-		thrown.expect(NoUniqueBeanDefinitionException.class);
-		thrown.expectMessage(containsString("more than one 'primary'"));
-		lbf.getBean(ConstructorDependency.class, 42);
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(() ->
+				lbf.getBean(ConstructorDependency.class, 42))
+			.withMessageContaining("more than one 'primary'");
 	}
 
 	@Test

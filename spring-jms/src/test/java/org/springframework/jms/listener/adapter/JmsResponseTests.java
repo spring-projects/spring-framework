@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,18 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.jms.support.destination.DestinationResolver;
 
-import static org.junit.Assert.assertSame;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Stephane Nicoll
  */
 public class JmsResponseTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void destinationDoesNotUseDestinationResolver() throws JMSException {
@@ -59,26 +54,26 @@ public class JmsResponseTests {
 
 	@Test
 	public void createWithNulResponse() {
-		thrown.expect(IllegalArgumentException.class);
-		JmsResponse.forQueue(null, "myQueue");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				JmsResponse.forQueue(null, "myQueue"));
 	}
 
 	@Test
 	public void createWithNullQueueName() {
-		thrown.expect(IllegalArgumentException.class);
-		JmsResponse.forQueue("foo", null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				JmsResponse.forQueue("foo", null));
 	}
 
 	@Test
 	public void createWithNullTopicName() {
-		thrown.expect(IllegalArgumentException.class);
-		JmsResponse.forTopic("foo", null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				JmsResponse.forTopic("foo", null));
 	}
 
 	@Test
 	public void createWithNulDestination() {
-		thrown.expect(IllegalArgumentException.class);
-		JmsResponse.forDestination("foo", null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				JmsResponse.forDestination("foo", null));
 	}
 
 }

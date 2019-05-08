@@ -31,16 +31,8 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.WebFilterChain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_MAX_AGE;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS;
-import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
-import static org.springframework.http.HttpHeaders.HOST;
-import static org.springframework.http.HttpHeaders.ORIGIN;
+import static org.junit.Assert.*;
+import static org.springframework.http.HttpHeaders.*;
 
 /**
  * Unit tests for {@link CorsWebFilter}.
@@ -65,12 +57,13 @@ public class CorsWebFilterTests {
 
 	@Test
 	public void nonCorsRequest() {
-		WebFilterChain filterChain = (filterExchange) -> {
+		WebFilterChain filterChain = filterExchange -> {
 			try {
 				HttpHeaders headers = filterExchange.getResponse().getHeaders();
 				assertNull(headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 				assertNull(headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
-			} catch (AssertionError ex) {
+			}
+			catch (AssertionError ex) {
 				return Mono.error(ex);
 			}
 			return Mono.empty();
@@ -85,12 +78,13 @@ public class CorsWebFilterTests {
 
 	@Test
 	public void sameOriginRequest() {
-		WebFilterChain filterChain = (filterExchange) -> {
+		WebFilterChain filterChain = filterExchange -> {
 			try {
 				HttpHeaders headers = filterExchange.getResponse().getHeaders();
 				assertNull(headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 				assertNull(headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
-			} catch (AssertionError ex) {
+			}
+			catch (AssertionError ex) {
 				return Mono.error(ex);
 			}
 			return Mono.empty();
@@ -105,12 +99,13 @@ public class CorsWebFilterTests {
 
 	@Test
 	public void validActualRequest() {
-		WebFilterChain filterChain = (filterExchange) -> {
+		WebFilterChain filterChain = filterExchange -> {
 			try {
 				HttpHeaders headers = filterExchange.getResponse().getHeaders();
 				assertEquals("https://domain2.com", headers.getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 				assertEquals("header3, header4", headers.getFirst(ACCESS_CONTROL_EXPOSE_HEADERS));
-			} catch (AssertionError ex) {
+			}
+			catch (AssertionError ex) {
 				return Mono.error(ex);
 			}
 			return Mono.empty();
@@ -134,7 +129,7 @@ public class CorsWebFilterTests {
 						.header(ORIGIN, "https://domain2.com")
 						.header("header2", "foo"));
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
+		WebFilterChain filterChain = filterExchange -> Mono.error(
 				new AssertionError("Invalid requests must not be forwarded to the filter chain"));
 		filter.filter(exchange, filterChain).block();
 		assertNull(exchange.getResponse().getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
@@ -152,7 +147,7 @@ public class CorsWebFilterTests {
 						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2")
 		);
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
+		WebFilterChain filterChain = filterExchange -> Mono.error(
 				new AssertionError("Preflight requests must not be forwarded to the filter chain"));
 		filter.filter(exchange, filterChain).block();
 
@@ -174,7 +169,7 @@ public class CorsWebFilterTests {
 						.header(ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.DELETE.name())
 						.header(ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2"));
 
-		WebFilterChain filterChain = (filterExchange) -> Mono.error(
+		WebFilterChain filterChain = filterExchange -> Mono.error(
 				new AssertionError("Preflight requests must not be forwarded to the filter chain"));
 
 		filter.filter(exchange, filterChain).block();

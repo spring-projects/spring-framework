@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,7 @@ import java.lang.reflect.Method;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.jms.StubTextMessage;
@@ -49,10 +47,6 @@ import static org.mockito.Mockito.*;
  * @author Stephane Nicoll
  */
 public abstract class AbstractJmsAnnotationDrivenTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public abstract void sampleConfiguration();

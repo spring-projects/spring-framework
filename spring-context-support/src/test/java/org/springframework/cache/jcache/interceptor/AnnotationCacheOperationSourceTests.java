@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.cache.jcache.support.TestableCacheResolverFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -99,8 +100,8 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 	@Test
 	public void multiAnnotations() {
-		thrown.expect(IllegalStateException.class);
-		getCacheOperation(InvalidCases.class, name.getMethodName());
+		assertThatIllegalStateException().isThrownBy(() ->
+				getCacheOperation(InvalidCases.class, name.getMethodName()));
 	}
 
 	@Test

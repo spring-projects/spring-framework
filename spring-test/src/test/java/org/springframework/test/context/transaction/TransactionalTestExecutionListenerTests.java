@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.BDDMockito;
 
 import org.springframework.beans.BeanUtils;
@@ -58,9 +56,6 @@ public class TransactionalTestExecutionListenerTests {
 	};
 
 	private final TestContext testContext = mock(TestContext.class);
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 
 	@After

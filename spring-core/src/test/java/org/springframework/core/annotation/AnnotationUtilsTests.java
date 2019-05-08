@@ -33,9 +33,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
@@ -44,6 +42,7 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.*;
 import static java.util.stream.Collectors.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
@@ -60,10 +59,6 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  */
 @SuppressWarnings("deprecation")
 public class AnnotationUtilsTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Before
 	public void clearCacheBeforeTests() {
@@ -497,13 +492,12 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void getAnnotationAttributesWithAttributeAliasesWithDifferentValues() throws Exception {
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("attribute 'path' and its alias 'value'"));
-		exception.expectMessage(containsString("values of [{/test}] and [{/enigma}]"));
-
 		Method method = WebController.class.getMethod("handleMappedWithDifferentPathAndValueAttributes");
 		WebMapping webMapping = method.getAnnotation(WebMapping.class);
-		getAnnotationAttributes(webMapping);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				getAnnotationAttributes(webMapping))
+			.withMessageContaining("attribute 'path' and its alias 'value'")
+			.withMessageContaining("values of [{/test}] and [{/enigma}]");
 	}
 
 	@Test
@@ -570,14 +564,12 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void getRepeatableAnnotationsDeclaredOnClassWithMissingAttributeAliasDeclaration() throws Exception {
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(startsWith("Attribute 'value' in"));
-		exception.expectMessage(containsString(BrokenContextConfig.class.getName()));
-		exception.expectMessage(either(
-				containsString("@AliasFor [location]")).or(
-				containsString("@AliasFor 'location'")));
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				getRepeatableAnnotations(BrokenConfigHierarchyTestCase.class, BrokenContextConfig.class, BrokenHierarchy.class))
+			.withMessageStartingWith("Attribute 'value' in")
+			.withMessageContaining(BrokenContextConfig.class.getName())
+			.withMessageContaining("@AliasFor 'location'");
 
-		getRepeatableAnnotations(BrokenConfigHierarchyTestCase.class, BrokenContextConfig.class, BrokenHierarchy.class);
 	}
 
 	@Test
@@ -748,13 +740,12 @@ public class AnnotationUtilsTests {
 		ImplicitAliasesWithMissingDefaultValuesContextConfig config = clazz.getAnnotation(annotationType);
 		assertNotNull(config);
 
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(startsWith("Misconfigured aliases:"));
-		exception.expectMessage(containsString("attribute 'location1' in annotation [" + annotationType.getName() + "]"));
-		exception.expectMessage(containsString("attribute 'location2' in annotation [" + annotationType.getName() + "]"));
-		exception.expectMessage(containsString("default values"));
-
-		synthesizeAnnotation(config, clazz);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				synthesizeAnnotation(config, clazz))
+			.withMessageStartingWith("Misconfigured aliases:")
+			.withMessageContaining("attribute 'location1' in annotation [" + annotationType.getName() + "]")
+			.withMessageContaining("attribute 'location2' in annotation [" + annotationType.getName() + "]")
+			.withMessageContaining("default values");
 	}
 
 	@Test
@@ -763,14 +754,12 @@ public class AnnotationUtilsTests {
 		Class<ImplicitAliasesWithDifferentDefaultValuesContextConfig> annotationType = ImplicitAliasesWithDifferentDefaultValuesContextConfig.class;
 		ImplicitAliasesWithDifferentDefaultValuesContextConfig config = clazz.getAnnotation(annotationType);
 		assertNotNull(config);
-
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(startsWith("Misconfigured aliases:"));
-		exception.expectMessage(containsString("attribute 'location1' in annotation [" + annotationType.getName() + "]"));
-		exception.expectMessage(containsString("attribute 'location2' in annotation [" + annotationType.getName() + "]"));
-		exception.expectMessage(containsString("same default value"));
-
-		synthesizeAnnotation(config, clazz);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				synthesizeAnnotation(config, clazz))
+			.withMessageStartingWith("Misconfigured aliases:")
+			.withMessageContaining("attribute 'location1' in annotation [" + annotationType.getName() + "]")
+			.withMessageContaining("attribute 'location2' in annotation [" + annotationType.getName() + "]")
+			.withMessageContaining("same default value");
 	}
 
 	@Test
@@ -780,16 +769,14 @@ public class AnnotationUtilsTests {
 		ImplicitAliasesWithDuplicateValuesContextConfig config = clazz.getAnnotation(annotationType);
 		assertNotNull(config);
 
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(either(startsWith("In annotation")).or(startsWith("Different @AliasFor mirror values")));
-		exception.expectMessage(containsString(annotationType.getName()));
-		exception.expectMessage(containsString("declared on class"));
-		exception.expectMessage(containsString(clazz.getName()));
-		exception.expectMessage(either(containsString("attribute 'location1' and its alias 'location2'")).or(
-				containsString("attribute 'location2' and its alias 'location1'")));
-		exception.expectMessage(either(containsString("with values of [1] and [2]")).or(
-				containsString("with values of [2] and [1]")));
-		synthesizeAnnotation(config, clazz).location1();
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				synthesizeAnnotation(config, clazz).location1())
+			.withMessageStartingWith("Different @AliasFor mirror values")
+			.withMessageContaining(annotationType.getName())
+			.withMessageContaining("declared on class")
+			.withMessageContaining(clazz.getName())
+			.withMessageContaining("attribute 'location1' and its alias 'location2'")
+			.withMessageContaining("with values of [1] and [2]");
 	}
 
 	@Test
@@ -940,22 +927,18 @@ public class AnnotationUtilsTests {
 	}
 
 	private void assertMissingTextAttribute(Map<String, Object> attributes) {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(either(allOf(startsWith("Attributes map"),
-				containsString("returned null for required attribute 'text'"),
-				containsString("defined by annotation type [" + AnnotationWithoutDefaults.class.getName() + "]"))).or(
-								containsString("No value found for attribute named 'text' in merged annotation")));
-		synthesizeAnnotation(attributes, AnnotationWithoutDefaults.class, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				synthesizeAnnotation(attributes, AnnotationWithoutDefaults.class, null))
+			.withMessageContaining("No value found for attribute named 'text' in merged annotation");
 	}
 
 	@Test
 	public void synthesizeAnnotationFromMapWithAttributeOfIncorrectType() throws Exception {
 		Map<String, Object> map = Collections.singletonMap(VALUE, 42L);
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(containsString(
-				"Attribute 'value' in annotation org.springframework.stereotype.Component " +
-				"should be compatible with java.lang.String but a java.lang.Long value was returned"));
-		synthesizeAnnotation(map, Component.class, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				synthesizeAnnotation(map, Component.class, null))
+			.withMessageContaining("Attribute 'value' in annotation org.springframework.stereotype.Component "
+					+ "should be compatible with java.lang.String but a java.lang.Long value was returned");
 	}
 
 	@Test

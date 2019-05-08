@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,10 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Rule;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.CoreMatchers.isA;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 
@@ -51,33 +48,29 @@ import static org.springframework.core.annotation.AnnotatedElementUtils.*;
  */
 public class ComposedRepeatableAnnotationsTests {
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	public void getNonRepeatableAnnotation() {
-		expectNonRepeatableAnnotation();
-		getMergedRepeatableAnnotations(getClass(), NonRepeatable.class);
+		expectNonRepeatableAnnotation(() ->
+				getMergedRepeatableAnnotations(getClass(), NonRepeatable.class));
 	}
 
 	@Test
 	public void getInvalidRepeatableAnnotationContainerMissingValueAttribute() {
-		expectContainerMissingValueAttribute();
-		getMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerMissingValueAttribute.class);
+		expectContainerMissingValueAttribute(() ->
+				getMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerMissingValueAttribute.class));
 	}
 
 	@Test
 	public void getInvalidRepeatableAnnotationContainerWithNonArrayValueAttribute() {
-		expectContainerWithNonArrayValueAttribute();
-		getMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerWithNonArrayValueAttribute.class);
+		expectContainerWithNonArrayValueAttribute(() ->
+				getMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerWithNonArrayValueAttribute.class));
 	}
 
 	@Test
 	public void getInvalidRepeatableAnnotationContainerWithArrayValueAttributeButWrongComponentType() {
-		expectContainerWithArrayValueAttributeButWrongComponentType();
-		getMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class,
-			ContainerWithArrayValueAttributeButWrongComponentType.class);
+		expectContainerWithArrayValueAttributeButWrongComponentType(() ->
+				getMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerWithArrayValueAttributeButWrongComponentType.class));
 	}
 
 	@Test
@@ -122,27 +115,27 @@ public class ComposedRepeatableAnnotationsTests {
 
 	@Test
 	public void findNonRepeatableAnnotation() {
-		expectNonRepeatableAnnotation();
-		findMergedRepeatableAnnotations(getClass(), NonRepeatable.class);
+		expectNonRepeatableAnnotation(() ->
+				findMergedRepeatableAnnotations(getClass(), NonRepeatable.class));
 	}
 
 	@Test
 	public void findInvalidRepeatableAnnotationContainerMissingValueAttribute() {
-		expectContainerMissingValueAttribute();
-		findMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerMissingValueAttribute.class);
+		expectContainerMissingValueAttribute(() ->
+				findMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerMissingValueAttribute.class));
 	}
 
 	@Test
 	public void findInvalidRepeatableAnnotationContainerWithNonArrayValueAttribute() {
-		expectContainerWithNonArrayValueAttribute();
-		findMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerWithNonArrayValueAttribute.class);
+		expectContainerWithNonArrayValueAttribute(() ->
+				findMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class, ContainerWithNonArrayValueAttribute.class));
 	}
 
 	@Test
 	public void findInvalidRepeatableAnnotationContainerWithArrayValueAttributeButWrongComponentType() {
-		expectContainerWithArrayValueAttributeButWrongComponentType();
-		findMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class,
-			ContainerWithArrayValueAttributeButWrongComponentType.class);
+		expectContainerWithArrayValueAttributeButWrongComponentType(() ->
+				findMergedRepeatableAnnotations(getClass(), InvalidRepeatable.class,
+					ContainerWithArrayValueAttributeButWrongComponentType.class));
 	}
 
 	@Test
@@ -184,36 +177,36 @@ public class ComposedRepeatableAnnotationsTests {
 		assertFindRepeatableAnnotations(ComposedContainerClass.class);
 	}
 
-	private void expectNonRepeatableAnnotation() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Annotation type must be a repeatable annotation"));
-		exception.expectMessage(containsString("failed to resolve container type for"));
-		exception.expectMessage(containsString(NonRepeatable.class.getName()));
+	private void expectNonRepeatableAnnotation(ThrowingCallable throwingCallable) {
+		assertThatIllegalArgumentException().isThrownBy(throwingCallable)
+			.withMessageStartingWith("Annotation type must be a repeatable annotation")
+			.withMessageContaining("failed to resolve container type for")
+			.withMessageContaining(NonRepeatable.class.getName());
 	}
 
-	private void expectContainerMissingValueAttribute() {
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(startsWith("Invalid declaration of container type"));
-		exception.expectMessage(containsString(ContainerMissingValueAttribute.class.getName()));
-		exception.expectMessage(containsString("for repeatable annotation"));
-		exception.expectMessage(containsString(InvalidRepeatable.class.getName()));
-		exception.expectCause(isA(NoSuchMethodException.class));
+	private void expectContainerMissingValueAttribute(ThrowingCallable throwingCallable) {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(throwingCallable)
+			.withMessageStartingWith("Invalid declaration of container type")
+			.withMessageContaining(ContainerMissingValueAttribute.class.getName())
+			.withMessageContaining("for repeatable annotation")
+			.withMessageContaining(InvalidRepeatable.class.getName())
+			.withCauseExactlyInstanceOf(NoSuchMethodException.class);
 	}
 
-	private void expectContainerWithNonArrayValueAttribute() {
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(startsWith("Container type"));
-		exception.expectMessage(containsString(ContainerWithNonArrayValueAttribute.class.getName()));
-		exception.expectMessage(containsString("must declare a 'value' attribute for an array of type"));
-		exception.expectMessage(containsString(InvalidRepeatable.class.getName()));
+	private void expectContainerWithNonArrayValueAttribute(ThrowingCallable throwingCallable) {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(throwingCallable)
+			.withMessageStartingWith("Container type")
+			.withMessageContaining(ContainerWithNonArrayValueAttribute.class.getName())
+			.withMessageContaining("must declare a 'value' attribute for an array of type")
+			.withMessageContaining(InvalidRepeatable.class.getName());
 	}
 
-	private void expectContainerWithArrayValueAttributeButWrongComponentType() {
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(startsWith("Container type"));
-		exception.expectMessage(containsString(ContainerWithArrayValueAttributeButWrongComponentType.class.getName()));
-		exception.expectMessage(containsString("must declare a 'value' attribute for an array of type"));
-		exception.expectMessage(containsString(InvalidRepeatable.class.getName()));
+	private void expectContainerWithArrayValueAttributeButWrongComponentType(ThrowingCallable throwingCallable) {
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(throwingCallable)
+			.withMessageStartingWith("Container type")
+			.withMessageContaining(ContainerWithArrayValueAttributeButWrongComponentType.class.getName())
+			.withMessageContaining("must declare a 'value' attribute for an array of type")
+			.withMessageContaining(InvalidRepeatable.class.getName());
 	}
 
 	private void assertGetRepeatableAnnotations(AnnotatedElement element) {

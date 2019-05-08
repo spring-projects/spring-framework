@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.springframework.core.task;
 
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.util.ConcurrencyThrottleSupport;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -35,17 +35,13 @@ import static org.junit.Assert.*;
  */
 public class SimpleAsyncTaskExecutorTests {
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
-
 	@Test
 	public void cannotExecuteWhenConcurrencyIsSwitchedOff() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
 		executor.setConcurrencyLimit(ConcurrencyThrottleSupport.NO_CONCURRENCY);
 		assertTrue(executor.isThrottleActive());
-		exception.expect(IllegalStateException.class);
-		executor.execute(new NoOpRunnable());
+		assertThatIllegalStateException().isThrownBy(() ->
+				executor.execute(new NoOpRunnable()));
 	}
 
 	@Test
@@ -80,8 +76,8 @@ public class SimpleAsyncTaskExecutorTests {
 
 	@Test
 	public void throwsExceptionWhenSuppliedWithNullRunnable() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		new SimpleAsyncTaskExecutor().execute(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SimpleAsyncTaskExecutor().execute(null));
 	}
 
 	private void executeAndWait(SimpleAsyncTaskExecutor executor, Runnable task, Object monitor) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.pattern.PathPattern;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.all;
-import static org.springframework.web.reactive.function.server.RequestPredicates.method;
-import static org.springframework.web.reactive.function.server.RequestPredicates.path;
-import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
 /**
  * @author Arjen Poutsma
@@ -141,7 +137,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 			Flux<String> responseBody;
 			if (!pattern.isEmpty()) {
 				responseBody = Flux.just(pattern, "\n", pathVariables.toString());
-			} else {
+			}
+			else {
 				responseBody = Flux.just(pathVariables.toString());
 			}
 			return ServerResponse.ok().body(responseBody, String.class);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,9 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLInputFactory;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
@@ -37,6 +35,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 
 /**
@@ -56,9 +55,6 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 	private Type typeListType;
 
 	private Type typeSetType;
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Before
@@ -199,9 +195,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 				"]>\n" +
 				"<list><rootElement><external>&lol9;</external></rootElement></list>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
-		this.thrown.expect(HttpMessageNotReadableException.class);
-		this.thrown.expectMessage("\"lol9\"");
-		this.converter.read(this.rootElementListType, null, inputMessage);
+		assertThatExceptionOfType(HttpMessageNotReadableException.class).isThrownBy(() ->
+				this.converter.read(this.rootElementListType, null, inputMessage))
+			.withMessageContaining("\"lol9\"");
 	}
 
 

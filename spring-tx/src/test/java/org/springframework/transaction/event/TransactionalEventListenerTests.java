@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -65,9 +63,6 @@ public class TransactionalEventListenerTests {
 	private EventCollector eventCollector;
 
 	private TransactionTemplate transactionTemplate = new TransactionTemplate(new CallCountingTransactionManager());
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 
 	@After

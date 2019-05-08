@@ -16,10 +16,11 @@
 
 package org.springframework.core.env;
 
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
-
 import org.junit.Test;
+
 import org.springframework.context.support.GenericApplicationContext;
+
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 
 public class PropertyPlaceholderConfigurerEnvironmentIntegrationTests {
 

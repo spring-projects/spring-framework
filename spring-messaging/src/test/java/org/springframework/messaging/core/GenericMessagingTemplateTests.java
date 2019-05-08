@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -38,6 +39,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -130,9 +132,7 @@ public class GenericMessagingTemplateTests {
 		SubscribableChannel channel = mock(SubscribableChannel.class);
 		MessageHandler handler = createLateReplier(latch, failure);
 		doAnswer(invocation -> {
-			this.executor.execute(() -> {
-				handler.handleMessage(invocation.getArgument(0));
-			});
+			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));
 			return true;
 		}).when(channel).send(any(Message.class), anyLong());
 
@@ -158,9 +158,7 @@ public class GenericMessagingTemplateTests {
 		SubscribableChannel channel = mock(SubscribableChannel.class);
 		MessageHandler handler = createLateReplier(latch, failure);
 		doAnswer(invocation -> {
-			this.executor.execute(() -> {
-				handler.handleMessage(invocation.getArgument(0));
-			});
+			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));
 			return true;
 		}).when(channel).send(any(Message.class), anyLong());
 
@@ -192,9 +190,7 @@ public class GenericMessagingTemplateTests {
 		SubscribableChannel channel = mock(SubscribableChannel.class);
 		MessageHandler handler = createLateReplier(latch, failure);
 		doAnswer(invocation -> {
-			this.executor.execute(() -> {
-				handler.handleMessage(invocation.getArgument(0));
-			});
+			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));
 			return true;
 		}).when(channel).send(any(Message.class), anyLong());
 

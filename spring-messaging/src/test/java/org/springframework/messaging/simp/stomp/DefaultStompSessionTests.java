@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,8 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -46,10 +43,12 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -71,9 +70,6 @@ public class DefaultStompSessionTests {
 
 	@Captor
 	private ArgumentCaptor<Message<byte[]>> messageCaptor;
-
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
 
 
 	@Before
@@ -399,9 +395,8 @@ public class DefaultStompSessionTests {
 		stompHeaders.setContentType(MimeTypeUtils.APPLICATION_JSON);
 		String payload = "{'foo':'bar'}";
 
-		this.expected.expect(MessageConversionException.class);
-		this.session.send(stompHeaders, payload);
-		verifyNoMoreInteractions(this.connection);
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				this.session.send(stompHeaders, payload));
 	}
 
 	@Test
@@ -414,12 +409,9 @@ public class DefaultStompSessionTests {
 		future.setException(exception);
 
 		when(this.connection.send(any())).thenReturn(future);
-		this.expected.expect(MessageDeliveryException.class);
-		this.expected.expectCause(Matchers.sameInstance(exception));
-
-		this.session.send("/topic/foo", "sample payload".getBytes(StandardCharsets.UTF_8));
-
-		verifyNoMoreInteractions(this.connection);
+		assertThatExceptionOfType(MessageDeliveryException.class).isThrownBy(() ->
+				this.session.send("/topic/foo", "sample payload".getBytes(StandardCharsets.UTF_8)))
+			.withCause(exception);
 	}
 
 	@Test

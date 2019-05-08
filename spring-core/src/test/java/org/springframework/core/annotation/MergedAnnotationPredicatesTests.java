@@ -101,8 +101,8 @@ public class MergedAnnotationPredicatesTests {
 
 	@Test
 	public void firstRunOfWhenValueExtractorIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.firstRunOf(null));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MergedAnnotationPredicates.firstRunOf(null));
 	}
 
 	@Test
@@ -117,8 +117,8 @@ public class MergedAnnotationPredicatesTests {
 
 	@Test
 	public void uniqueWhenKeyExtractorIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.unique(null));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MergedAnnotationPredicates.unique(null));
 	}
 
 	private char firstCharOfValue(MergedAnnotation<TestAnnotation> annotation) {

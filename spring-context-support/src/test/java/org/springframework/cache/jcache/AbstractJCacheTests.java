@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Rule;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 
 import org.springframework.cache.Cache;
@@ -37,9 +36,6 @@ import org.springframework.cache.support.SimpleCacheManager;
  * @author Stephane Nicoll
  */
 public abstract class AbstractJCacheTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Rule
 	public final TestName name = new TestName();

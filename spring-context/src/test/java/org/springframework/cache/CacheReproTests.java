@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import org.springframework.cache.annotation.CachePut;
@@ -43,6 +41,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -54,10 +53,6 @@ import static org.mockito.Mockito.*;
  * @author Stephane Nicoll
  */
 public class CacheReproTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void spr11124MultipleAnnotations() throws Exception {
@@ -129,9 +124,9 @@ public class CacheReproTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr13081Config.class);
 		Spr13081Service bean = context.getBean(Spr13081Service.class);
 
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage(MyCacheResolver.class.getName());
-		bean.getSimple(null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				bean.getSimple(null))
+			.withMessageContaining(MyCacheResolver.class.getName());
 	}
 
 	@Test

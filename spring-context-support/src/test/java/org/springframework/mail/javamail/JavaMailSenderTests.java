@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,14 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 
 /**
@@ -52,10 +51,6 @@ import static org.junit.Assert.*;
  * @since 09.10.2004
  */
 public class JavaMailSenderTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Test
 	public void javaMailSenderWithSimpleMessage() throws MessagingException, IOException {
@@ -511,9 +506,8 @@ public class JavaMailSenderTests {
 	public void testConnectionWithFailure() throws MessagingException {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		sender.setHost(null);
-
-		thrown.expect(MessagingException.class);
-		sender.testConnection();
+		assertThatExceptionOfType(MessagingException.class).isThrownBy(
+				sender::testConnection);
 	}
 
 

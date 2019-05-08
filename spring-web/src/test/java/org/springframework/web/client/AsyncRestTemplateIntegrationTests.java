@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 	public void getEntityCallbackWithLambdas() throws Exception {
 		ListenableFuture<ResponseEntity<String>> futureEntity =
 				template.getForEntity(baseUrl + "/{method}", String.class, "get");
-		futureEntity.addCallback((entity) -> {
+		futureEntity.addCallback(entity -> {
 			assertEquals("Invalid content", helloWorld, entity.getBody());
 			assertFalse("No headers", entity.getHeaders().isEmpty());
 			assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());
@@ -620,6 +620,12 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 
 	private void waitTillDone(ListenableFuture<?> future) {
 		while (!future.isDone()) {
+			try {
+				Thread.sleep(5);
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
 

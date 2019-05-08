@@ -40,6 +40,8 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
+import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
+import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
 import org.springframework.util.MimeType;
 
 import static java.util.Arrays.*;
@@ -47,8 +49,7 @@ import static java.util.Collections.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.ResolvableType.*;
 import static org.springframework.http.MediaType.*;
-import static org.springframework.http.codec.json.Jackson2JsonDecoder.*;
-import static org.springframework.http.codec.json.JacksonViewBean.*;
+import static org.springframework.http.codec.json.Jackson2CodecSupport.*;
 
 /**
  * Unit tests for {@link Jackson2JsonDecoder}.

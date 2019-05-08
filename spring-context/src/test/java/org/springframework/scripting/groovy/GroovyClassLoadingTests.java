@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.scripting.groovy;
 
-import groovy.lang.GroovyClassLoader;
-
 import java.lang.reflect.Method;
 
+import groovy.lang.GroovyClassLoader;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ReflectionUtils;

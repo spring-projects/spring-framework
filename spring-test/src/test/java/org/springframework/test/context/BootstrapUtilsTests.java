@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,16 @@ package org.springframework.test.context;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.context.web.WebTestContextBootstrapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.context.BootstrapUtils.*;
 
 /**
  * Unit tests for {@link BootstrapUtils}.
@@ -43,30 +41,23 @@ public class BootstrapUtilsTests {
 
 	private final CacheAwareContextLoaderDelegate delegate = mock(CacheAwareContextLoaderDelegate.class);
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void resolveTestContextBootstrapperWithEmptyBootstrapWithAnnotation() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(EmptyBootstrapWithAnnotationClass.class, delegate);
-
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Specify @BootstrapWith's 'value' attribute");
-
-		resolveTestContextBootstrapper(bootstrapContext);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolveTestContextBootstrapper(bootstrapContext))
+			.withMessageContaining("Specify @BootstrapWith's 'value' attribute");
 	}
 
 	@Test
 	public void resolveTestContextBootstrapperWithDoubleMetaBootstrapWithAnnotations() {
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(
 			DoubleMetaAnnotatedBootstrapWithAnnotationClass.class, delegate);
-
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Configuration error: found multiple declarations of @BootstrapWith");
-		exception.expectMessage(FooBootstrapper.class.getName());
-		exception.expectMessage(BarBootstrapper.class.getName());
-
-		resolveTestContextBootstrapper(bootstrapContext);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolveTestContextBootstrapper(bootstrapContext))
+			.withMessageContaining("Configuration error: found multiple declarations of @BootstrapWith")
+			.withMessageContaining(FooBootstrapper.class.getName())
+			.withMessageContaining(BarBootstrapper.class.getName());
 	}
 
 	@Test
@@ -156,12 +147,12 @@ public class BootstrapUtilsTests {
 	@BootWithFoo
 	@BootWithFooAgain
 	static class DuplicateMetaAnnotatedBootstrapWithAnnotationClass {}
-	
+
 	@BootWithFoo
 	@BootWithBar
 	@BootstrapWith(EnigmaBootstrapper.class)
 	static class LocalDeclarationAndMetaAnnotatedBootstrapWithAnnotationClass {}
-	
+
 	@WebAppConfiguration
 	static class WebAppConfigurationAnnotatedClass {}
 

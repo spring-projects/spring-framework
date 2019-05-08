@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,9 @@ import javax.jms.QueueSender;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -64,13 +62,9 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Stephane Nicoll
@@ -87,9 +81,6 @@ public class MethodJmsListenerEndpointTests {
 	@Rule
 	public final TestName name = new TestName();
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Before
 	public void setup() {
@@ -103,8 +94,8 @@ public class MethodJmsListenerEndpointTests {
 		endpoint.setBean(this);
 		endpoint.setMethod(getTestMethod());
 
-		this.thrown.expect(IllegalStateException.class);
-		endpoint.createMessageListener(this.container);
+		assertThatIllegalStateException().isThrownBy(() ->
+				endpoint.createMessageListener(this.container));
 	}
 
 	@Test
@@ -387,17 +378,17 @@ public class MethodJmsListenerEndpointTests {
 		Session session = mock(Session.class);
 		given(session.createTextMessage("content")).willReturn(reply);
 
-		this.thrown.expect(ReplyFailureException.class);
-		this.thrown.expectCause(Matchers.isA(InvalidDestinationException.class));
-		listener.onMessage(createSimpleJmsTextMessage("content"), session);
+		assertThatExceptionOfType(ReplyFailureException.class).isThrownBy(() ->
+				listener.onMessage(createSimpleJmsTextMessage("content"), session))
+			.withCauseInstanceOf(InvalidDestinationException.class);
 	}
 
 	@Test
 	public void invalidSendTo() {
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage("firstDestination");
-		this.thrown.expectMessage("secondDestination");
-		createDefaultInstance(String.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				createDefaultInstance(String.class))
+			.withMessageContaining("firstDestination")
+			.withMessageContaining("secondDestination");
 	}
 
 	@Test
@@ -424,8 +415,9 @@ public class MethodJmsListenerEndpointTests {
 		MessagingMessageListenerAdapter listener = createInstance(customFactory, method);
 		Session session = mock(Session.class);
 
-		this.thrown.expect(ListenerExecutionFailedException.class);
-		listener.onMessage(createSimpleJmsTextMessage("invalid value"), session); // test is an invalid value
+		// test is an invalid value
+		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
+				listener.onMessage(createSimpleJmsTextMessage("invalid value"), session));
 
 	}
 
@@ -436,10 +428,11 @@ public class MethodJmsListenerEndpointTests {
 		MessagingMessageListenerAdapter listener = createDefaultInstance(Integer.class);
 		Session session = mock(Session.class);
 
-		this.thrown.expect(ListenerExecutionFailedException.class);
-		this.thrown.expectCause(Matchers.isA(MessageConversionException.class));
-		this.thrown.expectMessage(getDefaultListenerMethod(Integer.class).toGenericString()); // ref to method
-		listener.onMessage(createSimpleJmsTextMessage("test"), session); // test is not a valid integer
+		// test is not a valid integer
+		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
+				listener.onMessage(createSimpleJmsTextMessage("test"), session))
+			.withCauseInstanceOf(MessageConversionException.class)
+			.withMessageContaining(getDefaultListenerMethod(Integer.class).toGenericString()); // ref to method
 	}
 
 	@Test
@@ -447,9 +440,10 @@ public class MethodJmsListenerEndpointTests {
 		MessagingMessageListenerAdapter listener = createDefaultInstance(Message.class);
 		Session session = mock(Session.class);
 
-		this.thrown.expect(ListenerExecutionFailedException.class);
-		this.thrown.expectCause(Matchers.isA(MessageConversionException.class));
-		listener.onMessage(createSimpleJmsTextMessage("test"), session);  // Message<String> as Message<Integer>
+		// Message<String> as Message<Integer>
+		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
+				listener.onMessage(createSimpleJmsTextMessage("test"), session))
+			.withCauseInstanceOf(MessageConversionException.class);
 	}
 
 

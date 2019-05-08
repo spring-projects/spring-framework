@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
@@ -41,9 +40,6 @@ public class SimpAttributesTests {
 	private SimpAttributes simpAttributes;
 
 	private Map<String, Object> map;
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Before
@@ -82,9 +78,9 @@ public class SimpAttributesTests {
 	@Test
 	public void registerDestructionCallbackAfterSessionCompleted() {
 		this.simpAttributes.sessionCompleted();
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage(containsString("already completed"));
-		this.simpAttributes.registerDestructionCallback("name1", Mockito.mock(Runnable.class));
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.simpAttributes.registerDestructionCallback("name1", Mockito.mock(Runnable.class)))
+			.withMessageContaining("already completed");
 	}
 
 	@Test
