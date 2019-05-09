@@ -105,6 +105,7 @@ public class CauchoRemotingTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void simpleHessianServiceExporter() throws IOException {
 		final int port = SocketUtils.findAvailableTcpPort();
 

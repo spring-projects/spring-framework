@@ -39,10 +39,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.AsyncClientHttpRequestExecution;
-import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -65,7 +62,7 @@ import static org.junit.Assert.fail;
 public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
 
 	private final AsyncRestTemplate template = new AsyncRestTemplate(
-			new HttpComponentsAsyncClientHttpRequestFactory());
+			new org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory());
 
 
 	@Test
@@ -637,7 +634,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 	}
 
 
-	private static class RequestInterceptor implements AsyncClientHttpRequestInterceptor {
+	private static class RequestInterceptor implements org.springframework.http.client.AsyncClientHttpRequestInterceptor {
 
 		private final CountDownLatch latch = new CountDownLatch(1);
 
@@ -647,7 +644,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 
 		@Override
 		public ListenableFuture<ClientHttpResponse> intercept(HttpRequest request, byte[] body,
-				AsyncClientHttpRequestExecution execution) throws IOException {
+				org.springframework.http.client.AsyncClientHttpRequestExecution execution) throws IOException {
 
 			ListenableFuture<ClientHttpResponse> future = execution.executeAsync(request, body);
 			future.addCallback(
@@ -662,4 +659,5 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 			return future;
 		}
 	}
+
 }

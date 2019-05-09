@@ -25,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
-import org.springframework.web.filter.reactive.ForwardedHeaderFilter;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -92,6 +91,7 @@ public class CorsUtilsTests {
 	}
 
 	@Test  // SPR-16362
+	@SuppressWarnings("deprecation")
 	public void isSameOriginWithDifferentSchemes() {
 		MockServerHttpRequest request = MockServerHttpRequest
 				.get("http://mydomain1.com")
@@ -100,6 +100,7 @@ public class CorsUtilsTests {
 		assertFalse(CorsUtils.isSameOrigin(request));
 	}
 
+	@SuppressWarnings("deprecation")
 	private void testWithXForwardedHeaders(String serverName, int port,
 			String forwardedProto, String forwardedHost, int forwardedPort, String originHeader) {
 
@@ -123,6 +124,7 @@ public class CorsUtilsTests {
 		assertTrue(CorsUtils.isSameOrigin(request));
 	}
 
+	@SuppressWarnings("deprecation")
 	private void testWithForwardedHeader(String serverName, int port,
 			String forwardedHeader, String originHeader) {
 
@@ -140,10 +142,11 @@ public class CorsUtilsTests {
 	}
 
 	// SPR-16668
+	@SuppressWarnings("deprecation")
 	private ServerHttpRequest adaptFromForwardedHeaders(MockServerHttpRequest.BaseBuilder<?> builder) {
 		AtomicReference<ServerHttpRequest> requestRef = new AtomicReference<>();
 		MockServerWebExchange exchange = MockServerWebExchange.from(builder);
-		new ForwardedHeaderFilter().filter(exchange, exchange2 -> {
+		new org.springframework.web.filter.reactive.ForwardedHeaderFilter().filter(exchange, exchange2 -> {
 			requestRef.set(exchange2.getRequest());
 			return Mono.empty();
 		}).block();

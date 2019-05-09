@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @author Stephane Nicoll
  */
+@SuppressWarnings("deprecation")
 public class BasicAuthorizationInterceptorTests {
 
 	@Test

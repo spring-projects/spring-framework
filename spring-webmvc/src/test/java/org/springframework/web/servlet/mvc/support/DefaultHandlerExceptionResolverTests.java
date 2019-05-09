@@ -133,6 +133,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void handleHttpMessageNotReadable() {
 		HttpMessageNotReadableException ex = new HttpMessageNotReadableException("foo");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);

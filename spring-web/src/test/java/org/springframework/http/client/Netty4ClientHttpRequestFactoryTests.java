@@ -43,6 +43,7 @@ public class Netty4ClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected ClientHttpRequestFactory createRequestFactory() {
 		return new Netty4ClientHttpRequestFactory(eventLoopGroup);
 	}

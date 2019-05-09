@@ -48,7 +48,6 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -83,7 +82,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		return Arrays.asList(
 				new SimpleClientHttpRequestFactory(),
 				new HttpComponentsClientHttpRequestFactory(),
-				new Netty4ClientHttpRequestFactory(),
+				new org.springframework.http.client.Netty4ClientHttpRequestFactory(),
 				new OkHttp3ClientHttpRequestFactory()
 		);
 	}
