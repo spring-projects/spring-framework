@@ -26,11 +26,13 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.Part;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -272,13 +274,13 @@ public final class MultipartBodyBuilder {
 	 * @param <T> the type contained in the publisher
 	 * @param <P> the publisher
 	 */
-	public static final class PublisherEntity<T, P extends Publisher<T>> extends HttpEntity<P> {
+	public static final class PublisherEntity<T, P extends Publisher<T>> extends HttpEntity<P>
+			implements ResolvableTypeProvider  {
 
 		private final ResolvableType resolvableType;
 
-
-		private PublisherEntity(@Nullable MultiValueMap<String, String> headers, P publisher,
-				ResolvableType resolvableType) {
+		PublisherEntity(
+				@Nullable MultiValueMap<String, String> headers, P publisher, ResolvableType resolvableType) {
 
 			super(publisher, headers);
 			Assert.notNull(publisher, "'publisher' must not be null");
@@ -289,6 +291,8 @@ public final class MultipartBodyBuilder {
 		/**
 		 * Return the element type for the {@code Publisher} body.
 		 */
+		@Override
+		@NonNull
 		public ResolvableType getResolvableType() {
 			return this.resolvableType;
 		}
