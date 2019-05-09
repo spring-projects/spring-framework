@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.http.codec;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,13 +33,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.ReflectionUtils;
 
 import static java.nio.charset.StandardCharsets.*;
 import static org.junit.Assert.*;
@@ -59,7 +61,7 @@ public class EncoderHttpMessageWriterTests {
 
 
 	@Mock
-	private Encoder<String> encoder;
+	private HttpMessageEncoder<String> encoder;
 
 	private ArgumentCaptor<MediaType> mediaTypeCaptor;
 
@@ -172,6 +174,17 @@ public class EncoderHttpMessageWriterTests {
 		assertEquals(0, this.response.getHeaders().getContentLength());
 	}
 
+	@Test  // gh-22936
+	public void isStreamingMediaType() throws InvocationTargetException, IllegalAccessException {
+		HttpMessageWriter<String> writer = getWriter(TEXT_HTML);
+		MediaType streamingMediaType = new MediaType(TEXT_PLAIN, Collections.singletonMap("streaming", "true"));
+		when(this.encoder.getStreamingMediaTypes()).thenReturn(Arrays.asList(streamingMediaType));
+		Method method = ReflectionUtils.findMethod(writer.getClass(), "isStreamingMediaType", MediaType.class);
+		ReflectionUtils.makeAccessible(method);
+		assertTrue((Boolean) method.invoke(writer, streamingMediaType));
+		assertFalse((Boolean) method.invoke(writer, new MediaType(TEXT_PLAIN, Collections.singletonMap("streaming", "false"))));
+		assertFalse((Boolean) method.invoke(writer, TEXT_HTML));
+	}
 
 	private HttpMessageWriter<String> getWriter(MimeType... mimeTypes) {
 		return getWriter(Flux.empty(), mimeTypes);
