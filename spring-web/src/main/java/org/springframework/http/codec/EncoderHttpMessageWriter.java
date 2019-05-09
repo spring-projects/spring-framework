@@ -50,6 +50,7 @@ import org.springframework.util.Assert;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.0
  * @param <T> the type of objects in the input stream
  */
@@ -171,7 +172,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		}
 		for (MediaType mediaType : ((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes()) {
 			if (contentType.isCompatibleWith(mediaType) &&
-					contentType.getParameters().entrySet().containsAll(mediaType.getParameters().keySet())) {
+					contentType.getParameters().keySet().containsAll(mediaType.getParameters().keySet())) {
 				return true;
 			}
 		}
