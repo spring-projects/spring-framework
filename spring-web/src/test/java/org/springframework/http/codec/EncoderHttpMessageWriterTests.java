@@ -183,7 +183,7 @@ public class EncoderHttpMessageWriterTests {
 	public void isStreamingMediaType() throws InvocationTargetException, IllegalAccessException {
 		HttpMessageWriter<String> writer = getWriter(TEXT_HTML);
 		MediaType streamingMediaType = new MediaType(TEXT_PLAIN, Collections.singletonMap("streaming", "true"));
-		when(this.encoder.getStreamingMediaTypes()).thenReturn(Arrays.asList(streamingMediaType));
+		given(this.encoder.getStreamingMediaTypes()).willReturn(Arrays.asList(streamingMediaType));
 		Method method = ReflectionUtils.findMethod(writer.getClass(), "isStreamingMediaType", MediaType.class);
 		ReflectionUtils.makeAccessible(method);
 		assertTrue((Boolean) method.invoke(writer, streamingMediaType));
