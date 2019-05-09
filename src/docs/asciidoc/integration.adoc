@@ -6209,7 +6209,7 @@ number of milliseconds to wait before the first execution of the method, as the 
 	}
 ----
 
-If simple periodic scheduling is not expressive enough, you ca provide a cron expression.
+If simple periodic scheduling is not expressive enough, you can provide a cron expression.
 For example, the following executes only on weekdays:
 
 [source,java,indent=0]
@@ -6762,9 +6762,9 @@ support of <<cache-jsr-107,JSR-107 annotations>> and more customization options.
 
 The terms, "`buffer`" and "`cache,`" tend to be used interchangeably. Note, however,
 that they represent different things. Traditionally, a buffer is used as an intermediate
-temporary store for data between a fast and a slow entity. As one party would has to wait
+temporary store for data between a fast and a slow entity. As one party would have to wait
 for the other (which affects performance), the buffer alleviates this by allowing entire
-blocks of data to move at once rather then in small chunks. The data is written and read
+blocks of data to move at once rather than in small chunks. The data is written and read
 only once from the buffer. Furthermore, the buffers are visible to at least one party
 that is aware of it.
 
@@ -7195,7 +7195,7 @@ Similarly to its sibling, `@CacheEvict` requires specifying one or more caches
 that are affected by the action, allows a custom cache and key resolution or a
 condition to be specified, and features an extra parameter
 (`allEntries`) that indicates whether a cache-wide eviction needs to be performed
-rather then just an entry eviction (based on the key). The following example evicts
+rather than just an entry eviction (based on the key). The following example evicts
 all entries from the `books` cache:
 
 [source,java,indent=0]
@@ -7208,7 +7208,7 @@ all entries from the `books` cache:
 
 
 This option comes in handy when an entire cache region needs to be cleared out. Rather
-then evicting each entry (which would take a long time, since it is inefficient), all the
+than evicting each entry (which would take a long time, since it is inefficient), all the
 entries are removed in one operation, as the preceding example shows. Note that the framework ignores
 any key specified in this scenario as it does not apply (the entire cache is evicted, not
 only one entry).
@@ -7223,7 +7223,7 @@ method is invoked. This is useful in cases where the eviction does not need to b
 to the method outcome.
 
 Note that `void` methods can be used with `@CacheEvict` - as the
-methods act as a trigger, the return values are ignored (as they do nt interact with the
+methods act as a trigger, the return values are ignored (as they do not interact with the
 cache). This is not the case with `@Cacheable` which adds or updates data into the cache
 and, thus, requires a result.
 
@@ -7808,7 +7808,7 @@ The following example shows how to do so:
 Sometimes, when switching environments or doing testing, you might have cache
 declarations without having an actual backing cache configured. As this is an invalid
 configuration, an exception is thrown at runtime, since the caching infrastructure
-is unable to find a suitable store. In situations like this, rather then removing the
+is unable to find a suitable store. In situations like this, rather than removing the
 cache declarations (which can prove tedious), you can wire in a simple dummy cache that
 performs no caching -- that is, it forces the cached methods to be executed every time.
 The following example shows how to do so:
