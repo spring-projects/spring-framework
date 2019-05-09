@@ -34,6 +34,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Hints;
@@ -46,7 +47,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -265,11 +265,8 @@ public class MultipartHttpMessageWriter extends LoggingCodecSupport
 			outputHeaders.putAll(httpEntity.getHeaders());
 			body = httpEntity.getBody();
 			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
-
-			if (httpEntity instanceof MultipartBodyBuilder.PublisherEntity<?, ?>) {
-				MultipartBodyBuilder.PublisherEntity<?, ?> publisherEntity =
-						(MultipartBodyBuilder.PublisherEntity<?, ?>) httpEntity;
-				resolvableType = publisherEntity.getResolvableType();
+			if (httpEntity instanceof ResolvableTypeProvider) {
+				resolvableType = ((ResolvableTypeProvider) httpEntity).getResolvableType();
 			}
 		}
 		else {
