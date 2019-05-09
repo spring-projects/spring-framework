@@ -67,8 +67,13 @@ public class ServletContextScope implements Scope, DisposableBean {
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject == null) {
-			scopedObject = objectFactory.getObject();
-			this.servletContext.setAttribute(name, scopedObject);
+			synchronized (this.servletContext) {
+				scopedObject = this.servletContext.getAttribute(name);
+				if(scopedObject == null) {
+					scopedObject = objectFactory.getObject();
+					this.servletContext.setAttribute(name, scopedObject);
+				}
+			}
 		}
 		return scopedObject;
 	}
@@ -77,9 +82,20 @@ public class ServletContextScope implements Scope, DisposableBean {
 	@Nullable
 	public Object remove(String name) {
 		Object scopedObject = this.servletContext.getAttribute(name);
+		boolean removed = false;
 		if (scopedObject != null) {
-			this.servletContext.removeAttribute(name);
-			this.destructionCallbacks.remove(name);
+			synchronized (this.servletContext) {
+				scopedObject = this.servletContext.getAttribute(name);
+				if(scopedObject != null) {
+					this.servletContext.removeAttribute(name);
+					removed = true;
+				}
+			}
+		}
+		if(removed) {
+			synchronized (this.destructionCallbacks) {
+				this.destructionCallbacks.remove(name);
+			}
 			return scopedObject;
 		}
 		else {
@@ -89,7 +105,9 @@ public class ServletContextScope implements Scope, DisposableBean {
 
 	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
-		this.destructionCallbacks.put(name, callback);
+		synchronized (this.destructionCallbacks) {
+			this.destructionCallbacks.put(name, callback);
+		}
 	}
 
 	@Override
@@ -112,10 +130,23 @@ public class ServletContextScope implements Scope, DisposableBean {
 	 */
 	@Override
 	public void destroy() {
-		for (Runnable runnable : this.destructionCallbacks.values()) {
-			runnable.run();
+		Runnable[] destructionCallbacksSnapshot;
+		synchronized (this.destructionCallbacks) {
+			if(this.destructionCallbacks.isEmpty()) {
+				return;
+			}
+
+			destructionCallbacksSnapshot = new Runnable[this.destructionCallbacks.size()];
+			int index = 0;
+			for (Runnable destructionCallback : this.destructionCallbacks.values()) {
+				destructionCallbacksSnapshot[index++] = destructionCallback;
+			}
+			this.destructionCallbacks.clear();
 		}
-		this.destructionCallbacks.clear();
+
+		for(Runnable destructionCallback : destructionCallbacksSnapshot) {
+			destructionCallback.run();
+		}
 	}
 
 }
