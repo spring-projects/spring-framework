@@ -66,6 +66,7 @@ public class JCacheErrorHandlerTests {
 		this.errorCache = context.getBean("mockErrorCache", Cache.class);
 		this.errorHandler = context.getBean(CacheErrorHandler.class);
 		this.simpleService = context.getBean(SimpleService.class);
+		context.close();
 	}
 
 

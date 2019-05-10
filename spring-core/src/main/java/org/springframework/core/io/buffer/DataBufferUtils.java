@@ -873,10 +873,6 @@ public abstract class DataBufferUtils {
 			return -1;
 		}
 
-		public void reset() {
-			this.matches = 0;
-		}
-
 		@Override
 		public byte[] delimiter() {
 			return Arrays.copyOf(this.delimiter, this.delimiter.length);

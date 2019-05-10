@@ -258,7 +258,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return null;
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "resource" })
 		protected void writeEntityWithMessageConverters(Object entity, HttpServletRequest request,
 				HttpServletResponse response, ServerResponse.Context context)
 				throws ServletException, IOException {

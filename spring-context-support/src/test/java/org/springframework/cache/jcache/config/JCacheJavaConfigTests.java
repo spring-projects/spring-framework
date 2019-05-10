@@ -74,6 +74,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 				cos.getExceptionCacheResolver());
 		JCacheInterceptor interceptor = context.getBean(JCacheInterceptor.class);
 		assertSame(context.getBean("errorHandler", CacheErrorHandler.class), interceptor.getErrorHandler());
+		context.close();
 	}
 
 	@Test

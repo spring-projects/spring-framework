@@ -63,9 +63,11 @@ import static org.junit.Assert.fail;
 /**
  * @author Juergen Hoeller
  */
+@SuppressWarnings("resource")
 public class ValidatorFactoryTests {
 
 	@Test
+	@SuppressWarnings("cast")
 	public void testSimpleValidation() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
@@ -92,6 +94,7 @@ public class ValidatorFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("cast")
 	public void testSimpleValidationWithCustomProvider() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.setProviderClass(HibernateValidator.class);

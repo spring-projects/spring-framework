@@ -107,7 +107,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 			Object value = param.getValue();
 			if (param.getParameterPosition() == context.getAllParameters().length - 1 &&
 					context.getMethod().isVarArgs()) {
-				parameters.addAll((List<Object>) CollectionUtils.arrayToList(value));
+				parameters.addAll(CollectionUtils.arrayToList(value));
 			}
 			else {
 				parameters.add(value);

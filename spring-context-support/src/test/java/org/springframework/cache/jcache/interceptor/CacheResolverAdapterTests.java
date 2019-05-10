@@ -59,6 +59,7 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 				adapter.resolveCaches(dummyContext));
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected CacheResolver getCacheResolver(CacheInvocationContext<? extends Annotation> context, String cacheName) {
 		CacheResolver cacheResolver = mock(CacheResolver.class);
 		javax.cache.Cache cache;

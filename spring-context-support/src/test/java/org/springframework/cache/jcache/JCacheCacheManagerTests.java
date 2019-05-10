@@ -97,7 +97,7 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 			return cacheManager;
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addCache(String name) {
 			cacheNames.add(name);
 			Cache cache = mock(Cache.class);

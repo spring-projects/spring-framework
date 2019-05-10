@@ -35,6 +35,8 @@ import static org.junit.Assert.fail;
 import static org.springframework.web.servlet.function.RequestPredicates.HEAD;
 
 /**
+ * Unit tests for {@link RouterFunctionBuilder}.
+ *
  * @author Arjen Poutsma
  */
 public class RouterFunctionBuilderTests {
@@ -183,7 +185,7 @@ public class RouterFunctionBuilderTests {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/foo");
 		ServerRequest fooRequest = new DefaultServerRequest(servletRequest, emptyList());
 
-		Optional<ServerResponse> fooResponse = route.route(fooRequest)
+		route.route(fooRequest)
 				.map(handlerFunction -> handle(handlerFunction, fooRequest));
 		assertEquals(4, filterCount.get());
 

@@ -43,7 +43,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JCacheKeyGeneratorTests {
@@ -60,6 +59,7 @@ public class JCacheKeyGeneratorTests {
 		this.keyGenerator = context.getBean(TestKeyGenerator.class);
 		this.simpleService = context.getBean(SimpleService.class);
 		this.cache = context.getBean(CacheManager.class).getCache("test");
+		context.close();
 	}
 
 	@Test
