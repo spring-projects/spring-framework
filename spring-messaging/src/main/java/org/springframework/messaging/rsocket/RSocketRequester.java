@@ -56,7 +56,7 @@ public interface RSocketRequester {
 	 * <p>For requestChannel interactions, i.e. Flux-to-Flux the metadata is
 	 * attached to the first request payload.
 	 * @param route the routing destination
-	 * @return a spec for further defining and executing the reuqest
+	 * @return a spec for further defining and executing the request
 	 */
 	RequestSpec route(String route);
 
@@ -64,8 +64,8 @@ public interface RSocketRequester {
 	/**
 	 * Obtain a builder for an {@link RSocketRequester} by connecting to an
 	 * RSocket server. The builder allows for customization of
-	 * {@link RSocketFactory.ClientRSocketFactory ClientRSocketFactory} settings,
-	 * {@link RSocketStrategies}, and for selecting the transport to use.
+	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory ClientRSocketFactory}
+	 * settings, {@link RSocketStrategies}, and for selecting the transport to use.
 	 */
 	static RSocketRequester.Builder builder() {
 		return new DefaultRSocketRequesterBuilder();
@@ -164,7 +164,7 @@ public interface RSocketRequester {
 		 * Provide request payload data. The given Object may be a synchronous
 		 * value, or a {@link Publisher} of values, or another async type that's
 		 * registered in the configured {@link ReactiveAdapterRegistry}.
-		 * <p>For multivalued Publishers, prefer using
+		 * <p>For multi-valued Publishers, prefer using
 		 * {@link #data(Publisher, Class)} or
 		 * {@link #data(Publisher, ParameterizedTypeReference)} since that makes
 		 * it possible to find a compatible {@code Encoder} up front vs looking
@@ -179,7 +179,7 @@ public interface RSocketRequester {
 		 * <p>Publisher semantics determined through the configured
 		 * {@link ReactiveAdapterRegistry} influence which of the 4 RSocket
 		 * interactions to use. Publishers with unknown semantics are treated
-		 * as multivalued. Consider registering a reactive type adapter, or
+		 * as multi-valued. Consider registering a reactive type adapter, or
 		 * passing {@code Mono.from(publisher)}.
 		 * <p>If the publisher completes empty, possibly {@code Publisher<Void>},
 		 * the request will have an empty data Payload.
@@ -214,7 +214,7 @@ public interface RSocketRequester {
 		 * expected data type is {@code Void.class}, the returned {@code Mono}
 		 * will complete after all data is consumed.
 		 * <p><strong>Note:</strong> Use of this method will raise an error if
-		 * the request payload is a multivalued {@link Publisher} as
+		 * the request payload is a multi-valued {@link Publisher} as
 		 * determined through the configured {@link ReactiveAdapterRegistry}.
 		 * @param dataType the expected data type for the response
 		 * @param <T> parameter for the expected data type

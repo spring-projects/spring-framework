@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  *
  * <p>If {@code @TestConstructor} is not <em>present</em> or <em>meta-present</em>
  * on a test class, the default <em>test constructor autowire</em> mode will be used.
- * See {@link #AUTOWIRE_TEST_CONSTRUCTOR_PROPERTY_NAME} for details on how to change
+ * See {@link #TEST_CONSTRUCTOR_AUTOWIRE_PROPERTY_NAME} for details on how to change
  * the default mode. Note, however, that a local declaration of
  * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} on
  * a constructor takes precedence over both {@code @TestConstructor} and the default
@@ -81,12 +81,12 @@ public @interface TestConstructor {
 	 * Flag for setting the <em>test constructor autowire</em> mode for the
 	 * current test class.
 	 * <p>Setting this flag overrides the global default. See
-	 * {@link #AUTOWIRE_TEST_CONSTRUCTOR_PROPERTY_NAME} for details on how to
+	 * {@link #TEST_CONSTRUCTOR_AUTOWIRE_PROPERTY_NAME} for details on how to
 	 * change the global default.
 	 * @return {@code true} if all test constructor arguments should be autowired
 	 * from the test's {@link org.springframework.context.ApplicationContext
 	 * ApplicationContext}
-	 * @see #AUTOWIRE_TEST_CONSTRUCTOR_PROPERTY_NAME
+	 * @see #TEST_CONSTRUCTOR_AUTOWIRE_PROPERTY_NAME
 	 * @see org.springframework.beans.factory.annotation.Autowired @Autowired
 	 */
 	boolean autowire();
