@@ -1212,7 +1212,7 @@ The following listing shows A more complex example:
 
 [NOTE]
 =====
-You can use the Elvis operator to apply default values in expressions. The folloiwng
+You can use the Elvis operator to apply default values in expressions. The following
 example shows how to use the Elvis operator in a `@Value` expression:
 
 [source,java,indent=0]
