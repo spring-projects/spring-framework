@@ -226,7 +226,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	 * or for multipart requests only ("true"). Generally the two sets are the
 	 * same except for the multipart writer itself.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	final List<HttpMessageWriter<?>> getTypedWriters(boolean forMultipart) {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();

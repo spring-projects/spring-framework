@@ -79,8 +79,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	private static void initLogger(Encoder<?> encoder) {
 		if (encoder instanceof AbstractEncoder &&
 				encoder.getClass().getName().startsWith("org.springframework.core.codec")) {
-			Log logger = HttpLogging.forLog(((AbstractEncoder) encoder).getLogger());
-			((AbstractEncoder) encoder).setLogger(logger);
+			Log logger = HttpLogging.forLog(((AbstractEncoder<?>) encoder).getLogger());
+			((AbstractEncoder<?>) encoder).setLogger(logger);
 		}
 	}
 
@@ -108,7 +108,6 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return this.encoder.canEncode(elementType, mediaType);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
 			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {

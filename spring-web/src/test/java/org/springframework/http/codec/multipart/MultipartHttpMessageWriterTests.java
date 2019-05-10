@@ -271,7 +271,8 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 	}
 
 
-	private class Foo {
+	@SuppressWarnings("unused")
+	private static class Foo {
 
 		private String bar;
 

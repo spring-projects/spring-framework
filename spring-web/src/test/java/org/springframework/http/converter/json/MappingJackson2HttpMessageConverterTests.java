@@ -614,6 +614,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class BeanWithNoDefaultConstructor {
 
 		private final String property1;

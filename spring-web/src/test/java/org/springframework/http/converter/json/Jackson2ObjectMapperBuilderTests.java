@@ -651,6 +651,7 @@ public class Jackson2ObjectMapperBuilderTests {
 
 	public static class JacksonVisibilityBean {
 
+		@SuppressWarnings("unused")
 		private String property1;
 
 		public String property2;

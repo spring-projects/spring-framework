@@ -61,6 +61,7 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void readServerSentEvents() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Mono.just(stringBuffer(
@@ -91,6 +92,7 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void readServerSentEventsWithMultipleChunks() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Flux.just(
@@ -198,6 +200,5 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 		buffer.write(bytes);
 		return buffer;
 	}
-
 
 }

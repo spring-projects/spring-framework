@@ -154,8 +154,8 @@ public class WebAsyncManagerTimeoutTests {
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, callable);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void startCallableProcessingTimeoutAndCheckThreadInterrupted() throws Exception {
 
 		StubCallable callable = new StubCallable();

@@ -49,7 +49,7 @@ public class ExtractingResponseErrorHandlerTests {
 
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		HttpMessageConverter<Object> converter = new MappingJackson2HttpMessageConverter();
 		this.errorHandler = new ExtractingResponseErrorHandler(
 				Collections.singletonList(converter));
@@ -184,9 +184,6 @@ public class ExtractingResponseErrorHandlerTests {
 			return this.foo;
 		}
 
-		public void setFoo(String foo) {
-			this.foo = foo;
-		}
 	}
 
 }

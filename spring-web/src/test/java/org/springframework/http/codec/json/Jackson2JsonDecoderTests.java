@@ -215,6 +215,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class BeanWithNoDefaultConstructor {
 
 		private final String property1;

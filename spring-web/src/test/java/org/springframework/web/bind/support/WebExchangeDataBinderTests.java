@@ -253,6 +253,7 @@ public class WebExchangeDataBinderTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class MultipartBean {
 
 		private String name;

@@ -222,11 +222,11 @@ public class RestTemplateTests {
 
 	@Test
 	public void requestAvoidsDuplicateAcceptHeaderValues() throws Exception {
-		HttpMessageConverter firstConverter = mock(HttpMessageConverter.class);
+		HttpMessageConverter<?> firstConverter = mock(HttpMessageConverter.class);
 		given(firstConverter.canRead(any(), any())).willReturn(true);
 		given(firstConverter.getSupportedMediaTypes())
 				.willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		HttpMessageConverter secondConverter = mock(HttpMessageConverter.class);
+		HttpMessageConverter<?> secondConverter = mock(HttpMessageConverter.class);
 		given(secondConverter.canRead(any(), any())).willReturn(true);
 		given(secondConverter.getSupportedMediaTypes())
 				.willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
@@ -704,7 +704,7 @@ public class RestTemplateTests {
 		mockHttpMessageConverter(MediaType.TEXT_PLAIN, String.class);
 	}
 
-	private void mockHttpMessageConverter(MediaType mediaType, Class type) {
+	private void mockHttpMessageConverter(MediaType mediaType, Class<?> type) {
 		given(converter.canRead(type, null)).willReturn(true);
 		given(converter.canRead(type, mediaType)).willReturn(true);
 		given(converter.getSupportedMediaTypes())

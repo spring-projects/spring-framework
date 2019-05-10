@@ -21,7 +21,6 @@ import java.io.IOException;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
@@ -47,23 +46,12 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("deprecation")
 public class ProtobufJsonFormatHttpMessageConverterTests {
 
-	private ProtobufHttpMessageConverter converter;
+	private final ExtensionRegistryInitializer registryInitializer = mock(ExtensionRegistryInitializer.class);
 
-	private ExtensionRegistry extensionRegistry;
+	private final ProtobufHttpMessageConverter converter = new ProtobufJsonFormatHttpMessageConverter(
+			JsonFormat.parser(), JsonFormat.printer(), this.registryInitializer);
 
-	private ExtensionRegistryInitializer registryInitializer;
-
-	private Msg testMsg;
-
-
-	@Before
-	public void setup() {
-		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
-		this.extensionRegistry = mock(ExtensionRegistry.class);
-		this.converter = new ProtobufJsonFormatHttpMessageConverter(
-				JsonFormat.parser(), JsonFormat.printer(), this.registryInitializer);
-		this.testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
-	}
+	private final Msg testMsg = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 
 
 	@Test

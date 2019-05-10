@@ -612,7 +612,7 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestParam(name = "name", required = false) String paramNotRequired,
 			@RequestParam("name") Optional<Integer> paramOptional,
 			@RequestParam("name") Optional<Integer[]> paramOptionalArray,
-			@RequestParam("name") Optional<List> paramOptionalList,
+			@RequestParam("name") Optional<List<?>> paramOptionalList,
 			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional) {
 	}
 
