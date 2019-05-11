@@ -38,6 +38,7 @@ import static org.junit.Assert.assertTrue;
 public class PagedListHolderTests {
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testPagedListHolder() {
 		Assume.group(TestGroup.LONG_RUNNING);
 

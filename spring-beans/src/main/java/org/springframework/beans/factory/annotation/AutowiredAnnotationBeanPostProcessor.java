@@ -523,8 +523,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 */
 	@SuppressWarnings("deprecation")
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
-		return determineRequiredStatus((AnnotationAttributes)
-				ann.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
+		return determineRequiredStatus(ann.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
 	}
 
 	/**

@@ -1464,6 +1464,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testGetFactoryBeanByTypeWithPrimary() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(NullTestBeanFactoryBean.class);
@@ -1814,6 +1815,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testBeanProviderSerialization() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.setSerializationId("test");
@@ -2674,10 +2676,6 @@ public class DefaultListableBeanFactoryTests {
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
-			@Override
-			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				return bean;
-			}
 		});
 		BeanWithDisposableBean.closed = false;
 		lbf.preInstantiateSingletons();
@@ -2694,10 +2692,6 @@ public class DefaultListableBeanFactoryTests {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
-			}
-			@Override
-			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				return bean;
 			}
 		});
 		BeanWithDisposableBean.closed = false;
@@ -2716,10 +2710,6 @@ public class DefaultListableBeanFactoryTests {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
-			}
-			@Override
-			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				return bean;
 			}
 		});
 		BeanWithDestroyMethod.closeCount = 0;
@@ -2943,7 +2933,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testInitSecurityAwarePrototypeBean() {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestSecuredBean.class);
@@ -3202,6 +3192,7 @@ public class DefaultListableBeanFactoryTests {
 
 		private static int closeCount = 0;
 
+		@SuppressWarnings("unused")
 		private BeanWithDestroyMethod inner;
 
 		public void setInner(BeanWithDestroyMethod inner) {
@@ -3416,7 +3407,7 @@ public class DefaultListableBeanFactoryTests {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType) {
 			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
 				try {
@@ -3435,13 +3426,13 @@ public class DefaultListableBeanFactoryTests {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable MethodParameter methodParam) {
 			return convertIfNecessary(value, requiredType);
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable Field field) {
 			return convertIfNecessary(value, requiredType);
 		}
@@ -3564,6 +3555,7 @@ public class DefaultListableBeanFactoryTests {
 
 		public TestBean testBean;
 
+		@SuppressWarnings("unused")
 		public TestBeanRecipient(TestBean testBean) {
 			this.testBean = testBean;
 		}

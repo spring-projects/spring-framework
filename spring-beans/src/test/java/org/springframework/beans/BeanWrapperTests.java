@@ -176,6 +176,7 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void getPropertyWithOptional() {
 		GetterWithOptional target = new GetterWithOptional();
 		TestBean tb = new TestBean("x");

@@ -48,6 +48,7 @@ import static org.junit.Assert.assertTrue;
  * @author Juergen Hoeller
  * @author Mark Fisher
  */
+@SuppressWarnings("rawtypes")
 public class UtilNamespaceHandlerTests {
 
 	private DefaultListableBeanFactory beanFactory;

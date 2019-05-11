@@ -92,6 +92,7 @@ public class PropertyComparatorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Dog implements Comparable<Object> {
 
 		private String nickName;

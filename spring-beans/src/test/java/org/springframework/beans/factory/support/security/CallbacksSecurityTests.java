@@ -63,7 +63,7 @@ import static org.junit.Assert.fail;
  * Security test case. Checks whether the container uses its privileges for its
  * internal work but does not leak them when touching/calling user code.
  *
- *t The first half of the test case checks that permissions are downgraded when
+ * <p>The first half of the test case checks that permissions are downgraded when
  * calling user code while the second half that the caller code permission get
  * through and Spring doesn't override the permission stack.
  *
@@ -162,7 +162,7 @@ public class CallbacksSecurityTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "rawtypes" })
 	private static class NonPrivilegedFactoryBean implements SmartFactoryBean {
 		private String expectedName;
 
@@ -557,4 +557,5 @@ public class CallbacksSecurityTests {
 			}
 		}, provider.getAccessControlContext());
 	}
+
 }

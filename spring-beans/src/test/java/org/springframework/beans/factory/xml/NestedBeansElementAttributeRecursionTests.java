@@ -91,6 +91,7 @@ public class NestedBeansElementAttributeRecursionTests {
 		assertMerge(bf);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void assertMerge(DefaultListableBeanFactory bf) {
 		TestBean topLevel = bf.getBean("topLevelConcreteTestBean", TestBean.class);
 		// has the concrete child bean values

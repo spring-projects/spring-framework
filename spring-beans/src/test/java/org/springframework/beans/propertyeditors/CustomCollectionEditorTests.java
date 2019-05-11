@@ -40,7 +40,7 @@ public class CustomCollectionEditorTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCtorWithNonCollectionType() throws Exception {
 		new CustomCollectionEditor((Class) String.class);
 	}

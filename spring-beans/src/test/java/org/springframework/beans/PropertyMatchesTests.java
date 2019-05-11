@@ -124,6 +124,7 @@ public class PropertyMatchesTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class SampleBeanProperties {
 
 		private String name;
@@ -178,6 +179,7 @@ public class PropertyMatchesTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class SampleFieldProperties {
 
 		private String name;

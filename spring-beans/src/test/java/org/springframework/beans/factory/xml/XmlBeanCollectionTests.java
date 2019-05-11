@@ -54,6 +54,7 @@ import static org.junit.Assert.fail;
  * @author Chris Beams
  * @since 19.12.2004
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class XmlBeanCollectionTests {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();

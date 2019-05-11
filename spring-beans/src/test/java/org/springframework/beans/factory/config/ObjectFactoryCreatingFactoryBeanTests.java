@@ -73,6 +73,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testFactorySerialization() throws Exception {
 		FactoryTestBean testBean = beanFactory.getBean("factoryTestBean", FactoryTestBean.class);
 		ObjectFactory<?> objectFactory = testBean.getObjectFactory();
@@ -95,6 +96,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testProviderSerialization() throws Exception {
 		ProviderTestBean testBean = beanFactory.getBean("providerTestBean", ProviderTestBean.class);
 		Provider<?> provider = testBean.getProvider();

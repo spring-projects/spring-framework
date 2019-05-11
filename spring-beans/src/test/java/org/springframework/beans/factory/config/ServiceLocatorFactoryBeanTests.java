@@ -262,7 +262,7 @@ public class ServiceLocatorFactoryBeanTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWhenServiceLocatorExceptionClassIsNotAnExceptionSubclass() throws Exception {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 		factory.setServiceLocatorExceptionClass((Class) getClass());

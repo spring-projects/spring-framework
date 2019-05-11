@@ -70,6 +70,7 @@ public class CollectionsWithDefaultTypesTests {
 		assertMap(bean.getSomeMap());
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void assertMap(Map<?,?> map) {
 		for (Map.Entry entry : map.entrySet()) {
 			assertEquals("Key type is incorrect", Integer.class, entry.getKey().getClass());
@@ -78,6 +79,7 @@ public class CollectionsWithDefaultTypesTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testBuildCollectionFromMixtureOfReferencesAndValues() throws Exception {
 		MixedCollectionBean jumble = (MixedCollectionBean) this.beanFactory.getBean("jumble");
 		assertTrue("Expected 3 elements, not " + jumble.getJumble().size(),

@@ -1142,6 +1142,7 @@ public abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void setGenericArrayProperty() {
 		SkipReaderStub target = new SkipReaderStub();
 		AbstractPropertyAccessor accessor = createAccessor(target);
@@ -1459,7 +1460,7 @@ public abstract class AbstractPropertyAccessorTests {
 		assertEquals("rob", ((TestBean) target.getMap().get(2)).getName());
 	}
 
-	@SuppressWarnings("unchecked") // must work with raw map in this test
+	@SuppressWarnings({ "unchecked", "rawtypes" }) // must work with raw map in this test
 	@Test
 	public void setRawMapPropertyWithNoEditorRegistered() {
 		IndexedTestBean target = new IndexedTestBean();
@@ -1787,6 +1788,7 @@ public abstract class AbstractPropertyAccessorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Simple {
 
 		private String name;
@@ -1815,6 +1817,7 @@ public abstract class AbstractPropertyAccessorTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class Person {
 		private String name;
 
@@ -1845,6 +1848,7 @@ public abstract class AbstractPropertyAccessorTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class Address {
 		private String city;
 
@@ -1876,6 +1880,7 @@ public abstract class AbstractPropertyAccessorTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class Country {
 		private String name;
 
@@ -1904,7 +1909,7 @@ public abstract class AbstractPropertyAccessorTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "rawtypes" })
 	private static class Foo {
 
 		private List list;
@@ -2200,10 +2205,12 @@ public abstract class AbstractPropertyAccessorTests {
 		public SkipReaderStub() {
 		}
 
+		@SuppressWarnings("unchecked")
 		public SkipReaderStub(T... items) {
 			this.items = items;
 		}
 
+		@SuppressWarnings("unchecked")
 		public void setItems(T... items) {
 			this.items = items;
 		}
@@ -2237,6 +2244,7 @@ public abstract class AbstractPropertyAccessorTests {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Spr13837Bean setSomething(final Integer something) {
 			this.something = something;
 			return this;

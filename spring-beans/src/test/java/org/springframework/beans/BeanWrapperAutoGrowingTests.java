@@ -164,6 +164,7 @@ public class BeanWrapperAutoGrowingTests {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class Bean {
 
 		private String prop;

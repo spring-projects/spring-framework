@@ -160,7 +160,7 @@ public class BeanWrapperGenericsTests {
 		GenericBean<?> gb = new GenericBean<>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-		Map<String, Collection> input = new HashMap<>();
+		Map<String, Collection<?>> input = new HashMap<>();
 		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(new Integer(1));
 		input.put("1", value1);
@@ -507,6 +507,7 @@ public class BeanWrapperGenericsTests {
 			public Holder(D data) {
 				this.data = data;
 			}
+			@SuppressWarnings("unused")
 			public D getData() {
 				return this.data;
 			}
