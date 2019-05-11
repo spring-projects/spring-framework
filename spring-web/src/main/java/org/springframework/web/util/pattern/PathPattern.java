@@ -352,7 +352,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 	/**
-	 * Combine this pattern with another. Currently does not produce a new PathPattern, just produces a new string.
+	 * Combine this pattern with another.
 	 */
 	public PathPattern combine(PathPattern pattern2string) {
 		// If one of them is empty the result is the other. If both empty the result is ""
