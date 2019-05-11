@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,25 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * JUnit independent assertion class.
+ * Test assertions that are independent of any third-party assertion library.
  *
  * @author Lukas Krecan
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class AssertionErrors {
 
 	/**
-	 * Fails a test with the given message.
-	 * @param message describes the reason for the failure
+	 * Fail a test with the given message.
+	 * @param message a message that describes the reason for the failure
 	 */
 	public static void fail(String message) {
 		throw new AssertionError(message);
 	}
 
 	/**
-	 * Fails a test with the given message passing along expected and actual
+	 * Fail a test with the given message passing along expected and actual
 	 * values to be added to the message.
 	 * <p>For example given:
 	 * <pre class="code">
@@ -47,9 +48,9 @@ public abstract class AssertionErrors {
 	 * <pre class="code">
 	 * Response header [Accept] expected:&lt;application/json&gt; but was:&lt;text/plain&gt;
 	 * </pre>
-	 * @param message describes the value that failed the match
-	 * @param expected expected value
-	 * @param actual actual value
+	 * @param message a message describes the value that failed the match
+	 * @param expected the expected value
+	 * @param actual the actual value
 	 */
 	public static void fail(String message, @Nullable Object expected, @Nullable Object actual) {
 		throw new AssertionError(message + " expected:<" + expected + "> but was:<" + actual + ">");
@@ -57,8 +58,8 @@ public abstract class AssertionErrors {
 
 	/**
 	 * Assert the given condition is {@code true} and raise an
-	 * {@link AssertionError} if it is not.
-	 * @param message the message
+	 * {@link AssertionError} otherwise.
+	 * @param message a message that describes the reason for the failure
 	 * @param condition the condition to test for
 	 */
 	public static void assertTrue(String message, boolean condition) {
@@ -68,12 +69,23 @@ public abstract class AssertionErrors {
 	}
 
 	/**
-	 * Assert two objects are equal and raise an {@link AssertionError} if not.
+	 * Assert that the given object is not {@code null} and raise an
+	 * {@link AssertionError} otherwise.
+	 * @param message a message that describes the reason for the failure
+	 * @param object the object to check
+	 * @since 5.1
+	 */
+	public static void assertNotNull(String message, Object object) {
+		assertTrue(message, object != null);
+	}
+
+	/**
+	 * Assert two objects are equal and raise an {@link AssertionError} otherwise.
 	 * <p>For example:
 	 * <pre class="code">
 	 * assertEquals("Response header [" + name + "]", expected, actual);
 	 * </pre>
-	 * @param message describes the value being checked
+	 * @param message a message that describes the reason for the failure
 	 * @param expected the expected value
 	 * @param actual the actual value
 	 */
@@ -89,7 +101,7 @@ public abstract class AssertionErrors {
 	 * <pre class="code">
 	 * assertNotEquals("Response header [" + name + "]", expected, actual);
 	 * </pre>
-	 * @param message describes the value being checked
+	 * @param message a message that describes the reason for the failure
 	 * @param expected the expected value
 	 * @param actual the actual value
 	 */
