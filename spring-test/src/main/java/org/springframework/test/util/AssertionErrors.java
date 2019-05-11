@@ -39,16 +39,19 @@ public abstract class AssertionErrors {
 
 	/**
 	 * Fail a test with the given message passing along expected and actual
-	 * values to be added to the message.
+	 * values to be appended to the message.
 	 * <p>For example given:
 	 * <pre class="code">
-	 * assertEquals("Response header [" + name + "]", actual, expected);
+	 * String name = "Accept";
+	 * String expected = "application/json";
+	 * String actual = "text/plain";
+	 * fail("Response header [" + name + "]", expected, actual);
 	 * </pre>
 	 * <p>The resulting message is:
 	 * <pre class="code">
 	 * Response header [Accept] expected:&lt;application/json&gt; but was:&lt;text/plain&gt;
 	 * </pre>
-	 * @param message a message describes the value that failed the match
+	 * @param message a message that describes the use case that failed
 	 * @param expected the expected value
 	 * @param actual the actual value
 	 */
@@ -85,9 +88,10 @@ public abstract class AssertionErrors {
 	 * <pre class="code">
 	 * assertEquals("Response header [" + name + "]", expected, actual);
 	 * </pre>
-	 * @param message a message that describes the reason for the failure
+	 * @param message a message that describes the value being checked
 	 * @param expected the expected value
 	 * @param actual the actual value
+	 * @see #fail(String, Object, Object)
 	 */
 	public static void assertEquals(String message, @Nullable Object expected, @Nullable Object actual) {
 		if (!ObjectUtils.nullSafeEquals(expected, actual)) {
@@ -101,7 +105,7 @@ public abstract class AssertionErrors {
 	 * <pre class="code">
 	 * assertNotEquals("Response header [" + name + "]", expected, actual);
 	 * </pre>
-	 * @param message a message that describes the reason for the failure
+	 * @param message a message that describes the value being checked
 	 * @param expected the expected value
 	 * @param actual the actual value
 	 */
