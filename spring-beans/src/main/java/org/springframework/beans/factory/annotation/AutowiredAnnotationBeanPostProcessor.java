@@ -521,9 +521,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 * @param ann the Autowired annotation
 	 * @return whether the annotation indicates that a dependency is required
 	 */
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "cast" })
 	protected boolean determineRequiredStatus(MergedAnnotation<?> ann) {
-		return determineRequiredStatus(ann.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
+		// The following (AnnotationAttributes) cast is required on JDK 9+.
+		return determineRequiredStatus((AnnotationAttributes)
+				ann.asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType())));
 	}
 
 	/**
