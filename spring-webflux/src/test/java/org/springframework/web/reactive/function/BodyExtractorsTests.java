@@ -29,7 +29,6 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.util.IllegalReferenceCountException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -67,6 +66,7 @@ import org.springframework.util.MultiValueMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -436,7 +436,7 @@ public class BodyExtractorsTests {
 					assertTrue(throwable instanceof UnsupportedMediaTypeException);
 					try {
 						buffer.release();
-						Assert.fail("releasing the buffer should have failed");
+						fail("releasing the buffer should have failed");
 					}
 					catch (IllegalReferenceCountException exc) {
 					}

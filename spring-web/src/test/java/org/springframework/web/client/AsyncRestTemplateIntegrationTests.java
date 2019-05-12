@@ -27,7 +27,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -315,7 +314,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 	@Test
 	public void deleteCallbackWithLambdas() throws Exception  {
 		ListenableFuture<?> deletedFuture = template.delete(new URI(baseUrl + "/delete"));
-		deletedFuture.addCallback(Assert::assertNull, ex -> fail(ex.getMessage()));
+		deletedFuture.addCallback(result -> assertNull(result), ex -> fail(ex.getMessage()));
 		waitTillDone(deletedFuture);
 	}
 

@@ -31,7 +31,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,6 +66,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -239,7 +239,7 @@ public class RequestPartIntegrationTests {
 				@RequestPart(name = "empty-data", required = false) TestData emptyData,
 				@RequestPart(name = "iso-8859-1-data") byte[] iso88591Data) {
 
-			Assert.assertArrayEquals(new byte[]{(byte) 0xC4}, iso88591Data);
+			assertArrayEquals(new byte[]{(byte) 0xC4}, iso88591Data);
 
 			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.get().getOriginalFilename();
 			HttpHeaders headers = new HttpHeaders();

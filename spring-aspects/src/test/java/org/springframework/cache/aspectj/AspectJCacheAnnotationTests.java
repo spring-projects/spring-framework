@@ -16,7 +16,6 @@
 
 package org.springframework.cache.aspectj;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.cache.Cache;
@@ -44,7 +43,7 @@ public class AspectJCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	public void testKeyStrategy() throws Exception {
 		AnnotationCacheAspect aspect = ctx.getBean(
 				"org.springframework.cache.config.internalCacheAspect", AnnotationCacheAspect.class);
-		Assert.assertSame(ctx.getBean("keyGenerator"), aspect.getKeyGenerator());
+		assertSame(ctx.getBean("keyGenerator"), aspect.getKeyGenerator());
 	}
 
 	@Override

@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.io.File;
 import java.time.Duration;
 
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -136,7 +135,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@Test
 	public void sseAsEvent() {
 
-		Assume.assumeTrue(server instanceof JettyHttpServer);
+		assumeTrue(server instanceof JettyHttpServer);
 
 		Flux<ServerSentEvent<Person>> result = this.webClient.get()
 				.uri("/event")

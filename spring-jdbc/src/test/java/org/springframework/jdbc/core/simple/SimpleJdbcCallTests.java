@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import javax.sql.DataSource;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -232,7 +231,7 @@ public class SimpleJdbcCallTests {
 
 
 	private void verifyStatement(SimpleJdbcCall adder, String expected) {
-		Assert.assertEquals("Incorrect call statement", expected, adder.getCallString());
+		assertEquals("Incorrect call statement", expected, adder.getCallString());
 	}
 
 	private void initializeAddInvoiceWithoutMetaData(boolean isFunction) throws SQLException {

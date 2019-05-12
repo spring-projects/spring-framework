@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
@@ -46,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -275,7 +275,7 @@ public class MultipartControllerTests {
 
 			if (file != null && file.length > 0) {
 				byte[] content = file[0].getBytes();
-				Assert.assertArrayEquals(content, file[1].getBytes());
+				assertArrayEquals(content, file[1].getBytes());
 				model.addAttribute("fileContent", content);
 			}
 			if (json != null) {
@@ -291,7 +291,7 @@ public class MultipartControllerTests {
 
 			if (file != null && !file.isEmpty()) {
 				byte[] content = file.get(0).getBytes();
-				Assert.assertArrayEquals(content, file.get(1).getBytes());
+				assertArrayEquals(content, file.get(1).getBytes());
 				model.addAttribute("fileContent", content);
 			}
 			if (json != null) {
@@ -319,7 +319,7 @@ public class MultipartControllerTests {
 
 			if (file.isPresent()) {
 				byte[] content = file.get()[0].getBytes();
-				Assert.assertArrayEquals(content, file.get()[1].getBytes());
+				assertArrayEquals(content, file.get()[1].getBytes());
 				model.addAttribute("fileContent", content);
 			}
 			model.addAttribute("jsonContent", json);
@@ -333,7 +333,7 @@ public class MultipartControllerTests {
 
 			if (file.isPresent()) {
 				byte[] content = file.get().get(0).getBytes();
-				Assert.assertArrayEquals(content, file.get().get(1).getBytes());
+				assertArrayEquals(content, file.get().get(1).getBytes());
 				model.addAttribute("fileContent", content);
 			}
 			model.addAttribute("jsonContent", json);

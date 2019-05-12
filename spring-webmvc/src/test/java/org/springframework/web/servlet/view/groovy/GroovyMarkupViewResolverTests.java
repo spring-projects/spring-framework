@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.web.servlet.view.groovy;
 
 import java.util.Locale;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for
@@ -34,18 +36,18 @@ public class GroovyMarkupViewResolverTests {
 	@Test
 	public void viewClass() throws Exception {
 		GroovyMarkupViewResolver resolver = new GroovyMarkupViewResolver();
-		Assert.assertEquals(GroovyMarkupView.class, resolver.requiredViewClass());
+		assertEquals(GroovyMarkupView.class, resolver.requiredViewClass());
 		DirectFieldAccessor viewAccessor = new DirectFieldAccessor(resolver);
 		Class<?> viewClass = (Class<?>) viewAccessor.getPropertyValue("viewClass");
-		Assert.assertEquals(GroovyMarkupView.class, viewClass);
+		assertEquals(GroovyMarkupView.class, viewClass);
 	}
 
 	@Test
 	public void cacheKey() throws Exception {
 		GroovyMarkupViewResolver resolver = new GroovyMarkupViewResolver();
 		String cacheKey = (String) resolver.getCacheKey("test", Locale.US);
-		Assert.assertNotNull(cacheKey);
-		Assert.assertEquals("test_en_US", cacheKey);
+		assertNotNull(cacheKey);
+		assertEquals("test_en_US", cacheKey);
 	}
 
 }

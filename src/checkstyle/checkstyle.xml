@@ -97,7 +97,7 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
 			<property name="regexp" value="true" />
 			<property name="illegalClasses"
-				value="^reactor\.core\.support\.Assert,^junit\.framework\..+,^org\.junit\.Assert\.assertThat,^org\.junit\.Assume\.assumeThat,^org\.junit\.rules\.ExpectedException,^org\.slf4j\.LoggerFactory" />
+				value="^reactor\.core\.support\.Assert,^junit\.framework\..+,^org\.junit\.Assert$,^org\.junit\.Assume$,^org\.junit\.Assert\.assertThat,^org\.junit\.Assume\.assumeThat,^org\.junit\.rules\.ExpectedException,^org\.slf4j\.LoggerFactory" />
 		</module>
 
 		<!-- Javadoc Comments -->

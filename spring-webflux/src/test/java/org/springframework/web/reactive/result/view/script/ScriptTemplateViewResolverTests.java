@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.web.reactive.result.view.script;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link ScriptTemplateViewResolver}.
@@ -31,10 +32,10 @@ public class ScriptTemplateViewResolverTests {
 	@Test
 	public void viewClass() throws Exception {
 		ScriptTemplateViewResolver resolver = new ScriptTemplateViewResolver();
-		Assert.assertEquals(ScriptTemplateView.class, resolver.requiredViewClass());
+		assertEquals(ScriptTemplateView.class, resolver.requiredViewClass());
 		DirectFieldAccessor viewAccessor = new DirectFieldAccessor(resolver);
 		Class<?> viewClass = (Class<?>) viewAccessor.getPropertyValue("viewClass");
-		Assert.assertEquals(ScriptTemplateView.class, viewClass);
+		assertEquals(ScriptTemplateView.class, viewClass);
 	}
 
 }

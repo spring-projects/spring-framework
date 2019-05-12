@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -35,6 +34,9 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.protobuf.Msg;
 import org.springframework.web.reactive.protobuf.SecondMsg;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Integration tests for Protobuf support.
@@ -71,9 +73,9 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.uri("/message")
 				.exchange()
 				.doOnNext(response -> {
-					Assert.assertFalse(response.headers().contentType().get().getParameters().containsKey("delimited"));
-					Assert.assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
-					Assert.assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
+					assertFalse(response.headers().contentType().get().getParameters().containsKey("delimited"));
+					assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
+					assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
 				})
 				.flatMap(response -> response.bodyToMono(Msg.class));
 
@@ -88,9 +90,9 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.uri("/messages")
 				.exchange()
 				.doOnNext(response -> {
-					Assert.assertEquals("true", response.headers().contentType().get().getParameters().get("delimited"));
-					Assert.assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
-					Assert.assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
+					assertEquals("true", response.headers().contentType().get().getParameters().get("delimited"));
+					assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
+					assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
 				})
 				.flatMapMany(response -> response.bodyToFlux(Msg.class));
 
@@ -107,9 +109,9 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.uri("/message-stream")
 				.exchange()
 				.doOnNext(response -> {
-					Assert.assertEquals("true", response.headers().contentType().get().getParameters().get("delimited"));
-					Assert.assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
-					Assert.assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
+					assertEquals("true", response.headers().contentType().get().getParameters().get("delimited"));
+					assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
+					assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
 				})
 				.flatMapMany(response -> response.bodyToFlux(Msg.class));
 
