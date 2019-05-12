@@ -25,7 +25,7 @@ import org.springframework.mock.env.MockPropertySource;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
 /**
@@ -38,7 +38,6 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ge
 public class EnvironmentAccessorIntegrationTests {
 
 	@Test
-	@SuppressWarnings("all")
 	public void braceAccess() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
@@ -51,6 +50,7 @@ public class EnvironmentAccessorIntegrationTests {
 		ctx.refresh();
 
 		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("myBean"));
+		ctx.close();
 	}
 
 }
