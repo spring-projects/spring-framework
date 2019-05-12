@@ -14,6 +14,9 @@
 	<suppress files="GenericBeanDefinition" checks="EqualsHashCode" />
 	<suppress files="RootBeanDefinition" checks="EqualsHashCode" />
 
+	<!-- spring-context -->
+	<suppress files="SpringAtInjectTckTests" checks="IllegalImportCheck" />
+
 	<!-- spring-core -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]asm[\\/]" checks=".*" />
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]cglib[\\/]" checks=".*" />

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.net.URI;
@@ -24,7 +25,7 @@ import org.junit.Test;
 import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
 import static java.util.Collections.singletonMap;
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link DefaultUriBuilderFactory}.
