@@ -84,7 +84,6 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 					initLookupPath((ResourceUrlProvider) value);
 				}
 			}
-
 		}
 
 		private void initLookupPath(ResourceUrlProvider urlProvider) {
@@ -94,10 +93,12 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				String requestUri = pathHelper.getRequestUri(this);
 				String lookupPath = pathHelper.getLookupPathForRequest(this);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
-				Assert.isTrue(this.indexLookupPath != -1,
-						"Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + ". " +
-						"Does the path have invalid encoded characters " +
-								"for characterEncoding=" + getRequest().getCharacterEncoding() + "?");
+				if (this.indexLookupPath == -1) {
+					throw new IllegalStateException(
+							"Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + "'. " +
+							"Does the path have invalid encoded characters for characterEncoding '" +
+							getRequest().getCharacterEncoding() + "'?");
+				}
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
 					String contextPath = pathHelper.getContextPath(this);
@@ -112,7 +113,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		public String resolveUrlPath(String url) {
 			if (this.resourceUrlProvider == null) {
 				logger.trace("ResourceUrlProvider not available via request attribute " +
-						"ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR");
+						ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR);
 				return null;
 			}
 			if (this.indexLookupPath != null && url.startsWith(this.prefixLookupPath)) {
