@@ -530,14 +530,16 @@ public class MockHttpServletRequestBuilder
 			this.contentType = parentBuilder.contentType;
 		}
 
-		for (String headerName : parentBuilder.headers.keySet()) {
+		for (Map.Entry<String, List<Object>> entry : parentBuilder.headers.entrySet()) {
+			String headerName = entry.getKey();
 			if (!this.headers.containsKey(headerName)) {
-				this.headers.put(headerName, parentBuilder.headers.get(headerName));
+				this.headers.put(headerName, entry.getValue());
 			}
 		}
-		for (String paramName : parentBuilder.parameters.keySet()) {
+		for (Map.Entry<String, List<String>> entry : parentBuilder.parameters.entrySet()) {
+			String paramName = entry.getKey();
 			if (!this.parameters.containsKey(paramName)) {
-				this.parameters.put(paramName, parentBuilder.parameters.get(paramName));
+				this.parameters.put(paramName, entry.getValue());
 			}
 		}
 		for (Cookie cookie : parentBuilder.cookies) {
@@ -551,19 +553,22 @@ public class MockHttpServletRequestBuilder
 			}
 		}
 
-		for (String attributeName : parentBuilder.requestAttributes.keySet()) {
+		for (Map.Entry<String, Object> entry : parentBuilder.requestAttributes.entrySet()) {
+			String attributeName = entry.getKey();
 			if (!this.requestAttributes.containsKey(attributeName)) {
-				this.requestAttributes.put(attributeName, parentBuilder.requestAttributes.get(attributeName));
+				this.requestAttributes.put(attributeName, entry.getValue());
 			}
 		}
-		for (String attributeName : parentBuilder.sessionAttributes.keySet()) {
+		for (Map.Entry<String, Object> entry : parentBuilder.sessionAttributes.entrySet()) {
+			String attributeName = entry.getKey();
 			if (!this.sessionAttributes.containsKey(attributeName)) {
-				this.sessionAttributes.put(attributeName, parentBuilder.sessionAttributes.get(attributeName));
+				this.sessionAttributes.put(attributeName, entry.getValue());
 			}
 		}
-		for (String attributeName : parentBuilder.flashAttributes.keySet()) {
+		for (Map.Entry<String, Object> entry : parentBuilder.flashAttributes.entrySet()) {
+			String attributeName = entry.getKey();
 			if (!this.flashAttributes.containsKey(attributeName)) {
-				this.flashAttributes.put(attributeName, parentBuilder.flashAttributes.get(attributeName));
+				this.flashAttributes.put(attributeName, entry.getValue());
 			}
 		}
 

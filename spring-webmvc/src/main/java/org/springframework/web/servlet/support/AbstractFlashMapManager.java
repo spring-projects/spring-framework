@@ -19,6 +19,7 @@ package org.springframework.web.servlet.support;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -169,12 +170,12 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		}
 		MultiValueMap<String, String> actualParams = getOriginatingRequestParams(request);
 		MultiValueMap<String, String> expectedParams = flashMap.getTargetRequestParams();
-		for (String expectedName : expectedParams.keySet()) {
-			List<String> actualValues = actualParams.get(expectedName);
+		for (Map.Entry<String, List<String>> entry : expectedParams.entrySet()) {
+			List<String> actualValues = actualParams.get(entry.getKey());
 			if (actualValues == null) {
 				return false;
 			}
-			for (String expectedValue : expectedParams.get(expectedName)) {
+			for (String expectedValue : entry.getValue()) {
 				if (!actualValues.contains(expectedValue)) {
 					return false;
 				}

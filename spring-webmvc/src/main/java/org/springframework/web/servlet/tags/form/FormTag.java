@@ -704,9 +704,9 @@ public class FormTag extends AbstractHtmlElementTag {
 		if (!CollectionUtils.isEmpty(hiddenFields)) {
 			Assert.state(this.tagWriter != null, "No TagWriter set");
 			this.tagWriter.appendValue("<div>\n");
-			for (String name : hiddenFields.keySet()) {
+			for (Map.Entry<String, String> entry : hiddenFields.entrySet()) {
 				this.tagWriter.appendValue("<input type=\"hidden\" ");
-				this.tagWriter.appendValue("name=\"" + name + "\" value=\"" + hiddenFields.get(name) + "\" ");
+				this.tagWriter.appendValue("name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\" ");
 				this.tagWriter.appendValue("/>\n");
 			}
 			this.tagWriter.appendValue("</div>");

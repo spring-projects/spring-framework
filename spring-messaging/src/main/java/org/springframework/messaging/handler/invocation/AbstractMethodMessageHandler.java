@@ -640,9 +640,10 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (method != null) {
 			return new InvocableHandlerMethod(handlerMethod.getBean(), method);
 		}
-		for (MessagingAdviceBean advice : this.exceptionHandlerAdviceCache.keySet()) {
+		for (Map.Entry<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
+			MessagingAdviceBean advice = entry.getKey();
 			if (advice.isApplicableToBeanType(beanType)) {
-				resolver = this.exceptionHandlerAdviceCache.get(advice);
+				resolver = entry.getValue();
 				method = resolver.resolveMethod(exception);
 				if (method != null) {
 					return new InvocableHandlerMethod(advice.resolveBean(), method);

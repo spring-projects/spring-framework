@@ -351,10 +351,11 @@ class ControllerMethodResolver {
 
 		if (targetMethod == null) {
 			// Global exception handlers...
-			for (ControllerAdviceBean advice : this.exceptionHandlerAdviceCache.keySet()) {
+			for (Map.Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
+				ControllerAdviceBean advice = entry.getKey();
 				if (advice.isApplicableToBeanType(handlerType)) {
 					targetBean = advice.resolveBean();
-					targetMethod = this.exceptionHandlerAdviceCache.get(advice).resolveMethodByThrowable(ex);
+					targetMethod = entry.getValue().resolveMethodByThrowable(ex);
 					if (targetMethod != null) {
 						break;
 					}
