@@ -1087,8 +1087,8 @@ the expression. A minimal example is:
 			"false ? 'trueExp' : 'falseExp'").getValue(String.class);
 ----
 
-In this case, the boolean false results in returning the string value `'falseExp'`. A more
-realistic example is shown below.
+In this case, the boolean false results in returning the string value `'falseExp'`.
+A more realistic example is shown below.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1112,10 +1112,10 @@ ternary operator.
 [[expressions-operator-elvis]]
 === The Elvis Operator
 
-The Elvis operator is a shortening of the ternary operator syntax and is used in the
-http://www.groovy-lang.org/operators.html#_elvis_operator[Groovy] language.
-With the ternary operator syntax you usually have to repeat a variable twice, for
-example:
+The Elvis operator is a shortening of the ternary operator syntax and is used in
+the http://www.groovy-lang.org/operators.html#_elvis_operator[Groovy] language.
+With the ternary operator syntax, you usually have to repeat a variable twice,
+as the following example shows:
 
 [source,groovy,indent=0]
 [subs="verbatim,quotes"]
@@ -1124,7 +1124,8 @@ example:
 	String displayName = (name != null ? name : "Unknown");
 ----
 
-Instead you can use the Elvis operator, named for the resemblance to Elvis' hair style.
+Instead, you can use the Elvis operator (named for the resemblance to Elvis' hair style).
+The following example shows how to use the Elvis operator:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1135,7 +1136,7 @@ Instead you can use the Elvis operator, named for the resemblance to Elvis' hair
 	System.out.println(name);  // 'Unknown'
 ----
 
-Here is a more complex example.
+The following listing shows a more complex example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
