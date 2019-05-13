@@ -35,10 +35,10 @@ import org.springframework.lang.Nullable;
  *
  * <ul>
  * <li>Explicit and Implicit {@link AliasFor @AliasFor} declarations on one or
- * more attributes within the annotation.</li>
- * <li>Explicit {@link AliasFor @AliasFor} declarations for a meta-annotation.</li>
+ * more attributes within the annotation</li>
+ * <li>Explicit {@link AliasFor @AliasFor} declarations for a meta-annotation</li>
  * <li>Convention based attribute aliases for a meta-annotation</li>
- * <li>From a meta-annotation declaration.</li>
+ * <li>From a meta-annotation declaration</li>
  * </ul>
  *
  * <p>For example, a {@code @PostMapping} annotation might be defined as follows:
@@ -116,7 +116,7 @@ import org.springframework.lang.Nullable;
  * // get all ExampleAnnotation declarations (including any meta-annotations) and
  * // print the merged "value" attributes
  * mergedAnnotations.stream(ExampleAnnotation.class).map(
- * 		a -> a.getString("value")).forEach(System.out::println);
+ * 		a -&gt; a.getString("value")).forEach(System.out::println);
  * </pre>
  *
  * @author Phillip Webb

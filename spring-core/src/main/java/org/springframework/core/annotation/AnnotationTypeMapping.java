@@ -647,7 +647,7 @@ final class AnnotationTypeMapping {
 							!ObjectUtils.nullSafeEquals(lastValue, value)) {
 						String on = (source != null) ? " declared on " + source : "";
 						throw new AnnotationConfigurationException(String.format(
-								"Different @AliasFor mirror values for annotation [%s]%s, attribute '%s' " +
+								"Different @AliasFor mirror values for annotation [%s]%s; attribute '%s' " +
 								"and its alias '%s' are declared with values of [%s] and [%s].",
 								getAnnotationType().getName(), on,
 								attributes.get(result).getName(),

@@ -394,7 +394,7 @@ public class AnnotationTypeMappingsTests {
 			.withMessage("Different @AliasFor mirror values for annotation ["
 								+ AliasPair.class.getName() + "] declared on "
 								+ WithDifferentValueAliasPair.class.getName()
-								+ ", attribute 'a' and its alias 'b' are declared with values of [test1] and [test2].");
+								+ "; attribute 'a' and its alias 'b' are declared with values of [test1] and [test2].");
 	}
 
 	@Test

@@ -52,52 +52,46 @@ public class AttributeMethodsTests {
 
 	@Test
 	public void forAnnotationTypeWhenHasMultipleAttributesReturnsAttributes() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(
-				MultipleAttributes.class);
+		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
 		assertThat(methods.get("value").getName()).isEqualTo("value");
 		assertThat(methods.get("intValue").getName()).isEqualTo("intValue");
-		assertThat(getAll(methods)).flatExtracting(Method::getName).containsExactly(
-				"intValue", "value");
+		assertThat(getAll(methods)).flatExtracting(Method::getName).containsExactly("intValue", "value");
 	}
 
 	@Test
-	public void isOnlyValueAttributeWhenHasOnlyValueAttributeReturnsTrue() {
+	public void hasOnlyValueAttributeWhenHasOnlyValueAttributeReturnsTrue() {
 		AttributeMethods methods = AttributeMethods.forAnnotationType(ValueOnly.class);
-		assertThat(methods.isOnlyValueAttribute()).isTrue();
+		assertThat(methods.hasOnlyValueAttribute()).isTrue();
 	}
 
 	@Test
-	public void isOnlyValueAttributeWhenHasOnlySingleNonValueAttributeReturnsFalse() {
+	public void hasOnlyValueAttributeWhenHasOnlySingleNonValueAttributeReturnsFalse() {
 		AttributeMethods methods = AttributeMethods.forAnnotationType(NonValueOnly.class);
-		assertThat(methods.isOnlyValueAttribute()).isFalse();
+		assertThat(methods.hasOnlyValueAttribute()).isFalse();
 	}
 
 	@Test
-	public void isOnlyValueAttributeWhenHasOnlyMultipleAttributesIncludingValueReturnsFalse() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(
-				MultipleAttributes.class);
-		assertThat(methods.isOnlyValueAttribute()).isFalse();
+	public void hasOnlyValueAttributeWhenHasOnlyMultipleAttributesIncludingValueReturnsFalse() {
+		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
+		assertThat(methods.hasOnlyValueAttribute()).isFalse();
 	}
 
 	@Test
 	public void indexOfNameReturnsIndex() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(
-				MultipleAttributes.class);
+		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
 		assertThat(methods.indexOf("value")).isEqualTo(1);
 	}
 
 	@Test
 	public void indexOfMethodReturnsIndex() throws Exception {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(
-				MultipleAttributes.class);
+		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
 		Method method = MultipleAttributes.class.getDeclaredMethod("value");
 		assertThat(methods.indexOf(method)).isEqualTo(1);
 	}
 
 	@Test
 	public void sizeReturnsSize() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(
-				MultipleAttributes.class);
+		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
 		assertThat(methods.size()).isEqualTo(2);
 	}
 
@@ -109,8 +103,7 @@ public class AttributeMethodsTests {
 
 	@Test
 	public void canThrowTypeNotPresentExceptionWhenHasClassArrayAttributeReturnsTrue() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(
-				ClassArrayValue.class);
+		AttributeMethods methods = AttributeMethods.forAnnotationType(ClassArrayValue.class);
 		assertThat(methods.canThrowTypeNotPresentException(0)).isTrue();
 	}
 
@@ -122,15 +115,13 @@ public class AttributeMethodsTests {
 
 	@Test
 	public void hasDefaultValueMethodWhenHasDefaultValueMethodReturnsTrue() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(
-				DefaultValueAttribute.class);
+		AttributeMethods methods = AttributeMethods.forAnnotationType(DefaultValueAttribute.class);
 		assertThat(methods.hasDefaultValueMethod()).isTrue();
 	}
 
 	@Test
 	public void hasDefaultValueMethodWhenHasNoDefaultValueMethodsReturnsFalse() {
-		AttributeMethods methods = AttributeMethods.forAnnotationType(
-				MultipleAttributes.class);
+		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
 		assertThat(methods.hasDefaultValueMethod()).isFalse();
 	}
 
@@ -138,8 +129,7 @@ public class AttributeMethodsTests {
 	public void isValidWhenHasTypeNotPresentExceptionReturnsFalse() {
 		ClassValue annotation = mockAnnotation(ClassValue.class);
 		given(annotation.value()).willThrow(TypeNotPresentException.class);
-		AttributeMethods attributes = AttributeMethods.forAnnotationType(
-				annotation.annotationType());
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		assertThat(attributes.isValid(annotation)).isFalse();
 	}
 
@@ -148,8 +138,7 @@ public class AttributeMethodsTests {
 	public void isValidWhenDoesNotHaveTypeNotPresentExceptionReturnsTrue() {
 		ClassValue annotation = mock(ClassValue.class);
 		given(annotation.value()).willReturn((Class) InputStream.class);
-		AttributeMethods attributes = AttributeMethods.forAnnotationType(
-				annotation.annotationType());
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		assertThat(attributes.isValid(annotation)).isTrue();
 	}
 
@@ -157,10 +146,8 @@ public class AttributeMethodsTests {
 	public void validateWhenHasTypeNotPresentExceptionThrowsException() {
 		ClassValue annotation = mockAnnotation(ClassValue.class);
 		given(annotation.value()).willThrow(TypeNotPresentException.class);
-		AttributeMethods attributes = AttributeMethods.forAnnotationType(
-				annotation.annotationType());
-		assertThatIllegalStateException().isThrownBy(() ->
-				attributes.validate(annotation));
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
+		assertThatIllegalStateException().isThrownBy(() -> attributes.validate(annotation));
 	}
 
 	@Test
@@ -168,8 +155,7 @@ public class AttributeMethodsTests {
 	public void validateWhenDoesNotHaveTypeNotPresentExceptionThrowsNothing() {
 		ClassValue annotation = mockAnnotation(ClassValue.class);
 		given(annotation.value()).willReturn((Class) InputStream.class);
-		AttributeMethods attributes = AttributeMethods.forAnnotationType(
-				annotation.annotationType());
+		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		attributes.validate(annotation);
 	}
 
@@ -189,12 +175,11 @@ public class AttributeMethodsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface NoAttributes {
-
+	@interface NoAttributes {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface MultipleAttributes {
+	@interface MultipleAttributes {
 
 		int intValue();
 
@@ -203,35 +188,35 @@ public class AttributeMethodsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ValueOnly {
+	@interface ValueOnly {
 
 		String value();
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface NonValueOnly {
+	@interface NonValueOnly {
 
 		String test();
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ClassValue {
+	@interface ClassValue {
 
 		Class<?> value();
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ClassArrayValue {
+	@interface ClassArrayValue {
 
 		Class<?>[] value();
 
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface DefaultValueAttribute {
+	@interface DefaultValueAttribute {
 
 		String one();
 

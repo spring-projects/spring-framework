@@ -77,7 +77,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Return a complete type hierarchy from this annotation to the
 	 * {@link #getRoot() root}. Provides a useful way to uniquely identify a
 	 * merged annotation instance.
-	 * @return the type heirarchy for the annotation
+	 * @return the type hierarchy for the annotation
 	 * @see MergedAnnotationPredicates#unique(Function)
 	 */
 	List<Class<? extends Annotation>> getTypeHierarchy();
