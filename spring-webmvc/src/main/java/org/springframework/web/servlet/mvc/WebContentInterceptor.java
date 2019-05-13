@@ -213,9 +213,9 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 			return cacheControl;
 		}
 		// Pattern match?
-		for (String registeredPath : this.cacheControlMappings.keySet()) {
-			if (this.pathMatcher.match(registeredPath, urlPath)) {
-				return this.cacheControlMappings.get(registeredPath);
+		for (Map.Entry<String, CacheControl> entry : this.cacheControlMappings.entrySet()) {
+			if (this.pathMatcher.match(entry.getKey(), urlPath)) {
+				return entry.getValue();
 			}
 		}
 		return null;
@@ -238,9 +238,9 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 			return cacheSeconds;
 		}
 		// Pattern match?
-		for (String registeredPath : this.cacheMappings.keySet()) {
-			if (this.pathMatcher.match(registeredPath, urlPath)) {
-				return this.cacheMappings.get(registeredPath);
+		for (Map.Entry<String, Integer> entry : this.cacheMappings.entrySet()) {
+			if (this.pathMatcher.match(entry.getKey(), urlPath)) {
+				return entry.getValue();
 			}
 		}
 		return null;
