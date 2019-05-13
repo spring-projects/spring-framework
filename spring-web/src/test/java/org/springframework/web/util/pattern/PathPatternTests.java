@@ -58,6 +58,16 @@ public class PathPatternTests {
 	}
 
 	@Test
+	public void hasPatternSyntax() {
+		PathPatternParser parser = new PathPatternParser();
+		assertTrue(parser.parse("/foo/*").hasPatternSyntax());
+		assertTrue(parser.parse("/foo/**/bar").hasPatternSyntax());
+		assertTrue(parser.parse("/f?o").hasPatternSyntax());
+		assertTrue(parser.parse("/foo/{bar}/baz").hasPatternSyntax());
+		assertFalse(parser.parse("/foo/bar").hasPatternSyntax());
+	}
+
+	@Test
 	public void matching_LiteralPathElement() {
 		checkMatches("foo", "foo");
 		checkNoMatch("foo", "bar");

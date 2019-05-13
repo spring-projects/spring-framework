@@ -175,6 +175,17 @@ public class PathPattern implements Comparable<PathPattern> {
 		return this.patternString;
 	}
 
+
+	/**
+	 * Whether the pattern string contains pattern syntax that would require
+	 * use of {@link #matches(PathContainer)}, or if it is a regular String that
+	 * could be compared directly to others.
+	 * @since 5.2
+	 */
+	public boolean hasPatternSyntax() {
+		return this.score > 0 || this.patternString.indexOf('?') != -1;
+	}
+
 	/**
 	 * Whether this pattern matches the given path.
 	 * @param pathContainer the candidate path to attempt to match against
