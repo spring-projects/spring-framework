@@ -98,7 +98,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 				String lookupPath = pathHelper.getLookupPathForRequest(this);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 				Assert.isTrue(this.indexLookupPath != -1, () ->
-						"Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + ". " +
+						"Failed to find lookupPath '" + lookupPath + "' within requestUri '" + requestUri + "'. " +
 						"Does the path have invalid encoded characters " +
 								"for characterEncoding=" + getRequest().getCharacterEncoding() + "?");
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
