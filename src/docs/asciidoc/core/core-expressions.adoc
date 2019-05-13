@@ -119,8 +119,8 @@ as shown below.
 	byte[] bytes = (byte[]) exp.getValue();
 ----
 
-SpEL also supports nested properties using standard _dot_ notation, i.e.
-`prop1.prop2.prop3` and the setting of property values
+SpEL also supports nested properties using the standard _dot_ notation, i.e.
+`prop1.prop2.prop3` and also the corresponding setting of property values.
 
 Public fields may also be accessed.
 
@@ -292,18 +292,17 @@ does not provide optimum performance. For occasional expression usage
 this is fine, but when used by other components like Spring Integration, 
 performance can be very important and there is no real need for the dynamism.
 
-The SpEL compiler is intended to address this need. The 
-compiler will generate a real Java class on the fly during evaluation that embodies the
-expression behavior and use that to achieve much faster expression
-evaluation. Due to the lack of typing around expressions the compiler
-uses information gathered during the interpreted evaluations of an
-expression when performing compilation. For example, it does not know the type
-of a property reference purely from the expression, but during the first
-interpreted evaluation it will find out what it is. Of course, basing the 
-compilation on this information could cause trouble later if the types of
-the various expression elements change over time. For this reason compilation
-is best suited to expressions whose type information is not going to change
-on repeated evaluations.
+The SpEL compiler is intended to address this need. The  compiler will generate a
+real Java class on the fly during evaluation that embodies the expression behavior
+and use that to achieve much faster expression evaluation. Due to the lack of
+typing around expressions the compiler uses information gathered during the
+interpreted evaluations of an expression when performing compilation. For example,
+it does not know the type of a property reference purely from the expression but
+during the first interpreted evaluation it will find out what it is. Of course,
+basing the compilation on this information could cause trouble later if the types
+of the various expression elements change over time. For this reason compilation
+is best suited to expressions whose type information is not going to change on
+repeated evaluations.
 
 For a basic expression like this:
 
@@ -364,24 +363,22 @@ After selecting a mode, use the `SpelParserConfiguration` to configure the parse
 When specifying the compiler mode it is also possible to specify a classloader (passing null is allowed).
 Compiled expressions will be defined in a child classloader created under any that is supplied.
 It is important to ensure if a classloader is specified it can see all the types involved in
-the expression evaluation process.
-If none is specified then a default classloader will be used (typically the context classloader for
-the thread that is running during expression evaluation).
+the expression evaluation process. If none is specified then a default classloader will be used
+(typically the context classloader for the thread that is running during expression evaluation).
 
 The second way to configure the compiler is for use when SpEL is embedded inside some other
-component and it may not be possible to configure via a configuration object.
-In these cases it is possible to use a system property. The property 
-`spring.expression.compiler.mode` can be set to one of the `SpelCompilerMode` 
-enum values (`off`, `immediate`, or `mixed`).
+component and it may not be possible to configure via a configuration object. In these cases
+it is possible to use a system property. The property `spring.expression.compiler.mode` can be
+set to one of the `SpelCompilerMode`  enum values (`off`, `immediate`, or `mixed`).
 
 
 [[expressions-compiler-limitations]]
 ==== Compiler limitations
 
-Since Spring Framework 4.1 the basic compilation framework is in place. However, the framework does not
-yet support compiling every kind of expression. The initial focus has been on the common expressions that are
-likely to be used in performance critical contexts. The following kinds of expression cannot be compiled
-at the moment:
+Since Spring Framework 4.1 the basic compilation framework is in place. However, the framework
+does not yet support compiling every kind of expression. The initial focus has been on the
+common expressions that are likely to be used in performance critical contexts. The following
+kinds of expression cannot be compiled at the moment:
 
 - expressions involving assignment 
 - expressions relying on the conversion service
@@ -1240,9 +1237,9 @@ first or the last value. To obtain the first entry matching the selection the sy
 === Collection Projection
 
 Projection allows a collection to drive the evaluation of a sub-expression and the
-result is a new collection. The syntax for projection is `.![projectionExpression]`. Most
-easily understood by example, suppose we have a list of inventors but want the list of
-cities where they were born. Effectively we want to evaluate 'placeOfBirth.city' for
+result is a new collection. The syntax for projection is `.![projectionExpression]`.
+Most easily understood by example, suppose we have a list of inventors but want the list
+of cities where they were born. Effectively we want to evaluate 'placeOfBirth.city' for
 every entry in the inventor list. Using projection:
 
 [source,java,indent=0]
