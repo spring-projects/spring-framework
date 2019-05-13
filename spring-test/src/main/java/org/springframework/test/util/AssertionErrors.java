@@ -76,9 +76,9 @@ public abstract class AssertionErrors {
 	 * {@link AssertionError} otherwise.
 	 * @param message a message that describes the reason for the failure
 	 * @param object the object to check
-	 * @since 5.1
+	 * @since 5.1.8
 	 */
-	public static void assertNotNull(String message, Object object) {
+	public static void assertNotNull(String message, @Nullable Object object) {
 		assertTrue(message, object != null);
 	}
 
