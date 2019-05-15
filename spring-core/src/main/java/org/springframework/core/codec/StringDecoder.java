@@ -32,8 +32,6 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -57,8 +55,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
-	private static final DataBuffer END_FRAME = new DefaultDataBufferFactory().wrap(new byte[0]);
-
 	/** The default charset to use, i.e. "UTF-8". */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
@@ -70,7 +66,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	private final boolean stripDelimiter;
 
-	private final ConcurrentMap<Charset, List<byte[]>> delimitersCache = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Charset, byte[][]> delimitersCache = new ConcurrentHashMap<>();
 
 
 	private StringDecoder(List<String> delimiters, boolean stripDelimiter, MimeType... mimeTypes) {
@@ -90,115 +86,22 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	public Flux<String> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		List<byte[]> delimiterBytes = getDelimiterBytes(mimeType);
+		byte[][] delimiterBytes = getDelimiterBytes(mimeType);
 
-		Flux<DataBuffer> inputFlux = Flux.from(input)
-				.flatMapIterable(buffer -> splitOnDelimiter(buffer, delimiterBytes))
-				.bufferUntil(buffer -> buffer == END_FRAME)
-				.map(StringDecoder::joinUntilEndFrame)
-				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+		Flux<DataBuffer> inputFlux =
+				DataBufferUtils.split(input, delimiterBytes, this.stripDelimiter);
 
 		return super.decode(inputFlux, elementType, mimeType, hints);
 	}
 
-	private List<byte[]> getDelimiterBytes(@Nullable MimeType mimeType) {
+	private byte[][] getDelimiterBytes(@Nullable MimeType mimeType) {
 		return this.delimitersCache.computeIfAbsent(getCharset(mimeType), charset -> {
-			List<byte[]> list = new ArrayList<>();
-			for (String delimiter : this.delimiters) {
-				byte[] bytes = delimiter.getBytes(charset);
-				list.add(bytes);
+			byte[][] result = new byte[this.delimiters.size()][];
+			for (int i = 0; i < this.delimiters.size(); i++) {
+				result[i] = this.delimiters.get(i).getBytes(charset);
 			}
-			return list;
+			return result;
 		});
-	}
-
-	/**
-	 * Split the given data buffer on delimiter boundaries.
-	 * The returned Flux contains an {@link #END_FRAME} buffer after each delimiter.
-	 */
-	private List<DataBuffer> splitOnDelimiter(DataBuffer buffer, List<byte[]> delimiterBytes) {
-		List<DataBuffer> frames = new ArrayList<>();
-		try {
-			do {
-				int length = Integer.MAX_VALUE;
-				byte[] matchingDelimiter = null;
-				for (byte[] delimiter : delimiterBytes) {
-					int index = indexOf(buffer, delimiter);
-					if (index >= 0 && index < length) {
-						length = index;
-						matchingDelimiter = delimiter;
-					}
-				}
-				DataBuffer frame;
-				int readPosition = buffer.readPosition();
-				if (matchingDelimiter != null) {
-					frame = this.stripDelimiter ?
-							buffer.slice(readPosition, length) :
-							buffer.slice(readPosition, length + matchingDelimiter.length);
-					buffer.readPosition(readPosition + length + matchingDelimiter.length);
-					frames.add(DataBufferUtils.retain(frame));
-					frames.add(END_FRAME);
-				}
-				else {
-					frame = buffer.slice(readPosition, buffer.readableByteCount());
-					buffer.readPosition(readPosition + buffer.readableByteCount());
-					frames.add(DataBufferUtils.retain(frame));
-				}
-			}
-			while (buffer.readableByteCount() > 0);
-		}
-		catch (Throwable ex) {
-			for (DataBuffer frame : frames) {
-				DataBufferUtils.release(frame);
-			}
-			throw ex;
-		}
-		finally {
-			DataBufferUtils.release(buffer);
-		}
-		return frames;
-	}
-
-	/**
-	 * Find the given delimiter in the given data buffer.
-	 * @return the index of the delimiter, or -1 if not found.
-	 */
-	private static int indexOf(DataBuffer buffer, byte[] delimiter) {
-		for (int i = buffer.readPosition(); i < buffer.writePosition(); i++) {
-			int bufferPos = i;
-			int delimiterPos = 0;
-			while (delimiterPos < delimiter.length) {
-				if (buffer.getByte(bufferPos) != delimiter[delimiterPos]) {
-					break;
-				}
-				else {
-					bufferPos++;
-					boolean endOfBuffer = bufferPos == buffer.writePosition();
-					boolean endOfDelimiter = delimiterPos == delimiter.length - 1;
-					if (endOfBuffer && !endOfDelimiter) {
-						return -1;
-					}
-				}
-				delimiterPos++;
-			}
-			if (delimiterPos == delimiter.length) {
-				return i - buffer.readPosition();
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Join the given list of buffers into a single buffer.
-	 */
-	private static DataBuffer joinUntilEndFrame(List<DataBuffer> dataBuffers) {
-		if (!dataBuffers.isEmpty()) {
-			int lastIdx = dataBuffers.size() - 1;
-			if (dataBuffers.get(lastIdx) == END_FRAME) {
-				dataBuffers.remove(lastIdx);
-			}
-		}
-		return dataBuffers.get(0).factory().join(dataBuffers);
 	}
 
 	@Override

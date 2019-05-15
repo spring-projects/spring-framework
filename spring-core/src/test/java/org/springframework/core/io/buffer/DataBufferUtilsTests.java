@@ -821,6 +821,25 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	public void splitMultipleDelimiters() {
+		Mono<DataBuffer> source =
+				deferStringBuffer("foo␤bar␍␤baz␤");
+
+		byte[][] delimiters = new byte[][]{
+				"␤".getBytes(StandardCharsets.UTF_8),
+				"␍␤".getBytes(StandardCharsets.UTF_8)
+		};
+
+		Flux<DataBuffer> result = DataBufferUtils.split(source, delimiters, false);
+
+		StepVerifier.create(result)
+				.consumeNextWith(stringConsumer("foo␤"))
+				.consumeNextWith(stringConsumer("bar␍␤"))
+				.consumeNextWith(stringConsumer("baz␤"))
+				.verifyComplete();
+	}
+
+	@Test
 	public void splitErrors() {
 		Flux<DataBuffer> source = Flux.concat(
 				deferStringBuffer("foo--"),
