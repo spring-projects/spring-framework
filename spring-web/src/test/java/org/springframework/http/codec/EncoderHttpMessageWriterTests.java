@@ -33,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
@@ -136,9 +137,7 @@ public class EncoderHttpMessageWriterTests {
 
 	@Test
 	public void useNegotiatedMediaTypeCharset() {
-
 		MediaType negotiatedMediaType = new MediaType("text", "html", ISO_8859_1);
-
 		HttpMessageWriter<String> writer = getWriter(TEXT_PLAIN_UTF_8, TEXT_HTML);
 		writer.write(Mono.just("body"), forClass(String.class), negotiatedMediaType, this.response, NO_HINTS);
 
@@ -148,7 +147,6 @@ public class EncoderHttpMessageWriterTests {
 
 	@Test
 	public void useHttpOutputMessageMediaType() {
-
 		MediaType outputMessageMediaType = MediaType.TEXT_HTML;
 		this.response.getHeaders().setContentType(outputMessageMediaType);
 
@@ -161,14 +159,23 @@ public class EncoderHttpMessageWriterTests {
 
 	@Test
 	public void setContentLengthForMonoBody() {
-
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DataBuffer buffer = factory.wrap("body".getBytes(StandardCharsets.UTF_8));
 		HttpMessageWriter<String> writer = getWriter(Flux.just(buffer), MimeTypeUtils.TEXT_PLAIN);
-
 		writer.write(Mono.just("body"), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS).block();
 
 		assertEquals(4, this.response.getHeaders().getContentLength());
+	}
+
+	@Test // gh-22952
+	public void monoBodyDoesNotCancelEncodedFlux() {
+		Mono<String> inputStream = Mono.just("body")
+				.doOnCancel(() -> {
+					throw new AssertionError("Cancel signal not expected");
+				});
+		new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes())
+				.write(inputStream, forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS)
+				.block();
 	}
 
 	@Test // SPR-17220

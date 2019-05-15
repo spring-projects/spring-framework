@@ -4515,8 +4515,7 @@ The following example shows how to achieve the same configuration in XML:
 [subs="verbatim"]
 ----
 <mvc:resources mapping="/resources/**" location="/public/">
-	<mvc:resource-chain>
-		<mvc:resource-cache/>
+	<mvc:resource-chain resource-cache="true">
 		<mvc:resolvers>
 			<mvc:version-resolver>
 				<mvc:content-version-strategy patterns="/**"/>
@@ -4533,7 +4532,7 @@ bean so that it can be injected into others. You can also make the rewrite trans
 rely on `HttpServletResponse#encodeURL`.
 
 Note that, when using both `EncodedResourceResolver` (for example, for serving gzipped or
-brotli-encoded resources) and `VersionedResourceResolver`, you must register them in this order.
+brotli-encoded resources) and `VersionResourceResolver`, you must register them in this order.
 That ensures content-based versions are always computed reliably, based on the unencoded file.
 
 https://www.webjars.org/documentation[WebJars] are also supported through the
