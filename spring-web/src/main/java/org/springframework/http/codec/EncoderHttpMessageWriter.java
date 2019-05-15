@@ -120,7 +120,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		if (inputStream instanceof Mono) {
 			HttpHeaders headers = message.getHeaders();
-			return Mono.from(body)
+			return body
+					.singleOrEmpty()
 					.switchIfEmpty(Mono.defer(() -> {
 						headers.setContentLength(0);
 						return message.setComplete().then(Mono.empty());
