@@ -53,6 +53,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.RouteMatcher;
 
 /**
  * Abstract base class for reactive HandlerMethod-based message handling.
@@ -393,8 +394,8 @@ public abstract class AbstractMethodMessageHandler<T>
 	private Match<T> getHandlerMethod(Message<?> message) {
 		List<Match<T>> matches = new ArrayList<>();
 
-		String destination = getDestination(message);
-		List<T> mappingsByUrl = destination != null ? this.destinationLookup.get(destination) : null;
+		RouteMatcher.Route destination = getDestination(message);
+		List<T> mappingsByUrl = destination != null ? this.destinationLookup.get(destination.value()) : null;
 		if (mappingsByUrl != null) {
 			addMatchesToCollection(mappingsByUrl, message, matches);
 		}
@@ -418,23 +419,21 @@ public abstract class AbstractMethodMessageHandler<T>
 			if (comparator.compare(bestMatch, secondBestMatch) == 0) {
 				HandlerMethod m1 = bestMatch.handlerMethod;
 				HandlerMethod m2 = secondBestMatch.handlerMethod;
-				throw new IllegalStateException("Ambiguous handler methods mapped for destination '" +
-						destination + "': {" + m1.getShortLogMessage() + ", " + m2.getShortLogMessage() + "}");
+				throw new IllegalStateException(
+						"Ambiguous handler methods mapped for destination '" +
+								destination.value() + "': {" +
+								m1.getShortLogMessage() + ", " + m2.getShortLogMessage() + "}");
 			}
 		}
 		return bestMatch;
 	}
 
 	/**
-	 * Extract a String-based destination, if any, that can be used to perform
-	 * a direct look up into the registered mappings.
-	 * <p><strong>Note:</strong> This is completely optional. The mapping
-	 * metadata for a sub-class may support neither direct lookups, nor String
-	 * based destinations.
+	 * Extract the destination from the given message.
 	 * @see #getDirectLookupMappings(Object)
 	 */
 	@Nullable
-	protected abstract String getDestination(Message<?> message);
+	protected abstract RouteMatcher.Route getDestination(Message<?> message);
 
 	private void addMatchesToCollection(
 			Collection<T> mappingsToCheck, Message<?> message, List<Match<T>> matches) {
@@ -470,8 +469,9 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @param destination the destination
 	 * @param message the message
 	 */
-	protected void handleNoMatch(@Nullable String destination, Message<?> message) {
-		logger.debug("No handlers for destination '" + destination + "'");
+	protected void handleNoMatch(@Nullable RouteMatcher.Route destination, Message<?> message) {
+		logger.debug("No handlers for destination '" +
+				(destination != null ? destination.value() : "") + "'");
 	}
 
 	/**

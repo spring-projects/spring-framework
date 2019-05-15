@@ -27,6 +27,7 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.RouteMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -110,16 +111,16 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	@Override
-	protected void handleNoMatch(@Nullable String destination, Message<?> message) {
+	protected void handleNoMatch(@Nullable RouteMatcher.Route destination, Message<?> message) {
 
 		// MessagingRSocket will raise an error anyway if reply Mono is expected
-		// Here we raise a more helpful message a destination is present
+		// Here we raise a more helpful message if a destination is present
 
 		// It is OK if some messages (ConnectionSetupPayload, metadataPush) are not handled
-		// We need a better way to avoid raising errors for those
+		// This works but would be better to have a more explicit way to differentiate
 
-		if (StringUtils.hasText(destination)) {
-			throw new MessageDeliveryException("No handler for destination '" + destination + "'");
+		if (destination != null && StringUtils.hasText(destination.value())) {
+			throw new MessageDeliveryException("No handler for destination '" + destination.value() + "'");
 		}
 	}
 

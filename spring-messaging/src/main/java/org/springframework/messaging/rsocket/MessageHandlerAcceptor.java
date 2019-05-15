@@ -73,6 +73,7 @@ public final class MessageHandlerAcceptor extends RSocketMessageHandler
 
 	private MessagingRSocket createRSocket(RSocket rsocket) {
 		return new MessagingRSocket(this::handleMessage,
+				route -> getRouteMatcher().parseRoute(route),
 				RSocketRequester.wrap(rsocket, this.defaultDataMimeType, getRSocketStrategies()),
 				this.defaultDataMimeType,
 				getRSocketStrategies().dataBufferFactory());

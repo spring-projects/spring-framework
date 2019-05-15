@@ -47,6 +47,8 @@ import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.SimpleRouteMatcher;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertTrue;
@@ -117,11 +119,11 @@ public class MessageMappingMessageHandlerTests {
 	public void unhandledExceptionShouldFlowThrough() {
 
 		GenericMessage<?> message = new GenericMessage<>(new Object(),
-				Collections.singletonMap(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, "string"));
+				Collections.singletonMap(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,
+						new SimpleRouteMatcher(new AntPathMatcher()).parseRoute("string")));
 
 		StepVerifier.create(initMesssageHandler().handleMessage(message))
-				.expectErrorSatisfies(ex -> assertTrue(
-						"Actual: " + ex.getMessage(),
+				.expectErrorSatisfies(ex -> assertTrue("Actual: " + ex.getMessage(),
 						ex.getMessage().startsWith("Could not resolve method parameter at index 0")))
 				.verify(Duration.ofSeconds(5));
 	}
@@ -156,7 +158,8 @@ public class MessageMappingMessageHandlerTests {
 		Flux<DataBuffer> payload = Flux.fromIterable(Arrays.asList(content)).map(parts -> toDataBuffer(parts));
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setLeaveMutable(true);
-		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, destination);
+		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,
+				new SimpleRouteMatcher(new AntPathMatcher()).parseRoute(destination));
 		return MessageBuilder.createMessage(payload, headers.getMessageHeaders());
 	}
 

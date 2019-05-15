@@ -56,7 +56,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.PathMatcher;
+import org.springframework.util.RouteMatcher;
+import org.springframework.util.SimpleRouteMatcher;
 import org.springframework.util.StringValueResolver;
 import org.springframework.validation.Validator;
 
@@ -91,7 +92,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	@Nullable
 	private Validator validator;
 
-	private PathMatcher pathMatcher;
+	private RouteMatcher routeMatcher;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -100,8 +101,9 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 
 	public MessageMappingMessageHandler() {
-		this.pathMatcher = new AntPathMatcher();
-		((AntPathMatcher) this.pathMatcher).setPathSeparator(".");
+		AntPathMatcher pathMatcher = new AntPathMatcher();
+		pathMatcher.setPathSeparator(".");
+		this.routeMatcher = new SimpleRouteMatcher(pathMatcher);
 	}
 
 
@@ -187,20 +189,23 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	/**
-	 * Set the PathMatcher implementation to use for matching destinations
-	 * against configured destination patterns.
-	 * <p>By default, {@link AntPathMatcher} is used with separator set to ".".
+	 * Set the {@code RouteMatcher} to use for mapping messages to handlers
+	 * based on the route patterns they're configured with.
+	 * <p>By default, {@link SimpleRouteMatcher} is used, backed by
+	 * {@link AntPathMatcher} with "." as separator. For greater
+	 * efficiency consider using the {@code PathPatternRouteMatcher} from
+	 * {@code spring-web} instead.
 	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
-		this.pathMatcher = pathMatcher;
+	public void setRouteMatcher(RouteMatcher routeMatcher) {
+		Assert.notNull(routeMatcher, "RouteMatcher must not be null");
+		this.routeMatcher = routeMatcher;
 	}
 
 	/**
-	 * Return the PathMatcher implementation to use for matching destinations.
+	 * Return the {@code RouteMatcher} used to map messages to handlers.
 	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
+	public RouteMatcher getRouteMatcher() {
+		return this.routeMatcher;
 	}
 
 	/**
@@ -289,14 +294,15 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 					.map(s -> this.valueResolver.resolveStringValue(s))
 					.toArray(String[]::new);
 		}
-		return new CompositeMessageCondition(new DestinationPatternsMessageCondition(destinations, this.pathMatcher));
+		return new CompositeMessageCondition(
+				new DestinationPatternsMessageCondition(destinations, this.routeMatcher));
 	}
 
 	@Override
 	protected Set<String> getDirectLookupMappings(CompositeMessageCondition mapping) {
 		Set<String> result = new LinkedHashSet<>();
 		for (String pattern : mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns()) {
-			if (!this.pathMatcher.isPattern(pattern)) {
+			if (!this.routeMatcher.isPattern(pattern)) {
 				result.add(pattern);
 			}
 		}
@@ -304,8 +310,9 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	@Override
-	protected String getDestination(Message<?> message) {
-		return (String) message.getHeaders().get(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);
+	protected RouteMatcher.Route getDestination(Message<?> message) {
+		return (RouteMatcher.Route) message.getHeaders()
+				.get(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);
 	}
 
 	@Override
@@ -324,13 +331,15 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	}
 
 	@Override
-	protected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message) {
+	protected Mono<Void> handleMatch(
+			CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message) {
+
 		Set<String> patterns = mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns();
 		if (!CollectionUtils.isEmpty(patterns)) {
 			String pattern = patterns.iterator().next();
-			String destination = getDestination(message);
+			RouteMatcher.Route destination = getDestination(message);
 			Assert.state(destination != null, "Missing destination header");
-			Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(pattern, destination);
+			Map<String, String> vars = getRouteMatcher().matchAndExtract(pattern, destination);
 			if (!CollectionUtils.isEmpty(vars)) {
 				MessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
 				Assert.state(mha != null && mha.isMutable(), "Mutable MessageHeaderAccessor required");

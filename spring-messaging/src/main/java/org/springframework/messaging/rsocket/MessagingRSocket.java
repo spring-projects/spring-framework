@@ -42,6 +42,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.RouteMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,6 +57,8 @@ class MessagingRSocket extends AbstractRSocket {
 
 	private final Function<Message<?>, Mono<Void>> handler;
 
+	private final Function<String, RouteMatcher.Route> routeParser;
+
 	private final RSocketRequester requester;
 
 	@Nullable
@@ -64,10 +67,13 @@ class MessagingRSocket extends AbstractRSocket {
 	private final DataBufferFactory bufferFactory;
 
 
-	MessagingRSocket(Function<Message<?>, Mono<Void>> handler, RSocketRequester requester,
+	MessagingRSocket(Function<Message<?>, Mono<Void>> handler,
+			Function<String, RouteMatcher.Route> routeParser, RSocketRequester requester,
 			@Nullable MimeType defaultDataMimeType, DataBufferFactory bufferFactory) {
+		this.routeParser = routeParser;
 
 		Assert.notNull(handler, "'handler' is required");
+		Assert.notNull(routeParser, "'routeParser' is required");
 		Assert.notNull(requester, "'requester' is required");
 		this.handler = handler;
 		this.requester = requester;
@@ -181,7 +187,8 @@ class MessagingRSocket extends AbstractRSocket {
 	private MessageHeaders createHeaders(String destination, @Nullable MonoProcessor<?> replyMono) {
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setLeaveMutable(true);
-		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, destination);
+		RouteMatcher.Route route = this.routeParser.apply(destination);
+		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, route);
 		if (this.dataMimeType != null) {
 			headers.setContentType(this.dataMimeType);
 		}
