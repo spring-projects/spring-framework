@@ -354,7 +354,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		String requestInfo = (logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : null);
 
 		try {
-			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
+			if (sockJsPath.isEmpty() || sockJsPath.equals("/")) {
 				if (requestInfo != null) {
 					logger.debug("Processing transport request: " + requestInfo);
 				}
