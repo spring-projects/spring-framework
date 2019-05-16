@@ -20,9 +20,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -211,30 +211,27 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 	 * <p>The default implementation creates a combined output Map that includes
 	 * model as well as static attributes with the former taking precedence.
 	 */
-	protected Mono<Map<String, Object>> getModelAttributes(@Nullable Map<String, ?> model,
-			ServerWebExchange exchange) {
+	protected Mono<Map<String, Object>> getModelAttributes(
+			@Nullable Map<String, ?> model, ServerWebExchange exchange) {
 
 		int size = (model != null ? model.size() : 0);
-
-		Map<String, Object> attributes = new LinkedHashMap<>(size);
+		Map<String, Object> attributes = new ConcurrentHashMap<>(size);
 		if (model != null) {
 			attributes.putAll(model);
 		}
-
-		return resolveAsyncAttributes(attributes).then(Mono.just(attributes));
+		return resolveAsyncAttributes(attributes).thenReturn(attributes);
 	}
 
 	/**
-	 * By default, resolve async attributes supported by the
-	 * {@link ReactiveAdapterRegistry} to their blocking counterparts.
-	 * <p>View implementations capable of taking advantage of reactive types
-	 * can override this method if needed.
-	 * @return {@code Mono} for the completion of async attributes resolution
+	 * Use the configured {@link ReactiveAdapterRegistry} to adapt asynchronous
+	 * model attributes to {@code Mono<T>} or {@code Mono<List<T>>} and resolve
+	 * them to actual values via {@link Mono#zip(Mono, Mono)}, so that when
+	 * the returned result {@code Mono} completes, the model has its asynchronous
+	 * attributes replaced with synchronous values.
+	 * @return result {@code Mono} that completes when the model is ready
 	 */
 	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
-		List<String> names = new ArrayList<>();
-		List<Mono<?>> valueMonos = new ArrayList<>();
-
+		List<Mono<?>> asyncAttributes = null;
 		for (Map.Entry<String, ?> entry : model.entrySet()) {
 			Object value =  entry.getValue();
 			if (value == null) {
@@ -242,35 +239,34 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 			}
 			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(null, value);
 			if (adapter != null) {
-				names.add(entry.getKey());
+				if (asyncAttributes == null) {
+					asyncAttributes = new ArrayList<>();
+				}
+				String name = entry.getKey();
 				if (adapter.isMultiValue()) {
-					Flux<Object> fluxValue = Flux.from(adapter.toPublisher(value));
-					valueMonos.add(fluxValue.collectList().defaultIfEmpty(Collections.emptyList()));
+					asyncAttributes.add(
+							Flux.from(adapter.toPublisher(value))
+									.collectList()
+									.doOnSuccess(result -> {
+										result = result != null ? result : Collections.emptyList();
+										model.put(name, result);
+									}));
 				}
 				else {
-					Mono<Object> monoValue = Mono.from(adapter.toPublisher(value));
-					valueMonos.add(monoValue.defaultIfEmpty(NO_VALUE));
+					asyncAttributes.add(
+							Mono.from(adapter.toPublisher(value))
+									.doOnSuccess(result -> {
+										if (result != null) {
+											model.put(name, result);
+										}
+										else {
+											model.remove(name);
+										}
+									}));
 				}
 			}
 		}
-
-		if (names.isEmpty()) {
-			return Mono.empty();
-		}
-
-		return Mono.zip(valueMonos,
-				values -> {
-					for (int i=0; i < values.length; i++) {
-						if (values[i] != NO_VALUE) {
-							model.put(names.get(i), values[i]);
-						}
-						else {
-							model.remove(names.get(i));
-						}
-					}
-					return NO_VALUE;
-				})
-				.then();
+		return asyncAttributes != null ? Mono.when(asyncAttributes) : Mono.empty();
 	}
 
 	/**

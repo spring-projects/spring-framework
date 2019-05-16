@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +55,8 @@ public class AbstractViewTests {
 		TestBean testBean1 = new TestBean("Bean1");
 		TestBean testBean2 = new TestBean("Bean2");
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put("attr1", Mono.just(testBean1));
-		attributes.put("attr2", Flux.just(testBean1, testBean2));
+		attributes.put("attr1", Mono.just(testBean1).delayElement(Duration.ofMillis(10)));
+		attributes.put("attr2", Flux.just(testBean1, testBean2).delayElements(Duration.ofMillis(10)));
 		attributes.put("attr3", Single.just(testBean2));
 		attributes.put("attr4", Observable.just(testBean1, testBean2));
 		attributes.put("attr5", Mono.empty());
