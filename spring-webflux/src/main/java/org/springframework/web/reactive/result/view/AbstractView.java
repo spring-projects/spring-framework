@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.view;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -37,6 +39,8 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -53,9 +57,6 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 
 	/** Logger that is available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	private static final Object NO_VALUE = new Object();
-
 
 	private final ReactiveAdapterRegistry adapterRegistry;
 
@@ -219,18 +220,23 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 		if (model != null) {
 			attributes.putAll(model);
 		}
-		return resolveAsyncAttributes(attributes).thenReturn(attributes);
+		//noinspection deprecation
+		return resolveAsyncAttributes(attributes)
+				.then(resolveAsyncAttributes(attributes, exchange))
+				.doOnTerminate(() -> exchange.getAttributes().remove(BINDING_CONTEXT_ATTRIBUTE))
+				.thenReturn(attributes);
 	}
 
 	/**
 	 * Use the configured {@link ReactiveAdapterRegistry} to adapt asynchronous
-	 * model attributes to {@code Mono<T>} or {@code Mono<List<T>>} and resolve
-	 * them to actual values via {@link Mono#zip(Mono, Mono)}, so that when
-	 * the returned result {@code Mono} completes, the model has its asynchronous
-	 * attributes replaced with synchronous values.
+	 * attributes to {@code Mono<T>} or {@code Mono<List<T>>} and then wait to
+	 * resolve them into actual values. When the returned {@code Mono<Void>}
+	 * completes, the asynchronous attributes in the model would have been
+	 * replaced with their corresponding resolved values.
 	 * @return result {@code Mono} that completes when the model is ready
+	 * @since 5.1.8
 	 */
-	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
+	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model, ServerWebExchange exchange) {
 		List<Mono<?>> asyncAttributes = null;
 		for (Map.Entry<String, ?> entry : model.entrySet()) {
 			Object value =  entry.getValue();
@@ -247,10 +253,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 					asyncAttributes.add(
 							Flux.from(adapter.toPublisher(value))
 									.collectList()
-									.doOnSuccess(result -> {
-										result = result != null ? result : Collections.emptyList();
-										model.put(name, result);
-									}));
+									.doOnSuccess(result -> model.put(name, result)));
 				}
 				else {
 					asyncAttributes.add(
@@ -258,6 +261,7 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 									.doOnSuccess(result -> {
 										if (result != null) {
 											model.put(name, result);
+											addBindingResult(name, result, model, exchange);
 										}
 										else {
 											model.remove(name);
@@ -267,6 +271,32 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 			}
 		}
 		return asyncAttributes != null ? Mono.when(asyncAttributes) : Mono.empty();
+	}
+
+	private void addBindingResult(String name, Object value, Map<String, Object> model, ServerWebExchange exchange) {
+		BindingContext context = exchange.getAttribute(BINDING_CONTEXT_ATTRIBUTE);
+		if (context == null || value.getClass().isArray() || value instanceof Collection ||
+				value instanceof Map || BeanUtils.isSimpleValueType(value.getClass())) {
+			return;
+		}
+		BindingResult result = context.createDataBinder(exchange, value, name).getBindingResult();
+		model.put(BindingResult.MODEL_KEY_PREFIX + name, result);
+	}
+
+	/**
+	 * Use the configured {@link ReactiveAdapterRegistry} to adapt asynchronous
+	 * attributes to {@code Mono<T>} or {@code Mono<List<T>>} and then wait to
+	 * resolve them into actual values. When the returned {@code Mono<Void>}
+	 * completes, the asynchronous attributes in the model would have been
+	 * replaced with their corresponding resolved values.
+	 * @return result {@code Mono} that completes when the model is ready
+	 * @deprecated as of 5.1.8 this method is still invoked but it is a no-op.
+	 * Please, use {@link #resolveAsyncAttributes(Map, ServerWebExchange)}
+	 * instead. It is invoked after this one and does the actual work.
+	 */
+	@Deprecated
+	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
+		return Mono.empty();
 	}
 
 	/**
