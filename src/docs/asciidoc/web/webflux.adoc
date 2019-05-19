@@ -2266,9 +2266,20 @@ configure or customize message readers.
 You can use `@RequestBody` in combination with `javax.validation.Valid` or Spring's
 `@Validated` annotation, which causes Standard Bean Validation to be applied.
 By default, validation errors cause a `WebExchangeBindException`, which is turned
-into a 400 (`BAD_REQUEST`) response. Alternatively, you can handle validation errors locally
-within the controller through an `Errors` or a `BindingResult` argument. The following
-example uses a `BindingResult` argument`:
+into a 400 (`BAD_REQUEST`) response. 
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@ExceptionHandler(WebExchangeBindException.class)
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+@ResponseBody
+public Mono<T> processValidationError(WebExchangeBindException ex) {
+	//..
+}
+----
+
+The following example uses a `BindingResult` argument :
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2279,6 +2290,9 @@ example uses a `BindingResult` argument`:
 	}
 ----
 
+And throws following exception :
+
+`java.lang.IllegalStateException: An Errors/BindingResult argument is expected immediately after the @ModelAttribute argument to which it applies. For @RequestBody and @RequestPart arguments, please declare them with a reactive type wrapper and use its onError operators to handle WebExchangeBindException`
 
 [[webflux-ann-httpentity]]
 ==== `HttpEntity`
