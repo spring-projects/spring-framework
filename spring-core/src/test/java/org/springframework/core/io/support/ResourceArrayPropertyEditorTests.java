@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 public class ResourceArrayPropertyEditorTests {
 
 	@Test
-	public void testVanillaResource() throws Exception {
+	public void testVanillaResource() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath:org/springframework/core/io/support/ResourceArrayPropertyEditor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
@@ -44,7 +44,7 @@ public class ResourceArrayPropertyEditorTests {
 	}
 
 	@Test
-	public void testPatternResource() throws Exception {
+	public void testPatternResource() {
 		// N.B. this will sometimes fail if you use classpath: instead of classpath*:.
 		// The result depends on the classpath - if test-classes are segregated from classes
 		// and they come first on the classpath (like in Maven) then it breaks, if classes
@@ -61,9 +61,9 @@ public class ResourceArrayPropertyEditorTests {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		System.setProperty("test.prop", "foo");
 		try {
-			editor.setAsText("${test.prop}-${bar}");
+			editor.setAsText("${test.prop}");
 			Resource[] resources = (Resource[]) editor.getValue();
-			assertEquals("foo-${bar}", resources[0].getFilename());
+			assertEquals("foo", resources[0].getFilename());
 		}
 		finally {
 			System.getProperties().remove("test.prop");
@@ -71,7 +71,7 @@ public class ResourceArrayPropertyEditorTests {
 	}
 
 	@Test
-	public void testStrictSystemPropertyReplacement() {
+	public void testStrictSystemPropertyReplacementWithUnresolvablePlaceholder() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor(
 				new PathMatchingResourcePatternResolver(), new StandardEnvironment(),
 				false);
