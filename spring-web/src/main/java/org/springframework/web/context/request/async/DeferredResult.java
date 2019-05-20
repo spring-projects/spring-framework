@@ -100,8 +100,8 @@ public class DeferredResult<T> {
 	 * @param timeoutResult the result to use
 	 */
 	public DeferredResult(@Nullable Long timeoutValue, Object timeoutResult) {
-		this.timeoutResult = timeoutResult;
 		this.timeoutValue = timeoutValue;
+		this.timeoutResult = timeoutResult;
 	}
 
 
