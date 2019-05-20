@@ -26,6 +26,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -123,7 +124,7 @@ public abstract class MetaAnnotationUtils {
 			}
 		}
 
-		// Declared on interface?
+		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, visited, annotationType);
 			if (descriptor != null) {
@@ -133,7 +134,20 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		// Declared on a superclass?
-		return findAnnotationDescriptor(clazz.getSuperclass(), visited, annotationType);
+		AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(clazz.getSuperclass(), visited, annotationType);
+		if (descriptor != null) {
+			return descriptor;
+		}
+
+		// Declared on an enclosing class of an inner class?
+		if (ClassUtils.isInnerClass(clazz)) {
+			descriptor = findAnnotationDescriptor(clazz.getDeclaringClass(), visited, annotationType);
+			if (descriptor != null) {
+				return descriptor;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -212,7 +226,7 @@ public abstract class MetaAnnotationUtils {
 			}
 		}
 
-		// Declared on interface?
+		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, visited, annotationTypes);
 			if (descriptor != null) {
@@ -222,7 +236,20 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		// Declared on a superclass?
-		return findAnnotationDescriptorForTypes(clazz.getSuperclass(), visited, annotationTypes);
+		UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(clazz.getSuperclass(), visited, annotationTypes);
+		if (descriptor != null) {
+			return descriptor;
+		}
+
+		// Declared on an enclosing class of an inner class?
+		if (ClassUtils.isInnerClass(clazz)) {
+			descriptor = findAnnotationDescriptorForTypes(clazz.getDeclaringClass(), visited, annotationTypes);
+			if (descriptor != null) {
+				return descriptor;
+			}
+		}
+
+		return null;
 	}
 
 	private static void assertNonEmptyAnnotationTypeArray(Class<?>[] annotationTypes, String message) {

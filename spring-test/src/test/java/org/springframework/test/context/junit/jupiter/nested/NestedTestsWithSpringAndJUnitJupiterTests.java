@@ -44,13 +44,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig(TopLevelConfig.class)
 class NestedTestsWithSpringAndJUnitJupiterTests {
 
+	private static final String FOO = "foo";
+	private static final String BAR = "bar";
+
 	@Autowired
 	String foo;
 
 
 	@Test
 	void topLevelTest() {
-		assertThat(foo).isEqualTo("foo");
+		assertThat(foo).isEqualTo(FOO);
 	}
 
 
@@ -67,8 +70,26 @@ class NestedTestsWithSpringAndJUnitJupiterTests {
 			// In contrast to nested test classes running in JUnit 4, the foo
 			// field in the outer instance should have been injected from the
 			// test ApplicationContext for the outer instance.
-			assertThat(foo).isEqualTo("foo");
-			assertThat(bar).isEqualTo("bar");
+			assertThat(foo).isEqualTo(FOO);
+			assertThat(bar).isEqualTo(BAR);
+		}
+	}
+
+	@Nested
+	// @SpringJUnitConfig(NestedConfig.class)
+	class NestedTestCaseWithInheritedConfigTests {
+
+		@Autowired
+		String bar;
+
+
+		@Test
+		void nestedTest() throws Exception {
+			// Since the configuration is inherited, the foo field in the outer instance
+			// and the bar field in the inner instance should both have been injected
+			// from the test ApplicationContext for the outer instance.
+			assertThat(foo).isEqualTo(FOO);
+			assertThat(bar).isEqualTo(FOO);
 		}
 	}
 
@@ -79,7 +100,7 @@ class NestedTestsWithSpringAndJUnitJupiterTests {
 
 		@Bean
 		String foo() {
-			return "foo";
+			return FOO;
 		}
 	}
 
@@ -88,7 +109,7 @@ class NestedTestsWithSpringAndJUnitJupiterTests {
 
 		@Bean
 		String bar() {
-			return "bar";
+			return BAR;
 		}
 	}
 

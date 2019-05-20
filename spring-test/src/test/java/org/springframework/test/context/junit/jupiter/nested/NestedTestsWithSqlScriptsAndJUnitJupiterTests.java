@@ -67,7 +67,7 @@ class NestedTestsWithSqlScriptsAndJUnitJupiterTests {
 	}
 
 	@Nested
-	@SpringJUnitConfig(PopulatedSchemaDatabaseConfig.class)
+	// @SpringJUnitConfig(PopulatedSchemaDatabaseConfig.class)
 	@Transactional
 	class NestedTests {
 
