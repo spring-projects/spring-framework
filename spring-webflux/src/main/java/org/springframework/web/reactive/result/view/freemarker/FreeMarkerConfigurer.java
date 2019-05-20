@@ -46,8 +46,6 @@ import org.springframework.util.Assert;
  * instance via the "configuration" property. This allows to share a FreeMarker
  * Configuration for web and email usage for example.
  *
- * <p>TODO: macros
- *
  * <p>This configurer registers a template loader for this package, allowing to
  * reference the "spring.ftl" macro library contained in this package:
  *
@@ -59,6 +57,7 @@ import org.springframework.util.Assert;
  * Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
  * @author Rossen Stoyanchev
+ * @author Issam El-atif
  * @since 5.0
  */
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
