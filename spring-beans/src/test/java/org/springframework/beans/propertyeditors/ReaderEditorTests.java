@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.util.ClassUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -34,9 +35,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class ReaderEditorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullResourceEditor() throws Exception {
-		new ReaderEditor(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ReaderEditor(null));
 	}
 
 	@Test
@@ -60,11 +62,12 @@ public class ReaderEditorTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWhenResourceDoesNotExist() throws Exception {
 		String resource = "classpath:bingo!";
 		ReaderEditor editor = new ReaderEditor();
-		editor.setAsText(resource);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText(resource));
 	}
 
 	@Test

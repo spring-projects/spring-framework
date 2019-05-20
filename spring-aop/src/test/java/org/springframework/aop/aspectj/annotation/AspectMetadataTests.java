@@ -23,6 +23,7 @@ import test.aop.PerTargetAspect;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.ExceptionAspect;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
@@ -36,9 +37,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class AspectMetadataTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNotAnAspect() {
-		new AspectMetadata(String.class,"someBean");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new AspectMetadata(String.class,"someBean"));
 	}
 
 	@Test

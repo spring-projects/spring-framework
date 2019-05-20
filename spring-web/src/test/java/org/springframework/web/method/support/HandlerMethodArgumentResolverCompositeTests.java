@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -76,9 +77,10 @@ public class HandlerMethodArgumentResolverCompositeTests {
 		assertEquals("Didn't use the first registered resolver", 1, resolvedValue);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noSuitableArgumentResolver() throws Exception {
-		this.resolverComposite.resolveArgument(paramStr, null, null, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.resolverComposite.resolveArgument(paramStr, null, null, null));
 	}
 
 

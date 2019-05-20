@@ -27,10 +27,10 @@ import org.junit.Test;
 
 import org.springframework.util.MBeanTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -138,26 +138,23 @@ public class MBeanServerFactoryBeanTests {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setRegisterWithFactory(referenceShouldExist);
 		bean.afterPropertiesSet();
-
 		try {
 			MBeanServer server = bean.getObject();
 			List<MBeanServer> servers = MBeanServerFactory.findMBeanServer(null);
-
-			boolean found = false;
-			for (MBeanServer candidate : servers) {
-				if (candidate == server) {
-					found = true;
-					break;
-				}
-			}
-
-			if (!(found == referenceShouldExist)) {
-				fail(failMsg);
-			}
+			assertThat(hasInstance(servers, server)).as(failMsg).isEqualTo(referenceShouldExist);
 		}
 		finally {
 			bean.destroy();
 		}
+	}
+
+	private boolean hasInstance(List<MBeanServer> servers, MBeanServer server) {
+		for (MBeanServer candidate : servers) {
+			if (candidate == server) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

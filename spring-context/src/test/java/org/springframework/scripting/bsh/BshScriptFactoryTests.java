@@ -37,6 +37,8 @@ import org.springframework.scripting.TestBeanAwareMessenger;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -44,7 +46,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -199,13 +200,9 @@ public class BshScriptFactoryTests {
 
 	@Test
 	public void scriptCompilationException() {
-		try {
-			new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml");
-			fail("Must throw exception for broken script file");
-		}
-		catch (NestedRuntimeException ex) {
-			assertTrue(ex.contains(ScriptCompilationException.class));
-		}
+		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml"))
+			.matches(ex -> ex.contains(ScriptCompilationException.class));
 	}
 
 	@Test
@@ -216,43 +213,28 @@ public class BshScriptFactoryTests {
 		given(script.isModified()).willReturn(true);
 		BshScriptFactory factory = new BshScriptFactory(
 				ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript, Messenger.class);
-		try {
+		assertThatExceptionOfType(BshScriptUtils.BshExecutionException.class).isThrownBy(() -> {
 			Messenger messenger = (Messenger) factory.getScriptedObject(script, Messenger.class);
 			messenger.getMessage();
-			fail("Must have thrown a BshScriptUtils.BshExecutionException.");
-		}
-		catch (BshScriptUtils.BshExecutionException expected) {
-		}
+		});
 	}
 
 	@Test
 	public void ctorWithNullScriptSourceLocator() {
-		try {
-			new BshScriptFactory(null, Messenger.class);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BshScriptFactory(null, Messenger.class));
 	}
 
 	@Test
 	public void ctorWithEmptyScriptSourceLocator() {
-		try {
-			new BshScriptFactory("", Messenger.class);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BshScriptFactory("", Messenger.class));
 	}
 
 	@Test
 	public void ctorWithWhitespacedScriptSourceLocator() {
-		try {
-			new BshScriptFactory("\n   ", Messenger.class);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BshScriptFactory("\n   ", Messenger.class));
 	}
 
 	@Test

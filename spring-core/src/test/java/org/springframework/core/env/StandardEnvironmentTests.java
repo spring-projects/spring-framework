@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.core.SpringProperties;
 import org.springframework.mock.env.MockPropertySource;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
@@ -40,7 +41,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME;
@@ -144,44 +144,52 @@ public class StandardEnvironmentTests {
 		assertThat(activeProfiles.length, is(2));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setActiveProfiles_withNullProfileArray() {
-		environment.setActiveProfiles((String[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.setActiveProfiles((String[]) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setActiveProfiles_withNullProfile() {
-		environment.setActiveProfiles((String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.setActiveProfiles((String) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setActiveProfiles_withEmptyProfile() {
-		environment.setActiveProfiles("");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.setActiveProfiles(""));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setActiveProfiles_withNotOperator() {
-		environment.setActiveProfiles("p1", "!p2");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.setActiveProfiles("p1", "!p2"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setDefaultProfiles_withNullProfileArray() {
-		environment.setDefaultProfiles((String[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.setDefaultProfiles((String[]) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setDefaultProfiles_withNullProfile() {
-		environment.setDefaultProfiles((String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.setDefaultProfiles((String) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setDefaultProfiles_withEmptyProfile() {
-		environment.setDefaultProfiles("");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.setDefaultProfiles(""));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setDefaultProfiles_withNotOperator() {
-		environment.setDefaultProfiles("d1", "!d2");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.setDefaultProfiles("d1", "!d2"));
 	}
 
 	@Test
@@ -219,11 +227,12 @@ public class StandardEnvironmentTests {
 		System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void defaultProfileWithCircularPlaceholder() {
 		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
 		try {
-			environment.getDefaultProfiles();
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					environment.getDefaultProfiles());
 		}
 		finally {
 			System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
@@ -278,24 +287,28 @@ public class StandardEnvironmentTests {
 		assertThat(Arrays.asList(environment.getDefaultProfiles()), hasItems("pd2", "pd3"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void acceptsProfiles_withEmptyArgumentList() {
-		environment.acceptsProfiles();
+		assertThatIllegalArgumentException().isThrownBy(
+				environment::acceptsProfiles);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void acceptsProfiles_withNullArgumentList() {
-		environment.acceptsProfiles((String[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.acceptsProfiles((String[]) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void acceptsProfiles_withNullArgument() {
-		environment.acceptsProfiles((String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.acceptsProfiles((String) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void acceptsProfiles_withEmptyArgument() {
-		environment.acceptsProfiles("");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.acceptsProfiles(""));
 	}
 
 	@Test
@@ -335,9 +348,10 @@ public class StandardEnvironmentTests {
 		assertThat(environment.acceptsProfiles("!p1"), is(false));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void acceptsProfiles_withInvalidNotOperator() {
-		environment.acceptsProfiles("p1", "!");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				environment.acceptsProfiles("p1", "!"));
 	}
 
 	@Test
@@ -364,14 +378,9 @@ public class StandardEnvironmentTests {
 
 		env.addActiveProfile("validProfile"); // succeeds
 
-		try {
-			env.addActiveProfile("invalid-profile");
-			fail("expected validation exception");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(),
-					equalTo("Invalid profile [invalid-profile]: must not contain dash character"));
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				env.addActiveProfile("invalid-profile"))
+			.withMessage("Invalid profile [invalid-profile]: must not contain dash character");
 	}
 
 	@Test
@@ -454,13 +463,8 @@ public class StandardEnvironmentTests {
 			// the user that under these very special conditions (non-object key +
 			// SecurityManager that disallows access to system properties), they
 			// cannot do what they're attempting.
-			try {
-				systemProperties.get(NON_STRING_PROPERTY_NAME);
-				fail("Expected IllegalArgumentException when searching with non-string key against ReadOnlySystemAttributesMap");
-			}
-			catch (IllegalArgumentException ex) {
-				// expected
-			}
+			assertThatIllegalArgumentException().as("searching with non-string key against ReadOnlySystemAttributesMap").isThrownBy(() ->
+					systemProperties.get(NON_STRING_PROPERTY_NAME));
 		}
 
 		System.setSecurityManager(oldSecurityManager);

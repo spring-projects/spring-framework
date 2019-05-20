@@ -46,11 +46,12 @@ import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -118,20 +119,10 @@ public class HttpInvokerTests {
 		assertTrue(Arrays.equals(new int[] {1, 2, 3}, intArray[0]));
 		assertTrue(Arrays.equals(new int[] {4, 5, 6}, intArray[1]));
 
-		try {
-			proxy.exceptional(new IllegalStateException());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-		try {
-			proxy.exceptional(new IllegalAccessException());
-			fail("Should have thrown IllegalAccessException");
-		}
-		catch (IllegalAccessException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				proxy.exceptional(new IllegalStateException()));
+		assertThatExceptionOfType(IllegalAccessException.class).isThrownBy(() ->
+				proxy.exceptional(new IllegalAccessException()));
 	}
 
 	@Test
@@ -157,14 +148,9 @@ public class HttpInvokerTests {
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
-		try {
-			proxy.setAge(50);
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IOException);
-		}
+		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(() ->
+				proxy.setAge(50))
+			.withCauseInstanceOf(IOException.class);
 	}
 
 	@Test
@@ -236,20 +222,10 @@ public class HttpInvokerTests {
 		proxy.setAge(50);
 		assertEquals(50, proxy.getAge());
 
-		try {
-			proxy.exceptional(new IllegalStateException());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-		try {
-			proxy.exceptional(new IllegalAccessException());
-			fail("Should have thrown IllegalAccessException");
-		}
-		catch (IllegalAccessException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				proxy.exceptional(new IllegalStateException()));
+		assertThatExceptionOfType(IllegalAccessException.class).isThrownBy(() ->
+				proxy.exceptional(new IllegalAccessException()));
 	}
 
 	@Test
@@ -316,20 +292,10 @@ public class HttpInvokerTests {
 		proxy.setAge(50);
 		assertEquals(50, proxy.getAge());
 
-		try {
-			proxy.exceptional(new IllegalStateException());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-		try {
-			proxy.exceptional(new IllegalAccessException());
-			fail("Should have thrown IllegalAccessException");
-		}
-		catch (IllegalAccessException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				proxy.exceptional(new IllegalStateException()));
+		assertThatExceptionOfType(IllegalAccessException.class).isThrownBy(() ->
+				proxy.exceptional(new IllegalAccessException()));
 	}
 
 	@Test
@@ -360,13 +326,8 @@ public class HttpInvokerTests {
 			public RemoteInvocation createRemoteInvocation(MethodInvocation methodInvocation) {
 				RemoteInvocation invocation = new RemoteInvocation(methodInvocation);
 				invocation.addAttribute("myKey", "myValue");
-				try {
-					invocation.addAttribute("myKey", "myValue");
-					fail("Should have thrown IllegalStateException");
-				}
-				catch (IllegalStateException ex) {
-					// expected: already defined
-				}
+				assertThatIllegalStateException().isThrownBy(() ->
+						invocation.addAttribute("myKey", "myValue"));
 				assertNotNull(invocation.getAttributes());
 				assertEquals(1, invocation.getAttributes().size());
 				assertEquals("myValue", invocation.getAttributes().get("myKey"));
@@ -472,14 +433,10 @@ public class HttpInvokerTests {
 		assertTrue(proxy.equals(proxy));
 
 		// should go through
-		try {
-			proxy.setAge(50);
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IOException);
-		}
+
+		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(() ->
+				proxy.setAge(50))
+			.withCauseInstanceOf(IOException.class);
 	}
 
 

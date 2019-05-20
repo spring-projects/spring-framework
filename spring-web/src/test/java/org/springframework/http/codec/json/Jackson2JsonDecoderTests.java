@@ -47,6 +47,7 @@ import org.springframework.util.MimeType;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -94,12 +95,13 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 		assertEquals(Collections.singletonList(textJavascript), decoder.getDecodableMimeTypes());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void decodableMimeTypesIsImmutable() {
 		MimeType textJavascript = new MimeType("text", "javascript", StandardCharsets.UTF_8);
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(new ObjectMapper(), textJavascript);
 
-		decoder.getMimeTypes().add(new MimeType("text", "ecmascript"));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				decoder.getMimeTypes().add(new MimeType("text", "ecmascript")));
 	}
 
 	@Override

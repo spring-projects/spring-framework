@@ -28,6 +28,7 @@ import org.springframework.tests.sample.beans.IOther;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -56,9 +57,10 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNullConfig() {
-		new JdkDynamicAopProxy(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new JdkDynamicAopProxy(null));
 	}
 
 	@Test

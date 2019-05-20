@@ -25,8 +25,8 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -55,13 +55,8 @@ public class WebApplicationObjectSupportTests {
 		StaticApplicationContext ac = new StaticApplicationContext();
 		ac.registerBeanDefinition("test", new RootBeanDefinition(TestWebApplicationObject.class));
 		WebApplicationObjectSupport wao = (WebApplicationObjectSupport) ac.getBean("test");
-		try {
-			wao.getWebApplicationContext();
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(
+				wao::getWebApplicationContext);
 	}
 
 

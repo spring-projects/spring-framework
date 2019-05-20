@@ -32,6 +32,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -100,13 +101,14 @@ public class SubProtocolWebSocketHandlerTests {
 				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void subProtocolNoMatch() throws Exception {
 		this.webSocketHandler.setDefaultProtocolHandler(defaultHandler);
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
 		this.session.setAcceptedProtocol("wamp");
 
-		this.webSocketHandler.afterConnectionEstablished(session);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.webSocketHandler.afterConnectionEstablished(session));
 	}
 
 	@Test
@@ -141,16 +143,18 @@ public class SubProtocolWebSocketHandlerTests {
 				isA(ConcurrentWebSocketSessionDecorator.class), eq(this.inClientChannel));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void noSubProtocolTwoHandlers() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
-		this.webSocketHandler.afterConnectionEstablished(session);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.webSocketHandler.afterConnectionEstablished(session));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void noSubProtocolNoDefaultHandler() throws Exception {
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(stompHandler, mqttHandler));
-		this.webSocketHandler.afterConnectionEstablished(session);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.webSocketHandler.afterConnectionEstablished(session));
 	}
 
 	@Test

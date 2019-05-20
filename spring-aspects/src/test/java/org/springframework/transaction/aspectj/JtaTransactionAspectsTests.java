@@ -30,8 +30,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Stephane Nicoll
@@ -59,13 +60,9 @@ public class JtaTransactionAspectsTests {
 	public void matchingRollbackOnApplied() throws Throwable {
 		assertEquals(0, this.txManager.begun);
 		InterruptedException test = new InterruptedException();
-		try {
-			new JtaAnnotationPublicAnnotatedMember().echo(test);
-			fail("Should have thrown an exception");
-		}
-		catch (Throwable throwable) {
-			assertEquals("wrong exception", test, throwable);
-		}
+		assertThatExceptionOfType(InterruptedException.class).isThrownBy(() ->
+				new JtaAnnotationPublicAnnotatedMember().echo(test))
+			.isSameAs(test);
 		assertEquals(1, this.txManager.rollbacks);
 		assertEquals(0, this.txManager.commits);
 	}
@@ -74,13 +71,9 @@ public class JtaTransactionAspectsTests {
 	public void nonMatchingRollbackOnApplied() throws Throwable {
 		assertEquals(0, this.txManager.begun);
 		IOException test = new IOException();
-		try {
-			new JtaAnnotationPublicAnnotatedMember().echo(test);
-			fail("Should have thrown an exception");
-		}
-		catch (Throwable throwable) {
-			assertEquals("wrong exception", test, throwable);
-		}
+		assertThatIOException().isThrownBy(() ->
+				new JtaAnnotationPublicAnnotatedMember().echo(test))
+			.isSameAs(test);
 		assertEquals(1, this.txManager.commits);
 		assertEquals(0, this.txManager.rollbacks);
 	}

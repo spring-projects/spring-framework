@@ -22,6 +22,7 @@ import java.net.Proxy;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -36,22 +37,25 @@ public class ProxyFactoryBeanTests {
 		factoryBean = new ProxyFactoryBean();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noType() {
 		factoryBean.setType(null);
-		factoryBean.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				factoryBean::afterPropertiesSet);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noHostname() {
 		factoryBean.setHostname("");
-		factoryBean.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				factoryBean::afterPropertiesSet);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noPort() {
 		factoryBean.setHostname("example.com");
-		factoryBean.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				factoryBean::afterPropertiesSet);
 	}
 
 	@Test

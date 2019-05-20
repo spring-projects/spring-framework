@@ -39,6 +39,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -109,14 +110,15 @@ public class HandlerMappingIntrospectorTests {
 		assertNull("Attributes changes not ignored", request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void getMatchableWhereHandlerMappingDoesNotImplementMatchableInterface() throws Exception {
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
 		cxt.registerSingleton("hm1", TestHandlerMapping.class);
 		cxt.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		getIntrospector(cxt).getMatchableHandlerMapping(request);
+		assertThatIllegalStateException().isThrownBy(() ->
+				getIntrospector(cxt).getMatchableHandlerMapping(request));
 	}
 
 	@Test

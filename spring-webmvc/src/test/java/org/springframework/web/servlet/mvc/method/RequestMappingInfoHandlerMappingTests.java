@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -59,14 +58,12 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * Test fixture with {@link RequestMappingInfoHandlerMapping}.
@@ -150,23 +147,19 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerRequestMethodNotAllowed() throws Exception {
-		try {
-			MockHttpServletRequest request = new MockHttpServletRequest("POST", "/bar");
-			this.handlerMapping.getHandler(request);
-			fail("HttpRequestMethodNotSupportedException expected");
-		}
-		catch (HttpRequestMethodNotSupportedException ex) {
-			assertArrayEquals("Invalid supported methods", new String[]{"GET", "HEAD"},
-					ex.getSupportedMethods());
-		}
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/bar");
+		assertThatExceptionOfType(HttpRequestMethodNotSupportedException.class).isThrownBy(() ->
+				this.handlerMapping.getHandler(request))
+			.satisfies(ex -> assertThat(ex.getSupportedMethods()).containsExactly("GET", "HEAD"));
 	}
 
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)  // SPR-9603
+	@Test // SPR-9603
 	public void getHandlerRequestMethodMatchFalsePositive() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users");
 		request.addHeader("Accept", "application/xml");
 		this.handlerMapping.registerHandler(new UserController());
-		this.handlerMapping.getHandler(request);
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				this.handlerMapping.getHandler(request));
 	}
 
 	@Test  // SPR-8462
@@ -186,15 +179,11 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerTestInvalidContentType() throws Exception {
-		try {
-			MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/person/1");
-			request.setContentType("bogus");
-			this.handlerMapping.getHandler(request);
-			fail("HttpMediaTypeNotSupportedException expected");
-		}
-		catch (HttpMediaTypeNotSupportedException ex) {
-			assertEquals("Invalid mime type \"bogus\": does not contain '/'", ex.getMessage());
-		}
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/person/1");
+		request.setContentType("bogus");
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
+				this.handlerMapping.getHandler(request))
+			.withMessage("Invalid mime type \"bogus\": does not contain '/'");
 	}
 
 	@Test  // SPR-8462
@@ -206,17 +195,11 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test  // SPR-12854
 	public void getHandlerUnsatisfiedServletRequestParameterException() throws Exception {
-		try {
-			MockHttpServletRequest request = new MockHttpServletRequest("GET", "/params");
-			this.handlerMapping.getHandler(request);
-			fail("UnsatisfiedServletRequestParameterException expected");
-		}
-		catch (UnsatisfiedServletRequestParameterException ex) {
-			List<String[]> groups = ex.getParamConditionGroups();
-			assertEquals(2, groups.size());
-			assertThat(Arrays.asList("foo=bar", "bar=baz"),
-					containsInAnyOrder(groups.get(0)[0], groups.get(1)[0]));
-		}
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/params");
+		assertThatExceptionOfType(UnsatisfiedServletRequestParameterException.class).isThrownBy(() ->
+				this.handlerMapping.getHandler(request))
+			.satisfies(ex -> assertThat(ex.getParamConditionGroups().stream().map(group -> group[0]))
+					.containsExactlyInAnyOrder("foo=bar", "bar=baz"));
 	}
 
 	@Test
@@ -395,17 +378,11 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	private void testHttpMediaTypeNotSupportedException(String url) throws Exception {
-		try {
-			MockHttpServletRequest request = new MockHttpServletRequest("PUT", url);
-			request.setContentType("application/json");
-			this.handlerMapping.getHandler(request);
-			fail("HttpMediaTypeNotSupportedException expected");
-		}
-		catch (HttpMediaTypeNotSupportedException ex) {
-			assertEquals("Invalid supported consumable media types",
-					Collections.singletonList(new MediaType("application", "xml")),
-					ex.getSupportedMediaTypes());
-		}
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", url);
+		request.setContentType("application/json");
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
+				this.handlerMapping.getHandler(request))
+			.satisfies(ex -> assertThat(ex.getSupportedMediaTypes()).containsExactly(MediaType.APPLICATION_XML));
 	}
 
 	private void testHttpOptions(String requestURI, String allowHeader) throws Exception {
@@ -422,17 +399,11 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	private void testHttpMediaTypeNotAcceptableException(String url) throws Exception {
-		try {
-			MockHttpServletRequest request = new MockHttpServletRequest("GET", url);
-			request.addHeader("Accept", "application/json");
-			this.handlerMapping.getHandler(request);
-			fail("HttpMediaTypeNotAcceptableException expected");
-		}
-		catch (HttpMediaTypeNotAcceptableException ex) {
-			assertEquals("Invalid supported producible media types",
-					Collections.singletonList(new MediaType("application", "xml")),
-					ex.getSupportedMediaTypes());
-		}
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", url);
+		request.addHeader("Accept", "application/json");
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				this.handlerMapping.getHandler(request))
+			.satisfies(ex -> assertThat(ex.getSupportedMediaTypes()).containsExactly(MediaType.APPLICATION_XML));
 	}
 
 	private void handleMatch(MockHttpServletRequest request, String pattern, String lookupPath) {

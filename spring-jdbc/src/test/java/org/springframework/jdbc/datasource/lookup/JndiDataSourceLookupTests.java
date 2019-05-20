@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -48,7 +49,7 @@ public class JndiDataSourceLookupTests {
 		assertSame(expectedDataSource, dataSource);
 	}
 
-	@Test(expected = DataSourceLookupFailureException.class)
+	@Test
 	public void testNoDataSourceAtJndiLocation() throws Exception {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
@@ -57,7 +58,8 @@ public class JndiDataSourceLookupTests {
 				throw new NamingException();
 			}
 		};
-		lookup.getDataSource(DATA_SOURCE_NAME);
+		assertThatExceptionOfType(DataSourceLookupFailureException.class).isThrownBy(() ->
+				lookup.getDataSource(DATA_SOURCE_NAME));
 	}
 
 }

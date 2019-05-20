@@ -23,8 +23,8 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.servlet.ThemeResolver;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Jean-Pierre Pawlak
@@ -47,8 +47,7 @@ public class ThemeResolverTests {
 		// set new theme name
 		try {
 			themeResolver.setThemeName(request, response, TEST_THEME_NAME);
-			if (!shouldSet)
-				fail("should not be able to set Theme name");
+			assertThat(shouldSet).as("able to set theme name").isTrue();
 			// check new theme namelocale
 			themeName = themeResolver.resolveThemeName(request);
 			assertEquals(TEST_THEME_NAME, themeName);
@@ -57,8 +56,7 @@ public class ThemeResolverTests {
 			assertEquals(themeName, defaultName);
 		}
 		catch (UnsupportedOperationException ex) {
-			if (shouldSet)
-				fail("should be able to set Theme name");
+			assertThat(shouldSet).as("able to set theme name").isFalse();
 		}
 	}
 

@@ -41,6 +41,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -75,9 +76,10 @@ public class MethodMessageHandlerTests {
 		this.messageHandler.registerHandler(this.testController);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void duplicateMapping() {
-		this.messageHandler.registerHandler(new DuplicateMappingsController());
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.messageHandler.registerHandler(new DuplicateMappingsController()));
 	}
 
 	@Test

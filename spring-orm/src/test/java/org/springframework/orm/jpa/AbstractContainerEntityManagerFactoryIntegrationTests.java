@@ -29,12 +29,12 @@ import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Integration tests for LocalContainerEntityManagerFactoryBean.
@@ -95,30 +95,22 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	public void testBogusQuery() {
-		try {
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> {
 			Query query = sharedEntityManager.createQuery("It's raining toads");
 			// required in OpenJPA case
 			query.executeUpdate();
-			fail("Should have thrown a RuntimeException");
-		}
-		catch (RuntimeException ex) {
-			// expected
-		}
+		});
 	}
 
 	@Test
 	public void testGetReferenceWhenNoRow() {
-		try {
-			Person notThere = sharedEntityManager.getReference(Person.class, 666);
-
-			// We may get here (as with Hibernate). Either behaviour is valid:
-			// throw exception on first access or on getReference itself.
-			notThere.getFirstName();
-			fail("Should have thrown an EntityNotFoundException or ObjectNotFoundException");
-		}
-		catch (Exception ex) {
-			assertTrue(ex.getClass().getName().endsWith("NotFoundException"));
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+				Person notThere = sharedEntityManager.getReference(Person.class, 666);
+				// We may get here (as with Hibernate). Either behaviour is valid:
+				// throw exception on first access or on getReference itself.
+				notThere.getFirstName();
+			})
+		.matches(ex -> ex.getClass().getName().endsWith("NotFoundException"));
 	}
 
 	@Test
@@ -169,12 +161,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	public void testEntityManagerProxyRejectsProgrammaticTxManagement() {
-		try {
-			sharedEntityManager.getTransaction();
-			fail("Should not be able to create transactions on container managed EntityManager");
-		}
-		catch (IllegalStateException ex) {
-		}
+		assertThatIllegalStateException().as("Should not be able to create transactions on container managed EntityManager").isThrownBy(
+				sharedEntityManager::getTransaction);
 	}
 
 	@Test
@@ -200,13 +188,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		assertEquals(0, people.size());
-		try {
-			assertNull(q.getSingleResult());
-			fail("Should have thrown NoResultException");
-		}
-		catch (NoResultException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoResultException.class).isThrownBy(
+				q::getSingleResult);
 	}
 
 	@Test
@@ -218,13 +201,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		assertEquals(0, people.size());
-		try {
-			assertNull(q.getSingleResult());
-			fail("Should have thrown NoResultException");
-		}
-		catch (NoResultException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoResultException.class).isThrownBy(
+				q::getSingleResult);
 	}
 
 	@Test
@@ -234,13 +212,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
 		assertEquals(0, people.size());
-		try {
-			assertNull(q.getSingleResult());
-			fail("Should have thrown NoResultException");
-		}
-		catch (NoResultException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoResultException.class).isThrownBy(
+				q::getSingleResult);
 	}
 
 	@Test
@@ -253,24 +226,16 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
 		assertEquals(0, people.size());
-		try {
-			assertNull(q.getSingleResult());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (Exception ex) {
-			// We would typically expect an IllegalStateException, but Hibernate throws a
-			// PersistenceException. So we assert the contents of the exception message instead.
-			assertTrue(ex.getMessage().contains("closed"));
-		}
-		q = em.createQuery("select p from Person as p");
-		q.setFlushMode(FlushModeType.AUTO);
-		try {
-			assertNull(q.getSingleResult());
-			fail("Should have thrown NoResultException");
-		}
-		catch (NoResultException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				q.getSingleResult())
+			.withMessageContaining("closed");
+		// We would typically expect an IllegalStateException, but Hibernate throws a
+		// PersistenceException. So we assert the contents of the exception message instead.
+
+		Query q2 = em.createQuery("select p from Person as p");
+		q2.setFlushMode(FlushModeType.AUTO);
+		assertThatExceptionOfType(NoResultException.class).isThrownBy(
+				q2::getSingleResult);
 	}
 
 	@Test

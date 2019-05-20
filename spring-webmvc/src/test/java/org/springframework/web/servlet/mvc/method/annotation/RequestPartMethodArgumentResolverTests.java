@@ -42,6 +42,7 @@ import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.test.MockPart;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
@@ -55,12 +56,13 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -280,15 +282,14 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void resolveRequestPartNotValid() throws Exception {
-		try {
-			testResolveArgument(new SimpleBean(null), paramValidRequestPart);
-			fail("Expected exception");
-		}
-		catch (MethodArgumentNotValidException ex) {
-			assertEquals("requestPart", ex.getBindingResult().getObjectName());
-			assertEquals(1, ex.getBindingResult().getErrorCount());
-			assertNotNull(ex.getBindingResult().getFieldError("name"));
-		}
+		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() ->
+				testResolveArgument(new SimpleBean(null), paramValidRequestPart))
+			.satisfies(ex -> {
+				BindingResult bindingResult = ex.getBindingResult();
+				assertThat(bindingResult.getObjectName()).isEqualTo("requestPart");
+				assertThat(bindingResult.getErrorCount()).isEqualTo(1);
+				assertThat(bindingResult.getFieldError("name")).isNotNull();
+			});
 	}
 
 	@Test
@@ -298,13 +299,9 @@ public class RequestPartMethodArgumentResolverTests {
 
 	@Test
 	public void resolveRequestPartRequired() throws Exception {
-		try {
-			testResolveArgument(null, paramValidRequestPart);
-			fail("Expected exception");
-		}
-		catch (MissingServletRequestPartException ex) {
-			assertEquals("requestPart", ex.getRequestPartName());
-		}
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				testResolveArgument(null, paramValidRequestPart))
+			.satisfies(ex -> assertThat(ex.getRequestPartName()).isEqualTo("requestPart"));
 	}
 
 	@Test
@@ -312,10 +309,11 @@ public class RequestPartMethodArgumentResolverTests {
 		testResolveArgument(new SimpleBean("foo"), paramValidRequestPart);
 	}
 
-	@Test(expected = MultipartException.class)
+	@Test
 	public void isMultipartRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		resolver.resolveArgument(paramMultipartFile, new ModelAndViewContainer(), new ServletWebRequest(request), null);
+		assertThatExceptionOfType(MultipartException.class).isThrownBy(() ->
+				resolver.resolveArgument(paramMultipartFile, new ModelAndViewContainer(), new ServletWebRequest(request), null));
 	}
 
 	@Test  // SPR-9079

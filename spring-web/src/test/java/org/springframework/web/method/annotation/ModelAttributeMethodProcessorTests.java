@@ -45,6 +45,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -216,7 +217,7 @@ public class ModelAttributeMethodProcessorTests {
 		assertTrue(dataBinder.isValidateInvoked());
 	}
 
-	@Test(expected = BindException.class)
+	@Test
 	public void resolveArgumentBindException() throws Exception {
 		String name = "testBean";
 		Object target = new TestBean();
@@ -227,7 +228,8 @@ public class ModelAttributeMethodProcessorTests {
 		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
 		given(binderFactory.createBinder(this.request, target, name)).willReturn(dataBinder);
 
-		this.processor.resolveArgument(this.paramNonSimpleType, this.container, this.request, binderFactory);
+		assertThatExceptionOfType(BindException.class).isThrownBy(() ->
+				this.processor.resolveArgument(this.paramNonSimpleType, this.container, this.request, binderFactory));
 		verify(binderFactory).createBinder(this.request, target, name);
 	}
 

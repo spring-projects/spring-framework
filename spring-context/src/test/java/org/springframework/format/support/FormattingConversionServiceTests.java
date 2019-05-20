@@ -55,6 +55,7 @@ import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationForm
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
 import org.springframework.format.number.NumberStyleFormatter;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -265,16 +266,18 @@ public class FormattingConversionServiceTests {
 		assertNull(formattingService.convert("     ", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void parseParserReturnsNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Integer.class, new NullReturningFormatter());
-		assertNull(formattingService.convert("1", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				formattingService.convert("1", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void parseNullPrimitiveProperty() throws ParseException {
 		formattingService.addFormatterForFieldType(Integer.class, new NumberStyleFormatter());
-		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
 	}
 
 	@Test

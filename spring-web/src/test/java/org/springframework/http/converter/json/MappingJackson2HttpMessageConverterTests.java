@@ -42,13 +42,13 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.Nullable;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Jackson 2.x converter tests.
@@ -180,12 +180,13 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertEquals("Invalid content-type", contentType, outputMessage.getHeaders().getContentType());
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)
+	@Test
 	public void readInvalidJson() throws IOException {
 		String body = "FooBar";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
-		converter.read(MyBean.class, inputMessage);
+		assertThatExceptionOfType(HttpMessageNotReadableException.class).isThrownBy(() ->
+				converter.read(MyBean.class, inputMessage));
 	}
 
 	@Test
@@ -442,14 +443,9 @@ public class MappingJackson2HttpMessageConverterTests {
 		String body = "{\"property1\":\"foo\",\"property2\":\"bar\"}";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
-		try {
-			converter.read(BeanWithNoDefaultConstructor.class, inputMessage);
-		}
-		catch (HttpMessageConversionException ex) {
-			assertTrue(ex.getMessage(), ex.getMessage().startsWith("Type definition error:"));
-			return;
-		}
-		fail();
+		assertThatExceptionOfType(HttpMessageConversionException.class).isThrownBy(() ->
+				converter.read(BeanWithNoDefaultConstructor.class, inputMessage))
+			.withMessageStartingWith("Type definition error:");
 	}
 
 

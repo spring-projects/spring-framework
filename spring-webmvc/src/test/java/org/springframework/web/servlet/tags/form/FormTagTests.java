@@ -25,11 +25,11 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 
 /**
@@ -219,14 +219,9 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 	@Test
 	public void withNullResolvedCommand() throws Exception {
-		try {
-			tag.setModelAttribute(null);
-			tag.doStartTag();
-			fail("Must not be able to have a command name that resolves to null");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		tag.setModelAttribute(null);
+		assertThatIllegalArgumentException().isThrownBy(
+				tag::doStartTag);
 	}
 
 	/**

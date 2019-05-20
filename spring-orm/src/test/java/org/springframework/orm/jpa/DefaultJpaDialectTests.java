@@ -26,8 +26,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -43,14 +43,8 @@ public class DefaultJpaDialectTests {
 	public void testDefaultTransactionDefinition() throws Exception {
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-
-		try {
-			dialect.beginTransaction(null, definition);
-			fail("expected exception");
-		}
-		catch (TransactionException e) {
-			// ok
-		}
+		assertThatExceptionOfType(TransactionException.class).isThrownBy(() ->
+				dialect.beginTransaction(null, definition));
 	}
 
 	@Test

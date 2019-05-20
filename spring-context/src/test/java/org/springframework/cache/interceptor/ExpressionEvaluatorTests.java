@@ -36,13 +36,14 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Costin Leau
@@ -124,13 +125,9 @@ public class ExpressionEvaluatorTests {
 	@Test
 	public void unavailableReturnValue() {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.RESULT_UNAVAILABLE);
-		try {
-			new SpelExpressionParser().parseExpression("#result").getValue(context);
-			fail("Should have failed to parse expression, result not available");
-		}
-		catch (VariableNotAvailableException e) {
-			assertEquals("wrong variable name", "result", e.getName());
-		}
+		assertThatExceptionOfType(VariableNotAvailableException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseExpression("#result").getValue(context))
+			.satisfies(ex ->  assertThat(ex.getName()).isEqualTo("result"));
 	}
 
 	@Test

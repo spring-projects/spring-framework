@@ -25,6 +25,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 ///CLOVER:OFF
@@ -54,18 +55,14 @@ public class PerformanceTests {
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).isNotNull();
 			expr.getValue(eContext);
 		}
 
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).isNotNull();
 			expr.getValue(eContext);
 		}
 		endtime = System.currentTimeMillis();
@@ -75,9 +72,7 @@ public class PerformanceTests {
 		}
 
 		Expression expr = parser.parseExpression("placeOfBirth.city");
-		if (expr == null) {
-			fail("Parser returned null for expression");
-		}
+		assertThat(expr).isNotNull();
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			expr.getValue(eContext);
@@ -104,18 +99,14 @@ public class PerformanceTests {
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).isNotNull();
 			expr.getValue(eContext);
 		}
 
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).isNotNull();
 			expr.getValue(eContext);
 		}
 		endtime = System.currentTimeMillis();
@@ -125,9 +116,7 @@ public class PerformanceTests {
 		}
 
 		Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");
-		if (expr == null) {
-			fail("Parser returned null for expression");
-		}
+		assertThat(expr).isNotNull();
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			expr.getValue(eContext);

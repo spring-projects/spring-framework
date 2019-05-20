@@ -30,8 +30,8 @@ import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.naming.ObjectNamingStrategy;
 import org.springframework.jmx.support.ObjectNameManager;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -114,13 +114,9 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		ObjectName reg1 = exporter.registerManagedResource(bean1);
 		assertIsRegistered("Bean 1 not registered with MBeanServer", reg1);
 
-		try {
-			exporter.registerManagedResource(bean2);
-			fail("Shouldn't be able to register a runtime MBean with a reused ObjectName.");
-		}
-		catch (MBeanExportException e) {
-			assertEquals("Incorrect root cause", InstanceAlreadyExistsException.class, e.getCause().getClass());
-		}
+		assertThatExceptionOfType(MBeanExportException.class).isThrownBy(()->
+				exporter.registerManagedResource(bean2))
+			.withCauseExactlyInstanceOf(InstanceAlreadyExistsException.class);
 	}
 
 	private void assertObjectNameMatchesTemplate(ObjectName objectNameTemplate, ObjectName registeredName) {

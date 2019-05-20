@@ -36,6 +36,7 @@ import org.springframework.protobuf.SecondMsg;
 import org.springframework.util.MimeType;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClass;
@@ -63,9 +64,10 @@ public class ProtobufDecoderTests extends AbstractDecoderTestCase<ProtobufDecode
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void extensionRegistryNull() {
-		new ProtobufDecoder(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ProtobufDecoder(null));
 	}
 
 	@Override

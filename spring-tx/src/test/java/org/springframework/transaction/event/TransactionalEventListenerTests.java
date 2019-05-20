@@ -46,9 +46,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMPLETION;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_ROLLBACK;
@@ -95,17 +94,14 @@ public class TransactionalEventListenerTests {
 	@Test
 	public void immediatelyImpactsCurrentTransaction() {
 		load(ImmediateTestListener.class, BeforeCommitTestListener.class);
-		try {
-			this.transactionTemplate.execute(status -> {
-				getContext().publishEvent("FAIL");
-				fail("Should have thrown an exception at this point");
-				return null;
-			});
-		}
-		catch (IllegalStateException e) {
-			assertTrue(e.getMessage().contains("Test exception"));
-			assertTrue(e.getMessage().contains(EventCollector.IMMEDIATELY));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.transactionTemplate.execute(status -> {
+					getContext().publishEvent("FAIL");
+					throw new AssertionError("Should have thrown an exception at this point");
+				}))
+			.withMessageContaining("Test exception")
+			.withMessageContaining(EventCollector.IMMEDIATELY);
+
 		getEventCollector().assertEvents(EventCollector.IMMEDIATELY, "FAIL");
 		getEventCollector().assertTotalEventsCount(1);
 	}
@@ -203,24 +199,19 @@ public class TransactionalEventListenerTests {
 	@Test
 	public void beforeCommitWithException() { // Validates the custom synchronization is invoked
 		load(BeforeCommitTestListener.class);
-		try {
-			this.transactionTemplate.execute(status -> {
-				TransactionSynchronizationManager.registerSynchronization(new EventTransactionSynchronization(10) {
-					@Override
-					public void beforeCommit(boolean readOnly) {
-						throw new IllegalStateException("test");
-					}
-				});
-				getContext().publishEvent("test");
-				getEventCollector().assertNoEventReceived();
-				return null;
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.transactionTemplate.execute(status -> {
+					TransactionSynchronizationManager.registerSynchronization(new EventTransactionSynchronization(10) {
+						@Override
+						public void beforeCommit(boolean readOnly) {
+							throw new IllegalStateException("test");
+						}
+					});
+					getContext().publishEvent("test");
+					getEventCollector().assertNoEventReceived();
+					return null;
 
-			});
-			fail("Should have thrown an exception");
-		}
-		catch (IllegalStateException e) {
-			// Test exception - ignore
-		}
+				}));
 		getEventCollector().assertNoEventReceived(); // Before commit not invoked
 	}
 

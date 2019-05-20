@@ -21,6 +21,8 @@ import java.security.ProtectionDomain;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -32,14 +34,16 @@ import static org.junit.Assert.assertNotNull;
  */
 public class ReflectiveLoadTimeWeaverTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullClassLoader() {
-		new ReflectiveLoadTimeWeaver(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ReflectiveLoadTimeWeaver(null));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testCtorWithClassLoaderThatDoesNotExposeAnAddTransformerMethod() {
-		new ReflectiveLoadTimeWeaver(getClass().getClassLoader());
+		assertThatIllegalStateException().isThrownBy(() ->
+				new ReflectiveLoadTimeWeaver(getClass().getClassLoader()));
 	}
 
 	@Test
@@ -55,9 +59,10 @@ public class ReflectiveLoadTimeWeaverTests {
 		assertEquals(1, classLoader.getNumTimesGetThrowawayClassLoaderCalled());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAddTransformerWithNullTransformer() {
-		new ReflectiveLoadTimeWeaver(new JustAddTransformerClassLoader()).addTransformer(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ReflectiveLoadTimeWeaver(new JustAddTransformerClassLoader()).addTransformer(null));
 	}
 
 	@Test

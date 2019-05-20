@@ -36,9 +36,10 @@ import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @SuppressWarnings("deprecation")
 public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMockWebServerTestCase {
@@ -94,12 +95,12 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 					assertEquals("Invalid status code", HttpStatus.NOT_FOUND, result.getStatusCode());
 				}
 				catch (IOException ex) {
-					fail(ex.getMessage());
+					throw new AssertionError(ex.getMessage(), ex);
 				}
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				fail(ex.getMessage());
+				throw new AssertionError(ex.getMessage(), ex);
 			}
 		});
 		ClientHttpResponse response = listenableFuture.get();
@@ -162,11 +163,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
 		try {
-			FileCopyUtils.copy(body, request.getBody());
-			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException ex) {
-			// expected
+			assertThatIllegalStateException().isThrownBy(() ->
+					FileCopyUtils.copy(body, request.getBody()));
 		}
 		finally {
 			response.close();
@@ -183,11 +181,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractMo
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		ClientHttpResponse response = futureResponse.get();
 		try {
-			request.getHeaders().add("MyHeader", "value");
-			fail("UnsupportedOperationException expected");
-		}
-		catch (UnsupportedOperationException ex) {
-			// expected
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+					request.getHeaders().add("MyHeader", "value"));
 		}
 		finally {
 			response.close();

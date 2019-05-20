@@ -45,13 +45,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -262,13 +265,9 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testScriptCompilationException() throws Exception {
-		try {
-			new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml");
-			fail("Should throw exception for broken script file");
-		}
-		catch (NestedRuntimeException ex) {
-			assertTrue("Wrong root cause: " + ex, ex.contains(ScriptCompilationException.class));
-		}
+		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml"))
+			.matches(ex -> ex.contains(ScriptCompilationException.class));
 	}
 
 	@Test
@@ -279,13 +278,9 @@ public class GroovyScriptFactoryTests {
 		given(script.suggestedClassName()).willReturn("someName");
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
 				+ badScript);
-		try {
-			factory.getScriptedObject(script);
-			fail("Must have thrown a ScriptCompilationException (no public no-arg ctor in scripted class).");
-		}
-		catch (ScriptCompilationException expected) {
-			assertTrue(expected.contains(NoSuchMethodException.class));
-		}
+		assertThatExceptionOfType(ScriptCompilationException.class).isThrownBy(() ->
+				factory.getScriptedObject(script))
+			.matches(ex -> ex.contains(NoSuchMethodException.class));
 	}
 
 	@Test
@@ -312,55 +307,35 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_WrongClassFirst() throws Exception {
-		try {
-			ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesWrongOneFirst.xml", getClass());
-			ctx.getBean("messenger", Messenger.class);
-			fail("Must have failed: two classes defined in GroovyScriptFactory source, non-Messenger class defined first.");
-		}
-		// just testing for failure here, hence catching Exception...
-		catch (Exception expected) {
-		}
+		assertThatExceptionOfType(Exception.class).as("two classes defined in GroovyScriptFactory source, non-Messenger class defined first").isThrownBy(() -> {
+				ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesWrongOneFirst.xml", getClass());
+				ctx.getBean("messenger", Messenger.class);
+		});
 	}
 
 	@Test
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
-		try {
-			new GroovyScriptFactory(null);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new GroovyScriptFactory(null));
 	}
 
 	@Test
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
-		try {
-			new GroovyScriptFactory("");
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new GroovyScriptFactory(""));
 	}
 
 	@Test
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
-		try {
-			new GroovyScriptFactory("\n   ");
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new GroovyScriptFactory("\n   "));
 	}
 
 	@Test
 	public void testWithInlineScriptWithLeadingWhitespace() throws Exception {
-		try {
-			new ClassPathXmlApplicationContext("lwspBadGroovyContext.xml", getClass());
-			fail("Must have thrown a BeanCreationException ('inline:' prefix was preceded by whitespace");
-		}
-		catch (BeanCreationException expected) {
-			assertTrue(expected.contains(FileNotFoundException.class));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).as("'inline:' prefix was preceded by whitespace").isThrownBy(() ->
+				new ClassPathXmlApplicationContext("lwspBadGroovyContext.xml", getClass()))
+			.matches(ex -> ex.contains(FileNotFoundException.class));
 	}
 
 	@Test
@@ -377,12 +352,8 @@ public class GroovyScriptFactoryTests {
 	@Test
 	public void testGetScriptedObjectDoesChokeOnNullScriptSourceBeingPassedIn() throws Exception {
 		GroovyScriptFactory factory = new GroovyScriptFactory("a script source locator (doesn't matter here)");
-		try {
-			factory.getScriptedObject(null);
-			fail("Must have thrown a NullPointerException as per contract ('null' ScriptSource supplied");
-		}
-		catch (NullPointerException expected) {
-		}
+		assertThatNullPointerException().as("NullPointerException as per contract ('null' ScriptSource supplied)").isThrownBy(() ->
+				factory.getScriptedObject(null));
 	}
 
 	@Test
@@ -556,15 +527,11 @@ public class GroovyScriptFactoryTests {
 
 	private void testMetaClass(String xmlFile) {
 		// expect the exception we threw in the custom metaclass to show it got invoked
-		try {
-			ApplicationContext ctx = new ClassPathXmlApplicationContext(xmlFile);
-			Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
-			calc.add(1, 2);
-			fail("expected IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertEquals("Gotcha", ex.getMessage());
-		}
+		ApplicationContext ctx = new ClassPathXmlApplicationContext(xmlFile);
+		Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
+		assertThatIllegalStateException().isThrownBy(() ->
+				calc.add(1, 2))
+			.withMessage("Gotcha");
 	}
 
 	@Test

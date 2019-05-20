@@ -37,6 +37,7 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebInputException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -104,19 +105,21 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		assertEquals(2013, actual);
 	}
 
-	@Test(expected = ServerErrorException.class)
+	@Test
 	public void resolveArgumentMultipleMatches() throws Exception {
 		getVariablesFor("var1").add("colors", "red");
 		getVariablesFor("var2").add("colors", "green");
 
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
-		this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
+		assertThatExceptionOfType(ServerErrorException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO));
 	}
 
-	@Test(expected = ServerWebInputException.class)
+	@Test
 	public void resolveArgumentRequired() throws Exception {
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
-		this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
+		assertThatExceptionOfType(ServerWebInputException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO));
 	}
 
 	@Test

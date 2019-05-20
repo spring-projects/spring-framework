@@ -29,6 +29,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.comparator.ComparableComparator;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,25 +47,28 @@ public class ConvertingComparatorTests {
 
 	private final TestComparator comparator = new TestComparator();
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldThrowOnNullComparator() throws Exception {
-		new ConvertingComparator<>(null, this.converter);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ConvertingComparator<>(null, this.converter));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldThrowOnNullConverter() throws Exception {
-		new ConvertingComparator<String, Integer>(this.comparator, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ConvertingComparator<String, Integer>(this.comparator, null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldThrowOnNullConversionService() throws Exception {
-		new ConvertingComparator<String, Integer>(this.comparator, null, Integer.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ConvertingComparator<String, Integer>(this.comparator, null, Integer.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldThrowOnNullType() throws Exception {
-		new ConvertingComparator<String, Integer>(this.comparator,
-			this.conversionService, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ConvertingComparator<String, Integer>(this.comparator, this.conversionService, null));
 	}
 
 	@Test

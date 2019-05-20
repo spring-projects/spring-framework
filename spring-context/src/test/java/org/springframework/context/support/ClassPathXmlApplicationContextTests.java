@@ -43,12 +43,13 @@ import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -141,39 +142,37 @@ public class ClassPathXmlApplicationContextTests {
 	public void testContextWithInvalidValueType() throws IOException {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				new String[] {INVALID_VALUE_TYPE_CONTEXT}, false);
-		try {
-			context.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.contains(TypeMismatchException.class));
-			assertTrue(ex.toString().contains("someMessageSource"));
-			assertTrue(ex.toString().contains("useCodeAsDefaultMessage"));
-			checkExceptionFromInvalidValueType(ex);
-			checkExceptionFromInvalidValueType(new ExceptionInInitializerError(ex));
-			assertFalse(context.isActive());
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh)
+			.satisfies(ex -> {
+				assertThat(ex.contains(TypeMismatchException.class)).isTrue();
+				assertThat(ex.toString()).contains("someMessageSource", "useCodeAsDefaultMessage");
+				checkExceptionFromInvalidValueType(ex);
+				checkExceptionFromInvalidValueType(new ExceptionInInitializerError(ex));
+				assertFalse(context.isActive());
+			});
 	}
 
-	private void checkExceptionFromInvalidValueType(Throwable ex) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ex.printStackTrace(new PrintStream(baos));
-		String dump = FileCopyUtils.copyToString(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
-		assertTrue(dump.contains("someMessageSource"));
-		assertTrue(dump.contains("useCodeAsDefaultMessage"));
+	private void checkExceptionFromInvalidValueType(Throwable ex) {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ex.printStackTrace(new PrintStream(baos));
+			String dump = FileCopyUtils.copyToString(new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
+			assertTrue(dump.contains("someMessageSource"));
+			assertTrue(dump.contains("useCodeAsDefaultMessage"));
+		}
+		catch (IOException ioex) {
+			throw new IllegalStateException(ioex);
+		}
 	}
 
 	@Test
 	public void testContextWithInvalidLazyClass() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(INVALID_CLASS_CONTEXT, getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
-		try {
-			ctx.getBean("someMessageSource");
-			fail("Should have thrown CannotLoadBeanClassException");
-		}
-		catch (CannotLoadBeanClassException ex) {
-			assertTrue(ex.contains(ClassNotFoundException.class));
-		}
+		assertThatExceptionOfType(CannotLoadBeanClassException.class).isThrownBy(() ->
+				ctx.getBean("someMessageSource"))
+			.satisfies(ex -> assertThat(ex.contains(ClassNotFoundException.class)).isTrue());
 		ctx.close();
 	}
 

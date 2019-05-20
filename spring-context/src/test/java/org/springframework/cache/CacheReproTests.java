@@ -46,7 +46,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -225,7 +224,7 @@ public class CacheReproTests {
 		@Cacheable("smallCache")
 		public List<String> single(int id) {
 			if (this.multipleCount > 0) {
-				fail("Called too many times");
+				throw new AssertionError("Called too many times");
 			}
 			this.multipleCount++;
 			return Collections.emptyList();
@@ -237,7 +236,7 @@ public class CacheReproTests {
 				@Cacheable(cacheNames = "smallCache", unless = "#result.size() > 3")})
 		public List<String> multiple(int id) {
 			if (this.multipleCount > 0) {
-				fail("Called too many times");
+				throw new AssertionError("Called too many times");
 			}
 			this.multipleCount++;
 			return Collections.emptyList();

@@ -23,6 +23,8 @@ import javax.xml.XMLConstants;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -45,9 +47,10 @@ public class SimpleNamespaceContextTests {
 	private final SimpleNamespaceContext context = new SimpleNamespaceContext();
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getNamespaceURI_withNull() throws Exception {
-		context.getNamespaceURI(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.getNamespaceURI(null));
 	}
 
 	@Test
@@ -72,9 +75,10 @@ public class SimpleNamespaceContextTests {
 				context.getNamespaceURI(XMLConstants.DEFAULT_NS_PREFIX), is(defaultNamespaceUri));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getPrefix_withNull() throws Exception {
-		context.getPrefix(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.getPrefix(null));
 	}
 
 	@Test
@@ -92,16 +96,18 @@ public class SimpleNamespaceContextTests {
 				anyOf(is("prefix1"), is("prefix2")));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getPrefixes_withNull() throws Exception {
-		context.getPrefixes(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.getPrefixes(null));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void getPrefixes_IteratorIsNotModifiable() throws Exception {
 		context.bindNamespaceUri(prefix, namespaceUri);
 		Iterator<String> iterator = context.getPrefixes(namespaceUri);
-		iterator.remove();
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
+				iterator::remove);
 	}
 
 	@Test
@@ -120,14 +126,16 @@ public class SimpleNamespaceContextTests {
 				getItemSet(context.getPrefixes(namespaceUri)), is(makeSet("prefix1", "prefix2")));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void bindNamespaceUri_withNullNamespaceUri() {
-		context.bindNamespaceUri("prefix", null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.bindNamespaceUri("prefix", null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void bindNamespaceUri_withNullPrefix() {
-		context.bindNamespaceUri(null, namespaceUri);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				context.bindNamespaceUri(null, namespaceUri));
 	}
 
 	@Test

@@ -38,12 +38,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests demonstrating use of @EnableTransactionManagement @Configuration classes.
@@ -118,14 +117,11 @@ public class EnableTransactionManagementTests {
 	@Test
 	@SuppressWarnings("resource")
 	public void proxyTypeAspectJCausesRegistrationOfAnnotationTransactionAspect() {
-		try {
-			new AnnotationConfigApplicationContext(EnableAspectjTxConfig.class, TxManagerConfig.class);
-			fail("should have thrown CNFE when trying to load AnnotationTransactionAspect. " +
-					"Do you actually have org.springframework.aspects on the classpath?");
-		}
-		catch (Exception ex) {
-			assertThat(ex.getMessage(), containsString("AspectJJtaTransactionManagementConfiguration"));
-		}
+		// should throw CNFE when trying to load AnnotationTransactionAspect.
+		// Do you actually have org.springframework.aspects on the classpath?
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(EnableAspectjTxConfig.class, TxManagerConfig.class))
+			.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
 	}
 
 	@Test

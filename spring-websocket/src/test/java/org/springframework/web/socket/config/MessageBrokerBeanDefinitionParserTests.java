@@ -90,6 +90,7 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.instanceOf;
@@ -99,7 +100,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test fixture for {@link MessageBrokerBeanDefinitionParser}.
@@ -229,13 +229,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		subscriberTypes = Arrays.asList(SimpleBrokerMessageHandler.class, UserDestinationMessageHandler.class);
 		testChannel("brokerChannel", subscriberTypes, 1);
-		try {
-			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);
-			fail("expected exception");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class));
 
 		assertNotNull(this.appContext.getBean("webSocketScopeConfigurer", CustomScopeConfigurer.class));
 
@@ -298,13 +293,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		subscriberTypes = Arrays.asList(StompBrokerRelayMessageHandler.class, UserDestinationMessageHandler.class);
 		testChannel("brokerChannel", subscriberTypes, 1);
-		try {
-			this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class);
-			fail("expected exception");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class));
 
 		String destination = "/topic/unresolved-user-destination";
 		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);

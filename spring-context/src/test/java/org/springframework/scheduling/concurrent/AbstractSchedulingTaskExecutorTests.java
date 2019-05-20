@@ -33,6 +33,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -90,28 +91,26 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		assertThreadNamePrefix(task);
 	}
 
-	@Test(expected = ExecutionException.class)
+	@Test
 	public void submitFailingRunnable() throws Exception {
 		TestTask task = new TestTask(0);
 		Future<?> future = executor.submit(task);
-		try {
-			future.get(1000, TimeUnit.MILLISECONDS);
-		}
-		catch (ExecutionException ex) {
-			assertTrue(future.isDone());
-			throw ex;
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				future.get(1000, TimeUnit.MILLISECONDS));
+		assertTrue(future.isDone());
 	}
 
-	@Test(expected = CancellationException.class)
+	@Test
 	public void submitRunnableWithGetAfterShutdown() throws Exception {
 		TestTask task1 = new TestTask(-1);
 		Future<?> future1 = executor.submit(task1);
 		TestTask task2 = new TestTask(-1);
 		Future<?> future2 = executor.submit(task2);
 		shutdownExecutor();
-		future1.get();
-		future2.get();
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(() -> {
+				future1.get();
+				future2.get();
+		});
 	}
 
 	@Test
@@ -143,15 +142,17 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
 
-	@Test(expected = CancellationException.class)
+	@Test
 	public void submitListenableRunnableWithGetAfterShutdown() throws Exception {
 		TestTask task1 = new TestTask(-1);
 		ListenableFuture<?> future1 = executor.submitListenable(task1);
 		TestTask task2 = new TestTask(-1);
 		ListenableFuture<?> future2 = executor.submitListenable(task2);
 		shutdownExecutor();
-		future1.get();
-		future2.get();
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(() -> {
+				future1.get();
+				future2.get();
+		});
 	}
 
 	@Test
@@ -162,23 +163,26 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		assertEquals(THREAD_NAME_PREFIX, result.substring(0, THREAD_NAME_PREFIX.length()));
 	}
 
-	@Test(expected = ExecutionException.class)
+	@Test
 	public void submitFailingCallable() throws Exception {
 		TestCallable task = new TestCallable(0);
 		Future<String> future = executor.submit(task);
-		future.get(1000, TimeUnit.MILLISECONDS);
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				future.get(1000, TimeUnit.MILLISECONDS));
 		assertTrue(future.isDone());
 	}
 
-	@Test(expected = CancellationException.class)
+	@Test
 	public void submitCallableWithGetAfterShutdown() throws Exception {
 		TestCallable task1 = new TestCallable(-1);
 		Future<?> future1 = executor.submit(task1);
 		TestCallable task2 = new TestCallable(-1);
 		Future<?> future2 = executor.submit(task2);
 		shutdownExecutor();
-		future1.get(1000, TimeUnit.MILLISECONDS);
-		future2.get(1000, TimeUnit.MILLISECONDS);
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(() -> {
+			future1.get(1000, TimeUnit.MILLISECONDS);
+			future2.get(1000, TimeUnit.MILLISECONDS);
+		});
 	}
 
 	@Test
@@ -210,7 +214,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		assertSame(RuntimeException.class, outcome.getClass());
 	}
 
-	@Test(expected = CancellationException.class)
+	@Test
 	public void submitListenableCallableWithGetAfterShutdown() throws Exception {
 		TestCallable task1 = new TestCallable(-1);
 		ListenableFuture<?> future1 = executor.submitListenable(task1);
@@ -218,7 +222,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		ListenableFuture<?> future2 = executor.submitListenable(task2);
 		shutdownExecutor();
 		future1.get(1000, TimeUnit.MILLISECONDS);
-		future2.get(1000, TimeUnit.MILLISECONDS);
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(() ->
+				future2.get(1000, TimeUnit.MILLISECONDS));
 	}
 
 

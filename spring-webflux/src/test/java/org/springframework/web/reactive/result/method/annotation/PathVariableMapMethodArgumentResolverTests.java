@@ -34,10 +34,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link PathVariableMapMethodArgumentResolver}.
@@ -73,15 +73,9 @@ public class PathVariableMapMethodArgumentResolverTests {
 		assertTrue(resolver.supportsParameter(paramMap));
 		assertFalse(resolver.supportsParameter(paramNamedMap));
 		assertFalse(resolver.supportsParameter(paramMapNoAnnot));
-		try {
-			this.resolver.supportsParameter(this.paramMonoMap);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"PathVariableMapMethodArgumentResolver does not support reactive type wrapper"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.paramMonoMap))
+			.withMessageStartingWith("PathVariableMapMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test

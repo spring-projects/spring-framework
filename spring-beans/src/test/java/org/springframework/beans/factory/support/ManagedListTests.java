@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -51,18 +53,20 @@ public class ManagedListTests {
 		assertSame(child, child.merge(null));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void mergeNotAllowedWhenMergeNotEnabled() {
 		ManagedList child = new ManagedList();
-		child.merge(null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				child.merge(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void mergeWithNonCompatibleParentType() {
 		ManagedList child = new ManagedList();
 		child.add("one");
 		child.setMergeEnabled(true);
-		child.merge("hello");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				child.merge("hello"));
 	}
 
 	@Test

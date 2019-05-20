@@ -21,6 +21,7 @@ import javax.resource.spi.ManagedConnectionFactory;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -36,9 +37,10 @@ import static org.mockito.Mockito.verify;
  */
 public class LocalConnectionFactoryBeanTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testManagedConnectionFactoryIsRequired() throws Exception {
-		new LocalConnectionFactoryBean().afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				new LocalConnectionFactoryBean()::afterPropertiesSet);
 	}
 
 	@Test

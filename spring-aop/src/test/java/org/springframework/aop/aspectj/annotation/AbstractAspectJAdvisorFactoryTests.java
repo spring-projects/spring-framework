@@ -58,14 +58,15 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Abstract tests for AspectJAdvisorFactory.
@@ -86,26 +87,18 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Test
 	public void testRejectsPerCflowAspect() {
-		try {
-			getFixture().getAdvisors(
-					new SingletonMetadataAwareAspectInstanceFactory(new PerCflowAspect(), "someBean"));
-			fail("Cannot accept cflow");
-		}
-		catch (AopConfigException ex) {
-			assertTrue(ex.getMessage().contains("PERCFLOW"));
-		}
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
+				getFixture().getAdvisors(
+						new SingletonMetadataAwareAspectInstanceFactory(new PerCflowAspect(), "someBean")))
+			.withMessageContaining("PERCFLOW");
 	}
 
 	@Test
 	public void testRejectsPerCflowBelowAspect() {
-		try {
-			getFixture().getAdvisors(
-					new SingletonMetadataAwareAspectInstanceFactory(new PerCflowBelowAspect(), "someBean"));
-			fail("Cannot accept cflowbelow");
-		}
-		catch (AopConfigException ex) {
-			assertTrue(ex.getMessage().contains("PERCFLOWBELOW"));
-		}
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
+					getFixture().getAdvisors(
+							new SingletonMetadataAwareAspectInstanceFactory(new PerCflowBelowAspect(), "someBean")))
+			.withMessageContaining("PERCFLOWBELOW");
 	}
 
 	@Test
@@ -365,12 +358,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		assertFalse(lockable2.locked());
 		notLockable2.setIntValue(1);
 		lockable2.lock();
-		try {
-			notLockable2.setIntValue(32);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+			notLockable2.setIntValue(32));
 		assertTrue(lockable2.locked());
 	}
 
@@ -400,13 +389,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		assertTrue("Already locked", lockable.locked());
 		lockable.lock();
 		assertTrue("Real target ignores locking", lockable.locked());
-		try {
-			lockable.unlock();
-			fail();
-		}
-		catch (UnsupportedOperationException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				lockable.unlock());
 	}
 
 	@Test
@@ -463,13 +447,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 		lockable.lock();
 		assertTrue(lockable.locked());
-		try {
-			itb.setName("Else");
-			fail("Should be locked");
-		}
-		catch (IllegalStateException ex) {
-			// Ok
-		}
+		assertThatIllegalStateException().as("Should be locked").isThrownBy(() ->
+				itb.setName("Else"));
 		lockable.unlock();
 		itb.setName("Tony");
 	}
@@ -482,14 +461,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 				new SingletonMetadataAwareAspectInstanceFactory(new ExceptionAspect(expectedException), "someBean"));
 		assertEquals("One advice method was found", 1, advisors.size());
 		ITestBean itb = (ITestBean) createProxy(target, advisors, ITestBean.class);
-
-		try {
-			itb.getAge();
-			fail();
-		}
-		catch (UnsupportedOperationException ex) {
-			assertSame(expectedException, ex);
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
+				itb::getAge);
 	}
 
 	// TODO document this behaviour.
@@ -502,14 +475,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 				new SingletonMetadataAwareAspectInstanceFactory(new ExceptionAspect(expectedException), "someBean"));
 		assertEquals("One advice method was found", 1, advisors.size());
 		ITestBean itb = (ITestBean) createProxy(target, advisors, ITestBean.class);
-
-		try {
-			itb.getAge();
-			fail();
-		}
-		catch (UndeclaredThrowableException ex) {
-			assertSame(expectedException, ex.getCause());
-		}
+		assertThatExceptionOfType(UndeclaredThrowableException.class).isThrownBy(
+				itb::getAge).withCause(expectedException);
 	}
 
 	protected Object createProxy(Object target, List<Advisor> advisors, Class<?>... interfaces) {
@@ -555,17 +522,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		assertEquals("", echo.echo(""));
 		assertEquals(1, afterReturningAspect.successCount);
 		assertEquals(0, afterReturningAspect.failureCount);
-
-		try {
-			echo.echo(new FileNotFoundException());
-			fail();
-		}
-		catch (FileNotFoundException ex) {
-			// Ok
-		}
-		catch (Exception ex) {
-			fail();
-		}
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+			echo.echo(new FileNotFoundException()));
 		assertEquals(1, afterReturningAspect.successCount);
 		assertEquals(1, afterReturningAspect.failureCount);
 		assertEquals(afterReturningAspect.failureCount + afterReturningAspect.successCount, afterReturningAspect.afterCount);
@@ -581,12 +539,14 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		itb.getAge();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDeclarePrecedenceNotSupported() {
 		TestBean target = new TestBean();
-		MetadataAwareAspectInstanceFactory aspectInstanceFactory = new SingletonMetadataAwareAspectInstanceFactory(
-				new DeclarePrecedenceShouldSucceed(), "someBean");
-		createProxy(target, getFixture().getAdvisors(aspectInstanceFactory), ITestBean.class);
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+				MetadataAwareAspectInstanceFactory aspectInstanceFactory = new SingletonMetadataAwareAspectInstanceFactory(
+							new DeclarePrecedenceShouldSucceed(), "someBean");
+				createProxy(target, getFixture().getAdvisors(aspectInstanceFactory), ITestBean.class);
+		});
 	}
 
 

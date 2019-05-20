@@ -49,12 +49,14 @@ import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.NumberTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for the various PropertyEditors in Spring.
@@ -223,13 +225,8 @@ public class CustomEditorTests {
 		bw.setPropertyValue("bool1", "0");
 		assertTrue("Correct bool1 value", !tb.isBool1());
 
-		try {
-			bw.setPropertyValue("bool1", "argh");
-			fail("Should have thrown BeansException");
-		}
-		catch (BeansException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
+				bw.setPropertyValue("bool1", "argh"));
 	}
 
 	@Test
@@ -324,14 +321,8 @@ public class CustomEditorTests {
 		editor.setAsText(falseString.toUpperCase());
 		assertFalse(((Boolean) editor.getValue()).booleanValue());
 		assertEquals(falseString, editor.getAsText());
-
-		try {
-			editor.setAsText(null);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText(null));
 	}
 
 	@Test
@@ -453,16 +444,10 @@ public class CustomEditorTests {
 		bw.setPropertyValue("long2", "");
 		assertTrue("Correct long2 value", bw.getPropertyValue("long2") == null);
 		assertTrue("Correct long2 value", tb.getLong2() == null);
-
-		try {
-			bw.setPropertyValue("long1", "");
-			fail("Should have thrown BeansException");
-		}
-		catch (BeansException ex) {
-			// expected
-			assertTrue("Correct long1 value", new Long("5").equals(bw.getPropertyValue("long1")));
-			assertTrue("Correct long1 value", tb.getLong1() == 5);
-		}
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
+				bw.setPropertyValue("long1", ""));
+		assertThat(bw.getPropertyValue("long1")).isEqualTo(5L);
+		assertThat(tb.getLong1()).isEqualTo(5);
 	}
 
 	@Test
@@ -481,14 +466,9 @@ public class CustomEditorTests {
 
 	@Test
 	public void testParseShortGreaterThanMaxValueWithoutNumberFormat() {
-		try {
-			CustomNumberEditor editor = new CustomNumberEditor(Short.class, true);
-			editor.setAsText(String.valueOf(Short.MAX_VALUE + 1));
-			fail(Short.MAX_VALUE + 1 + " is greater than max value");
-		}
-		catch (NumberFormatException ex) {
-			// expected
-		}
+		CustomNumberEditor editor = new CustomNumberEditor(Short.class, true);
+		assertThatExceptionOfType(NumberFormatException.class).as("greater than Short.MAX_VALUE + 1").isThrownBy(() ->
+			editor.setAsText(String.valueOf(Short.MAX_VALUE + 1)));
 	}
 
 	@Test
@@ -551,10 +531,11 @@ public class CustomEditorTests {
 		assertNull(cb.getMyCharacter());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCharacterEditorSetAsTextWithStringLongerThanOneCharacter() throws Exception {
 		PropertyEditor charEditor = new CharacterEditor(false);
-		charEditor.setAsText("ColdWaterCanyon");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				charEditor.setAsText("ColdWaterCanyon"));
 	}
 
 	@Test
@@ -570,10 +551,11 @@ public class CustomEditorTests {
 		assertEquals(" ", charEditor.getAsText());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCharacterEditorSetAsTextWithNullNotAllowingEmptyAsNull() throws Exception {
 		PropertyEditor charEditor = new CharacterEditor(false);
-		charEditor.setAsText(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				charEditor.setAsText(null));
 	}
 
 	@Test
@@ -591,10 +573,11 @@ public class CustomEditorTests {
 		assertEquals("", classEditor.getAsText());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testClassEditorWithNonExistentClass() throws Exception {
 		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("hairdresser.on.Fire");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				classEditor.setAsText("hairdresser.on.Fire"));
 	}
 
 	@Test
@@ -706,13 +689,8 @@ public class CustomEditorTests {
 		assertEquals(null, editor.getValue());
 		assertEquals("", editor.getAsText());
 
-		try {
-			editor.setAsText(null);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText(null));
 	}
 
 	@Test
@@ -758,22 +736,10 @@ public class CustomEditorTests {
 		assertFalse(invalidDate.length() == maxLength);
 
 		CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("MM/dd/yyyy"), true, maxLength);
-
-		try {
-			editor.setAsText(validDate);
-		}
-		catch (IllegalArgumentException ex) {
-			fail("Exception shouldn't be thrown because this is a valid date");
-		}
-
-		try {
-			editor.setAsText(invalidDate);
-			fail("Exception should be thrown because this is an invalid date");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-			assertTrue(ex.getMessage().contains("10"));
-		}
+		editor.setAsText(validDate);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText(invalidDate))
+			.withMessageContaining("10");
 	}
 
 	@Test

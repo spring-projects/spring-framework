@@ -18,8 +18,8 @@ package org.springframework.jndi;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -29,13 +29,8 @@ public class JndiTemplateEditorTests {
 
 	@Test
 	public void testNullIsIllegalArgument() {
-		try {
-			new JndiTemplateEditor().setAsText(null);
-			fail("Null is illegal");
-		}
-		catch (IllegalArgumentException ex) {
-			// OK
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new JndiTemplateEditor().setAsText(null));
 	}
 
 	@Test

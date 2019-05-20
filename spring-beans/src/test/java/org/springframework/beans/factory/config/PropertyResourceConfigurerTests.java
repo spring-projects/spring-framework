@@ -44,12 +44,12 @@ import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
@@ -481,35 +481,21 @@ public class PropertyResourceConfigurerTests {
 	public void testPropertyPlaceholderConfigurerWithUnresolvableSystemProperty() {
 		factory.registerBeanDefinition("tb", genericBeanDefinition(TestBean.class)
 				.addPropertyValue("touchy", "${user.dir}").getBeanDefinition());
-
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
 		ppc.setSystemPropertiesMode(PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_NEVER);
-
-		try {
-			ppc.postProcessBeanFactory(factory);
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			assertTrue(ex.getMessage().contains("user.dir"));
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				ppc.postProcessBeanFactory(factory))
+			.withMessageContaining("user.dir");
 	}
 
 	@Test
 	public void testPropertyPlaceholderConfigurerWithUnresolvablePlaceholder() {
 		factory.registerBeanDefinition("tb", genericBeanDefinition(TestBean.class)
 				.addPropertyValue("name", "${ref}").getBeanDefinition());
-
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
-
-		try {
-			ppc.postProcessBeanFactory(factory);
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			assertTrue(ex.getMessage().contains("ref"));
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				ppc.postProcessBeanFactory(factory))
+			.withMessageContaining("ref");
 	}
 
 	@Test
@@ -615,14 +601,8 @@ public class PropertyResourceConfigurerTests {
 		props.setProperty("var", "${m}");
 		props.setProperty("m", "${var}");
 		ppc.setProperties(props);
-
-		try {
-			ppc.postProcessBeanFactory(factory);
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				ppc.postProcessBeanFactory(factory));
 	}
 
 	@Test

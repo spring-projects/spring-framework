@@ -20,11 +20,11 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.wiring.BeanWiringInfo;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rick Evans
@@ -34,12 +34,8 @@ public class AnnotationBeanWiringInfoResolverTests {
 
 	@Test
 	public void testResolveWiringInfo() throws Exception {
-		try {
-			new AnnotationBeanWiringInfoResolver().resolveWiringInfo(null);
-			fail("Must have thrown an IllegalArgumentException by this point (null argument)");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new AnnotationBeanWiringInfoResolver().resolveWiringInfo(null));
 	}
 
 	@Test

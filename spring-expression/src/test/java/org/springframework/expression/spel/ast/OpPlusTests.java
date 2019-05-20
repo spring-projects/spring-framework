@@ -30,6 +30,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -42,19 +44,21 @@ import static org.junit.Assert.assertEquals;
  */
 public class OpPlusTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void test_emptyOperands() {
-		new OpPlus(-1, -1);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new OpPlus(-1, -1));
 	}
 
-	@Test(expected = SpelEvaluationException.class)
+	@Test
 	public void test_unaryPlusWithStringLiteral() {
 		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 
 		StringLiteral str = new StringLiteral("word", -1, -1, "word");
 
 		OpPlus o = new OpPlus(-1, -1, str);
-		o.getValueInternal(expressionState);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				o.getValueInternal(expressionState));
 	}
 
 	@Test

@@ -24,7 +24,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test construction of arrays.
@@ -199,7 +198,7 @@ public class ArrayConstructorTests extends AbstractExpressionTests {
 			}
 		}
 		else {
-			fail("Not supported " + o.getClass());
+			throw new IllegalStateException("Not supported " + o.getClass());
 		}
 		s.append(']');
 		assertEquals(expectedToString, s.toString());

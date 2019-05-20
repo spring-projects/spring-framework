@@ -32,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -44,9 +45,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invalidInput() {
-		new OriginHandshakeInterceptor(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new OriginHandshakeInterceptor(null));
 	}
 
 	@Test

@@ -25,8 +25,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.ContextLoaderListener;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests the interaction between a WebApplicationContext and ContextLoaderListener with
@@ -47,15 +46,9 @@ public class Spr8510Tests {
 
 		MockServletContext sc = new MockServletContext();
 
-		try {
-			cll.contextInitialized(new ServletContextEvent(sc));
-			fail("expected exception");
-		}
-		catch (Throwable t) {
-			// assert that an attempt was made to load the correct XML
-			assertTrue(t.getMessage(), t.getMessage().endsWith(
-					"Could not open ServletContext resource [/programmatic.xml]"));
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				cll.contextInitialized(new ServletContextEvent(sc)))
+			.withMessageEndingWith("Could not open ServletContext resource [/programmatic.xml]");
 	}
 
 	/**
@@ -74,15 +67,9 @@ public class Spr8510Tests {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "from-init-param.xml");
 
-		try {
-			cll.contextInitialized(new ServletContextEvent(sc));
-			fail("expected exception");
-		}
-		catch (Throwable t) {
-			// assert that an attempt was made to load the correct XML
-			assertTrue(t.getMessage(), t.getMessage().endsWith(
-					"Could not open ServletContext resource [/from-init-param.xml]"));
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				cll.contextInitialized(new ServletContextEvent(sc)))
+			.withMessageEndingWith("Could not open ServletContext resource [/from-init-param.xml]");
 	}
 
 	/**
@@ -98,15 +85,9 @@ public class Spr8510Tests {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "from-init-param.xml");
 
-		try {
-			cll.contextInitialized(new ServletContextEvent(sc));
-			fail("expected exception");
-		}
-		catch (Throwable t) {
-			// assert that an attempt was made to load the correct XML
-			assertTrue(t.getMessage().endsWith(
-					"Could not open ServletContext resource [/from-init-param.xml]"));
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				cll.contextInitialized(new ServletContextEvent(sc)))
+			.withMessageEndingWith("Could not open ServletContext resource [/from-init-param.xml]");
 	}
 
 	/**
@@ -126,16 +107,9 @@ public class Spr8510Tests {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "from-init-param.xml");
 
-		try {
-			cll.contextInitialized(new ServletContextEvent(sc));
-			fail("expected exception");
-		}
-		catch (Throwable t) {
-			// assert that an attempt was made to load the correct XML
-			System.out.println(t.getMessage());
-			assertTrue(t.getMessage().endsWith(
-					"Could not open ServletContext resource [/from-init-param.xml]"));
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				cll.contextInitialized(new ServletContextEvent(sc)))
+			.withMessageEndingWith("Could not open ServletContext resource [/from-init-param.xml]");
 	}
 
 	/**
@@ -152,16 +126,9 @@ public class Spr8510Tests {
 		// no init-param set
 		//sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "from-init-param.xml");
 
-		try {
-			cll.contextInitialized(new ServletContextEvent(sc));
-			fail("expected exception");
-		}
-		catch (Throwable t) {
-			// assert that an attempt was made to load the correct XML
-			System.out.println(t.getMessage());
-			assertTrue(t.getMessage().endsWith(
-					"Could not open ServletContext resource [/WEB-INF/applicationContext.xml]"));
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				cll.contextInitialized(new ServletContextEvent(sc)))
+			.withMessageEndingWith("Could not open ServletContext resource [/WEB-INF/applicationContext.xml]");
 	}
 
 	/**

@@ -32,10 +32,10 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for pooling invoker interceptor.
@@ -151,13 +151,8 @@ public class CommonsPool2TargetSourceTests {
 		}
 
 		// should be at maximum now
-		try {
-			targetSource.getTarget();
-			fail("Should throw NoSuchElementException");
-		}
-		catch (NoSuchElementException ex) {
-			// desired
-		}
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
+				targetSource::getTarget);
 
 		// lets now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);
@@ -184,13 +179,8 @@ public class CommonsPool2TargetSourceTests {
 		}
 
 		// should be at maximum now
-		try {
-			targetSource.getTarget();
-			fail("Should throw NoSuchElementException");
-		}
-		catch (NoSuchElementException ex) {
-			// desired
-		}
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
+				targetSource::getTarget);
 
 		// lets now release an object and try to acquire a new one
 		targetSource.releaseTarget(pooledInstances[9]);

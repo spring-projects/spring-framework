@@ -33,13 +33,15 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.Assert;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -124,13 +126,8 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		wac.setNamespace("testNamespace");
 		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
 		wac.refresh();
-		try {
-			wac.getMessage("someMessage", null, Locale.getDefault());
-			fail("Should have thrown NoSuchMessageException");
-		}
-		catch (NoSuchMessageException ex) {
-			// expected;
-		}
+		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
+				wac.getMessage("someMessage", null, Locale.getDefault()));
 		String msg = wac.getMessage("someMessage", null, "default", Locale.getDefault());
 		assertTrue("Default message returned", "default".equals(msg));
 	}
@@ -180,34 +177,26 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 
 		@Override
 		public void afterPropertiesSet() {
-			if (this.initMethodInvoked)
-				fail();
+			assertThat(this.initMethodInvoked).isFalse();
 			this.afterPropertiesSetInvoked = true;
 		}
 
 		/** Init method */
 		public void customInit() throws ServletException {
-			if (!this.afterPropertiesSetInvoked)
-				fail();
+			assertThat(this.afterPropertiesSetInvoked).isTrue();
 			this.initMethodInvoked = true;
 		}
 
 		@Override
 		public void destroy() {
-			if (this.customDestroyed)
-				fail();
-			if (this.destroyed) {
-				throw new IllegalStateException("Already destroyed");
-			}
+			assertThat(this.customDestroyed).isFalse();
+			Assert.state(!this.destroyed, "Already destroyed");
 			this.destroyed = true;
 		}
 
 		public void customDestroy() {
-			if (!this.destroyed)
-				fail();
-			if (this.customDestroyed) {
-				throw new IllegalStateException("Already customDestroyed");
-			}
+			assertThat(this.destroyed).isTrue();
+			Assert.state(!this.customDestroyed, "Already customDestroyed");
 			this.customDestroyed = true;
 		}
 	}

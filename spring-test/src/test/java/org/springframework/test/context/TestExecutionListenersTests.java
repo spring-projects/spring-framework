@@ -35,6 +35,7 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
@@ -164,9 +165,10 @@ public class TestExecutionListenersTests {
 		assertNumRegisteredListeners(MetaNonInheritedListenersWithOverridesTestCase.class, 8);
 	}
 
-	@Test(expected = AnnotationConfigurationException.class)
+	@Test
 	public void listenersAndValueAttributesDeclared() {
-		new TestContextManager(DuplicateListenersConfigTestCase.class);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				new TestContextManager(DuplicateListenersConfigTestCase.class));
 	}
 
 

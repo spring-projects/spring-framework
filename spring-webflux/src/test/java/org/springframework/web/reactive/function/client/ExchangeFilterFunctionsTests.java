@@ -33,6 +33,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.BodyExtractors;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -115,12 +116,13 @@ public class ExchangeFilterFunctionsTests {
 		assertEquals(response, result);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void basicAuthenticationInvalidCharacters() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ExchangeFunction exchange = r -> Mono.just(mock(ClientResponse.class));
 
-		ExchangeFilterFunctions.basicAuthentication("foo", "\ud83d\udca9").filter(request, exchange);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ExchangeFilterFunctions.basicAuthentication("foo", "\ud83d\udca9").filter(request, exchange));
 	}
 
 	@Test

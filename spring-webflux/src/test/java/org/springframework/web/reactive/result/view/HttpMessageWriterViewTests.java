@@ -38,9 +38,8 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link HttpMessageWriterView}.
@@ -107,14 +106,9 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo1", "bar1");
 		this.model.addAttribute("foo2", "bar2");
 
-		try {
-			doRender();
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			String message = ex.getMessage();
-			assertTrue(message, message.contains("Map rendering is not supported"));
-		}
+		assertThatIllegalStateException().isThrownBy(
+				this::doRender)
+			.withMessageContaining("Map rendering is not supported");
 	}
 
 	@Test

@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -35,17 +36,19 @@ import static org.junit.Assert.assertTrue;
  */
 public class ValidationUtilsTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvokeValidatorWithNullValidator() throws Exception {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		ValidationUtils.invokeValidator(null, tb, errors);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ValidationUtils.invokeValidator(null, tb, errors));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvokeValidatorWithNullErrors() throws Exception {
 		TestBean tb = new TestBean();
-		ValidationUtils.invokeValidator(new EmptyValidator(), tb, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ValidationUtils.invokeValidator(new EmptyValidator(), tb, null));
 	}
 
 	@Test

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -45,109 +46,88 @@ public class MockHttpSessionTests {
 		assertTrue(session.isInvalid());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void invalidateTwice() {
 		session.invalidate();
-		session.invalidate();
+		assertThatIllegalStateException().isThrownBy(
+				session::invalidate);
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void getCreationTimeOnInvalidatedSession() {
 		session.invalidate();
-		session.getCreationTime();
+		assertThatIllegalStateException().isThrownBy(
+				session::getCreationTime);
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void getLastAccessedTimeOnInvalidatedSession() {
 		session.invalidate();
-		session.getLastAccessedTime();
+		assertThatIllegalStateException().isThrownBy(
+				session::getLastAccessedTime);
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void getAttributeOnInvalidatedSession() {
 		session.invalidate();
-		session.getAttribute("foo");
+		assertThatIllegalStateException().isThrownBy(() ->
+				session.getAttribute("foo"));
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void getAttributeNamesOnInvalidatedSession() {
 		session.invalidate();
-		session.getAttributeNames();
+		assertThatIllegalStateException().isThrownBy(
+				session::getAttributeNames);
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void getValueOnInvalidatedSession() {
 		session.invalidate();
-		session.getValue("foo");
+		assertThatIllegalStateException().isThrownBy(() ->
+				session.getValue("foo"));
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void getValueNamesOnInvalidatedSession() {
 		session.invalidate();
-		session.getValueNames();
+		assertThatIllegalStateException().isThrownBy(
+				session::getValueNames);
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void setAttributeOnInvalidatedSession() {
 		session.invalidate();
-		session.setAttribute("name", "value");
+		assertThatIllegalStateException().isThrownBy(() ->
+				session.setAttribute("name", "value"));
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void putValueOnInvalidatedSession() {
 		session.invalidate();
-		session.putValue("name", "value");
+		assertThatIllegalStateException().isThrownBy(() ->
+				session.putValue("name", "value"));
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void removeAttributeOnInvalidatedSession() {
 		session.invalidate();
-		session.removeAttribute("name");
+		assertThatIllegalStateException().isThrownBy(() ->
+				session.removeAttribute("name"));
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void removeValueOnInvalidatedSession() {
 		session.invalidate();
-		session.removeValue("name");
+		assertThatIllegalStateException().isThrownBy(() ->
+				session.removeValue("name"));
 	}
 
-	/**
-	 * @since 4.0
-	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void isNewOnInvalidatedSession() {
 		session.invalidate();
-		session.isNew();
+		assertThatIllegalStateException().isThrownBy(
+				session::isNew);
 	}
 
 	@Test

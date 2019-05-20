@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -56,37 +57,42 @@ public class MethodLocatingFactoryBeanTests {
 		assertEquals(Method.class, factory.getObjectType());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNullTargetBeanName() {
 		factory.setMethodName("toString()");
-		factory.setBeanFactory(beanFactory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setBeanFactory(beanFactory));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithEmptyTargetBeanName() {
 		factory.setTargetBeanName("");
 		factory.setMethodName("toString()");
-		factory.setBeanFactory(beanFactory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setBeanFactory(beanFactory));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNullTargetMethodName() {
 		factory.setTargetBeanName(BEAN_NAME);
-		factory.setBeanFactory(beanFactory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setBeanFactory(beanFactory));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithEmptyTargetMethodName() {
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("");
-		factory.setBeanFactory(beanFactory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setBeanFactory(beanFactory));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWhenTargetBeanClassCannotBeResolved() {
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("toString()");
-		factory.setBeanFactory(beanFactory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setBeanFactory(beanFactory));
 		verify(beanFactory).getType(BEAN_NAME);
 	}
 
@@ -104,13 +110,14 @@ public class MethodLocatingFactoryBeanTests {
 		assertEquals("Bingo", method.invoke("Bingo"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testWhereMethodCannotBeResolved() {
 		given(beanFactory.getType(BEAN_NAME)).willReturn((Class)String.class);
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("loadOfOld()");
-		factory.setBeanFactory(beanFactory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setBeanFactory(beanFactory));
 	}
 
 }

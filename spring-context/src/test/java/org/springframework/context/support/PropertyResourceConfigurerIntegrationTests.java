@@ -31,8 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link PropertyResourceConfigurer} implementations requiring
@@ -54,20 +53,11 @@ public class PropertyResourceConfigurerIntegrationTests {
 		pvs = new MutablePropertyValues();
 		pvs.add("location", "${user.dir}/test");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanInitializationException");
-		}
-		catch (BeanInitializationException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof FileNotFoundException);
-			// slight hack for Linux/Unix systems
-			String userDir = StringUtils.cleanPath(System.getProperty("user.dir"));
-			if (userDir.startsWith("/")) {
-				userDir = userDir.substring(1);
-			}
-			assertTrue(ex.getMessage().contains(userDir));
-		}
+		String userDir = getUserDir();
+		assertThatExceptionOfType(BeanInitializationException.class).isThrownBy(
+				ac::refresh)
+			.withCauseInstanceOf(FileNotFoundException.class)
+			.withMessageContaining(userDir);
 	}
 
 	@Test
@@ -79,24 +69,21 @@ public class PropertyResourceConfigurerIntegrationTests {
 		pvs = new MutablePropertyValues();
 		pvs.add("location", "${user.dir}/test/${user.dir}");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanInitializationException");
-		}
-		catch (BeanInitializationException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof FileNotFoundException);
-			// slight hack for Linux/Unix systems
-			String userDir = StringUtils.cleanPath(System.getProperty("user.dir"));
-			if (userDir.startsWith("/")) {
-				userDir = userDir.substring(1);
-			}
-			/* the above hack doesn't work since the exception message is created without
-			   the leading / stripped so the test fails.  Changed 17/11/04. DD */
-			//assertTrue(ex.getMessage().indexOf(userDir + "/test/" + userDir) != -1);
-			assertTrue(ex.getMessage().contains(userDir + "/test/" + userDir) ||
+		String userDir = getUserDir();
+		assertThatExceptionOfType(BeanInitializationException.class).isThrownBy(
+				ac::refresh)
+			.withCauseInstanceOf(FileNotFoundException.class)
+			.matches(ex -> ex.getMessage().contains(userDir + "/test/" + userDir) ||
 					ex.getMessage().contains(userDir + "/test//" + userDir));
+	}
+
+	private String getUserDir() {
+		// slight hack for Linux/Unix systems
+		String userDir = StringUtils.cleanPath(System.getProperty("user.dir"));
+		if (userDir.startsWith("/")) {
+			userDir = userDir.substring(1);
 		}
+		return userDir;
 	}
 
 	@Test
@@ -108,14 +95,9 @@ public class PropertyResourceConfigurerIntegrationTests {
 		pvs = new MutablePropertyValues();
 		pvs.add("location", "${myprop}/test/${myprop}");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanInitializationException");
-		}
-		catch (BeanInitializationException ex) {
-			// expected
-			assertTrue(ex.getMessage().contains("myprop"));
-		}
+		assertThatExceptionOfType(BeanInitializationException.class).isThrownBy(
+				ac::refresh)
+			.withMessageContaining("myprop");
 	}
 
 	@Test
@@ -127,13 +109,8 @@ public class PropertyResourceConfigurerIntegrationTests {
 		pvs = new MutablePropertyValues();
 		pvs.add("properties", "var=${m}var\nm=${var2}\nvar2=${var}");
 		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(
+				ac::refresh);
 	}
 
 	@Test
@@ -145,13 +122,8 @@ public class PropertyResourceConfigurerIntegrationTests {
 		pvs = new MutablePropertyValues();
 		pvs.add("properties", "var=${m}var\nm=${var2}\nvar2=${m}");
 		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(
+				ac::refresh);
 	}
 
 	@Test
@@ -163,14 +135,8 @@ public class PropertyResourceConfigurerIntegrationTests {
 		pvs = new MutablePropertyValues();
 		pvs.add("properties", "var=${m}var\nm=${var2}\nvar2=${m2}");
 		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			ex.printStackTrace();
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(
+				ac::refresh);
 	}
 
 	@Ignore // this test was breaking after the 3.0 repackaging

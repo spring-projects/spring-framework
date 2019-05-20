@@ -29,10 +29,10 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
@@ -127,33 +127,27 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 	@Test
 	public void testWhenTargetBeanNameIsNull() throws Exception {
-		try {
-			new ObjectFactoryCreatingFactoryBean().afterPropertiesSet();
-			fail("Must have thrown an IllegalArgumentException; 'targetBeanName' property not set.");
-		}
-		catch (IllegalArgumentException expected) {}
+		assertThatIllegalArgumentException().as(
+				"'targetBeanName' property not set").isThrownBy(
+						new ObjectFactoryCreatingFactoryBean()::afterPropertiesSet);
 	}
 
 	@Test
 	public void testWhenTargetBeanNameIsEmptyString() throws Exception {
-		try {
-			ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
-			factory.setTargetBeanName("");
-			factory.afterPropertiesSet();
-			fail("Must have thrown an IllegalArgumentException; 'targetBeanName' property set to (invalid) empty string.");
-		}
-		catch (IllegalArgumentException expected) {}
+		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
+		factory.setTargetBeanName("");
+		assertThatIllegalArgumentException().as(
+				"'targetBeanName' property set to (invalid) empty string").isThrownBy(
+						factory::afterPropertiesSet);
 	}
 
 	@Test
 	public void testWhenTargetBeanNameIsWhitespacedString() throws Exception {
-		try {
-			ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
-			factory.setTargetBeanName("  \t");
-			factory.afterPropertiesSet();
-			fail("Must have thrown an IllegalArgumentException; 'targetBeanName' property set to (invalid) only-whitespace string.");
-		}
-		catch (IllegalArgumentException expected) {}
+		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
+		factory.setTargetBeanName("  \t");
+		assertThatIllegalArgumentException().as(
+				"'targetBeanName' property set to (invalid) only-whitespace string").isThrownBy(
+						factory::afterPropertiesSet);
 	}
 
 	@Test

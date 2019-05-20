@@ -43,7 +43,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link AnnotationAsyncExecutionAspect}.
@@ -176,18 +175,12 @@ public class AnnotationAsyncExecutionAspectTests {
 		try {
 			assertFalse("Handler should not have been called", exceptionHandler.isCalled());
 			ClassWithException obj = new ClassWithException();
-			try {
-				obj.failWithVoid();
-				exceptionHandler.await(3000);
-				exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
-			}
-			catch (Exception ex) {
-				fail("No unexpected exception should have been received but got " + ex.getMessage());
-			}
+			obj.failWithVoid();
+			exceptionHandler.await(3000);
+			exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
 		}
 		finally {
 			AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(defaultExceptionHandler);
-
 		}
 	}
 
@@ -215,7 +208,7 @@ public class AnnotationAsyncExecutionAspectTests {
 				wait(WAIT_TIME);
 			}
 			catch (InterruptedException ex) {
-				fail("Didn't finish the async job in " + WAIT_TIME + " milliseconds");
+				throw new AssertionError("Didn't finish the async job in " + WAIT_TIME + " milliseconds");
 			}
 		}
 	}

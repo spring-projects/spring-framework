@@ -34,6 +34,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ResourceTestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertTrue;
@@ -94,13 +95,14 @@ public class ConversionServiceFactoryBeanTests {
 		assertTrue(service.canConvert(String.class, Baz.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void createDefaultConversionServiceWithInvalidSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
 		Set<Object> converters = new HashSet<>();
 		converters.add("bogus");
 		factory.setConverters(converters);
-		factory.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				factory::afterPropertiesSet);
 	}
 
 	@Test

@@ -24,13 +24,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -48,13 +49,8 @@ public class GenericApplicationContextTests {
 		assertSame(ac.getBean("testBean"), ac.getBean(String.class));
 		assertSame(ac.getBean("testBean"), ac.getBean(CharSequence.class));
 
-		try {
-			assertSame(ac.getBean("testBean"), ac.getBean(Object.class));
-			fail("Should have thrown NoUniqueBeanDefinitionException");
-		}
-		catch (NoUniqueBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(() ->
+				ac.getBean(Object.class));
 	}
 
 	@Test
@@ -94,22 +90,13 @@ public class GenericApplicationContextTests {
 
 		ac.close();
 
-		try {
-			assertSame(ac.getBean("testBean"), ac.getBean(String.class));
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				ac.getBean(String.class));
 
-		try {
-			assertSame(ac.getAutowireCapableBeanFactory().getBean("testBean"),
-					ac.getAutowireCapableBeanFactory().getBean(String.class));
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() -> {
+				ac.getAutowireCapableBeanFactory().getBean("testBean");
+				ac.getAutowireCapableBeanFactory().getBean(String.class);
+		});
 	}
 
 	@Test

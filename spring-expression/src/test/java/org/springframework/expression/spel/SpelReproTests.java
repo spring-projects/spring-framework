@@ -60,7 +60,9 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -68,7 +70,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Reproduction tests cornering various reported SpEL issues.
@@ -109,14 +110,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals(12, expr.getValue(context));
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull(null)");
 		assertEquals(null, expr.getValue(context));
-		try {
-			expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull2(null)");
-			expr.getValue();
-			fail("Should have failed to find a method to which it could pass null");
-		}
-		catch (EvaluationException see) {
-			// success
-		}
+		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull2(null)");
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(
+				expr::getValue);
 		context.setTypeLocator(new MyTypeLocator());
 
 		// varargs
@@ -243,22 +239,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		assertFalse(accessor.canRead(context, null, "abc"));
 		assertFalse(accessor.canWrite(context, null, "abc"));
-
-		try {
-			accessor.read(context, null, "abc");
-			fail("Should have failed with an IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-
-		try {
-			accessor.write(context, null, "abc", "foo");
-			fail("Should have failed with an IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				accessor.read(context, null, "abc"));
+		assertThatIllegalStateException().isThrownBy(() ->
+				accessor.write(context, null, "abc", "foo"));
 	}
 
 	@Test
@@ -416,20 +400,15 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage) {
 		SpelExpressionParser parser = new SpelExpressionParser();
-		try {
-			parser.parseExpression(expression, context);
-			fail("Should have failed with message: " + expectedMessage);
-		}
-		catch (Exception ex) {
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				parser.parseExpression(expression, context))
+			.satisfies(ex -> {
 			String message = ex.getMessage();
 			if (ex instanceof ExpressionException) {
 				message = ((ExpressionException) ex).getSimpleMessage();
 			}
-			if (!message.equals(expectedMessage)) {
-				ex.printStackTrace();
-			}
-			assertThat(expectedMessage, equalTo(message));
-		}
+			assertThat(message).isEqualTo(expectedMessage);
+		});
 	}
 
 
@@ -513,26 +492,16 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals(null, expr.getValue());
 
 		// Different parts of ternary expression are null
-		try {
-			expr = new SpelExpressionParser().parseRaw("(?'abc':'default')");
-			expr.getValue(context);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.TYPE_CONVERSION_ERROR, see.getMessageCode());
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseRaw("(?'abc':'default')").getValue(context))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.TYPE_CONVERSION_ERROR));
 		expr = new SpelExpressionParser().parseRaw("(false?'abc':null)");
 		assertEquals(null, expr.getValue());
 
 		// Assignment
-		try {
-			expr = new SpelExpressionParser().parseRaw("(='default')");
-			expr.getValue(context);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.SETVALUE_NOT_SUPPORTED, see.getMessageCode());
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseRaw("(='default')").getValue(context))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.SETVALUE_NOT_SUPPORTED));
 	}
 
 	@Test
@@ -1265,14 +1234,8 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void SPR16123() {
 		ExpressionParser parser = new SpelExpressionParser();
 		parser.parseExpression("simpleProperty").setValue(new BooleanHolder(), null);
-
-		try {
-			parser.parseExpression("primitiveProperty").setValue(new BooleanHolder(), null);
-			fail("Should have thrown EvaluationException");
-		}
-		catch (EvaluationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("primitiveProperty").setValue(new BooleanHolder(), null));
 	}
 
 	@Test
@@ -1578,23 +1541,19 @@ public class SpelReproTests extends AbstractExpressionTests {
 		expr = new SpelExpressionParser().parseRaw("&foo");
 		assertEquals("foo factory",expr.getValue(context));
 
-		try {
-			expr = new SpelExpressionParser().parseRaw("&@foo");
-			fail("Illegal syntax, error expected");
-		}
-		catch (SpelParseException spe) {
-			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
-			assertEquals(0,spe.getPosition());
-		}
+		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseRaw("&@foo"))
+			.satisfies(ex -> {
+				assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.INVALID_BEAN_REFERENCE);
+				assertThat(ex.getPosition()).isEqualTo(0);
+			});
 
-		try {
-			expr = new SpelExpressionParser().parseRaw("@&foo");
-			fail("Illegal syntax, error expected");
-		}
-		catch (SpelParseException spe) {
-			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
-			assertEquals(0,spe.getPosition());
-		}
+		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() ->
+				new SpelExpressionParser().parseRaw("@&foo"))
+		.satisfies(ex -> {
+			assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.INVALID_BEAN_REFERENCE);
+			assertThat(ex.getPosition()).isEqualTo(0);
+		});
 	}
 
 	@Test

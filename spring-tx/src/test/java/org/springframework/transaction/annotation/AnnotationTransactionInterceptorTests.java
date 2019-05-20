@@ -24,10 +24,12 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -134,21 +136,13 @@ public class AnnotationTransactionInterceptorTests {
 
 		TestWithExceptions proxy = (TestWithExceptions) proxyFactory.getProxy();
 
-		try {
-			proxy.doSomethingErroneous();
-			fail("Should throw IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertGetTransactionAndRollbackCount(1);
-		}
+		assertThatIllegalStateException().isThrownBy(
+				proxy::doSomethingErroneous)
+			.satisfies(ex -> assertGetTransactionAndRollbackCount(1));
 
-		try {
-			proxy.doSomethingElseErroneous();
-			fail("Should throw IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertGetTransactionAndRollbackCount(2);
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				proxy::doSomethingElseErroneous)
+			.satisfies(ex -> assertGetTransactionAndRollbackCount(2));
 	}
 
 	@Test
@@ -159,13 +153,9 @@ public class AnnotationTransactionInterceptorTests {
 
 		TestWithExceptions proxy = (TestWithExceptions) proxyFactory.getProxy();
 
-		try {
-			proxy.doSomethingElseWithCheckedException();
-			fail("Should throw Exception");
-		}
-		catch (Exception ex) {
-			assertGetTransactionAndCommitCount(1);
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(
+				proxy::doSomethingElseWithCheckedException)
+			.satisfies(ex -> assertGetTransactionAndCommitCount(1));
 	}
 
 	@Test
@@ -176,13 +166,9 @@ public class AnnotationTransactionInterceptorTests {
 
 		TestWithExceptions proxy = (TestWithExceptions) proxyFactory.getProxy();
 
-		try {
-			proxy.doSomethingElseWithCheckedExceptionAndRollbackRule();
-			fail("Should throw Exception");
-		}
-		catch (Exception ex) {
-			assertGetTransactionAndRollbackCount(1);
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(
+				proxy::doSomethingElseWithCheckedExceptionAndRollbackRule)
+			.satisfies(ex -> assertGetTransactionAndRollbackCount(1));
 	}
 
 	@Test

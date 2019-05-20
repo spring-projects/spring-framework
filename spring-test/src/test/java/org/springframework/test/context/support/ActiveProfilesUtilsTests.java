@@ -31,6 +31,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.springframework.test.context.support.ActiveProfilesUtils.resolveActiveProfiles;
 
@@ -189,17 +191,19 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	/**
 	 * @since 4.0
 	 */
-	@Test(expected = AnnotationConfigurationException.class)
+	@Test
 	public void resolveActiveProfilesWithConflictingProfilesAndValue() {
-		resolveActiveProfiles(ConflictingProfilesAndValueTestCase.class);
+		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
+				resolveActiveProfiles(ConflictingProfilesAndValueTestCase.class));
 	}
 
 	/**
 	 * @since 4.0
 	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void resolveActiveProfilesWithResolverWithoutDefaultConstructor() {
-		resolveActiveProfiles(NoDefaultConstructorActiveProfilesResolverTestCase.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolveActiveProfiles(NoDefaultConstructorActiveProfilesResolverTestCase.class));
 	}
 
 	/**

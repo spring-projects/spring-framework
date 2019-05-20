@@ -37,6 +37,7 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -178,12 +179,11 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Host header", "[::1]", headers.getFirst("Host"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void illegalETag() {
 		String eTag = "v2.6";
-		headers.setETag(eTag);
-		assertEquals("Invalid ETag header", eTag, headers.getETag());
-		assertEquals("Invalid ETag header", "\"v2.6\"", headers.getFirst("ETag"));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				headers.setETag(eTag));
 	}
 
 	@Test
@@ -194,10 +194,11 @@ public class HttpHeadersTests {
 		assertEquals("Invalid If-Match header", "\"v2.6\"", headers.getFirst("If-Match"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ifMatchIllegalHeader() {
 		headers.setIfMatch("Illegal");
-		headers.getIfMatch();
+		assertThatIllegalArgumentException().isThrownBy(
+				headers::getIfMatch);
 	}
 
 	@Test
@@ -251,10 +252,11 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Date header", date, headers.getDate());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void dateInvalid() {
 		headers.set("Date", "Foo Bar Baz");
-		headers.getDate();
+		assertThatIllegalArgumentException().isThrownBy(
+				headers::getDate);
 	}
 
 	@Test
@@ -549,11 +551,12 @@ public class HttpHeadersTests {
 		assertEquals("foo:bar", new String(result, StandardCharsets.ISO_8859_1));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void basicAuthIllegalChar() {
 		String username = "foo";
 		String password = "\u03BB";
-		headers.setBasicAuth(username, password);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				headers.setBasicAuth(username, password));
 	}
 
 	@Test

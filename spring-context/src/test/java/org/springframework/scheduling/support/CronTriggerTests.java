@@ -31,6 +31,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.scheduling.TriggerContext;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -488,7 +489,7 @@ public class CronTriggerTests {
 		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNonExistentSpecificDate() throws Exception {
 		// TODO: maybe try and detect this as a special case in parser?
 		CronTrigger trigger = new CronTrigger("0 0 0 31 6 *", timeZone);
@@ -496,7 +497,8 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MONTH, 2);
 		Date date = calendar.getTime();
 		TriggerContext context1 = getTriggerContext(date);
-		trigger.nextExecutionTime(context1);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				trigger.nextExecutionTime(context1));
 		// new CronTrigger("0 0 0 30 1 ?", timeZone);
 	}
 
@@ -605,64 +607,76 @@ public class CronTriggerTests {
 		assertEquals(trigger1, trigger2);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSecondInvalid() throws Exception {
-		new CronTrigger("77 * * * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("77 * * * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSecondRangeInvalid() throws Exception {
-		new CronTrigger("44-77 * * * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("44-77 * * * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMinuteInvalid() throws Exception {
-		new CronTrigger("* 77 * * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* 77 * * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMinuteRangeInvalid() throws Exception {
-		new CronTrigger("* 44-77 * * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* 44-77 * * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testHourInvalid() throws Exception {
-		new CronTrigger("* * 27 * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * 27 * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testHourRangeInvalid() throws Exception {
-		new CronTrigger("* * 23-28 * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * 23-28 * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDayInvalid() throws Exception {
-		new CronTrigger("* * * 45 * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * * 45 * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDayRangeInvalid() throws Exception {
-		new CronTrigger("* * * 28-45 * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * * 28-45 * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMonthInvalid() throws Exception {
-		new CronTrigger("0 0 0 25 13 ?", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("0 0 0 25 13 ?", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMonthInvalidTooSmall() throws Exception {
-		new CronTrigger("0 0 0 25 0 ?", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("0 0 0 25 0 ?", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDayOfMonthInvalid() throws Exception {
-		new CronTrigger("0 0 0 32 12 ?", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("0 0 0 32 12 ?", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMonthRangeInvalid() throws Exception {
-		new CronTrigger("* * * * 11-13 *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * * * 11-13 *", timeZone));
 	}
 
 	@Test

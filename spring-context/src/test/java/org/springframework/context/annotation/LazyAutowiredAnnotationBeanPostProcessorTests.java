@@ -29,12 +29,12 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -133,13 +133,8 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 
 		FieldResourceInjectionBean bean = (FieldResourceInjectionBean) bf.getBean("annotatedBean");
 		assertNotNull(bean.getTestBean());
-		try {
-			bean.getTestBean().getName();
-			fail("Should have thrown NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				bean.getTestBean().getName());
 	}
 
 	@Test
@@ -157,13 +152,8 @@ public class LazyAutowiredAnnotationBeanPostProcessorTests {
 		assertNotNull(bean.getTestBean());
 		assertNotNull(bean.getTestBeans());
 		assertTrue(bean.getTestBeans().isEmpty());
-		try {
-			bean.getTestBean().getName();
-			fail("Should have thrown NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				bean.getTestBean().getName());
 	}
 
 

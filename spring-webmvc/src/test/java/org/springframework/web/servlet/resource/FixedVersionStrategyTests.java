@@ -19,6 +19,7 @@ package org.springframework.web.servlet.resource;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -44,9 +45,10 @@ public class FixedVersionStrategyTests {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void emptyPrefixVersion() {
-		new FixedVersionStrategy("  ");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new FixedVersionStrategy("  "));
 	}
 
 	@Test

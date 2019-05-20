@@ -56,13 +56,13 @@ import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -131,14 +131,12 @@ public class BeanFactoryGenericsTests {
 		rbd.getPropertyValues().add("testBeanList", input);
 
 		bf.registerBeanDefinition("genericBean", rbd);
-		try {
-			bf.getBean("genericBean");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMessage().contains("genericBean") && ex.getMessage().contains("testBeanList[0]"));
-			assertTrue(ex.getMessage().contains(TestBean.class.getName()) && ex.getMessage().contains("Integer"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				bf.getBean("genericBean"))
+			.withMessageContaining("genericBean")
+			.withMessageContaining("testBeanList[0]")
+			.withMessageContaining(TestBean.class.getName())
+			.withMessageContaining("Integer");
 	}
 
 	@Test
@@ -883,20 +881,8 @@ public class BeanFactoryGenericsTests {
 		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
 		ObjectProvider<NumberStore<Double>> doubleStoreProvider = bf.getBeanProvider(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
 		ObjectProvider<NumberStore<Float>> floatStoreProvider = bf.getBeanProvider(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
-		try {
-			numberStoreProvider.getObject();
-			fail("Should have thrown NoUniqueBeanDefinitionException");
-		}
-		catch (NoUniqueBeanDefinitionException ex) {
-			// expected
-		}
-		try {
-			numberStoreProvider.getIfAvailable();
-			fail("Should have thrown NoUniqueBeanDefinitionException");
-		}
-		catch (NoUniqueBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(numberStoreProvider::getObject);
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(numberStoreProvider::getIfAvailable);
 		assertNull(numberStoreProvider.getIfUnique());
 		assertSame(bf.getBean("store1"), doubleStoreProvider.getObject());
 		assertSame(bf.getBean("store1"), doubleStoreProvider.getIfAvailable());

@@ -17,19 +17,15 @@
 package org.springframework.core.io;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests that serve as regression tests for the bugs described in SPR-6888
@@ -136,14 +132,9 @@ public class ClassPathResourceTests {
 	}
 
 	private void assertExceptionContainsFullyQualifiedPath(ClassPathResource resource) {
-		try {
-			resource.getInputStream();
-			fail("FileNotFoundException expected for resource: " + resource);
-		}
-		catch (IOException ex) {
-			assertThat(ex, instanceOf(FileNotFoundException.class));
-			assertThat(ex.getMessage(), containsString(FQ_RESOURCE_PATH));
-		}
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
+				resource::getInputStream)
+			.withMessageContaining(FQ_RESOURCE_PATH);
 	}
 
 }

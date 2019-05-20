@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -160,10 +161,11 @@ public class WebContentInterceptorTests {
 		assertThat(cacheControlHeaders, Matchers.contains("max-age=10, must-revalidate"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void throwsExceptionWithNullPathMatcher() throws Exception {
 		WebContentInterceptor interceptor = new WebContentInterceptor();
-		interceptor.setPathMatcher(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				interceptor.setPathMatcher(null));
 	}
 
 }

@@ -60,10 +60,11 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for custom XML namespace handler implementations.
@@ -126,13 +127,9 @@ public class CustomNamespaceHandlerTests {
 		String[] beanNames = this.beanFactory.getBeanNamesForType(ApplicationListener.class);
 		assertTrue(Arrays.asList(beanNames).contains("debuggingTestBeanNoInstance"));
 		assertEquals(ApplicationListener.class, this.beanFactory.getType("debuggingTestBeanNoInstance"));
-		try {
-			this.beanFactory.getBean("debuggingTestBeanNoInstance");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause() instanceof BeanInstantiationException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				this.beanFactory.getBean("debuggingTestBeanNoInstance"))
+			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(BeanInstantiationException.class));
 	}
 
 	@Test

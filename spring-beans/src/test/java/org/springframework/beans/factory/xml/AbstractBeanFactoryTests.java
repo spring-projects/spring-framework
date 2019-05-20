@@ -34,11 +34,13 @@ import org.springframework.tests.sample.beans.MustBeInitialized;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Subclasses must initialize the bean factory and any other variables they need.
@@ -67,9 +69,10 @@ public abstract class AbstractBeanFactoryTests {
 		assertTrue("roderick.age was inherited", roderick.getAge() == rod.getAge());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getBeanWithNullArg() {
-		getBeanFactory().getBean((String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getBeanFactory().getBean((String) null));
 	}
 
 	/**
@@ -114,17 +117,13 @@ public abstract class AbstractBeanFactoryTests {
 
 	@Test
 	public void getInstanceByNonmatchingClass() {
-		try {
-			getBeanFactory().getBean("rod", BeanFactory.class);
-			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
-		}
-		catch (BeanNotOfRequiredTypeException ex) {
-			// So far, so good
-			assertTrue("Exception has correct bean name", ex.getBeanName().equals("rod"));
-			assertTrue("Exception requiredType must be BeanFactory.class", ex.getRequiredType().equals(BeanFactory.class));
-			assertTrue("Exception actualType as TestBean.class", TestBean.class.isAssignableFrom(ex.getActualType()));
-			assertTrue("Actual type is correct", ex.getActualType() == getBeanFactory().getBean("rod").getClass());
-		}
+		assertThatExceptionOfType(BeanNotOfRequiredTypeException.class).isThrownBy(() ->
+				getBeanFactory().getBean("rod", BeanFactory.class))
+			.satisfies(ex -> {
+				assertThat(ex.getBeanName()).isEqualTo("rod");
+				assertThat(ex.getRequiredType()).isEqualTo(BeanFactory.class);
+				assertThat(ex.getActualType()).isEqualTo(TestBean.class).isEqualTo(getBeanFactory().getBean("rod").getClass());
+			});
 	}
 
 	@Test
@@ -141,16 +140,13 @@ public abstract class AbstractBeanFactoryTests {
 
 	@Test
 	public void getSharedInstanceByNonmatchingClass() {
-		try {
-			getBeanFactory().getBean("rod", BeanFactory.class);
-			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
-		}
-		catch (BeanNotOfRequiredTypeException ex) {
-			// So far, so good
-			assertTrue("Exception has correct bean name", ex.getBeanName().equals("rod"));
-			assertTrue("Exception requiredType must be BeanFactory.class", ex.getRequiredType().equals(BeanFactory.class));
-			assertTrue("Exception actualType as TestBean.class", TestBean.class.isAssignableFrom(ex.getActualType()));
-		}
+		assertThatExceptionOfType(BeanNotOfRequiredTypeException.class).isThrownBy(() ->
+				getBeanFactory().getBean("rod", BeanFactory.class))
+			.satisfies(ex -> {
+				assertThat(ex.getBeanName()).isEqualTo("rod");
+				assertThat(ex.getRequiredType()).isEqualTo(BeanFactory.class);
+				assertThat(ex.getActualType()).isEqualTo(TestBean.class);
+			});
 	}
 
 	@Test
@@ -175,10 +171,11 @@ public abstract class AbstractBeanFactoryTests {
 		assertTrue("object equal now false", !tb1.equals(tb2));
 	}
 
-	@Test(expected = BeansException.class)
+	@Test
 	public void notThere() {
 		assertFalse(getBeanFactory().containsBean("Mr Squiggle"));
-		getBeanFactory().getBean("Mr Squiggle");
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
+				getBeanFactory().getBean("Mr Squiggle"));
 	}
 
 	@Test
@@ -190,19 +187,16 @@ public abstract class AbstractBeanFactoryTests {
 	}
 
 	public void xtestTypeMismatch() {
-		try {
-			getBeanFactory().getBean("typeMismatch");
-			fail("Shouldn't succeed with type mismatch");
-		}
-		catch (BeanCreationException wex) {
-			assertEquals("typeMismatch", wex.getBeanName());
-			assertTrue(wex.getCause() instanceof PropertyBatchUpdateException);
-			PropertyBatchUpdateException ex = (PropertyBatchUpdateException) wex.getCause();
-			// Further tests
-			assertTrue("Has one error ", ex.getExceptionCount() == 1);
-			assertTrue("Error is for field age", ex.getPropertyAccessException("age") != null);
-			assertTrue("We have rejected age in exception", ex.getPropertyAccessException("age").getPropertyChangeEvent().getNewValue().equals("34x"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				getBeanFactory().getBean("typeMismatch"))
+			.withCauseInstanceOf(PropertyBatchUpdateException.class)
+			.satisfies(ex -> {
+				assertThat(ex.getBeanName()).isEqualTo("typeMismatch");
+				PropertyBatchUpdateException pex = (PropertyBatchUpdateException) ex.getCause();
+				assertThat(pex.getExceptionCount()).isEqualTo(1);
+				assertThat(pex.getPropertyAccessException("age")).isNotNull();
+				assertThat(pex.getPropertyAccessException("age").getPropertyChangeEvent().getNewValue()).isEqualTo("34x");
+			});
 	}
 
 	@Test
@@ -256,9 +250,10 @@ public abstract class AbstractBeanFactoryTests {
 	/**
 	 * It should be illegal to dereference a normal bean as a factory.
 	 */
-	@Test(expected = BeanIsNotAFactoryException.class)
+	@Test
 	public void rejectsFactoryGetOnNormalBean() {
-		getBeanFactory().getBean("&rod");
+		assertThatExceptionOfType(BeanIsNotAFactoryException.class).isThrownBy(() ->
+				getBeanFactory().getBean("&rod"));
 	}
 
 	// TODO: refactor in AbstractBeanFactory (tests for AbstractBeanFactory)
@@ -272,14 +267,10 @@ public abstract class AbstractBeanFactoryTests {
 		ConfigurableBeanFactory cbf = (ConfigurableBeanFactory) bf;
 
 		String alias = "rods alias";
-		try {
-			cbf.getBean(alias);
-			fail("Shouldn't permit factory get on normal bean");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Ok
-			assertTrue(alias.equals(ex.getBeanName()));
-		}
+
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				cbf.getBean(alias))
+			.satisfies(ex -> assertThat(ex.getBeanName()).isEqualTo(alias));
 
 		// Create alias
 		cbf.registerAlias("rod", alias);

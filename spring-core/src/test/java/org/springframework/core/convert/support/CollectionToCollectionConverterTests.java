@@ -40,6 +40,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -236,22 +237,24 @@ public class CollectionToCollectionConverterTests {
 		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-	@Test(expected = ConverterNotFoundException.class)
+	@Test
 	public void elementTypesNotConvertible() throws Exception {
 		List<String> resources = new ArrayList<>();
 		resources.add(null);
 		resources.add(null);
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("strings"));
-		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void nothingInCommon() throws Exception {
 		List<Object> resources = new ArrayList<>();
 		resources.add(new ClassPathResource("test"));
 		resources.add(3);
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
-		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
 	@Test

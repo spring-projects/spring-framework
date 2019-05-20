@@ -26,8 +26,7 @@ import org.junit.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Adrian Colyer
@@ -44,14 +43,9 @@ public class SPR3064Tests {
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		service = (Service) ctx.getBean("service");
-
-		try {
-			this.service.serveMe();
-			fail("service operation has not been advised by transaction interceptor");
-		}
-		catch (RuntimeException ex) {
-			assertEquals("advice invoked",ex.getMessage());
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
+				this.service::serveMe)
+			.withMessageContaining("advice invoked");
 	}
 
 }

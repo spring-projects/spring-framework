@@ -30,9 +30,10 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -130,13 +131,9 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		// default resourceRef=false should cause this to fail, as java:/comp/env will not
 		// automatically be added
 		si.setJndiTemplate(jt);
-		try {
-			si.afterPropertiesSet();
-			fail("Should have failed with naming exception");
-		}
-		catch (NamingException ex) {
-			assertTrue(ex == nex);
-		}
+		assertThatExceptionOfType(NamingException.class).isThrownBy(
+				si::afterPropertiesSet)
+			.satisfies(ex -> assertThat(ex).isSameAs(nex));
 	}
 
 	@Test
@@ -199,13 +196,8 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
 		RemoteInterface target = (RemoteInterface) configuredProxy(si, RemoteInterface.class);
-		try {
-			target.targetMethod();
-			fail("Should have thrown RemoteException");
-		}
-		catch (RemoteException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(RemoteException.class).isThrownBy(
+				target::targetMethod);
 
 		verify(mockContext).close();
 		verify(ejb, times(2)).remove();
@@ -254,13 +246,8 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		si.setCacheHome(cacheHome);
 
 		RemoteInterface target = (RemoteInterface) configuredProxy(si, RemoteInterface.class);
-		try {
-			target.targetMethod();
-			fail("Should have thrown RemoteException");
-		}
-		catch (ConnectException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ConnectException.class).isThrownBy(
+				target::targetMethod);
 
 		verify(mockContext, times(lookupCount)).close();
 		verify(ejb, times(2)).remove();
@@ -295,13 +282,8 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
 		BusinessInterface target = (BusinessInterface) configuredProxy(si, BusinessInterface.class);
-		try {
-			target.targetMethod();
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(
+				target::targetMethod);
 
 		verify(mockContext).close();
 		verify(ejb).remove();
@@ -327,14 +309,9 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		SimpleRemoteSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
 		RemoteInterface target = (RemoteInterface) configuredProxy(si, RemoteInterface.class);
-		try {
-			target.targetMethod();
-			fail("Should have thrown remote exception");
-		}
-		catch (Exception thrown) {
-			assertTrue(thrown == expected);
-		}
-
+		assertThatExceptionOfType(Exception.class).isThrownBy(
+				target::targetMethod)
+			.satisfies(ex -> assertThat(ex).isSameAs(expected));
 		verify(mockContext).close();
 		verify(ejb).remove();
 	}

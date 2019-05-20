@@ -48,12 +48,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.tags.TransformTag;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -351,15 +351,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setPath("country");
 		this.tag.setItems(new TestBean());
 		this.tag.setItemValue("isoCode");
-		try {
-			this.tag.doStartTag();
-			fail("Must not be able to use a non-Collection typed value as the value of 'items'");
-		}
-		catch (JspException expected) {
-			String message = expected.getMessage();
-			assertTrue(message.contains("items"));
-			assertTrue(message.contains("org.springframework.tests.sample.beans.TestBean"));
-		}
+		assertThatExceptionOfType(JspException.class).as("use a non-Collection typed value as the value of 'items'").isThrownBy(
+				this.tag::doStartTag)
+			.withMessageContaining("items")
+			.withMessageContaining("org.springframework.tests.sample.beans.TestBean");
 	}
 
 	@Test

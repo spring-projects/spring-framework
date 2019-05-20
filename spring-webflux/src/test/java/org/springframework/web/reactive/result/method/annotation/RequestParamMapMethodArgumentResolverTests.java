@@ -33,10 +33,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
 /**
@@ -66,16 +66,9 @@ public class RequestParamMapMethodArgumentResolverTests {
 		param = this.testMethod.annotNotPresent(RequestParam.class).arg(Map.class);
 		assertFalse(this.resolver.supportsParameter(param));
 
-		try {
-			param = this.testMethod.annot(requestParam()).arg(Mono.class, Map.class);
-			this.resolver.supportsParameter(param);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"RequestParamMapMethodArgumentResolver does not support reactive type wrapper"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+					this.resolver.supportsParameter(this.testMethod.annot(requestParam()).arg(Mono.class, Map.class)))
+			.withMessageStartingWith("RequestParamMapMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test

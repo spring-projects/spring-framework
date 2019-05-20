@@ -32,10 +32,11 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests invocation of constructors.
@@ -129,38 +130,25 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 		// 4 will make it throw a checked exception - this will be wrapped by spel on the
 		// way out
 		eContext.setVariable("bar", 4);
-		try {
-			o = expr.getValue(eContext);
-			fail("Should have failed");
-		}
-		catch (Exception e) {
-			// A problem occurred whilst attempting to construct an object of type
-			// 'org.springframework.expression.spel.ConstructorInvocationTests$Tester'
-			// using arguments '(java.lang.Integer)'
-			int idx = e.getMessage().indexOf("Tester");
-			if (idx == -1) {
-				fail("Expected reference to Tester in :" + e.getMessage());
-			}
-			// normal
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				expr.getValue(eContext))
+			.withMessageContaining("Tester");
+		// A problem occurred whilst attempting to construct an object of type
+		// 'org.springframework.expression.spel.ConstructorInvocationTests$Tester'
+		// using arguments '(java.lang.Integer)'
+
 		// If counter is 4 then the method got called twice!
 		assertEquals(3, parser.parseExpression("counter").getValue(eContext));
 
 		// 1 will make it throw a RuntimeException - SpEL will let this through
 		eContext.setVariable("bar", 1);
-		try {
-			o = expr.getValue(eContext);
-			fail("Should have failed");
-		}
-		catch (Exception e) {
-			// A problem occurred whilst attempting to construct an object of type
-			// 'org.springframework.expression.spel.ConstructorInvocationTests$Tester'
-			// using arguments '(java.lang.Integer)'
-			if (e instanceof SpelEvaluationException) {
-				e.printStackTrace();
-				fail("Should not have been wrapped");
-			}
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				expr.getValue(eContext))
+			.satisfies(ex -> assertThat(ex).isNotInstanceOf(SpelEvaluationException.class));
+		// A problem occurred whilst attempting to construct an object of type
+		// 'org.springframework.expression.spel.ConstructorInvocationTests$Tester'
+		// using arguments '(java.lang.Integer)'
+
 		// If counter is 5 then the method got called twice!
 		assertEquals(4, parser.parseExpression("counter").getValue(eContext));
 	}

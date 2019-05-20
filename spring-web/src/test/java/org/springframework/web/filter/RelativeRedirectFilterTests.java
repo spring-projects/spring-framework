@@ -29,6 +29,7 @@ import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
@@ -45,14 +46,16 @@ public class RelativeRedirectFilterTests {
 	private HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void sendRedirectHttpStatusWhenNullThenIllegalArgumentException() {
-		this.filter.setRedirectStatus(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.filter.setRedirectStatus(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void sendRedirectHttpStatusWhenNot3xxThenIllegalArgumentException() {
-		this.filter.setRedirectStatus(HttpStatus.OK);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.filter.setRedirectStatus(HttpStatus.OK));
 	}
 
 	@Test

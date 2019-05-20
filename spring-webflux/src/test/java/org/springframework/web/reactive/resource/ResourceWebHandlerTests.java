@@ -55,6 +55,8 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -453,17 +455,19 @@ public class ResourceWebHandlerTests {
 				}).verify(TIMEOUT);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noPathWithinHandlerMappingAttribute() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
-		this.handler.handle(exchange).block(TIMEOUT);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.handler.handle(exchange).block(TIMEOUT));
 	}
 
-	@Test(expected = MethodNotAllowedException.class)
+	@Test
 	public void unsupportedHttpMethod() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
-		this.handler.handle(exchange).block(TIMEOUT);
+		assertThatExceptionOfType(MethodNotAllowedException.class).isThrownBy(() ->
+				this.handler.handle(exchange).block(TIMEOUT));
 	}
 
 	@Test

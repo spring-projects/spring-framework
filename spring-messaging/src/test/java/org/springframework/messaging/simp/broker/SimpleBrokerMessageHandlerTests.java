@@ -38,6 +38,7 @@ import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.TaskScheduler;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -176,10 +177,11 @@ public class SimpleBrokerMessageHandlerTests {
 		assertArrayEquals(new long[] {10000, 10000}, this.messageHandler.getHeartbeatValue());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void startWithHeartbeatValueWithoutTaskScheduler() {
 		this.messageHandler.setHeartbeatValue(new long[] {10000, 10000});
-		this.messageHandler.start();
+		assertThatIllegalArgumentException().isThrownBy(
+				this.messageHandler::start);
 	}
 
 	@SuppressWarnings("unchecked")

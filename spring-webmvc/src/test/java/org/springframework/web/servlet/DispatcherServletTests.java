@@ -58,6 +58,8 @@ import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -70,7 +72,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -295,14 +296,9 @@ public class DispatcherServletTests {
 		request.addUserRole("role1");
 		request.addParameter("fail", "yes");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexDispatcherServlet.service(request, response);
-			assertEquals(200, response.getStatus());
-			assertTrue("forwarded to failed", "failed1.jsp".equals(response.getForwardedUrl()));
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		complexDispatcherServlet.service(request, response);
+		assertEquals(200, response.getStatus());
+		assertTrue("forwarded to failed", "failed1.jsp".equals(response.getForwardedUrl()));
 	}
 
 	@Test
@@ -416,13 +412,8 @@ public class DispatcherServletTests {
 		request.addParameter("theme", "mytheme");
 		request.addParameter("theme2", "theme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexDispatcherServlet.service(request, response);
-			assertTrue("Not forwarded", response.getForwardedUrl() == null);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		complexDispatcherServlet.service(request, response);
+		assertTrue("Not forwarded", response.getForwardedUrl() == null);
 	}
 
 	@Test
@@ -430,13 +421,8 @@ public class DispatcherServletTests {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/locale.do");
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexDispatcherServlet.service(request, response);
-			assertTrue("Correct response", response.getStatus() == HttpServletResponse.SC_FORBIDDEN);
-		}
-		catch (ServletException ex) {
-			fail("Should not have thrown ServletException: " + ex.getMessage());
-		}
+		complexDispatcherServlet.service(request, response);
+		assertTrue("Correct response", response.getStatus() == HttpServletResponse.SC_FORBIDDEN);
 	}
 
 	@Test
@@ -572,14 +558,9 @@ public class DispatcherServletTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/unknown.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexDispatcherServlet.service(request, response);
-			fail("Should have thrown ServletException");
-		}
-		catch (ServletException ex) {
-			// expected
-			assertTrue(ex.getMessage().contains("No adapter for handler"));
-		}
+		assertThatExceptionOfType(ServletException.class).isThrownBy(() ->
+				complexDispatcherServlet.service(request, response))
+			.withMessageContaining("No adapter for handler");
 	}
 
 	@Test
@@ -592,14 +573,9 @@ public class DispatcherServletTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/unknown.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			complexDispatcherServlet.service(request, response);
-			fail("Should have thrown ServletException");
-		}
-		catch (ServletException ex) {
-			// expected
-			assertTrue(ex.getMessage().contains("failed0"));
-		}
+		assertThatExceptionOfType(ServletException.class).isThrownBy(() ->
+				complexDispatcherServlet.service(request, response))
+			.withMessageContaining("failed0");
 	}
 
 	@Test
@@ -733,13 +709,8 @@ public class DispatcherServletTests {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/noview");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		try {
-			complexDispatcherServlet.service(request, response);
-			fail("Should have thrown ServletException");
-		}
-		catch (ServletException ex) {
-			ex.printStackTrace();
-		}
+		assertThatExceptionOfType(ServletException.class).isThrownBy(() ->
+				complexDispatcherServlet.service(request, response));
 	}
 
 	@Test
@@ -812,12 +783,8 @@ public class DispatcherServletTests {
 		ConfigurableEnvironment env1 = new StandardServletEnvironment();
 		servlet.setEnvironment(env1); // should succeed
 		assertThat(servlet.getEnvironment(), sameInstance(env1));
-		try {
-			servlet.setEnvironment(new DummyEnvironment());
-			fail("expected IllegalArgumentException for non-configurable Environment");
-		}
-		catch (IllegalArgumentException ex) {
-		}
+		assertThatIllegalArgumentException().as("non-configurable Environment").isThrownBy(() ->
+				servlet.setEnvironment(new DummyEnvironment()));
 		class CustomServletEnvironment extends StandardServletEnvironment { }
 		@SuppressWarnings("serial")
 		DispatcherServlet custom = new DispatcherServlet() {

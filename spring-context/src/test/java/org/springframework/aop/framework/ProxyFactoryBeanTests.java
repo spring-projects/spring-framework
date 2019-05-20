@@ -17,7 +17,6 @@
 package org.springframework.aop.framework;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.LinkedList;
@@ -61,6 +60,9 @@ import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -70,7 +72,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @since 13.03.2003
@@ -144,32 +145,22 @@ public class ProxyFactoryBeanTests {
 	}
 
 	private void testDoubleTargetSourceIsRejected(String name) {
-		try {
-			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(DBL_TARGETSOURCE_CONTEXT, CLASS));
-			bf.getBean(name);
-			fail("Should not allow TargetSource to be specified in interceptorNames as well as targetSource property");
-		}
-		catch (BeanCreationException ex) {
-			// Root cause of the problem must be an AOP exception
-			AopConfigException aex = (AopConfigException) ex.getCause();
-			assertTrue(aex.getMessage().contains("TargetSource"));
-		}
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(DBL_TARGETSOURCE_CONTEXT, CLASS));
+		assertThatExceptionOfType(BeanCreationException.class).as("Should not allow TargetSource to be specified in interceptorNames as well as targetSource property").isThrownBy(() ->
+				bf.getBean(name))
+			.withCauseInstanceOf(AopConfigException.class)
+			.satisfies(ex -> assertThat(ex.getCause().getMessage()).contains("TargetSource"));
 	}
 
 	@Test
 	public void testTargetSourceNotAtEndOfInterceptorNamesIsRejected() {
-		try {
-			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(NOTLAST_TARGETSOURCE_CONTEXT, CLASS));
-			bf.getBean("targetSourceNotLast");
-			fail("TargetSource or non-advised object must be last in interceptorNames");
-		}
-		catch (BeanCreationException ex) {
-			// Root cause of the problem must be an AOP exception
-			AopConfigException aex = (AopConfigException) ex.getCause();
-			assertTrue(aex.getMessage().contains("interceptorNames"));
-		}
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(NOTLAST_TARGETSOURCE_CONTEXT, CLASS));
+		assertThatExceptionOfType(BeanCreationException.class).as("TargetSource or non-advised object must be last in interceptorNames").isThrownBy(() ->
+				bf.getBean("targetSourceNotLast"))
+			.withCauseInstanceOf(AopConfigException.class)
+			.satisfies(ex -> assertThat(ex.getCause().getMessage()).contains("interceptorNames"));
 	}
 
 	@Test
@@ -205,13 +196,9 @@ public class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(TARGETSOURCE_CONTEXT, CLASS));
 
 		ITestBean tb = (ITestBean) bf.getBean("noTarget");
-		try {
-			tb.getName();
-			fail();
-		}
-		catch (UnsupportedOperationException ex) {
-			assertEquals("getName", ex.getMessage());
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				tb.getName())
+			.withMessage("getName");
 		FactoryBean<?> pfb = (ProxyFactoryBean) bf.getBean("&noTarget");
 		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(pfb.getObjectType()));
 	}
@@ -332,15 +319,10 @@ public class ProxyFactoryBeanTests {
 		});
 		assertEquals("Have correct advisor count", 2, config.getAdvisors().length);
 
-		tb = (ITestBean) factory.getBean("test1");
-		try {
-			// Will fail now
-			tb.toString();
-			fail("Evil interceptor added programmatically should fail all method calls");
-		}
-		catch (Exception thrown) {
-			assertTrue(thrown == ex);
-		}
+		ITestBean tb1 = (ITestBean) factory.getBean("test1");
+		assertThatExceptionOfType(Exception.class).isThrownBy(
+				tb1::toString)
+			.satisfies(thrown -> assertThat(thrown).isSameAs(ex));
 	}
 
 	/**
@@ -466,25 +448,18 @@ public class ProxyFactoryBeanTests {
 		assertEquals(2, cba.getCalls());
 		assertEquals(0, th.getCalls());
 		Exception expected = new Exception();
-		try {
-			echo.echoException(1, expected);
-			fail();
-		}
-		catch (Exception ex) {
-			assertEquals(expected, ex);
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				echo.echoException(1, expected))
+			.matches(expected::equals);
 		// No throws handler method: count should still be 0
 		assertEquals(0, th.getCalls());
 
 		// Handler knows how to handle this exception
-		expected = new FileNotFoundException();
-		try {
-			echo.echoException(1, expected);
-			fail();
-		}
-		catch (IOException ex) {
-			assertEquals(expected, ex);
-		}
+		FileNotFoundException expectedFileNotFound = new FileNotFoundException();
+		assertThatIOException().isThrownBy(() ->
+				echo.echoException(1, expectedFileNotFound))
+			.matches(expectedFileNotFound::equals);
+
 		// One match
 		assertEquals(1, th.getCalls("ioException"));
 	}
@@ -494,13 +469,8 @@ public class ProxyFactoryBeanTests {
 	/*
 	@Test
 	public void testNoInterceptorNamesWithoutTarget() {
-		try {
-			ITestBean tb = (ITestBean) factory.getBean("noInterceptorNamesWithoutTarget");
-			fail("Should require interceptor names");
-		}
-		catch (AopConfigException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(AopConfigurationException.class).as("Should require interceptor names").isThrownBy(() ->
+				ITestBean tb = (ITestBean) factory.getBean("noInterceptorNamesWithoutTarget"));
 	}
 
 	@Test
@@ -513,13 +483,8 @@ public class ProxyFactoryBeanTests {
 	public void testEmptyInterceptorNames() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(INVALID_CONTEXT, CLASS));
-		try {
-			bf.getBean("emptyInterceptorNames");
-			fail("Interceptor names cannot be empty");
-		}
-		catch (BeanCreationException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(BeanCreationException.class).as("Interceptor names cannot be empty").isThrownBy(() ->
+				bf.getBean("emptyInterceptorNames"));
 	}
 
 	/**
@@ -529,13 +494,9 @@ public class ProxyFactoryBeanTests {
 	public void testGlobalsWithoutTarget() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(INVALID_CONTEXT, CLASS));
-		try {
-			bf.getBean("globalsWithoutTarget");
-			fail("Should require target name");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof AopConfigException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).as("Should require target name").isThrownBy(() ->
+				bf.getBean("globalsWithoutTarget"))
+			.withCauseInstanceOf(AopConfigException.class);
 	}
 
 	/**
@@ -559,12 +520,8 @@ public class ProxyFactoryBeanTests {
 		agi = (AddedGlobalInterface) l;
 		assertTrue(agi.globalsAdded() == -1);
 
-		try {
-			agi = (AddedGlobalInterface) factory.getBean("test1");
-			fail("Aspect interface should't be implemeneted without globals");
-		}
-		catch (ClassCastException ex) {
-		}
+		assertThat(factory.getBean("test1")).as("Aspect interface should't be implemeneted without globals")
+				.isNotInstanceOf(AddedGlobalInterface.class);
 	}
 
 	@Test
@@ -639,20 +596,10 @@ public class ProxyFactoryBeanTests {
 
 		((Lockable) bean1).lock();
 
-		try {
-			bean1.setAge(5);
-			fail("expected LockedException");
-		}
-		catch (LockedException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(LockedException.class).isThrownBy(() ->
+				bean1.setAge(5));
 
-		try {
-			bean2.setAge(6);
-		}
-		catch (LockedException ex) {
-			fail("did not expect LockedException");
-		}
+		bean2.setAge(6); //do not expect LockedException"
 	}
 
 	@Test
@@ -670,20 +617,11 @@ public class ProxyFactoryBeanTests {
 
 		((Lockable) bean1).lock();
 
-		try {
-			bean1.setAge(5);
-			fail("expected LockedException");
-		}
-		catch (LockedException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(LockedException.class).isThrownBy(() ->
+				bean1.setAge(5));
 
-		try {
-			bean2.setAge(6);
-		}
-		catch (LockedException ex) {
-			fail("did not expect LockedException");
-		}
+		// do not expect LockedException
+		bean2.setAge(6);
 	}
 
 	/**

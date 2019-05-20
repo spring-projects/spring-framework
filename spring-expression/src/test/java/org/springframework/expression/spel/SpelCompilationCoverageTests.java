@@ -45,12 +45,12 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Checks SpelCompiler behavior. This should cover compilation all compiled node types.
@@ -1251,13 +1251,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		ctx.setVariable("target", "123");
 		assertEquals("123", expression.getValue(ctx));
 		ctx.setVariable("target", 42);
-		try {
-			assertEquals(42, expression.getValue(ctx));
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertTrue(see.getCause() instanceof ClassCastException);
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expression.getValue(ctx))
+			.withCauseInstanceOf(ClassCastException.class);
 
 		ctx.setVariable("target", "abc");
 		expression = parser.parseExpression("#target.charAt(0)");
@@ -1267,13 +1263,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		ctx.setVariable("target", "1");
 		assertEquals('1', expression.getValue(ctx));
 		ctx.setVariable("target", 42);
-		try {
-			assertEquals('4', expression.getValue(ctx));
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertTrue(see.getCause() instanceof ClassCastException);
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expression.getValue(ctx))
+			.withCauseInstanceOf(ClassCastException.class);
 	}
 
 	@Test
@@ -4004,14 +3996,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(2, expression.getValue(is));
 		assertCanCompile(expression);
 		assertEquals(2, expression.getValue(is));
-
-		try {
-			assertEquals(2, expression.getValue(strings));
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertTrue(see.getCause() instanceof ClassCastException);
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expression.getValue(strings))
+			.withCauseInstanceOf(ClassCastException.class);
 		SpelCompiler.revertToInterpreted(expression);
 		assertEquals("b", expression.getValue(strings));
 		assertCanCompile(expression);
@@ -4037,26 +4024,18 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		tc.reset();
 		tc.obj=new Integer(42);
-		try {
-			expression.getValue(tc);
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			assertTrue(see.getCause() instanceof ClassCastException);
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expression.getValue(tc))
+			.withCauseInstanceOf(ClassCastException.class);
+
 
 		// method with changing target
 		expression = parser.parseExpression("#root.charAt(0)");
 		assertEquals('a', expression.getValue("abc"));
 		assertCanCompile(expression);
-		try {
-			expression.getValue(new Integer(42));
-			fail();
-		}
-		catch (SpelEvaluationException see) {
-			// java.lang.Integer cannot be cast to java.lang.String
-			assertTrue(see.getCause() instanceof ClassCastException);
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expression.getValue(new Integer(42)))
+			.withCauseInstanceOf(ClassCastException.class);
 	}
 
 	@Test
@@ -5179,13 +5158,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	private void assertGetValueFail(Expression expression) {
-		try {
-			Object o = expression.getValue();
-			fail("Calling getValue on the expression should have failed but returned "+o);
-		}
-		catch (Exception ex) {
-			// success!
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				expression.getValue());
 	}
 
 	private void assertIsCompiled(Expression expression) {
@@ -5196,7 +5170,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertNotNull(object);
 		}
 		catch (Exception ex) {
-			fail(ex.toString());
+			throw new AssertionError(ex.getMessage(), ex);
 		}
 	}
 

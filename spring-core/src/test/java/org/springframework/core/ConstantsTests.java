@@ -21,10 +21,11 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -44,20 +45,12 @@ public class ConstantsTests {
 		assertEquals(A.DOG, c.asNumber("dog").intValue());
 		assertEquals(A.CAT, c.asNumber("cat").intValue());
 
-		try {
-			c.asNumber("bogus");
-			fail("Can't get bogus field");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.asNumber("bogus"));
 
 		assertTrue(c.asString("S1").equals(A.S1));
-		try {
-			c.asNumber("S1");
-			fail("Wrong type");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThatExceptionOfType(Constants.ConstantException.class).as("wrong type").isThrownBy(() ->
+				c.asNumber("S1"));
 	}
 
 	@Test
@@ -169,27 +162,15 @@ public class ConstantsTests {
 		assertEquals("S1", c.toCode("", "s"));
 		assertEquals("S1", c.toCode("", "s1"));
 		assertEquals("S1", c.toCode("", null));
-		try {
-			c.toCode("bogus", "bogus");
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
-		try {
-			c.toCode("bogus", null);
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCode("bogus", "bogus"));
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCode("bogus", null));
 
 		assertEquals("MY_PROPERTY_NO", c.toCodeForProperty(Integer.valueOf(1), "myProperty"));
 		assertEquals("MY_PROPERTY_YES", c.toCodeForProperty(Integer.valueOf(2), "myProperty"));
-		try {
-			c.toCodeForProperty("bogus", "bogus");
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCodeForProperty("bogus", "bogus"));
 
 		assertEquals("DOG", c.toCodeForSuffix(Integer.valueOf(0), ""));
 		assertEquals("DOG", c.toCodeForSuffix(Integer.valueOf(0), "G"));
@@ -205,18 +186,10 @@ public class ConstantsTests {
 		assertEquals("S1", c.toCodeForSuffix("", "1"));
 		assertEquals("S1", c.toCodeForSuffix("", "s1"));
 		assertEquals("S1", c.toCodeForSuffix("", null));
-		try {
-			c.toCodeForSuffix("bogus", "bogus");
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
-		try {
-			c.toCodeForSuffix("bogus", null);
-			fail("Should have thrown ConstantException");
-		}
-		catch (Constants.ConstantException expected) {
-		}
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCodeForSuffix("bogus", "bogus"));
+		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
+				c.toCodeForSuffix("bogus", null));
 	}
 
 	@Test
@@ -251,11 +224,8 @@ public class ConstantsTests {
 
 	@Test
 	public void ctorWithNullClass() throws Exception {
-		try {
-			new Constants(null);
-			fail("Must have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new Constants(null));
 	}
 
 

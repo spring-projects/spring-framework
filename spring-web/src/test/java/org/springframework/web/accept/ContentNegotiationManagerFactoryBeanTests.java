@@ -33,6 +33,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -128,7 +129,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		assertEquals(Collections.singletonList(MediaType.IMAGE_GIF), manager.resolveMediaTypes(this.webRequest));
 	}
 
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)  // SPR-10170
+	@Test // SPR-10170
 	public void favorPathWithIgnoreUnknownPathExtensionTurnedOff() throws Exception {
 		this.factoryBean.setFavorPathExtension(true);
 		this.factoryBean.setIgnoreUnknownPathExtensions(false);
@@ -138,7 +139,8 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.servletRequest.setRequestURI("/flower.foobarbaz");
 		this.servletRequest.addParameter("format", "json");
 
-		manager.resolveMediaTypes(this.webRequest);
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				manager.resolveMediaTypes(this.webRequest));
 	}
 
 	@Test
@@ -159,7 +161,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 				manager.resolveMediaTypes(this.webRequest));
 	}
 
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)  // SPR-10170
+	@Test // SPR-10170
 	public void favorParameterWithUnknownMediaType() throws HttpMediaTypeNotAcceptableException {
 		this.factoryBean.setFavorParameter(true);
 		this.factoryBean.afterPropertiesSet();
@@ -168,7 +170,8 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.servletRequest.setRequestURI("/flower");
 		this.servletRequest.setParameter("format", "invalid");
 
-		manager.resolveMediaTypes(this.webRequest);
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				manager.resolveMediaTypes(this.webRequest));
 	}
 
 	@Test

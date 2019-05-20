@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -314,14 +315,16 @@ public class MockHttpServletRequestTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setPreferredLocalesWithNullList() {
-		request.setPreferredLocales(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				request.setPreferredLocales(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setPreferredLocalesWithEmptyList() {
-		request.setPreferredLocales(new ArrayList<>());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				request.setPreferredLocales(new ArrayList<>()));
 	}
 
 	@Test
@@ -556,10 +559,11 @@ public class MockHttpServletRequestTests {
 		assertEquals(1437472800000L, request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void httpHeaderFormattedDateError() {
 		request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "This is not a date");
-		request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				request.getDateHeader(HttpHeaders.IF_MODIFIED_SINCE));
 	}
 
 	private void assertEqualEnumerations(Enumeration<?> enum1, Enumeration<?> enum2) {

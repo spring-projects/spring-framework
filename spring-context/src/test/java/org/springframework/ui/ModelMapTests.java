@@ -34,6 +34,7 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -100,10 +101,11 @@ public class ModelMapTests {
 		assertEquals("bing", string);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testOneArgCtorWithNull() {
 		//Null model arguments added without a name being explicitly supplied are not allowed
-		new ModelMap(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ModelMap(null));
 	}
 
 	@Test
@@ -124,11 +126,12 @@ public class ModelMapTests {
 		assertEquals(0, model.size());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAddObjectWithNull() throws Exception {
 		// Null model arguments added without a name being explicitly supplied are not allowed
 		ModelMap model = new ModelMap();
-		model.addAttribute(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				model.addAttribute(null));
 	}
 
 	@Test
@@ -154,14 +157,15 @@ public class ModelMapTests {
 		assertEquals(0, model.size());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAddAllObjectsWithSparseArrayList() throws Exception {
 		// Null model arguments added without a name being explicitly supplied are not allowed
 		ModelMap model = new ModelMap();
 		ArrayList<String> list = new ArrayList<>();
 		list.add("bing");
 		list.add(null);
-		model.addAllAttributes(list);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				model.addAllAttributes(list));
 	}
 
 	@Test

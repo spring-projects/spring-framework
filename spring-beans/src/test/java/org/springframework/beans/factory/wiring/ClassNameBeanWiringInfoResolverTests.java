@@ -18,6 +18,7 @@ package org.springframework.beans.factory.wiring;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -28,9 +29,10 @@ import static org.junit.Assert.assertNotNull;
  */
 public class ClassNameBeanWiringInfoResolverTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void resolveWiringInfoWithNullBeanInstance() throws Exception {
-		new ClassNameBeanWiringInfoResolver().resolveWiringInfo(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ClassNameBeanWiringInfoResolver().resolveWiringInfo(null));
 	}
 
 	@Test

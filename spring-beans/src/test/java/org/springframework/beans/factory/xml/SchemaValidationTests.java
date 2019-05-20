@@ -24,10 +24,9 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -38,13 +37,9 @@ public class SchemaValidationTests {
 	public void withAutodetection() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
-		try {
-			reader.loadBeanDefinitions(new ClassPathResource("invalidPerSchema.xml", getClass()));
-			fail("Should not be able to parse a file with errors");
-		}
-		catch (BeansException ex) {
-			assertTrue(ex.getCause() instanceof SAXParseException);
-		}
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
+				reader.loadBeanDefinitions(new ClassPathResource("invalidPerSchema.xml", getClass())))
+			.withCauseInstanceOf(SAXParseException.class);
 	}
 
 	@Test
@@ -52,13 +47,9 @@ public class SchemaValidationTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);
-		try {
-			reader.loadBeanDefinitions(new ClassPathResource("invalidPerSchema.xml", getClass()));
-			fail("Should not be able to parse a file with errors");
-		}
-		catch (BeansException ex) {
-			assertTrue(ex.getCause() instanceof SAXParseException);
-		}
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
+				reader.loadBeanDefinitions(new ClassPathResource("invalidPerSchema.xml", getClass())))
+			.withCauseInstanceOf(SAXParseException.class);
 	}
 
 	@Test

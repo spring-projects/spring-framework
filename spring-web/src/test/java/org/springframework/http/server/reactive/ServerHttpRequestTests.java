@@ -34,6 +34,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
@@ -110,9 +111,10 @@ public class ServerHttpRequestTests {
 		assertEquals("/app", request.getPath().contextPath().value());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void mutateWithInvalidPath() throws Exception {
-		createHttpRequest("/").mutate().path("foo-bar");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createHttpRequest("/").mutate().path("foo-bar"));
 	}
 
 	@Test  // SPR-16434

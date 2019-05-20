@@ -26,9 +26,10 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSes
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestHttpSockJsSession;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -59,10 +60,11 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 		handleRequestAndExpectFailure();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void readMessagesNoSession() throws Exception {
 		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
-		new XhrReceivingTransportHandler().handleRequest(this.request, this.response, webSocketHandler, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new XhrReceivingTransportHandler().handleRequest(this.request, this.response, webSocketHandler, null));
 	}
 
 	@Test
@@ -76,15 +78,11 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 
 		willThrow(new Exception()).given(wsHandler).handleMessage(session, new TextMessage("x"));
 
-		try {
-			XhrReceivingTransportHandler transportHandler = new XhrReceivingTransportHandler();
-			transportHandler.initialize(sockJsConfig);
-			transportHandler.handleRequest(this.request, this.response, wsHandler, session);
-			fail("Expected exception");
-		}
-		catch (SockJsMessageDeliveryException ex) {
-			assertNull(session.getCloseStatus());
-		}
+		XhrReceivingTransportHandler transportHandler = new XhrReceivingTransportHandler();
+		transportHandler.initialize(sockJsConfig);
+		assertThatExceptionOfType(SockJsMessageDeliveryException.class).isThrownBy(() ->
+				transportHandler.handleRequest(this.request, this.response, wsHandler, session));
+		assertNull(session.getCloseStatus());
 	}
 
 

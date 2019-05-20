@@ -26,7 +26,6 @@ import org.springframework.http.MediaType;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test-case for AbstractHttpMessageConverter.
@@ -92,14 +91,13 @@ public class HttpMessageConverterTests {
 		@Override
 		protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 				throws IOException, HttpMessageNotReadableException {
-			fail("Not expected");
-			return null;
+			throw new AssertionError("Not expected");
 		}
 
 		@Override
 		protected void writeInternal(T t, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
-			fail("Not expected");
+			throw new AssertionError("Not expected");
 		}
 	}
 

@@ -26,6 +26,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -36,18 +37,20 @@ import static org.junit.Assert.assertTrue;
  */
 public class SpelExceptionTests {
 
-	@Test(expected = SpelEvaluationException.class)
+	@Test
 	public void spelExpressionMapNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aMap.containsKey('one')");
-		spelExpression.getValue();
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
+				spelExpression::getValue);
 	}
 
-	@Test(expected = SpelEvaluationException.class)
+	@Test
 	public void spelExpressionMapIndexAccessNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aMap['one'] eq 1");
-		spelExpression.getValue();
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
+				spelExpression::getValue);
 	}
 
 	@Test
@@ -73,18 +76,20 @@ public class SpelExceptionTests {
 
 	}
 
-	@Test(expected = SpelEvaluationException.class)
+	@Test
 	public void spelExpressionListNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aList.contains('one')");
-		spelExpression.getValue();
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
+				spelExpression::getValue);
 	}
 
-	@Test(expected = SpelEvaluationException.class)
+	@Test
 	public void spelExpressionListIndexAccessNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#aList[0] eq 'one'");
-		spelExpression.getValue();
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
+				spelExpression::getValue);
 	}
 
 	@Test
@@ -131,11 +136,12 @@ public class SpelExceptionTests {
 		assertTrue(result);
 	}
 
-	@Test(expected = SpelEvaluationException.class)
+	@Test
 	public void spelExpressionArrayIndexAccessNullVariables() {
 		ExpressionParser parser = new SpelExpressionParser();
 		Expression spelExpression = parser.parseExpression("#anArray[0] eq 1");
-		spelExpression.getValue();
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
+				spelExpression::getValue);
 	}
 
 	@Test

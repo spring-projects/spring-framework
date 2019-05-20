@@ -26,6 +26,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.InvalidMimeTypeException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -160,9 +161,10 @@ public class StompDecoderTests {
 		assertEquals("alpha:bravo\r\n\\", headers.getFirstNativeHeader("a:\r\n\\b"));
 	}
 
-	@Test(expected = StompConversionException.class)
+	@Test
 	public void decodeFrameBodyNotAllowed() {
-		decode("CONNECT\naccept-version:1.2\n\nThe body of the message\0");
+		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
+				decode("CONNECT\naccept-version:1.2\n\nThe body of the message\0"));
 	}
 
 	@Test
@@ -226,14 +228,16 @@ public class StompDecoderTests {
 		assertIncompleteDecode("SEND\ncontent-type:text/plain;charset=U");
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void decodeFrameWithInvalidContentType() {
-		assertIncompleteDecode("SEND\ncontent-type:text/plain;charset=U\n\nThe body\0");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				assertIncompleteDecode("SEND\ncontent-type:text/plain;charset=U\n\nThe body\0"));
 	}
 
-	@Test(expected = StompConversionException.class)
+	@Test
 	public void decodeFrameWithIncorrectTerminator() {
-		decode("SEND\ncontent-length:23\n\nThe body of the message*");
+		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
+				decode("SEND\ncontent-length:23\n\nThe body of the message*"));
 	}
 
 	@Test

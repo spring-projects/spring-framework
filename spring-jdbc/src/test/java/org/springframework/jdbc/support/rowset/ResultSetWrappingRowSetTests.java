@@ -30,8 +30,8 @@ import org.junit.Test;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -215,13 +215,9 @@ public class ResultSetWrappingRowSetTests {
 			given(rsetMethod.invoke(resultSet, arg)).willReturn(ret).willThrow(new SQLException("test"));
 		}
 		rowsetMethod.invoke(rowSet, arg);
-		try {
-			rowsetMethod.invoke(rowSet, arg);
-			fail("InvalidResultSetAccessException should have been thrown");
-		}
-		catch (InvocationTargetException ex) {
-			assertEquals(InvalidResultSetAccessException.class, ex.getTargetException().getClass());
-		}
+		assertThatExceptionOfType(InvocationTargetException.class).isThrownBy(() ->
+				rowsetMethod.invoke(rowSet, arg)).
+			satisfies(ex -> assertThat(ex.getTargetException()).isExactlyInstanceOf(InvalidResultSetAccessException.class));
 	}
 
 }

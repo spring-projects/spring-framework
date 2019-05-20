@@ -33,6 +33,7 @@ import org.springframework.messaging.handler.invocation.ResolvableMethod;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -96,10 +97,11 @@ public class HeaderMethodArgumentResolverTests {
 				this.resolvable.annot(header("nativeHeaders.param1")).arg(), message));
 	}
 
-	@Test(expected = MessageHandlingException.class)
+	@Test
 	public void resolveArgumentNotFound() throws Exception {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
-		this.resolver.resolveArgument(this.resolvable.annot(headerPlain()).arg(), message);
+		assertThatExceptionOfType(MessageHandlingException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(this.resolvable.annot(headerPlain()).arg(), message));
 	}
 
 	@Test

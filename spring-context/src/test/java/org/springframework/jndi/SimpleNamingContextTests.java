@@ -38,9 +38,9 @@ import org.junit.Test;
 import org.springframework.tests.mock.jndi.SimpleNamingContext;
 import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -86,35 +86,20 @@ public class SimpleNamingContextTests {
 		assertTrue("key1 removed", context3.getEnvironment().get("key1") == null);
 
 		assertTrue("Correct DataSource registered", context1.lookup("jdbc/myds") == ds);
-		try {
-			context1.lookup("myobject");
-			fail("Should have thrown NameNotFoundException");
-		}
-		catch (NameNotFoundException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NameNotFoundException.class).isThrownBy(() ->
+				context1.lookup("myobject"));
 		assertTrue("Correct Integer registered", context1.lookup("myinteger") == i);
 		assertTrue("Correct String registered", context1.lookup("mystring") == s);
 
 		assertTrue("Correct DataSource registered", context2.lookup("jdbc/myds") == ds);
-		try {
-			context2.lookup("myobject");
-			fail("Should have thrown NameNotFoundException");
-		}
-		catch (NameNotFoundException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NameNotFoundException.class).isThrownBy(() ->
+				context2.lookup("myobject"));
 		assertTrue("Correct Integer registered", context2.lookup("myinteger") == i);
 		assertTrue("Correct String registered", context2.lookup("mystring") == s);
 
 		assertTrue("Correct DataSource registered", context3.lookup("jdbc/myds") == ds);
-		try {
-			context3.lookup("myobject");
-			fail("Should have thrown NameNotFoundException");
-		}
-		catch (NameNotFoundException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NameNotFoundException.class).isThrownBy(() ->
+				context3.lookup("myobject"));
 		assertTrue("Correct Integer registered", context3.lookup("myinteger") == i);
 		assertTrue("Correct String registered", context3.lookup("mystring") == s);
 
@@ -192,28 +177,18 @@ public class SimpleNamingContextTests {
 		assertTrue(ctx.lookup(name) == o);
 		// Check it returns mutable contexts
 		ctx.unbind(name);
-		try {
-			ctx = new InitialContext();
-			ctx.lookup(name);
-			fail("Should have thrown NamingException");
-		}
-		catch (NamingException ex) {
-			// expected
-		}
+		InitialContext badCtx1 = new InitialContext();
+		assertThatExceptionOfType(NamingException.class).isThrownBy(() ->
+				badCtx1.lookup(name));
 
 		// Check the same call will work again, but the context is empty
 		builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
-		try {
-			ctx = new InitialContext();
-			ctx.lookup(name);
-			fail("Should have thrown NamingException");
-		}
-		catch (NamingException ex) {
-			// expected
-		}
+		InitialContext badCtx2 = new InitialContext();
+		assertThatExceptionOfType(NamingException.class).isThrownBy(() ->
+				badCtx2.lookup(name));
 		Object o2 = new Object();
 		builder.bind(name, o2);
-		assertEquals(ctx.lookup(name), o2);
+		assertEquals(badCtx2.lookup(name), o2);
 	}
 
 

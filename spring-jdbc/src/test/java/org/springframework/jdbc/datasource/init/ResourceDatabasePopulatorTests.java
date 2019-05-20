@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -37,14 +38,16 @@ public class ResourceDatabasePopulatorTests {
 	private static final Resource script3 = Mockito.mock(Resource.class);
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructWithNullResource() {
-		new ResourceDatabasePopulator((Resource) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ResourceDatabasePopulator((Resource) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructWithNullResourceArray() {
-		new ResourceDatabasePopulator((Resource[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ResourceDatabasePopulator((Resource[]) null));
 	}
 
 	@Test
@@ -68,28 +71,32 @@ public class ResourceDatabasePopulatorTests {
 		assertEquals(3, databasePopulator.scripts.size());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void addScriptsWithNullResource() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		databasePopulator.addScripts((Resource) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				databasePopulator.addScripts((Resource) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void addScriptsWithNullResourceArray() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		databasePopulator.addScripts((Resource[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				databasePopulator.addScripts((Resource[]) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setScriptsWithNullResource() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		databasePopulator.setScripts((Resource) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				databasePopulator.setScripts((Resource) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setScriptsWithNullResourceArray() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		databasePopulator.setScripts((Resource[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				databasePopulator.setScripts((Resource[]) null));
 	}
 
 	@Test

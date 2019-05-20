@@ -24,6 +24,8 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -84,10 +86,11 @@ public class FastByteArrayOutputStreamTests {
 		assertByteArrayEqualsString(this.os);
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void close() throws Exception {
 		this.os.close();
-		this.os.write(this.helloBytes);
+		assertThatIOException().isThrownBy(() ->
+				this.os.write(this.helloBytes));
 	}
 
 	@Test
@@ -107,10 +110,11 @@ public class FastByteArrayOutputStreamTests {
 		assertArrayEquals(baos.toByteArray(), this.helloBytes);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failResize() throws Exception {
 		this.os.write(this.helloBytes);
-		this.os.resize(5);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.os.resize(5));
 	}
 
 	@Test

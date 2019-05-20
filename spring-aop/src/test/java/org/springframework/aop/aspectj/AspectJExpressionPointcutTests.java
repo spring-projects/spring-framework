@@ -36,10 +36,13 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.subpkg.DeepBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -163,37 +166,25 @@ public class AspectJExpressionPointcutTests {
 	@Test
 	public void testFriendlyErrorOnNoLocationClassMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(ITestBean.class);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(ITestBean.class))
+			.withMessageContaining("expression");
 	}
 
 	@Test
 	public void testFriendlyErrorOnNoLocation2ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(getAge, ITestBean.class);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(getAge, ITestBean.class))
+			.withMessageContaining("expression");
 	}
 
 	@Test
 	public void testFriendlyErrorOnNoLocation3ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(getAge, ITestBean.class, (Object[]) null);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(getAge, ITestBean.class, (Object[]) null))
+			.withMessageContaining("expression");
 	}
 
 
@@ -248,14 +239,8 @@ public class AspectJExpressionPointcutTests {
 	@Test
 	public void testInvalidExpression() {
 		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number) && args(Double)";
-
-		try {
-			getPointcut(expression).getClassFilter();  // call to getClassFilter forces resolution
-			fail("Invalid expression should throw IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(true);
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				getPointcut(expression)::getClassFilter);  // call to getClassFilter forces resolution
 	}
 
 	private TestBean getAdvisedProxy(String pointcutExpression, CallCountingInterceptor interceptor) {
@@ -285,14 +270,9 @@ public class AspectJExpressionPointcutTests {
 	@Test
 	public void testWithUnsupportedPointcutPrimitive() {
 		String expression = "call(int org.springframework.tests.sample.beans.TestBean.getAge())";
-
-		try {
-			getPointcut(expression).getClassFilter(); // call to getClassFilter forces resolution...
-			fail("Should not support call pointcuts");
-		}
-		catch (UnsupportedPointcutPrimitiveException ex) {
-			assertEquals("Should not support call pointcut", PointcutPrimitive.CALL, ex.getUnsupportedPrimitive());
-		}
+		assertThatExceptionOfType(UnsupportedPointcutPrimitiveException.class).isThrownBy(() ->
+				getPointcut(expression).getClassFilter()) // call to getClassFilter forces resolution...
+			.satisfies(ex -> assertThat(ex.getUnsupportedPrimitive()).isEqualTo(PointcutPrimitive.CALL));
 	}
 
 	@Test

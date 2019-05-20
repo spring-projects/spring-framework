@@ -28,6 +28,7 @@ import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.GenericMessage;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -59,9 +60,10 @@ public class MessageReceivingTemplateTests {
 		assertSame(expected, actual);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void receiveMissingDefaultDestination() {
-		this.template.receive();
+		assertThatIllegalStateException().isThrownBy(
+				this.template::receive);
 	}
 
 	@Test

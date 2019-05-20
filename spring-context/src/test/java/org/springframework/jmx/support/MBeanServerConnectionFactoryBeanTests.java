@@ -28,6 +28,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.util.SocketUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -76,10 +77,11 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNoServiceUrl() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-		bean.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				bean::afterPropertiesSet);
 	}
 
 	@Test

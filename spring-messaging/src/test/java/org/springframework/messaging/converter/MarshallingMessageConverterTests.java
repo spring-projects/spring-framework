@@ -28,6 +28,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -65,18 +66,20 @@ public class MarshallingMessageConverterTests {
 		assertEquals("Foo", actual.getName());
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void fromMessageInvalidXml() throws Exception {
 		String payload = "<myBean><name>Foo</name><myBean>";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
-		this.converter.fromMessage(message, MyBean.class);
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				this.converter.fromMessage(message, MyBean.class));
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void fromMessageValidXmlWithUnknownProperty() throws IOException {
 		String payload = "<myBean><age>42</age><myBean>";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
-		this.converter.fromMessage(message, MyBean.class);
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				this.converter.fromMessage(message, MyBean.class));
 	}
 
 	@Test

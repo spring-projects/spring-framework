@@ -30,13 +30,14 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.orm.jpa.domain.Person;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Integration tests using in-memory database for container-managed JPA
@@ -81,26 +82,16 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		assertTrue(people.isEmpty());
 
 		assertTrue("Should be open to start with", em.isOpen());
-		try {
-			em.close();
-			fail("Close should not work on container managed EM");
-		}
-		catch (IllegalStateException ex) {
-			// OK
-		}
+		assertThatIllegalStateException().as("Close should not work on container managed EM").isThrownBy(
+				em::close);
 		assertTrue(em.isOpen());
 	}
 
 	// This would be legal, at least if not actually _starting_ a tx
 	@Test
 	public void testEntityManagerProxyRejectsProgrammaticTxManagement() {
-		try {
-			createContainerManagedEntityManager().getTransaction();
-			fail("Should have thrown an IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(
+				createContainerManagedEntityManager()::getTransaction);
 	}
 
 	/*
@@ -115,14 +106,8 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 	@Test
 	public void testContainerEntityManagerProxyRejectsJoinTransactionWithoutTransaction() {
 		endTransaction();
-
-		try {
-			createContainerManagedEntityManager().joinTransaction();
-			fail("Should have thrown a TransactionRequiredException");
-		}
-		catch (TransactionRequiredException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(
+				createContainerManagedEntityManager()::joinTransaction);
 	}
 
 	@Test

@@ -41,11 +41,11 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -99,15 +99,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		assertTrue("String parameter not supported", resolver.supportsParameter(paramNamedDefaultValueStringHeader));
 		assertTrue("String array parameter not supported", resolver.supportsParameter(paramNamedValueStringArray));
 		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(paramNamedValueMap));
-		try {
-			this.resolver.supportsParameter(this.paramMono);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"RequestHeaderMethodArgumentResolver does not support reactive type wrapper"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.paramMono))
+			.withMessageStartingWith("RequestHeaderMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test

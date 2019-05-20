@@ -20,6 +20,7 @@ import javax.jms.Session;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -31,10 +32,11 @@ import static org.junit.Assert.assertFalse;
  */
 public class JmsAccessorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testChokesIfConnectionFactoryIsNotSupplied() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
-		accessor.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				accessor::afterPropertiesSet);
 	}
 
 	@Test
@@ -56,9 +58,10 @@ public class JmsAccessorTests {
 				accessor.getSessionAcknowledgeMode());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() throws Exception {
-		new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!"));
 	}
 
 

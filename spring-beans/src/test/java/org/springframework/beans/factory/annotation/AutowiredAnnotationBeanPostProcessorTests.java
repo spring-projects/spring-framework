@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.junit.After;
@@ -49,6 +51,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
@@ -72,6 +75,8 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -80,7 +85,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -116,13 +120,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testIncompleteBeanDefinition() {
 		bf.registerBeanDefinition("testBean", new GenericBeanDefinition());
-		try {
-			bf.getBean("testBean");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause() instanceof IllegalStateException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				bf.getBean("testBean"))
+			.withRootCauseInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -619,15 +619,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	@Test
 	public void testConstructorResourceInjectionWithNoCandidatesAndNoFallback() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorWithoutFallbackBean.class));
-
-		try {
-			bf.getBean("annotatedBean");
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertSame(ConstructorWithoutFallbackBean.class, ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("annotatedBean"))
+			.satisfies(methodParameterDeclaredOn(ConstructorWithoutFallbackBean.class));
 	}
 
 	@Test
@@ -792,20 +786,21 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNull(bean.getNestedTestBeans());
 	}
 
-	@Test(expected = UnsatisfiedDependencyException.class)
+	@Test
 	public void testSingleConstructorInjectionWithMissingDependency() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorOptionalCollectionBean.class));
-		bf.getBean("annotatedBean");
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("annotatedBean"));
 	}
 
-	@Test(expected = UnsatisfiedDependencyException.class)
+	@Test
 	public void testSingleConstructorInjectionWithNullDependency() {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SingleConstructorOptionalCollectionBean.class));
 		RootBeanDefinition tb = new RootBeanDefinition(NullFactoryMethods.class);
 		tb.setFactoryMethodName("createTestBean");
 		bf.registerBeanDefinition("testBean", tb);
-
-		bf.getBean("annotatedBean");
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("annotatedBean"));
 	}
 
 	@Test
@@ -901,15 +896,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
 		bf.registerBeanDefinition("testBean1", new RootBeanDefinition(TestBean.class));
 		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class));
-
-		try {
-			bf.getBean("annotatedBean");
-			fail("should have failed, more than one bean of type");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertSame(MapMethodInjectionBean.class, ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).as("should have failed, more than one bean of type").isThrownBy(() ->
+				bf.getBean("annotatedBean"))
+			.satisfies(methodParameterDeclaredOn(MapMethodInjectionBean.class));
 	}
 
 	@Test
@@ -1222,13 +1211,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectProviderInjectionBean.class));
 
 		ObjectProviderInjectionBean bean = (ObjectProviderInjectionBean) bf.getBean("annotatedBean");
-		try {
-			bean.getTestBean();
-			fail("Should have thrown NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(
+				bean::getTestBean);
 		assertNull(bean.getOptionalTestBean());
 		assertNull(bean.consumeOptionalTestBean());
 		assertEquals(new TestBean("default"), bean.getOptionalTestBeanWithDefault());
@@ -1253,27 +1237,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class));
 
 		ObjectProviderInjectionBean bean = (ObjectProviderInjectionBean) bf.getBean("annotatedBean");
-		try {
-			bean.getTestBean();
-			fail("Should have thrown NoUniqueBeanDefinitionException");
-		}
-		catch (NoUniqueBeanDefinitionException ex) {
-			// expected
-		}
-		try {
-			bean.getOptionalTestBean();
-			fail("Should have thrown NoUniqueBeanDefinitionException");
-		}
-		catch (NoUniqueBeanDefinitionException ex) {
-			// expected
-		}
-		try {
-			bean.consumeOptionalTestBean();
-			fail("Should have thrown NoUniqueBeanDefinitionException");
-		}
-		catch (NoUniqueBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(bean::getTestBean);
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(bean::getOptionalTestBean);
+		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class).isThrownBy(bean::consumeOptionalTestBean);
 		assertNull(bean.getUniqueTestBean());
 		assertNull(bean.consumeUniqueTestBean());
 
@@ -1374,16 +1340,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bpp.setRequiredParameterValue(false);
 		bf.registerBeanDefinition("customBean", new RootBeanDefinition(
 				CustomAnnotationRequiredFieldResourceInjectionBean.class));
-
-		try {
-			bf.getBean("customBean");
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertSame(CustomAnnotationRequiredFieldResourceInjectionBean.class,
-					ex.getInjectionPoint().getField().getDeclaringClass());
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("customBean"))
+			.satisfies(fieldDeclaredOn(CustomAnnotationRequiredFieldResourceInjectionBean.class));
 	}
 
 	@Test
@@ -1397,16 +1356,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("testBean1", tb1);
 		TestBean tb2 = new TestBean();
 		bf.registerSingleton("testBean2", tb2);
-
-		try {
-			bf.getBean("customBean");
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertSame(CustomAnnotationRequiredFieldResourceInjectionBean.class,
-					ex.getInjectionPoint().getField().getDeclaringClass());
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("customBean"))
+			.satisfies(fieldDeclaredOn(CustomAnnotationRequiredFieldResourceInjectionBean.class));
 	}
 
 	@Test
@@ -1431,16 +1383,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bpp.setRequiredParameterValue(false);
 		bf.registerBeanDefinition("customBean", new RootBeanDefinition(
 				CustomAnnotationRequiredMethodResourceInjectionBean.class));
-
-		try {
-			bf.getBean("customBean");
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertSame(CustomAnnotationRequiredMethodResourceInjectionBean.class,
-					ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("customBean"))
+			.satisfies(methodParameterDeclaredOn(CustomAnnotationRequiredMethodResourceInjectionBean.class));
 	}
 
 	@Test
@@ -1454,16 +1399,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("testBean1", tb1);
 		TestBean tb2 = new TestBean();
 		bf.registerSingleton("testBean2", tb2);
-
-		try {
-			bf.getBean("customBean");
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertSame(CustomAnnotationRequiredMethodResourceInjectionBean.class,
-					ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("customBean"))
+			.satisfies(methodParameterDeclaredOn(CustomAnnotationRequiredMethodResourceInjectionBean.class));
 	}
 
 	@Test
@@ -1509,16 +1447,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("testBean1", tb1);
 		TestBean tb2 = new TestBean();
 		bf.registerSingleton("testBean2", tb2);
-
-		try {
-			bf.getBean("customBean");
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertSame(CustomAnnotationOptionalFieldResourceInjectionBean.class,
-					ex.getInjectionPoint().getField().getDeclaringClass());
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("customBean"))
+			.satisfies(fieldDeclaredOn(CustomAnnotationOptionalFieldResourceInjectionBean.class));
 	}
 
 	@Test
@@ -1564,16 +1495,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("testBean1", tb1);
 		TestBean tb2 = new TestBean();
 		bf.registerSingleton("testBean2", tb2);
-
-		try {
-			bf.getBean("customBean");
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
-			assertSame(CustomAnnotationOptionalMethodResourceInjectionBean.class,
-					ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
+				bf.getBean("customBean"))
+			.satisfies(methodParameterDeclaredOn(CustomAnnotationOptionalMethodResourceInjectionBean.class));
 	}
 
 	/**
@@ -2217,6 +2141,30 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		SelfInjectingFactoryBean bean = bf.getBean(SelfInjectingFactoryBean.class);
 		assertSame(bf.getBean("annotatedBean"), bean.testBean);
+	}
+
+	private <E extends UnsatisfiedDependencyException> Consumer<E> methodParameterDeclaredOn(
+			Class<?> expected) {
+		return declaredOn(
+				injectionPoint -> injectionPoint.getMethodParameter().getDeclaringClass(),
+				expected);
+	}
+
+	private <E extends UnsatisfiedDependencyException> Consumer<E> fieldDeclaredOn(
+			Class<?> expected) {
+		return declaredOn(
+				injectionPoint -> injectionPoint.getField().getDeclaringClass(),
+				expected);
+	}
+
+	private <E extends UnsatisfiedDependencyException> Consumer<E> declaredOn(
+			Function<InjectionPoint, Class<?>> declaringClassExtractor,
+			Class<?> expected) {
+		return ex -> {
+			InjectionPoint injectionPoint = ex.getInjectionPoint();
+			Class<?> declaringClass = declaringClassExtractor.apply(injectionPoint);
+			assertThat(declaringClass).isSameAs(expected);
+		};
 	}
 
 

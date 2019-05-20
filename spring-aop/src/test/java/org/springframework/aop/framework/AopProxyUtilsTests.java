@@ -26,6 +26,7 @@ import org.springframework.aop.SpringProxy;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -125,11 +126,12 @@ public class AopProxyUtilsTests {
 		assertEquals(Comparable.class, userInterfaces[1]);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testProxiedUserInterfacesWithNoInterface() {
 		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[0],
 				(proxy1, method, args) -> null);
-		AopProxyUtils.proxiedUserInterfaces(proxy);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				AopProxyUtils.proxiedUserInterfaces(proxy));
 	}
 
 }

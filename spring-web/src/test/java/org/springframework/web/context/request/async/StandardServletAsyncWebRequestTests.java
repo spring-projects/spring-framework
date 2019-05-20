@@ -26,14 +26,12 @@ import org.springframework.mock.web.test.MockAsyncContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -93,25 +91,17 @@ public class StandardServletAsyncWebRequestTests {
 	@Test
 	public void startAsyncNotSupported() throws Exception {
 		this.request.setAsyncSupported(false);
-		try {
-			this.asyncRequest.startAsync();
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("Async support must be enabled"));
-		}
+		assertThatIllegalStateException().isThrownBy(
+				this.asyncRequest::startAsync)
+			.withMessageContaining("Async support must be enabled");
 	}
 
 	@Test
 	public void startAsyncAfterCompleted() throws Exception {
 		this.asyncRequest.onComplete(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
-		try {
-			this.asyncRequest.startAsync();
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertEquals("Async processing has already completed", ex.getMessage());
-		}
+		assertThatIllegalStateException().isThrownBy(
+				this.asyncRequest::startAsync)
+			.withMessage("Async processing has already completed");
 	}
 
 	@Test
@@ -138,10 +128,11 @@ public class StandardServletAsyncWebRequestTests {
 		verify(errorHandler).accept(e);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void setTimeoutDuringConcurrentHandling() {
 		this.asyncRequest.startAsync();
-		this.asyncRequest.setTimeout(25L);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.asyncRequest.setTimeout(25L));
 	}
 
 	@Test

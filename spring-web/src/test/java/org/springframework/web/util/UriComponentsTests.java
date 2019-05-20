@@ -27,6 +27,8 @@ import java.util.Collections;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
@@ -158,19 +160,22 @@ public class UriComponentsTests {
 		assertEquals("https://example.com:8080/bar", uri4.toUriString());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void expandEncoded() {
-		UriComponentsBuilder.fromPath("/{foo}").build().encode().expand("bar");
+		assertThatIllegalStateException().isThrownBy(() ->
+				UriComponentsBuilder.fromPath("/{foo}").build().encode().expand("bar"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invalidCharacters() {
-		UriComponentsBuilder.fromPath("/{foo}").build(true);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromPath("/{foo}").build(true));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invalidEncodedSequence() {
-		UriComponentsBuilder.fromPath("/fo%2o").build(true);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromPath("/fo%2o").build(true));
 	}
 
 	@Test

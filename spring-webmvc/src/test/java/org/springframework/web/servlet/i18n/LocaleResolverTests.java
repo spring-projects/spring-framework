@@ -31,6 +31,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -75,16 +76,13 @@ public class LocaleResolverTests {
 		// set new locale
 		try {
 			localeResolver.setLocale(request, response, Locale.GERMANY);
-			if (!shouldSet)
-				fail("should not be able to set Locale");
+			assertThat(shouldSet).as("should not be able to set Locale").isTrue();
 			// check new locale
 			locale = localeResolver.resolveLocale(request);
 			assertEquals(Locale.GERMANY, locale);
 		}
 		catch (UnsupportedOperationException ex) {
-			if (shouldSet) {
-				fail("should be able to set Locale");
-			}
+			assertThat(shouldSet).as("should be able to set Locale").isFalse();
 		}
 
 		// check LocaleContext

@@ -31,6 +31,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CustomizableThreadCreator;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -76,9 +77,10 @@ public class ExecutorBeanDefinitionParserTests {
 		assertEquals(42, getMaxPoolSize(executor));
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void invalidPoolSize() {
-		this.context.getBean("invalidPoolSize");
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				this.context.getBean("invalidPoolSize"));
 	}
 
 	@Test
@@ -126,9 +128,10 @@ public class ExecutorBeanDefinitionParserTests {
 		assertEquals(true, getAllowCoreThreadTimeOut(executor));
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void propertyPlaceholderWithInvalidPoolSize() {
-		this.context.getBean("propertyPlaceholderWithInvalidPoolSize");
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				this.context.getBean("propertyPlaceholderWithInvalidPoolSize"));
 	}
 
 	@Test

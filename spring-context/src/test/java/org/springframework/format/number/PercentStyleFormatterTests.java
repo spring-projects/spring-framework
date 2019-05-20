@@ -22,6 +22,7 @@ import java.util.Locale;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -42,14 +43,16 @@ public class PercentStyleFormatterTests {
 		assertEquals(new BigDecimal(".2356"), formatter.parse("23.56%", Locale.US));
 	}
 
-	@Test(expected = ParseException.class)
+	@Test
 	public void parseBogusValue() throws ParseException {
-		formatter.parse("bogus", Locale.US);
+		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
+				formatter.parse("bogus", Locale.US));
 	}
 
-	@Test(expected = ParseException.class)
+	@Test
 	public void parsePercentValueNotLenientFailure() throws ParseException {
-		formatter.parse("23.56%bogus", Locale.US);
+		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
+				formatter.parse("23.56%bogus", Locale.US));
 	}
 
 }

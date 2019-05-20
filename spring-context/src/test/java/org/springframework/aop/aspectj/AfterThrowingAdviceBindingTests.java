@@ -23,6 +23,7 @@ import org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect.Afte
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -54,44 +55,50 @@ public class AfterThrowingAdviceBindingTests {
 	}
 
 
-	@Test(expected = Throwable.class)
+	@Test
 	public void testSimpleAfterThrowing() throws Throwable {
-		this.testBean.exceptional(new Throwable());
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(new Throwable()));
 		verify(mockCollaborator).noArgs();
 	}
 
-	@Test(expected = Throwable.class)
+	@Test
 	public void testAfterThrowingWithBinding() throws Throwable {
 		Throwable t = new Throwable();
-		this.testBean.exceptional(t);
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(t));
 		verify(mockCollaborator).oneThrowable(t);
 	}
 
-	@Test(expected = Throwable.class)
+	@Test
 	public void testAfterThrowingWithNamedTypeRestriction() throws Throwable {
 		Throwable t = new Throwable();
-		this.testBean.exceptional(t);
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(t));
 		verify(mockCollaborator).noArgs();
 		verify(mockCollaborator).oneThrowable(t);
 		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
-	@Test(expected = Throwable.class)
+	@Test
 	public void testAfterThrowingWithRuntimeExceptionBinding() throws Throwable {
 		RuntimeException ex = new RuntimeException();
-		this.testBean.exceptional(ex);
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(ex));
 		verify(mockCollaborator).oneRuntimeException(ex);
 	}
 
-	@Test(expected = Throwable.class)
+	@Test
 	public void testAfterThrowingWithTypeSpecified() throws Throwable {
-		this.testBean.exceptional(new Throwable());
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+					this.testBean.exceptional(new Throwable()));
 		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
-	@Test(expected = Throwable.class)
+	@Test
 	public void testAfterThrowingWithRuntimeTypeSpecified() throws Throwable {
-		this.testBean.exceptional(new RuntimeException());
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				this.testBean.exceptional(new RuntimeException()));
 		verify(mockCollaborator).noArgsOnRuntimeExceptionMatch();
 	}
 

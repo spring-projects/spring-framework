@@ -34,6 +34,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.interceptor.TransactionAspectSupport.TransactionInfo;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -157,13 +158,8 @@ public abstract class AbstractTransactionAspectTests {
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
 		checkTransactionStatus(false);
-		try {
-			itb.exceptional(new OptimisticLockingFailureException(""));
-			fail("Should have thrown OptimisticLockingFailureException");
-		}
-		catch (OptimisticLockingFailureException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(OptimisticLockingFailureException.class).isThrownBy(() ->
+				itb.exceptional(new OptimisticLockingFailureException("")));
 		checkTransactionStatus(false);
 
 		assertSame(txatt, ptm.getDefinition());

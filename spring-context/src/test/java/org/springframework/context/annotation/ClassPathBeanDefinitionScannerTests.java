@@ -39,11 +39,13 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Mark Fisher
@@ -149,16 +151,11 @@ public class ClassPathBeanDefinitionScannerTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
-		try {
-			scanner.scan("org.springframework.context.annotation3");
-			scanner.scan(BASE_PACKAGE);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-			assertTrue(ex.getMessage().contains("stubFooDao"));
-			assertTrue(ex.getMessage().contains(StubFooDao.class.getName()));
-		}
+		scanner.scan("org.springframework.context.annotation3");
+		assertThatIllegalStateException().isThrownBy(() ->
+				scanner.scan(BASE_PACKAGE))
+			.withMessageContaining("stubFooDao")
+			.withMessageContaining(StubFooDao.class.getName());
 	}
 
 	@Test
@@ -214,16 +211,12 @@ public class ClassPathBeanDefinitionScannerTests {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
-		try {
-			scanner.scan("org.springframework.context.annotation2");
-			scanner.scan(BASE_PACKAGE);
-			fail("Must have thrown IllegalStateException");
-		}
-		catch (IllegalStateException expected) {
-			assertTrue(expected.getMessage().contains("myNamedDao"));
-			assertTrue(expected.getMessage().contains(NamedStubDao.class.getName()));
-			assertTrue(expected.getMessage().contains(NamedStubDao2.class.getName()));
-		}
+		scanner.scan("org.springframework.context.annotation2");
+		assertThatIllegalStateException().isThrownBy(() ->
+				scanner.scan(BASE_PACKAGE))
+			.withMessageContaining("myNamedDao")
+			.withMessageContaining(NamedStubDao.class.getName())
+			.withMessageContaining(NamedStubDao2.class.getName());
 	}
 
 	@Test
@@ -472,15 +465,10 @@ public class ClassPathBeanDefinitionScannerTests {
 		scanner.setBeanNameGenerator(new TestBeanNameGenerator());
 		scanner.setAutowireCandidatePatterns("*NoSuchDao");
 		scanner.scan(BASE_PACKAGE);
-
-		try {
-			context.refresh();
-			context.getBean("fooService");
-			fail("BeanCreationException expected; fooDao should not have been an autowire-candidate");
-		}
-		catch (BeanCreationException expected) {
-			assertTrue(expected.getMostSpecificCause() instanceof NoSuchBeanDefinitionException);
-		}
+		context.refresh();
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				context.getBean("fooService"))
+			.satisfies(ex -> assertThat(ex.getMostSpecificCause()).isInstanceOf(NoSuchBeanDefinitionException.class));
 	}
 
 

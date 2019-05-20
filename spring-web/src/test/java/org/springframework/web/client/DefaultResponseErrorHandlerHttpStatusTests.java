@@ -26,9 +26,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.HttpStatus.BAD_GATEWAY;
@@ -104,14 +103,8 @@ public class DefaultResponseErrorHandlerHttpStatusTests {
 		given(this.response.getRawStatusCode()).willReturn(this.httpStatus.value());
 		given(this.response.getHeaders()).willReturn(headers);
 
-		try {
-			this.handler.handleError(this.response);
-			fail("expected " + this.expectedExceptionClass.getSimpleName());
-		}
-		catch (HttpStatusCodeException ex) {
-			assertEquals("Expected " + this.expectedExceptionClass.getSimpleName(),
-					this.expectedExceptionClass, ex.getClass());
-		}
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() ->
+				this.handler.handleError(this.response));
 	}
 
 }

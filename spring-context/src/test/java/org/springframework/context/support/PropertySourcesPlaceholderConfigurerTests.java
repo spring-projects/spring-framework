@@ -33,6 +33,7 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -154,7 +155,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	public void ignoreUnresolvablePlaceholders_falseIsDefault() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
@@ -164,7 +165,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 
 		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
 		//pc.setIgnoreUnresolvablePlaceholders(false); // the default
-		ppc.postProcessBeanFactory(bf); // should throw
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				ppc.postProcessBeanFactory(bf));
 	}
 
 	@Test
@@ -181,7 +183,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		assertThat(bf.getBean(TestBean.class).getName(), equalTo("${my.name}"));
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	@SuppressWarnings("serial")
 	public void nestedUnresolvablePlaceholder() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -194,7 +196,8 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setProperties(new Properties() {{
 			put("my.name", "${bogus}");
 		}});
-		ppc.postProcessBeanFactory(bf); // should throw
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				ppc.postProcessBeanFactory(bf));
 	}
 
 	@Test

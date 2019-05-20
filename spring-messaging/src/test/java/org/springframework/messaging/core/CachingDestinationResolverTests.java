@@ -18,6 +18,7 @@ package org.springframework.messaging.core;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -50,15 +51,17 @@ public class CachingDestinationResolverTests {
 		verify(resolver, times(1)).resolveDestination("1234");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noTargetSet() {
 		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>();
-		resolverProxy.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				resolverProxy::afterPropertiesSet);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void nullTargetThroughConstructor() {
-		new CachingDestinationResolverProxy<String>(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CachingDestinationResolverProxy<String>(null));
 	}
 
 }

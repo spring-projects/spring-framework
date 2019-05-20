@@ -24,9 +24,9 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -69,13 +69,8 @@ public class DeclareParentsTests {
 
 		testBeanProxy.setName("");
 		lockable.lock();
-		try {
-			testBeanProxy.setName(" ");
-			fail("Should be locked");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().as("should be locked").isThrownBy(() ->
+				testBeanProxy.setName(" "));
 	}
 
 }

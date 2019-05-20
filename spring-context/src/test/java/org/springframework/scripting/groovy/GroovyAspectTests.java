@@ -26,8 +26,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.util.ClassUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Dave Syer
@@ -95,13 +95,9 @@ public class GroovyAspectTests {
 		TestService bean = (TestService) factory.getProxy();
 
 		assertEquals(0, logAdvice.getCountThrows());
-		try {
-			bean.sayHello();
-			fail("Expected exception");
-		}
-		catch (TestException ex) {
-			assertEquals(message, ex.getMessage());
-		}
+		assertThatExceptionOfType(TestException.class).isThrownBy(
+				bean::sayHello)
+			.withMessage(message);
 		assertEquals(1, logAdvice.getCountThrows());
 	}
 

@@ -44,6 +44,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -351,19 +352,17 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 
 	@Test
 	public void notFoundGet() throws Exception {
-		try {
-			Future<?> future = template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);
-			future.get();
-			fail("HttpClientErrorException expected");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof HttpClientErrorException);
-			HttpClientErrorException cause = (HttpClientErrorException)ex.getCause();
-
-			assertEquals(HttpStatus.NOT_FOUND, cause.getStatusCode());
-			assertNotNull(cause.getStatusText());
-			assertNotNull(cause.getResponseBodyAsString());
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() -> {
+				Future<?> future = template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);
+				future.get();
+				})
+			.withCauseInstanceOf(HttpClientErrorException.class)
+			.satisfies(ex -> {
+				HttpClientErrorException cause = (HttpClientErrorException) ex.getCause();
+				assertEquals(HttpStatus.NOT_FOUND, cause.getStatusCode());
+				assertNotNull(cause.getStatusText());
+				assertNotNull(cause.getResponseBodyAsString());
+			});
 	}
 
 	@Test

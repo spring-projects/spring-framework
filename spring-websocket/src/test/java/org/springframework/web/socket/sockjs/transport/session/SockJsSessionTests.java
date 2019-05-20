@@ -31,10 +31,11 @@ import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
@@ -118,18 +119,14 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		willThrow(new IOException()).given(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
 
 		sockJsSession.delegateConnectionEstablished();
-		try {
-			sockJsSession.delegateMessages(msg1, msg2, msg3);
-			fail("expected exception");
-		}
-		catch (SockJsMessageDeliveryException ex) {
-			assertEquals(Collections.singletonList(msg3), ex.getUndeliveredMessages());
-			verify(this.webSocketHandler).afterConnectionEstablished(sockJsSession);
-			verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg1));
-			verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
-			verify(this.webSocketHandler).afterConnectionClosed(sockJsSession, CloseStatus.SERVER_ERROR);
-			verifyNoMoreInteractions(this.webSocketHandler);
-		}
+		assertThatExceptionOfType(SockJsMessageDeliveryException.class).isThrownBy(() ->
+				sockJsSession.delegateMessages(msg1, msg2, msg3))
+			.satisfies(ex -> assertThat(ex.getUndeliveredMessages()).containsExactly(msg3));
+		verify(this.webSocketHandler).afterConnectionEstablished(sockJsSession);
+		verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg1));
+		verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
+		verify(this.webSocketHandler).afterConnectionClosed(sockJsSession, CloseStatus.SERVER_ERROR);
+		verifyNoMoreInteractions(this.webSocketHandler);
 	}
 
 	@Test
@@ -237,14 +234,10 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		this.session.setExceptionOnWrite(new IOException());
 		this.session.delegateConnectionEstablished();
 
-		try {
-			this.session.writeFrame(SockJsFrame.openFrame());
-			fail("expected exception");
-		}
-		catch (SockJsTransportFailureException ex) {
-			assertEquals(CloseStatus.SERVER_ERROR, this.session.getCloseStatus());
-			verify(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.SERVER_ERROR);
-		}
+		assertThatExceptionOfType(SockJsTransportFailureException.class).isThrownBy(() ->
+				this.session.writeFrame(SockJsFrame.openFrame()));
+		assertEquals(CloseStatus.SERVER_ERROR, this.session.getCloseStatus());
+		verify(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.SERVER_ERROR);
 	}
 
 	@Test

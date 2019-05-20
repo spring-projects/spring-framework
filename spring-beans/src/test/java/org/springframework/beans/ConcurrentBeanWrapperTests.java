@@ -30,7 +30,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Guillaume Poirier
@@ -75,7 +74,7 @@ public class ConcurrentBeanWrapperTests {
 			}
 		}
 		if (ex != null) {
-			fail(ex.getMessage());
+			throw new AssertionError("Unexpected exception", ex);
 		}
 	}
 

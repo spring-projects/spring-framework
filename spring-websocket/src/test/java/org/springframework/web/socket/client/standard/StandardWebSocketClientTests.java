@@ -35,6 +35,7 @@ import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,10 +86,11 @@ public class StandardWebSocketClientTests {
 		assertEquals(443, session.getLocalAddress().getPort());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetLocalAddressNoScheme() throws Exception {
 		URI uri = new URI("localhost/abc");
-		this.wsClient.doHandshake(this.wsHandler, this.headers, uri);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.wsClient.doHandshake(this.wsHandler, this.headers, uri));
 	}
 
 	@Test

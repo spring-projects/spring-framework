@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,15 +38,17 @@ import static org.junit.Assert.assertTrue;
  */
 public class BeanPropertySqlParameterSourceTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withNullBeanPassedToCtor() {
-		new BeanPropertySqlParameterSource(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BeanPropertySqlParameterSource(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getValueWhereTheUnderlyingBeanHasNoSuchProperty() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
-		source.getValue("thisPropertyDoesNotExist");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				source.getValue("thisPropertyDoesNotExist"));
 	}
 
 	@Test
@@ -75,10 +78,11 @@ public class BeanPropertySqlParameterSourceTests {
 		assertFalse(source.hasValue("thisPropertyDoesNotExist"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getValueWhereTheUnderlyingBeanPropertyIsNotReadable() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
-		source.getValue("noOp");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				source.getValue("noOp"));
 	}
 
 	@Test

@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.transaction.TransactionDefinition;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -49,9 +50,10 @@ public class TransactionAttributeSourceEditorTests {
 		assertNull(tas.getTransactionAttribute(m, null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invalidFormat() throws Exception {
-		editor.setAsText("foo=bar");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText("foo=bar"));
 	}
 
 	@Test

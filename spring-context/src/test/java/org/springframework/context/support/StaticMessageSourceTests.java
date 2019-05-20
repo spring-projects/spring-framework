@@ -153,10 +153,11 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 				.equals("This is a test message in the message catalog with no args."));
 	}
 
-	@Test(expected = NoSuchMessageException.class)
+	@Test
 	public void getMessageWithNoDefaultPassedInAndNotFoundInMsgCatalog() {
 		// Try with Locale.US
-		sac.getMessage("bogus.message", null, Locale.US);
+		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
+				sac.getMessage("bogus.message", null, Locale.US));
 	}
 
 	@Test

@@ -62,6 +62,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -383,12 +384,13 @@ public class MvcUriComponentsBuilderTests {
 		assertEquals("http://localhost/hotels/42/bookings/21", uriComponents.encode().toUri().toString());
 	}
 
-	@Test(expected = IllegalStateException.class)  // SPR-16710
+	@Test // SPR-16710
 	public void fromMethodCallWithStringReturnType() {
-		UriComponents uriComponents = fromMethodCall(
-				on(BookingControllerWithString.class).getBooking(21L)).buildAndExpand(42);
-
-		assertEquals("http://localhost/hotels/42/bookings/21", uriComponents.encode().toUri().toString());
+		assertThatIllegalStateException().isThrownBy(() -> {
+				UriComponents uriComponents = fromMethodCall(
+						on(BookingControllerWithString.class).getBooking(21L)).buildAndExpand(42);
+				uriComponents.encode().toUri().toString();
+		});
 	}
 
 	@Test  // SPR-16710

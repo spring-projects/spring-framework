@@ -35,10 +35,10 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -57,13 +57,8 @@ public class EntityManagerFactoryUtilsTests {
 	@Test
 	public void testDoGetEntityManager() {
 		// test null assertion
-		try {
-			EntityManagerFactoryUtils.doGetTransactionalEntityManager(null, null);
-			fail("expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			// it's okay
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				EntityManagerFactoryUtils.doGetTransactionalEntityManager(null, null));
 		EntityManagerFactory factory = mock(EntityManagerFactory.class);
 
 		// no tx active

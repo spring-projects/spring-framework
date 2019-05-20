@@ -26,10 +26,11 @@ import org.junit.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Integration tests for {@link MockMvcWebConnection}.
@@ -62,21 +63,15 @@ public class MockMvcWebConnectionTests {
 	@Test
 	public void contextPathEmpty() throws IOException {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
-		try {
-			this.webClient.getPage("http://localhost/context/a");
-			fail("Empty context path (root context) should not match to a URL with a context path");
-		}
-		catch (FailingHttpStatusCodeException ex) {
-			assertEquals(404, ex.getStatusCode());
-		}
+		// Empty context path (root context) should not match to a URL with a context path
+		assertThatExceptionOfType(FailingHttpStatusCodeException.class).isThrownBy(() ->
+				this.webClient.getPage("http://localhost/context/a"))
+			.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient));
-		try {
-			this.webClient.getPage("http://localhost/context/a");
-			fail("No context is the same providing an empty context path");
-		}
-		catch (FailingHttpStatusCodeException ex) {
-			assertEquals(404, ex.getStatusCode());
-		}
+		// No context is the same providing an empty context path
+		assertThatExceptionOfType(FailingHttpStatusCodeException.class).isThrownBy(() ->
+				this.webClient.getPage("http://localhost/context/a"))
+		.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(404));
 	}
 
 	@Test
@@ -86,16 +81,18 @@ public class MockMvcWebConnectionTests {
 		assertThat(page.getWebResponse().getContentAsString(), equalTo("hello"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings("resource")
 	public void contextPathDoesNotStartWithSlash() throws IOException {
-		new MockMvcWebConnection(this.mockMvc, this.webClient, "context");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MockMvcWebConnection(this.mockMvc, this.webClient, "context"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings("resource")
 	public void contextPathEndsWithSlash() throws IOException {
-		new MockMvcWebConnection(this.mockMvc, this.webClient, "/context/");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MockMvcWebConnection(this.mockMvc, this.webClient, "/context/"));
 	}
 
 }

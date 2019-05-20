@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -72,16 +73,18 @@ public class CorsConfigurationTests {
 		assertEquals(new Long(123), config.getMaxAge());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void asteriskWildCardOnAddExposedHeader() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.addExposedHeader("*");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				config.addExposedHeader("*"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void asteriskWildCardOnSetExposedHeaders() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setExposedHeaders(Arrays.asList("*"));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				config.setExposedHeaders(Arrays.asList("*")));
 	}
 
 	@Test

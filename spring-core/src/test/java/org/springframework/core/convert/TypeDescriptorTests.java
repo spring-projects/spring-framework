@@ -42,6 +42,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
@@ -51,7 +52,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link TypeDescriptor}.
@@ -418,9 +418,10 @@ public class TypeDescriptorTests {
 		assertEquals(String.class, t1.getType());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void nestedMethodParameterNot1NestedLevel() throws Exception {
-		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0, 2), 2);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0, 2), 2));
 	}
 
 	@Test
@@ -435,9 +436,10 @@ public class TypeDescriptorTests {
 		assertNull(t1);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void nestedMethodParameterTypeInvalidNestingLevel() throws Exception {
-		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0, 2), 2);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0, 2), 2));
 	}
 
 	@Test
@@ -684,13 +686,9 @@ public class TypeDescriptorTests {
 		Property property = new Property(getClass(), getClass().getMethod("getProperty"),
 				getClass().getMethod("setProperty", Map.class));
 		TypeDescriptor typeDescriptor = new TypeDescriptor(property);
-		try {
-			typeDescriptor.upcast(Collection.class);
-			fail("Did not throw");
-		}
-		catch (IllegalArgumentException ex) {
-			assertEquals("interface java.util.Map is not assignable to interface java.util.Collection", ex.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				typeDescriptor.upcast(Collection.class))
+			.withMessage("interface java.util.Map is not assignable to interface java.util.Collection");
 	}
 
 	@Test

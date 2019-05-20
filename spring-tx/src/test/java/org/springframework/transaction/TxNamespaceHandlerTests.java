@@ -30,10 +30,10 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -79,14 +79,10 @@ public class TxNamespaceHandlerTests {
 		assertEquals("Should not have started another transaction", 1, ptm.begun);
 
 		// try with exceptional
-		try {
-			testBean.exceptional(new IllegalArgumentException("foo"));
-			fail("Should NEVER get here");
-		}
-		catch (Throwable throwable) {
-			assertEquals("Should have another started transaction", 2, ptm.begun);
-			assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				testBean.exceptional(new IllegalArgumentException("foo")));
+		assertEquals("Should have another started transaction", 2, ptm.begun);
+		assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
 	}
 
 	@Test

@@ -25,6 +25,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.NotAcceptableStatusException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -50,11 +51,12 @@ public class HeaderContentTypeResolverTests {
 		assertEquals("text/plain;q=0.5", mediaTypes.get(3).toString());
 	}
 
-	@Test(expected = NotAcceptableStatusException.class)
+	@Test
 	public void resolveMediaTypesParseError() throws Exception {
 		String header = "textplain; q=0.5";
-		this.resolver.resolveMediaTypes(
-				MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header)));
+		assertThatExceptionOfType(NotAcceptableStatusException.class).isThrownBy(() ->
+				this.resolver.resolveMediaTypes(
+						MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header))));
 	}
 
 }

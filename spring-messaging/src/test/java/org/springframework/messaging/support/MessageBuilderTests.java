@@ -27,6 +27,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.IdGenerator;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -75,16 +76,18 @@ public class MessageBuilderTests {
 		assertEquals("2", message2.getHeaders().get("bar"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testIdHeaderValueReadOnly() {
 		UUID id = UUID.randomUUID();
-		MessageBuilder.withPayload("test").setHeader(MessageHeaders.ID, id);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MessageBuilder.withPayload("test").setHeader(MessageHeaders.ID, id));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTimestampValueReadOnly() {
 		Long timestamp = 12345L;
-		MessageBuilder.withPayload("test").setHeader(MessageHeaders.TIMESTAMP, timestamp).build();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MessageBuilder.withPayload("test").setHeader(MessageHeaders.TIMESTAMP, timestamp).build());
 	}
 
 	@Test

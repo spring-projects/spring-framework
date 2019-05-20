@@ -25,6 +25,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -75,14 +76,16 @@ public class AspectJPointcutAdvisorTests {
 				TestBean.class.getMethod("getSpouse"), TestBean.class));
 	}
 
-	@Test(expected = AopConfigException.class)
+	@Test
 	public void testPerCflowTarget() {
-		testIllegalInstantiationModel(AbstractAspectJAdvisorFactoryTests.PerCflowAspect.class);
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
+				testIllegalInstantiationModel(AbstractAspectJAdvisorFactoryTests.PerCflowAspect.class));
 	}
 
-	@Test(expected = AopConfigException.class)
+	@Test
 	public void testPerCflowBelowTarget() {
-		testIllegalInstantiationModel(AbstractAspectJAdvisorFactoryTests.PerCflowBelowAspect.class);
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(() ->
+				testIllegalInstantiationModel(AbstractAspectJAdvisorFactoryTests.PerCflowBelowAspect.class));
 	}
 
 	private void testIllegalInstantiationModel(Class<?> c) throws AopConfigException {

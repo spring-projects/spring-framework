@@ -29,6 +29,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -66,11 +67,12 @@ public class InitializeDatabaseIntegrationTests {
 		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
 	}
 
-	@Test(expected = BadSqlGrammarException.class)
+	@Test
 	public void testDisableCreateEmbeddedDatabase() throws Exception {
 		System.setProperty("ENABLED", "false");
 		context = new ClassPathXmlApplicationContext("org/springframework/jdbc/config/jdbc-initialize-config.xml");
-		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
+		assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
+				assertCorrectSetup(context.getBean("dataSource", DataSource.class)));
 	}
 
 	@Test

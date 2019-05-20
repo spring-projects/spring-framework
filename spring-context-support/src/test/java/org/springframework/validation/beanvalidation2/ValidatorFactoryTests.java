@@ -52,13 +52,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -77,12 +77,8 @@ public class ValidatorFactoryTests {
 		assertEquals(2, result.size());
 		for (ConstraintViolation<ValidPerson> cv : result) {
 			String path = cv.getPropertyPath().toString();
-			if ("name".equals(path) || "address.street".equals(path)) {
-				assertTrue(cv.getConstraintDescriptor().getAnnotation() instanceof NotNull);
-			}
-			else {
-				fail("Invalid constraint violation with path '" + path + "'");
-			}
+			assertThat(path).matches(actual -> "name".equals(actual) || "address.street".equals(actual));
+			assertThat(cv.getConstraintDescriptor().getAnnotation()).isInstanceOf(NotNull.class);
 		}
 
 		Validator nativeValidator = validator.unwrap(Validator.class);
@@ -105,12 +101,8 @@ public class ValidatorFactoryTests {
 		assertEquals(2, result.size());
 		for (ConstraintViolation<ValidPerson> cv : result) {
 			String path = cv.getPropertyPath().toString();
-			if ("name".equals(path) || "address.street".equals(path)) {
-				assertTrue(cv.getConstraintDescriptor().getAnnotation() instanceof NotNull);
-			}
-			else {
-				fail("Invalid constraint violation with path '" + path + "'");
-			}
+			assertThat(path).matches(actual -> "name".equals(actual) || "address.street".equals(actual));
+			assertThat(cv.getConstraintDescriptor().getAnnotation()).isInstanceOf(NotNull.class);
 		}
 
 		Validator nativeValidator = validator.unwrap(Validator.class);

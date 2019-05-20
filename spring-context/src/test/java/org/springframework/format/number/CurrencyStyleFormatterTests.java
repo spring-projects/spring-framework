@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -43,9 +44,10 @@ public class CurrencyStyleFormatterTests {
 		assertEquals(new BigDecimal("23.56"), formatter.parse("$23.56", Locale.US));
 	}
 
-	@Test(expected = ParseException.class)
+	@Test
 	public void parseBogusValue() throws ParseException {
-		formatter.parse("bogus", Locale.US);
+		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
+				formatter.parse("bogus", Locale.US));
 	}
 
 	@Test
@@ -59,9 +61,10 @@ public class CurrencyStyleFormatterTests {
 		assertEquals(new BigDecimal("23.00"), formatter.parse("$23", Locale.US));
 	}
 
-	@Test(expected = ParseException.class)
+	@Test
 	public void parseValueNotLenientFailure() throws ParseException {
-		formatter.parse("$23.56bogus", Locale.US);
+		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
+				formatter.parse("$23.56bogus", Locale.US));
 	}
 
 }

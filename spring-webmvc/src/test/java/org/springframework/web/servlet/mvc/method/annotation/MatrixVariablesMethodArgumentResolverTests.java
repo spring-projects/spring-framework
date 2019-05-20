@@ -36,6 +36,7 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -109,19 +110,21 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		assertEquals("2013", resolver.resolveArgument(param, this.mavContainer, this.webRequest, null));
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test
 	public void resolveArgumentMultipleMatches() throws Exception {
 		getVariablesFor("var1").add("colors", "red");
 		getVariablesFor("var2").add("colors", "green");
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
 
-		this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null);
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null));
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test
 	public void resolveArgumentRequired() throws Exception {
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
-		this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null);
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(param, this.mavContainer, this.webRequest, null));
 	}
 
 	@Test

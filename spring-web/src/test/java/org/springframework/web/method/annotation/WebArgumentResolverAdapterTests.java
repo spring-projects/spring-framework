@@ -27,6 +27,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -111,25 +113,28 @@ public class WebArgumentResolverAdapterTests {
 		assertEquals("Invalid result", expected, result);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void resolveArgumentUnresolved() throws Exception {
 		given(adaptee.resolveArgument(parameter, webRequest)).willReturn(WebArgumentResolver.UNRESOLVED);
 
-		adapter.resolveArgument(parameter, null, webRequest, null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				adapter.resolveArgument(parameter, null, webRequest, null));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void resolveArgumentWrongType() throws Exception {
 		given(adaptee.resolveArgument(parameter, webRequest)).willReturn("Foo");
 
-		adapter.resolveArgument(parameter, null, webRequest, null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				adapter.resolveArgument(parameter, null, webRequest, null));
 	}
 
-	@Test(expected = Exception.class)
+	@Test
 	public void resolveArgumentThrowsException() throws Exception {
 		given(adaptee.resolveArgument(parameter, webRequest)).willThrow(new Exception());
 
-		adapter.resolveArgument(parameter, null, webRequest, null);
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				adapter.resolveArgument(parameter, null, webRequest, null));
 	}
 
 	public void handle(int param) {

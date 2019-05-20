@@ -32,12 +32,12 @@ import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -79,20 +79,10 @@ public class ResourceBundleViewResolverTests {
 
 	@Test
 	public void parentsAreAbstract() throws Exception {
-		try {
-			rb.resolveViewName("debug.Parent", Locale.ENGLISH);
-			fail("Should have thrown BeanIsAbstractException");
-		}
-		catch (BeanIsAbstractException ex) {
-			// expected
-		}
-		try {
-			rb.resolveViewName("testParent", Locale.ENGLISH);
-			fail("Should have thrown BeanIsAbstractException");
-		}
-		catch (BeanIsAbstractException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeanIsAbstractException.class).isThrownBy(() ->
+				rb.resolveViewName("debug.Parent", Locale.ENGLISH));
+		assertThatExceptionOfType(BeanIsAbstractException.class).isThrownBy(() ->
+				rb.resolveViewName("testParent", Locale.ENGLISH));
 	}
 
 	@Test
@@ -158,10 +148,11 @@ public class ResourceBundleViewResolverTests {
 		assertEquals("test should have been initialized once, not ", 1, tv.initCount);
 	}
 
-	@Test(expected = MissingResourceException.class)
+	@Test
 	public void noSuchBasename() throws Exception {
 		rb.setBasename("weoriwoierqupowiuer");
-		rb.resolveViewName("debugView", Locale.ENGLISH);
+		assertThatExceptionOfType(MissingResourceException.class).isThrownBy(() ->
+				rb.resolveViewName("debugView", Locale.ENGLISH));
 	}
 
 

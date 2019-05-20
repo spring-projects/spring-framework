@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -58,9 +59,10 @@ public class PathMatchingResourcePatternResolverTests {
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 
-	@Test(expected = FileNotFoundException.class)
+	@Test
 	public void invalidPrefixWithPatternElementInIt() throws IOException {
-		resolver.getResources("xx**:**/*.xy");
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+				resolver.getResources("xx**:**/*.xy"));
 	}
 
 	@Test

@@ -35,8 +35,8 @@ import org.springframework.jmx.access.NotificationListenerRegistrar;
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -199,12 +199,8 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testCreationWithNoNotificationListenerSet() {
-		try {
-			new NotificationListenerBean().afterPropertiesSet();
-			fail("Must have thrown an IllegalArgumentException (no NotificationListener supplied)");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().as("no NotificationListener supplied").isThrownBy(
+				new NotificationListenerBean()::afterPropertiesSet);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

@@ -49,6 +49,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -168,7 +169,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.responseHandler.expectMessages(send);
 	}
 
-	@Test(expected = MessageDeliveryException.class)
+	@Test
 	public void messageDeliveryExceptionIfSystemSessionForwardFails() throws Exception {
 		logger.debug("Starting test messageDeliveryExceptionIfSystemSessionForwardFails()");
 
@@ -176,7 +177,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.eventPublisher.expectBrokerAvailabilityEvent(false);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
-		this.relay.handleMessage(MessageBuilder.createMessage("test".getBytes(), headers.getMessageHeaders()));
+		assertThatExceptionOfType(MessageDeliveryException.class).isThrownBy(() ->
+				this.relay.handleMessage(MessageBuilder.createMessage("test".getBytes(), headers.getMessageHeaders())));
 	}
 
 	@Test

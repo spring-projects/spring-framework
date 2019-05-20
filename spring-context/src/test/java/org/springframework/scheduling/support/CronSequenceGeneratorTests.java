@@ -20,6 +20,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -49,24 +50,28 @@ public class CronSequenceGeneratorTests {
 				new CronSequenceGenerator("0 */2 1-4 * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void with0Increment() {
-		new CronSequenceGenerator("*/0 * * * * *").next(new Date(2012, 6, 1, 9, 0));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronSequenceGenerator("*/0 * * * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withNegativeIncrement() {
-		new CronSequenceGenerator("*/-1 * * * * *").next(new Date(2012, 6, 1, 9, 0));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronSequenceGenerator("*/-1 * * * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withInvertedMinuteRange() {
-		new CronSequenceGenerator("* 6-5 * * * *").next(new Date(2012, 6, 1, 9, 0));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronSequenceGenerator("* 6-5 * * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withInvertedHourRange() {
-		new CronSequenceGenerator("* * 6-5 * * *").next(new Date(2012, 6, 1, 9, 0));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronSequenceGenerator("* * 6-5 * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
 	@Test

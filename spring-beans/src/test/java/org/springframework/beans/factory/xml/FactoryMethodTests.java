@@ -28,11 +28,11 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -79,14 +79,8 @@ public class FactoryMethodTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-
-		try {
-			xbf.getBean("defaultTestBeanWithInvalidDestroyMethod");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("defaultTestBeanWithInvalidDestroyMethod"));
 	}
 
 	@Test
@@ -96,14 +90,8 @@ public class FactoryMethodTests {
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 
 		assertEquals("null", xbf.getBean("null").toString());
-
-		try {
-			xbf.getBean("nullWithProperty");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("nullWithProperty"));
 	}
 
 	@Test
@@ -253,13 +241,8 @@ public class FactoryMethodTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-		try {
-			xbf.getBean("noMatchPrototype");
-			fail("No static method matched");
-		}
-		catch (BeanCreationException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(BeanCreationException.class).as("No static method matched").isThrownBy(() ->
+				xbf.getBean("noMatchPrototype"));
 	}
 
 	@Test
@@ -267,13 +250,9 @@ public class FactoryMethodTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-		try {
-			xbf.getBean("invalidPrototype");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMessage().contains("nonExisting(TestBean)"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("invalidPrototype"))
+			.withMessageContaining("nonExisting(TestBean)");
 	}
 
 	@Test
@@ -281,13 +260,9 @@ public class FactoryMethodTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
-		try {
-			xbf.getBean("invalidPrototype", new TestBean());
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMessage().contains("nonExisting(TestBean)"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				xbf.getBean("invalidPrototype", new TestBean()))
+			.withMessageContaining("nonExisting(TestBean)");
 	}
 
 	@Test

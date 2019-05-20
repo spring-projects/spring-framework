@@ -29,11 +29,11 @@ import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -63,11 +63,11 @@ public class EhCacheSupportTests {
 	@Test
 	public void testCacheManagerConflict() {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
-		cacheManagerFb.setCacheManagerName("myCacheManager");
-		assertEquals(CacheManager.class, cacheManagerFb.getObjectType());
-		assertTrue("Singleton property", cacheManagerFb.isSingleton());
-		cacheManagerFb.afterPropertiesSet();
 		try {
+			cacheManagerFb.setCacheManagerName("myCacheManager");
+			assertEquals(CacheManager.class, cacheManagerFb.getObjectType());
+			assertTrue("Singleton property", cacheManagerFb.isSingleton());
+			cacheManagerFb.afterPropertiesSet();
 			CacheManager cm = cacheManagerFb.getObject();
 			assertTrue("Loaded CacheManager with no caches", cm.getCacheNames().length == 0);
 			Cache myCache1 = cm.getCache("myCache1");
@@ -75,11 +75,8 @@ public class EhCacheSupportTests {
 
 			EhCacheManagerFactoryBean cacheManagerFb2 = new EhCacheManagerFactoryBean();
 			cacheManagerFb2.setCacheManagerName("myCacheManager");
-			cacheManagerFb2.afterPropertiesSet();
-			fail("Should have thrown CacheException because of naming conflict");
-		}
-		catch (CacheException ex) {
-			// expected
+			assertThatExceptionOfType(CacheException.class).as("because of naming conflict").isThrownBy(
+					cacheManagerFb2::afterPropertiesSet);
 		}
 		finally {
 			cacheManagerFb.destroy();

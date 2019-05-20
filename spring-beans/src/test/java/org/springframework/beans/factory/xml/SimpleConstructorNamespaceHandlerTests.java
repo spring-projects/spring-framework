@@ -24,6 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.DummyBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -88,11 +89,12 @@ public class SimpleConstructorNamespaceHandlerTests {
 		assertEquals(beanFactory.getBean("name-value"), typeRef.getSpouse());
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	public void ambiguousConstructor() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
-				new ClassPathResource("simpleConstructorNamespaceHandlerTestsWithErrors.xml", getClass()));
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
+							new ClassPathResource("simpleConstructorNamespaceHandlerTestsWithErrors.xml", getClass())));
 	}
 
 	@Test

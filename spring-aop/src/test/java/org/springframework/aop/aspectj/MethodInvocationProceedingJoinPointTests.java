@@ -37,12 +37,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -54,24 +55,14 @@ public class MethodInvocationProceedingJoinPointTests {
 
 	@Test
 	public void testingBindingWithJoinPoint() {
-		try {
-			AbstractAspectJAdvice.currentJoinPoint();
-			fail("Needs to be bound by interceptor action");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(
+				AbstractAspectJAdvice::currentJoinPoint);
 	}
 
 	@Test
 	public void testingBindingWithProceedingJoinPoint() {
-		try {
-			AbstractAspectJAdvice.currentJoinPoint();
-			fail("Needs to be bound by interceptor action");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(
+				AbstractAspectJAdvice::currentJoinPoint);
 	}
 
 	@Test
@@ -148,21 +139,8 @@ public class MethodInvocationProceedingJoinPointTests {
 				SourceLocation sloc = AbstractAspectJAdvice.currentJoinPoint().getSourceLocation();
 				assertEquals("Same source location must be returned on subsequent requests", sloc, AbstractAspectJAdvice.currentJoinPoint().getSourceLocation());
 				assertEquals(TestBean.class, sloc.getWithinType());
-				try {
-					sloc.getLine();
-					fail("Can't get line number");
-				}
-				catch (UnsupportedOperationException ex) {
-					// Expected
-				}
-
-				try {
-					sloc.getFileName();
-					fail("Can't get file name");
-				}
-				catch (UnsupportedOperationException ex) {
-					// Expected
-				}
+				assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(sloc::getLine);
+				assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(sloc::getFileName);
 			}
 		});
 		ITestBean itb = (ITestBean) pf.getProxy();

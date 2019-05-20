@@ -23,7 +23,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
 
-import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -38,10 +37,10 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -80,24 +79,15 @@ public class PersistenceExceptionTranslationPostProcessorTests {
 		assertTrue(AopUtils.isAopProxy(rwi2));
 		rwi2.additionalMethod(false);
 		checkWillTranslateExceptions(rwi2);
-		try {
-			rwi2.additionalMethod(true);
-			fail("Should have thrown DataAccessResourceFailureException");
-		}
-		catch (DataAccessResourceFailureException ex) {
-			assertEquals("my failure", ex.getMessage());
-		}
+		assertThatExceptionOfType(DataAccessResourceFailureException.class).isThrownBy(() ->
+				rwi2.additionalMethod(true))
+			.withMessage("my failure");
 	}
 
 	protected void checkWillTranslateExceptions(Object o) {
-		assertTrue(o instanceof Advised);
-		Advised a = (Advised) o;
-		for (Advisor advisor : a.getAdvisors()) {
-			if (advisor instanceof PersistenceExceptionTranslationAdvisor) {
-				return;
-			}
-		}
-		fail("No translation");
+		assertThat(o).isInstanceOf(Advised.class);
+		assertThat(((Advised) o).getAdvisors()).anyMatch(
+				PersistenceExceptionTranslationAdvisor.class::isInstance);
 	}
 
 

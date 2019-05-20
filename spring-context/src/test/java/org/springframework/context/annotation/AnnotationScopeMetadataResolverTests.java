@@ -29,6 +29,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.context.annotation.ScopedProxyMode.INTERFACES;
@@ -117,14 +118,16 @@ public class AnnotationScopeMetadataResolverTests {
 		assertEquals(TARGET_CLASS, scopeMetadata.getScopedProxyMode());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorWithNullScopedProxyMode() {
-		new AnnotationScopeMetadataResolver(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new AnnotationScopeMetadataResolver(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setScopeAnnotationTypeWithNullType() {
-		scopeMetadataResolver.setScopeAnnotationType(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				scopeMetadataResolver.setScopeAnnotationType(null));
 	}
 
 

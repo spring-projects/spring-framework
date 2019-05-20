@@ -28,6 +28,7 @@ import test.aop.PerThisAspect;
 
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -38,10 +39,11 @@ import static org.junit.Assert.assertTrue;
  */
 public class AspectProxyFactoryTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNonAspect() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
-		proxyFactory.addAspect(TestBean.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				proxyFactory.addAspect(TestBean.class));
 	}
 
 	@Test
@@ -74,10 +76,11 @@ public class AspectProxyFactoryTests {
 		assertEquals(2, proxy1.getAge());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithInstanceWithNonAspect() throws Exception {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
-		pf.addAspect(new TestBean());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pf.addAspect(new TestBean()));
 	}
 
 	@Test
@@ -111,10 +114,11 @@ public class AspectProxyFactoryTests {
 		assertEquals(target.getAge() * multiple, serializedProxy.getAge());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNonSingletonAspectInstance() throws Exception {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
-		pf.addAspect(new PerThisAspect());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pf.addAspect(new PerThisAspect()));
 	}
 
 	@Test  // SPR-13328

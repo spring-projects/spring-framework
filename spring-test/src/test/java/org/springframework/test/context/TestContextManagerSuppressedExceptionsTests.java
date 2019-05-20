@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -55,18 +57,17 @@ public class TestContextManagerSuppressedExceptionsTests {
 		TestContextManager testContextManager = new TestContextManager(testClass);
 		assertEquals("Registered TestExecutionListeners", 2, testContextManager.getTestExecutionListeners().size());
 
-		try {
-			Method testMethod = getClass().getMethod("toString");
-			callback.invoke(testContextManager, testClass, testMethod);
-			fail("should have thrown an AssertionError");
-		}
-		catch (AssertionError err) {
-			// 'after' callbacks are reversed, so 2 comes before 1.
-			assertEquals(useCase + "-2", err.getMessage());
-			Throwable[] suppressed = err.getSuppressed();
-			assertEquals(1, suppressed.length);
-			assertEquals(useCase + "-1", suppressed[0].getMessage());
-		}
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> {
+				Method testMethod = getClass().getMethod("toString");
+				callback.invoke(testContextManager, testClass, testMethod);
+				fail("should have thrown an AssertionError");
+			}).satisfies(ex -> {
+				// 'after' callbacks are reversed, so 2 comes before 1.
+				assertThat(ex.getMessage()).isEqualTo(useCase + "-2");
+				Throwable[] suppressed = ex.getSuppressed();
+				assertThat(suppressed).hasSize(1);
+				assertThat(suppressed[0].getMessage()).isEqualTo(useCase + "-1");
+			});
 	}
 
 

@@ -22,13 +22,12 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Keith Donald
@@ -58,9 +57,10 @@ public class BeanWrapperAutoGrowingTests {
 		assertEquals("test", bean.getNested().getProp());
 	}
 
-	@Test(expected = NullValueInNestedPathException.class)
+	@Test
 	public void getPropertyValueNullValueInNestedPathNoDefaultConstructor() {
-		wrapper.getPropertyValue("nestedNoConstructor.prop");
+		assertThatExceptionOfType(NullValueInNestedPathException.class).isThrownBy(() ->
+				wrapper.getPropertyValue("nestedNoConstructor.prop"));
 	}
 
 	@Test
@@ -129,14 +129,9 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowListFailsAgainstLimit() {
 		wrapper.setAutoGrowCollectionLimit(2);
-		try {
-			assertNotNull(wrapper.getPropertyValue("list[4]"));
-			fail("Should have thrown InvalidPropertyException");
-		}
-		catch (InvalidPropertyException ex) {
-			// expected
-			assertTrue(ex.getRootCause() instanceof IndexOutOfBoundsException);
-		}
+		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
+				assertNotNull(wrapper.getPropertyValue("list[4]")))
+			.withRootCauseInstanceOf(IndexOutOfBoundsException.class);
 	}
 
 	@Test
@@ -146,9 +141,10 @@ public class BeanWrapperAutoGrowingTests {
 		assertThat(bean.getMultiList().get(0).get(0), instanceOf(Bean.class));
 	}
 
-	@Test(expected = InvalidPropertyException.class)
+	@Test
 	public void getPropertyValueAutoGrowListNotParameterized() {
-		wrapper.getPropertyValue("listNotParameterized[0]");
+		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
+				wrapper.getPropertyValue("listNotParameterized[0]"));
 	}
 
 	@Test

@@ -31,6 +31,7 @@ import org.springframework.http.server.PathContainer.Element;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.pattern.PathPattern.PathRemainingMatchInfo;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -38,7 +39,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Exercise matching of {@link PathPattern} objects.
@@ -1180,14 +1180,7 @@ public class PathPatternTests {
 		}
 		for (Map.Entry<String, String> me : expectedKeyValues.entrySet()) {
 			String value = matchResult.getUriVariables().get(me.getKey());
-			if (value == null) {
-				fail("Did not find key '" + me.getKey() + "' in captured variables: "
-						+ matchResult.getUriVariables());
-			}
-			if (!value.equals(me.getValue())) {
-				fail("Expected value '" + me.getValue() + "' for key '" + me.getKey()
-						+ "' but was '" + value + "'");
-			}
+			assertThat(value).as("value for " + me.getKey()).isEqualTo(me.getValue());
 		}
 		return matchResult;
 	}

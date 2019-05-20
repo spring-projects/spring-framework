@@ -42,6 +42,7 @@ import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -79,10 +80,11 @@ public class RedirectViewTests {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noUrlSet() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				rv::afterPropertiesSet);
 	}
 
 	@Test

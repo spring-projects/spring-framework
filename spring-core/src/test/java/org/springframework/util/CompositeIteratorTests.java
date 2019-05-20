@@ -23,10 +23,12 @@ import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 
 /**
@@ -41,13 +43,8 @@ public class CompositeIteratorTests {
 	public void testNoIterators() {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		assertFalse(it.hasNext());
-		try {
-			it.next();
-			fail();
-		}
-		catch (NoSuchElementException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
+				it::next);
 	}
 
 	@Test
@@ -59,13 +56,8 @@ public class CompositeIteratorTests {
 			assertEquals(String.valueOf(i), it.next());
 		}
 		assertFalse(it.hasNext());
-		try {
-			it.next();
-			fail();
-		}
-		catch (NoSuchElementException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
+				it::next);
 	}
 
 	@Test
@@ -79,13 +71,9 @@ public class CompositeIteratorTests {
 			assertEquals(String.valueOf(i), it.next());
 		}
 		assertFalse(it.hasNext());
-		try {
-			it.next();
-			fail();
-		}
-		catch (NoSuchElementException ex) {
-			// expected
-		}
+
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
+				it::next);
 	}
 
 	@Test
@@ -94,23 +82,13 @@ public class CompositeIteratorTests {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(list.iterator());
 		it.hasNext();
-		try {
-			it.add(list.iterator());
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-		it = new CompositeIterator<>();
-		it.add(list.iterator());
-		it.next();
-		try {
-			it.add(list.iterator());
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				it.add(list.iterator()));
+		CompositeIterator<String> it2 = new CompositeIterator<>();
+		it2.add(list.iterator());
+		it2.next();
+		assertThatIllegalStateException().isThrownBy(() ->
+				it2.add(list.iterator()));
 	}
 
 	@Test
@@ -120,13 +98,8 @@ public class CompositeIteratorTests {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(iterator);
 		it.add(list.iterator());
-		try {
-			it.add(iterator);
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				it.add(iterator));
 	}
 
 }

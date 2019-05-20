@@ -23,10 +23,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Mark Fisher
@@ -51,26 +51,16 @@ public class ComponentScanParserWithUserDefinedStrategiesTests {
 
 	@Test
 	public void testInvalidConstructorBeanNameGenerator() {
-		try {
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 			new ClassPathXmlApplicationContext(
-					"org/springframework/context/annotation/invalidConstructorNameGeneratorTests.xml");
-			fail("should have failed: no-arg constructor is required");
-		}
-		catch (BeansException ex) {
-			// expected
-		}
+					"org/springframework/context/annotation/invalidConstructorNameGeneratorTests.xml"));
 	}
 
 	@Test
 	public void testInvalidClassNameScopeMetadataResolver() {
-		try {
-			new ClassPathXmlApplicationContext(
-					"org/springframework/context/annotation/invalidClassNameScopeResolverTests.xml");
-			fail("should have failed: no such class");
-		}
-		catch (BeansException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext(
+						"org/springframework/context/annotation/invalidClassNameScopeResolverTests.xml"));
 	}
 
 }

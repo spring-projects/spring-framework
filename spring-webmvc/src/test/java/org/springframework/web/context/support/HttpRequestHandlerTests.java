@@ -31,9 +31,10 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -74,23 +75,15 @@ public class HttpRequestHandlerTests {
 		servlet.service(request, response);
 		assertEquals("myResponse", response.getContentAsString());
 
-		try {
-			request.setParameter("exception", "ServletException");
-			servlet.service(request, response);
-			fail("Should have thrown ServletException");
-		}
-		catch (ServletException ex) {
-			assertEquals("test", ex.getMessage());
-		}
+		request.setParameter("exception", "ServletException");
+		assertThatExceptionOfType(ServletException.class).isThrownBy(() ->
+				servlet.service(request, response))
+			.withMessage("test");
 
-		try {
-			request.setParameter("exception", "IOException");
-			servlet.service(request, response);
-			fail("Should have thrown IOException");
-		}
-		catch (IOException ex) {
-			assertEquals("test", ex.getMessage());
-		}
+		request.setParameter("exception", "IOException");
+		assertThatIOException().isThrownBy(() ->
+				servlet.service(request, response))
+			.withMessage("test");
 	}
 
 }

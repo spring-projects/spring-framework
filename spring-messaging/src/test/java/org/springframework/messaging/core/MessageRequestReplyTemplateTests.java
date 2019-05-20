@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -65,9 +66,10 @@ public class MessageRequestReplyTemplateTests {
 		assertSame(responseMessage, actual);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void sendAndReceiveMissingDestination() {
-		this.template.sendAndReceive(new GenericMessage<Object>("request"));
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.template.sendAndReceive(new GenericMessage<Object>("request")));
 	}
 
 	@Test

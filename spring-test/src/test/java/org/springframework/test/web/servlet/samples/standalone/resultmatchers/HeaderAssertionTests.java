@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -158,9 +159,10 @@ public class HeaderAssertionTests {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().exists(LAST_MODIFIED));
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void existsFail() throws Exception {
-		this.mockMvc.perform(get("/persons/1")).andExpect(header().exists("X-Custom-Header"));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.mockMvc.perform(get("/persons/1")).andExpect(header().exists("X-Custom-Header")));
 	}
 
 	@Test  // SPR-10771
@@ -168,14 +170,16 @@ public class HeaderAssertionTests {
 		this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist("X-Custom-Header"));
 	}
 
-	@Test(expected = AssertionError.class)  // SPR-10771
+	@Test // SPR-10771
 	public void doesNotExistFail() throws Exception {
-		this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist(LAST_MODIFIED));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.mockMvc.perform(get("/persons/1")).andExpect(header().doesNotExist(LAST_MODIFIED)));
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void longValueWithIncorrectResponseHeaderValue() throws Exception {
-		this.mockMvc.perform(get("/persons/1")).andExpect(header().longValue("X-Rate-Limiting", 1));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.mockMvc.perform(get("/persons/1")).andExpect(header().longValue("X-Rate-Limiting", 1)));
 	}
 
 	@Test

@@ -27,6 +27,8 @@ import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -46,14 +48,16 @@ public class MediaTypeTests {
 		assertEquals("Invalid toString() returned", "text/plain;q=0.7", result);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void slashInType() {
-		new MediaType("text/plain");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MediaType("text/plain"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void slashInSubtype() {
-		new MediaType("text", "/");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MediaType("text", "/"));
 	}
 
 	@Test
@@ -71,59 +75,70 @@ public class MediaTypeTests {
 		assertEquals("Invalid quality factor", 0.2D, mediaType.getQualityValue(), 0D);
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeNoSubtype() {
-		MediaType.parseMediaType("audio");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeNoSubtypeSlash() {
-		MediaType.parseMediaType("audio/");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio/"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeTypeRange() {
-		MediaType.parseMediaType("*/json");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("*/json"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeIllegalType() {
-		MediaType.parseMediaType("audio(/basic");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio(/basic"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeIllegalSubtype() {
-		MediaType.parseMediaType("audio/basic)");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio/basic)"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeEmptyParameterAttribute() {
-		MediaType.parseMediaType("audio/*;=value");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio/*;=value"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeEmptyParameterValue() {
-		MediaType.parseMediaType("audio/*;attr=");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio/*;attr="));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeIllegalParameterAttribute() {
-		MediaType.parseMediaType("audio/*;attr<=value");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio/*;attr<=value"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeIllegalParameterValue() {
-		MediaType.parseMediaType("audio/*;attr=v>alue");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio/*;attr=v>alue"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeIllegalQualityFactor() {
-		MediaType.parseMediaType("audio/basic;q=1.1");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("audio/basic;q=1.1"));
 	}
 
-	@Test(expected = InvalidMediaTypeException.class)
+	@Test
 	public void parseMediaTypeIllegalCharset() {
-		MediaType.parseMediaType("text/html; charset=foo-bar");
+		assertThatExceptionOfType(InvalidMediaTypeException.class).isThrownBy(() ->
+				MediaType.parseMediaType("text/html; charset=foo-bar"));
 	}
 
 	@Test

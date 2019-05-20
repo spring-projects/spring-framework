@@ -22,8 +22,8 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -88,13 +88,9 @@ public class PasswordInputTagTests extends InputTagTests {
 	@Test
 	@Override
 	public void dynamicTypeAttribute() throws JspException {
-		try {
-			this.getTag().setDynamicAttribute(null, "type", "email");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.getTag().setDynamicAttribute(null, "type", "email"))
+			.withMessage("Attribute type=\"email\" is not allowed");
 	}
 
 	@Override

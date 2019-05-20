@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -50,9 +51,10 @@ public class UrlBasedCorsConfigurationSourceTests {
 		assertEquals(config, this.configSource.getCorsConfiguration(request));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void unmodifiableConfigurationsMap() {
-		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration()));
 	}
 
 }

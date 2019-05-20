@@ -26,6 +26,8 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.subpkg.DeepBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -38,10 +40,11 @@ import static org.junit.Assert.assertTrue;
  */
 public class TypePatternClassFilterTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvalidPattern() {
 		// should throw - pattern must be recognized as invalid
-		new TypePatternClassFilter("-");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new TypePatternClassFilter("-"));
 	}
 
 	@Test
@@ -79,14 +82,16 @@ public class TypePatternClassFilterTests {
 		assertTrue("matches Double",tpcf.matches(Double.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetTypePatternWithNullArgument() throws Exception {
-		new TypePatternClassFilter(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new TypePatternClassFilter(null));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testInvocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
-		new TypePatternClassFilter().matches(String.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				new TypePatternClassFilter().matches(String.class));
 	}
 
 }

@@ -33,13 +33,13 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Keith Donald
@@ -152,13 +152,8 @@ public class MapToMapConverterTests {
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("collectionMapTarget"));
 
 		assertFalse(conversionService.canConvert(sourceType, targetType));
-		try {
-			conversionService.convert(map, sourceType, targetType);
-			fail("Should have failed");
-		}
-		catch (ConverterNotFoundException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert(map, sourceType, targetType));
 
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());

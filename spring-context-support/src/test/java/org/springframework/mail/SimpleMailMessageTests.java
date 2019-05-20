@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -156,14 +157,16 @@ public class SimpleMailMessageTests {
 		assertTrue(message1.equals(message2));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCopyCtorChokesOnNullOriginalMessage() throws Exception {
-		new SimpleMailMessage(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SimpleMailMessage(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCopyToChokesOnNullTargetMessage() throws Exception {
-		new SimpleMailMessage().copyTo(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SimpleMailMessage().copyTo(null));
 	}
 
 }

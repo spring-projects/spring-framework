@@ -42,10 +42,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.HasMap;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for collections in XML bean definitions.
@@ -178,14 +178,10 @@ public class XmlBeanCollectionTests {
 
 	@Test
 	public void testInvalidBeanNameReference() throws Exception {
-		try {
-			this.beanFactory.getBean("jumble2");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof BeanDefinitionStoreException);
-			assertTrue(ex.getCause().getMessage().contains("rod2"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				this.beanFactory.getBean("jumble2"))
+			.withCauseInstanceOf(BeanDefinitionStoreException.class)
+			.withMessageContaining("rod2");
 	}
 
 	@Test

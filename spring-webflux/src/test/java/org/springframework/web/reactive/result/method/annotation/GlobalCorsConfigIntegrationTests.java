@@ -36,11 +36,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 /**
  *
@@ -88,13 +89,9 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 
 	@Test
 	public void actualRequestWithCorsRejected() throws Exception {
-		try {
-			performGet("/cors-restricted", this.headers, String.class);
-			fail();
-		}
-		catch (HttpClientErrorException e) {
-			assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
-		}
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				performGet("/cors-restricted", this.headers, String.class))
+			.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
 	}
 
 	@Test
@@ -125,26 +122,18 @@ public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingInte
 
 	@Test
 	public void preFlightRequestWithCorsRejected() throws Exception {
-		try {
-			this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-			performOptions("/cors-restricted", this.headers, String.class);
-			fail();
-		}
-		catch (HttpClientErrorException e) {
-			assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
-		}
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				performOptions("/cors-restricted", this.headers, String.class))
+			.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
 	}
 
 	@Test
 	public void preFlightRequestWithoutCorsEnabled() throws Exception {
-		try {
-			this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-			performOptions("/welcome", this.headers, String.class);
-			fail();
-		}
-		catch (HttpClientErrorException e) {
-			assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
-		}
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				performOptions("/welcome", this.headers, String.class))
+			.satisfies(ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
 	}
 
 	@Test

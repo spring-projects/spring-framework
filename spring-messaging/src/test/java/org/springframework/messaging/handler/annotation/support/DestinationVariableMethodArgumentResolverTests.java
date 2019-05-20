@@ -29,6 +29,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.invocation.ResolvableMethod;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -73,10 +74,11 @@ public class DestinationVariableMethodArgumentResolverTests {
 		assertEquals("value", result);
 	}
 
-	@Test(expected = MessageHandlingException.class)
+	@Test
 	public void resolveArgumentNotFound() throws Exception {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
-		this.resolver.resolveArgument(this.resolvable.annot(destinationVar().noValue()).arg(), message);
+		assertThatExceptionOfType(MessageHandlingException.class).isThrownBy(() ->
+				this.resolver.resolveArgument(this.resolvable.annot(destinationVar().noValue()).arg(), message));
 	}
 
 	@SuppressWarnings("unused")

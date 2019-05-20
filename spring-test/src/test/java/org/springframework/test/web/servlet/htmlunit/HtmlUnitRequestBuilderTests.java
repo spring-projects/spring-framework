@@ -46,6 +46,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -86,19 +87,22 @@ public class HtmlUnitRequestBuilderTests {
 
 	// --- constructor
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorNullSessions() {
-		new HtmlUnitRequestBuilder(null, webClient, webRequest);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new HtmlUnitRequestBuilder(null, webClient, webRequest));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorNullWebClient() {
-		new HtmlUnitRequestBuilder(sessions, null, webRequest);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new HtmlUnitRequestBuilder(sessions, null, webRequest));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorNullWebRequest() {
-		new HtmlUnitRequestBuilder(sessions, webClient, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new HtmlUnitRequestBuilder(sessions, webClient, null));
 	}
 
 
@@ -184,11 +188,12 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(contextPath, equalTo(""));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void buildRequestContextPathInvalid() {
 		requestBuilder.setContextPath("/invalid");
 
-		requestBuilder.buildRequest(servletContext).getContextPath();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				requestBuilder.buildRequest(servletContext).getContextPath());
 	}
 
 	@Test
@@ -823,14 +828,16 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(getContextPath(), isEmptyString());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setContextPathDoesNotStartWithSlash() {
-		requestBuilder.setContextPath("abc/def");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				requestBuilder.setContextPath("abc/def"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setContextPathEndsWithSlash() {
-		requestBuilder.setContextPath("/abc/def/");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				requestBuilder.setContextPath("/abc/def/"));
 	}
 
 	@Test

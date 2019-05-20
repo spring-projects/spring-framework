@@ -41,6 +41,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -190,9 +191,10 @@ public class RequestHeaderMethodArgumentResolverTests {
 		assertEquals("/bar", result);
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test
 	public void notFound() throws Exception {
-		resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null));
 	}
 
 	@Test

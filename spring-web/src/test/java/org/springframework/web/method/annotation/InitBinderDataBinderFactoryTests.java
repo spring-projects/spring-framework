@@ -36,6 +36,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -102,10 +103,11 @@ public class InitBinderDataBinderFactoryTests {
 		assertNull(dataBinder.getDisallowedFields());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void returnValueNotExpected() throws Exception {
 		WebDataBinderFactory factory = createFactory("initBinderReturnValue", WebDataBinder.class);
-		factory.createBinder(this.webRequest, null, "invalidName");
+		assertThatIllegalStateException().isThrownBy(() ->
+				factory.createBinder(this.webRequest, null, "invalidName"));
 	}
 
 	@Test

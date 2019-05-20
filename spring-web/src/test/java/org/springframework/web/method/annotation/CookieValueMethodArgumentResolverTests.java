@@ -31,10 +31,10 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.AbstractCookieValueMethodArgumentResolver}.
@@ -86,10 +86,10 @@ public class CookieValueMethodArgumentResolverTests {
 		assertEquals("Invalid result", "bar", result);
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test
 	public void notFound() throws Exception {
-		resolver.resolveArgument(paramNamedCookie, null, webRequest, null);
-		fail("Expected exception");
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+			resolver.resolveArgument(paramNamedCookie, null, webRequest, null));
 	}
 
 	private static class TestCookieValueMethodArgumentResolver extends AbstractCookieValueMethodArgumentResolver {

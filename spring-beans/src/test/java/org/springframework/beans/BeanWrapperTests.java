@@ -24,12 +24,12 @@ import org.junit.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Specific {@link BeanWrapperImpl} tests.
@@ -82,38 +82,30 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		TestBean target = new TestBean();
 		String newName = "tony";
 		String invalidTouchy = ".valid";
-		try {
-			BeanWrapper accessor = createAccessor(target);
-			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue(new PropertyValue("age", "foobar"));
-			pvs.addPropertyValue(new PropertyValue("name", newName));
-			pvs.addPropertyValue(new PropertyValue("touchy", invalidTouchy));
-			accessor.setPropertyValues(pvs);
-			fail("Should throw exception when everything is valid");
-		}
-		catch (PropertyBatchUpdateException ex) {
-			assertTrue("Must contain 2 exceptions", ex.getExceptionCount() == 2);
-			// Test validly set property matches
-			assertTrue("Valid set property must stick", target.getName().equals(newName));
-			assertTrue("Invalid set property must retain old value", target.getAge() == 0);
-			assertTrue("New value of dodgy setter must be available through exception",
-					ex.getPropertyAccessException("touchy").getPropertyChangeEvent().getNewValue().equals(invalidTouchy));
-		}
+		BeanWrapper accessor = createAccessor(target);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("age", "foobar"));
+		pvs.addPropertyValue(new PropertyValue("name", newName));
+		pvs.addPropertyValue(new PropertyValue("touchy", invalidTouchy));
+		assertThatExceptionOfType(PropertyBatchUpdateException.class).isThrownBy(() ->
+				accessor.setPropertyValues(pvs))
+			.satisfies(ex -> {
+				assertThat(ex.getExceptionCount()).isEqualTo(2);
+				assertThat(ex.getPropertyAccessException("touchy").getPropertyChangeEvent()
+						.getNewValue()).isEqualTo(invalidTouchy);
+			});
+		// Test validly set property matches
+		assertTrue("Valid set property must stick", target.getName().equals(newName));
+		assertTrue("Invalid set property must retain old value", target.getAge() == 0);
 	}
 
 	@Test
 	public void checkNotWritablePropertyHoldPossibleMatches() {
 		TestBean target = new TestBean();
-		try {
-			BeanWrapper accessor = createAccessor(target);
-			accessor.setPropertyValue("ag", "foobar");
-			fail("Should throw exception on invalid property");
-		}
-		catch (NotWritablePropertyException ex) {
-			// expected
-			assertEquals(1, ex.getPossibleMatches().length);
-			assertEquals("age", ex.getPossibleMatches()[0]);
-		}
+		BeanWrapper accessor = createAccessor(target);
+		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
+				accessor.setPropertyValue("ag", "foobar"))
+			.satisfies(ex -> assertThat(ex.getPossibleMatches()).containsExactly("age"));
 	}
 
 	@Test // Can't be shared; there is no such thing as a read-only field
@@ -214,14 +206,10 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 	@Test
 	public void incompletelyQuotedKeyLeadsToPropertyException() {
 		TestBean target = new TestBean();
-		try {
-			BeanWrapper accessor = createAccessor(target);
-			accessor.setPropertyValue("[']", "foobar");
-			fail("Should throw exception on invalid property");
-		}
-		catch (NotWritablePropertyException ex) {
-			assertNull(ex.getPossibleMatches());
-		}
+		BeanWrapper accessor = createAccessor(target);
+		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
+				accessor.setPropertyValue("[']", "foobar"))
+			.satisfies(ex -> assertThat(ex.getPossibleMatches()).isNull());
 	}
 
 

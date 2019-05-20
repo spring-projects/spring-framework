@@ -26,6 +26,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -68,10 +69,11 @@ public class HeaderContentNegotiationStrategyTests {
 		assertEquals("text/plain;q=0.5", mediaTypes.get(3).toString());
 	}
 
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)
+	@Test
 	public void resolveMediaTypesParseError() throws Exception {
 		this.servletRequest.addHeader("Accept", "textplain; q=0.5");
-		this.strategy.resolveMediaTypes(this.webRequest);
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				this.strategy.resolveMediaTypes(this.webRequest));
 	}
 
 }

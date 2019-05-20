@@ -34,7 +34,6 @@ import org.springframework.util.StreamUtils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -73,8 +72,8 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
 						assertEquals("foobar", new String(bytes));
 					}
-					catch (IOException e) {
-						fail(e.getMessage());
+					catch (IOException ex) {
+						throw new AssertionError(ex.getMessage(), ex);
 					}
 				})
 				.expectComplete()
@@ -96,8 +95,8 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 								assertEquals("foobar", new String(bytes));
 								assertEquals("testFile", resource.getFilename());
 							}
-							catch (IOException e) {
-								fail(e.getMessage());
+							catch (IOException ex) {
+								throw new AssertionError(ex.getMessage(), ex);
 							}
 						})
 						.expectComplete()

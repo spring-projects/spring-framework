@@ -31,11 +31,11 @@ import org.springframework.scripting.groovy.GroovyScriptFactory;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -91,12 +91,8 @@ public class ScriptFactoryPostProcessorTests {
 
 	@Test
 	public void testThrowsExceptionIfGivenNonAbstractBeanFactoryImplementation() throws Exception {
-		try {
-			new ScriptFactoryPostProcessor().setBeanFactory(mock(BeanFactory.class));
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalStateException expected) {
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				new ScriptFactoryPostProcessor().setBeanFactory(mock(BeanFactory.class)));
 	}
 
 	@Test
@@ -213,13 +209,9 @@ public class ScriptFactoryPostProcessorTests {
 		// needs The Sundays compiler; must NOT throw any exception here...
 		source.setScript("I keep hoping you are the same as me, and I'll send you letters and come to your house for tea");
 		Messenger refreshedMessenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
-		try {
-			refreshedMessenger.getMessage();
-			fail("Must have thrown an Exception (invalid script)");
-		}
-		catch (FatalBeanException expected) {
-			assertTrue(expected.contains(ScriptCompilationException.class));
-		}
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+				refreshedMessenger.getMessage())
+			.matches(ex -> ex.contains(ScriptCompilationException.class));
 	}
 
 	@Test

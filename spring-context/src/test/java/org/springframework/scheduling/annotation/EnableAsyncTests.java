@@ -54,15 +54,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests use of @EnableAsync on @Configuration classes.
@@ -102,14 +101,9 @@ public class EnableAsyncTests {
 	public void properExceptionForExistingProxyDependencyMismatch() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncBeanWithInterface.class, AsyncBeanUser.class);
-
-		try {
-			ctx.refresh();
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			assertTrue(ex.getCause() instanceof BeanNotOfRequiredTypeException);
-		}
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
+				ctx::refresh)
+			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 		ctx.close();
 	}
 
@@ -117,15 +111,9 @@ public class EnableAsyncTests {
 	public void properExceptionForResolvedProxyDependencyMismatch() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncBeanUser.class, AsyncBeanWithInterface.class);
-
-		try {
-			ctx.refresh();
-			fail("Should have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			assertTrue(ex.getCause() instanceof BeanNotOfRequiredTypeException);
-		}
-
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
+				ctx::refresh)
+			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 		ctx.close();
 	}
 
@@ -195,12 +183,13 @@ public class EnableAsyncTests {
 	/**
 	 * Fails with classpath errors on trying to classload AnnotationAsyncExecutionAspect.
 	 */
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	public void aspectModeAspectJAttemptsToRegisterAsyncAspect() {
 		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AspectJAsyncAnnotationConfig.class);
-		ctx.refresh();
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(
+				ctx::refresh);
 	}
 
 	@Test
@@ -334,17 +323,9 @@ public class EnableAsyncTests {
 	@Test
 	@SuppressWarnings("resource")
 	public void exceptionThrownWithBeanNotOfRequiredTypeRootCause() {
-		try {
-			new AnnotationConfigApplicationContext(JdkProxyConfiguration.class);
-			fail("Should have thrown exception");
-		}
-		catch (Throwable ex) {
-			ex.printStackTrace();
-			while (ex.getCause() != null) {
-				ex = ex.getCause();
-			}
-			assertThat(ex, instanceOf(BeanNotOfRequiredTypeException.class));
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(JdkProxyConfiguration.class))
+			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 	}
 
 

@@ -33,6 +33,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -77,11 +78,12 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		assertFalse(mavContainer.isRequestHandled());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void modelAndViewResolverUnresolved() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
 		mavResolvers.add(new TestModelAndViewResolver(TestBean.class));
-		handler.handleReturnValue(99, returnType, mavContainer, request);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				handler.handleReturnValue(99, returnType, mavContainer, request));
 	}
 
 	@Test
@@ -94,10 +96,11 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		assertTrue(mavContainer.getModel().isEmpty());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void handleSimpleType() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
-		handler.handleReturnValue(55, returnType, mavContainer, request);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+					handler.handleReturnValue(55, returnType, mavContainer, request));
 	}
 
 	@Test

@@ -47,12 +47,12 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
@@ -305,11 +305,11 @@ public class RequestParamMethodArgumentResolverTests {
 		assertEquals(Arrays.asList(expected1, expected2), result);
 	}
 
-	@Test(expected = MultipartException.class)
+	@Test
 	public void isMultipartRequest() throws Exception {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile.class);
-		resolver.resolveArgument(param, null, webRequest, null);
-		fail("Expected exception: request is not a multipart request");
+		assertThatExceptionOfType(MultipartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
 	}
 
 	@Test  // SPR-9079
@@ -328,21 +328,21 @@ public class RequestParamMethodArgumentResolverTests {
 		assertEquals(expected, ((List<?>) actual).get(0));
 	}
 
-	@Test(expected = MultipartException.class)
+	@Test
 	public void noMultipartContent() throws Exception {
 		request.setMethod("POST");
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile.class);
-		resolver.resolveArgument(param, null, webRequest, null);
-		fail("Expected exception: no multipart content");
+		assertThatExceptionOfType(MultipartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
 	}
 
-	@Test(expected = MissingServletRequestPartException.class)
+	@Test
 	public void missingMultipartFile() throws Exception {
 		request.setMethod("POST");
 		request.setContentType("multipart/form-data");
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile.class);
-		resolver.resolveArgument(param, null, webRequest, null);
-		fail("Expected exception: no such part found");
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
 	}
 
 	@Test
@@ -368,11 +368,11 @@ public class RequestParamMethodArgumentResolverTests {
 		assertEquals("Invalid result", "bar", result);
 	}
 
-	@Test(expected = MissingServletRequestParameterException.class)
+	@Test
 	public void missingRequestParam() throws Exception {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
-		resolver.resolveArgument(param, null, webRequest, null);
-		fail("Expected exception");
+		assertThatExceptionOfType(MissingServletRequestParameterException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
 	}
 
 	@Test  // SPR-10578

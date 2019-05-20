@@ -28,6 +28,7 @@ import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
 import java.util.PropertyPermission;
 import java.util.Set;
+import java.util.function.Consumer;
 import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
@@ -50,14 +51,15 @@ import org.springframework.beans.factory.support.SecurityContextProvider;
 import org.springframework.beans.factory.support.security.support.ConstructorBean;
 import org.springframework.beans.factory.support.security.support.CustomCallbackBean;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Security test case. Checks whether the container uses its privileges for its
@@ -325,68 +327,38 @@ public class CallbacksSecurityTests {
 	@Test
 	public void testSecuritySanity() throws Exception {
 		AccessControlContext acc = provider.getAccessControlContext();
-		try {
-			acc.checkPermission(new PropertyPermission("*", "read"));
-			fail("Acc should not have any permissions");
-		}
-		catch (SecurityException se) {
-			// expected
-		}
+		assertThatExceptionOfType(SecurityException.class).as(
+				"Acc should not have any permissions").isThrownBy(() ->
+				acc.checkPermission(new PropertyPermission("*", "read")));
 
-		final CustomCallbackBean bean = new CustomCallbackBean();
-		final Method method = bean.getClass().getMethod("destroy");
+		CustomCallbackBean bean = new CustomCallbackBean();
+		Method method = bean.getClass().getMethod("destroy");
 		method.setAccessible(true);
 
-		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () -> {
+						method.invoke(bean);
+						return null;
+					}, acc));
 
-				@Override
-				public Object run() throws Exception {
-					method.invoke(bean);
-					return null;
-				}
-			}, acc);
-			fail("expected security exception");
-		}
-		catch (Exception ex) {
-		}
-
-		final Class<ConstructorBean> cl = ConstructorBean.class;
-		try {
-			AccessController.doPrivileged(
-					new PrivilegedExceptionAction<Object>() {
-
-						@Override
-						public Object run() throws Exception {
-							return cl.newInstance();
-						}
-					}, acc);
-			fail("expected security exception");
-		}
-		catch (Exception ex) {
-		}
+		Class<ConstructorBean> cl = ConstructorBean.class;
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
+						cl.newInstance(), acc));
 	}
 
 	@Test
 	public void testSpringInitBean() throws Exception {
-		try {
-			beanFactory.getBean("spring-init");
-			fail("expected security exception");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof SecurityException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean("spring-init"))
+			.withCauseInstanceOf(SecurityException.class);
 	}
 
 	@Test
 	public void testCustomInitBean() throws Exception {
-		try {
-			beanFactory.getBean("custom-init");
-			fail("expected security exception");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof SecurityException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean("custom-init"))
+			.withCauseInstanceOf(SecurityException.class);
 	}
 
 	@Test
@@ -405,14 +377,9 @@ public class CallbacksSecurityTests {
 
 	@Test
 	public void testCustomFactoryObject() throws Exception {
-		try {
-			beanFactory.getBean("spring-factory");
-			fail("expected security exception");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof SecurityException);
-		}
-
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean("spring-factory"))
+			.withCauseInstanceOf(SecurityException.class);
 	}
 
 	@Test
@@ -423,47 +390,30 @@ public class CallbacksSecurityTests {
 
 	@Test
 	public void testCustomStaticFactoryMethod() throws Exception {
-		try {
-			beanFactory.getBean("custom-static-factory-method");
-			fail("expected security exception");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMostSpecificCause() instanceof SecurityException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean("custom-static-factory-method"))
+			.satisfies(ex -> assertThat(ex.getMostSpecificCause()).isInstanceOf(SecurityException.class));
 	}
 
 	@Test
 	public void testCustomInstanceFactoryMethod() throws Exception {
-		try {
-			beanFactory.getBean("custom-factory-method");
-			fail("expected security exception");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMostSpecificCause() instanceof SecurityException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean("custom-factory-method"))
+			.satisfies(ex -> assertThat(ex.getMostSpecificCause()).isInstanceOf(SecurityException.class));
 	}
 
 	@Test
 	public void testTrustedFactoryMethod() throws Exception {
-		try {
-			beanFactory.getBean("privileged-static-factory-method");
-			fail("expected security exception");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMostSpecificCause() instanceof SecurityException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean("privileged-static-factory-method"))
+			.satisfies(mostSpecificCauseOf(SecurityException.class));
 	}
 
 	@Test
 	public void testConstructor() throws Exception {
-		try {
-			beanFactory.getBean("constructor");
-			fail("expected security exception");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			assertTrue(ex.getMostSpecificCause() instanceof SecurityException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean("constructor"))
+			.satisfies(mostSpecificCauseOf(SecurityException.class));
 	}
 
 	@Test
@@ -483,14 +433,9 @@ public class CallbacksSecurityTests {
 
 	@Test
 	public void testPropertyInjection() throws Exception {
-		try {
-			beanFactory.getBean("property-injection");
-			fail("expected security exception");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMessage().contains("security"));
-		}
-
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean("property-injection"))
+			.withMessageContaining("security");
 		beanFactory.getBean("working-property-injection");
 	}
 
@@ -556,6 +501,11 @@ public class CallbacksSecurityTests {
 				return null;
 			}
 		}, provider.getAccessControlContext());
+	}
+
+	private <E extends NestedRuntimeException> Consumer<E> mostSpecificCauseOf(Class<? extends Throwable> type) {
+		return ex -> assertThat(ex.getMostSpecificCause()).isInstanceOf(type);
+
 	}
 
 }

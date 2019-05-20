@@ -21,10 +21,10 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
 
 /**
  * @author Brian Clozel
@@ -74,13 +74,9 @@ public class ContentCachingRequestWrapperTests {
 			}
 		};
 
-		try {
-			FileCopyUtils.copyToByteArray(wrapper.getInputStream());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertEquals("3", ex.getMessage());
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				FileCopyUtils.copyToByteArray(wrapper.getInputStream()))
+			.withMessage("3");
 	}
 
 	@Test

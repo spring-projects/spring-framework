@@ -20,6 +20,7 @@ import java.util.ResourceBundle;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -102,28 +103,32 @@ public class ResourceBundleEditorTests {
 		assertEquals("ned", string);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetAsTextWithNull() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
-		editor.setAsText(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetAsTextWithEmptyString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
-		editor.setAsText("");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText(""));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetAsTextWithWhiteSpaceString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
-		editor.setAsText("   ");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText("   "));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetAsTextWithJustSeparatorString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
-		editor.setAsText("_");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText("_"));
 	}
 
 }

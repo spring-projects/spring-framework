@@ -25,10 +25,10 @@ import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -63,13 +63,8 @@ public class SharedEntityManagerFactoryTests {
 
 		assertTrue(proxy instanceof EntityManagerProxy);
 		EntityManagerProxy emProxy = (EntityManagerProxy) proxy;
-		try {
-			emProxy.getTargetEntityManager();
-			fail("Should have thrown IllegalStateException outside of transaction");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().as("outside of transaction").isThrownBy(
+				emProxy::getTargetEntityManager);
 
 		TransactionSynchronizationManager.bindResource(mockEmf, new EntityManagerHolder(mockEm));
 		try {

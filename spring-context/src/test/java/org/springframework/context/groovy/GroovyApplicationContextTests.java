@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.support.GenericGroovyApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -70,9 +71,10 @@ public class GroovyApplicationContextTests {
 		assertEquals("SpringSource", company);
 	}
 
-	@Test(expected = BeanDefinitionParsingException.class)
+	@Test
 	public void testConfigFileParsingError() {
-		new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext-error.groovy");
+		assertThatExceptionOfType(BeanDefinitionParsingException.class).isThrownBy(() ->
+				new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext-error.groovy"));
 	}
 
 }

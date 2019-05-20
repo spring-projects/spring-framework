@@ -27,8 +27,9 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.jndi.JndiTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -72,13 +73,9 @@ public class LocalSlsbInvokerInterceptorTests {
 		// default resourceRef=false should cause this to fail, as java:/comp/env will not
 		// automatically be added
 		si.setJndiTemplate(jt);
-		try {
-			si.afterPropertiesSet();
-			fail("Should have failed with naming exception");
-		}
-		catch (NamingException ex) {
-			assertTrue(ex == nex);
-		}
+		assertThatExceptionOfType(NamingException.class).isThrownBy(
+				si::afterPropertiesSet)
+			.satisfies(ex -> assertThat(ex).isSameAs(nex));
 	}
 
 	@Test
@@ -136,13 +133,9 @@ public class LocalSlsbInvokerInterceptorTests {
 		pf.addAdvice(si);
 		LocalInterfaceWithBusinessMethods target = (LocalInterfaceWithBusinessMethods) pf.getProxy();
 
-		try {
-			target.targetMethod();
-			fail("Should have thrown exception");
-		}
-		catch (Exception thrown) {
-			assertTrue(thrown == expected);
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(
+				target::targetMethod)
+			.satisfies(ex -> assertThat(ex).isSameAs(expected));
 
 		verify(mockContext).close();
 	}

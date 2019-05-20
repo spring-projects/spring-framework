@@ -38,11 +38,11 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -167,13 +167,8 @@ public class JmsTransactionManagerTests {
 				status.setRollbackOnly();
 			}
 		});
-		try {
-			tm.commit(ts);
-			fail("Should have thrown UnexpectedRollbackException");
-		}
-		catch (UnexpectedRollbackException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(UnexpectedRollbackException.class).isThrownBy(() ->
+				tm.commit(ts));
 
 		verify(session).rollback();
 		verify(session).close();

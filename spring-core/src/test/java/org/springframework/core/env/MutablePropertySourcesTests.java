@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import org.springframework.mock.env.MockPropertySource;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -32,7 +34,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Chris Beams
@@ -111,13 +112,9 @@ public class MutablePropertySourcesTests {
 		assertThat(sources.size(), equalTo(6));
 
 		String bogusPS = "bogus";
-		try {
-			sources.addAfter(bogusPS, new MockPropertySource("h"));
-			fail("expected non-existent PropertySource exception");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(ex.getMessage().contains("does not exist"));
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				sources.addAfter(bogusPS, new MockPropertySource("h")))
+			.withMessageContaining("does not exist");
 
 		sources.addFirst(new MockPropertySource("a"));
 		assertThat(sources.size(), equalTo(7));
@@ -133,29 +130,17 @@ public class MutablePropertySourcesTests {
 
 		sources.replace("a-replaced", new MockPropertySource("a"));
 
-		try {
-			sources.replace(bogusPS, new MockPropertySource("bogus-replaced"));
-			fail("expected non-existent PropertySource exception");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(ex.getMessage().contains("does not exist"));
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				sources.replace(bogusPS, new MockPropertySource("bogus-replaced")))
+			.withMessageContaining("does not exist");
 
-		try {
-			sources.addBefore("b", new MockPropertySource("b"));
-			fail("expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(ex.getMessage().contains("cannot be added relative to itself"));
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				sources.addBefore("b", new MockPropertySource("b")))
+			.withMessageContaining("cannot be added relative to itself");
 
-		try {
-			sources.addAfter("b", new MockPropertySource("b"));
-			fail("expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(ex.getMessage().contains("cannot be added relative to itself"));
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				sources.addAfter("b", new MockPropertySource("b")))
+			.withMessageContaining("cannot be added relative to itself");
 	}
 
 	@Test
@@ -173,13 +158,8 @@ public class MutablePropertySourcesTests {
 		assertTrue(it.hasNext());
 		assertEquals("test", it.next().getName());
 
-		try {
-			it.remove();
-			fail("Should have thrown UnsupportedOperationException");
-		}
-		catch (UnsupportedOperationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
+				it::remove);
 		assertFalse(it.hasNext());
 	}
 

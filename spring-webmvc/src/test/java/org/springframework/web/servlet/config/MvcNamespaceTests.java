@@ -141,6 +141,7 @@ import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.instanceOf;
@@ -262,7 +263,7 @@ public class MvcNamespaceTests {
 		assertEquals(BeanNameUrlHandlerMapping.class, introspector.getHandlerMappings().get(1).getClass());
 	}
 
-	@Test(expected = TypeMismatchException.class)
+	@Test
 	public void testCustomConversionService() throws Exception {
 		loadBeanDefinitions("mvc-config-custom-conversion-service.xml");
 
@@ -285,7 +286,8 @@ public class MvcNamespaceTests {
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
-		adapter.handle(request, response, handlerMethod);
+		assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() ->
+				adapter.handle(request, response, handlerMethod));
 	}
 
 	@Test

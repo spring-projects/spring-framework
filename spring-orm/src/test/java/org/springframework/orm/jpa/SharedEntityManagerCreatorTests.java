@@ -27,11 +27,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.mock;
@@ -56,46 +57,52 @@ public class SharedEntityManagerCreatorTests {
 		assertThat(SharedEntityManagerCreator.createSharedEntityManager(emf), is(notNullValue()));
 	}
 
-	@Test(expected = TransactionRequiredException.class)
+	@Test
 	public void transactionRequiredExceptionOnJoinTransaction() {
 		EntityManagerFactory emf = mock(EntityManagerFactory.class);
 		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(emf);
-		em.joinTransaction();
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(
+				em::joinTransaction);
 	}
 
-	@Test(expected = TransactionRequiredException.class)
+	@Test
 	public void transactionRequiredExceptionOnFlush() {
 		EntityManagerFactory emf = mock(EntityManagerFactory.class);
 		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(emf);
-		em.flush();
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(
+				em::flush);
 	}
 
-	@Test(expected = TransactionRequiredException.class)
+	@Test
 	public void transactionRequiredExceptionOnPersist() {
 		EntityManagerFactory emf = mock(EntityManagerFactory.class);
 		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(emf);
-		em.persist(new Object());
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(() ->
+				em.persist(new Object()));
 	}
 
-	@Test(expected = TransactionRequiredException.class)
+	@Test
 	public void transactionRequiredExceptionOnMerge() {
 		EntityManagerFactory emf = mock(EntityManagerFactory.class);
 		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(emf);
-		em.merge(new Object());
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(() ->
+				em.merge(new Object()));
 	}
 
-	@Test(expected = TransactionRequiredException.class)
+	@Test
 	public void transactionRequiredExceptionOnRemove() {
 		EntityManagerFactory emf = mock(EntityManagerFactory.class);
 		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(emf);
-		em.remove(new Object());
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(() ->
+				em.remove(new Object()));
 	}
 
-	@Test(expected = TransactionRequiredException.class)
+	@Test
 	public void transactionRequiredExceptionOnRefresh() {
 		EntityManagerFactory emf = mock(EntityManagerFactory.class);
 		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(emf);
-		em.refresh(new Object());
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(() ->
+				em.refresh(new Object()));
 	}
 
 	@Test
@@ -180,13 +187,8 @@ public class SharedEntityManagerCreatorTests {
 		spq.registerStoredProcedureParameter(2, Object.class, ParameterMode.INOUT);
 		spq.execute();
 		assertEquals("y", spq.getOutputParameterValue(0));
-		try {
-			spq.getOutputParameterValue(1);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				spq.getOutputParameterValue(1));
 		assertEquals("z", spq.getOutputParameterValue(2));
 
 		verify(query).registerStoredProcedureParameter(0, String.class, ParameterMode.OUT);
@@ -216,13 +218,8 @@ public class SharedEntityManagerCreatorTests {
 		spq.registerStoredProcedureParameter("c", Object.class, ParameterMode.INOUT);
 		spq.execute();
 		assertEquals("y", spq.getOutputParameterValue("a"));
-		try {
-			spq.getOutputParameterValue("b");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				spq.getOutputParameterValue("b"));
 		assertEquals("z", spq.getOutputParameterValue("c"));
 
 		verify(query).registerStoredProcedureParameter("a", String.class, ParameterMode.OUT);

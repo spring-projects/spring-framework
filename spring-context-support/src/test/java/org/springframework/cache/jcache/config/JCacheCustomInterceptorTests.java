@@ -38,9 +38,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 /**
  * @author Stephane Nicoll
@@ -85,17 +84,9 @@ public class JCacheCustomInterceptorTests {
 
 	@Test
 	public void customInterceptorAppliesWithCheckedException() {
-		try {
-			cs.cacheWithCheckedException("id", true);
-			fail("Should have failed");
-		}
-		catch (RuntimeException e) {
-			assertNotNull("missing original exception", e.getCause());
-			assertEquals(IOException.class, e.getCause().getClass());
-		}
-		catch (Exception e) {
-			fail("Wrong exception type " + e);
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				cs.cacheWithCheckedException("id", true))
+			.withCauseExactlyInstanceOf(IOException.class);
 	}
 
 

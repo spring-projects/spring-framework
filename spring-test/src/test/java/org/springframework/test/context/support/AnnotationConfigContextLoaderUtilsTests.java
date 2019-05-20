@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,9 +39,10 @@ import static org.springframework.test.context.support.AnnotationConfigContextLo
  */
 public class AnnotationConfigContextLoaderUtilsTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void detectDefaultConfigurationClassesWithNullDeclaringClass() {
-		detectDefaultConfigurationClasses(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				detectDefaultConfigurationClasses(null));
 	}
 
 	@Test

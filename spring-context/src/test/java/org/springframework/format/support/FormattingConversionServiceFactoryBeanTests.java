@@ -39,9 +39,9 @@ import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.NumberFormat;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rossen Stoyanchev
@@ -76,13 +76,9 @@ public class FormattingConversionServiceFactoryBeanTests {
 		FormattingConversionService fcs = factory.getObject();
 		TypeDescriptor descriptor = new TypeDescriptor(TestBean.class.getDeclaredField("pattern"));
 
-		try {
-			fcs.convert("15,00", TypeDescriptor.valueOf(String.class), descriptor);
-			fail("This format should not be parseable");
-		}
-		catch (ConversionFailedException ex) {
-			assertTrue(ex.getCause() instanceof NumberFormatException);
-		}
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				fcs.convert("15,00", TypeDescriptor.valueOf(String.class), descriptor))
+			.withCauseInstanceOf(NumberFormatException.class);
 	}
 
 	@Test
@@ -126,13 +122,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 		Set<Object> formatters = new HashSet<>();
 		formatters.add(new Object());
 		factory.setFormatters(formatters);
-		try {
-			factory.afterPropertiesSet();
-			fail("Expected formatter to be rejected");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(factory::afterPropertiesSet);
 	}
 
 

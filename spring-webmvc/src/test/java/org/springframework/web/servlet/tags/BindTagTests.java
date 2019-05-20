@@ -41,12 +41,12 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.tags.form.FormTag;
 import org.springframework.web.servlet.tags.form.TagWriter;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -629,13 +629,8 @@ public class BindTagTests extends AbstractTagTests {
 		BindTag tag = new BindTag();
 		tag.setPageContext(pc);
 		tag.setPath("tb");
-		try {
-			tag.doStartTag();
-			fail("Should have thrown JspException");
-		}
-		catch (JspException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(JspException.class).isThrownBy(
+				tag::doStartTag);
 	}
 
 
@@ -906,13 +901,8 @@ public class BindTagTests extends AbstractTagTests {
 		transform.setPageContext(pc);
 		transform.setVar("var");
 		transform.setValue("bla");
-		try {
-			transform.doStartTag();
-			fail("Tag can be executed outside BindTag");
-		}
-		catch (JspException e) {
-			// this is ok!
-		}
+		assertThatExceptionOfType(JspException.class).as("executed outside BindTag").isThrownBy(
+				transform::doStartTag);
 
 		// now try to execute the tag outside a bindtag, but inside a messageTag
 		MessageTag message = new MessageTag();
@@ -922,13 +912,8 @@ public class BindTagTests extends AbstractTagTests {
 		transform.setVar("var");
 		transform.setValue("bla");
 		transform.setParent(message);
-		try {
-			transform.doStartTag();
-			fail("Tag can be executed outside BindTag and inside messagetag");
-		}
-		catch (JspException e) {
-			// this is ok!
-		}
+		assertThatExceptionOfType(JspException.class).as("executed outside BindTag and inside messagetag").isThrownBy(
+				transform::doStartTag);
 	}
 
 	@Test

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -84,14 +85,16 @@ public class ExceptionHandlerMethodResolverTests {
 		assertEquals("handleIOException", resolver.resolveMethod(exception).getName());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void ambiguousExceptionMapping() {
-		new ExceptionHandlerMethodResolver(AmbiguousController.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				new ExceptionHandlerMethodResolver(AmbiguousController.class));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void noExceptionMapping() {
-		new ExceptionHandlerMethodResolver(NoExceptionController.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				new ExceptionHandlerMethodResolver(NoExceptionController.class));
 	}
 
 

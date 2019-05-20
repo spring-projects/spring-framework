@@ -17,7 +17,6 @@
 package org.springframework.jmx.access;
 
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
@@ -38,6 +37,9 @@ import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
 import org.springframework.util.SocketUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -119,32 +121,36 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertEquals("The name of the bean should have been updated", "Rob Harrop", target.getName());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetAttributeValueWithRuntimeException() throws Exception {
 		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		proxy.setName("Juergen");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				proxy.setName("Juergen"));
 	}
 
-	@Test(expected = ClassNotFoundException.class)
+	@Test
 	public void testSetAttributeValueWithCheckedException() throws Exception {
 		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		proxy.setName("Juergen Class");
+		assertThatExceptionOfType(ClassNotFoundException.class).isThrownBy(() ->
+			proxy.setName("Juergen Class"));
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void testSetAttributeValueWithIOException() throws Exception {
 		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		proxy.setName("Juergen IO");
+		assertThatIOException().isThrownBy(() ->
+				proxy.setName("Juergen IO"));
 	}
 
-	@Test(expected = InvalidInvocationException.class)
+	@Test
 	public void testSetReadOnlyAttribute() throws Exception {
 		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		proxy.setAge(900);
+		assertThatExceptionOfType(InvalidInvocationException.class).isThrownBy(() ->
+				proxy.setAge(900));
 	}
 
 	@Test
@@ -163,11 +169,12 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertEquals("The operation should return 3", 3, result);
 	}
 
-	@Test(expected = InvalidInvocationException.class)
+	@Test
 	public void testInvokeUnexposedMethodWithException() throws Exception {
 		assumeTrue(runTests);
 		IJmxTestBean bean = getProxy();
-		bean.dontExposeMe();
+		assertThatExceptionOfType(InvalidInvocationException.class).isThrownBy(() ->
+				bean.dontExposeMe());
 	}
 
 	@Test

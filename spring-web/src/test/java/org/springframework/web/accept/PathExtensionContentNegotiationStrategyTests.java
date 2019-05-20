@@ -29,6 +29,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -122,14 +123,15 @@ public class PathExtensionContentNegotiationStrategyTests {
 		assertEquals(ContentNegotiationStrategy.MEDIA_TYPE_ALL_LIST, mediaTypes);
 	}
 
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)
+	@Test
 	public void resolveMediaTypesDoNotIgnoreUnknownExtension() throws Exception {
 
 		this.servletRequest.setRequestURI("test.foobar");
 
 		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy();
 		strategy.setIgnoreUnknownExtensions(false);
-		strategy.resolveMediaTypes(this.webRequest);
+		assertThatExceptionOfType(HttpMediaTypeNotAcceptableException.class).isThrownBy(() ->
+				strategy.resolveMediaTypes(this.webRequest));
 	}
 
 }

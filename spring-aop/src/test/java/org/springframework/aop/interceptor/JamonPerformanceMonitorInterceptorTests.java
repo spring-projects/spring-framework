@@ -23,9 +23,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -69,12 +69,8 @@ public class JamonPerformanceMonitorInterceptorTests {
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.proceed()).willThrow(new IllegalArgumentException());
 
-		try {
-			interceptor.invokeUnderTrace(mi, log);
-			fail("Must have propagated the IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				interceptor.invokeUnderTrace(mi, log));
 
 		assertEquals("Monitors must exist for the method invocation and 2 exceptions",
 				3, MonitorFactory.getNumRows());

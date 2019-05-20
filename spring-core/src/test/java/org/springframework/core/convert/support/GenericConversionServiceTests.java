@@ -51,6 +51,9 @@ import org.springframework.util.StringUtils;
 
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertArrayEquals;
@@ -59,7 +62,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link GenericConversionService}.
@@ -92,14 +94,16 @@ public class GenericConversionServiceTests {
 		assertTrue(conversionService.canConvert(boolean.class, Boolean.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void canConvertFromClassSourceTypeToNullTargetType() {
-		conversionService.canConvert(String.class, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.canConvert(String.class, null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void canConvertFromTypeDescriptorSourceTypeToNullTargetType() {
-		conversionService.canConvert(TypeDescriptor.valueOf(String.class), null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.canConvert(TypeDescriptor.valueOf(String.class), null));
 	}
 
 	@Test
@@ -119,19 +123,22 @@ public class GenericConversionServiceTests {
 		assertEquals(null, conversionService.convert(null, Integer.class));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void convertNullSourcePrimitiveTarget() {
-		conversionService.convert(null, int.class);
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(null, int.class));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void convertNullSourcePrimitiveTargetTypeDescriptor() {
-		conversionService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class));
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void convertNotNullSourceNullSourceTypeDescriptor() {
-		conversionService.convert("3", null, TypeDescriptor.valueOf(int.class));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.convert("3", null, TypeDescriptor.valueOf(int.class)));
 	}
 
 	@Test
@@ -140,14 +147,16 @@ public class GenericConversionServiceTests {
 		assertEquals(Boolean.FALSE, conversionService.convert(false, Boolean.class));
 	}
 
-	@Test(expected = ConverterNotFoundException.class)
+	@Test
 	public void converterNotFound() {
-		conversionService.convert("3", Integer.class);
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert("3", Integer.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void addConverterNoSourceTargetClassInfoAvailable() {
-		conversionService.addConverter(new UntypedConverter());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.addConverter(new UntypedConverter()));
 	}
 
 	@Test
@@ -165,25 +174,29 @@ public class GenericConversionServiceTests {
 		assertNull(conversionService.convert(null, Integer.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void convertToNullTargetClass() {
-		conversionService.convert("3", (Class<?>) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.convert("3", (Class<?>) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void convertToNullTargetTypeDescriptor() {
-		conversionService.convert("3", TypeDescriptor.valueOf(String.class), null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.convert("3", TypeDescriptor.valueOf(String.class), null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void convertWrongSourceTypeDescriptor() {
-		conversionService.convert("3", TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(Long.class));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.convert("3", TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(Long.class)));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void convertWrongTypeArgument() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		conversionService.convert("BOGUS", Integer.class);
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert("BOGUS", Integer.class));
 	}
 
 	@Test
@@ -199,10 +212,11 @@ public class GenericConversionServiceTests {
 	}
 
 	// SPR-8718
-	@Test(expected = ConverterNotFoundException.class)
+	@Test
 	public void convertSuperTarget() {
 		conversionService.addConverter(new ColorConverter());
-		conversionService.convert("#000000", SystemColor.class);
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert("#000000", SystemColor.class));
 	}
 
 	@Test
@@ -226,11 +240,12 @@ public class GenericConversionServiceTests {
 		assertEquals(3, three.intValue());
 	}
 
-	@Test(expected = ConverterNotFoundException.class)
+	@Test
 	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
 		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
 		assertFalse(conversionService.canConvert(String.class, Integer[].class));
-		conversionService.convert("3,4,5", Integer[].class);
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert("3,4,5", Integer[].class));
 	}
 
 	@Test
@@ -445,14 +460,16 @@ public class GenericConversionServiceTests {
 		assertFalse(pair.hashCode() == pairOpposite.hashCode());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void canConvertIllegalArgumentNullTargetTypeFromClass() {
-		conversionService.canConvert(String.class, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.canConvert(String.class, null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void canConvertIllegalArgumentNullTargetTypeFromTypeDescriptor() {
-		conversionService.canConvert(TypeDescriptor.valueOf(String.class), null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				conversionService.canConvert(TypeDescriptor.valueOf(String.class), null));
 	}
 
 	@Test
@@ -500,13 +517,9 @@ public class GenericConversionServiceTests {
 	@Test
 	public void shouldNotSupportNullConvertibleTypesFromNonConditionalGenericConverter() {
 		GenericConverter converter = new NonConditionalGenericConverter();
-		try {
-			conversionService.addConverter(converter);
-			fail("Did not throw IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertEquals("Only conditional converters may return null convertible types", ex.getMessage());
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				conversionService.addConverter(converter))
+			.withMessage("Only conditional converters may return null convertible types");
 	}
 
 	@Test
@@ -606,13 +619,8 @@ public class GenericConversionServiceTests {
 		assertEquals(Collections.singleton("testX"),
 				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("rawCollection"))));
 
-		try {
-			conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection")));
-			fail("Should have thrown ConverterNotFoundException");
-		}
-		catch (ConverterNotFoundException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert("test", TypeDescriptor.valueOf(String.class), new TypeDescriptor(getClass().getField("integerCollection"))));
 	}
 
 	@Test

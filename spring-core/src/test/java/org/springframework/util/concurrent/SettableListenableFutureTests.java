@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
@@ -81,13 +82,9 @@ public class SettableListenableFutureTests {
 		Throwable exception = new RuntimeException();
 		assertTrue(settableListenableFuture.setException(exception));
 
-		try {
-			settableListenableFuture.get();
-			fail("Expected ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertThat(ex.getCause(), equalTo(exception));
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				settableListenableFuture::get)
+			.withCause(exception);
 
 		assertFalse(settableListenableFuture.isCancelled());
 		assertTrue(settableListenableFuture.isDone());
@@ -99,13 +96,9 @@ public class SettableListenableFutureTests {
 		assertTrue(settableListenableFuture.setException(exception));
 		Future<String> completable = settableListenableFuture.completable();
 
-		try {
-			completable.get();
-			fail("Expected ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertThat(ex.getCause(), equalTo(exception));
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				completable::get)
+			.withCause(exception);
 
 		assertFalse(completable.isCancelled());
 		assertTrue(completable.isDone());
@@ -116,13 +109,9 @@ public class SettableListenableFutureTests {
 		Throwable exception = new OutOfMemoryError();
 		assertTrue(settableListenableFuture.setException(exception));
 
-		try {
-			settableListenableFuture.get();
-			fail("Expected ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertThat(ex.getCause(), equalTo(exception));
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				settableListenableFuture::get)
+			.withCause(exception);
 
 		assertFalse(settableListenableFuture.isCancelled());
 		assertTrue(settableListenableFuture.isDone());
@@ -134,13 +123,9 @@ public class SettableListenableFutureTests {
 		assertTrue(settableListenableFuture.setException(exception));
 		Future<String> completable = settableListenableFuture.completable();
 
-		try {
-			completable.get();
-			fail("Expected ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertThat(ex.getCause(), equalTo(exception));
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				completable::get)
+			.withCause(exception);
 
 		assertFalse(completable.isCancelled());
 		assertTrue(completable.isDone());
@@ -158,7 +143,7 @@ public class SettableListenableFutureTests {
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				fail("Expected onSuccess() to be called");
+				throw new AssertionError("Expected onSuccess() to be called", ex);
 			}
 		});
 
@@ -180,7 +165,7 @@ public class SettableListenableFutureTests {
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				fail("Expected onSuccess() to be called");
+				throw new AssertionError("Expected onSuccess() to be called", ex);
 			}
 		});
 
@@ -269,13 +254,8 @@ public class SettableListenableFutureTests {
 
 	@Test
 	public void getWithTimeoutThrowsTimeoutException() throws ExecutionException, InterruptedException {
-		try {
-			settableListenableFuture.get(1L, TimeUnit.MILLISECONDS);
-			fail("Expected TimeoutException");
-		}
-		catch (TimeoutException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(TimeoutException.class).isThrownBy(() ->
+				settableListenableFuture.get(1L, TimeUnit.MILLISECONDS));
 	}
 
 	@Test
@@ -362,13 +342,8 @@ public class SettableListenableFutureTests {
 	public void cancelStateThrowsExceptionWhenCallingGet() throws ExecutionException, InterruptedException {
 		settableListenableFuture.cancel(true);
 
-		try {
-			settableListenableFuture.get();
-			fail("Expected CancellationException");
-		}
-		catch (CancellationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(() ->
+				settableListenableFuture.get());
 
 		assertTrue(settableListenableFuture.isCancelled());
 		assertTrue(settableListenableFuture.isDone());
@@ -389,13 +364,8 @@ public class SettableListenableFutureTests {
 			}
 		}).start();
 
-		try {
-			settableListenableFuture.get(500L, TimeUnit.MILLISECONDS);
-			fail("Expected CancellationException");
-		}
-		catch (CancellationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(CancellationException.class).isThrownBy(() ->
+			settableListenableFuture.get(500L, TimeUnit.MILLISECONDS));
 
 		assertTrue(settableListenableFuture.isCancelled());
 		assertTrue(settableListenableFuture.isDone());

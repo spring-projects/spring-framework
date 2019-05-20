@@ -44,6 +44,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -150,7 +152,7 @@ public class DefaultServerRequestTests {
 		assertEquals("bar", request.pathVariable("foo"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void pathVariableNotFound() {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
@@ -160,7 +162,8 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
 				this.messageConverters);
 
-		request.pathVariable("baz");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				request.pathVariable("baz"));
 	}
 
 	@Test
@@ -253,7 +256,7 @@ public class DefaultServerRequestTests {
 		assertEquals("bar", result.get(1));
 	}
 
-	@Test(expected = HttpMediaTypeNotSupportedException.class)
+	@Test
 	public void bodyUnacceptable() throws Exception {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
@@ -262,7 +265,8 @@ public class DefaultServerRequestTests {
 		DefaultServerRequest request =
 				new DefaultServerRequest(servletRequest, Collections.emptyList());
 
-		request.body(String.class);
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class).isThrownBy(() ->
+				request.body(String.class));
 	}
 
 	@Test

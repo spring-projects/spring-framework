@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -104,9 +105,10 @@ public class MethodParameterTests {
 		assertEquals(longParameter, MethodParameter.forParameter(method.getParameters()[1]));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testIndexValidation() {
-		new MethodParameter(method, 2);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MethodParameter(method, 2));
 	}
 
 	@Test

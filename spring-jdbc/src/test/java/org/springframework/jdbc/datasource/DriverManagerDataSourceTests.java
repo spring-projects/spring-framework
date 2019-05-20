@@ -21,9 +21,9 @@ import java.util.Properties;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -139,14 +139,9 @@ public class DriverManagerDataSourceTests {
 	public void testInvalidClassName() throws Exception {
 		String bogusClassName = "foobar";
 		DriverManagerDataSource ds = new DriverManagerDataSource();
-		try {
-			ds.setDriverClassName(bogusClassName);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// OK
-			assertTrue(ex.getCause() instanceof ClassNotFoundException);
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				ds.setDriverClassName(bogusClassName))
+			.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 }

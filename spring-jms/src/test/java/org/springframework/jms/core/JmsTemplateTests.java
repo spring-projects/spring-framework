@@ -60,10 +60,10 @@ import org.springframework.jndi.JndiTemplate;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -800,15 +800,9 @@ public class JmsTemplateTests {
 
 		willThrow(original).given(messageProducer).send(textMessage);
 
-		try {
-			template.convertAndSend(this.queue, s);
-			fail("Should have thrown JmsException");
-		}
-		catch (JmsException wrappedEx) {
-			// expected
-			assertEquals(thrownExceptionClass, wrappedEx.getClass());
-			assertEquals(original, wrappedEx.getCause());
-		}
+		assertThatExceptionOfType(thrownExceptionClass).isThrownBy(() ->
+				template.convertAndSend(this.queue, s))
+			.withCause(original);
 
 		verify(messageProducer).close();
 		verify(this.session).close();

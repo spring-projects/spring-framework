@@ -32,8 +32,8 @@ import org.springframework.oxm.Marshaller;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -122,13 +122,9 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		try {
-			view.render(model, request, response);
-			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				view.render(model, request, response));
+
 		assertEquals("Invalid content length", 0, response.getContentLength());
 	}
 
@@ -141,13 +137,9 @@ public class MarshallingViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		try {
-			view.render(model, request, response);
-			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				view.render(model, request, response));
+
 		assertEquals("Invalid content length", 0, response.getContentLength());
 	}
 
@@ -164,13 +156,8 @@ public class MarshallingViewTests {
 
 		given(marshallerMock.supports(Object.class)).willReturn(false);
 
-		try {
-			view.render(model, request, response);
-			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				view.render(model, request, response));
 	}
 
 	@Test
@@ -223,13 +210,8 @@ public class MarshallingViewTests {
 
 		given(marshallerMock.supports(Object.class)).willReturn(false);
 
-		try {
-			view.render(model, request, response);
-			fail("IllegalStateException expected");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				view.render(model, request, response));
 	}
 
 }

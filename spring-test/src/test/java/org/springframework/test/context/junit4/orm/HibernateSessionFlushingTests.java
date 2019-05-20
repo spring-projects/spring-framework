@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.orm.domain.Person;
 import org.springframework.test.context.junit4.orm.service.PersonService;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
@@ -98,9 +99,10 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		assertNotNull("Juergen's ID should have been set", juergen.getId());
 	}
 
-	@Test(expected = ConstraintViolationException.class)
+	@Test
 	public void saveJuergenWithNullDriversLicense() {
-		personService.save(new Person(JUERGEN));
+		assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() ->
+				personService.save(new Person(JUERGEN)));
 	}
 
 	@Test
@@ -111,17 +113,19 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		// finally flushed (i.e., in production code)
 	}
 
-	@Test(expected = ConstraintViolationException.class)
+	@Test
 	public void updateSamWithNullDriversLicenseWithSessionFlush() throws Throwable {
 		updateSamWithNullDriversLicense();
-		// Manual flush is required to avoid false positive in test
-		try {
-			sessionFactory.getCurrentSession().flush();
-		}
-		catch (PersistenceException ex) {
-			// Wrapped in Hibernate 5.2, with the constraint violation as cause
-			throw ex.getCause();
-		}
+		assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> {
+			// Manual flush is required to avoid false positive in test
+			try {
+				sessionFactory.getCurrentSession().flush();
+			}
+			catch (PersistenceException ex) {
+				// Wrapped in Hibernate 5.2, with the constraint violation as cause
+				throw ex.getCause();
+			}
+		});
 	}
 
 	private void updateSamWithNullDriversLicense() {

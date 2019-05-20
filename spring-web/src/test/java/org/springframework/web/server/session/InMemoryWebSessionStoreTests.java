@@ -27,12 +27,12 @@ import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.web.server.WebSession;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link InMemoryWebSessionStore}.
@@ -149,14 +149,9 @@ public class InMemoryWebSessionStoreTests {
 	public void maxSessions() {
 
 		IntStream.range(0, 10000).forEach(i -> insertSession());
-
-		try {
-			insertSession();
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertEquals("Max sessions limit reached: 10000", ex.getMessage());
-		}
+		assertThatIllegalStateException().isThrownBy(
+				this::insertSession)
+			.withMessage("Max sessions limit reached: 10000");
 	}
 
 	private WebSession insertSession() {

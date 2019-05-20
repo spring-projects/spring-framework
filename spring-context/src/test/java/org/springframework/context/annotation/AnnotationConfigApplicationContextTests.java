@@ -34,6 +34,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
 
 import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
@@ -45,7 +46,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.util.StringUtils.uncapitalize;
 
 /**
@@ -106,13 +106,9 @@ public class AnnotationConfigApplicationContextTests {
 
 		// attempt to retrieve a bean that does not exist
 		Class<?> targetType = Pattern.class;
-		try {
-			context.getBean(targetType);
-			fail("Should have thrown NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			assertThat(ex.getMessage(), containsString(format("No qualifying bean of type '%s'", targetType.getName())));
-		}
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				context.getBean(targetType))
+			.withMessageContaining(format("No qualifying bean of type '%s'", targetType.getName()));
 	}
 
 	@Test

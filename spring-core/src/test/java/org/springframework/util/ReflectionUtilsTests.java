@@ -32,6 +32,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.objects.TestObject;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
@@ -119,25 +120,28 @@ public class ReflectionUtilsTests {
 		assertFalse(ReflectionUtils.declaresException(illegalExMethod, Exception.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void copySrcToDestinationOfIncorrectClass() {
 		TestObject src = new TestObject();
 		String dest = new String();
-		ReflectionUtils.shallowCopyFieldState(src, dest);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ReflectionUtils.shallowCopyFieldState(src, dest));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullSrc() {
 		TestObject src = null;
 		String dest = new String();
-		ReflectionUtils.shallowCopyFieldState(src, dest);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ReflectionUtils.shallowCopyFieldState(src, dest));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullDest() {
 		TestObject src = new TestObject();
 		String dest = null;
-		ReflectionUtils.shallowCopyFieldState(src, dest);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ReflectionUtils.shallowCopyFieldState(src, dest));
 	}
 
 	@Test

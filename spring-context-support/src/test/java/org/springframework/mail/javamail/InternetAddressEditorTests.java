@@ -18,6 +18,7 @@ package org.springframework.mail.javamail;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -69,9 +70,10 @@ public class InternetAddressEditorTests {
 		assertEquals("Whitespace was not stripped", SIMPLE, editor.getAsText());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void simpleBadAddress() {
-		editor.setAsText(BAD);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setAsText(BAD));
 	}
 
 }

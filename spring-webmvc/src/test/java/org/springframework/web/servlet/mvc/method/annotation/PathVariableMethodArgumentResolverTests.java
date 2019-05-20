@@ -40,12 +40,12 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test fixture with {@link PathVariableMethodArgumentResolver}.
@@ -164,10 +164,10 @@ public class PathVariableMethodArgumentResolverTests {
 		assertEquals("oldValue", pathVars.get("oldName"));
 	}
 
-	@Test(expected = MissingPathVariableException.class)
+	@Test
 	public void handleMissingValue() throws Exception {
-		resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
-		fail("Unresolved path variable should lead to exception");
+		assertThatExceptionOfType(MissingPathVariableException.class).isThrownBy(() ->
+				resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null));
 	}
 
 	@Test

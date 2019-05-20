@@ -29,13 +29,11 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.ResolvableMethod;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -83,13 +81,9 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void cannotResolveArg() throws Exception {
-		try {
-			getInvocable(Integer.class, String.class).invokeForRequest(request, null);
-			fail("Expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("Could not resolve parameter [0]"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				getInvocable(Integer.class, String.class).invokeForRequest(request, null))
+			.withMessageContaining("Could not resolve parameter [0]");
 	}
 
 	@Test
@@ -113,85 +107,54 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void exceptionInResolvingArg() throws Exception {
 		this.composite.addResolver(new ExceptionRaisingArgumentResolver());
-		try {
-			getInvocable(Integer.class, String.class).invokeForRequest(request, null);
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected -  allow HandlerMethodArgumentResolver exceptions to propagate
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getInvocable(Integer.class, String.class).invokeForRequest(request, null));
 	}
 
 	@Test
 	public void illegalArgumentException() throws Exception {
 		this.composite.addResolver(new StubArgumentResolver(Integer.class, "__not_an_int__"));
 		this.composite.addResolver(new StubArgumentResolver("value"));
-		try {
-			getInvocable(Integer.class, String.class).invokeForRequest(request, null);
-			fail("Expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertNotNull("Exception not wrapped", ex.getCause());
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-			assertTrue(ex.getMessage().contains("Controller ["));
-			assertTrue(ex.getMessage().contains("Method ["));
-			assertTrue(ex.getMessage().contains("with argument values:"));
-			assertTrue(ex.getMessage().contains("[0] [type=java.lang.String] [value=__not_an_int__]"));
-			assertTrue(ex.getMessage().contains("[1] [type=java.lang.String] [value=value"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				getInvocable(Integer.class, String.class).invokeForRequest(request, null))
+			.withCauseInstanceOf(IllegalArgumentException.class)
+			.withMessageContaining("Controller [")
+			.withMessageContaining("Method [")
+			.withMessageContaining("with argument values:")
+			.withMessageContaining("[0] [type=java.lang.String] [value=__not_an_int__]")
+			.withMessageContaining("[1] [type=java.lang.String] [value=value");
 	}
 
 	@Test
 	public void invocationTargetException() throws Exception {
-		Throwable expected = new RuntimeException("error");
-		try {
-			getInvocable(Throwable.class).invokeForRequest(this.request, null, expected);
-			fail("Expected exception");
-		}
-		catch (RuntimeException actual) {
-			assertSame(expected, actual);
-		}
+		RuntimeException runtimeException = new RuntimeException("error");
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				getInvocable(Throwable.class).invokeForRequest(this.request, null, runtimeException))
+			.isSameAs(runtimeException);
 
-		expected = new Error("error");
-		try {
-			getInvocable(Throwable.class).invokeForRequest(this.request, null, expected);
-			fail("Expected exception");
-		}
-		catch (Error actual) {
-			assertSame(expected, actual);
-		}
+		Error error = new Error("error");
+		assertThatExceptionOfType(Error.class).isThrownBy(() ->
+				getInvocable(Throwable.class).invokeForRequest(this.request, null, error))
+			.isSameAs(error);
 
-		expected = new Exception("error");
-		try {
-			getInvocable(Throwable.class).invokeForRequest(this.request, null, expected);
-			fail("Expected exception");
-		}
-		catch (Exception actual) {
-			assertSame(expected, actual);
-		}
+		Exception exception = new Exception("error");
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				getInvocable(Throwable.class).invokeForRequest(this.request, null, exception))
+			.isSameAs(exception);
 
-		expected = new Throwable("error");
-		try {
-			getInvocable(Throwable.class).invokeForRequest(this.request, null, expected);
-			fail("Expected exception");
-		}
-		catch (IllegalStateException actual) {
-			assertNotNull(actual.getCause());
-			assertSame(expected, actual.getCause());
-			assertTrue(actual.getMessage().contains("Invocation failure"));
-		}
+		Throwable throwable = new Throwable("error");
+		assertThatIllegalStateException().isThrownBy(() ->
+				getInvocable(Throwable.class).invokeForRequest(this.request, null, throwable))
+			.withCause(throwable)
+			.withMessageContaining("Invocation failure");
 	}
 
 	@Test  // SPR-13917
 	public void invocationErrorMessage() throws Exception {
 		this.composite.addResolver(new StubArgumentResolver(double.class));
-		try {
-			getInvocable(double.class).invokeForRequest(this.request, null);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("Illegal argument"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				getInvocable(double.class).invokeForRequest(this.request, null))
+			.withMessageContaining("Illegal argument");
 	}
 
 	private InvocableHandlerMethod getInvocable(Class<?>... argTypes) {

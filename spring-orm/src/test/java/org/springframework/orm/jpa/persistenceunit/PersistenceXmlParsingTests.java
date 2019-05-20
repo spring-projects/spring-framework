@@ -36,13 +36,13 @@ import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit and integration tests for the JPA XML resource parsing support.
@@ -264,12 +264,8 @@ public class PersistenceXmlParsingTests {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-invalid.xml";
-		try {
-			reader.readPersistenceUnitInfos(resource);
-			fail("expected invalid document exception");
-		}
-		catch (RuntimeException expected) {
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				reader.readPersistenceUnitInfos(resource));
 	}
 
 	@Ignore  // not doing schema parsing anymore for JPA 2.0 compatibility
@@ -278,12 +274,8 @@ public class PersistenceXmlParsingTests {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-no-schema.xml";
-		try {
-			reader.readPersistenceUnitInfos(resource);
-			fail("expected invalid document exception");
-		}
-		catch (RuntimeException expected) {
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				reader.readPersistenceUnitInfos(resource));
 	}
 
 	@Test

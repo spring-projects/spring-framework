@@ -45,12 +45,12 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -203,16 +203,14 @@ public class MappingJackson2XmlViewTests {
 		validateResult();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void renderModelWithMultipleKeys() throws Exception {
-
 		Map<String, Object> model = new TreeMap<>();
 		model.put("foo", "foo");
 		model.put("bar", "bar");
 
-		view.render(model, request, response);
-
-		fail();
+		assertThatIllegalStateException().isThrownBy(() ->
+				view.render(model, request, response));
 	}
 
 	@Test

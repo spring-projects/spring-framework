@@ -40,6 +40,7 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -126,9 +127,10 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertSame(xhrHandler, handlers.get(xhrHandler.getTransportType()));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invalidAllowedOrigins() {
-		this.service.setAllowedOrigins(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.service.setAllowedOrigins(null));
 	}
 
 	@Test

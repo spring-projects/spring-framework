@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.core.env.StandardEnvironment;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -44,9 +45,10 @@ public class ResourceEditorTests {
 		assertTrue(resource.exists());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorWithNullCtorArgs() throws Exception {
-		new ResourceEditor(null, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ResourceEditor(null, null));
 	}
 
 	@Test
@@ -77,14 +79,15 @@ public class ResourceEditorTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testStrictSystemPropertyReplacement() {
 		PropertyEditor editor = new ResourceEditor(new DefaultResourceLoader(), new StandardEnvironment(), false);
 		System.setProperty("test.prop", "foo");
 		try {
-			editor.setAsText("${test.prop}-${bar}");
-			Resource resolved = (Resource) editor.getValue();
-			assertEquals("foo-${bar}", resolved.getFilename());
+			assertThatIllegalArgumentException().isThrownBy(() -> {
+					editor.setAsText("${test.prop}-${bar}");
+					editor.getValue();
+			});
 		}
 		finally {
 			System.getProperties().remove("test.prop");

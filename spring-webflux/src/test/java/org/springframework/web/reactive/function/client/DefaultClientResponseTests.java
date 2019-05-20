@@ -46,9 +46,9 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
@@ -247,13 +247,8 @@ public class DefaultClientResponseTests {
 
 		ResponseEntity<String> result = defaultClientResponse.toEntity(String.class).block();
 		assertEquals("foo", result.getBody());
-		try {
-			result.getStatusCode();
-			fail("Expected IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// do nothing
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				result::getStatusCode);
 		assertEquals(999, result.getStatusCodeValue());
 		assertEquals(MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
 	}
@@ -318,13 +313,8 @@ public class DefaultClientResponseTests {
 
 		ResponseEntity<List<String>> result = defaultClientResponse.toEntityList(String.class).block();
 		assertEquals(Collections.singletonList("foo"), result.getBody());
-		try {
-			result.getStatusCode();
-			fail("Expected IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// do nothing
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				result::getStatusCode);
 		assertEquals(999, result.getStatusCodeValue());
 		assertEquals(MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
 	}

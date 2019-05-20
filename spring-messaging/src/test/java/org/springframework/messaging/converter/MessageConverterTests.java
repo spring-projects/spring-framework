@@ -33,6 +33,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -104,10 +105,11 @@ public class MessageConverterTests {
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setStrictContentTypeMatchWithNoSupportedMimeTypes() {
 		this.converter = new TestMessageConverter(Collections.<MimeType>emptyList());
-		this.converter.setStrictContentTypeMatch(true);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.converter.setStrictContentTypeMatch(true));
 	}
 
 	@Test

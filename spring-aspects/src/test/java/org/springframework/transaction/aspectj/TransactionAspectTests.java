@@ -21,9 +21,8 @@ import org.junit.Test;
 
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -104,50 +103,34 @@ public class TransactionAspectTests {
 
 	@Test
 	public void defaultCommitOnAnnotatedClass() throws Throwable {
-		final Exception ex = new Exception();
-		try {
-			testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), false);
-			fail("Should have thrown Exception");
-		}
-		catch (Exception ex2) {
-			assertSame(ex, ex2);
-		}
+		Exception ex = new Exception();
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), false))
+			.isSameAs(ex);
 	}
 
 	@Test
 	public void defaultRollbackOnAnnotatedClass() throws Throwable {
-		final RuntimeException ex = new RuntimeException();
-		try {
-			testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), true);
-			fail("Should have thrown RuntimeException");
-		}
-		catch (RuntimeException ex2) {
-			assertSame(ex, ex2);
-		}
+		RuntimeException ex = new RuntimeException();
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				testRollback(() -> annotationOnlyOnClassWithNoInterface.echo(ex), true))
+			.isSameAs(ex);
 	}
 
 	@Test
 	public void defaultCommitOnSubclassOfAnnotatedClass() throws Throwable {
-		final Exception ex = new Exception();
-		try {
-			testRollback(() -> new SubclassOfClassWithTransactionalAnnotation().echo(ex), false);
-			fail("Should have thrown Exception");
-		}
-		catch (Exception ex2) {
-			assertSame(ex, ex2);
-		}
+		Exception ex = new Exception();
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				testRollback(() -> new SubclassOfClassWithTransactionalAnnotation().echo(ex), false))
+			.isSameAs(ex);
 	}
 
 	@Test
 	public void defaultCommitOnSubclassOfClassWithTransactionalMethodAnnotated() throws Throwable {
-		final Exception ex = new Exception();
-		try {
-			testRollback(() -> new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex), false);
-			fail("Should have thrown Exception");
-		}
-		catch (Exception ex2) {
-			assertSame(ex, ex2);
-		}
+		Exception ex = new Exception();
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				testRollback(() -> new SubclassOfClassWithTransactionalMethodAnnotation().echo(ex), false))
+			.isSameAs(ex);
 	}
 
 	@Test
@@ -180,18 +163,9 @@ public class TransactionAspectTests {
 	protected void testNotTransactional(TransactionOperationCallback toc, Throwable expected) throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
-		try {
-			toc.performTransactionalOperation();
-		}
-		catch (Throwable ex) {
-			if (expected == null) {
-				fail("Expected " + expected);
-			}
-			assertSame(expected, ex);
-		}
-		finally {
-			assertEquals(0, txManager.begun);
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(
+				toc::performTransactionalOperation).isSameAs(expected);
+		assertEquals(0, txManager.begun);
 	}
 
 

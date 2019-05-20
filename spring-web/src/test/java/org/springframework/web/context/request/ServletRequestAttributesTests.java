@@ -26,9 +26,10 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpSession;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -49,9 +50,10 @@ public class ServletRequestAttributesTests {
 	};
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorRejectsNullArg() throws Exception {
-		new ServletRequestAttributes(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ServletRequestAttributes(null));
 	}
 
 	@Test
@@ -68,13 +70,8 @@ public class ServletRequestAttributesTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		request.close();
-		try {
-			attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST));
 	}
 
 	@Test

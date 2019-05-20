@@ -30,6 +30,7 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 public class RedirectViewUriTemplateTests {
@@ -113,9 +114,10 @@ public class RedirectViewUriTemplateTests {
 		assertEquals(url + "/value1/v1/value2?key3=value3", this.response.getRedirectedUrl());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void uriTemplateNullValue() throws Exception {
-		new RedirectView("/{foo}").renderMergedOutputModel(new ModelMap(), this.request, this.response);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RedirectView("/{foo}").renderMergedOutputModel(new ModelMap(), this.request, this.response));
 	}
 
 	@Test

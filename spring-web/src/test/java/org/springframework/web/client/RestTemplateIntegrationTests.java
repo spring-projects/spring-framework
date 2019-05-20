@@ -54,13 +54,13 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -173,40 +173,34 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 
 	@Test
 	public void notFound() {
-		try {
-			template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);
-			fail("HttpClientErrorException expected");
-		}
-		catch (HttpClientErrorException ex) {
-			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-			assertNotNull(ex.getStatusText());
-			assertNotNull(ex.getResponseBodyAsString());
-		}
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null))
+			.satisfies(ex -> {
+				assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+				assertNotNull(ex.getStatusText());
+				assertNotNull(ex.getResponseBodyAsString());
+			});
 	}
 
 	@Test
 	public void badRequest() {
-		try {
-			template.execute(baseUrl + "/status/badrequest", HttpMethod.GET, null, null);
-			fail("HttpClientErrorException.BadRequest expected");
-		}
-		catch (HttpClientErrorException.BadRequest ex) {
-			assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-			assertEquals("400 Client Error", ex.getMessage());
-		}
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				template.execute(baseUrl + "/status/badrequest", HttpMethod.GET, null, null))
+			.satisfies(ex -> {
+				assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+				assertEquals("400 Client Error", ex.getMessage());
+			});
 	}
 
 	@Test
 	public void serverError() {
-		try {
-			template.execute(baseUrl + "/status/server", HttpMethod.GET, null, null);
-			fail("HttpServerErrorException expected");
-		}
-		catch (HttpServerErrorException ex) {
-			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
-			assertNotNull(ex.getStatusText());
-			assertNotNull(ex.getResponseBodyAsString());
-		}
+		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
+				template.execute(baseUrl + "/status/server", HttpMethod.GET, null, null))
+			.satisfies(ex -> {
+				assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
+				assertNotNull(ex.getStatusText());
+				assertNotNull(ex.getResponseBodyAsString());
+			});
 	}
 
 	@Test

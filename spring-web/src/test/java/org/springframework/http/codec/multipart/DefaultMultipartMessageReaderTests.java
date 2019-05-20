@@ -37,7 +37,6 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -148,7 +147,9 @@ public class DefaultMultipartMessageReaderTests extends AbstractDataBufferAlloca
 			CountDownLatch latch = new CountDownLatch(1);
 			file.transferTo(tempFile)
 					.subscribe(null,
-							throwable -> fail(throwable.getMessage()),
+							throwable -> {
+								throw new AssertionError(throwable.getMessage(), throwable);
+							},
 							() -> {
 								try {
 									verifyContents(tempFile, contents);

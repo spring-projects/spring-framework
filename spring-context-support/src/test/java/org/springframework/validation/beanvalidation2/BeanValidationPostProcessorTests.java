@@ -29,9 +29,9 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.beanvalidation.BeanValidationPostProcessor;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -44,14 +44,9 @@ public class BeanValidationPostProcessorTests {
 		ac.registerBeanDefinition("bvpp", new RootBeanDefinition(BeanValidationPostProcessor.class));
 		ac.registerBeanDefinition("capp", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
 		ac.registerBeanDefinition("bean", new RootBeanDefinition(NotNullConstrainedBean.class));
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause().getMessage().contains("testBean"));
-			assertTrue(ex.getRootCause().getMessage().contains("invalid"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				ac::refresh)
+			.satisfies(ex -> assertThat(ex.getRootCause().getMessage()).contains("testBean", "invalid"));
 		ac.close();
 	}
 
@@ -87,14 +82,9 @@ public class BeanValidationPostProcessorTests {
 		bd.getPropertyValues().add("testBean", new TestBean());
 		bd.getPropertyValues().add("stringValue", "s");
 		ac.registerBeanDefinition("bean", bd);
-		try {
-			ac.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause().getMessage().contains("stringValue"));
-			assertTrue(ex.getRootCause().getMessage().contains("invalid"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				ac::refresh)
+			.satisfies(ex -> assertThat(ex.getRootCause().getMessage()).contains("stringValue", "invalid"));
 		ac.close();
 	}
 

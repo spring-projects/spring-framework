@@ -34,6 +34,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
@@ -118,7 +119,7 @@ public class SampleTests {
 		this.mockServer.verify();
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void expectNeverViolated() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
@@ -129,7 +130,8 @@ public class SampleTests {
 				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
-		this.restTemplate.getForObject("/composers/{id}", Person.class, 43);
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.restTemplate.getForObject("/composers/{id}", Person.class, 43));
 	}
 
 	@Test

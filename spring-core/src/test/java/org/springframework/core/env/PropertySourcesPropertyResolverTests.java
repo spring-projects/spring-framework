@@ -26,13 +26,15 @@ import org.junit.Test;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.mock.env.MockPropertySource;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Chris Beams
@@ -117,13 +119,8 @@ public class PropertySourcesPropertyResolverTests {
 
 		class TestType { }
 
-		try {
-			propertyResolver.getProperty("foo", TestType.class);
-			fail("Expected ConverterNotFoundException due to non-convertible types");
-		}
-		catch (ConverterNotFoundException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				propertyResolver.getProperty("foo", TestType.class));
 	}
 
 	@Test
@@ -177,13 +174,8 @@ public class PropertySourcesPropertyResolverTests {
 		testProperties.put("exists", "xyz");
 		assertThat(propertyResolver.getRequiredProperty("exists"), is("xyz"));
 
-		try {
-			propertyResolver.getRequiredProperty("bogus");
-			fail("expected IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				propertyResolver.getRequiredProperty("bogus"));
 	}
 
 	@Test
@@ -191,13 +183,8 @@ public class PropertySourcesPropertyResolverTests {
 		testProperties.put("exists", "abc,123");
 		assertThat(propertyResolver.getRequiredProperty("exists", String[].class), equalTo(new String[] { "abc", "123" }));
 
-		try {
-			propertyResolver.getRequiredProperty("bogus", String[].class);
-			fail("expected IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				propertyResolver.getRequiredProperty("bogus", String[].class));
 	}
 
 	@Test
@@ -226,9 +213,10 @@ public class PropertySourcesPropertyResolverTests {
 				equalTo("Replace this value plus defaultValue"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void resolvePlaceholders_withNullInput() {
-		new PropertySourcesPropertyResolver(new MutablePropertySources()).resolvePlaceholders(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new PropertySourcesPropertyResolver(new MutablePropertySources()).resolvePlaceholders(null));
 	}
 
 	@Test
@@ -239,12 +227,13 @@ public class PropertySourcesPropertyResolverTests {
 		assertThat(resolver.resolveRequiredPlaceholders("Replace this ${key}"), equalTo("Replace this value"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void resolveRequiredPlaceholders_withUnresolvable() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.resolveRequiredPlaceholders("Replace this ${key} plus ${unknown}");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				resolver.resolveRequiredPlaceholders("Replace this ${key} plus ${unknown}"));
 	}
 
 	@Test
@@ -256,9 +245,10 @@ public class PropertySourcesPropertyResolverTests {
 				equalTo("Replace this value plus defaultValue"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void resolveRequiredPlaceholders_withNullInput() {
-		new PropertySourcesPropertyResolver(new MutablePropertySources()).resolveRequiredPlaceholders(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new PropertySourcesPropertyResolver(new MutablePropertySources()).resolveRequiredPlaceholders(null));
 	}
 
 	@Test
@@ -270,27 +260,17 @@ public class PropertySourcesPropertyResolverTests {
 		propertyResolver.setRequiredProperties("foo", "bar");
 
 		// neither foo nor bar properties are present -> validating should throw
-		try {
-			propertyResolver.validateRequiredProperties();
-			fail("expected validation exception");
-		}
-		catch (MissingRequiredPropertiesException ex) {
-			assertThat(ex.getMessage(), equalTo(
-					"The following properties were declared as required " +
-					"but could not be resolved: [foo, bar]"));
-		}
+		assertThatExceptionOfType(MissingRequiredPropertiesException.class).isThrownBy(
+				propertyResolver::validateRequiredProperties)
+			.withMessage("The following properties were declared as required " +
+					"but could not be resolved: [foo, bar]");
 
 		// add foo property -> validation should fail only on missing 'bar' property
 		testProperties.put("foo", "fooValue");
-		try {
-			propertyResolver.validateRequiredProperties();
-			fail("expected validation exception");
-		}
-		catch (MissingRequiredPropertiesException ex) {
-			assertThat(ex.getMessage(), equalTo(
-					"The following properties were declared as required " +
-					"but could not be resolved: [bar]"));
-		}
+		assertThatExceptionOfType(MissingRequiredPropertiesException.class).isThrownBy(
+				propertyResolver::validateRequiredProperties)
+			.withMessage("The following properties were declared as required " +
+					"but could not be resolved: [bar]");
 
 		// add bar property -> validation should pass, even with an empty string value
 		testProperties.put("bar", "");

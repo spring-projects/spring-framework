@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -50,17 +52,19 @@ public class ManagedPropertiesTests {
 		assertSame(child, child.merge(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void mergeWithNonCompatibleParentType() {
 		ManagedProperties map = new ManagedProperties();
 		map.setMergeEnabled(true);
-		map.merge("hello");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				map.merge("hello"));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void mergeNotAllowedWhenMergeNotEnabled() {
 		ManagedProperties map = new ManagedProperties();
-		map.merge(null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				map.merge(null));
 	}
 
 	@Test

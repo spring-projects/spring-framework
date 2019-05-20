@@ -38,6 +38,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -70,10 +71,11 @@ public class HandlerMethodMappingTests {
 	}
 
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void registerDuplicates() {
 		this.mapping.registerMapping("foo", this.handler, this.method1);
-		this.mapping.registerMapping("foo", this.handler, this.method2);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.mapping.registerMapping("foo", this.handler, this.method2));
 	}
 
 	@Test
@@ -98,12 +100,13 @@ public class HandlerMethodMappingTests {
 		assertEquals(result, request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void ambiguousMatch() throws Exception {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 
-		this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo")));
 	}
 
 	@Test

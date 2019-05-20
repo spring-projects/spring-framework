@@ -35,9 +35,9 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -78,14 +78,12 @@ public class AnnotationTransactionNamespaceHandlerTests {
 		assertEquals("Should not have started another transaction", 1, ptm.begun);
 
 		// try with exceptional
-		try {
-			testBean.exceptional(new IllegalArgumentException("foo"));
-			fail("Should NEVER get here");
-		}
-		catch (Throwable throwable) {
-			assertEquals("Should have another started transaction", 2, ptm.begun);
-			assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				testBean.exceptional(new IllegalArgumentException("foo")))
+			.satisfies(ex -> {
+				assertEquals("Should have another started transaction", 2, ptm.begun);
+				assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
+			});
 	}
 
 	@Test

@@ -42,12 +42,12 @@ import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.entry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -402,18 +402,9 @@ public class JavaMailSenderTests {
 		sender.setUsername("username");
 		sender.setPassword("password");
 		SimpleMailMessage simpleMessage1 = new SimpleMailMessage();
-		try {
-			sender.send(simpleMessage1);
-			fail("Should have thrown MailSendException");
-		}
-		catch (MailSendException ex) {
-			// expected
-			ex.printStackTrace();
-			assertTrue(ex.getFailedMessages() != null);
-			assertEquals(1, ex.getFailedMessages().size());
-			assertSame(simpleMessage1, ex.getFailedMessages().keySet().iterator().next());
-			assertSame(ex.getCause(), ex.getFailedMessages().values().iterator().next());
-		}
+		assertThatExceptionOfType(MailSendException.class).isThrownBy(() ->
+				sender.send(simpleMessage1))
+			.satisfies(ex ->  assertThat(ex.getFailedMessages()).containsExactly(entry(simpleMessage1, (Exception) ex.getCause())));
 	}
 
 	@Test
@@ -423,16 +414,9 @@ public class JavaMailSenderTests {
 		sender.setUsername("username");
 		sender.setPassword("password");
 		SimpleMailMessage simpleMessage1 = new SimpleMailMessage();
-		try {
-			sender.send(simpleMessage1);
-			fail("Should have thrown MailSendException");
-		}
-		catch (MailSendException ex) {
-			// expected
-			ex.printStackTrace();
-			assertTrue(ex.getFailedMessages() != null);
-			assertEquals(0, ex.getFailedMessages().size());
-		}
+		assertThatExceptionOfType(MailSendException.class).isThrownBy(() ->
+				sender.send(simpleMessage1))
+			.satisfies(ex -> assertThat(ex.getFailedMessages()).isEmpty());
 	}
 
 	@Test

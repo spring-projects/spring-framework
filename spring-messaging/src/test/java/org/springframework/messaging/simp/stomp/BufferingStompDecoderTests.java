@@ -25,9 +25,9 @@ import org.junit.Test;
 
 import org.springframework.messaging.Message;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link BufferingStompDecoder}.
@@ -153,21 +153,17 @@ public class BufferingStompDecoderTests {
 		assertEquals(24, stompDecoder.getBufferSize());
 		assertEquals(129, (int) stompDecoder.getExpectedContentLength());
 
-		try {
-			String chunk2 = "\nPayload2a";
-			stompDecoder.decode(toByteBuffer(chunk2));
-			fail("Expected exception");
-		}
-		catch (StompConversionException ex) {
-			// expected
-		}
+		String chunk2 = "\nPayload2a";
+		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
+				stompDecoder.decode(toByteBuffer(chunk2)));
 	}
 
-	@Test(expected = StompConversionException.class)
+	@Test
 	public void bufferSizeLimit() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 10);
 		String payload = "SEND\na:alpha\n\nMessage body";
-		stompDecoder.decode(toByteBuffer(payload));
+		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
+				stompDecoder.decode(toByteBuffer(payload)));
 	}
 
 	@Test
@@ -190,18 +186,20 @@ public class BufferingStompDecoderTests {
 		assertEquals(0, messages.size());
 	}
 
-	@Test(expected = StompConversionException.class)
+	@Test
 	public void invalidEscapeSequence() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String payload = "SEND\na:alpha\\x\\n\nMessage body\0";
-		stompDecoder.decode(toByteBuffer(payload));
+		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
+				stompDecoder.decode(toByteBuffer(payload)));
 	}
 
-	@Test(expected = StompConversionException.class)
+	@Test
 	public void invalidEscapeSequenceWithSingleSlashAtEndOfHeaderValue() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String payload = "SEND\na:alpha\\\n\nMessage body\0";
-		stompDecoder.decode(toByteBuffer(payload));
+		assertThatExceptionOfType(StompConversionException.class).isThrownBy(() ->
+				stompDecoder.decode(toByteBuffer(payload)));
 	}
 
 	private ByteBuffer toByteBuffer(String chunk) {

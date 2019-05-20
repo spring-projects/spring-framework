@@ -31,12 +31,12 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Alef Arendsen
@@ -93,14 +93,10 @@ public class CookieLocaleResolverTests {
 
 		CookieLocaleResolver resolver = new CookieLocaleResolver();
 		resolver.setCookieName("LanguageKoekje");
-		try {
-			resolver.resolveLocaleContext(request);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("LanguageKoekje"));
-			assertTrue(ex.getMessage().contains("++ GMT+1"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolver.resolveLocaleContext(request))
+			.withMessageContaining("LanguageKoekje")
+			.withMessageContaining("++ GMT+1");
 	}
 
 	@Test
@@ -128,14 +124,10 @@ public class CookieLocaleResolverTests {
 
 		CookieLocaleResolver resolver = new CookieLocaleResolver();
 		resolver.setCookieName("LanguageKoekje");
-		try {
-			resolver.resolveLocaleContext(request);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("LanguageKoekje"));
-			assertTrue(ex.getMessage().contains("nl X-MT"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolver.resolveLocaleContext(request))
+			.withMessageContaining("LanguageKoekje")
+			.withMessageContaining("nl X-MT");
 	}
 
 	@Test

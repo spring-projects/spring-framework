@@ -67,14 +67,14 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -159,14 +159,8 @@ public class DataBinderTests {
 		pvs.add("name", "Rod");
 		pvs.add("age", 32);
 		pvs.add("nonExisting", "someValue");
-
-		try {
-			binder.bind(pvs);
-			fail("Should have thrown NotWritablePropertyException");
-		}
-		catch (NotWritablePropertyException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
+				binder.bind(pvs));
 	}
 
 	@Test
@@ -176,14 +170,8 @@ public class DataBinderTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "Rod");
 		pvs.add("spouse.age", 32);
-
-		try {
-			binder.bind(pvs);
-			fail("Should have thrown NullValueInNestedPathException");
-		}
-		catch (NullValueInNestedPathException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NullValueInNestedPathException.class).isThrownBy(() ->
+				binder.bind(pvs));
 	}
 
 	@Test
@@ -207,68 +195,57 @@ public class DataBinderTests {
 		pvs.add("age", "32x");
 		pvs.add("touchy", "m.y");
 		binder.bind(pvs);
+		assertThatExceptionOfType(BindException.class).isThrownBy(
+				binder::close)
+			.satisfies(ex -> {
+				assertThat(rod.getName()).isEqualTo("Rod");
+				Map<?, ?> map = binder.getBindingResult().getModel();
+				TestBean tb = (TestBean) map.get("person");
+				assertThat(tb).isSameAs(rod);
 
-		try {
-			binder.close();
-			fail("Should have thrown BindException");
-		}
-		catch (BindException ex) {
-			assertTrue("changed name correctly", rod.getName().equals("Rod"));
-			//assertTrue("changed age correctly", rod.getAge() == 32);
+				BindingResult br = (BindingResult) map.get(BindingResult.MODEL_KEY_PREFIX + "person");
+				assertThat(BindingResultUtils.getBindingResult(map, "person")).isEqualTo(br);
+				assertThat(BindingResultUtils.getRequiredBindingResult(map, "person")).isEqualTo(br);
 
-			Map<?, ?> map = binder.getBindingResult().getModel();
-			//assertTrue("There are 3 element in map", m.size() == 1);
-			TestBean tb = (TestBean) map.get("person");
-			assertTrue("Same object", tb.equals(rod));
+				assertThat(BindingResultUtils.getBindingResult(map, "someOtherName")).isNull();
+				assertThatIllegalStateException().isThrownBy(() ->
+						BindingResultUtils.getRequiredBindingResult(map, "someOtherName"));
 
-			BindingResult br = (BindingResult) map.get(BindingResult.MODEL_KEY_PREFIX + "person");
-			assertSame(br, BindingResultUtils.getBindingResult(map, "person"));
-			assertSame(br, BindingResultUtils.getRequiredBindingResult(map, "person"));
+				assertThat(binder.getBindingResult()).as("Added itself to map").isSameAs(br);
+				assertThat(br.hasErrors()).isTrue();
+				assertThat(br.getErrorCount()).isEqualTo(2);
 
-			assertNull(BindingResultUtils.getBindingResult(map, "someOtherName"));
-			try {
-				BindingResultUtils.getRequiredBindingResult(map, "someOtherName");
-				fail("Should have thrown IllegalStateException");
-			}
-			catch (IllegalStateException expected) {
-			}
+				assertThat(br.hasFieldErrors("age")).isTrue();
+				assertThat(br.getFieldErrorCount("age")).isEqualTo(1);
+				assertThat(binder.getBindingResult().getFieldValue("age")).isEqualTo("32x");
+				FieldError ageError = binder.getBindingResult().getFieldError("age");
+				assertThat(ageError).isNotNull();
+				assertThat(ageError.getCode()).isEqualTo("typeMismatch");
+				assertThat(ageError.getRejectedValue()).isEqualTo("32x");
+				assertThat(ageError.contains(TypeMismatchException.class)).isTrue();
+				assertThat(ageError.contains(NumberFormatException.class)).isTrue();
+				assertThat(ageError.unwrap(NumberFormatException.class).getMessage()).contains("32x");
+				assertThat(tb.getAge()).isEqualTo(0);
 
-			assertTrue("Added itself to map", br == binder.getBindingResult());
-			assertTrue(br.hasErrors());
-			assertTrue("Correct number of errors", br.getErrorCount() == 2);
+				assertThat(br.hasFieldErrors("touchy")).isTrue();
+				assertThat(br.getFieldErrorCount("touchy")).isEqualTo(1);
+				assertThat(binder.getBindingResult().getFieldValue("touchy")).isEqualTo("m.y");
+				FieldError touchyError = binder.getBindingResult().getFieldError("touchy");
+				assertThat(touchyError).isNotNull();
+				assertThat(touchyError.getCode()).isEqualTo("methodInvocation");
+				assertThat(touchyError.getRejectedValue()).isEqualTo("m.y");
+				assertThat(touchyError.contains(MethodInvocationException.class)).isTrue();
+				assertThat(touchyError.unwrap(MethodInvocationException.class).getCause().getMessage()).contains("a .");
+				assertThat(tb.getTouchy()).isNull();
 
-			assertTrue("Has age errors", br.hasFieldErrors("age"));
-			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
-			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
-			FieldError ageError = binder.getBindingResult().getFieldError("age");
-			assertNotNull(ageError);
-			assertEquals("typeMismatch", ageError.getCode());
-			assertEquals("32x", ageError.getRejectedValue());
-			assertTrue(ageError.contains(TypeMismatchException.class));
-			assertTrue(ageError.contains(NumberFormatException.class));
-			assertTrue(ageError.unwrap(NumberFormatException.class).getMessage().contains("32x"));
-			assertEquals(0, tb.getAge());
-
-			assertTrue("Has touchy errors", br.hasFieldErrors("touchy"));
-			assertTrue("Correct number of touchy errors", br.getFieldErrorCount("touchy") == 1);
-			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
-			FieldError touchyError = binder.getBindingResult().getFieldError("touchy");
-			assertNotNull(touchyError);
-			assertEquals("methodInvocation", touchyError.getCode());
-			assertEquals("m.y", touchyError.getRejectedValue());
-			assertTrue(touchyError.contains(MethodInvocationException.class));
-			assertTrue(touchyError.unwrap(MethodInvocationException.class).getCause().getMessage().contains("a ."));
-			assertNull(tb.getTouchy());
-
-			rod = new TestBean();
-			binder = new DataBinder(rod, "person");
-			pvs = new MutablePropertyValues();
-			pvs.add("name", "Rod");
-			pvs.add("age", "32x");
-			pvs.add("touchy", "m.y");
-			binder.bind(pvs);
-			assertEquals(binder.getBindingResult(), ex.getBindingResult());
-		}
+				DataBinder binder2 = new DataBinder(new TestBean(), "person");
+				MutablePropertyValues pvs2 = new MutablePropertyValues();
+				pvs2.add("name", "Rod");
+				pvs2.add("age", "32x");
+				pvs2.add("touchy", "m.y");
+				binder2.bind(pvs2);
+				assertEquals(binder2.getBindingResult(), ex.getBindingResult());
+		});
 	}
 
 	@Test
@@ -278,14 +255,9 @@ public class DataBinderTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("class.classLoader.URLs[0]", "https://myserver");
 		binder.setIgnoreUnknownFields(false);
-
-		try {
-			binder.bind(pvs);
-			fail("Should have thrown NotWritablePropertyException");
-		}
-		catch (NotWritablePropertyException ex) {
-			assertTrue(ex.getMessage().contains("classLoader"));
-		}
+		assertThatExceptionOfType(NotWritablePropertyException.class).isThrownBy(() ->
+				binder.bind(pvs))
+			.withMessageContaining("classLoader");
 	}
 
 	@Test
@@ -319,46 +291,41 @@ public class DataBinderTests {
 		pvs.add("spouse", "Kerry");
 		binder.bind(pvs);
 
-		try {
-			binder.close();
-			fail("Should have thrown BindException");
-		}
-		catch (BindException ex) {
-			assertTrue("changed name correctly", rod.getName().equals("Rod"));
-			//assertTrue("changed age correctly", rod.getAge() == 32);
+		assertThatExceptionOfType(BindException.class).isThrownBy(
+				binder::close)
+			.satisfies(ex -> {
+				assertThat(rod.getName()).isEqualTo("Rod");
+				Map<?, ?> model = binder.getBindingResult().getModel();
+				TestBean tb = (TestBean) model.get("person");
+				assertThat(tb).isEqualTo(rod);
 
-			Map<?, ?> model = binder.getBindingResult().getModel();
-			//assertTrue("There are 3 element in map", m.size() == 1);
-			TestBean tb = (TestBean) model.get("person");
-			assertTrue("Same object", tb.equals(rod));
+				BindingResult br = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + "person");
+				assertThat(binder.getBindingResult()).isSameAs(br);
+				assertThat(br.hasErrors()).isTrue();
+				assertThat(br.getErrorCount()).isEqualTo(2);
 
-			BindingResult br = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + "person");
-			assertTrue("Added itself to map", br == binder.getBindingResult());
-			assertTrue(br.hasErrors());
-			assertTrue("Correct number of errors", br.getErrorCount() == 2);
+				assertThat(br.hasFieldErrors("age")).isTrue();
+				assertThat(br.getFieldErrorCount("age")).isEqualTo(1);
+				assertThat(binder.getBindingResult().getFieldValue("age")).isEqualTo("32x");
+				FieldError ageError = binder.getBindingResult().getFieldError("age");
+				assertThat(ageError).isNotNull();
+				assertThat(ageError.getCode()).isEqualTo("typeMismatch");
+				assertThat(ageError.getRejectedValue()).isEqualTo("32x");
+				assertThat(tb.getAge()).isEqualTo(0);
 
-			assertTrue("Has age errors", br.hasFieldErrors("age"));
-			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
-			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
-			FieldError ageError = binder.getBindingResult().getFieldError("age");
-			assertNotNull(ageError);
-			assertEquals("typeMismatch", ageError.getCode());
-			assertEquals("32x", ageError.getRejectedValue());
-			assertEquals(0, tb.getAge());
+				assertThat(br.hasFieldErrors("touchy")).isTrue();
+				assertThat(br.getFieldErrorCount("touchy")).isEqualTo(1);
+				assertThat(binder.getBindingResult().getFieldValue("touchy")).isEqualTo("m.y");
+				FieldError touchyError = binder.getBindingResult().getFieldError("touchy");
+				assertThat(touchyError).isNotNull();
+				assertThat(touchyError.getCode()).isEqualTo("methodInvocation");
+				assertThat(touchyError.getRejectedValue()).isEqualTo("m.y");
+				assertThat(tb.getTouchy()).isNull();
 
-			assertTrue("Has touchy errors", br.hasFieldErrors("touchy"));
-			assertTrue("Correct number of touchy errors", br.getFieldErrorCount("touchy") == 1);
-			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
-			FieldError touchyError = binder.getBindingResult().getFieldError("touchy");
-			assertNotNull(touchyError);
-			assertEquals("methodInvocation", touchyError.getCode());
-			assertEquals("m.y", touchyError.getRejectedValue());
-			assertNull(tb.getTouchy());
-
-			assertTrue("Does not have spouse errors", !br.hasFieldErrors("spouse"));
-			assertEquals("Kerry", binder.getBindingResult().getFieldValue("spouse"));
-			assertNotNull(tb.getSpouse());
-		}
+				assertThat(br.hasFieldErrors("spouse")).isFalse();
+				assertThat(binder.getBindingResult().getFieldValue("spouse")).isEqualTo("Kerry");
+				assertThat(tb.getSpouse()).isNotNull();
+			});
 	}
 
 	@Test
@@ -1159,16 +1126,11 @@ public class DataBinderTests {
 	}
 
 	@Test
-	public void testValidatorNoErrors() {
+	public void testValidatorNoErrors() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setAge(33);
 		tb.setName("Rod");
-		try {
-			tb.setTouchy("Rod");
-		}
-		catch (Exception e) {
-			fail("Should not throw any Exception");
-		}
+		tb.setTouchy("Rod"); // Should not throw
 		TestBean tb2 = new TestBean();
 		tb2.setAge(34);
 		tb.setSpouse(tb2);
@@ -1929,14 +1891,9 @@ public class DataBinderTests {
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.add("friends[256]", "");
-		try {
-			binder.bind(mpvs);
-			fail("Should have thrown InvalidPropertyException");
-		}
-		catch (InvalidPropertyException ex) {
-			// expected
-			assertTrue(ex.getRootCause() instanceof IndexOutOfBoundsException);
-		}
+		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
+				binder.bind(mpvs))
+			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IndexOutOfBoundsException.class));
 	}
 
 	@Test
@@ -1960,14 +1917,9 @@ public class DataBinderTests {
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.add("friends[16]", "");
-		try {
-			binder.bind(mpvs);
-			fail("Should have thrown InvalidPropertyException");
-		}
-		catch (InvalidPropertyException ex) {
-			// expected
-			assertTrue(ex.getRootCause() instanceof IndexOutOfBoundsException);
-		}
+		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
+				binder.bind(mpvs))
+			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IndexOutOfBoundsException.class));
 	}
 
 	@Test

@@ -39,9 +39,9 @@ import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -81,13 +81,9 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		Set<TestBean> input = new HashSet<>();
 		input.add(new TestBean());
-		try {
-			bw.setPropertyValue("integerSet", input);
-			fail("Should have thrown TypeMismatchException");
-		}
-		catch (TypeMismatchException ex) {
-			assertTrue(ex.getMessage().contains("java.lang.Integer"));
-		}
+		assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() ->
+				bw.setPropertyValue("integerSet", input))
+			.withMessageContaining("java.lang.Integer");
 	}
 
 	@Test

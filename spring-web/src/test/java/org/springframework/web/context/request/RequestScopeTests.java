@@ -31,6 +31,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -38,7 +39,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -117,16 +117,11 @@ public class RequestScopeTests {
 		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
-		try {
-			String name = "requestScopedObjectCircle1";
-			assertNull(request.getAttribute(name));
-
-			this.beanFactory.getBean(name);
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
-		}
+		String name = "requestScopedObjectCircle1";
+		assertNull(request.getAttribute(name));
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				this.beanFactory.getBean(name))
+			.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
 	}
 
 	@Test

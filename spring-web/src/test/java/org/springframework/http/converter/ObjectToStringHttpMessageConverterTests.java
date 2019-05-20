@@ -34,6 +34,7 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -171,9 +172,10 @@ public class ObjectToStringHttpMessageConverterTests {
 		assertArrayEquals(new byte[] { -2, -1, 0, '9', 0, '5', 0, '8' }, this.servletResponse.getContentAsByteArray());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testConversionServiceRequired() {
-		new ObjectToStringHttpMessageConverter(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ObjectToStringHttpMessageConverter(null));
 	}
 
 }

@@ -25,6 +25,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -106,11 +107,10 @@ public class HeaderWebSessionIdResolverTests {
 				this.exchange.getResponse().getHeaders().get(headerName));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setSessionIdWhenNullIdThenIllegalArgumentException() {
-		String id = null;
-
-		this.idResolver.setSessionId(this.exchange, id);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.idResolver.setSessionId(this.exchange, (String) null));
 	}
 
 	@Test

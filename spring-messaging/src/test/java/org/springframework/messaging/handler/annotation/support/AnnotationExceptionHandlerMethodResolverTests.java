@@ -27,6 +27,7 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -93,14 +94,16 @@ public class AnnotationExceptionHandlerMethodResolverTests {
 		assertEquals("handleIOException", this.resolver.resolveMethod(exception).getName());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void ambiguousExceptionMapping() {
-		new AnnotationExceptionHandlerMethodResolver(AmbiguousController.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				new AnnotationExceptionHandlerMethodResolver(AmbiguousController.class));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void noExceptionMapping() {
-		new AnnotationExceptionHandlerMethodResolver(NoExceptionController.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				new AnnotationExceptionHandlerMethodResolver(NoExceptionController.class));
 	}
 
 

@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -75,14 +76,16 @@ public class MockMvcConnectionBuilderSupportTests {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorMockMvcNull() {
-		new MockMvcWebConnectionBuilderSupport((MockMvc) null){};
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MockMvcWebConnectionBuilderSupport((MockMvc) null){});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorContextNull() {
-		new MockMvcWebConnectionBuilderSupport((WebApplicationContext) null){};
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MockMvcWebConnectionBuilderSupport((WebApplicationContext) null){});
 	}
 
 	@Test

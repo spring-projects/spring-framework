@@ -56,6 +56,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
@@ -157,7 +158,7 @@ public class DefaultServerRequestTests {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void pathVariableNotFound() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"));
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
@@ -165,7 +166,8 @@ public class DefaultServerRequestTests {
 
 		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
 
-		request.pathVariable("baz");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				request.pathVariable("baz"));
 	}
 
 	@Test

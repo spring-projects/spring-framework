@@ -27,10 +27,10 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -69,13 +69,8 @@ public class RequestAndSessionScopedBeanTests {
 		assertNotSame(target3, target);
 
 		RequestContextHolder.setRequestAttributes(null);
-		try {
-			wac.getBean(targetBeanName);
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				wac.getBean(targetBeanName));
 	}
 
 	@Test
@@ -97,15 +92,8 @@ public class RequestAndSessionScopedBeanTests {
 		assertSame(target, request.getSession().getAttribute(targetBeanName));
 
 		RequestContextHolder.setRequestAttributes(null);
-		try {
-			wac.getBean(targetBeanName);
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-		}
-
-
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				wac.getBean(targetBeanName));
 	}
 
 }

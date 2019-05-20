@@ -42,6 +42,8 @@ import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.HandlerMapping;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -510,16 +512,18 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(404, this.response.getStatus());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void noPathWithinHandlerMappingAttribute() throws Exception {
-		this.handler.handleRequest(this.request, this.response);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.handler.handleRequest(this.request, this.response));
 	}
 
-	@Test(expected = HttpRequestMethodNotSupportedException.class)
+	@Test
 	public void unsupportedHttpMethod() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.request.setMethod("POST");
-		this.handler.handleRequest(this.request, this.response);
+		assertThatExceptionOfType(HttpRequestMethodNotSupportedException.class).isThrownBy(() ->
+				this.handler.handleRequest(this.request, this.response));
 	}
 
 	@Test

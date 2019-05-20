@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -109,9 +110,10 @@ public class UriUtilsTests {
 		assertEquals("Invalid encoded result", "T\u014dky\u014d", UriUtils.decode("T\u014dky\u014d", CHARSET));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void decodeInvalidSequence() {
-		UriUtils.decode("foo%2", CHARSET);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriUtils.decode("foo%2", CHARSET));
 	}
 
 	@Test

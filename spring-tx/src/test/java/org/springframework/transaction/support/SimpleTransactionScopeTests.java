@@ -28,11 +28,11 @@ import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -58,23 +58,13 @@ public class SimpleTransactionScopeTests {
 
 		context.refresh();
 
-		try {
-			context.getBean(TestBean.class);
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected - no synchronization active
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				context.getBean(TestBean.class))
+			.withCauseInstanceOf(IllegalStateException.class);
 
-		try {
-			context.getBean(DerivedTestBean.class);
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected - no synchronization active
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				context.getBean(DerivedTestBean.class))
+			.withCauseInstanceOf(IllegalStateException.class);
 
 		TestBean bean1 = null;
 		DerivedTestBean bean2 = null;
@@ -113,23 +103,13 @@ public class SimpleTransactionScopeTests {
 		assertTrue(bean2b.wasDestroyed());
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 
-		try {
-			context.getBean(TestBean.class);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (BeanCreationException ex) {
-			// expected - no synchronization active
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				context.getBean(TestBean.class))
+			.withCauseInstanceOf(IllegalStateException.class);
 
-		try {
-			context.getBean(DerivedTestBean.class);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (BeanCreationException ex) {
-			// expected - no synchronization active
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				context.getBean(DerivedTestBean.class))
+			.withCauseInstanceOf(IllegalStateException.class);
 	}
 
 	@Test

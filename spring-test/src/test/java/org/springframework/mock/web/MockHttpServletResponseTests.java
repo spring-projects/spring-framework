@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -298,11 +299,12 @@ public class MockHttpServletResponseTests {
 		assertEquals(time, response.getDateHeader("Last-Modified"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getInvalidDateHeader() {
 		response.setHeader("Last-Modified", "invalid");
 		assertEquals("invalid", response.getHeader("Last-Modified"));
-		response.getDateHeader("Last-Modified");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				response.getDateHeader("Last-Modified"));
 	}
 
 	@Test  // SPR-16160

@@ -29,10 +29,10 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -193,16 +193,12 @@ public class ResourceBundleMessageSourceTests {
 		}
 		assertEquals("I'm", ac.getMessage("escaped", new Object[] {"some arg"}, Locale.ENGLISH));
 
-		try {
+		if (useCodeAsDefaultMessage) {
 			assertEquals("code4", ac.getMessage("code4", null, Locale.GERMAN));
-			if (!useCodeAsDefaultMessage) {
-				fail("Should have thrown NoSuchMessageException");
-			}
 		}
-		catch (NoSuchMessageException ex) {
-			if (useCodeAsDefaultMessage) {
-				fail("Should have returned code as default message");
-			}
+		else {
+			assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
+					ac.getMessage("code4", null, Locale.GERMAN));
 		}
 	}
 
@@ -278,13 +274,8 @@ public class ResourceBundleMessageSourceTests {
 		ms.setBasename("org/springframework/context/support/messages");
 		ms.setDefaultEncoding("argh");
 		ms.setFallbackToSystemLocale(false);
-		try {
-			ms.getMessage("code1", null, Locale.ENGLISH);
-			fail("Should have thrown NoSuchMessageException");
-		}
-		catch (NoSuchMessageException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
+				ms.getMessage("code1", null, Locale.ENGLISH));
 	}
 
 	@Test
@@ -363,13 +354,8 @@ public class ResourceBundleMessageSourceTests {
 		fileCharsets.setProperty("org/springframework/context/support/messages_de", "unicode");
 		ms.setFileEncodings(fileCharsets);
 		ms.setFallbackToSystemLocale(false);
-		try {
-			ms.getMessage("code1", null, Locale.ENGLISH);
-			fail("Should have thrown NoSuchMessageException");
-		}
-		catch (NoSuchMessageException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
+				ms.getMessage("code1", null, Locale.ENGLISH));
 	}
 
 	@Test
@@ -380,13 +366,8 @@ public class ResourceBundleMessageSourceTests {
 		Properties fileCharsets = new Properties();
 		fileCharsets.setProperty("org/springframework/context/support/messages", "unicode");
 		ms.setFileEncodings(fileCharsets);
-		try {
-			ms.getMessage("code1", null, Locale.ENGLISH);
-			fail("Should have thrown NoSuchMessageException");
-		}
-		catch (NoSuchMessageException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
+				ms.getMessage("code1", null, Locale.ENGLISH));
 	}
 
 	@Test

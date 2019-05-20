@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -37,10 +38,11 @@ public class MapSqlParameterSourceTests {
 		new MapSqlParameterSource(null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getValueChokesIfParameterIsNotPresent() {
 		MapSqlParameterSource source = new MapSqlParameterSource();
-		source.getValue("pechorin was right!");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				source.getValue("pechorin was right!"));
 	}
 
 	@Test

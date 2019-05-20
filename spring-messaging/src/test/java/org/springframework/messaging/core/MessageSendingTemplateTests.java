@@ -36,6 +36,8 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -81,10 +83,11 @@ public class MessageSendingTemplateTests {
 		assertSame(message, this.template.message);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void sendMissingDestination() {
 		Message<?> message = new GenericMessage<Object>("payload");
-		this.template.send(message);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.template.send(message));
 	}
 
 	@Test
@@ -174,7 +177,7 @@ public class MessageSendingTemplateTests {
 		assertSame(this.template.message, this.postProcessor.getMessage());
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void convertAndSendNoMatchingConverter() {
 
 		MessageConverter converter = new CompositeMessageConverter(
@@ -182,7 +185,8 @@ public class MessageSendingTemplateTests {
 		this.template.setMessageConverter(converter);
 
 		this.headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_XML);
-		this.template.convertAndSend("home", "payload", new MessageHeaders(this.headers));
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				this.template.convertAndSend("home", "payload", new MessageHeaders(this.headers)));
 	}
 
 

@@ -373,7 +373,7 @@ public class SpelCompilationPerformanceTests extends AbstractExpressionTests {
 
 		assertEquals(interpretedResult,compiledResult);
 		reportPerformance("method reference", interpretedTotal, compiledTotal);
-		if (compiledTotal>=interpretedTotal) {
+		if (compiledTotal >= interpretedTotal) {
 			fail("Compiled version is slower than interpreted!");
 		}
 	}

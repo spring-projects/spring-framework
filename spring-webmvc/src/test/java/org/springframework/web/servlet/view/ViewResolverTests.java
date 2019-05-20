@@ -36,7 +36,6 @@ import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -53,11 +52,12 @@ import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -437,14 +437,9 @@ public class ViewResolverTests {
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
 		XmlViewResolver vr = new XmlViewResolver();
-		try {
-			vr.setApplicationContext(wac);
-			vr.afterPropertiesSet();
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-		}
+		vr.setApplicationContext(wac);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(
+				vr::afterPropertiesSet);
 	}
 
 	@Test
@@ -460,19 +455,9 @@ public class ViewResolverTests {
 		wac.refresh();
 		XmlViewResolver vr = new XmlViewResolver();
 		vr.setCache(false);
-		try {
-			vr.setApplicationContext(wac);
-		}
-		catch (ApplicationContextException ex) {
-			fail("Should not have thrown ApplicationContextException: " + ex.getMessage());
-		}
-		try {
-			vr.resolveViewName("example1", Locale.getDefault());
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-		}
+		vr.setApplicationContext(wac);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				vr.resolveViewName("example1", Locale.getDefault()));
 	}
 
 	@Test
@@ -486,16 +471,12 @@ public class ViewResolverTests {
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
 		View cached = vr.resolveViewName("example1", Locale.getDefault());
-		if (view != cached) {
-			fail("Caching doesn't work");
-		}
+		assertThat(cached).isSameAs(view);
 
 		vr.removeFromCache("example1", Locale.getDefault());
 		cached = vr.resolveViewName("example1", Locale.getDefault());
-		if (view == cached) {
-			// the chance of having the same reference (hashCode) twice if negligible).
-			fail("View wasn't removed from cache");
-		}
+		// the chance of having the same reference (hashCode) twice is negligible.
+		assertThat(cached).as("removed from cache").isNotSameAs(view);
 	}
 
 	@Test

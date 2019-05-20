@@ -64,6 +64,7 @@ import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -91,10 +92,11 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	private final Jackson2ObjectMapperFactoryBean factory = new Jackson2ObjectMapperFactoryBean();
 
 
-	@Test(expected = FatalBeanException.class)
+	@Test
 	public void unknownFeature() {
 		this.factory.setFeaturesToEnable(Boolean.TRUE);
-		this.factory.afterPropertiesSet();
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(
+				this.factory::afterPropertiesSet);
 	}
 
 	@Test

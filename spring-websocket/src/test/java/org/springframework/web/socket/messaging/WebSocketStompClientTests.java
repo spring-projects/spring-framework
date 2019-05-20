@@ -46,10 +46,10 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -252,13 +252,8 @@ public class WebSocketStompClientTests {
 	public void heartbeatDefaultValueSetWithoutScheduler() throws Exception {
 		WebSocketStompClient stompClient = new WebSocketStompClient(mock(WebSocketClient.class));
 		stompClient.setDefaultHeartbeat(new long[] {5, 5});
-		try {
-			stompClient.processConnectHeaders(null);
-			fail("Expected IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// ignore
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				stompClient.processConnectHeaders(null));
 	}
 
 	@Test

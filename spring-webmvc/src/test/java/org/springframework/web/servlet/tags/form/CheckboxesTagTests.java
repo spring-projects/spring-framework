@@ -46,10 +46,10 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 /**
  * @author Thomas Risberg
@@ -677,14 +677,9 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 	@Test
 	public void withNullValue() throws Exception {
-		try {
-			this.tag.setPath("name");
-			this.tag.doStartTag();
-			fail("Should not be able to render with a null value when binding to a non-boolean.");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+		this.tag.setPath("name");
+		assertThatIllegalArgumentException().as("null value binding to a non-boolean").isThrownBy(
+				this.tag::doStartTag);
 	}
 
 	@Test
@@ -733,13 +728,9 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 	@Test
 	public void dynamicTypeAttribute() throws JspException {
-		try {
-			this.tag.setDynamicAttribute(null, "type", "email");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.tag.setDynamicAttribute(null, "type", "email"))
+			.withMessage("Attribute type=\"email\" is not allowed");
 	}
 
 

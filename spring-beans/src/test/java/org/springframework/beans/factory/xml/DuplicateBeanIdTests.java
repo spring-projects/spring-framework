@@ -22,9 +22,9 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * With Spring 3.1, bean id attributes (and all other id attributes across the
@@ -46,13 +46,8 @@ public class DuplicateBeanIdTests {
 	public void duplicateBeanIdsWithinSameNestingLevelRaisesError() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
-		try {
-			reader.loadBeanDefinitions(new ClassPathResource("DuplicateBeanIdTests-sameLevel-context.xml", this.getClass()));
-			fail("expected parsing exception due to duplicate ids in same nesting level");
-		}
-		catch (Exception ex) {
-			// expected
-		}
+		assertThatExceptionOfType(Exception.class).as("duplicate ids in same nesting level").isThrownBy(() ->
+			reader.loadBeanDefinitions(new ClassPathResource("DuplicateBeanIdTests-sameLevel-context.xml", this.getClass())));
 	}
 
 	@Test

@@ -31,7 +31,6 @@ import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.web.servlet.function.RequestPredicates.HEAD;
 
 /**
@@ -95,9 +94,8 @@ public class RouterFunctionBuilderTests {
 		try {
 			return handlerFunction.handle(request);
 		}
-		catch (Exception e) {
-			fail(e.getMessage());
-			return null;
+		catch (Exception ex) {
+			throw new AssertionError(ex.getMessage(), ex);
 		}
 	}
 

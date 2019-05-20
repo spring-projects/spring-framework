@@ -35,6 +35,7 @@ import org.springframework.jms.StubQueue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -67,9 +68,10 @@ public class SimpleMessageListenerContainerTests {
 		assertNull(this.container.getMessageListener());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSettingMessageListenerToAnUnsupportedType() {
-		this.container.setMessageListener("Bingo");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.container.setMessageListener("Bingo"));
 	}
 
 	@Test
@@ -80,16 +82,20 @@ public class SimpleMessageListenerContainerTests {
 				this.container.isPubSubNoLocal());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSettingConcurrentConsumersToZeroIsNotAllowed() {
-		this.container.setConcurrentConsumers(0);
-		this.container.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+				this.container.setConcurrentConsumers(0);
+				this.container.afterPropertiesSet();
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSettingConcurrentConsumersToANegativeValueIsNotAllowed() {
-		this.container.setConcurrentConsumers(-198);
-		this.container.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+				this.container.setConcurrentConsumers(-198);
+				this.container.afterPropertiesSet();
+		});
 	}
 
 	@Test

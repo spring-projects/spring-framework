@@ -57,12 +57,12 @@ import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.fail;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 import static org.springframework.context.ConfigurableApplicationContext.ENVIRONMENT_BEAN_NAME;
 import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.DERIVED_DEV_BEAN_NAME;
@@ -566,12 +566,8 @@ public class EnvironmentSystemIntegrationTests {
 		{
 			ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
 			ctx.getEnvironment().setRequiredProperties("foo", "bar");
-			try {
-				ctx.refresh();
-				fail("expected missing property exception");
-			}
-			catch (MissingRequiredPropertiesException ex) {
-			}
+			assertThatExceptionOfType(MissingRequiredPropertiesException.class).isThrownBy(
+					ctx::refresh);
 		}
 
 		{

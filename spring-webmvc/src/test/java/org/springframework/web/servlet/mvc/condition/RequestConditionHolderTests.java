@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -53,11 +54,12 @@ public class RequestConditionHolderTests {
 		assertSame(notEmpty, empty.combine(notEmpty));
 	}
 
-	@Test(expected = ClassCastException.class)
+	@Test
 	public void combineIncompatible() {
 		RequestConditionHolder params = new RequestConditionHolder(new ParamsRequestCondition("name"));
 		RequestConditionHolder headers = new RequestConditionHolder(new HeadersRequestCondition("name"));
-		params.combine(headers);
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				params.combine(headers));
 	}
 
 	@Test
@@ -112,11 +114,12 @@ public class RequestConditionHolderTests {
 		assertEquals(1, empty.compareTo(notEmpty, request));
 	}
 
-	@Test(expected = ClassCastException.class)
+	@Test
 	public void compareIncompatible() {
 		RequestConditionHolder params = new RequestConditionHolder(new ParamsRequestCondition("name"));
 		RequestConditionHolder headers = new RequestConditionHolder(new HeadersRequestCondition("name"));
-		params.compareTo(headers, new MockHttpServletRequest());
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				params.compareTo(headers, new MockHttpServletRequest()));
 	}
 
 }

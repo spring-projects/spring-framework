@@ -32,12 +32,13 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.MethodArgumentResolutionException;
 import org.springframework.messaging.handler.invocation.ResolvableMethod;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -81,15 +82,10 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void cannotResolveArg() {
-		try {
-			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
-			invokeAndBlock(new Handler(), method);
-			fail("Expected exception");
-		}
-		catch (MethodArgumentResolutionException ex) {
-			assertNotNull(ex.getMessage());
-			assertTrue(ex.getMessage().contains("Could not resolve parameter [0]"));
-		}
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		assertThatExceptionOfType(MethodArgumentResolutionException.class).isThrownBy(() ->
+				invokeAndBlock(new Handler(), method))
+			.withMessageContaining("Could not resolve parameter [0]");
 	}
 
 	@Test
@@ -115,34 +111,24 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void exceptionInResolvingArg() {
 		this.resolvers.add(new InvocableHandlerMethodTests.ExceptionRaisingArgumentResolver());
-		try {
-			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
-			invokeAndBlock(new Handler(), method);
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected -  allow HandlerMethodArgumentResolver exceptions to propagate
-		}
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				invokeAndBlock(new Handler(), method));
 	}
 
 	@Test
 	public void illegalArgumentException() {
 		this.resolvers.add(new StubArgumentResolver(Integer.class, "__not_an_int__"));
 		this.resolvers.add(new StubArgumentResolver("value"));
-		try {
-			Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
-			invokeAndBlock(new Handler(), method);
-			fail("Expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertNotNull("Exception not wrapped", ex.getCause());
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-			assertTrue(ex.getMessage().contains("Endpoint ["));
-			assertTrue(ex.getMessage().contains("Method ["));
-			assertTrue(ex.getMessage().contains("with argument values:"));
-			assertTrue(ex.getMessage().contains("[0] [type=java.lang.String] [value=__not_an_int__]"));
-			assertTrue(ex.getMessage().contains("[1] [type=java.lang.String] [value=value"));
-		}
+		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
+		assertThatIllegalStateException().isThrownBy(() ->
+				invokeAndBlock(new Handler(), method))
+			.withCauseInstanceOf(IllegalArgumentException.class)
+			.withMessageContaining("Endpoint [")
+			.withMessageContaining("Method [")
+			.withMessageContaining("with argument values:")
+			.withMessageContaining("[0] [type=java.lang.String] [value=__not_an_int__]")
+			.withMessageContaining("[1] [type=java.lang.String] [value=value");
 	}
 
 	@Test

@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -59,10 +60,11 @@ public class UriTemplateTests {
 		assertEquals(new URI("/sum?numbers=1,2,3"), result);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void expandVarArgsNotEnoughVariables() throws Exception {
 		UriTemplate template = new UriTemplate("/hotels/{hotel}/bookings/{booking}");
-		template.expand("1");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				template.expand("1"));
 	}
 
 	@Test
@@ -101,13 +103,14 @@ public class UriTemplateTests {
 		assertEquals("Invalid expanded template", new URI("/hotel%20list/Z%C3%BCrich"), result);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void expandMapUnboundVariables() throws Exception {
 		Map<String, String> uriVariables = new HashMap<>(2);
 		uriVariables.put("booking", "42");
 		uriVariables.put("bar", "1");
 		UriTemplate template = new UriTemplate("/hotels/{hotel}/bookings/{booking}");
-		template.expand(uriVariables);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				template.expand(uriVariables));
 	}
 
 	@Test

@@ -28,6 +28,7 @@ import org.springframework.expression.TypeComparator;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypeLocator;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -48,11 +49,12 @@ public class StandardComponentsTests {
 		assertEquals(tl, context.getTypeLocator());
 	}
 
-	@Test(expected = EvaluationException.class)
+	@Test
 	public void testStandardOperatorOverloader() throws EvaluationException {
 		OperatorOverloader oo = new StandardOperatorOverloader();
 		assertFalse(oo.overridesOperation(Operation.ADD, null, null));
-		oo.operate(Operation.ADD, 2, 3);
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
+				oo.operate(Operation.ADD, 2, 3));
 	}
 
 	@Test

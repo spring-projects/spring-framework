@@ -192,19 +192,22 @@ public class ReflectionTestUtilsTests {
 		assertNull("'favorite number' (package field)", person.getFavoriteNumber());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setFieldWithNullValueForPrimitiveLong() throws Exception {
-		setField(person, "id", null, long.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				setField(person, "id", null, long.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setFieldWithNullValueForPrimitiveInt() throws Exception {
-		setField(person, "age", null, int.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				setField(person, "age", null, int.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setFieldWithNullValueForPrimitiveBoolean() throws Exception {
-		setField(person, "likesPets", null, boolean.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				setField(person, "likesPets", null, boolean.class));
 	}
 
 	@Test
@@ -307,19 +310,22 @@ public class ReflectionTestUtilsTests {
 		assertNull("'favorite number' (protected method for a Number)", person.getFavoriteNumber());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invokeSetterMethodWithNullValueForPrimitiveLong() throws Exception {
-		invokeSetterMethod(person, "id", null, long.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				invokeSetterMethod(person, "id", null, long.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invokeSetterMethodWithNullValueForPrimitiveInt() throws Exception {
-		invokeSetterMethod(person, "age", null, int.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				invokeSetterMethod(person, "age", null, int.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void invokeSetterMethodWithNullValueForPrimitiveBoolean() throws Exception {
-		invokeSetterMethod(person, "likesPets", null, boolean.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				invokeSetterMethod(person, "likesPets", null, boolean.class));
 	}
 
 	@Test

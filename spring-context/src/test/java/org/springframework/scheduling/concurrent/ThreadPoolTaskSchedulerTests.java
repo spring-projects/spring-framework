@@ -31,6 +31,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.ErrorHandler;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -98,17 +99,13 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		assertThreadNamePrefix(task);
 	}
 
-	@Test(expected = ExecutionException.class)
+	@Test
 	public void scheduleOneTimeFailingTaskWithoutErrorHandler() throws Exception {
 		TestTask task = new TestTask(0);
 		Future<?> future = scheduler.schedule(task, new Date());
-		try {
-			future.get(1000, TimeUnit.MILLISECONDS);
-		}
-		catch (ExecutionException ex) {
-			assertTrue(future.isDone());
-			throw ex;
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				future.get(1000, TimeUnit.MILLISECONDS));
+		assertTrue(future.isDone());
 	}
 
 	@Test

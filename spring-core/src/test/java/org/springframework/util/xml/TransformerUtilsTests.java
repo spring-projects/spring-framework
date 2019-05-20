@@ -27,6 +27,7 @@ import javax.xml.transform.URIResolver;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -72,19 +73,22 @@ public class TransformerUtilsTests {
 		assertEquals("no", indent);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void enableIndentingWithNullTransformer() throws Exception {
-		TransformerUtils.enableIndenting(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				TransformerUtils.enableIndenting(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void disableIndentingWithNullTransformer() throws Exception {
-		TransformerUtils.disableIndenting(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				TransformerUtils.disableIndenting(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void enableIndentingWithNegativeIndentAmount() throws Exception {
-		TransformerUtils.enableIndenting(new StubTransformer(), -21938);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				TransformerUtils.enableIndenting(new StubTransformer(), -21938));
 	}
 
 	@Test

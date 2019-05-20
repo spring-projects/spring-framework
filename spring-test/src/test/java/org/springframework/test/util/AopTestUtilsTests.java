@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotSame;
@@ -40,9 +41,10 @@ public class AopTestUtilsTests {
 	private final FooImpl foo = new FooImpl();
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getTargetObjectForNull() {
-		getTargetObject(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getTargetObject(null));
 	}
 
 	@Test
@@ -75,9 +77,10 @@ public class AopTestUtilsTests {
 		assertNotSame(foo, target);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getUltimateTargetObjectForNull() {
-		getUltimateTargetObject(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getUltimateTargetObject(null));
 	}
 
 	@Test

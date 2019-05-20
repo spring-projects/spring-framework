@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import org.springframework.util.ClassUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -44,10 +45,11 @@ public class PathEditorTests {
 		assertTrue(path.toFile().exists());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNonExistentResource() throws Exception {
 		PropertyEditor propertyEditor = new PathEditor();
-		propertyEditor.setAsText("classpath:/no_way_this_file_is_found.doc");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				propertyEditor.setAsText("classpath:/no_way_this_file_is_found.doc"));
 	}
 
 	@Test

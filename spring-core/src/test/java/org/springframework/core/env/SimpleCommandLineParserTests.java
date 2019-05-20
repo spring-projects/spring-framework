@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -62,28 +64,32 @@ public class SimpleCommandLineParserTests {
 		assertThat(args.getOptionValues("o3"), nullValue());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withEmptyOptionText() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		parser.parse("--");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				parser.parse("--"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withEmptyOptionName() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		parser.parse("--=v1");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				parser.parse("--=v1"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withEmptyOptionValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		parser.parse("--o1=");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				parser.parse("--o1="));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withEmptyOptionNameAndEmptyOptionValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		parser.parse("--=");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				parser.parse("--="));
 	}
 
 	@Test
@@ -99,16 +105,18 @@ public class SimpleCommandLineParserTests {
 		assertThat(nonOptions.size(), equalTo(2));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void assertOptionNamesIsUnmodifiable() {
 		CommandLineArgs args = new SimpleCommandLineArgsParser().parse();
-		args.getOptionNames().add("bogus");
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				args.getOptionNames().add("bogus"));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void assertNonOptionArgsIsUnmodifiable() {
 		CommandLineArgs args = new SimpleCommandLineArgsParser().parse();
-		args.getNonOptionArgs().add("foo");
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				args.getNonOptionArgs().add("foo"));
 	}
 
 }

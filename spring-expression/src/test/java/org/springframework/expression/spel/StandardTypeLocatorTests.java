@@ -22,10 +22,11 @@ import org.junit.Test;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for type comparison
@@ -49,14 +50,9 @@ public class StandardTypeLocatorTests {
 		// currently does not know about java.util by default
 //		assertEquals(java.util.List.class,locator.findType("List"));
 
-		try {
-			locator.findType("URL");
-			fail("Should have failed");
-		}
-		catch (EvaluationException ee) {
-			SpelEvaluationException sEx = (SpelEvaluationException)ee;
-			assertEquals(SpelMessage.TYPE_NOT_FOUND,sEx.getMessageCode());
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				locator.findType("URL"))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.TYPE_NOT_FOUND));
 		locator.registerImport("java.net");
 		assertEquals(java.net.URL.class,locator.findType("URL"));
 	}

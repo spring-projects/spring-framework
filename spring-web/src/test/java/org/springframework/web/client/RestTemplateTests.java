@@ -47,13 +47,13 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -168,13 +168,8 @@ public class RestTemplateTests {
 		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
 				.given(errorHandler).handleError(new URI(url), GET, response);
 
-		try {
-			template.execute(url, GET, null, null);
-			fail("HttpServerErrorException expected");
-		}
-		catch (HttpServerErrorException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
+				template.execute(url, GET, null, null));
 
 		verify(response).close();
 	}
@@ -209,13 +204,8 @@ public class RestTemplateTests {
 		mockResponseBody("Foo", new MediaType("bar", "baz"));
 		given(converter.canRead(String.class, barBaz)).willReturn(false);
 
-		try {
-			template.getForObject("https://example.com/{p}", String.class, "resource");
-			fail("UnsupportedMediaTypeException expected");
-		}
-		catch (RestClientException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(RestClientException.class).isThrownBy(() ->
+				template.getForObject("https://example.com/{p}", String.class, "resource"));
 
 		verify(response).close();
 	}
@@ -547,15 +537,10 @@ public class RestTemplateTests {
 		mockHttpMessageConverter(new MediaType("foo", "bar"), String.class);
 		given(request.execute()).willThrow(new IOException("Socket failure"));
 
-		try {
-			template.getForObject(url, String.class);
-			fail("RestClientException expected");
-		}
-		catch (ResourceAccessException ex) {
-			assertEquals("I/O error on GET request for \"https://example.com/resource\": " +
-							"Socket failure; nested exception is java.io.IOException: Socket failure",
-					ex.getMessage());
-		}
+		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() ->
+				template.getForObject(url, String.class))
+			.withMessage("I/O error on GET request for \"https://example.com/resource\": " +
+							"Socket failure; nested exception is java.io.IOException: Socket failure");
 	}
 
 	@Test  // SPR-15900
@@ -570,15 +555,10 @@ public class RestTemplateTests {
 		given(request.getHeaders()).willReturn(new HttpHeaders());
 		given(request.execute()).willThrow(new IOException("Socket failure"));
 
-		try {
-			template.getForObject(uri, String.class);
-			fail("RestClientException expected");
-		}
-		catch (ResourceAccessException ex) {
-			assertEquals("I/O error on GET request for \"https://example.com/resource\": " +
-					"Socket failure; nested exception is java.io.IOException: Socket failure",
-					ex.getMessage());
-		}
+		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() ->
+				template.getForObject(uri, String.class))
+			.withMessage("I/O error on GET request for \"https://example.com/resource\": " +
+					"Socket failure; nested exception is java.io.IOException: Socket failure");
 	}
 
 	@Test

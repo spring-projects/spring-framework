@@ -45,6 +45,8 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.SimpleWebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -54,7 +56,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link ContextLoader} and {@link ContextLoaderListener}.
@@ -231,13 +232,9 @@ public class ContextLoaderTests {
 		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM,
 				StringUtils.arrayToCommaDelimitedString(new Object[] {UnknownContextInitializer.class.getName()}));
 		ContextLoaderListener listener = new ContextLoaderListener();
-		try {
-			listener.contextInitialized(new ServletContextEvent(sc));
-			fail("expected exception");
-		}
-		catch (ApplicationContextException ex) {
-			assertTrue(ex.getMessage().contains("not assignable"));
-		}
+		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(() ->
+				listener.contextInitialized(new ServletContextEvent(sc)))
+			.withMessageContaining("not assignable");
 	}
 
 	@Test
@@ -260,14 +257,9 @@ public class ContextLoaderTests {
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "/WEB-INF/myContext.xml");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
-		try {
-			listener.contextInitialized(event);
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof FileNotFoundException);
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				listener.contextInitialized(event))
+			.withCauseInstanceOf(FileNotFoundException.class);
 	}
 
 	@Test
@@ -277,14 +269,9 @@ public class ContextLoaderTests {
 				"org.springframework.web.context.support.InvalidWebApplicationContext");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
-		try {
-			listener.contextInitialized(event);
-			fail("Should have thrown ApplicationContextException");
-		}
-		catch (ApplicationContextException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof ClassNotFoundException);
-		}
+		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(() ->
+				listener.contextInitialized(event))
+			.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test
@@ -292,30 +279,20 @@ public class ContextLoaderTests {
 		MockServletContext sc = new MockServletContext("");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
-		try {
-			listener.contextInitialized(event);
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IOException);
-			assertTrue(ex.getCause().getMessage().contains("/WEB-INF/applicationContext.xml"));
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				listener.contextInitialized(event))
+			.withCauseInstanceOf(IOException.class)
+			.satisfies(ex -> assertThat(ex.getCause()).hasMessageContaining("/WEB-INF/applicationContext.xml"));
 	}
 
 	@Test
 	public void testFrameworkServletWithDefaultLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextClass(XmlWebApplicationContext.class);
-		try {
-			servlet.init(new MockServletConfig(new MockServletContext(""), "test"));
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IOException);
-			assertTrue(ex.getCause().getMessage().contains("/WEB-INF/test-servlet.xml"));
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				servlet.init(new MockServletConfig(new MockServletContext(""), "test")))
+			.withCauseInstanceOf(IOException.class)
+			.satisfies(ex -> assertThat(ex.getCause()).hasMessageContaining("/WEB-INF/test-servlet.xml"));
 	}
 
 	@Test
@@ -347,25 +324,26 @@ public class ContextLoaderTests {
 		assertTrue("Has kerry", context.containsBean("kerry"));
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	@SuppressWarnings("resource")
 	public void testSingletonDestructionOnStartupFailure() throws IOException {
-		new ClassPathXmlApplicationContext(new String[] {
-			"/org/springframework/web/context/WEB-INF/applicationContext.xml",
-			"/org/springframework/web/context/WEB-INF/fail.xml" }) {
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext(new String[] {
+					"/org/springframework/web/context/WEB-INF/applicationContext.xml",
+					"/org/springframework/web/context/WEB-INF/fail.xml" }) {
 
-			@Override
-			public void refresh() throws BeansException {
-				try {
-					super.refresh();
-				}
-				catch (BeanCreationException ex) {
-					DefaultListableBeanFactory factory = (DefaultListableBeanFactory) getBeanFactory();
-					assertEquals(0, factory.getSingletonCount());
-					throw ex;
-				}
-			}
-		};
+					@Override
+					public void refresh() throws BeansException {
+						try {
+							super.refresh();
+						}
+						catch (BeanCreationException ex) {
+							DefaultListableBeanFactory factory = (DefaultListableBeanFactory) getBeanFactory();
+							assertEquals(0, factory.getSingletonCount());
+							throw ex;
+						}
+					}
+				});
 	}
 
 

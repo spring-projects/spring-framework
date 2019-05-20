@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -80,19 +81,22 @@ public class ContentDispositionTests {
 				.filename("中文.txt", StandardCharsets.UTF_8).build(), disposition);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void parseEmpty() {
-		ContentDisposition.parse("");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ContentDisposition.parse(""));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void parseNoType() {
-		ContentDisposition.parse(";");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ContentDisposition.parse(";"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void parseInvalidParameter() {
-		ContentDisposition.parse("foo;bar");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ContentDisposition.parse("foo;bar"));
 	}
 
 	@Test
@@ -147,12 +151,13 @@ public class ContentDispositionTests {
 		assertEquals("UTF-8''%E4%B8%AD%E6%96%87.txt", result);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void encodeHeaderFieldParamInvalidCharset() {
 		Method encode = ReflectionUtils.findMethod(ContentDisposition.class,
 				"encodeHeaderFieldParam", String.class, Charset.class);
 		ReflectionUtils.makeAccessible(encode);
-		ReflectionUtils.invokeMethod(encode, null, "test", StandardCharsets.UTF_16);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ReflectionUtils.invokeMethod(encode, null, "test", StandardCharsets.UTF_16));
 	}
 
 	@Test  // SPR-14408
@@ -168,12 +173,13 @@ public class ContentDispositionTests {
 		assertEquals("中文.txt", result);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void decodeHeaderFieldParamInvalidCharset() {
 		Method decode = ReflectionUtils.findMethod(ContentDisposition.class,
 				"decodeHeaderFieldParam", String.class);
 		ReflectionUtils.makeAccessible(decode);
-		ReflectionUtils.invokeMethod(decode, null, "UTF-16''test");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ReflectionUtils.invokeMethod(decode, null, "UTF-16''test"));
 	}
 
 }

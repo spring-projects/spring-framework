@@ -33,10 +33,9 @@ import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
@@ -88,14 +87,9 @@ public class ListBasedXMLEventReaderTests {
 
 		assertEquals(START_DOCUMENT, reader.nextEvent().getEventType());
 
-		try {
-			reader.getElementText();
-			fail("Should have thrown XMLStreamException");
-		}
-		catch (XMLStreamException ex) {
-			// expected
-			assertTrue(ex.getMessage().startsWith("Not at START_ELEMENT"));
-		}
+		assertThatExceptionOfType(XMLStreamException.class).isThrownBy(
+				reader::getElementText)
+			.withMessageStartingWith("Not at START_ELEMENT");
 	}
 
 	private List<XMLEvent> readEvents(String xml) throws XMLStreamException {

@@ -26,8 +26,8 @@ import org.junit.Test;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -46,7 +46,7 @@ public class AsyncResultTests {
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				fail("Failure callback not expected: " + ex);
+				throw new AssertionError("Failure callback not expected: " + ex, ex);
 			}
 		});
 		assertSame(value, values.iterator().next());
@@ -63,7 +63,7 @@ public class AsyncResultTests {
 		future.addCallback(new ListenableFutureCallback<String>() {
 			@Override
 			public void onSuccess(String result) {
-				fail("Success callback not expected: " + result);
+				throw new AssertionError("Success callback not expected: " + result);
 			}
 			@Override
 			public void onFailure(Throwable ex) {
@@ -71,20 +71,12 @@ public class AsyncResultTests {
 			}
 		});
 		assertSame(ex, values.iterator().next());
-		try {
-			future.get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(ex, ex2.getCause());
-		}
-		try {
-			future.completable().get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(ex, ex2.getCause());
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				future::get)
+			.withCause(ex);
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				future.completable()::get)
+			.withCause(ex);
 	}
 
 	@Test
@@ -92,7 +84,7 @@ public class AsyncResultTests {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
 		ListenableFuture<String> future = AsyncResult.forValue(value);
-		future.addCallback(values::add, ex -> fail("Failure callback not expected: " + ex));
+		future.addCallback(values::add, ex -> new AssertionError("Failure callback not expected: " + ex));
 		assertSame(value, values.iterator().next());
 		assertSame(value, future.get());
 		assertSame(value, future.completable().get());
@@ -104,22 +96,14 @@ public class AsyncResultTests {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);
 		ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
-		future.addCallback(result -> fail("Success callback not expected: " + result), values::add);
+		future.addCallback(result -> new AssertionError("Success callback not expected: " + result), values::add);
 		assertSame(ex, values.iterator().next());
-		try {
-			future.get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(ex, ex2.getCause());
-		}
-		try {
-			future.completable().get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(ex, ex2.getCause());
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				future::get)
+			.withCause(ex);
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				future.completable()::get)
+			.withCause(ex);
 	}
 
 }

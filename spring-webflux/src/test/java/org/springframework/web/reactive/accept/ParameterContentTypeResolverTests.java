@@ -27,6 +27,7 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -44,12 +45,11 @@ public class ParameterContentTypeResolverTests {
 		assertEquals(RequestedContentTypeResolver.MEDIA_TYPE_ALL_LIST, mediaTypes);
 	}
 
-	@Test(expected = NotAcceptableStatusException.class)
+	@Test
 	public void noMatchForKey() {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
-		List<MediaType> mediaTypes = resolver.resolveMediaTypes(createExchange("blah"));
-
-		assertEquals(0, mediaTypes.size());
+		assertThatExceptionOfType(NotAcceptableStatusException.class).isThrownBy(() ->
+				resolver.resolveMediaTypes(createExchange("blah")));
 	}
 
 	@Test

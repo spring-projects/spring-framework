@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.util.ClassUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -33,9 +34,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class URLEditorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullResourceEditor() throws Exception {
-		new URLEditor(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new URLEditor(null));
 	}
 
 	@Test
@@ -70,10 +72,11 @@ public class URLEditorTests {
 		assertTrue(!url.getProtocol().startsWith("classpath"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithNonExistentResource() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
-		urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening"));
 	}
 
 	@Test

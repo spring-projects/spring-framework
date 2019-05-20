@@ -36,11 +36,11 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -109,18 +109,13 @@ public class WebSphereUowTransactionManagerTests {
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
 
-		try {
+		assertThatExceptionOfType(IllegalTransactionStateException.class).isThrownBy(() ->
 			ptm.execute(definition, new TransactionCallback<String>() {
 				@Override
 				public String doInTransaction(TransactionStatus status) {
 					return "result";
 				}
-			});
-			fail("Should have thrown IllegalTransactionStateException");
-		}
-		catch (IllegalTransactionStateException ex) {
-			// expected
-		}
+			}));
 	}
 
 	@Test
@@ -357,24 +352,21 @@ public class WebSphereUowTransactionManagerTests {
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
-		try {
-			ptm.execute(definition, new TransactionCallback<String>() {
-				@Override
-				public String doInTransaction(TransactionStatus status) {
-					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
-					assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
-					assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
-					return "result";
-				}
+		assertThatExceptionOfType(TransactionSystemException.class).isThrownBy(() ->
+				ptm.execute(definition, new TransactionCallback<String>() {
+					@Override
+					public String doInTransaction(TransactionStatus status) {
+						assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+						assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+						assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+						return "result";
+					}
+				}))
+			.withCauseInstanceOf(UOWException.class)
+			.satisfies(ex -> {
+				assertThat(ex.getRootCause()).isSameAs(rex);
+				assertThat(ex.getMostSpecificCause()).isSameAs(rex);
 			});
-			fail("Should have thrown TransactionSystemException");
-		}
-		catch (TransactionSystemException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof UOWException);
-			assertSame(rex, ex.getRootCause());
-			assertSame(rex, ex.getMostSpecificCause());
-		}
 
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
@@ -393,7 +385,7 @@ public class WebSphereUowTransactionManagerTests {
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
-		try {
+		assertThatExceptionOfType(OptimisticLockingFailureException.class).isThrownBy(() ->
 			ptm.execute(definition, new TransactionCallback<String>() {
 				@Override
 				public String doInTransaction(TransactionStatus status) {
@@ -402,12 +394,7 @@ public class WebSphereUowTransactionManagerTests {
 					assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 					throw new OptimisticLockingFailureException("");
 				}
-			});
-			fail("Should have thrown OptimisticLockingFailureException");
-		}
-		catch (OptimisticLockingFailureException ex) {
-			// expected
-		}
+			}));
 
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
@@ -489,18 +476,13 @@ public class WebSphereUowTransactionManagerTests {
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_NEVER);
 
-		try {
+		assertThatExceptionOfType(IllegalTransactionStateException.class).isThrownBy(() ->
 			ptm.execute(definition, new TransactionCallback<String>() {
 				@Override
 				public String doInTransaction(TransactionStatus status) {
 					return "result";
 				}
-			});
-			fail("Should have thrown IllegalTransactionStateException");
-		}
-		catch (IllegalTransactionStateException ex) {
-			// expected
-		}
+			}));
 	}
 
 	@Test
@@ -511,18 +493,13 @@ public class WebSphereUowTransactionManagerTests {
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 
-		try {
+		assertThatExceptionOfType(NestedTransactionNotSupportedException.class).isThrownBy(() ->
 			ptm.execute(definition, new TransactionCallback<String>() {
 				@Override
 				public String doInTransaction(TransactionStatus status) {
 					return "result";
 				}
-			});
-			fail("Should have thrown NestedTransactionNotSupportedException");
-		}
-		catch (NestedTransactionNotSupportedException ex) {
-			// expected
-		}
+			}));
 	}
 
 	@Test

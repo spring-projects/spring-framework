@@ -30,6 +30,8 @@ import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -39,24 +41,26 @@ import static org.junit.Assert.assertEquals;
  */
 public class ArgumentBindingTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testBindingInPointcutUsedByAdvice() {
 		TestBean tb = new TestBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
 		proxyFactory.addAspect(NamedPointcutWithArgs.class);
 
 		ITestBean proxiedTestBean = proxyFactory.getProxy();
-		proxiedTestBean.setName("Supercalifragalisticexpialidocious");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				proxiedTestBean.setName("Supercalifragalisticexpialidocious"));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testAnnotationArgumentNameBinding() {
 		TransactionalBean tb = new TransactionalBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
 		proxyFactory.addAspect(PointcutWithAnnotationArgument.class);
 
 		ITransactionalBean proxiedTestBean = proxyFactory.getProxy();
-		proxiedTestBean.doInTransaction();
+		assertThatIllegalStateException().isThrownBy(
+				proxiedTestBean::doInTransaction);
 	}
 
 	@Test

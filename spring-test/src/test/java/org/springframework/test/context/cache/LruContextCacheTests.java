@@ -28,6 +28,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -55,14 +56,16 @@ public class LruContextCacheTests {
 	private final ConfigurableApplicationContext bazContext = mock(ConfigurableApplicationContext.class);
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void maxCacheSizeNegativeOne() {
-		new DefaultContextCache(-1);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new DefaultContextCache(-1));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void maxCacheSizeZero() {
-		new DefaultContextCache(0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new DefaultContextCache(0));
 	}
 
 	@Test

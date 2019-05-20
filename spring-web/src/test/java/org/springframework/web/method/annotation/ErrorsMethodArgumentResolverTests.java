@@ -28,6 +28,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertSame;
 
 /**
@@ -73,18 +74,20 @@ public class ErrorsMethodArgumentResolverTests {
 		assertSame(actual, bindingResult);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void bindingResultNotFound() throws Exception {
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(bindingResult.getModel());
 		mavContainer.addAttribute("ignore1", "value1");
 
-		resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolver.resolveArgument(paramErrors, mavContainer, webRequest, null));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void noBindingResult() throws Exception {
-		resolver.resolveArgument(paramErrors, new ModelAndViewContainer(), webRequest, null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolver.resolveArgument(paramErrors, new ModelAndViewContainer(), webRequest, null));
 	}
 
 

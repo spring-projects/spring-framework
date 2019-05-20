@@ -16,7 +16,6 @@
 
 package org.springframework.cache.config;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -30,6 +29,8 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
@@ -39,7 +40,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Abstract cache annotation tests (containing several reusable methods).
@@ -336,49 +336,28 @@ public abstract class AbstractCacheAnnotationTests {
 
 	public void testCheckedThrowable(CacheableService<?> service) throws Exception {
 		String arg = UUID.randomUUID().toString();
-		try {
-			service.throwChecked(arg);
-			fail("Excepted exception");
-		}
-		catch (Exception ex) {
-			assertEquals("Wrong exception type", IOException.class, ex.getClass());
-			assertEquals(arg, ex.getMessage());
-		}
+		assertThatIOException().isThrownBy(() ->
+				service.throwChecked(arg))
+			.withMessage(arg);
 	}
 
 	public void testUncheckedThrowable(CacheableService<?> service) throws Exception {
-		try {
-			service.throwUnchecked(1L);
-			fail("Excepted exception");
-		}
-		catch (RuntimeException ex) {
-			assertEquals("Wrong exception type", UnsupportedOperationException.class, ex.getClass());
-			assertEquals("1", ex.getMessage());
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.throwUnchecked(1L))
+			.withMessage("1");
 	}
 
 	public void testCheckedThrowableSync(CacheableService<?> service) throws Exception {
 		String arg = UUID.randomUUID().toString();
-		try {
-			service.throwCheckedSync(arg);
-			fail("Excepted exception");
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			assertEquals("Wrong exception type", IOException.class, ex.getClass());
-			assertEquals(arg, ex.getMessage());
-		}
+		assertThatIOException().isThrownBy(() ->
+				service.throwCheckedSync(arg))
+			.withMessage(arg);
 	}
 
 	public void testUncheckedThrowableSync(CacheableService<?> service) throws Exception {
-		try {
-			service.throwUncheckedSync(1L);
-			fail("Excepted exception");
-		}
-		catch (RuntimeException ex) {
-			assertEquals("Wrong exception type", UnsupportedOperationException.class, ex.getClass());
-			assertEquals("1", ex.getMessage());
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				service.throwUncheckedSync(1L))
+			.withMessage("1");
 	}
 
 	public void testNullArg(CacheableService<?> service) {
@@ -709,14 +688,9 @@ public abstract class AbstractCacheAnnotationTests {
 
 	@Test
 	public void testUnknownCustomKeyGenerator() {
-		try {
-			Object param = new Object();
-			this.cs.unknownCustomKeyGenerator(param);
-			fail("should have failed with NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		Object param = new Object();
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				this.cs.unknownCustomKeyGenerator(param));
 	}
 
 	@Test
@@ -732,14 +706,9 @@ public abstract class AbstractCacheAnnotationTests {
 
 	@Test
 	public void testUnknownCustomCacheManager() {
-		try {
-			Object param = new Object();
-			this.cs.unknownCustomCacheManager(param);
-			fail("should have failed with NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		Object param = new Object();
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				this.cs.unknownCustomCacheManager(param));
 	}
 
 	@Test

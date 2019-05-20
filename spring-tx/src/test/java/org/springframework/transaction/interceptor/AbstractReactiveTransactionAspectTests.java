@@ -352,7 +352,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 	private void checkReactiveTransaction(boolean expected) {
 		Mono.subscriberContext().handle((context, sink) -> {
-			if (context.hasKey(TransactionContext.class) != expected){
+			if (context.hasKey(TransactionContext.class) != expected) {
 				fail("Should have thrown NoTransactionException");
 			}
 			sink.complete();

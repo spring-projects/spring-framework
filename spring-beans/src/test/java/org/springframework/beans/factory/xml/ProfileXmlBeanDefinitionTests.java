@@ -27,6 +27,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -62,9 +63,10 @@ public class ProfileXmlBeanDefinitionTests {
 
 	private static final String TARGET_BEAN = "foo";
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testProfileValidation() {
-		beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE));
 	}
 
 	@Test

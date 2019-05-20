@@ -31,6 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -48,11 +49,12 @@ public class XmlBeanDefinitionReaderTests {
 		new XmlBeanDefinitionReader(registry).setDocumentReaderClass(DefaultBeanDefinitionDocumentReader.class);
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	public void withOpenInputStream() {
 		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		Resource resource = new InputStreamResource(getClass().getResourceAsStream("test.xml"));
-		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource));
 	}
 
 	@Test
@@ -81,11 +83,12 @@ public class XmlBeanDefinitionReaderTests {
 		testBeanDefinitions(registry);
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	public void withInputSource() {
 		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
 		InputSource resource = new InputSource(getClass().getResourceAsStream("test.xml"));
-		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource));
 	}
 
 	@Test

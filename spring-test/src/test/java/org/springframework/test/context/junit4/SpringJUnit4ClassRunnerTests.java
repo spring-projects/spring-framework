@@ -25,6 +25,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -36,7 +37,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class SpringJUnit4ClassRunnerTests {
 
-	@Test(expected = Exception.class)
+	@Test
 	public void checkThatExceptionsAreNotSilentlySwallowed() throws Exception {
 		SpringJUnit4ClassRunner runner = new SpringJUnit4ClassRunner(getClass()) {
 
@@ -52,7 +53,8 @@ public class SpringJUnit4ClassRunnerTests {
 				};
 			}
 		};
-		runner.createTest();
+		assertThatExceptionOfType(Exception.class).isThrownBy(
+				runner::createTest);
 	}
 
 	@Test

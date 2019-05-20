@@ -23,10 +23,10 @@ import javax.management.modelmbean.ModelMBeanInfo;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -47,24 +47,14 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 
 	@Test
 	public void testWithUnknownClass() throws Exception {
-		try {
-			getWithMapping("com.foo.bar.Unknown");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getWithMapping("com.foo.bar.Unknown"));
 	}
 
 	@Test
 	public void testWithNonInterface() throws Exception {
-		try {
-			getWithMapping("JmxTestBean");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				getWithMapping("JmxTestBean"));
 	}
 
 	@Test

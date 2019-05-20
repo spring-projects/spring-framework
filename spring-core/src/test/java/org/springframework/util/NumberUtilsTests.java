@@ -23,9 +23,8 @@ import java.util.Locale;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -204,26 +203,14 @@ public class NumberUtilsTests {
 		String aLong = "" + Long.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
 
-		try {
-			NumberUtils.parseNumber(aLong, Byte.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Byte.class));
 
-		try {
-			NumberUtils.parseNumber(aLong, Short.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Short.class));
 
-		try {
-			NumberUtils.parseNumber(aLong, Integer.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Integer.class));
 
 		assertEquals(Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class));
 		assertEquals(Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
@@ -234,26 +221,14 @@ public class NumberUtilsTests {
 		String aLong = "" + Long.MIN_VALUE;
 		String aDouble = "" + Double.MIN_VALUE;
 
-		try {
-			NumberUtils.parseNumber(aLong, Byte.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Byte.class));
 
-		try {
-			NumberUtils.parseNumber(aLong, Short.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Short.class));
 
-		try {
-			NumberUtils.parseNumber(aLong, Integer.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Integer.class));
 
 		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class));
 		assertEquals(Double.valueOf(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class));
@@ -265,26 +240,14 @@ public class NumberUtilsTests {
 		String aLong = "" + Long.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
 
-		try {
-			NumberUtils.parseNumber(aLong, Byte.class, nf);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Byte.class, nf));
 
-		try {
-			NumberUtils.parseNumber(aLong, Short.class, nf);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Short.class, nf));
 
-		try {
-			NumberUtils.parseNumber(aLong, Integer.class, nf);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Integer.class, nf));
 
 		assertEquals(Long.valueOf(Long.MAX_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
 		assertEquals(Double.valueOf(Double.MAX_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
@@ -296,26 +259,14 @@ public class NumberUtilsTests {
 		String aLong = "" + Long.MIN_VALUE;
 		String aDouble = "" + Double.MIN_VALUE;
 
-		try {
-			NumberUtils.parseNumber(aLong, Byte.class, nf);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Byte.class, nf));
 
-		try {
-			NumberUtils.parseNumber(aLong, Short.class, nf);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Short.class, nf));
 
-		try {
-			NumberUtils.parseNumber(aLong, Integer.class, nf);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				NumberUtils.parseNumber(aLong, Integer.class, nf));
 
 		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.parseNumber(aLong, Long.class, nf));
 		assertEquals(Double.valueOf(Double.MIN_VALUE), NumberUtils.parseNumber(aDouble, Double.class, nf));
@@ -451,15 +402,10 @@ public class NumberUtilsTests {
 	}
 
 	private void assertToNumberOverflow(Number number, Class<? extends Number> targetClass) {
-		String msg = "Expected exception due to overflow: from=" + number + ", toClass=" + targetClass;
-		try {
-			NumberUtils.convertNumberToTargetClass(number, targetClass);
-			fail(msg);
-		}
-		catch (IllegalArgumentException expected) {
-			assertTrue(msg + ", with \"overflow\" in message but got message=" + expected.getMessage(),
-					expected.getMessage().endsWith("overflow"));
-		}
+		String msg = "overflow: from=" + number + ", toClass=" + targetClass;
+		assertThatIllegalArgumentException().as(msg).isThrownBy(() ->
+				NumberUtils.convertNumberToTargetClass(number, targetClass))
+			.withMessageEndingWith("overflow");
 	}
 
 }

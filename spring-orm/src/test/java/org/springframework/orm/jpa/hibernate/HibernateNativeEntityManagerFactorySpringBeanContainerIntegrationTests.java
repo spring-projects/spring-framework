@@ -35,6 +35,7 @@ import org.springframework.orm.jpa.hibernate.beans.MultiplePrototypesInSpringCon
 import org.springframework.orm.jpa.hibernate.beans.NoDefinitionInSpringContextTestBean;
 import org.springframework.orm.jpa.hibernate.beans.SinglePrototypeInSpringContextTestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -246,32 +247,36 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 		assertNull(instance.getApplicationContext());
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testFallbackExceptionInCaseOfNoSpringBeanFound() {
-		getBeanContainer().getBean(NoDefinitionInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
-		);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+			getBeanContainer().getBean(NoDefinitionInSpringContextTestBean.class,
+					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+			));
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void testOriginalExceptionInCaseOfFallbackProducerFailure() {
-		getBeanContainer().getBean(AttributeConverter.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
-		);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+			getBeanContainer().getBean(AttributeConverter.class,
+					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+			));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testFallbackExceptionInCaseOfNoSpringBeanFoundByName() {
-		getBeanContainer().getBean("some name", NoDefinitionInSpringContextTestBean.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
-		);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+			getBeanContainer().getBean("some name", NoDefinitionInSpringContextTestBean.class,
+					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+			));
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void testOriginalExceptionInCaseOfFallbackProducerFailureByName() {
-		getBeanContainer().getBean("invalid", AttributeConverter.class,
-				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
-		);
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+			getBeanContainer().getBean("invalid", AttributeConverter.class,
+					NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
+			));
 	}
 
 

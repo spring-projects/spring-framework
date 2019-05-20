@@ -33,6 +33,8 @@ import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -49,14 +51,16 @@ import static org.junit.Assert.assertTrue;
  */
 public class BeanUtilsTests {
 
-	@Test(expected = FatalBeanException.class)
+	@Test
 	public void testInstantiateClassGivenInterface() {
-		BeanUtils.instantiateClass(List.class);
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+				BeanUtils.instantiateClass(List.class));
 	}
 
-	@Test(expected = FatalBeanException.class)
+	@Test
 	public void testInstantiateClassGivenClassWithoutDefaultConstructor() {
-		BeanUtils.instantiateClass(CustomDateEditor.class);
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+				BeanUtils.instantiateClass(CustomDateEditor.class));
 	}
 
 	@Test  // gh-22531
@@ -78,10 +82,11 @@ public class BeanUtilsTests {
 		assertEquals("foo", bean.getValue());
 	}
 
-	@Test(expected = BeanInstantiationException.class)  // gh-22531
+	@Test // gh-22531
 	public void testInstantiateClassWithMoreArgsThanParameters() throws NoSuchMethodException {
 		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
-		BeanUtils.instantiateClass(ctor, null, null, "foo", null);
+		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
+				BeanUtils.instantiateClass(ctor, null, null, "foo", null));
 	}
 
 	@Test
@@ -221,14 +226,16 @@ public class BeanUtilsTests {
 		assertSignatureEquals(desiredMethod, "doSomething()");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testResolveInvalidSignatureEndParen() {
-		BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testResolveInvalidSignatureStartParen() {
-		BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class));
 	}
 
 	@Test

@@ -27,9 +27,9 @@ import org.springframework.core.task.NoOpRunnable;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -44,17 +44,9 @@ public class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	public void testThrowsExceptionIfPoolSizeIsLessThanZero() throws Exception {
-		try {
-			ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
-			factory.setPoolSize(-1);
-			factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
-				new NoOpScheduledExecutorTask()
-			});
-			factory.afterPropertiesSet();
-			fail("Pool size less than zero");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setPoolSize(-1));
 	}
 
 	@Test

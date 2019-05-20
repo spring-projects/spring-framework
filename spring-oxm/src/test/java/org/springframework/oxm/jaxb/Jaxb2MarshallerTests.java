@@ -55,11 +55,12 @@ import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -148,27 +149,30 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		marshaller.afterPropertiesSet();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noContextPathOrClassesToBeBound() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-		marshaller.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				marshaller::afterPropertiesSet);
 	}
 
-	@Test(expected = UncategorizedMappingException.class)
+	@Test
 	public void testInvalidContextPath() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath("ab");
-		marshaller.afterPropertiesSet();
+		assertThatExceptionOfType(UncategorizedMappingException.class).isThrownBy(
+				marshaller::afterPropertiesSet);
 	}
 
-	@Test(expected = XmlMappingException.class)
+	@Test
 	public void marshalInvalidClass() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(FlightType.class);
 		marshaller.afterPropertiesSet();
 		Result result = new StreamResult(new StringWriter());
 		Flights flights = new Flights();
-		marshaller.marshal(flights, result);
+		assertThatExceptionOfType(XmlMappingException.class).isThrownBy(() ->
+				marshaller.marshal(flights, result));
 	}
 
 	@Test
@@ -238,7 +242,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 					marshaller.marshal(returnValue, new StreamResult(new ByteArrayOutputStream()));
 				}
 				catch (InvocationTargetException e) {
-					fail(e.getMessage());
+					throw new AssertionError(e.getMessage(), e);
 				}
 			}
 		}, new ReflectionUtils.MethodFilter() {
@@ -263,7 +267,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 					marshaller.marshal(returnValue, new StreamResult(new ByteArrayOutputStream()));
 				}
 				catch (InvocationTargetException e) {
-					fail(e.getMessage());
+					throw new AssertionError(e.getMessage(), e);
 				}
 			}
 		}, new ReflectionUtils.MethodFilter() {

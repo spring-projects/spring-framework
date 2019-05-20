@@ -30,11 +30,12 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -99,13 +100,9 @@ public class ExtractingResponseErrorHandlerTests {
 		responseHeaders.setContentLength(body.length);
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
-		try {
-			this.errorHandler.handleError(this.response);
-			fail("MyRestClientException expected");
-		}
-		catch (MyRestClientException ex) {
-			assertEquals("bar", ex.getFoo());
-		}
+		assertThatExceptionOfType(MyRestClientException.class).isThrownBy(() ->
+				this.errorHandler.handleError(this.response))
+			.satisfies(ex -> assertThat(ex.getFoo()).isEqualTo("bar"));
 	}
 
 	@Test
@@ -119,13 +116,9 @@ public class ExtractingResponseErrorHandlerTests {
 		responseHeaders.setContentLength(body.length);
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
-		try {
-			this.errorHandler.handleError(this.response);
-			fail("MyRestClientException expected");
-		}
-		catch (MyRestClientException ex) {
-			assertEquals("bar", ex.getFoo());
-		}
+		assertThatExceptionOfType(MyRestClientException.class).isThrownBy(() ->
+				this.errorHandler.handleError(this.response))
+			.satisfies(ex -> assertThat(ex.getFoo()).isEqualTo("bar"));
 	}
 
 	@Test
@@ -139,14 +132,12 @@ public class ExtractingResponseErrorHandlerTests {
 		responseHeaders.setContentLength(body.length);
 		given(this.response.getBody()).willReturn(new ByteArrayInputStream(body));
 
-		try {
-			this.errorHandler.handleError(this.response);
-			fail("HttpClientErrorException expected");
-		}
-		catch (HttpClientErrorException ex) {
-			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-			assertArrayEquals(body, ex.getResponseBodyAsByteArray());
-		}
+		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
+				this.errorHandler.handleError(this.response))
+			.satisfies(ex -> {
+				assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+				assertArrayEquals(body, ex.getResponseBodyAsByteArray());
+			});
 	}
 
 	@Test

@@ -26,8 +26,9 @@ import org.mockito.MockitoAnnotations;
 
 import org.springframework.http.MediaType;
 
+import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -98,10 +99,11 @@ public class ResponseBodyEmitterTests {
 		verifyNoMoreInteractions(this.handler);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void sendFailsAfterComplete() throws Exception {
 		this.emitter.complete();
-		this.emitter.send("foo");
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.emitter.send("foo"));
 	}
 
 	@Test
@@ -151,13 +153,8 @@ public class ResponseBodyEmitterTests {
 
 		IOException failure = new IOException();
 		willThrow(failure).given(this.handler).send("foo", MediaType.TEXT_PLAIN);
-		try {
-			this.emitter.send("foo", MediaType.TEXT_PLAIN);
-			fail("Expected exception");
-		}
-		catch (IOException ex) {
-			// expected
-		}
+		assertThatIOException().isThrownBy(() ->
+				this.emitter.send("foo", MediaType.TEXT_PLAIN));
 		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
 		verifyNoMoreInteractions(this.handler);
 	}

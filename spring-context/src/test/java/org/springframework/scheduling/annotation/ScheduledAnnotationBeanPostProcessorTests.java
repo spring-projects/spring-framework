@@ -58,6 +58,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -306,16 +307,17 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals(cal.getTime(), nextExecutionTime);  // assert that 6:00 is next execution time
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void cronTaskWithInvalidZone() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(CronWithInvalidTimezoneTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		context.refresh();
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh);
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void cronTaskWithMethodValidation() {
 		BeanDefinition validationDefinition = new RootBeanDefinition(MethodValidationPostProcessor.class);
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
@@ -323,7 +325,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		context.registerBeanDefinition("methodValidation", validationDefinition);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		context.refresh();
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh);
 	}
 
 	@Test
@@ -661,31 +664,34 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals("0 0 9-17 * * MON-FRI", task.getExpression());
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void emptyAnnotation() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(EmptyAnnotationTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		context.refresh();
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh);
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void invalidCron() throws Throwable {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(InvalidCronTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		context.refresh();
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh);
 	}
 
-	@Test(expected = BeanCreationException.class)
+	@Test
 	public void nonEmptyParamList() {
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(NonEmptyParamListTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
-		context.refresh();
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh);
 	}
 
 

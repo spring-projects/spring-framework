@@ -19,6 +19,7 @@ package org.springframework.util;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -76,10 +77,11 @@ public class ResizableByteArrayOutputStreamTests {
 		assertByteArrayEqualsString(this.baos);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failResize() throws Exception{
 		this.baos.write(helloBytes);
-		this.baos.resize(5);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.baos.resize(5));
 	}
 
 

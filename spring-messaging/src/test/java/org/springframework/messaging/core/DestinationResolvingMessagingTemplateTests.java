@@ -28,6 +28,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -74,10 +75,11 @@ public class DestinationResolvingMessagingTemplateTests {
 		assertSame(message, this.template.message);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void sendNoDestinationResolver() {
 		TestDestinationResolvingMessagingTemplate template = new TestDestinationResolvingMessagingTemplate();
-		template.send("myChannel", new GenericMessage<Object>("payload"));
+		assertThatIllegalStateException().isThrownBy(() ->
+				template.send("myChannel", new GenericMessage<Object>("payload")));
 	}
 
 	@Test

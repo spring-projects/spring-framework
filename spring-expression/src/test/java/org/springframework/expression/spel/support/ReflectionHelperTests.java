@@ -34,13 +34,13 @@ import org.springframework.expression.spel.SpelUtilities;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for reflection helper code.
@@ -329,83 +329,41 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 
 	@Test
 	public void testOptimalReflectivePropertyAccessor() throws Exception {
-		ReflectivePropertyAccessor rpa = new ReflectivePropertyAccessor();
-		Tester t = new Tester();
-		t.setProperty("hello");
-		EvaluationContext ctx = new StandardEvaluationContext(t);
-		assertTrue(rpa.canRead(ctx, t, "property"));
-		assertEquals("hello", rpa.read(ctx, t, "property").getValue());
-		assertEquals("hello", rpa.read(ctx, t, "property").getValue()); // cached accessor used
+		ReflectivePropertyAccessor reflective = new ReflectivePropertyAccessor();
+		Tester tester = new Tester();
+		tester.setProperty("hello");
+		EvaluationContext ctx = new StandardEvaluationContext(tester);
+		assertTrue(reflective.canRead(ctx, tester, "property"));
+		assertEquals("hello", reflective.read(ctx, tester, "property").getValue());
+		assertEquals("hello", reflective.read(ctx, tester, "property").getValue()); // cached accessor used
 
-		PropertyAccessor optA = rpa.createOptimalAccessor(ctx, t, "property");
-		assertTrue(optA.canRead(ctx, t, "property"));
-		assertFalse(optA.canRead(ctx, t, "property2"));
-		try {
-			optA.canWrite(ctx, t, "property");
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		try {
-			optA.canWrite(ctx, t, "property2");
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		assertEquals("hello",optA.read(ctx, t, "property").getValue());
-		assertEquals("hello",optA.read(ctx, t, "property").getValue()); // cached accessor used
+		PropertyAccessor property = reflective.createOptimalAccessor(ctx, tester, "property");
+		assertTrue(property.canRead(ctx, tester, "property"));
+		assertFalse(property.canRead(ctx, tester, "property2"));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				property.canWrite(ctx, tester, "property"));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				property.canWrite(ctx, tester, "property2"));
+		assertEquals("hello",property.read(ctx, tester, "property").getValue());
+		assertEquals("hello",property.read(ctx, tester, "property").getValue()); // cached accessor used
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				property.getSpecificTargetClasses());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				property.write(ctx, tester, "property", null));
 
-		try {
-			optA.getSpecificTargetClasses();
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		try {
-			optA.write(ctx, t, "property", null);
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-
-		optA = rpa.createOptimalAccessor(ctx, t, "field");
-		assertTrue(optA.canRead(ctx, t, "field"));
-		assertFalse(optA.canRead(ctx, t, "field2"));
-		try {
-			optA.canWrite(ctx, t, "field");
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		try {
-			optA.canWrite(ctx, t, "field2");
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		assertEquals(3,optA.read(ctx, t, "field").getValue());
-		assertEquals(3,optA.read(ctx, t, "field").getValue());  // cached accessor used
-
-		try {
-			optA.getSpecificTargetClasses();
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
-		try {
-			optA.write(ctx, t, "field", null);
-			fail();
-		}
-		catch (UnsupportedOperationException uoe) {
-			// success
-		}
+		PropertyAccessor field = reflective.createOptimalAccessor(ctx, tester, "field");
+		assertTrue(field.canRead(ctx, tester, "field"));
+		assertFalse(field.canRead(ctx, tester, "field2"));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				field.canWrite(ctx, tester, "field"));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				field.canWrite(ctx, tester, "field2"));
+		assertEquals(3,field.read(ctx, tester, "field").getValue());
+		assertEquals(3,field.read(ctx, tester, "field").getValue());  // cached accessor used
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				field.getSpecificTargetClasses());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				field.write(ctx, tester, "field", null));
 	}
 
 

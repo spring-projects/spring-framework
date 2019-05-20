@@ -39,11 +39,12 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests invocation of methods.
@@ -124,31 +125,17 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// Now cause it to throw an exception:
 		eContext.setVariable("bar", 1);
-		try {
-			o = expr.getValue(eContext);
-			fail();
-		}
-		catch (Exception ex) {
-			if (ex instanceof SpelEvaluationException) {
-				fail("Should not be a SpelEvaluationException: " + ex);
-			}
-			// normal
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				expr.getValue(eContext))
+			.isNotInstanceOf(SpelEvaluationException.class);
+
 		// If counter is 4 then the method got called twice!
 		assertEquals(3, parser.parseExpression("counter").getValue(eContext));
 
 		eContext.setVariable("bar", 4);
-		try {
-			o = expr.getValue(eContext);
-			fail();
-		}
-		catch (Exception ex) {
-			// 4 means it will throw a checked exception - this will be wrapped
-			if (!(ex instanceof ExpressionInvocationTargetException)) {
-				fail("Should have been wrapped: " + ex);
-			}
-			// normal
-		}
+		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() ->
+				expr.getValue(eContext));
+
 		// If counter is 5 then the method got called twice!
 		assertEquals(4, parser.parseExpression("counter").getValue(eContext));
 	}
@@ -168,16 +155,9 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 2);
-		try {
-			expr.getValue(context);
-			fail();
-		}
-		catch (Exception ex) {
-			if (ex instanceof SpelEvaluationException) {
-				fail("Should not be a SpelEvaluationException: " + ex);
-			}
-			// normal
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				expr.getValue(context))
+			.satisfies(ex -> assertThat(ex).isNotInstanceOf(SpelEvaluationException.class));
 	}
 
 	@Test
@@ -192,15 +172,10 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 4);
-		try {
-			expr.getValue(context);
-			fail();
-		}
-		catch (ExpressionInvocationTargetException ex) {
-			Throwable cause = ex.getCause();
-			assertEquals("org.springframework.expression.spel.testresources.Inventor$TestException",
-					cause.getClass().getName());
-		}
+		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() ->
+				expr.getValue(context))
+			.satisfies(ex -> assertThat(ex.getCause().getClass().getName()).isEqualTo(
+					"org.springframework.expression.spel.testresources.Inventor$TestException"));
 	}
 
 	@Test

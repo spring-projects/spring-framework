@@ -20,13 +20,13 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link MutablePropertyValues}.
@@ -122,14 +122,7 @@ public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 		PropertyValue pv = it.next();
 		assertEquals("foo", pv.getName());
 		assertEquals("bar", pv.getValue());
-
-		try {
-			it.remove();
-			fail("Should have thrown UnsupportedOperationException");
-		}
-		catch (UnsupportedOperationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(it::remove);
 		assertFalse(it.hasNext());
 	}
 

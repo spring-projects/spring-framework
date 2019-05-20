@@ -42,6 +42,7 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -59,16 +60,18 @@ public class XsltViewTests {
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withNoSource() throws Exception {
 		final XsltView view = getXsltView(HTML_OUTPUT);
-		view.render(emptyMap(), request, response);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				view.render(emptyMap(), request, response));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withoutUrl() throws Exception {
 		final XsltView view = new XsltView();
-		view.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				view::afterPropertiesSet);
 	}
 
 	@Test

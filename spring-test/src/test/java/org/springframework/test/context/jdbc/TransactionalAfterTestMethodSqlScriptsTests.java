@@ -29,8 +29,8 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 /**
@@ -52,13 +52,9 @@ public class TransactionalAfterTestMethodSqlScriptsTests extends AbstractTransac
 	@AfterTransaction
 	public void afterTransaction() {
 		if ("test01".equals(testName.getMethodName())) {
-			try {
-				assertNumUsers(99);
-				fail("Should throw a BadSqlGrammarException after test01, assuming 'drop-schema.sql' was executed");
-			}
-			catch (BadSqlGrammarException e) {
-				/* expected */
-			}
+			// Should throw a BadSqlGrammarException after test01, assuming 'drop-schema.sql' was executed
+			assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
+					assertNumUsers(99));
 		}
 	}
 

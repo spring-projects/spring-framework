@@ -18,6 +18,7 @@ package org.springframework.beans.factory.wiring;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -29,29 +30,34 @@ import static org.junit.Assert.assertTrue;
  */
 public class BeanWiringInfoTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorWithNullBeanName() throws Exception {
-		new BeanWiringInfo(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BeanWiringInfo(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorWithWhitespacedBeanName() throws Exception {
-		new BeanWiringInfo("   \t");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BeanWiringInfo("   \t"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorWithEmptyBeanName() throws Exception {
-		new BeanWiringInfo("");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BeanWiringInfo(""));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorWithNegativeIllegalAutowiringValue() throws Exception {
-		new BeanWiringInfo(-1, true);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BeanWiringInfo(-1, true));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorWithPositiveOutOfRangeAutowiringValue() throws Exception {
-		new BeanWiringInfo(123871, true);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BeanWiringInfo(123871, true));
 	}
 
 	@Test

@@ -76,20 +76,22 @@ public class YamlPropertiesFactoryBeanTests {
 		assertThat(properties.getProperty("foo.bar"), equalTo("spam"));
 	}
 
-	@Test(expected = DuplicateKeyException.class)
+	@Test
 	public void testLoadResourcesWithInternalOverride() {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
 		factory.setResources(new ByteArrayResource(
 				"foo: bar\nspam:\n  foo: baz\nfoo: bucket".getBytes()));
-		factory.getObject();
+		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(
+				factory::getObject);
 	}
 
-	@Test(expected = DuplicateKeyException.class)
+	@Test
 	public void testLoadResourcesWithNestedInternalOverride() {
 		YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
 		factory.setResources(new ByteArrayResource(
 				"foo:\n  bar: spam\n  foo: baz\nbreak: it\nfoo: bucket".getBytes()));
-		factory.getObject();
+		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(
+				factory::getObject);
 	}
 
 	@Test

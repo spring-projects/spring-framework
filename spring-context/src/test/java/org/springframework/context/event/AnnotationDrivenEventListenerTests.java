@@ -65,12 +65,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Stephane Nicoll
@@ -299,13 +299,9 @@ public class AnnotationDrivenEventListenerTests {
 
 	@Test
 	public void privateMethodOnCglibProxyFails() throws Exception {
-		try {
-			load(CglibProxyWithPrivateMethod.class);
-			fail("Should have thrown BeanInitializationException");
-		}
-		catch (BeanInitializationException ex) {
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-		}
+		assertThatExceptionOfType(BeanInitializationException.class).isThrownBy(() ->
+				load(CglibProxyWithPrivateMethod.class))
+			.withCauseInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -331,15 +327,10 @@ public class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertEvent(proxy.getId(), event);
 		this.eventCollector.assertTotalEventsCount(1);
 
-		try {
-			customScope.active = false;
-			this.context.publishEvent(new TestEvent());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-		}
+		customScope.active = false;
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				this.context.publishEvent(new TestEvent()))
+			.withCauseInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -393,15 +384,11 @@ public class AnnotationDrivenEventListenerTests {
 		TestEvent event = new TestEvent(this, "fail");
 		ExceptionEventListener listener = this.context.getBean(ExceptionEventListener.class);
 		this.eventCollector.assertNoEventReceived(listener);
-		try {
-			this.context.publishEvent(event);
-			fail("An exception should have thrown");
-		}
-		catch (IllegalStateException e) {
-			assertEquals("Wrong exception", "Test exception", e.getMessage());
-			this.eventCollector.assertEvent(listener, event);
-			this.eventCollector.assertTotalEventsCount(1);
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.context.publishEvent(event))
+			.withMessage("Test exception");
+		this.eventCollector.assertEvent(listener, event);
+		this.eventCollector.assertTotalEventsCount(1);
 	}
 
 	@Test

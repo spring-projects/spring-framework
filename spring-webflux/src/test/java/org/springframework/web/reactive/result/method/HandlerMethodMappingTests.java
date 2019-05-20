@@ -35,6 +35,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -66,10 +67,11 @@ public class HandlerMethodMappingTests {
 	}
 
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void registerDuplicates() {
 		this.mapping.registerMapping("foo", this.handler, this.method1);
-		this.mapping.registerMapping("foo", this.handler, this.method2);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.mapping.registerMapping("foo", this.handler, this.method2));
 	}
 
 	@Test

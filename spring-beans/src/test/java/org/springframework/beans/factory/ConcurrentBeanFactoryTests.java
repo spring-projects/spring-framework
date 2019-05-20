@@ -37,7 +37,6 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
@@ -119,7 +118,7 @@ public class ConcurrentBeanFactoryTests {
 			}
 		}
 		if (ex != null) {
-			fail(ex.getMessage());
+			throw new AssertionError("Unexpected exception", ex);
 		}
 	}
 

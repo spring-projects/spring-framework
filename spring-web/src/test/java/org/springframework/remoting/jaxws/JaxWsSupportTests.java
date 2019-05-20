@@ -36,9 +36,9 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.remoting.RemoteAccessException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -101,30 +101,20 @@ public class JaxWsSupportTests {
 
 			String order = orderService.getOrder(1000);
 			assertEquals("order 1000", order);
-			try {
-				orderService.getOrder(0);
-				fail("Should have thrown OrderNotFoundException");
-			}
-			catch (OrderNotFoundException ex) {
-				// expected
-			}
-			catch (RemoteAccessException ex) {
-				// ignore - probably setup issue with JAX-WS provider vs JAXB
-			}
+			assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+					orderService.getOrder(0))
+				.matches(ex -> ex instanceof OrderNotFoundException ||
+						ex instanceof RemoteAccessException);
+			// ignore RemoteAccessException as probably setup issue with JAX-WS provider vs JAXB
 
 			ServiceAccessor serviceAccessor = ac.getBean("accessor", ServiceAccessor.class);
 			order = serviceAccessor.orderService.getOrder(1000);
 			assertEquals("order 1000", order);
-			try {
-				serviceAccessor.orderService.getOrder(0);
-				fail("Should have thrown OrderNotFoundException");
-			}
-			catch (OrderNotFoundException ex) {
-				// expected
-			}
-			catch (WebServiceException ex) {
-				// ignore - probably setup issue with JAX-WS provider vs JAXB
-			}
+			assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+					serviceAccessor.orderService.getOrder(0))
+				.matches(ex -> ex instanceof OrderNotFoundException ||
+							ex instanceof WebServiceException);
+			// ignore WebServiceException as probably setup issue with JAX-WS provider vs JAXB
 		}
 		catch (BeanCreationException ex) {
 			if ("exporter".equals(ex.getBeanName()) && ex.getRootCause() instanceof ClassNotFoundException) {

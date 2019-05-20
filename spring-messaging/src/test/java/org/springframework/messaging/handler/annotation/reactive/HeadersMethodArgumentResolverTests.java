@@ -31,6 +31,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -70,9 +71,10 @@ public class HeadersMethodArgumentResolverTests {
 		assertEquals("bar", headers.get("foo"));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void resolveArgumentAnnotatedNotMap() {
-		resolveArgument(this.resolvable.annotPresent(Headers.class).arg(String.class));
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolveArgument(this.resolvable.annotPresent(Headers.class).arg(String.class)));
 	}
 
 	@Test

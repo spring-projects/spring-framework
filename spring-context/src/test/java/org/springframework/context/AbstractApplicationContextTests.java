@@ -30,6 +30,7 @@ import org.springframework.beans.factory.xml.AbstractListableBeanFactoryTests;
 import org.springframework.tests.sample.beans.LifecycleBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -134,12 +135,12 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		assertTrue("Destroyed", lb.isDestroyed());
 	}
 
-	@Test(expected = NoSuchMessageException.class)
+	@Test
 	public void messageSource() throws NoSuchMessageException {
 		assertEquals("message1", applicationContext.getMessage("code1", null, Locale.getDefault()));
 		assertEquals("message2", applicationContext.getMessage("code2", null, Locale.getDefault()));
-
-		applicationContext.getMessage("code0", null, Locale.getDefault());
+		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
+				applicationContext.getMessage("code0", null, Locale.getDefault()));
 	}
 
 	@Test

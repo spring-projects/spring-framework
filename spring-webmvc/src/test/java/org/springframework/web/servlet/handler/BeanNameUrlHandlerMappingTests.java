@@ -29,8 +29,8 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -193,13 +193,8 @@ public class BeanNameUrlHandlerMappingTests {
 	@Test
 	public void doubleMappings() throws ServletException {
 		BeanNameUrlHandlerMapping hm = (BeanNameUrlHandlerMapping) wac.getBean("handlerMapping");
-		try {
-			hm.registerHandler("/mypath/welcome.html", new Object());
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				hm.registerHandler("/mypath/welcome.html", new Object()));
 	}
 
 }

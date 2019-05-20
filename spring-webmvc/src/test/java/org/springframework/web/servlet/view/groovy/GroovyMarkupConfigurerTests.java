@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.groovy;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -32,11 +31,11 @@ import org.junit.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for
@@ -165,11 +164,11 @@ public class GroovyMarkupConfigurerTests {
 		assertThat(url.getPath(), Matchers.containsString("i18n.tpl"));
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void failMissingTemplate() throws Exception {
 		LocaleContextHolder.setLocale(Locale.US);
-		this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "missing.tpl");
-		fail();
+		assertThatIOException().isThrownBy(() ->
+			this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "missing.tpl"));
 	}
 
 }

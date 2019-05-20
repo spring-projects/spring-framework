@@ -35,8 +35,9 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 ///CLOVER:OFF
 
@@ -82,8 +83,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			assertEquals(String.class, value.getClass());
 		}
 		catch (EvaluationException | ParseException ex) {
-			ex.printStackTrace();
-			fail("Unexpected Exception: " + ex.getMessage());
+			throw new AssertionError(ex.getMessage(), ex);
 		}
 	}
 
@@ -187,8 +187,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 		}
 		catch (EvaluationException | ParseException ex) {
-			ex.printStackTrace();
-			fail("Unexpected Exception: " + ex.getMessage());
+			throw new AssertionError(ex.getMessage(), ex);
 		}
 	}
 
@@ -206,14 +205,9 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		Expression expr = parser.parseRaw("orange");
 		Object value = expr.getValue(ctx);
 		assertEquals(Color.orange, value);
-
-		try {
-			expr.setValue(ctx, Color.blue);
-			fail("Should not be allowed to set oranges to be blue !");
-		}
-		catch (SpelEvaluationException ee) {
-			assertEquals(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, ee.getMessageCode());
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expr.setValue(ctx, Color.blue))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL));
 	}
 
 	@Test
@@ -228,13 +222,9 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		Object value = expr.getValue(ctx);
 		assertEquals(Color.green, value);
 
-		try {
-			expr.setValue(ctx, Color.blue);
-			fail("Should not be allowed to set peas to be blue !");
-		}
-		catch (SpelEvaluationException ee) {
-			assertEquals(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL, ee.getMessageCode());
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expr.setValue(ctx, Color.blue))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL));
 	}
 
 

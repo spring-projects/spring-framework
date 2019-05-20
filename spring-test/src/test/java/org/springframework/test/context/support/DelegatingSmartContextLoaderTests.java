@@ -27,6 +27,8 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -103,10 +105,10 @@ public class DelegatingSmartContextLoaderTests {
 
 	// --- SmartContextLoader - loadContext() ----------------------------------
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void loadContextWithNullConfig() throws Exception {
-		MergedContextConfiguration mergedConfig = null;
-		loader.loadContext(mergedConfig);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				loader.loadContext((MergedContextConfiguration) null));
 	}
 
 	@Test
@@ -160,14 +162,16 @@ public class DelegatingSmartContextLoaderTests {
 
 	// --- ContextLoader -------------------------------------------------------
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void processLocations() {
-		loader.processLocations(getClass(), EMPTY_STRING_ARRAY);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				loader.processLocations(getClass(), EMPTY_STRING_ARRAY));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void loadContextFromLocations() throws Exception {
-		loader.loadContext(EMPTY_STRING_ARRAY);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				loader.loadContext(EMPTY_STRING_ARRAY));
 	}
 
 

@@ -34,6 +34,7 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -49,10 +50,11 @@ import static org.mockito.Mockito.mock;
  */
 public class DelegatingIntroductionInterceptorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNullTarget() throws Exception {
 		// Shouldn't accept null target
-		new DelegatingIntroductionInterceptor(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new DelegatingIntroductionInterceptor(null));
 	}
 
 	@Test

@@ -17,13 +17,13 @@
 package org.springframework.transaction.annotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.cache.Cache;
@@ -43,11 +43,11 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Integration tests for the @EnableTransactionManagement annotation.
@@ -64,14 +64,7 @@ public class EnableTransactionManagementIntegrationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class);
 		ctx.refresh();
-
-		try {
-			assertTxProxying(ctx);
-			fail("expected exception");
-		}
-		catch (AssertionError ex) {
-			assertThat(ex.getMessage(), equalTo("FooRepository is not a TX proxy"));
-		}
+		assertThat(isTxProxy(ctx.getBean(FooRepository.class))).isFalse();
 	}
 
 	@Test
@@ -167,20 +160,18 @@ public class EnableTransactionManagementIntegrationTests {
 
 	private void assertTxProxying(AnnotationConfigApplicationContext ctx) {
 		FooRepository repo = ctx.getBean(FooRepository.class);
-
-		boolean isTxProxy = false;
-		if (AopUtils.isAopProxy(repo)) {
-			for (Advisor advisor : ((Advised)repo).getAdvisors()) {
-				if (advisor instanceof BeanFactoryTransactionAttributeSourceAdvisor) {
-					isTxProxy = true;
-					break;
-				}
-			}
-		}
+		boolean isTxProxy = isTxProxy(repo);
 		assertTrue("FooRepository is not a TX proxy", isTxProxy);
-
 		// trigger a transaction
 		repo.findAll();
+	}
+
+	private boolean isTxProxy(FooRepository repo) {
+		if (!AopUtils.isAopProxy(repo)) {
+			return false;
+		}
+		return Arrays.stream(((Advised) repo).getAdvisors())
+				.anyMatch(BeanFactoryTransactionAttributeSourceAdvisor.class::isInstance);
 	}
 
 

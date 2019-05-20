@@ -31,10 +31,10 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.BindingContext;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ExpressionValueMethodArgumentResolver}.
@@ -75,15 +75,9 @@ public class ExpressionValueMethodArgumentResolverTests {
 	@Test
 	public void doesNotSupport() {
 		assertFalse(this.resolver.supportsParameter(this.paramNotSupported));
-		try {
-			this.resolver.supportsParameter(this.paramAlsoNotSupported);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"ExpressionValueMethodArgumentResolver does not support reactive type wrapper"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.paramAlsoNotSupported))
+			.withMessageStartingWith("ExpressionValueMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test

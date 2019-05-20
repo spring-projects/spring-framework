@@ -33,7 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Chris Beams
@@ -176,7 +175,7 @@ public class ExtendedBeanInfoTests {
 				return;
 			}
 		}
-		fail("never matched write method");
+		throw new AssertionError("never matched write method");
 	}
 
 	@Test
@@ -671,7 +670,7 @@ public class ExtendedBeanInfoTests {
 				return;
 			}
 		}
-		fail("never matched write method");
+		throw new AssertionError("never matched write method");
 	}
 
 	@Test
@@ -699,7 +698,7 @@ public class ExtendedBeanInfoTests {
 				return;
 			}
 		}
-		fail("never matched write method");
+		throw new AssertionError("never matched write method");
 	}
 
 	/**

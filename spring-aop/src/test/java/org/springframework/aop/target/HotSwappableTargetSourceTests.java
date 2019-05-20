@@ -31,9 +31,8 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
@@ -110,19 +109,11 @@ public class HotSwappableTargetSourceTests {
 	@Test
 	public void testRejectsSwapToNull() {
 		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
-		IllegalArgumentException aopex = null;
-		try {
-			swapper.swap(null);
-			fail("Shouldn't be able to swap to invalid value");
-		}
-		catch (IllegalArgumentException ex) {
-			// Ok
-			aopex = ex;
-		}
-
+		assertThatIllegalArgumentException().as("Shouldn't be able to swap to invalid value").isThrownBy(() ->
+				swapper.swap(null))
+			.withMessageContaining("null");
 		// It shouldn't be corrupted, it should still work
 		testBasicFunctionality();
-		assertTrue(aopex.getMessage().contains("null"));
 	}
 
 	@Test

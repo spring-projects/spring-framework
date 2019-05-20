@@ -37,12 +37,12 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 
@@ -109,27 +109,12 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	public void doesNotSupportReactiveWrapper() {
-		MethodParameter param;
-		try {
-			param = this.testMethod.annot(requestParam()).arg(Mono.class, String.class);
-			this.resolver.supportsParameter(param);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"RequestParamMethodArgumentResolver does not support reactive type wrapper"));
-		}
-		try {
-			param = this.testMethod.annotNotPresent(RequestParam.class).arg(Mono.class, String.class);
-			this.resolver.supportsParameter(param);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"RequestParamMethodArgumentResolver does not support reactive type wrapper"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.testMethod.annot(requestParam()).arg(Mono.class, String.class)))
+			.withMessageStartingWith("RequestParamMethodArgumentResolver does not support reactive type wrapper");
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.testMethod.annotNotPresent(RequestParam.class).arg(Mono.class, String.class)))
+			.withMessageStartingWith("RequestParamMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test

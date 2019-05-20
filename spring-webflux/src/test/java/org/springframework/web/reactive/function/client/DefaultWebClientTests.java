@@ -34,6 +34,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -179,12 +180,13 @@ public class DefaultWebClientTests {
 		assertEquals("bar", actual.get("foo"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void bodyObjectPublisher() {
 		Mono<Void> mono = Mono.empty();
 		WebClient client = this.builder.build();
 
-		client.post().uri("https://example.com").syncBody(mono);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				client.post().uri("https://example.com").syncBody(mono));
 	}
 
 	@Test

@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -127,13 +128,14 @@ public class MessageHeadersTests {
 		assertEquals(value, headers.get("test", Integer.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testHeaderValueAccessWithIncorrectType() {
 		Integer value = new Integer(123);
 		Map<String, Object> map = new HashMap<>();
 		map.put("test", value);
 		MessageHeaders headers = new MessageHeaders(map);
-		assertEquals(value, headers.get("test", String.class));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				headers.get("test", String.class));
 	}
 
 	@Test

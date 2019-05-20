@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -34,21 +35,24 @@ import static org.junit.Assert.assertTrue;
  */
 public class CustomCollectionEditorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullCollectionType() throws Exception {
-		new CustomCollectionEditor(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CustomCollectionEditor(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCtorWithNonCollectionType() throws Exception {
-		new CustomCollectionEditor((Class) String.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CustomCollectionEditor((Class) String.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWithCollectionTypeThatDoesNotExposeAPublicNoArgCtor() throws Exception {
 		CustomCollectionEditor editor = new CustomCollectionEditor(CollectionTypeWithNoNoArgCtor.class);
-		editor.setValue("1");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setValue("1"));
 	}
 
 	@Test

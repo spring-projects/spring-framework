@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -77,11 +78,12 @@ public class ByteArrayMultipartFileEditorTests {
 		assertEquals(expectedValue, editor.getAsText());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void setValueAsMultipartFileWithBadBytes() throws Exception {
 		MultipartFile file = mock(MultipartFile.class);
 		given(file.getBytes()).willThrow(new IOException());
-		editor.setValue(file);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				editor.setValue(file));
 	}
 
 }

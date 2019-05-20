@@ -22,6 +22,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
@@ -49,7 +51,7 @@ public class ListenableFutureTaskTests {
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				fail(ex.getMessage());
+				throw new AssertionError(ex.getMessage(), ex);
 			}
 		});
 		task.run();
@@ -79,20 +81,12 @@ public class ListenableFutureTaskTests {
 		});
 		task.run();
 
-		try {
-			task.get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertSame(s, ex.getCause().getMessage());
-		}
-		try {
-			task.completable().get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertSame(s, ex.getCause().getMessage());
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				task::get)
+			.satisfies(ex -> assertThat(ex.getCause().getMessage()).isEqualTo(s));
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				task.completable()::get)
+		.satisfies(ex -> assertThat(ex.getCause().getMessage()).isEqualTo(s));
 	}
 
 	@Test
@@ -129,20 +123,12 @@ public class ListenableFutureTaskTests {
 		verify(failureCallback).onFailure(ex);
 		verifyZeroInteractions(successCallback);
 
-		try {
-			task.get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(s, ex2.getCause().getMessage());
-		}
-		try {
-			task.completable().get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex2) {
-			assertSame(s, ex2.getCause().getMessage());
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				task::get)
+			.satisfies(e -> assertThat(e.getCause().getMessage()).isEqualTo(s));
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				task.completable()::get)
+			.satisfies(e -> assertThat(e.getCause().getMessage()).isEqualTo(s));
 	}
 
 }

@@ -22,9 +22,9 @@ import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.UtilNamespaceHandler;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 /**
  * Unit and integration tests for the {@link DefaultNamespaceHandlerResolver} class.
@@ -53,13 +53,7 @@ public class DefaultNamespaceHandlerResolverTests {
 	@Test
 	public void testNonExistentHandlerClass() {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
-		try {
-			new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
-			// pass
-		}
-		catch (Throwable ex) {
-			fail("Non-existent handler classes must be ignored: " + ex);
-		}
+		new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
 	}
 
 	@Test
@@ -68,9 +62,10 @@ public class DefaultNamespaceHandlerResolverTests {
 		new DefaultNamespaceHandlerResolver(null);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCtorWithNullClassLoaderArgumentAndNullMappingLocationArgument() {
-		new DefaultNamespaceHandlerResolver(null, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new DefaultNamespaceHandlerResolver(null, null));
 	}
 
 	@Test

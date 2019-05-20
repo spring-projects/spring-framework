@@ -47,12 +47,12 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.post;
@@ -102,15 +102,9 @@ public class HttpEntityMethodArgumentResolverTests {
 	public void doesNotSupport() {
 		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(Mono.class, String.class)));
 		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
-		try {
-			this.resolver.supportsParameter(this.testMethod.arg(Mono.class, httpEntityType(String.class)));
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"HttpEntityMethodArgumentResolver does not support reactive type wrapper"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.testMethod.arg(Mono.class, httpEntityType(String.class))))
+			.withMessageStartingWith("HttpEntityMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test

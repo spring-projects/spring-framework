@@ -25,6 +25,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -57,13 +58,14 @@ public class BeanCreatingHandlerProviderTests {
 		assertNotNull(provider.getHandler());
 	}
 
-	@Test(expected = BeanInstantiationException.class)
+	@Test
 	public void getHandlerNoBeanFactory() {
 
 		BeanCreatingHandlerProvider<EchoHandler> provider =
 				new BeanCreatingHandlerProvider<>(EchoHandler.class);
 
-		provider.getHandler();
+		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(
+				provider::getHandler);
 	}
 
 

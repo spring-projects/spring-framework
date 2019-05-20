@@ -36,12 +36,13 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Person;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests accessing of properties.
@@ -83,31 +84,13 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	public void testAccessingOnNullObject() {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("madeup");
 		EvaluationContext context = new StandardEvaluationContext(null);
-		try {
-			expr.getValue(context);
-			fail("Should have failed - default property resolver cannot resolve on null");
-		}
-		catch (Exception ex) {
-			checkException(ex, SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL);
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expr.getValue(context))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL));
 		assertFalse(expr.isWritable(context));
-		try {
-			expr.setValue(context, "abc");
-			fail("Should have failed - default property resolver cannot resolve on null");
-		}
-		catch (Exception ex) {
-			checkException(ex, SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
-		}
-	}
-
-	private void checkException(Exception ex, SpelMessage expectedMessage) {
-		if (ex instanceof SpelEvaluationException) {
-			SpelMessage sm = ((SpelEvaluationException) ex).getMessageCode();
-			assertEquals("Expected exception type did not occur", expectedMessage, sm);
-		}
-		else {
-			fail("Should be a SpelException " + ex);
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				expr.setValue(context, "abc"))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL));
 	}
 
 	@Test
@@ -129,21 +112,17 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		Object o = expr.getValue(ctx);
 		assertNotNull(o);
 
-		expr = parser.parseRaw("new String('hello').flibbles");
-		expr.setValue(ctx, 99);
-		i = expr.getValue(ctx, Integer.class);
+		SpelExpression flibbleexpr = parser.parseRaw("new String('hello').flibbles");
+		flibbleexpr.setValue(ctx, 99);
+		i = flibbleexpr.getValue(ctx, Integer.class);
 		assertEquals(99, (int) i);
 
 		// Cannot set it to a string value
-		try {
-			expr.setValue(ctx, "not allowed");
-			fail("Should not have been allowed");
-		}
-		catch (EvaluationException ex) {
-			// success - message will be: EL1063E:(pos 20): A problem occurred whilst attempting to set the property
-			// 'flibbles': 'Cannot set flibbles to an object of type 'class java.lang.String''
-			// System.out.println(e.getMessage());
-		}
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
+				flibbleexpr.setValue(ctx, "not allowed"));
+		// message will be: EL1063E:(pos 20): A problem occurred whilst attempting to set the property
+		// 'flibbles': 'Cannot set flibbles to an object of type 'class java.lang.String''
+		// System.out.println(e.getMessage());
 	}
 
 	@Test
@@ -194,11 +173,11 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		assertEquals(String.class.getName(), parser.parseExpression("'a'.class.name").getValue());
 	}
 
-	@Test(expected = SpelEvaluationException.class)
+	@Test
 	public void noGetClassAccess() {
 		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
-
-		parser.parseExpression("'a'.class.name").getValue(context);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("'a'.class.name").getValue(context));
 	}
 
 	@Test
@@ -211,13 +190,8 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		target.setName("p2");
 		assertEquals("p2", expr.getValue(context, target));
 
-		try {
-			parser.parseExpression("name='p3'").getValue(context, target);
-			fail("Should have thrown SpelEvaluationException");
-		}
-		catch (SpelEvaluationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("name='p3'").getValue(context, target));
 	}
 
 	@Test
@@ -263,13 +237,8 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 	public void propertyAccessWithoutMethodResolver() {
 		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 		Person target = new Person("p1");
-		try {
-			parser.parseExpression("name.substring(1)").getValue(context, target);
-			fail("Should have thrown SpelEvaluationException");
-		}
-		catch (SpelEvaluationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("name.substring(1)").getValue(context, target));
 	}
 
 	@Test

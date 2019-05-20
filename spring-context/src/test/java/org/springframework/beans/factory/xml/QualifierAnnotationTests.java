@@ -35,10 +35,10 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 
 import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.util.ClassUtils.convertClassNameToResourcePath;
 
 /**
@@ -59,13 +59,9 @@ public class QualifierAnnotationTests {
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(CONFIG_LOCATION);
 		context.registerSingleton("testBean", NonQualifiedTestBean.class);
-		try {
-			context.refresh();
-			fail("Should have thrown a BeanCreationException");
-		}
-		catch (BeanCreationException e) {
-			assertTrue(e.getMessage().contains("found 6"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh)
+			.withMessageContaining("found 6");
 	}
 
 	@Test
@@ -196,13 +192,9 @@ public class QualifierAnnotationTests {
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(CONFIG_LOCATION);
 		context.registerSingleton("testBean", QualifiedByAttributesTestBean.class);
-		try {
-			context.refresh();
-			fail("should have thrown a BeanCreationException");
-		}
-		catch (BeanCreationException e) {
-			assertTrue(e.getMessage().contains("found 6"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				context::refresh)
+			.withMessageContaining("found 6");
 	}
 
 	@Test

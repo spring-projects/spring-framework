@@ -56,6 +56,7 @@ import org.springframework.tests.TestGroup;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StopWatch;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertArrayEquals;
@@ -93,9 +94,10 @@ public class DefaultConversionServiceTests {
 		assertEquals(null, conversionService.convert("", Character.class));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void testStringToCharacterInvalidString() {
-		conversionService.convert("invalid", Character.class);
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert("invalid", Character.class));
 	}
 
 	@Test
@@ -130,9 +132,10 @@ public class DefaultConversionServiceTests {
 		assertEquals(null, conversionService.convert("", Boolean.class));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void testStringToBooleanInvalidString() {
-		conversionService.convert("invalid", Boolean.class);
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert("invalid", Boolean.class));
 	}
 
 	@Test
@@ -331,9 +334,10 @@ public class DefaultConversionServiceTests {
 		assertEquals(Long.valueOf(1), conversionService.convert(1, Long.class));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void testNumberToNumberNotSupportedNumber() {
-		conversionService.convert(1, CustomNumber.class);
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(1, CustomNumber.class));
 	}
 
 	@Test
@@ -397,9 +401,10 @@ public class DefaultConversionServiceTests {
 		assertEquals("3", result.get(2));
 	}
 
-	@Test(expected = ConversionFailedException.class)
+	@Test
 	public void convertArrayToAbstractCollection() {
-		conversionService.convert(new String[]{"1", "2", "3"}, AbstractList.class);
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(new String[]{"1", "2", "3"}, AbstractList.class));
 	}
 
 	@Test
@@ -881,9 +886,10 @@ public class DefaultConversionServiceTests {
 		assertEquals(ZoneId.of("GMT+1"), conversionService.convert("GMT+1", ZoneId.class));
 	}
 
-	@Test(expected = ConverterNotFoundException.class)
+	@Test
 	public void convertObjectToObjectNoValueOfMethodOrConstructor() {
-		conversionService.convert(Long.valueOf(3), SSN.class);
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert(Long.valueOf(3), SSN.class));
 	}
 
 	@Test

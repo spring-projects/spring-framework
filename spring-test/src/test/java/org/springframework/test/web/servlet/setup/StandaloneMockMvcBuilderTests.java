@@ -38,6 +38,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -92,28 +93,32 @@ public class StandaloneMockMvcBuilderTests {
 		assertEquals(wac, WebApplicationContextUtils.getRequiredWebApplicationContext(wac.getServletContext()));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void addFiltersFiltersNull() {
 		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
-		builder.addFilters((Filter[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				builder.addFilters((Filter[]) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void addFiltersFiltersContainsNull() {
 		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
-		builder.addFilters(new ContinueFilter(), (Filter) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				builder.addFilters(new ContinueFilter(), (Filter) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void addFilterPatternsNull() {
 		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
-		builder.addFilter(new ContinueFilter(), (String[]) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				builder.addFilter(new ContinueFilter(), (String[]) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void addFilterPatternContainsNull() {
 		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
-		builder.addFilter(new ContinueFilter(), (String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				builder.addFilter(new ContinueFilter(), (String) null));
 	}
 
 	@Test  // SPR-13375

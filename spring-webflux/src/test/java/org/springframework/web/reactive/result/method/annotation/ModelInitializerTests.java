@@ -53,9 +53,9 @@ import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -174,13 +174,9 @@ public class ModelInitializerTests {
 
 		Method method = ResolvableMethod.on(TestController.class).annotPresent(PostMapping.class).resolveMethod();
 		HandlerMethod handlerMethod = new HandlerMethod(controller, method);
-		try {
-			this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000));
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			assertEquals("Required attribute 'missing-bean' is missing.", ex.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.modelInitializer.initModel(handlerMethod, context, this.exchange).block(Duration.ofMillis(5000)))
+			.withMessage("Required attribute 'missing-bean' is missing.");
 	}
 
 	@Test

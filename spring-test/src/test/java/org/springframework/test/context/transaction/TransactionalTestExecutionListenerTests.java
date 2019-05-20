@@ -34,10 +34,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
@@ -86,14 +86,9 @@ public class TransactionalTestExecutionListenerTests {
 		assertFalse("callback should not have been invoked", instance.invoked());
 		TransactionContextHolder.removeCurrentTransactionContext();
 
-		try {
-			listener.beforeTestMethod(testContext);
-			fail("Should have thrown an IllegalStateException");
-		}
-		catch (IllegalStateException e) {
-			assertTrue(e.getMessage().startsWith(
-					"Failed to retrieve PlatformTransactionManager for @Transactional test"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				listener.beforeTestMethod(testContext))
+			.withMessageStartingWith("Failed to retrieve PlatformTransactionManager for @Transactional test");
 	}
 
 	@Test

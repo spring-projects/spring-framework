@@ -25,10 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Hibernate-specific JPA tests with multiple EntityManagerFactory instances.
@@ -61,11 +61,8 @@ public class HibernateMultiEntityManagerFactoryIntegrationTests extends Abstract
 	public void testEntityManagerFactory2() {
 		EntityManager em = this.entityManagerFactory2.createEntityManager();
 		try {
-			em.createQuery("select tb from TestBean");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					em.createQuery("select tb from TestBean"));
 		}
 		finally {
 			em.close();

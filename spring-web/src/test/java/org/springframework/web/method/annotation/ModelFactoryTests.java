@@ -41,11 +41,11 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolverCompo
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -153,13 +153,8 @@ public class ModelFactoryTests {
 	public void sessionAttributeNotPresent() throws Exception {
 		ModelFactory modelFactory = new ModelFactory(null, null, this.attributeHandler);
 		HandlerMethod handlerMethod = createHandlerMethod("handleSessionAttr", String.class);
-		try {
-			modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
-			fail("Expected HttpSessionRequiredException");
-		}
-		catch (HttpSessionRequiredException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(HttpSessionRequiredException.class).isThrownBy(() ->
+				modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod));
 
 		// Now add attribute and try again
 		this.attributeStore.storeAttribute(this.webRequest, "sessionAttr", "sessionAttrValue");

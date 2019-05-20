@@ -31,10 +31,11 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -84,21 +85,14 @@ public class RequestContextFilterTests {
 
 		try {
 			rbf.doFilter(req, resp, fc);
-			if (sex != null) {
-				fail();
-			}
+			assertThat(sex).isNull();
 		}
 		catch (ServletException ex) {
 			assertNotNull(sex);
 		}
 
-		try {
-			RequestContextHolder.currentRequestAttributes();
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			// Ok
-		}
+		assertThatIllegalStateException().isThrownBy(
+				RequestContextHolder::currentRequestAttributes);
 
 		assertEquals(1, fc.invocations);
 	}

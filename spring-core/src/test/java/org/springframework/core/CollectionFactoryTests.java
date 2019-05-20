@@ -39,11 +39,12 @@ import org.junit.Test;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
 import static org.springframework.core.CollectionFactory.createApproximateCollection;
 import static org.springframework.core.CollectionFactory.createApproximateMap;
 import static org.springframework.core.CollectionFactory.createCollection;
@@ -75,16 +76,13 @@ public class CollectionFactoryTests {
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
 		// next line and not as a result of the previous line.
-		try {
-			// Note that ints is of type Collection<Integer>, but the collection returned
-			// by createApproximateCollection() is of type Collection<Color>. Thus, 42
-			// cannot be cast to a Color.
-			ints.add(42);
-			fail("Should have thrown a ClassCastException");
-		}
-		catch (ClassCastException e) {
-			/* expected */
-		}
+
+		// Note that ints is of type Collection<Integer>, but the collection returned
+		// by createApproximateCollection() is of type Collection<Color>. Thus, 42
+		// cannot be cast to a Color.
+
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				ints.add(42));
 	}
 
 	@Test
@@ -93,16 +91,13 @@ public class CollectionFactoryTests {
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
 		// next line and not as a result of the previous line.
-		try {
-			// Note that ints is of type Collection<Integer>, but the collection returned
-			// by createCollection() is of type Collection<Color>. Thus, 42 cannot be cast
-			// to a Color.
-			ints.add(42);
-			fail("Should have thrown a ClassCastException");
-		}
-		catch (ClassCastException e) {
-			/* expected */
-		}
+
+		// Note that ints is of type Collection<Integer>, but the collection returned
+		// by createCollection() is of type Collection<Color>. Thus, 42 cannot be cast
+		// to a Color.
+
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				ints.add(42));
 	}
 
 	/**
@@ -121,16 +116,13 @@ public class CollectionFactoryTests {
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
 		// next line and not as a result of the previous line.
-		try {
-			// Note that the 'map' key must be of type String, but the keys in the map
-			// returned by createApproximateMap() are of type Color. Thus "foo" cannot be
-			// cast to a Color.
-			map.put("foo", 1);
-			fail("Should have thrown a ClassCastException");
-		}
-		catch (ClassCastException e) {
-			/* expected */
-		}
+
+		// Note that the 'map' key must be of type String, but the keys in the map
+		// returned by createApproximateMap() are of type Color. Thus "foo" cannot be
+		// cast to a Color.
+
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				map.put("foo", 1));
 	}
 
 	@Test
@@ -139,16 +131,13 @@ public class CollectionFactoryTests {
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
 		// next line and not as a result of the previous line.
-		try {
-			// Note that the 'map' key must be of type String, but the keys in the map
-			// returned by createMap() are of type Color. Thus "foo" cannot be cast to a
-			// Color.
-			map.put("foo", 1);
-			fail("Should have thrown a ClassCastException");
-		}
-		catch (ClassCastException e) {
-			/* expected */
-		}
+
+		// Note that the 'map' key must be of type String, but the keys in the map
+		// returned by createMap() are of type Color. Thus "foo" cannot be cast to a
+		// Color.
+
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				map.put("foo", 1));
 	}
 
 	@Test
@@ -157,16 +146,13 @@ public class CollectionFactoryTests {
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
 		// next line and not as a result of the previous line.
-		try {
-			// Note: 'map' values must be of type Integer, but the values in the map
-			// returned by createMap() are of type java.util.List. Thus 1 cannot be
-			// cast to a List.
-			map.put("foo", 1);
-			fail("Should have thrown a ClassCastException");
-		}
-		catch (ClassCastException e) {
-			/* expected */
-		}
+
+		// Note: 'map' values must be of type Integer, but the values in the map
+		// returned by createMap() are of type java.util.List. Thus 1 cannot be
+		// cast to a List.
+
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				map.put("foo", 1));
 	}
 
 	@Test
@@ -254,19 +240,22 @@ public class CollectionFactoryTests {
 		assertThat(createCollection(enumSet.getClass(), Color.class, 0), is(instanceOf(enumSet.getClass())));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsInvalidElementTypeForEnumSet() {
-		createCollection(EnumSet.class, Object.class, 0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createCollection(EnumSet.class, Object.class, 0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullElementTypeForEnumSet() {
-		createCollection(EnumSet.class, null, 0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createCollection(EnumSet.class, null, 0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullCollectionType() {
-		createCollection(null, Object.class, 0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createCollection(null, Object.class, 0));
 	}
 
 	@Test
@@ -293,19 +282,22 @@ public class CollectionFactoryTests {
 		assertThat(createMap(EnumMap.class, Color.class, 0), is(instanceOf(EnumMap.class)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsInvalidKeyTypeForEnumMap() {
-		createMap(EnumMap.class, Object.class, 0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createMap(EnumMap.class, Object.class, 0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullKeyTypeForEnumMap() {
-		createMap(EnumMap.class, null, 0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createMap(EnumMap.class, null, 0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullMapType() {
-		createMap(null, Object.class, 0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createMap(null, Object.class, 0));
 	}
 
 

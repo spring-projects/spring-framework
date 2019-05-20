@@ -37,6 +37,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -104,11 +105,12 @@ public class InitBinderBindingContextTests {
 		assertNull(dataBinder.getDisallowedFields());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void returnValueNotExpected() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderReturnValue", WebDataBinder.class);
-		context.createDataBinder(exchange, null, "invalidName");
+		assertThatIllegalStateException().isThrownBy(() ->
+				context.createDataBinder(exchange, null, "invalidName"));
 	}
 
 	@Test

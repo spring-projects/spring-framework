@@ -37,11 +37,10 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -164,7 +163,7 @@ public class JpaTransactionManagerTests {
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
-		try {
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
 			tt.execute(new TransactionCallback() {
 				@Override
 				public Object doInTransaction(TransactionStatus status) {
@@ -172,13 +171,7 @@ public class JpaTransactionManagerTests {
 					EntityManagerFactoryUtils.getTransactionalEntityManager(factory);
 					throw new RuntimeException("some exception");
 				}
-			});
-			fail("Should have propagated RuntimeException");
-		}
-		catch (RuntimeException ex) {
-			// expected
-			assertEquals("some exception", ex.getMessage());
-		}
+			})).withMessage("some exception");
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
@@ -197,7 +190,7 @@ public class JpaTransactionManagerTests {
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
-		try {
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
 			tt.execute(new TransactionCallback() {
 				@Override
 				public Object doInTransaction(TransactionStatus status) {
@@ -205,12 +198,7 @@ public class JpaTransactionManagerTests {
 					EntityManagerFactoryUtils.getTransactionalEntityManager(factory);
 					throw new RuntimeException("some exception");
 				}
-			});
-			fail("Should have propagated RuntimeException");
-		}
-		catch (RuntimeException ex) {
-			// expected
-		}
+			}));
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
@@ -293,7 +281,7 @@ public class JpaTransactionManagerTests {
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
-		try {
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
 			tt.execute(new TransactionCallback() {
 				@Override
 				public Object doInTransaction(TransactionStatus status) {
@@ -306,12 +294,7 @@ public class JpaTransactionManagerTests {
 						}
 					});
 				}
-			});
-			fail("Should have propagated RuntimeException");
-		}
-		catch (RuntimeException ex) {
-			// expected
-		}
+			}));
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
@@ -334,28 +317,23 @@ public class JpaTransactionManagerTests {
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
-		try {
-			tt.execute(new TransactionCallback() {
-				@Override
-				public Object doInTransaction(TransactionStatus status) {
-					assertTrue(TransactionSynchronizationManager.hasResource(factory));
+		assertThatExceptionOfType(TransactionSystemException.class).isThrownBy(() ->
+				tt.execute(new TransactionCallback() {
+					@Override
+					public Object doInTransaction(TransactionStatus status) {
+						assertTrue(TransactionSynchronizationManager.hasResource(factory));
 
-					return tt.execute(new TransactionCallback() {
-						@Override
-						public Object doInTransaction(TransactionStatus status) {
-							EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
-							status.setRollbackOnly();
-							return null;
-						}
-					});
-				}
-			});
-			fail("Should have thrown TransactionSystemException");
-		}
-		catch (TransactionSystemException tse) {
-			// expected
-			assertTrue(tse.getCause() instanceof RollbackException);
-		}
+						return tt.execute(new TransactionCallback() {
+							@Override
+							public Object doInTransaction(TransactionStatus status) {
+								EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
+								status.setRollbackOnly();
+								return null;
+							}
+						});
+					}
+				}))
+			.withCauseInstanceOf(RollbackException.class);
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
@@ -770,17 +748,12 @@ public class JpaTransactionManagerTests {
 
 		given(manager.isOpen()).willReturn(true);
 
-		try {
+		assertThatExceptionOfType(InvalidIsolationLevelException.class).isThrownBy(() ->
 			tt.execute(new TransactionCallbackWithoutResult() {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 				}
-			});
-			fail("Should have thrown InvalidIsolationLevelException");
-		}
-		catch (InvalidIsolationLevelException ex) {
-			// expected
-		}
+			}));
 
 		verify(manager).close();
 	}

@@ -32,10 +32,10 @@ import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.UnmarshallingFailureException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -104,13 +104,9 @@ public class MarshallingHttpMessageConverterTests {
 		given(unmarshaller.unmarshal(isA(StreamSource.class))).willReturn(Integer.valueOf(3));
 
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter(marshaller, unmarshaller);
-		try {
-			converter.read(String.class, inputMessage);
-			fail("Should have thrown HttpMessageNotReadableException");
-		}
-		catch (HttpMessageNotReadableException ex) {
-			assertTrue(ex.getCause() instanceof TypeMismatchException);
-		}
+		assertThatExceptionOfType(HttpMessageNotReadableException.class).isThrownBy(() ->
+				converter.read(String.class, inputMessage))
+			.withCauseInstanceOf(TypeMismatchException.class);
 	}
 
 	@Test
@@ -124,13 +120,9 @@ public class MarshallingHttpMessageConverterTests {
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter();
 		converter.setUnmarshaller(unmarshaller);
 
-		try {
-			converter.read(Object.class, inputMessage);
-			fail("HttpMessageNotReadableException should be thrown");
-		}
-		catch (HttpMessageNotReadableException e) {
-			assertTrue("Invalid exception hierarchy", e.getCause() == ex);
-		}
+		assertThatExceptionOfType(HttpMessageNotReadableException.class).isThrownBy(() ->
+				converter.read(Object.class, inputMessage))
+			.withCause(ex);
 	}
 
 	@Test
@@ -157,18 +149,15 @@ public class MarshallingHttpMessageConverterTests {
 		Marshaller marshaller = mock(Marshaller.class);
 		willThrow(ex).given(marshaller).marshal(eq(body), isA(Result.class));
 
-		try {
-			MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter(marshaller);
-			converter.write(body, null, outputMessage);
-			fail("HttpMessageNotWritableException should be thrown");
-		}
-		catch (HttpMessageNotWritableException e) {
-			assertTrue("Invalid exception hierarchy", e.getCause() == ex);
-		}
+		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter(marshaller);
+		assertThatExceptionOfType(HttpMessageNotWritableException.class).isThrownBy(() ->
+				converter.write(body, null, outputMessage))
+			.withCause(ex);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void supports() throws Exception {
-		new MarshallingHttpMessageConverter().supports(Object.class);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				new MarshallingHttpMessageConverter().supports(Object.class));
 	}
 }

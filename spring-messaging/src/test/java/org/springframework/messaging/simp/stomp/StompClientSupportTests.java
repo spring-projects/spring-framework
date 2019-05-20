@@ -18,11 +18,11 @@ package org.springframework.messaging.simp.stomp;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link StompClientSupport}.
@@ -41,13 +41,8 @@ public class StompClientSupportTests {
 	}
 
 	private void trySetDefaultHeartbeat(long[] heartbeat) {
-		try {
-			this.stompClient.setDefaultHeartbeat(heartbeat);
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			// Ignore
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.stompClient.setDefaultHeartbeat(heartbeat));
 	}
 
 	@Test

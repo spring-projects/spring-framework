@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.transaction.TransactionDefinition;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -66,11 +67,12 @@ public class TransactionAttributeEditorTests {
 		assertTrue(!ta.isReadOnly());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvalidPropagationCodeOnly() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should have failed with bogus propagation code
-		pe.setAsText("XXPROPAGATION_REQUIRED");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pe.setAsText("XXPROPAGATION_REQUIRED"));
 	}
 
 	@Test
@@ -83,11 +85,12 @@ public class TransactionAttributeEditorTests {
 		assertTrue(ta.getIsolationLevel() == TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testValidPropagationAndIsolationCodesAndInvalidRollbackRule() {
 		TransactionAttributeEditor pe = new TransactionAttributeEditor();
 		// should fail with bogus rollback rule
-		pe.setAsText("PROPAGATION_REQUIRED,ISOLATION_READ_UNCOMMITTED,XXX");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pe.setAsText("PROPAGATION_REQUIRED,ISOLATION_READ_UNCOMMITTED,XXX"));
 	}
 
 	@Test

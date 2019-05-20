@@ -28,6 +28,7 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -46,9 +47,10 @@ public class SQLStateSQLExceptionTranslatorTests {
 	private static final String SQL = "select count(0) from t_sheep where over_fence = ... yawn... 1";
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTranslateNullException() throws Exception {
-		new SQLStateSQLExceptionTranslator().translate("", "", null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SQLStateSQLExceptionTranslator().translate("", "", null));
 	}
 
 	@Test

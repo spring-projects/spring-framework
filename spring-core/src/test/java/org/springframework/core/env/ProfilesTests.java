@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link Profiles}.
@@ -296,13 +295,9 @@ public class ProfilesTests {
 	}
 
 	private void assertMalformed(Supplier<Profiles> supplier) {
-		try {
-			supplier.get();
-			fail("Not malformed");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(ex.getMessage().contains("Malformed"));
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				supplier::get)
+			.withMessageContaining("Malformed");
 	}
 
 	private static Predicate<String> activeProfiles(String... profiles) {

@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -60,13 +61,14 @@ public class PooledDataBufferTests {
 		assertTrue(result);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void tooManyReleases() {
 		PooledDataBuffer buffer = createDataBuffer(1);
 		buffer.write((byte) 'a');
 
 		buffer.release();
-		buffer.release();
+		assertThatIllegalStateException().isThrownBy(
+				buffer::release);
 	}
 
 

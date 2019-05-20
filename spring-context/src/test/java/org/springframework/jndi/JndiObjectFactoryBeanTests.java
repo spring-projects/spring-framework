@@ -27,10 +27,12 @@ import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -46,12 +48,7 @@ public class JndiObjectFactoryBeanTests {
 	@Test
 	public void testNoJndiName() throws NamingException {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
-		try {
-			jof.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(jof::afterPropertiesSet);
 	}
 
 	@Test
@@ -116,13 +113,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiTemplate(new ExpectedLookupTemplate("java:comp/env/foo", o));
 		jof.setJndiName("foo");
 		jof.setResourceRef(false);
-		try {
-			jof.afterPropertiesSet();
-			fail("Should have thrown NamingException");
-		}
-		catch (NamingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NamingException.class).isThrownBy(jof::afterPropertiesSet);
 	}
 
 	@Test
@@ -153,13 +144,9 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiTemplate(new ExpectedLookupTemplate("foo", new Object()));
 		jof.setJndiName("foo");
 		jof.setExpectedType(String.class);
-		try {
-			jof.afterPropertiesSet();
-			fail("Should have thrown NamingException");
-		}
-		catch (NamingException ex) {
-			assertTrue(ex.getMessage().contains("java.lang.String"));
-		}
+		assertThatExceptionOfType(NamingException.class).isThrownBy(
+				jof::afterPropertiesSet)
+			.withMessageContaining("java.lang.String");
 	}
 
 	@Test
@@ -214,13 +201,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("myFoo");
 		jof.setExpectedType(Boolean.class);
 		jof.setDefaultObject("5");
-		try {
-			jof.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(jof::afterPropertiesSet);
 	}
 
 	@Test
@@ -246,13 +227,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("myFoo");
 		jof.setProxyInterface(ITestBean.class);
 		jof.setDefaultObject(Boolean.TRUE);
-		try {
-			jof.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(jof::afterPropertiesSet);
 	}
 
 	@Test
@@ -349,13 +324,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		jof.setJndiName("foo");
 		jof.setLookupOnStartup(false);
-		try {
-			jof.afterPropertiesSet();
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(jof::afterPropertiesSet);
 	}
 
 	@Test
@@ -364,13 +333,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("foo");
 		jof.setCache(false);
 		jof.setLookupOnStartup(false);
-		try {
-			jof.afterPropertiesSet();
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(jof::afterPropertiesSet);
 	}
 
 	@Test
@@ -397,13 +360,9 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("foo");
 		jof.setExpectedType(DerivedTestBean.class);
 		jof.setProxyInterface(ITestBean.class);
-		try {
-			jof.afterPropertiesSet();
-			fail("Should have thrown NamingException");
-		}
-		catch (NamingException ex) {
-			assertTrue(ex.getMessage().contains("org.springframework.tests.sample.beans.DerivedTestBean"));
-		}
+		assertThatExceptionOfType(NamingException.class).isThrownBy(
+				jof::afterPropertiesSet)
+			.withMessageContaining("org.springframework.tests.sample.beans.DerivedTestBean");
 	}
 
 	@Test

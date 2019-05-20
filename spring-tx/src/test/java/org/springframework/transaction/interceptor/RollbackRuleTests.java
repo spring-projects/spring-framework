@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -72,19 +73,22 @@ public class RollbackRuleTests {
 		assertTrue(rr.getDepth(new RuntimeException()) > 0);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgMustBeAThrowableClassWithNonThrowableType() {
-		new RollbackRuleAttribute(StringBuffer.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute(StringBuffer.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgMustBeAThrowableClassWithNullThrowableType() {
-		new RollbackRuleAttribute((Class<?>) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute((Class<?>) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgExceptionStringNameVersionWithNull() {
-		new RollbackRuleAttribute((String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute((String) null));
 	}
 
 }

@@ -25,6 +25,9 @@ import org.junit.Test;
 import org.springframework.http.server.PathContainer;
 import org.springframework.web.util.pattern.PatternParseException.PatternMessage;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -242,20 +245,12 @@ public class PathPatternParserTests {
 		checkError("/foobar/{abc}_{abc}", 8, PatternMessage.ILLEGAL_DOUBLE_CAPTURE);
 		checkError("/foobar/{abc:..}_{abc:..}", 8, PatternMessage.ILLEGAL_DOUBLE_CAPTURE);
 		PathPattern pp = parse("/{abc:foo(bar)}");
-		try {
-			pp.matchAndExtract(toPSC("/foo"));
-			fail("Should have raised exception");
-		}
-		catch (IllegalArgumentException iae) {
-			assertEquals("No capture groups allowed in the constraint regex: foo(bar)", iae.getMessage());
-		}
-		try {
-			pp.matchAndExtract(toPSC("/foobar"));
-			fail("Should have raised exception");
-		}
-		catch (IllegalArgumentException iae) {
-			assertEquals("No capture groups allowed in the constraint regex: foo(bar)", iae.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pp.matchAndExtract(toPSC("/foo")))
+			.withMessage("No capture groups allowed in the constraint regex: foo(bar)");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pp.matchAndExtract(toPSC("/foobar")))
+			.withMessage("No capture groups allowed in the constraint regex: foo(bar)");
 	}
 
 	@Test
@@ -432,20 +427,15 @@ public class PathPatternParserTests {
 	private void checkError(String pattern, int expectedPos, PatternMessage expectedMessage,
 			String... expectedInserts) {
 
-		try {
-			pathPattern = parse(pattern);
-			fail("Expected to fail");
-		}
-		catch (PatternParseException ppe) {
-			assertEquals(ppe.toDetailedString(), expectedPos, ppe.getPosition());
-			assertEquals(ppe.toDetailedString(), expectedMessage, ppe.getMessageType());
+		assertThatExceptionOfType(PatternParseException.class).isThrownBy(() ->
+				pathPattern = parse(pattern))
+		.satisfies(ex -> {
+			assertEquals(ex.toDetailedString(), expectedPos, ex.getPosition());
+			assertEquals(ex.toDetailedString(), expectedMessage, ex.getMessageType());
 			if (expectedInserts.length != 0) {
-				assertEquals(ppe.getInserts().length, expectedInserts.length);
-				for (int i = 0; i < expectedInserts.length; i++) {
-					assertEquals("Insert at position " + i + " is wrong", expectedInserts[i], ppe.getInserts()[i]);
-				}
+				assertThat(ex.getInserts()).isEqualTo(expectedInserts);
 			}
-		}
+		});
 	}
 
 	@SafeVarargs

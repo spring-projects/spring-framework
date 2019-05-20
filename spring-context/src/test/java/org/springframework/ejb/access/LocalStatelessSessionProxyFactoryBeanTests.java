@@ -26,10 +26,10 @@ import org.junit.Test;
 
 import org.springframework.jndi.JndiTemplate;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -139,13 +139,9 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
 
-		try {
-			mbm.getValue();
-			fail("Should have failed to create EJB");
-		}
-		catch (EjbAccessException ex) {
-			assertSame(cex, ex.getCause());
-		}
+		assertThatExceptionOfType(EjbAccessException.class).isThrownBy(
+				mbm::getValue)
+			.withCause(cex);
 	}
 
 	@Test
@@ -174,14 +170,9 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		// Check it's a singleton
 		assertTrue(fb.isSingleton());
 
-		try {
-			fb.afterPropertiesSet();
-			fail("Should have failed to create EJB");
-		}
-		catch (IllegalArgumentException ex) {
-			// TODO more appropriate exception?
-			assertTrue(ex.getMessage().indexOf("businessInterface") != 1);
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				fb::afterPropertiesSet)
+			.withMessageContaining("businessInterface");
 
 		// Expect no methods on home
 		verifyZeroInteractions(home);

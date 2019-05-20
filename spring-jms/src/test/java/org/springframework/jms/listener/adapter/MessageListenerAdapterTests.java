@@ -37,12 +37,12 @@ import org.mockito.stubbing.Answer;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -312,13 +312,9 @@ public class MessageListenerAdapterTests {
 				return message;
 			}
 		};
-		try {
-			adapter.onMessage(sentTextMessage, session);
-			fail("expected CouldNotSendReplyException with InvalidDestinationException");
-		}
-		catch (ReplyFailureException ex) {
-			assertEquals(InvalidDestinationException.class, ex.getCause().getClass());
-		}
+		assertThatExceptionOfType(ReplyFailureException.class).isThrownBy(() ->
+				adapter.onMessage(sentTextMessage, session))
+			.withCauseExactlyInstanceOf(InvalidDestinationException.class);
 
 		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
 		verify(delegate).handleMessage(sentTextMessage);
@@ -351,13 +347,9 @@ public class MessageListenerAdapterTests {
 				return message;
 			}
 		};
-		try {
-			adapter.onMessage(sentTextMessage, session);
-			fail("expected CouldNotSendReplyException with JMSException");
-		}
-		catch (ReplyFailureException ex) {
-			assertEquals(JMSException.class, ex.getCause().getClass());
-		}
+		assertThatExceptionOfType(ReplyFailureException.class).isThrownBy(() ->
+				adapter.onMessage(sentTextMessage, session))
+			.withCauseExactlyInstanceOf(JMSException.class);
 
 		verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
 		verify(messageProducer).close();
@@ -378,11 +370,8 @@ public class MessageListenerAdapterTests {
 				return message;
 			}
 		};
-		try {
-			adapter.onMessage(message, session);
-			fail("expected ListenerExecutionFailedException");
-		}
-		catch (ListenerExecutionFailedException ex) { /* expected */ }
+		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
+				adapter.onMessage(message, session));
 	}
 
 	@Test
@@ -399,13 +388,9 @@ public class MessageListenerAdapterTests {
 			}
 		};
 		adapter.setMessageConverter(null);
-		try {
-			adapter.onMessage(sentTextMessage, session);
-			fail("expected CouldNotSendReplyException with MessageConversionException");
-		}
-		catch (ReplyFailureException ex) {
-			assertEquals(MessageConversionException.class, ex.getCause().getClass());
-		}
+		assertThatExceptionOfType(ReplyFailureException.class).isThrownBy(() ->
+				adapter.onMessage(sentTextMessage, session))
+			.withCauseExactlyInstanceOf(MessageConversionException.class);
 	}
 
 	@Test

@@ -23,10 +23,10 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Karl Pietrzak
@@ -95,12 +95,8 @@ public class LookupAnnotationTests {
 	public void testWithThreeArgsShouldFail() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
 		assertNotNull(bean);
-		try {
-			bean.getThreeArguments("name", 1, 2);
-			fail("TestBean does not have a three arg constructor so this should not have worked");
-		}
-		catch (AbstractMethodError ex) {
-		}
+		assertThatExceptionOfType(AbstractMethodError.class).as("TestBean has no three arg constructor").isThrownBy(() ->
+				bean.getThreeArguments("name", 1, 2));
 		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
 	}
 

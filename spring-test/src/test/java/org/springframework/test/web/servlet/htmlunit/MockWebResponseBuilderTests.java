@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -58,14 +59,16 @@ public class MockWebResponseBuilderTests {
 
 	// --- constructor
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorWithNullWebRequest() {
-		new MockWebResponseBuilder(0L, null, this.response);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MockWebResponseBuilder(0L, null, this.response));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void constructorWithNullResponse() throws Exception {
-		new MockWebResponseBuilder(0L, new WebRequest(new URL("http://example.com:80/test/this/here")), null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MockWebResponseBuilder(0L, new WebRequest(new URL("http://example.com:80/test/this/here")), null));
 	}
 
 

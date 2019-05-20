@@ -31,6 +31,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -54,11 +55,12 @@ public class XhrTransportTests {
 		assertEquals("body", transport.executeInfoRequest(new URI("https://example.com/info"), null));
 	}
 
-	@Test(expected = HttpServerErrorException.class)
+	@Test
 	public void infoResponseError() throws Exception {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.infoResponseToReturn = new ResponseEntity<>("body", HttpStatus.BAD_REQUEST);
-		assertEquals("body", transport.executeInfoRequest(new URI("https://example.com/info"), null));
+		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
+				transport.executeInfoRequest(new URI("https://example.com/info"), null));
 	}
 
 	@Test
@@ -75,12 +77,13 @@ public class XhrTransportTests {
 		assertEquals(MediaType.APPLICATION_JSON, transport.actualSendRequestHeaders.getContentType());
 	}
 
-	@Test(expected = HttpServerErrorException.class)
+	@Test
 	public void sendMessageError() throws Exception {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.sendMessageResponseToReturn = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		URI url = new URI("https://example.com");
-		transport.executeSendRequest(url, new HttpHeaders(), new TextMessage("payload"));
+		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
+				transport.executeSendRequest(url, new HttpHeaders(), new TextMessage("payload")));
 	}
 
 	@Test

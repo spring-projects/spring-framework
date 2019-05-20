@@ -63,10 +63,10 @@ import org.springframework.mock.http.client.reactive.test.MockClientHttpResponse
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -434,12 +434,8 @@ public class BodyExtractorsTests {
 				})
 				.expectErrorSatisfies(throwable -> {
 					assertTrue(throwable instanceof UnsupportedMediaTypeException);
-					try {
-						buffer.release();
-						fail("releasing the buffer should have failed");
-					}
-					catch (IllegalReferenceCountException exc) {
-					}
+					assertThatExceptionOfType(IllegalReferenceCountException.class).isThrownBy(
+							buffer::release);
 					body.assertCancelled();
 				}).verify();
 	}

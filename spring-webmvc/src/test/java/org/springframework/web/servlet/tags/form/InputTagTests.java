@@ -28,9 +28,9 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.tags.BindTag;
 import org.springframework.web.servlet.tags.NestedPathTag;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -360,24 +360,16 @@ public class InputTagTests extends AbstractFormTagTests {
 
 	@Test
 	public void dynamicTypeRadioAttribute() throws JspException {
-		try {
-			this.tag.setDynamicAttribute(null, "type", "radio");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Attribute type=\"radio\" is not allowed", e.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.tag.setDynamicAttribute(null, "type", "radio"))
+			.withMessage("Attribute type=\"radio\" is not allowed");
 	}
 
 	@Test
 	public void dynamicTypeCheckboxAttribute() throws JspException {
-		try {
-			this.tag.setDynamicAttribute(null, "type", "checkbox");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException e) {
-			assertEquals("Attribute type=\"checkbox\" is not allowed", e.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.tag.setDynamicAttribute(null, "type", "checkbox"))
+			.withMessage("Attribute type=\"checkbox\" is not allowed");
 	}
 
 	protected final void assertTagClosed(String output) {

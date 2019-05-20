@@ -32,13 +32,13 @@ import org.junit.Test;
 
 import org.springframework.util.FileCopyUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for various {@link Resource} implementations.
@@ -197,20 +197,10 @@ public class ResourceTests {
 		Resource relative4 = resource.createRelative("X.class");
 		assertFalse(relative4.exists());
 		assertFalse(relative4.isReadable());
-		try {
-			relative4.contentLength();
-			fail("Should have thrown FileNotFoundException");
-		}
-		catch (FileNotFoundException ex) {
-			// expected
-		}
-		try {
-			relative4.lastModified();
-			fail("Should have thrown FileNotFoundException");
-		}
-		catch (FileNotFoundException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
+				relative4::contentLength);
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
+				relative4::lastModified);
 	}
 
 	@Test
@@ -255,27 +245,15 @@ public class ResourceTests {
 			}
 		};
 
-		try {
-			resource.getURL();
-			fail("FileNotFoundException should have been thrown");
-		}
-		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().contains(name));
-		}
-		try {
-			resource.getFile();
-			fail("FileNotFoundException should have been thrown");
-		}
-		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().contains(name));
-		}
-		try {
-			resource.createRelative("/testing");
-			fail("FileNotFoundException should have been thrown");
-		}
-		catch (FileNotFoundException ex) {
-			assertTrue(ex.getMessage().contains(name));
-		}
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
+				resource::getURL)
+			.withMessageContaining(name);
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
+				resource::getFile)
+			.withMessageContaining(name);
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+				resource.createRelative("/testing"))
+			.withMessageContaining(name);
 
 		assertThat(resource.getFilename(), nullValue());
 	}
@@ -313,24 +291,28 @@ public class ResourceTests {
 		}
 	}
 
-	@Test(expected = FileNotFoundException.class)
+	@Test
 	public void testInputStreamNotFoundOnFileSystemResource() throws IOException {
-		new FileSystemResource(getClass().getResource("Resource.class").getFile()).createRelative("X").getInputStream();
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+				new FileSystemResource(getClass().getResource("Resource.class").getFile()).createRelative("X").getInputStream());
 	}
 
-	@Test(expected = FileNotFoundException.class)
+	@Test
 	public void testReadableChannelNotFoundOnFileSystemResource() throws IOException {
-		new FileSystemResource(getClass().getResource("Resource.class").getFile()).createRelative("X").readableChannel();
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+				new FileSystemResource(getClass().getResource("Resource.class").getFile()).createRelative("X").readableChannel());
 	}
 
-	@Test(expected = FileNotFoundException.class)
+	@Test
 	public void testInputStreamNotFoundOnClassPathResource() throws IOException {
-		new ClassPathResource("Resource.class", getClass()).createRelative("X").getInputStream();
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+				new ClassPathResource("Resource.class", getClass()).createRelative("X").getInputStream());
 	}
 
-	@Test(expected = FileNotFoundException.class)
+	@Test
 	public void testReadableChannelNotFoundOnClassPathResource() throws IOException {
-		new ClassPathResource("Resource.class", getClass()).createRelative("X").readableChannel();
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+				new ClassPathResource("Resource.class", getClass()).createRelative("X").readableChannel());
 	}
 
 }

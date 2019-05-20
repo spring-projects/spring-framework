@@ -20,8 +20,8 @@ import javax.jms.ConnectionFactory;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -34,17 +34,10 @@ public class JmsDestinationAccessorTests {
 	public void testChokesIfDestinationResolverIsetToNullExplicitly() throws Exception {
 		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 
-		try {
-			JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
-			accessor.setConnectionFactory(connectionFactory);
-			accessor.setDestinationResolver(null);
-			accessor.afterPropertiesSet();
-			fail("expected IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-
+		JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
+		accessor.setConnectionFactory(connectionFactory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				accessor.setDestinationResolver(null));
 	}
 
 	@Test

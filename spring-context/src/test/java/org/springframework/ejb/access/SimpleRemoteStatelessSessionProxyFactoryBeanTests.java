@@ -28,10 +28,11 @@ import org.junit.Test;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -157,13 +158,9 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-		try {
-			mbm.getValue();
-			fail("Should've thrown remote exception");
-		}
-		catch (RemoteException ex) {
-			assertSame("Threw expected RemoteException", rex, ex);
-		}
+		assertThatExceptionOfType(RemoteException.class).isThrownBy(
+				mbm::getValue)
+			.satisfies(ex -> assertThat(ex).isSameAs(rex));
 		verify(myEjb).remove();
 	}
 
@@ -196,14 +193,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-
-		try {
-			mbm.getValue();
-			fail("Should have failed to create EJB");
-		}
-		catch (RemoteException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(RemoteException.class).isThrownBy(mbm::getValue);
 	}
 
 	@Test
@@ -235,14 +225,9 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 
 		MyLocalBusinessMethods mbm = (MyLocalBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-
-		try {
-			mbm.getValue();
-			fail("Should have failed to create EJB");
-		}
-		catch (RemoteAccessException ex) {
-			assertTrue(ex.getCause() == cex);
-		}
+		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(
+				mbm::getValue)
+			.withCause(cex);
 	}
 
 	@Test
@@ -271,14 +256,9 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		// Check it's a singleton
 		assertTrue(fb.isSingleton());
 
-		try {
-			fb.afterPropertiesSet();
-			fail("Should have failed to create EJB");
-		}
-		catch (IllegalArgumentException ex) {
-			// TODO more appropriate exception?
-			assertTrue(ex.getMessage().indexOf("businessInterface") != 1);
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				fb::afterPropertiesSet)
+			.withMessageContaining("businessInterface");
 
 		// Expect no methods on home
 		verifyZeroInteractions(home);

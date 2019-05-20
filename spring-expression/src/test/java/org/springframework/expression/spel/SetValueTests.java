@@ -27,11 +27,12 @@ import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests set value expressions.
@@ -84,53 +85,37 @@ public class SetValueTests extends AbstractExpressionTests {
 
 	@Test
 	public void testIsWritableForInvalidExpressions_SPR10610() {
-		Expression e = null;
 		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
 
 		// PROPERTYORFIELDREFERENCE
 		// Non existent field (or property):
-		e = parser.parseExpression("arrayContainer.wibble");
-		assertFalse("Should not be writable!",e.isWritable(lContext));
+		Expression e1 = parser.parseExpression("arrayContainer.wibble");
+		assertFalse("Should not be writable!", e1.isWritable(lContext));
 
-		e = parser.parseExpression("arrayContainer.wibble.foo");
-		try {
-			assertFalse("Should not be writable!",e.isWritable(lContext));
-			fail("Should have had an error because wibble does not really exist");
-		}
-		catch (SpelEvaluationException see) {
+		Expression e2 = parser.parseExpression("arrayContainer.wibble.foo");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e2.isWritable(lContext));
 //			org.springframework.expression.spel.SpelEvaluationException: EL1008E:(pos 15): Property or field 'wibble' cannot be found on object of type 'org.springframework.expression.spel.testresources.ArrayContainer' - maybe not public?
 //					at org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:225)
-			// success!
-		}
 
 		// VARIABLE
 		// the variable does not exist (but that is OK, we should be writable)
-		e = parser.parseExpression("#madeup1");
-		assertTrue("Should be writable!",e.isWritable(lContext));
+		Expression e3 = parser.parseExpression("#madeup1");
+		assertTrue("Should be writable!",e3.isWritable(lContext));
 
-		e = parser.parseExpression("#madeup2.bar"); // compound expression
-		assertFalse("Should not be writable!",e.isWritable(lContext));
+		Expression e4 = parser.parseExpression("#madeup2.bar"); // compound expression
+		assertFalse("Should not be writable!",e4.isWritable(lContext));
 
 		// INDEXER
 		// non existent indexer (wibble made up)
-		e = parser.parseExpression("arrayContainer.wibble[99]");
-		try {
-			assertFalse("Should not be writable!",e.isWritable(lContext));
-			fail("Should have had an error because wibble does not really exist");
-		}
-		catch (SpelEvaluationException see) {
-			// success!
-		}
+		Expression e5 = parser.parseExpression("arrayContainer.wibble[99]");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e5.isWritable(lContext));
 
 		// non existent indexer (index via a string)
-		e = parser.parseExpression("arrayContainer.ints['abc']");
-		try {
-			assertFalse("Should not be writable!",e.isWritable(lContext));
-			fail("Should have had an error because wibble does not really exist");
-		}
-		catch (SpelEvaluationException see) {
-			// success!
-		}
+		Expression e6 = parser.parseExpression("arrayContainer.ints['abc']");
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				e6.isWritable(lContext));
 	}
 
 	@Test
@@ -245,33 +230,20 @@ public class SetValueTests extends AbstractExpressionTests {
 	 * Call setValue() but expect it to fail.
 	 */
 	protected void setValueExpectError(String expression, Object value) {
-		try {
-			Expression e = parser.parseExpression(expression);
-			if (e == null) {
-				fail("Parser returned null for expression");
-			}
-			if (DEBUG) {
-				SpelUtilities.printAbstractSyntaxTree(System.out, e);
-			}
-			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-			e.setValue(lContext, value);
-			fail("expected an error");
+		Expression e = parser.parseExpression(expression);
+		assertThat(e).isNotNull();
+		if (DEBUG) {
+			SpelUtilities.printAbstractSyntaxTree(System.out, e);
 		}
-		catch (ParseException pe) {
-			pe.printStackTrace();
-			fail("Unexpected Exception: " + pe.getMessage());
-		}
-		catch (EvaluationException ee) {
-			// success!
-		}
+		StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
+		assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
+				e.setValue(lContext, value));
 	}
 
 	protected void setValue(String expression, Object value) {
 		try {
 			Expression e = parser.parseExpression(expression);
-			if (e == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(e).isNotNull();
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
@@ -281,8 +253,7 @@ public class SetValueTests extends AbstractExpressionTests {
 			assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext,value.getClass()));
 		}
 		catch (EvaluationException | ParseException ex) {
-			ex.printStackTrace();
-			fail("Unexpected Exception: " + ex.getMessage());
+			throw new AssertionError("Unexpected Exception: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -293,9 +264,7 @@ public class SetValueTests extends AbstractExpressionTests {
 	protected void setValue(String expression, Object value, Object expectedValue) {
 		try {
 			Expression e = parser.parseExpression(expression);
-			if (e == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(e).isNotNull();
 			if (DEBUG) {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
@@ -304,14 +273,10 @@ public class SetValueTests extends AbstractExpressionTests {
 			e.setValue(lContext, value);
 			Object a = expectedValue;
 			Object b = e.getValue(lContext);
-			if (!a.equals(b)) {
-				fail("Not the same: ["+a+"] type="+a.getClass()+"  ["+b+"] type="+b.getClass());
-//				assertEquals("Retrieved value was not equal to set value", expectedValue, e.getValue(lContext));
-			}
+			assertThat(a).isEqualTo(b);
 		}
 		catch (EvaluationException | ParseException ex) {
-			ex.printStackTrace();
-			fail("Unexpected Exception: " + ex.getMessage());
+			throw new AssertionError("Unexpected Exception: " + ex.getMessage(), ex);
 		}
 	}
 

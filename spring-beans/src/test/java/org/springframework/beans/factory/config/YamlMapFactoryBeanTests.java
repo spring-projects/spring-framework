@@ -28,6 +28,8 @@ import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -49,10 +51,12 @@ public class YamlMapFactoryBeanTests {
 		assertEquals(0, this.factory.getObject().size());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testSetBarfOnResourceNotFound() {
-		this.factory.setResources(new FileSystemResource("non-exsitent-file.yml"));
-		assertEquals(0, this.factory.getObject().size());
+		assertThatIllegalStateException().isThrownBy(() -> {
+				this.factory.setResources(new FileSystemResource("non-exsitent-file.yml"));
+				this.factory.getObject().size();
+		});
 	}
 
 	@Test
@@ -118,10 +122,11 @@ public class YamlMapFactoryBeanTests {
 		assertEquals(Integer.valueOf(3), sub.get("key1.key2"));
 	}
 
-	@Test(expected = DuplicateKeyException.class)
+	@Test
 	public void testDuplicateKey() {
 		this.factory.setResources(new ByteArrayResource("mymap:\n  foo: bar\nmymap:\n  bar: foo".getBytes()));
-		this.factory.getObject().get("mymap");
+		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() ->
+				this.factory.getObject().get("mymap"));
 	}
 
 }

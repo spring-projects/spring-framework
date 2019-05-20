@@ -33,6 +33,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeType;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -127,12 +128,13 @@ public class MappingJackson2MessageConverterTests {
 		assertSame(myBean, converter.fromMessage(message, MyBean.class));
 	}
 
-	@Test(expected = MessageConversionException.class)
+	@Test
 	public void fromMessageInvalidJson() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "FooBar";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
-		converter.fromMessage(message, MyBean.class);
+		assertThatExceptionOfType(MessageConversionException.class).isThrownBy(() ->
+				converter.fromMessage(message, MyBean.class));
 	}
 
 	@Test

@@ -41,6 +41,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
@@ -131,11 +132,12 @@ public class QuartzSupportTests {
 		bean.destroy();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void jobDetailWithRunnableInsteadOfJob() {
 		JobDetailImpl jobDetail = new JobDetailImpl();
-		jobDetail.setJobClass((Class) DummyRunnable.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				jobDetail.setJobClass((Class) DummyRunnable.class));
 	}
 
 	@Test

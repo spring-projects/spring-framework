@@ -32,6 +32,8 @@ import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -113,7 +115,7 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void multipleWrites() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 
@@ -131,24 +133,22 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 		}
 
 		request.execute();
-		FileCopyUtils.copy(body, request.getBody());
+		assertThatIllegalStateException().isThrownBy(() ->
+				FileCopyUtils.copy(body, request.getBody()));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void headersAfterExecute() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/status/ok"), HttpMethod.POST);
 
 		request.getHeaders().add("MyHeader", "value");
 		byte[] body = "Hello World".getBytes("UTF-8");
-		FileCopyUtils.copy(body, request.getBody());
-
-		ClientHttpResponse response = request.execute();
-		try {
-			request.getHeaders().add("MyHeader", "value");
-		}
-		finally {
-			response.close();
-		}
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
+				FileCopyUtils.copy(body, request.getBody());
+				try(ClientHttpResponse response = request.execute()) {
+					request.getHeaders().add("MyHeader", "value");
+				}
+		});
 	}
 
 	@Test

@@ -36,6 +36,8 @@ import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -79,17 +81,19 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNullConfig() {
-		new CglibAopProxy(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CglibAopProxy(null));
 	}
 
-	@Test(expected = AopConfigException.class)
+	@Test
 	public void testNoTarget() {
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(new NopInterceptor());
 		AopProxy aop = createAopProxy(pc);
-		aop.getProxy();
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(
+				aop::getProxy);
 	}
 
 	@Test

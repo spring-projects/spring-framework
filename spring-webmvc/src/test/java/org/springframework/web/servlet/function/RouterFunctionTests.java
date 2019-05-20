@@ -26,7 +26,6 @@ import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Arjen Poutsma
@@ -112,9 +111,8 @@ public class RouterFunctionTests {
 					try {
 						return hf.handle(request);
 					}
-					catch (Exception e) {
-						fail(e.getMessage());
-						return null;
+					catch (Exception ex) {
+						throw new AssertionError(ex.getMessage(), ex);
 					}
 				});
 		assertTrue(resultHandlerFunction.isPresent());

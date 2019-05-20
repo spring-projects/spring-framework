@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockBodyContent;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -122,12 +123,13 @@ public class ParamTagTests extends AbstractTagTests {
 		assertEquals("value2", parent.getParam().getValue());
 	}
 
-	@Test(expected = JspException.class)
+	@Test
 	public void paramWithNoParent() throws Exception {
 		tag.setName("name");
 		tag.setValue("value");
 		tag.setParent(null);
-		tag.doEndTag();
+		assertThatExceptionOfType(JspException.class).isThrownBy(
+				tag::doEndTag);
 	}
 
 	@SuppressWarnings("serial")

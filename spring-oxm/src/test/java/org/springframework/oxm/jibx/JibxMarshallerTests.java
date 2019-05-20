@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTests;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -65,10 +66,11 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void afterPropertiesSetNoContextPath() throws Exception {
 		JibxMarshaller marshaller = new JibxMarshaller();
-		marshaller.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				marshaller::afterPropertiesSet);
 	}
 
 	@Test

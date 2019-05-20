@@ -39,6 +39,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -46,7 +48,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -196,13 +197,8 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		em.joinTransaction();
 		assertFalse(em.contains(testEntity));
 
-		try {
-			jpatm.commit(txStatus);
-			fail("Should have thrown OptimisticLockingFailureException");
-		}
-		catch (OptimisticLockingFailureException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(OptimisticLockingFailureException.class).isThrownBy(() ->
+				jpatm.commit(txStatus));
 
 		cefb.destroy();
 
@@ -259,13 +255,8 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 	@Test
 	public void testInvalidPersistenceUnitName() throws Exception {
-		try {
-			createEntityManagerFactoryBean("org/springframework/orm/jpa/domain/persistence.xml", null, "call me Bob");
-			fail("Should not create factory with this name");
-		}
-		catch (IllegalArgumentException ex) {
-			// Ok
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createEntityManagerFactoryBean("org/springframework/orm/jpa/domain/persistence.xml", null, "call me Bob"));
 	}
 
 	protected LocalContainerEntityManagerFactoryBean createEntityManagerFactoryBean(
@@ -306,13 +297,8 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		containerEmfb.setPersistenceUnitName(entityManagerName);
 		containerEmfb.setPersistenceProviderClass(DummyContainerPersistenceProvider.class);
 
-		try {
-			containerEmfb.afterPropertiesSet();
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			// Ok
-		}
+		assertThatIllegalArgumentException().isThrownBy(
+				containerEmfb::afterPropertiesSet);
 	}
 
 

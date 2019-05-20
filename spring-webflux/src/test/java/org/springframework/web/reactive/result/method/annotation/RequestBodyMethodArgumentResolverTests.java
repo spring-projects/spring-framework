@@ -45,6 +45,7 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -94,10 +95,11 @@ public class RequestBodyMethodArgumentResolverTests {
 		assertEquals(body, value);
 	}
 
-	@Test(expected = ServerWebInputException.class)
+	@Test
 	public void emptyBodyWithString() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(String.class);
-		resolveValueWithEmptyBody(param);
+		assertThatExceptionOfType(ServerWebInputException.class).isThrownBy(() ->
+				resolveValueWithEmptyBody(param));
 	}
 
 	@Test

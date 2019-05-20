@@ -23,9 +23,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -62,18 +63,16 @@ public class BeanFactoryDataSourceLookupTests {
 				new BeanNotOfRequiredTypeException(DATASOURCE_BEAN_NAME,
 						DataSource.class, String.class));
 
-		try {
-				BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup(beanFactory);
-				lookup.getDataSource(DATASOURCE_BEAN_NAME);
-				fail("should have thrown DataSourceLookupFailureException");
-		}
-		catch (DataSourceLookupFailureException ex) { /* expected */ }
+		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup(beanFactory);
+		assertThatExceptionOfType(DataSourceLookupFailureException.class).isThrownBy(() ->
+				lookup.getDataSource(DATASOURCE_BEAN_NAME));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testLookupWhereBeanFactoryHasNotBeenSupplied() throws Exception {
 		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
-		lookup.getDataSource(DATASOURCE_BEAN_NAME);
+		assertThatIllegalStateException().isThrownBy(() ->
+				lookup.getDataSource(DATASOURCE_BEAN_NAME));
 	}
 
 }

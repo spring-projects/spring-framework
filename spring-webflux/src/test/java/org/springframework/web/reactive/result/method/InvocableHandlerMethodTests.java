@@ -42,13 +42,12 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -96,15 +95,9 @@ public class InvocableHandlerMethodTests {
 	public void cannotResolveArg() {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
-
-		try {
-			mono.block();
-			fail("Expected IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), is("Could not resolve parameter [0] in " +
-					method.toGenericString() + ": No suitable resolver"));
-		}
+		assertThatIllegalStateException().isThrownBy(
+				mono::block)
+			.withMessage("Could not resolve parameter [0] in " + method.toGenericString() + ": No suitable resolver");
 	}
 
 	@Test
@@ -130,13 +123,9 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
-		try {
-			mono.block();
-			fail("Expected UnsupportedMediaTypeStatusException");
-		}
-		catch (UnsupportedMediaTypeStatusException ex) {
-			assertThat(ex.getMessage(), is("415 UNSUPPORTED_MEDIA_TYPE \"boo\""));
-		}
+		assertThatExceptionOfType(UnsupportedMediaTypeStatusException.class).isThrownBy(
+				mono::block)
+			.withMessage("415 UNSUPPORTED_MEDIA_TYPE \"boo\"");
 	}
 
 	@Test
@@ -144,19 +133,13 @@ public class InvocableHandlerMethodTests {
 		this.resolvers.add(stubResolver(1));
 		Method method = ResolvableMethod.on(TestController.class).mockCall(o -> o.singleArg(null)).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
-
-		try {
-			mono.block();
-			fail("Expected IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertNotNull("Exception not wrapped", ex.getCause());
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-			assertTrue(ex.getMessage().contains("Controller ["));
-			assertTrue(ex.getMessage().contains("Method ["));
-			assertTrue(ex.getMessage().contains("with argument values:"));
-			assertTrue(ex.getMessage().contains("[0] [type=java.lang.Integer] [value=1]"));
-		}
+		assertThatIllegalStateException().isThrownBy(
+				mono::block)
+			.withCauseInstanceOf(IllegalArgumentException.class)
+			.withMessageContaining("Controller [")
+			.withMessageContaining("Method [")
+			.withMessageContaining("with argument values:")
+			.withMessageContaining("[0] [type=java.lang.Integer] [value=1]");
 	}
 
 	@Test
@@ -164,13 +147,9 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(TestController::exceptionMethod).method();
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
-		try {
-			mono.block();
-			fail("Expected IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), is("boo"));
-		}
+		assertThatIllegalStateException().isThrownBy(
+				mono::block)
+			.withMessage("boo");
 	}
 
 	@Test

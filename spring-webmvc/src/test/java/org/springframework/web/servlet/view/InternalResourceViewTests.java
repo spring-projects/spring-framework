@@ -30,6 +30,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -62,9 +63,10 @@ public class InternalResourceViewTests {
 	/**
 	 * If the url property isn't supplied, view initialization should fail.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullUrl() throws Exception {
-		view.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				view::afterPropertiesSet);
 	}
 
 	@Test

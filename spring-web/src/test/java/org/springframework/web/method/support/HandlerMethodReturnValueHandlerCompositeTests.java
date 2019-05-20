@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -108,9 +109,10 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		verifyNoMoreInteractions(responseBodyHandler);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noSuitableReturnValueHandler() throws Exception {
-		this.handlers.handleReturnValue("value", this.stringType, null, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.handlers.handleReturnValue("value", this.stringType, null, null));
 	}
 
 

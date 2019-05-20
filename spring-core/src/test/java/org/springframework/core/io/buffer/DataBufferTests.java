@@ -25,10 +25,11 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Arjen Poutsma
@@ -80,10 +81,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	public void readPositionSmallerThanZero() {
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.readPosition(-1);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+					buffer.readPosition(-1));
 		}
 		finally {
 			release(buffer);
@@ -94,10 +93,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	public void readPositionGreaterThanWritePosition() {
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.readPosition(1);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+					buffer.readPosition(1));
 		}
 		finally {
 			release(buffer);
@@ -110,11 +107,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		try {
 			buffer.write((byte) 'a');
 			buffer.read();
-
-			buffer.writePosition(0);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+					buffer.writePosition(0));
 		}
 		finally {
 			release(buffer);
@@ -125,10 +119,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	public void writePositionGreaterThanCapacity() {
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.writePosition(2);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+					buffer.writePosition(2));
 		}
 		finally {
 			release(buffer);
@@ -158,10 +150,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	public void writeNullString() {
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.write(null, StandardCharsets.UTF_8);
-			fail("IllegalArgumentException expected");
-		}
-		catch (IllegalArgumentException exc) {
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					buffer.write(null, StandardCharsets.UTF_8));
 		}
 		finally {
 			release(buffer);
@@ -172,10 +162,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	public void writeNullCharset() {
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.write("test", null);
-			fail("IllegalArgumentException expected");
-		}
-		catch (IllegalArgumentException exc) {
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					buffer.write("test", null));
 		}
 		finally {
 			release(buffer);
@@ -369,10 +357,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	public void capacityLessThanZero() {
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.capacity(-1);
-			fail("IllegalArgumentException expected");
-		}
-		catch (IllegalArgumentException ignored) {
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					buffer.capacity(-1));
 		}
 		finally {
 			release(buffer);
@@ -558,12 +544,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 		DataBuffer slice = buffer.slice(1, 2);
 		assertEquals(2, slice.readableByteCount());
-		try {
-			slice.write((byte) 0);
-			fail("Exception expected");
-		}
-		catch (Exception ignored) {
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				slice.write((byte) 0));
 		buffer.write((byte) 'c');
 
 		assertEquals(3, buffer.readableByteCount());
@@ -589,12 +571,8 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 		DataBuffer slice = buffer.retainedSlice(1, 2);
 		assertEquals(2, slice.readableByteCount());
-		try {
-			slice.write((byte) 0);
-			fail("Exception expected");
-		}
-		catch (Exception ignored) {
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				slice.write((byte) 0));
 		buffer.write((byte) 'c');
 
 		assertEquals(3, buffer.readableByteCount());
@@ -651,19 +629,11 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		assertEquals('a', buffer.getByte(0));
 		assertEquals('b', buffer.getByte(1));
 		assertEquals('c', buffer.getByte(2));
-		try {
-			buffer.getByte(-1);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
-		}
+		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+				buffer.getByte(-1));
 
-		try {
-			buffer.getByte(3);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
-		}
+		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+			buffer.getByte(3));
 
 		release(buffer);
 	}

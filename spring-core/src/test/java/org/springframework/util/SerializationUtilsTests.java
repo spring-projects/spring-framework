@@ -20,8 +20,9 @@ import java.math.BigInteger;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 /**
@@ -42,21 +43,23 @@ public class SerializationUtilsTests {
 		assertEquals("foo", SerializationUtils.deserialize(SerializationUtils.serialize("foo")));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void deserializeUndefined() throws Exception {
 		byte[] bytes = FOO.toByteArray();
-		Object foo = SerializationUtils.deserialize(bytes);
-		assertNotNull(foo);
+		assertThatIllegalStateException().isThrownBy(() ->
+				SerializationUtils.deserialize(bytes));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void serializeNonSerializable() throws Exception {
-		SerializationUtils.serialize(new Object());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SerializationUtils.serialize(new Object()));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void deserializeNonSerializable() throws Exception {
-		SerializationUtils.deserialize("foo".getBytes());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SerializationUtils.deserialize("foo".getBytes()));
 	}
 
 	@Test

@@ -83,6 +83,8 @@ import org.junit.Test;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -107,9 +109,10 @@ public class Jackson2ObjectMapperBuilderTests {
 	private static final String DATA = "{\"offsetDateTime\": \"2020-01-01T00:00:00\"}";
 
 
-	@Test(expected = FatalBeanException.class)
+	@Test
 	public void unknownFeature() {
-		Jackson2ObjectMapperBuilder.json().featuresToEnable(Boolean.TRUE).build();
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+				Jackson2ObjectMapperBuilder.json().featuresToEnable(Boolean.TRUE).build());
 	}
 
 	@Test
@@ -226,10 +229,11 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertEquals(timeZone, objectMapper.getDeserializationConfig().getTimeZone());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void wrongTimeZoneStringSetter() {
 		String zoneId = "foo";
-		Jackson2ObjectMapperBuilder.json().timeZone(zoneId).build();
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				Jackson2ObjectMapperBuilder.json().timeZone(zoneId).build());
 	}
 
 	@Test

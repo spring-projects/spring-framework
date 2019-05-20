@@ -18,6 +18,7 @@ package org.springframework.scripting.support;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -35,19 +36,22 @@ public class StaticScriptSourceTests {
 	private final StaticScriptSource source = new StaticScriptSource(SCRIPT_TEXT);
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void createWithNullScript() throws Exception {
-		new StaticScriptSource(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new StaticScriptSource(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void createWithEmptyScript() throws Exception {
-		new StaticScriptSource("");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new StaticScriptSource(""));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void createWithWhitespaceOnlyScript() throws Exception {
-		new StaticScriptSource("   \n\n\t  \t\n");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new StaticScriptSource("   \n\n\t  \t\n"));
 	}
 
 	@Test

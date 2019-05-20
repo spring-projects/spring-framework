@@ -31,9 +31,9 @@ import org.junit.Test;
 
 import org.springframework.jmx.AbstractMBeanServerTests;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -99,14 +99,10 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	public void noRegisterWithMBeanServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.afterPropertiesSet();
-
 		try {
 			// Try to get the connector bean.
-			getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
-			fail("Instance should not be found");
-		}
-		catch (InstanceNotFoundException ex) {
-			// expected
+			assertThatExceptionOfType(InstanceNotFoundException.class).isThrownBy(() ->
+				getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME)));
 		}
 		finally {
 			bean.destroy();

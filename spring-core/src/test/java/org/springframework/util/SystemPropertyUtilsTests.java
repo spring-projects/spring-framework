@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -94,10 +95,10 @@ public class SystemPropertyUtilsTests {
 		assertEquals("Y#{foo.bar}X", resolved);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testReplaceWithNoDefault() {
-		String resolved = SystemPropertyUtils.resolvePlaceholders("${test.prop}");
-		assertEquals("", resolved);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SystemPropertyUtils.resolvePlaceholders("${test.prop}"));
 	}
 
 	@Test

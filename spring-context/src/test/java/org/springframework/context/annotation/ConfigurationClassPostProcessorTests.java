@@ -64,12 +64,13 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Chris Beams
@@ -318,13 +319,8 @@ public class ConfigurationClassPostProcessorTests {
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.setEnvironment(new StandardEnvironment());
 		pp.postProcessBeanFactory(beanFactory);
-		try {
-			beanFactory.getBean(SimpleComponent.class);
-			fail("Should have thrown NoSuchBeanDefinitionException");
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				beanFactory.getBean(SimpleComponent.class));
 	}
 
 	@Test
@@ -374,15 +370,11 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(SingletonBeanConfig.class));
 		beanFactory.setAllowBeanDefinitionOverriding(false);
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
-		try {
-			pp.postProcessBeanFactory(beanFactory);
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			assertTrue(ex.getMessage().contains("bar"));
-			assertTrue(ex.getMessage().contains("SingletonBeanConfig"));
-			assertTrue(ex.getMessage().contains(TestBean.class.getName()));
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				pp.postProcessBeanFactory(beanFactory))
+			.withMessageContaining("bar")
+			.withMessageContaining("SingletonBeanConfig")
+			.withMessageContaining(TestBean.class.getName());
 	}
 
 	@Test
@@ -420,16 +412,12 @@ public class ConfigurationClassPostProcessorTests {
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
 
-		try {
-			beanFactory.getBean(Bar.class);
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMessage().contains("OverridingSingletonBeanConfig.foo"));
-			assertTrue(ex.getMessage().contains(ExtendedFoo.class.getName()));
-			assertTrue(ex.getMessage().contains(Foo.class.getName()));
-			assertTrue(ex.getMessage().contains("InvalidOverridingSingletonBeanConfig"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				beanFactory.getBean(Bar.class))
+			.withMessageContaining("OverridingSingletonBeanConfig.foo")
+			.withMessageContaining(ExtendedFoo.class.getName())
+			.withMessageContaining(Foo.class.getName())
+			.withMessageContaining("InvalidOverridingSingletonBeanConfig");
 	}
 
 	@Test  // SPR-15384
@@ -479,19 +467,11 @@ public class ConfigurationClassPostProcessorTests {
 		DefaultListableBeanFactory bf2 = new DefaultListableBeanFactory();
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(bf1); // first invocation -- should succeed
-		try {
-			pp.postProcessBeanFactory(bf1); // second invocation for bf1 -- should throw
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pp.postProcessBeanFactory(bf1)); // second invocation for bf1 -- should throw
 		pp.postProcessBeanFactory(bf2); // first invocation for bf2 -- should succeed
-		try {
-			pp.postProcessBeanFactory(bf2); // second invocation for bf2 -- should throw
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pp.postProcessBeanFactory(bf2)); // second invocation for bf2 -- should throw
 	}
 
 	@Test
@@ -985,24 +965,16 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("configClass1", new RootBeanDefinition(A.class));
 		beanFactory.registerBeanDefinition("configClass2", new RootBeanDefinition(AStrich.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
-		try {
-			beanFactory.preInstantiateSingletons();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMessage().contains("Circular reference"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				beanFactory::preInstantiateSingletons)
+			.withMessageContaining("Circular reference");
 	}
 
 	@Test
 	public void testCircularDependencyWithApplicationContext() {
-		try {
-			new AnnotationConfigApplicationContext(A.class, AStrich.class);
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getMessage().contains("Circular reference"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(A.class, AStrich.class))
+			.withMessageContaining("Circular reference");
 	}
 
 	@Test
@@ -1106,10 +1078,12 @@ public class ConfigurationClassPostProcessorTests {
 		assertSame(ctx.getBean(TestBean.class), bean.getTestBean());
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	public void testNameClashBetweenConfigurationClassAndBean() {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(MyTestBean.class);
-		ctx.getBean("myTestBean", TestBean.class);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() -> {
+				ApplicationContext ctx = new AnnotationConfigApplicationContext(MyTestBean.class);
+				ctx.getBean("myTestBean", TestBean.class);
+		});
 	}
 
 	@Test

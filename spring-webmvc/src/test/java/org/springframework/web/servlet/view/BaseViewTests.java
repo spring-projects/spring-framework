@@ -33,9 +33,9 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.View;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -239,36 +239,21 @@ public class BaseViewTests {
 	@Test
 	public void attributeCSVParsingInvalid() {
 		AbstractView v = new ConcreteView();
-		try {
-			// No equals
-			v.setAttributesCSV("fweoiruiu");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-		}
+		// No equals
+		assertThatIllegalArgumentException().isThrownBy(() ->
+			v.setAttributesCSV("fweoiruiu"));
 
-		try {
-			// No value
-			v.setAttributesCSV("fweoiruiu=");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-		}
+		// No value
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				v.setAttributesCSV("fweoiruiu="));
 
-		try {
-			// No closing ]
-			v.setAttributesCSV("fweoiruiu=[");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-		}
-		try {
-			// Second one is bogus
-			v.setAttributesCSV("fweoiruiu=[de],=");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-		}
+		// No closing ]
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				v.setAttributesCSV("fweoiruiu=["));
+
+		// Second one is bogus
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				v.setAttributesCSV("fweoiruiu=[de],="));
 	}
 
 	@Test

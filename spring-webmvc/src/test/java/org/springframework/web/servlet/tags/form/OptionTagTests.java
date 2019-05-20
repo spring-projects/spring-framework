@@ -35,9 +35,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rob Harrop
@@ -199,13 +199,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setParent(null);
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
-		try {
-			tag.doStartTag();
-			fail("Must not be able to use <option> tag without exposed context.");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().as("not be able to use <option> tag without exposed context").isThrownBy(
+				tag::doStartTag);
 	}
 
 	@Test
@@ -469,15 +464,10 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	@Test
 	public void optionTagNotNestedWithinSelectTag() throws Exception {
-		try {
-			tag.setParent(null);
-			tag.setValue("foo");
-			tag.doStartTag();
-			fail("Must throw an IllegalStateException when not nested within a <select/> tag.");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		tag.setParent(null);
+		tag.setValue("foo");
+		assertThatIllegalStateException().as("when not nested within a <select/> tag").isThrownBy(
+				tag::doStartTag);
 	}
 
 

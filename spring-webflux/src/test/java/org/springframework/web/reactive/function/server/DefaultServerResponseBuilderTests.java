@@ -44,6 +44,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -355,11 +356,12 @@ public class DefaultServerResponseBuilderTests {
 		StepVerifier.create(response.getBody()).expectComplete().verify();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void bodyObjectPublisher() {
 		Mono<Void> mono = Mono.empty();
 
-		ServerResponse.ok().syncBody(mono);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				ServerResponse.ok().syncBody(mono));
 	}
 
 	@Test

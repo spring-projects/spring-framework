@@ -32,11 +32,12 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -57,14 +58,10 @@ public class SimpleUrlHandlerMappingTests {
 		wac.setServletContext(sc);
 		wac.setNamespace("map2err");
 		wac.setConfigLocations("/org/springframework/web/servlet/handler/map2err.xml");
-		try {
-			wac.refresh();
-			fail("Should have thrown NoSuchBeanDefinitionException");
-		}
-		catch (FatalBeanException ex) {
-			NoSuchBeanDefinitionException nestedEx = (NoSuchBeanDefinitionException) ex.getCause();
-			assertEquals("mainControlle", nestedEx.getBeanName());
-		}
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(
+				wac::refresh)
+			.withCauseInstanceOf(NoSuchBeanDefinitionException.class)
+			.satisfies(ex -> assertThat(((NoSuchBeanDefinitionException) ex.getCause()).getBeanName()).isEqualTo("mainControlle"));
 	}
 
 	@Test

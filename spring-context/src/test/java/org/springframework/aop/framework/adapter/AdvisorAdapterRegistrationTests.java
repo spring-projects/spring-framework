@@ -31,8 +31,8 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * TestCase for AdvisorAdapterRegistrationManager mechanism.
@@ -54,14 +54,9 @@ public class AdvisorAdapterRegistrationTests {
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-without-bpp.xml", getClass());
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
-		try {
-			tb.getName();
-			fail("Should throw UnknownAdviceTypeException");
-		}
-		catch (UnknownAdviceTypeException ex) {
-			// expected
-			assertEquals(0, getAdviceImpl(tb).getInvocationCounter());
-		}
+		assertThatExceptionOfType(UnknownAdviceTypeException.class).isThrownBy(
+				tb::getName);
+		assertThat(getAdviceImpl(tb).getInvocationCounter()).isZero();
 	}
 
 	@Test
@@ -70,13 +65,8 @@ public class AdvisorAdapterRegistrationTests {
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-with-bpp.xml", getClass());
 		ITestBean tb = (ITestBean) ctx.getBean("testBean");
 		// just invoke any method to see if advice fired
-		try {
-			tb.getName();
-			assertEquals(1, getAdviceImpl(tb).getInvocationCounter());
-		}
-		catch (UnknownAdviceTypeException ex) {
-			fail("Should not throw UnknownAdviceTypeException");
-		}
+		tb.getName();
+		getAdviceImpl(tb).getInvocationCounter();
 	}
 
 	private SimpleBeforeAdviceImpl getAdviceImpl(ITestBean tb) {

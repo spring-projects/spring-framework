@@ -30,11 +30,11 @@ import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition.ProduceMediaTypeExpression;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ProducesRequestCondition}.
@@ -370,21 +370,8 @@ public class ProducesRequestConditionTests {
 
 	private void assertConditions(ProducesRequestCondition condition, String... expected) {
 		Collection<ProduceMediaTypeExpression> expressions = condition.getContent();
-		assertEquals("Invalid number of conditions", expressions.size(), expected.length);
-		for (String s : expected) {
-			boolean found = false;
-			for (ProduceMediaTypeExpression expr : expressions) {
-				String conditionMediaType = expr.getMediaType().toString();
-				if (conditionMediaType.equals(s)) {
-					found = true;
-					break;
-
-				}
-			}
-			if (!found) {
-				fail("Condition [" + s + "] not found");
-			}
-		}
+		assertThat(expressions.stream().map(expr -> expr.getMediaType().toString()))
+			.containsExactlyInAnyOrder(expected);
 	}
 
 }

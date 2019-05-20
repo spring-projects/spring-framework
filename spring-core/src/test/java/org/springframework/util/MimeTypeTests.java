@@ -28,6 +28,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -44,34 +46,40 @@ import static org.junit.Assert.assertTrue;
  */
 public class MimeTypeTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void slashInSubtype() {
-		new MimeType("text", "/");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new MimeType("text", "/"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void valueOfNoSubtype() {
-		MimeType.valueOf("audio");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeType.valueOf("audio"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void valueOfNoSubtypeSlash() {
-		MimeType.valueOf("audio/");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeType.valueOf("audio/"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void valueOfIllegalType() {
-		MimeType.valueOf("audio(/basic");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeType.valueOf("audio(/basic"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void valueOfIllegalSubtype() {
-		MimeType.valueOf("audio/basic)");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeType.valueOf("audio/basic)"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void valueOfIllegalCharset() {
-		MimeType.valueOf("text/html; charset=foo-bar");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeType.valueOf("text/html; charset=foo-bar"));
 	}
 
 	@Test
@@ -185,59 +193,70 @@ public class MimeTypeTests {
 		assertEquals("Invalid subtype", "*", mimeType.getSubtype());
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeNoSubtype() {
-		MimeTypeUtils.parseMimeType("audio");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeNoSubtypeSlash() {
-		MimeTypeUtils.parseMimeType("audio/");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio/"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeTypeRange() {
-		MimeTypeUtils.parseMimeType("*/json");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("*/json"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeIllegalType() {
-		MimeTypeUtils.parseMimeType("audio(/basic");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio(/basic"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeIllegalSubtype() {
-		MimeTypeUtils.parseMimeType("audio/basic)");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio/basic)"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeMissingTypeAndSubtype() {
-		MimeTypeUtils.parseMimeType("     ;a=b");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("     ;a=b"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeEmptyParameterAttribute() {
-		MimeTypeUtils.parseMimeType("audio/*;=value");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio/*;=value"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeEmptyParameterValue() {
-		MimeTypeUtils.parseMimeType("audio/*;attr=");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio/*;attr="));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeIllegalParameterAttribute() {
-		MimeTypeUtils.parseMimeType("audio/*;attr<=value");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio/*;attr<=value"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeIllegalParameterValue() {
-		MimeTypeUtils.parseMimeType("audio/*;attr=v>alue");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio/*;attr=v>alue"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeIllegalCharset() {
-		MimeTypeUtils.parseMimeType("text/html; charset=foo-bar");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("text/html; charset=foo-bar"));
 	}
 
 	@Test  // SPR-8917
@@ -264,9 +283,10 @@ public class MimeTypeTests {
 		assertEquals("\" bar \"", mimeType.getParameter("foo"));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void parseMimeTypeIllegalQuotedParameterValue() {
-		MimeTypeUtils.parseMimeType("audio/*;attr=\"");
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType("audio/*;attr=\""));
 	}
 
 	@Test

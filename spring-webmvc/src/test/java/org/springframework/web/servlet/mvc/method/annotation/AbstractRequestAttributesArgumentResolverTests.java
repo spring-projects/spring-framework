@@ -41,13 +41,13 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -96,13 +96,9 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 	@Test
 	public void resolve() throws Exception {
 		MethodParameter param = initMethodParameter(0);
-		try {
-			testResolveArgument(param);
-			fail("Should be required by default");
-		}
-		catch (ServletRequestBindingException ex) {
-			assertTrue(ex.getMessage().startsWith("Missing "));
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				testResolveArgument(param))
+			.withMessageStartingWith("Missing ");
 
 		Foo foo = new Foo();
 		this.webRequest.setAttribute("foo", foo, getScope());

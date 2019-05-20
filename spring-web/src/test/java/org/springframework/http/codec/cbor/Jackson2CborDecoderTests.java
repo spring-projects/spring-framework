@@ -31,6 +31,7 @@ import org.springframework.http.codec.Pojo;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClass;
@@ -66,16 +67,16 @@ public class Jackson2CborDecoderTests extends AbstractDecoderTestCase<Jackson2Cb
 	}
 
 	@Override
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void decode() {
 		Flux<DataBuffer> input = Flux.just(this.pojo1, this.pojo2)
 				.map(this::writeObject)
 				.flatMap(this::dataBuffer);
-
-		testDecodeAll(input, Pojo.class, step -> step
-				.expectNext(pojo1)
-				.expectNext(pojo2)
-				.verifyComplete());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				testDecodeAll(input, Pojo.class, step -> step
+						.expectNext(pojo1)
+						.expectNext(pojo2)
+						.verifyComplete()));
 
 	}
 

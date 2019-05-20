@@ -31,6 +31,7 @@ import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
@@ -38,7 +39,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.springframework.test.context.support.ContextLoaderUtils.GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX;
 import static org.springframework.test.context.support.ContextLoaderUtils.buildContextHierarchyMap;
 import static org.springframework.test.context.support.ContextLoaderUtils.resolveContextHierarchyAttributes;
@@ -57,14 +57,16 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		// }
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void resolveContextHierarchyAttributesForSingleTestClassWithContextConfigurationAndContextHierarchy() {
-		resolveContextHierarchyAttributes(SingleTestClassWithContextConfigurationAndContextHierarchy.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolveContextHierarchyAttributes(SingleTestClassWithContextConfigurationAndContextHierarchy.class));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void resolveContextHierarchyAttributesForSingleTestClassWithContextConfigurationAndContextHierarchyOnSingleMetaAnnotation() {
-		resolveContextHierarchyAttributes(SingleTestClassWithContextConfigurationAndContextHierarchyOnSingleMetaAnnotation.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				resolveContextHierarchyAttributes(SingleTestClassWithContextConfigurationAndContextHierarchyOnSingleMetaAnnotation.class));
 	}
 
 	@Test
@@ -319,16 +321,10 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	}
 
 	private void assertContextConfigEntriesAreNotUnique(Class<?> testClass) {
-		try {
-			buildContextHierarchyMap(testClass);
-			fail("Should throw an IllegalStateException");
-		}
-		catch (IllegalStateException e) {
-			String msg = String.format(
-				"The @ContextConfiguration elements configured via @ContextHierarchy in test class [%s] and its superclasses must define unique contexts per hierarchy level.",
-				testClass.getName());
-			assertEquals(msg, e.getMessage());
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				buildContextHierarchyMap(testClass))
+			.withMessage(String.format(
+				"The @ContextConfiguration elements configured via @ContextHierarchy in test class [%s] and its superclasses must define unique contexts per hierarchy level.", testClass.getName()));
 	}
 
 	@Test

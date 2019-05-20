@@ -24,9 +24,9 @@ import org.junit.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Thomas Risberg
@@ -80,12 +80,8 @@ public class NamedParameterUtilsTests {
 		assertSame(5, NamedParameterUtils.buildValueArray("xxx :a :b :c xx :a :b", paramMap).length);
 		assertSame(5, NamedParameterUtils.buildValueArray("xxx :a :a :a xx :a :a", paramMap).length);
 		assertEquals("b", NamedParameterUtils.buildValueArray("xxx :a :b :c xx :a :b", paramMap)[4]);
-		try {
-			NamedParameterUtils.buildValueArray("xxx :a :b ?", paramMap);
-			fail("mixed named parameters and ? placeholders not detected");
-		}
-		catch (InvalidDataAccessApiUsageException expected) {
-		}
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).as("mixed named parameters and ? placeholders").isThrownBy(() ->
+				NamedParameterUtils.buildValueArray("xxx :a :b ?", paramMap));
 	}
 
 	@Test
@@ -118,10 +114,11 @@ public class NamedParameterUtilsTests {
 				.buildSqlParameterList(NamedParameterUtils.parseSqlStatement("xxx :a :b :c"), namedParams).get(2).getTypeName());
 	}
 
-	@Test(expected = InvalidDataAccessApiUsageException.class)
+	@Test
 	public void buildValueArrayWithMissingParameterValue() {
 		String sql = "select count(0) from foo where id = :id";
-		NamedParameterUtils.buildValueArray(sql, Collections.<String, Object>emptyMap());
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				NamedParameterUtils.buildValueArray(sql, Collections.<String, Object>emptyMap()));
 	}
 
 	@Test

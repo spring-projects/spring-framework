@@ -32,10 +32,10 @@ import org.springframework.tests.aop.interceptor.NopInterceptor;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Rod Johnson
@@ -106,13 +106,8 @@ public class BeanNameAutoProxyCreatorTests {
 		// Can still mod second object
 		tb2.setAge(12);
 		// But can't mod first
-		try {
-			tb.setAge(6);
-			fail("Mixin should have locked this object");
-		}
-		catch (LockedException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(LockedException.class).as("mixin should have locked this object").isThrownBy(() ->
+				tb.setAge(6));
 	}
 
 	@Test
@@ -144,13 +139,8 @@ public class BeanNameAutoProxyCreatorTests {
 		// Can still mod second object
 		tb2.setAge(12);
 		// But can't mod first
-		try {
-			tb.setAge(6);
-			fail("Mixin should have locked this object");
-		}
-		catch (LockedException ex) {
-			// Ok
-		}
+		assertThatExceptionOfType(LockedException.class).as("mixin should have locked this object").isThrownBy(() ->
+				tb.setAge(6));
 	}
 
 	@Test

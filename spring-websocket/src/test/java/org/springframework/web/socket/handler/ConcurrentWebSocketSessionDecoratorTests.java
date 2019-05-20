@@ -30,9 +30,10 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator.OverflowStrategy;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ConcurrentWebSocketSessionDecorator}.
@@ -100,17 +101,11 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		// Exceed send time..
 		Thread.sleep(200);
 
-		try {
-			TextMessage payload = new TextMessage("payload");
-			decorator.sendMessage(payload);
-			fail("Expected exception");
-		}
-		catch (SessionLimitExceededException ex) {
-			String actual = ex.getMessage();
-			String regex = "Send time [\\d]+ \\(ms\\) for session '123' exceeded the allowed limit 100";
-			assertTrue("Unexpected message: " + actual, actual.matches(regex));
-			assertEquals(CloseStatus.SESSION_NOT_RELIABLE, ex.getStatus());
-		}
+		TextMessage payload = new TextMessage("payload");
+		assertThatExceptionOfType(SessionLimitExceededException.class).isThrownBy(() ->
+				decorator.sendMessage(payload))
+			.withMessageMatching("Send time [\\d]+ \\(ms\\) for session '123' exceeded the allowed limit 100")
+			.satisfies(ex -> assertThat(ex.getStatus()).isEqualTo(CloseStatus.SESSION_NOT_RELIABLE));
 	}
 
 	@Test
@@ -136,16 +131,10 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		assertEquals(1023, decorator.getBufferSize());
 		assertTrue(session.isOpen());
 
-		try {
-			decorator.sendMessage(message);
-			fail("Expected exception");
-		}
-		catch (SessionLimitExceededException ex) {
-			String actual = ex.getMessage();
-			String regex = "Buffer size [\\d]+ bytes for session '123' exceeds the allowed limit 1024";
-			assertTrue("Unexpected message: " + actual, actual.matches(regex));
-			assertEquals(CloseStatus.SESSION_NOT_RELIABLE, ex.getStatus());
-		}
+		assertThatExceptionOfType(SessionLimitExceededException.class).isThrownBy(() ->
+				decorator.sendMessage(message))
+			.withMessageMatching("Buffer size [\\d]+ bytes for session '123' exceeds the allowed limit 1024")
+			.satisfies(ex -> assertThat(ex.getStatus()).isEqualTo(CloseStatus.SESSION_NOT_RELIABLE));
 	}
 
 	@Test // SPR-17140

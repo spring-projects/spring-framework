@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -99,9 +100,10 @@ public class SynthesizingMethodParameterTests {
 		assertEquals(longParameter, SynthesizingMethodParameter.forParameter(method.getParameters()[1]));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testIndexValidation() {
-		new SynthesizingMethodParameter(method, 2);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new SynthesizingMethodParameter(method, 2));
 	}
 
 

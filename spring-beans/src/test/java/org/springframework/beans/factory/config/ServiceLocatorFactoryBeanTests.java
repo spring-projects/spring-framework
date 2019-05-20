@@ -27,11 +27,12 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.NestedCheckedException;
 import org.springframework.core.NestedRuntimeException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
@@ -80,27 +81,12 @@ public class ServiceLocatorFactoryBeanTests {
 				genericBeanDefinition(ServiceLocatorFactoryBean.class)
 				.addPropertyValue("serviceLocatorInterface", TestService2Locator.class)
 				.getBeanDefinition());
-
-		try {
-			TestServiceLocator factory = (TestServiceLocator) bf.getBean("factory");
-			factory.getTestService();
-			fail("Must fail on more than one matching type");
-		}
-		catch (NoSuchBeanDefinitionException ex) { /* expected */ }
-
-		try {
-			TestServiceLocator2 factory = (TestServiceLocator2) bf.getBean("factory2");
-			factory.getTestService(null);
-			fail("Must fail on more than one matching type");
-		}
-		catch (NoSuchBeanDefinitionException ex) { /* expected */ }
-
-		try {
-			TestService2Locator factory = (TestService2Locator) bf.getBean("factory3");
-			factory.getTestService();
-			fail("Must fail on no matching types");
-		}
-		catch (NoSuchBeanDefinitionException ex) { /* expected */ }
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).as("more than one matching type").isThrownBy(() ->
+			((TestServiceLocator) bf.getBean("factory")).getTestService());
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).as("more than one matching type").isThrownBy(() ->
+			((TestServiceLocator2) bf.getBean("factory2")).getTestService(null));
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).as("no matching types").isThrownBy(() ->
+			((TestService2Locator) bf.getBean("factory3")).getTestService());
 	}
 
 	@Test
@@ -122,31 +108,14 @@ public class ServiceLocatorFactoryBeanTests {
 				.addPropertyValue("serviceLocatorInterface", TestService2Locator.class)
 				.addPropertyValue("serviceLocatorExceptionClass", CustomServiceLocatorException3.class)
 				.getBeanDefinition());
-
-		try {
-			TestServiceLocator factory = (TestServiceLocator) bf.getBean("factory");
-			factory.getTestService();
-			fail("Must fail on more than one matching type");
-		}
-		catch (CustomServiceLocatorException1 expected) {
-			assertTrue(expected.getCause() instanceof NoSuchBeanDefinitionException);
-		}
-
-		try {
-			TestServiceLocator2 factory2 = (TestServiceLocator2) bf.getBean("factory2");
-			factory2.getTestService(null);
-			fail("Must fail on more than one matching type");
-		}
-		catch (CustomServiceLocatorException2 expected) {
-			assertTrue(expected.getCause() instanceof NoSuchBeanDefinitionException);
-		}
-
-		try {
-			TestService2Locator factory3 = (TestService2Locator) bf.getBean("factory3");
-			factory3.getTestService();
-			fail("Must fail on no matching type");
-		}
-		catch (CustomServiceLocatorException3 ex) { /* expected */ }
+		assertThatExceptionOfType(CustomServiceLocatorException1.class).as("more than one matching type").isThrownBy(() ->
+				((TestServiceLocator) bf.getBean("factory")).getTestService())
+			.withCauseInstanceOf(NoSuchBeanDefinitionException.class);
+		assertThatExceptionOfType(CustomServiceLocatorException2.class).as("more than one matching type").isThrownBy(() ->
+				((TestServiceLocator2) bf.getBean("factory2")).getTestService(null))
+			.withCauseInstanceOf(NoSuchBeanDefinitionException.class);
+		assertThatExceptionOfType(CustomServiceLocatorException3.class).as("no matching type").isThrownBy(() ->
+				((TestService2Locator) bf.getBean("factory3")).getTestService());
 	}
 
 	@Test
@@ -165,11 +134,8 @@ public class ServiceLocatorFactoryBeanTests {
 		// now test with explicit id
 		testBean = factory.getTestService("testService");
 		// now verify failure on bad id
-		try {
-			factory.getTestService("bogusTestService");
-			fail("Illegal operation allowed");
-		}
-		catch (NoSuchBeanDefinitionException ex) { /* expected */ }
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				factory.getTestService("bogusTestService"));
 	}
 
 	@Ignore @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory
@@ -241,41 +207,46 @@ public class ServiceLocatorFactoryBeanTests {
 		assertTrue(testBean4 instanceof ExtendedTestService);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNoServiceLocatorInterfaceSupplied() throws Exception {
-		new ServiceLocatorFactoryBean().afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				new ServiceLocatorFactoryBean()::afterPropertiesSet);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWhenServiceLocatorInterfaceIsNotAnInterfaceType() throws Exception {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 		factory.setServiceLocatorInterface(getClass());
-		factory.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+					factory::afterPropertiesSet);
 		// should throw, bad (non-interface-type) serviceLocator interface supplied
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWhenServiceLocatorExceptionClassToExceptionTypeWithOnlyNoArgCtor() throws Exception {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
-		factory.setServiceLocatorExceptionClass(ExceptionClassWithOnlyZeroArgCtor.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setServiceLocatorExceptionClass(ExceptionClassWithOnlyZeroArgCtor.class));
 		// should throw, bad (invalid-Exception-type) serviceLocatorException class supplied
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWhenServiceLocatorExceptionClassIsNotAnExceptionSubclass() throws Exception {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
-		factory.setServiceLocatorExceptionClass((Class) getClass());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				factory.setServiceLocatorExceptionClass((Class) getClass()));
 		// should throw, bad (non-Exception-type) serviceLocatorException class supplied
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testWhenServiceLocatorMethodCalledWithTooManyParameters() throws Exception {
 		ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 		factory.setServiceLocatorInterface(ServiceLocatorInterfaceWithExtraNonCompliantMethod.class);
 		factory.afterPropertiesSet();
 		ServiceLocatorInterfaceWithExtraNonCompliantMethod locator = (ServiceLocatorInterfaceWithExtraNonCompliantMethod) factory.getObject();
-		locator.getTestService("not", "allowed"); //bad method (too many args, doesn't obey class contract)
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				locator.getTestService("not", "allowed")); //bad method (too many args, doesn't obey class contract)
 	}
 
 	@Test

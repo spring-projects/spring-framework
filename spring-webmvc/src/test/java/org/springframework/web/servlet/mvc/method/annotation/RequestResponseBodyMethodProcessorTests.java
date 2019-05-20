@@ -70,6 +70,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -196,14 +198,15 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("foobarbaz", result);
 	}
 
-	@Test(expected = HttpMessageNotReadableException.class)  // SPR-9942
+	@Test // SPR-9942
 	public void resolveArgumentRequiredNoContent() throws Exception {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("text/plain");
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
-		processor.resolveArgument(paramString, container, request, factory);
+		assertThatExceptionOfType(HttpMessageNotReadableException.class).isThrownBy(() ->
+				processor.resolveArgument(paramString, container, request, factory));
 	}
 
 	@Test  // SPR-12778
@@ -361,12 +364,14 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	// SPR-13135
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void handleReturnValueWithInvalidReturnType() throws Exception {
 		Method method = getClass().getDeclaredMethod("handleAndReturnOutputStream");
 		MethodParameter returnType = new MethodParameter(method, -1);
-		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(new ArrayList<>());
-		processor.writeWithMessageConverters(new ByteArrayOutputStream(), returnType, this.request);
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+				RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(new ArrayList<>());
+				processor.writeWithMessageConverters(new ByteArrayOutputStream(), returnType, this.request);
+		});
 	}
 
 	@Test

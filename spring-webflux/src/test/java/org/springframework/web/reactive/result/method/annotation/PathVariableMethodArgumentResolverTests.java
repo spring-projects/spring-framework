@@ -39,10 +39,10 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link PathVariableMethodArgumentResolver}.
@@ -80,15 +80,9 @@ public class PathVariableMethodArgumentResolverTests {
 	public void supportsParameter() {
 		assertTrue(this.resolver.supportsParameter(this.paramNamedString));
 		assertFalse(this.resolver.supportsParameter(this.paramString));
-		try {
-			this.resolver.supportsParameter(this.paramMono);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue("Unexpected error message:\n" + ex.getMessage(),
-					ex.getMessage().startsWith(
-							"PathVariableMethodArgumentResolver does not support reactive type wrapper"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.resolver.supportsParameter(this.paramMono))
+			.withMessageStartingWith("PathVariableMethodArgumentResolver does not support reactive type wrapper");
 	}
 
 	@Test

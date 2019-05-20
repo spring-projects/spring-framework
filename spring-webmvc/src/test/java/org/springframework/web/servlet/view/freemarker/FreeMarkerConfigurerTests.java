@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -35,6 +34,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.ui.freemarker.SpringTemplateLoader;
 
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -46,14 +46,15 @@ import static org.junit.Assert.assertTrue;
  */
 public class FreeMarkerConfigurerTests {
 
-	@Test(expected = IOException.class)
+	@Test
 	public void freeMarkerConfigurationFactoryBeanWithConfigLocation() throws Exception {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
 		fcfb.setFreemarkerSettings(props);
-		fcfb.afterPropertiesSet();
+		assertThatIOException().isThrownBy(
+				fcfb::afterPropertiesSet);
 	}
 
 	@Test

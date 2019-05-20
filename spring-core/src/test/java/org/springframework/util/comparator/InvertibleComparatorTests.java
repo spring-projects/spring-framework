@@ -20,6 +20,7 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -36,14 +37,16 @@ public class InvertibleComparatorTests {
 	private final Comparator<Integer> comparator = new ComparableComparator<>();
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldNeedComparator() throws Exception {
-		new InvertibleComparator<>(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new InvertibleComparator<>(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldNeedComparatorWithAscending() throws Exception {
-		new InvertibleComparator<>(null, true);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new InvertibleComparator<>(null, true));
 	}
 
 	@Test

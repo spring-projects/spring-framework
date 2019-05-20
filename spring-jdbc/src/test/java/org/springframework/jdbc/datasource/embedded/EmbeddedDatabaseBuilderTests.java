@@ -23,8 +23,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 import org.springframework.jdbc.datasource.init.ScriptStatementFailedException;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
 
@@ -54,9 +54,10 @@ public class EmbeddedDatabaseBuilderTests {
 		});
 	}
 
-	@Test(expected = CannotReadScriptException.class)
+	@Test
 	public void addScriptWithBogusFileName() {
-		new EmbeddedDatabaseBuilder().addScript("bogus.sql").build();
+		assertThatExceptionOfType(CannotReadScriptException.class).isThrownBy(
+				new EmbeddedDatabaseBuilder().addScript("bogus.sql")::build);
 	}
 
 	@Test
@@ -165,17 +166,11 @@ public class EmbeddedDatabaseBuilderTests {
 
 	@Test
 	public void createSameSchemaTwiceWithoutUniqueDbNames() throws Exception {
-		EmbeddedDatabase db1 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))//
-		.addScripts("db-schema-without-dropping.sql").build();
-
+		EmbeddedDatabase db1 = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))
+				.addScripts("db-schema-without-dropping.sql").build();
 		try {
-			new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()))//
-			.addScripts("db-schema-without-dropping.sql").build();
-
-			fail("Should have thrown a ScriptStatementFailedException");
-		}
-		catch (ScriptStatementFailedException e) {
-			// expected
+			assertThatExceptionOfType(ScriptStatementFailedException.class).isThrownBy(() ->
+					new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass())).addScripts("db-schema-without-dropping.sql").build());
 		}
 		finally {
 			db1.shutdown();

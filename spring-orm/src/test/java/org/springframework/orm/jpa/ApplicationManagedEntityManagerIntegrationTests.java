@@ -26,11 +26,11 @@ import org.junit.Test;
 
 import org.springframework.orm.jpa.domain.Person;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * An application-managed entity manager can join an existing transaction,
@@ -72,13 +72,8 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 	@Test
 	public void testCannotFlushWithoutGettingTransaction() {
 		EntityManager em = entityManagerFactory.createEntityManager();
-		try {
-			doInstantiateAndSave(em);
-			fail("Should have thrown TransactionRequiredException");
-		}
-		catch (TransactionRequiredException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(TransactionRequiredException.class).isThrownBy(() ->
+				doInstantiateAndSave(em));
 
 		// TODO following lines are a workaround for Hibernate bug
 		// If Hibernate throws an exception due to flush(),

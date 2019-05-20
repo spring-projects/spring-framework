@@ -43,9 +43,9 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -80,45 +80,25 @@ public class AsyncExecutionTests {
 		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
 		assertEquals("20", completableFuture.get());
 
-		try {
-			asyncTest.returnSomething(0).get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				asyncTest.returnSomething(0).get())
+			.withCauseInstanceOf(IllegalArgumentException.class);
 
-		try {
-			asyncTest.returnSomething(-1).get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof IOException);
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				asyncTest.returnSomething(-1).get())
+			.withCauseInstanceOf(IOException.class);
 
-		try {
-			asyncTest.returnSomethingListenable(0).get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				asyncTest.returnSomethingListenable(0).get())
+			.withCauseInstanceOf(IllegalArgumentException.class);
 
-		try {
-			asyncTest.returnSomethingListenable(-1).get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof IOException);
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				asyncTest.returnSomethingListenable(-1).get())
+			.withCauseInstanceOf(IOException.class);
 
-		try {
-			asyncTest.returnSomethingCompletable(0).get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				asyncTest.returnSomethingCompletable(0).get())
+			.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -197,29 +177,17 @@ public class AsyncExecutionTests {
 		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
 		assertEquals("20", completableFuture.get());
 
-		try {
-			asyncTest.returnSomething(0).get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				asyncTest.returnSomething(0).get())
+			.withCauseInstanceOf(IllegalArgumentException.class);
 
-		try {
-			asyncTest.returnSomethingListenable(0).get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				asyncTest.returnSomethingListenable(0).get())
+			.withCauseInstanceOf(IllegalArgumentException.class);
 
-		try {
-			asyncTest.returnSomethingCompletable(0).get();
-			fail("Should have thrown ExecutionException");
-		}
-		catch (ExecutionException ex) {
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
+				asyncTest.returnSomethingCompletable(0).get())
+			.withCauseInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test

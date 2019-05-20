@@ -23,6 +23,8 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -77,32 +79,35 @@ public class CustomScopeConfigurerTests {
 		assertTrue(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWhereScopeMapHasNullScopeValueInEntrySet() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, null);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
-		figurer.postProcessBeanFactory(factory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				figurer.postProcessBeanFactory(factory));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testWhereScopeMapHasNonScopeInstanceInEntrySet() {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, this);  // <-- not a valid value...
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
-		figurer.postProcessBeanFactory(factory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				figurer.postProcessBeanFactory(factory));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Test(expected = ClassCastException.class)
+	@Test
 	public void testWhereScopeMapHasNonStringTypedScopeNameInKeySet() {
 		Map scopes = new HashMap();
 		scopes.put(this, new NoOpScope());  // <-- not a valid value (the key)...
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
-		figurer.postProcessBeanFactory(factory);
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				figurer.postProcessBeanFactory(factory));
 	}
 
 }

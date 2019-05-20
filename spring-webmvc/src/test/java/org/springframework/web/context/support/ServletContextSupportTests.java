@@ -31,10 +31,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for various ServletContext-related support classes.
@@ -73,15 +73,10 @@ public class ServletContextSupportTests {
 		pvs.add("attributeName", "myAttr");
 		wac.registerSingleton("importedAttr", ServletContextAttributeFactoryBean.class, pvs);
 
-		try {
-			wac.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-			assertTrue(ex.getCause().getMessage().contains("myAttr"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				wac::refresh)
+			.withCauseInstanceOf(IllegalStateException.class)
+			.withMessageContaining("myAttr");
 	}
 
 	@Test
@@ -112,15 +107,10 @@ public class ServletContextSupportTests {
 		pvs.add("initParamName", "myParam");
 		wac.registerSingleton("importedParam", ServletContextParameterFactoryBean.class, pvs);
 
-		try {
-			wac.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IllegalStateException);
-			assertTrue(ex.getCause().getMessage().contains("myParam"));
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				wac::refresh)
+			.withCauseInstanceOf(IllegalStateException.class)
+			.withMessageContaining("myParam");
 	}
 
 	@Test

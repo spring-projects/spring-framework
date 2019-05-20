@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -69,16 +70,15 @@ public class ResourceArrayPropertyEditorTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testStrictSystemPropertyReplacement() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor(
 				new PathMatchingResourcePatternResolver(), new StandardEnvironment(),
 				false);
 		System.setProperty("test.prop", "foo");
 		try {
-			editor.setAsText("${test.prop}-${bar}");
-			Resource[] resources = (Resource[]) editor.getValue();
-			assertEquals("foo-${bar}", resources[0].getFilename());
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					editor.setAsText("${test.prop}-${bar}"));
 		}
 		finally {
 			System.getProperties().remove("test.prop");

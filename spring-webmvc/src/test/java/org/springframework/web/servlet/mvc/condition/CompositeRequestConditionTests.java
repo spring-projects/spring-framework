@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -73,11 +74,12 @@ public class CompositeRequestConditionTests {
 		assertSame(notEmpty, empty.combine(notEmpty));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void combineDifferentLength() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param1, this.header1);
-		cond1.combine(cond2);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				cond1.combine(cond2));
 	}
 
 	@Test
@@ -132,11 +134,12 @@ public class CompositeRequestConditionTests {
 		assertEquals(1, empty.compareTo(notEmpty, request));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void compareDifferentLength() {
 		CompositeRequestCondition cond1 = new CompositeRequestCondition(this.param1);
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param1, this.header1);
-		cond1.compareTo(cond2, new MockHttpServletRequest());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				cond1.compareTo(cond2, new MockHttpServletRequest()));
 	}
 
 }

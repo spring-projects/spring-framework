@@ -35,7 +35,6 @@ import org.springframework.jdbc.support.lob.LobHandler;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -141,14 +140,9 @@ public class SqlLobValueTests  {
 		SqlLobValue lob = new SqlLobValue("bla");
 		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 
-		try {
-			lob = new SqlLobValue("bla".getBytes());
-			lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
-			fail("IllegalArgumentException should have been thrown");
-		}
-		catch (IllegalArgumentException e) {
-			// expected
-		}
+		SqlLobValue lob2 = new SqlLobValue("bla".getBytes());
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				lob2.setTypeValue(preparedStatement, 1, Types.CLOB, "test"));
 
 		lob = new SqlLobValue(new ByteArrayInputStream("bla".getBytes()), 3);
 		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
@@ -167,16 +161,10 @@ public class SqlLobValueTests  {
 		lob = new SqlLobValue(new ByteArrayInputStream("bla".getBytes()), 3);
 		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
 
-		lob = new SqlLobValue(new InputStreamReader(new ByteArrayInputStream(
+		SqlLobValue lob3 = new SqlLobValue(new InputStreamReader(new ByteArrayInputStream(
 				"bla".getBytes())), 3);
-
-		try {
-			lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
-			fail("IllegalArgumentException should have been thrown");
-		}
-		catch (IllegalArgumentException e) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				lob3.setTypeValue(preparedStatement, 1, Types.BLOB, "test"));
 	}
 
 	@Test

@@ -42,11 +42,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Mark Fisher
@@ -220,17 +219,9 @@ public class AsyncAnnotationBeanPostProcessorTests {
 
 	private void assertFutureWithException(Future<Object> result,
 			TestableAsyncUncaughtExceptionHandler exceptionHandler) {
-
-		try {
-			result.get();
-		}
-		catch (InterruptedException ex) {
-			fail("Should not have failed with InterruptedException: " + ex);
-		}
-		catch (ExecutionException ex) {
-			// expected
-			assertEquals("Wrong exception cause", UnsupportedOperationException.class, ex.getCause().getClass());
-		}
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				result::get)
+			.withCauseExactlyInstanceOf(UnsupportedOperationException.class);
 		assertFalse("handler should never be called with Future return type", exceptionHandler.isCalled());
 	}
 
@@ -264,13 +255,8 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		ITestBean testBean = context.getBean("target", ITestBean.class);
 
 		assertFalse("Handler should not have been called", exceptionHandler.isCalled());
-		try {
-			testBean.failWithVoid();
-			exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
-		}
-		catch (Exception e) {
-			fail("No unexpected exception should have been received");
-		}
+		testBean.failWithVoid();
+		exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
 	}
 
 	private ConfigurableApplicationContext initContext(BeanDefinition asyncAnnotationBeanPostProcessorDefinition) {

@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -75,14 +76,16 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void webAppContextSetupNull() {
-		MockMvcHtmlUnitDriverBuilder.webAppContextSetup(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MockMvcHtmlUnitDriverBuilder.webAppContextSetup(null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void mockMvcSetupNull() {
-		MockMvcHtmlUnitDriverBuilder.mockMvcSetup(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MockMvcHtmlUnitDriverBuilder.mockMvcSetup(null));
 	}
 
 	@Test

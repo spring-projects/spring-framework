@@ -24,6 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -57,11 +58,12 @@ public class SimplePropertyNamespaceHandlerTests {
 		assertEquals(rob.getSpouse(), sally);
 	}
 
-	@Test(expected = BeanDefinitionStoreException.class)
+	@Test
 	public void withPropertyDefinedTwice() throws Exception {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
-				new ClassPathResource("simplePropertyNamespaceHandlerTestsWithErrors.xml", getClass()));
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
+							new ClassPathResource("simplePropertyNamespaceHandlerTestsWithErrors.xml", getClass())));
 	}
 
 	@Test

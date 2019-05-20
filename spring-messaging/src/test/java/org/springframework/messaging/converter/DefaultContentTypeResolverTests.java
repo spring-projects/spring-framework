@@ -27,6 +27,8 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeTypeUtils;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -63,20 +65,22 @@ public class DefaultContentTypeResolverTests {
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, this.resolver.resolve(headers));
 	}
 
-	@Test(expected = InvalidMimeTypeException.class)
+	@Test
 	public void resolveInvalidStringContentType() {
 		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, "invalidContentType");
 		MessageHeaders headers = new MessageHeaders(map);
-		this.resolver.resolve(headers);
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				this.resolver.resolve(headers));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void resolveUnknownHeaderType() {
 		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, new Integer(1));
 		MessageHeaders headers = new MessageHeaders(map);
-		this.resolver.resolve(headers);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.resolver.resolve(headers));
 	}
 
 	@Test

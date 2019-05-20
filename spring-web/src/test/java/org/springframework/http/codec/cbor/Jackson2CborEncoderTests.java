@@ -33,6 +33,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -92,13 +93,14 @@ public class Jackson2CborEncoderTests extends AbstractLeakCheckingTestCase {
 		pojoConsumer(value).accept(result);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void encodeStream() {
 		Pojo pojo1 = new Pojo("foo", "bar");
 		Pojo pojo2 = new Pojo("foofoo", "barbar");
 		Pojo pojo3 = new Pojo("foofoofoo", "barbarbar");
 		Flux<Pojo> input = Flux.just(pojo1, pojo2, pojo3);
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
-		encoder.encode(input, this.bufferFactory, type, CBOR_MIME_TYPE, null);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				encoder.encode(input, this.bufferFactory, type, CBOR_MIME_TYPE, null));
 	}
 }

@@ -42,6 +42,7 @@ import org.springframework.tests.sample.beans.IOther;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -49,7 +50,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Also tests AdvisedSupport and ProxyCreatorSupport superclasses.
@@ -277,13 +277,9 @@ public class ProxyFactoryTests {
 
 		assertTrue(config.getAdvisors().length == oldCount);
 
-		try {
-			// Existing reference will fail
-			ts.getTimeStamp();
-			fail("Existing object won't implement this interface any more");
-		}
-		catch (RuntimeException ex) {
-		}
+		assertThatExceptionOfType(RuntimeException.class)
+				.as("Existing object won't implement this interface any more")
+				.isThrownBy(ts::getTimeStamp); // Existing reference will fail
 
 		assertFalse("Should no longer implement TimeStamped",
 				config.getProxy() instanceof TimeStamped);

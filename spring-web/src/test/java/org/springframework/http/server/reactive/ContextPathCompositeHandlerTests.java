@@ -30,10 +30,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ContextPathCompositeHandler}.
@@ -50,13 +50,9 @@ public class ContextPathCompositeHandlerTests {
 	}
 
 	private void testInvalid(String contextPath, String expectedError) {
-		try {
-			new ContextPathCompositeHandler(Collections.singletonMap(contextPath, new TestHttpHandler()));
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			assertEquals(expectedError, ex.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ContextPathCompositeHandler(Collections.singletonMap(contextPath, new TestHttpHandler())))
+			.withMessage(expectedError);
 	}
 
 	@Test

@@ -34,6 +34,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -174,7 +175,7 @@ public class DelegatingFilterProxyTests {
 		assertNull(targetFilter.filterConfig);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testDelegatingFilterProxyWithTargetBeanNameAndNoApplicationContext()
 			throws ServletException, IOException {
 
@@ -185,7 +186,8 @@ public class DelegatingFilterProxyTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		filterProxy.doFilter(request, response, null); // throws
+		assertThatIllegalStateException().isThrownBy(() ->
+				filterProxy.doFilter(request, response, null));
 	}
 
 	@Test

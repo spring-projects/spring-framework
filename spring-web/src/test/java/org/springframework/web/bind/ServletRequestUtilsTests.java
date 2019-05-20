@@ -23,11 +23,11 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author Juergen Hoeller
@@ -48,31 +48,16 @@ public class ServletRequestUtilsTests {
 		assertEquals(ServletRequestUtils.getRequiredIntParameter(request, "param1"), 5);
 
 		assertEquals(ServletRequestUtils.getIntParameter(request, "param2", 6), 6);
-		try {
-			ServletRequestUtils.getRequiredIntParameter(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredIntParameter(request, "param2"));
 
 		assertEquals(ServletRequestUtils.getIntParameter(request, "param3"), null);
 		assertEquals(ServletRequestUtils.getIntParameter(request, "param3", 6), 6);
-		try {
-			ServletRequestUtils.getRequiredIntParameter(request, "param3");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredIntParameter(request, "param3"));
 
-		try {
-			ServletRequestUtils.getRequiredIntParameter(request, "paramEmpty");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredIntParameter(request, "paramEmpty"));
 	}
 
 	@Test
@@ -91,13 +76,8 @@ public class ServletRequestUtilsTests {
 			assertEquals(array[i], values[i]);
 		}
 
-		try {
-			ServletRequestUtils.getRequiredIntParameters(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredIntParameters(request, "param2"));
 	}
 
 	@Test
@@ -112,31 +92,16 @@ public class ServletRequestUtilsTests {
 		assertEquals(ServletRequestUtils.getRequiredIntParameter(request, "param1"), 5L);
 
 		assertEquals(ServletRequestUtils.getLongParameter(request, "param2", 6L), 6L);
-		try {
-			ServletRequestUtils.getRequiredLongParameter(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredLongParameter(request, "param2"));
 
 		assertEquals(ServletRequestUtils.getLongParameter(request, "param3"), null);
 		assertEquals(ServletRequestUtils.getLongParameter(request, "param3", 6L), 6L);
-		try {
-			ServletRequestUtils.getRequiredLongParameter(request, "param3");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredLongParameter(request, "param3"));
 
-		try {
-			ServletRequestUtils.getRequiredLongParameter(request, "paramEmpty");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredLongParameter(request, "paramEmpty"));
 	}
 
 	@Test
@@ -156,13 +121,8 @@ public class ServletRequestUtilsTests {
 			assertEquals(array[i], values[i]);
 		}
 
-		try {
-			ServletRequestUtils.getRequiredLongParameters(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredLongParameters(request, "param2"));
 
 		request.setParameter("param2", new String[] {"1", "2"});
 		values = ServletRequestUtils.getRequiredLongParameters(request, "param2");
@@ -171,13 +131,8 @@ public class ServletRequestUtilsTests {
 		assertEquals(2, values[1]);
 
 		request.removeParameter("param2");
-		try {
-			ServletRequestUtils.getRequiredLongParameters(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredLongParameters(request, "param2"));
 	}
 
 	@Test
@@ -192,31 +147,16 @@ public class ServletRequestUtilsTests {
 		assertTrue(ServletRequestUtils.getRequiredFloatParameter(request, "param1") == 5.5f);
 
 		assertTrue(ServletRequestUtils.getFloatParameter(request, "param2", 6.5f) == 6.5f);
-		try {
-			ServletRequestUtils.getRequiredFloatParameter(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredFloatParameter(request, "param2"));
 
 		assertTrue(ServletRequestUtils.getFloatParameter(request, "param3") == null);
 		assertTrue(ServletRequestUtils.getFloatParameter(request, "param3", 6.5f) == 6.5f);
-		try {
-			ServletRequestUtils.getRequiredFloatParameter(request, "param3");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredFloatParameter(request, "param3"));
 
-		try {
-			ServletRequestUtils.getRequiredFloatParameter(request, "paramEmpty");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredFloatParameter(request, "paramEmpty"));
 	}
 
 	@Test
@@ -235,13 +175,8 @@ public class ServletRequestUtilsTests {
 			assertEquals(array[i], values[i], 0);
 		}
 
-		try {
-			ServletRequestUtils.getRequiredFloatParameters(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredFloatParameters(request, "param2"));
 	}
 
 	@Test
@@ -256,31 +191,16 @@ public class ServletRequestUtilsTests {
 		assertTrue(ServletRequestUtils.getRequiredDoubleParameter(request, "param1") == 5.5);
 
 		assertTrue(ServletRequestUtils.getDoubleParameter(request, "param2", 6.5) == 6.5);
-		try {
-			ServletRequestUtils.getRequiredDoubleParameter(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredDoubleParameter(request, "param2"));
 
 		assertTrue(ServletRequestUtils.getDoubleParameter(request, "param3") == null);
 		assertTrue(ServletRequestUtils.getDoubleParameter(request, "param3", 6.5) == 6.5);
-		try {
-			ServletRequestUtils.getRequiredDoubleParameter(request, "param3");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredDoubleParameter(request, "param3"));
 
-		try {
-			ServletRequestUtils.getRequiredDoubleParameter(request, "paramEmpty");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredDoubleParameter(request, "paramEmpty"));
 	}
 
 	@Test
@@ -299,13 +219,8 @@ public class ServletRequestUtilsTests {
 			assertEquals(array[i], values[i], 0);
 		}
 
-		try {
-			ServletRequestUtils.getRequiredDoubleParameters(request, "param2");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredDoubleParameters(request, "param2"));
 	}
 
 	@Test
@@ -326,13 +241,8 @@ public class ServletRequestUtilsTests {
 
 		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param3") == null);
 		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param3", true));
-		try {
-			ServletRequestUtils.getRequiredBooleanParameter(request, "param3");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredBooleanParameter(request, "param3"));
 
 		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param4", false));
 		assertTrue(ServletRequestUtils.getRequiredBooleanParameter(request, "param4"));
@@ -379,13 +289,8 @@ public class ServletRequestUtilsTests {
 		assertEquals(null, ServletRequestUtils.getStringParameter(request, "param3"));
 		assertEquals("string", ServletRequestUtils.getStringParameter(request, "param3", "string"));
 		assertNull(ServletRequestUtils.getStringParameter(request, "param3", null));
-		try {
-			ServletRequestUtils.getRequiredStringParameter(request, "param3");
-			fail("Should have thrown ServletRequestBindingException");
-		}
-		catch (ServletRequestBindingException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
+				ServletRequestUtils.getRequiredStringParameter(request, "param3"));
 
 		assertEquals("", ServletRequestUtils.getStringParameter(request, "paramEmpty"));
 		assertEquals("", ServletRequestUtils.getRequiredStringParameter(request, "paramEmpty"));

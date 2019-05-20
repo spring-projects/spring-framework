@@ -44,11 +44,11 @@ import org.springframework.messaging.rsocket.RSocketRequester.ResponseSpec;
 import org.springframework.util.MimeTypeUtils;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link DefaultRSocketRequester}.
@@ -194,13 +194,9 @@ public class DefaultRSocketRequesterTests {
 
 	@Test
 	public void rejectFluxToMono() {
-		try {
-			this.requester.route("").data(Flux.just("a", "b")).retrieveMono(String.class);
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			assertEquals("No RSocket interaction model for Flux request to Mono response.", ex.getMessage());
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.requester.route("").data(Flux.just("a", "b")).retrieveMono(String.class))
+			.withMessage("No RSocket interaction model for Flux request to Mono response.");
 	}
 
 	private Payload toPayload(String value) {

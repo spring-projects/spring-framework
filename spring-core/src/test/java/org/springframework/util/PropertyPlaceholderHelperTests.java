@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -104,14 +105,15 @@ public class PropertyPlaceholderHelperTests {
 		assertEquals("foo=bar,bar=${bar}", this.helper.replacePlaceholders(text, props));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testUnresolvedPlaceholderAsError() {
 		String text = "foo=${foo},bar=${bar}";
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
 
 		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", null, false);
-		assertEquals("foo=bar,bar=${bar}", helper.replacePlaceholders(text, props));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				helper.replacePlaceholders(text, props));
 	}
 
 }

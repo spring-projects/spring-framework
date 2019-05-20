@@ -25,6 +25,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -34,14 +35,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class BeanNameAutoProxyCreatorInitTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testIgnoreAdvisorThatIsCurrentlyInCreation() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 		TestBean bean = (TestBean) ctx.getBean("bean");
 		bean.setName("foo");
 		assertEquals("foo", bean.getName());
-		bean.setName(null);  // should throw
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				bean.setName(null));
 	}
 
 }
