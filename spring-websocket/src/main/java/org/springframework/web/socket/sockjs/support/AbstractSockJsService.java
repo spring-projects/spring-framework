@@ -68,11 +68,12 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class AbstractSockJsService implements SockJsService, CorsConfigurationSource {
 
+	private static final String XFRAME_OPTIONS_HEADER = "X-Frame-Options";
+
 	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
 
-	private static final Random random = new Random();
 
-	private static final String XFRAME_OPTIONS_HEADER = "X-Frame-Options";
+	private static final Random random = new Random();
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -291,7 +292,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	/**
 	 * Return if automatic addition of CORS headers has been disabled.
 	 * @since 4.1.2
-	 * @see #setSuppressCors(boolean)
+	 * @see #setSuppressCors
 	 */
 	public boolean shouldSuppressCors() {
 		return this.suppressCors;

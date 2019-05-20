@@ -100,9 +100,9 @@ public class DeferredResult<T> {
 	 * @param timeoutValue timeout value in milliseconds (ignored if {@code null})
 	 * @param timeoutResult the result to use
 	 */
-	public DeferredResult(@Nullable Long timeoutValue, final Object timeoutResult) {
-		this.timeoutResult = () -> timeoutResult;
+	public DeferredResult(@Nullable Long timeoutValue, Object timeoutResult) {
 		this.timeoutValue = timeoutValue;
+		this.timeoutResult = () -> timeoutResult;
 	}
 
 	/**
@@ -113,8 +113,8 @@ public class DeferredResult<T> {
 	 * @since 5.1.1
 	 */
 	public DeferredResult(@Nullable Long timeoutValue, Supplier<?> timeoutResult) {
-		this.timeoutResult = timeoutResult;
 		this.timeoutValue = timeoutValue;
+		this.timeoutResult = timeoutResult;
 	}
 
 
