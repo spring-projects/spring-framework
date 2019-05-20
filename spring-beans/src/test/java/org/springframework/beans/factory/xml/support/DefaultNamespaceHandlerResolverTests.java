@@ -51,7 +51,7 @@ public class DefaultNamespaceHandlerResolverTests {
 	}
 
 	@Test
-	public void testNonExistentHandlerClass() throws Exception {
+	public void testNonExistentHandlerClass() {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
 		try {
 			new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
@@ -63,29 +63,18 @@ public class DefaultNamespaceHandlerResolverTests {
 	}
 
 	@Test
-	public void testResolveInvalidHandler() throws Exception {
-		String mappingPath = "org/springframework/beans/factory/xml/support/invalid.properties";
-		try {
-			new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
-			fail("Should not be able to map a class that doesn't implement NamespaceHandler");
-		}
-		catch (Throwable expected) {
-		}
-	}
-
-	@Test
-	public void testCtorWithNullClassLoaderArgument() throws Exception {
+	public void testCtorWithNullClassLoaderArgument() {
 		// simply must not bail...
 		new DefaultNamespaceHandlerResolver(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testCtorWithNullClassLoaderArgumentAndNullMappingLocationArgument() throws Exception {
+	public void testCtorWithNullClassLoaderArgumentAndNullMappingLocationArgument() {
 		new DefaultNamespaceHandlerResolver(null, null);
 	}
 
 	@Test
-	public void testCtorWithNonExistentMappingLocationArgument() throws Exception {
+	public void testCtorWithNonExistentMappingLocationArgument() {
 		// simply must not bail; we don't want non-existent resources to result in an Exception
 		new DefaultNamespaceHandlerResolver(null, "738trbc bobabloobop871");
 	}
