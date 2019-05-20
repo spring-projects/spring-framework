@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,12 +68,12 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class AbstractSockJsService implements SockJsService, CorsConfigurationSource {
 
-	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
-
-	private static final Random random = new Random();
-
 	private static final String XFRAME_OPTIONS_HEADER = "X-Frame-Options";
 
+	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
+
+
+	private static final Random random = new Random();
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -286,6 +286,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
+	 * Return if automatic addition of CORS headers has been disabled.
 	 * @since 4.1.2
 	 * @see #setSuppressCors(boolean)
 	 */
@@ -315,6 +316,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
+	 * Return configure allowed {@code Origin} header values.
 	 * @since 4.1.2
 	 * @see #setAllowedOrigins
 	 */
@@ -349,7 +351,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		String requestInfo = (logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : null);
 
 		try {
-			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
+			if (sockJsPath.isEmpty() || sockJsPath.equals("/")) {
 				if (requestInfo != null) {
 					logger.debug("Processing transport request: " + requestInfo);
 				}
@@ -571,21 +573,21 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		private static final String IFRAME_CONTENT =
 				"<!DOCTYPE html>\n" +
-		        "<html>\n" +
-		        "<head>\n" +
-		        "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" +
-		        "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
-		        "  <script>\n" +
-		        "    document.domain = document.domain;\n" +
-		        "    _sockjs_onload = function(){SockJS.bootstrap_iframe();};\n" +
-		        "  </script>\n" +
-		        "  <script src=\"%s\"></script>\n" +
-		        "</head>\n" +
-		        "<body>\n" +
-		        "  <h2>Don't panic!</h2>\n" +
-		        "  <p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>\n" +
-		        "</body>\n" +
-		        "</html>";
+				"<html>\n" +
+				"<head>\n" +
+				"  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" +
+				"  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
+				"  <script>\n" +
+				"    document.domain = document.domain;\n" +
+				"    _sockjs_onload = function(){SockJS.bootstrap_iframe();};\n" +
+				"  </script>\n" +
+				"  <script src=\"%s\"></script>\n" +
+				"</head>\n" +
+				"<body>\n" +
+				"  <h2>Don't panic!</h2>\n" +
+				"  <p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>\n" +
+				"</body>\n" +
+				"</html>";
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
