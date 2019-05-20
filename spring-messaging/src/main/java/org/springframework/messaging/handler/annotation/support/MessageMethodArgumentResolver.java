@@ -103,7 +103,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	 * return {@code String} if target type is {@code Object} and
 	 * {@code "Content-Type:text/**"}.
 	 * @param parameter the target method parameter
-	 * @param message the message bring processed
+	 * @param message the message being processed
 	 * @return the target type to use
 	 * @since 5.2
 	 */
