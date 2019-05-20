@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
-import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptor;
 
 /**
  * Utility methods for working with {@link ActiveProfiles @ActiveProfiles} and
@@ -70,25 +71,21 @@ abstract class ActiveProfilesUtils {
 	static String[] resolveActiveProfiles(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 
-		final List<String[]> profileArrays = new ArrayList<>();
-
-		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
-		AnnotationDescriptor<ActiveProfiles> descriptor =
-				MetaAnnotationUtils.findAnnotationDescriptor(testClass, annotationType);
+		List<String[]> profileArrays = new ArrayList<>();
+		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, ActiveProfiles.class);
 		if (descriptor == null && logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-					annotationType.getName(), testClass.getName()));
+					ActiveProfiles.class.getName(), testClass.getName()));
 		}
 
 		while (descriptor != null) {
 			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
-			Class<?> declaringClass = descriptor.getDeclaringClass();
 			ActiveProfiles annotation = descriptor.synthesizeAnnotation();
 
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s]",
-						annotation, declaringClass.getName()));
+						annotation, descriptor.getDeclaringClass().getName()));
 			}
 
 			Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
@@ -112,14 +109,13 @@ abstract class ActiveProfilesUtils {
 				profileArrays.add(profiles);
 			}
 
-			descriptor = (annotation.inheritProfiles() ? MetaAnnotationUtils.findAnnotationDescriptor(
-					rootDeclaringClass.getSuperclass(), annotationType) : null);
+			descriptor = (annotation.inheritProfiles() ? descriptor.next() : null);
 		}
 
 		// Reverse the list so that we can traverse "down" the hierarchy.
 		Collections.reverse(profileArrays);
 
-		final Set<String> activeProfiles = new LinkedHashSet<>();
+		Set<String> activeProfiles = new LinkedHashSet<>();
 		for (String[] profiles : profileArrays) {
 			for (String profile : profiles) {
 				if (StringUtils.hasText(profile)) {

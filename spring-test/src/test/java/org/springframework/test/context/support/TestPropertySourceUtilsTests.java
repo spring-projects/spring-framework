@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
@@ -80,6 +81,7 @@ class TestPropertySourceUtilsTests {
 	}
 
 	@Test
+	@Disabled("Validation for repeated @TestPropertySource annotations has been removed")
 	void repeatedTestPropertySourcesWithConflictingInheritLocationsFlags() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> buildMergedTestPropertySources(RepeatedPropertySourcesWithConflictingInheritLocationsFlags.class))
@@ -89,6 +91,7 @@ class TestPropertySourceUtilsTests {
 	}
 
 	@Test
+	@Disabled("Validation for repeated @TestPropertySource annotations has been removed")
 	void repeatedTestPropertySourcesWithConflictingInheritPropertiesFlags() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> buildMergedTestPropertySources(RepeatedPropertySourcesWithConflictingInheritPropertiesFlags.class))

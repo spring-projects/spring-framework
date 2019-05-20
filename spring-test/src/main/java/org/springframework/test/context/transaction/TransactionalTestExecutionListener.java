@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -148,7 +149,27 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
 	// Do not require @Transactional test methods to be public.
-	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource(false);
+	@SuppressWarnings("serial")
+	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource(false) {
+
+		@Override
+		protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
+			// @Transactional present in inheritance hierarchy?
+			TransactionAttribute result = super.findTransactionAttribute(clazz);
+			if (result != null) {
+				return result;
+			}
+			// @Transactional present in enclosing class hierarchy?
+			return findTransactionAttributeInEnclosingClassHierarchy(clazz);
+		}
+
+		private TransactionAttribute findTransactionAttributeInEnclosingClassHierarchy(Class<?> clazz) {
+			if (MetaAnnotationUtils.searchEnclosingClass(clazz)) {
+				return findTransactionAttribute(clazz.getEnclosingClass());
+			}
+			return null;
+		}
+	};
 
 
 	/**
@@ -376,7 +397,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	protected final boolean isDefaultRollback(TestContext testContext) throws Exception {
 		Class<?> testClass = testContext.getTestClass();
-		Rollback rollback = AnnotatedElementUtils.findMergedAnnotation(testClass, Rollback.class);
+		Rollback rollback = MetaAnnotationUtils.findMergedAnnotation(testClass, Rollback.class);
 		boolean rollbackPresent = (rollback != null);
 
 		if (rollbackPresent) {

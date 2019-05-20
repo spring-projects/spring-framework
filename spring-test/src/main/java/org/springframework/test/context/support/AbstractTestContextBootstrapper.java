@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.BootstrapContext;
@@ -139,13 +138,11 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				}
 
 				boolean inheritListeners = testExecutionListeners.inheritListeners();
-				AnnotationDescriptor<TestExecutionListeners> superDescriptor =
-						MetaAnnotationUtils.findAnnotationDescriptor(
-								descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
+				AnnotationDescriptor<TestExecutionListeners> parentDescriptor = descriptor.next();
 
 				// If there are no listeners to inherit, we might need to merge the
 				// locally declared listeners with the defaults.
-				if ((!inheritListeners || superDescriptor == null) &&
+				if ((!inheritListeners || parentDescriptor == null) &&
 						testExecutionListeners.mergeMode() == MergeMode.MERGE_WITH_DEFAULTS) {
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("Merging default listeners with listeners configured via " +
@@ -157,7 +154,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 				classesList.addAll(0, Arrays.asList(testExecutionListeners.listeners()));
 
-				descriptor = (inheritListeners ? superDescriptor : null);
+				descriptor = (inheritListeners ? parentDescriptor : null);
 			}
 		}
 
@@ -265,7 +262,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			return buildDefaultMergedContextConfiguration(testClass, cacheAwareContextLoaderDelegate);
 		}
 
-		if (AnnotationUtils.findAnnotation(testClass, ContextHierarchy.class) != null) {
+		if (MetaAnnotationUtils.findAnnotationDescriptor(testClass, ContextHierarchy.class) != null) {
 			Map<String, List<ContextConfigurationAttributes>> hierarchyMap =
 					ContextLoaderUtils.buildContextHierarchyMap(testClass);
 			MergedContextConfiguration parentConfig = null;

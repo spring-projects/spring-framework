@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@ package org.springframework.test.context.support;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +45,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
+import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -71,40 +75,20 @@ public abstract class TestPropertySourceUtils {
 
 
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
-		MergedAnnotations mergedAnnotations = MergedAnnotations.from(testClass, SearchStrategy.TYPE_HIERARCHY);
-		return (mergedAnnotations.isPresent(TestPropertySource.class) ? mergeTestPropertySources(mergedAnnotations) :
-				MergedTestPropertySources.empty());
+		return mergeTestPropertySources(findRepeatableAnnotations(testClass, TestPropertySource.class));
 	}
 
-	private static MergedTestPropertySources mergeTestPropertySources(MergedAnnotations mergedAnnotations) {
-		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(mergedAnnotations);
+	private static MergedTestPropertySources mergeTestPropertySources(
+			List<MergedAnnotation<TestPropertySource>> mergedAnnotations) {
+
+		if (mergedAnnotations.isEmpty()) {
+			return MergedTestPropertySources.empty();
+		}
+
+		List<TestPropertySourceAttributes> attributesList = mergedAnnotations.stream()
+				.map(TestPropertySourceAttributes::new)
+				.collect(Collectors.toList());
 		return new MergedTestPropertySources(mergeLocations(attributesList), mergeProperties(attributesList));
-	}
-
-	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(
-			MergedAnnotations mergedAnnotations) {
-
-		List<TestPropertySourceAttributes> attributesList = new ArrayList<>();
-		mergedAnnotations.stream(TestPropertySource.class)
-				.forEach(annotation -> addOrMergeTestPropertySourceAttributes(attributesList, annotation));
-		return attributesList;
-	}
-
-	private static void addOrMergeTestPropertySourceAttributes(List<TestPropertySourceAttributes> attributesList,
-			MergedAnnotation<TestPropertySource> current) {
-
-		if (attributesList.isEmpty()) {
-			attributesList.add(new TestPropertySourceAttributes(current));
-		}
-		else {
-			TestPropertySourceAttributes previous = attributesList.get(attributesList.size() - 1);
-			if (previous.canMergeWith(current)) {
-				previous.mergeWith(current);
-			}
-			else {
-				attributesList.add(new TestPropertySourceAttributes(current));
-			}
-		}
 	}
 
 	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {
@@ -290,6 +274,55 @@ public abstract class TestPropertySourceUtils {
 		}
 
 		return map;
+	}
+
+	private static <T extends Annotation> List<MergedAnnotation<T>> findRepeatableAnnotations(
+			Class<?> clazz, Class<T> annotationType) {
+
+		List<List<MergedAnnotation<T>>> listOfLists = new ArrayList<>();
+		findRepeatableAnnotations(clazz, annotationType, listOfLists, new int[] {0});
+		return listOfLists.stream().flatMap(List::stream).collect(Collectors.toList());
+	}
+
+	private static <T extends Annotation> void findRepeatableAnnotations(
+			Class<?> clazz, Class<T> annotationType, List<List<MergedAnnotation<T>>> listOfLists, int[] aggregateIndex) {
+
+		MergedAnnotations.from(clazz, SearchStrategy.DIRECT)
+			.stream(annotationType)
+			.sorted(highMetaDistancesFirst())
+			.forEach(annotation -> {
+				List<MergedAnnotation<T>> current = null;
+				if (listOfLists.size() < aggregateIndex[0] + 1) {
+					current = new ArrayList<>();
+					listOfLists.add(current);
+				}
+				else {
+					current = listOfLists.get(aggregateIndex[0]);
+				}
+				current.add(0, annotation);
+			});
+
+		aggregateIndex[0]++;
+
+		// Declared on an interface?
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			findRepeatableAnnotations(ifc, annotationType, listOfLists, aggregateIndex);
+		}
+
+		// Declared on a superclass?
+		Class<?> superclass = clazz.getSuperclass();
+		if (superclass != null & superclass != Object.class) {
+			findRepeatableAnnotations(superclass, annotationType, listOfLists, aggregateIndex);
+		}
+
+		// Declared on an enclosing class of an inner class?
+		if (MetaAnnotationUtils.searchEnclosingClass(clazz)) {
+			findRepeatableAnnotations(clazz.getEnclosingClass(), annotationType, listOfLists, aggregateIndex);
+		}
+	}
+
+	private static <A extends Annotation> Comparator<MergedAnnotation<A>> highMetaDistancesFirst() {
+		return Comparator.<MergedAnnotation<A>> comparingInt(MergedAnnotation::getDistance).reversed();
 	}
 
 }

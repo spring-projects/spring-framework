@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.test.context.support;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.log.LogMessage;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
@@ -52,11 +51,7 @@ class TestPropertySourceAttributes {
 	private static final Log logger = LogFactory.getLog(TestPropertySourceAttributes.class);
 
 
-	private final int aggregateIndex;
-
 	private final Class<?> declaringClass;
-
-	private final MergedAnnotation<?> rootAnnotation;
 
 	private final List<String> locations = new ArrayList<>();
 
@@ -68,94 +63,22 @@ class TestPropertySourceAttributes {
 
 
 	TestPropertySourceAttributes(MergedAnnotation<TestPropertySource> annotation) {
-		this.aggregateIndex = annotation.getAggregateIndex();
 		this.declaringClass = declaringClass(annotation);
-		this.rootAnnotation = annotation.getRoot();
 		this.inheritLocations = annotation.getBoolean("inheritLocations");
 		this.inheritProperties = annotation.getBoolean("inheritProperties");
 		mergePropertiesAndLocations(annotation);
 	}
 
-
-	/**
-	 * Determine if the annotation represented by this
-	 * {@code TestPropertySourceAttributes} instance can be merged with the
-	 * supplied {@code annotation}.
-	 * <p>This method effectively checks that two annotations are declared at
-	 * the same level in the type hierarchy (i.e., have the same
-	 * {@linkplain MergedAnnotation#getAggregateIndex() aggregate index}).
-	 * @since 5.2
-	 * @see #mergeWith(MergedAnnotation)
-	 */
-	boolean canMergeWith(MergedAnnotation<TestPropertySource> annotation) {
-		return annotation.getAggregateIndex() == this.aggregateIndex;
-	}
-
-	/**
-	 * Merge this {@code TestPropertySourceAttributes} instance with the
-	 * supplied {@code annotation}, asserting that the two sets of test property
-	 * source attributes have identical values for the
-	 * {@link TestPropertySource#inheritLocations} and
-	 * {@link TestPropertySource#inheritProperties} flags and that the two
-	 * underlying annotations were declared on the same class.
-	 * <p>This method should only be invoked if {@link #canMergeWith(MergedAnnotation)}
-	 * returns {@code true}.
-	 * @since 5.2
-	 * @see #canMergeWith(MergedAnnotation)
-	 */
-	void mergeWith(MergedAnnotation<TestPropertySource> annotation) {
-		Class<?> source = declaringClass(annotation);
-		Assert.state(source == this.declaringClass,
-				() -> "Detected @TestPropertySource declarations within an aggregate index "
-						+ "with different sources: " + this.declaringClass.getName() + " and "
-						+ source.getName());
-		logger.trace(LogMessage.format("Retrieved %s for declaring class [%s].",
-				annotation, this.declaringClass.getName()));
-		assertSameBooleanAttribute(this.inheritLocations, annotation, "inheritLocations");
-		assertSameBooleanAttribute(this.inheritProperties, annotation, "inheritProperties");
-		mergePropertiesAndLocations(annotation);
-	}
-
-	private void assertSameBooleanAttribute(boolean expected, MergedAnnotation<TestPropertySource> annotation,
-			String attribute) {
-
-		Assert.isTrue(expected == annotation.getBoolean(attribute), () -> String.format(
-				"@%s on %s and @%s on %s must declare the same value for '%s' as other " +
-				"directly present or meta-present @TestPropertySource annotations",
-			this.rootAnnotation.getType().getSimpleName(), this.declaringClass.getSimpleName(),
-			annotation.getRoot().getType().getSimpleName(), declaringClass(annotation).getSimpleName(),
-			attribute));
-	}
-
 	private void mergePropertiesAndLocations(MergedAnnotation<TestPropertySource> annotation) {
 		String[] locations = annotation.getStringArray("locations");
 		String[] properties = annotation.getStringArray("properties");
-		// If the meta-distance is positive, that means the annotation is
-		// meta-present and should therefore have lower priority than directly
-		// present annotations (i.e., it should be prepended to the list instead
-		// of appended). This follows the rule of last-one-wins for overriding
-		// properties.
-		boolean prepend = annotation.getDistance() > 0;
 		if (ObjectUtils.isEmpty(locations) && ObjectUtils.isEmpty(properties)) {
-			addAll(prepend, this.locations, detectDefaultPropertiesFile(annotation));
+			Collections.addAll(this.locations, detectDefaultPropertiesFile(annotation));
 		}
 		else {
-			addAll(prepend, this.locations, locations);
-			addAll(prepend, this.properties, properties);
+			Collections.addAll(this.locations, locations);
+			Collections.addAll(this.properties, properties);
 		}
-	}
-
-	/**
-	 * Add all of the supplied elements to the provided list, honoring the
-	 * {@code prepend} flag.
-	 * <p>If the {@code prepend} flag is {@code false}, the elements will appended
-	 * to the list.
-	 * @param prepend whether the elements should be prepended to the list
-	 * @param list the list to which to add the elements
-	 * @param elements the elements to add to the list
-	 */
-	private void addAll(boolean prepend, List<String> list, String... elements) {
-		list.addAll((prepend ? 0 : list.size()), Arrays.asList(elements));
 	}
 
 	private String detectDefaultPropertiesFile(MergedAnnotation<TestPropertySource> annotation) {

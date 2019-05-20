@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.junit.jupiter.nested.NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTests.TopLevelConfig;
+import org.springframework.test.context.junit.jupiter.nested.ConstructorInjectionNestedTests.TopLevelConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,15 +43,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sam Brannen
  * @since 5.0.5
- * @see NestedTestsWithSpringAndJUnitJupiterTests
+ * @see ContextConfigurationNestedTests
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
  */
 @SpringJUnitConfig(TopLevelConfig.class)
-class NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTests {
+class ConstructorInjectionNestedTests {
 
 	final String foo;
 
-	NestedTestsWithConstructorInjectionWithSpringAndJUnitJupiterTests(TestInfo testInfo, @Autowired String foo) {
+	ConstructorInjectionNestedTests(TestInfo testInfo, @Autowired String foo) {
 		this.foo = foo;
 	}
 
