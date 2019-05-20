@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 public class ResourceArrayPropertyEditorTests {
 
 	@Test
-	public void testVanillaResource() throws Exception {
+	public void testVanillaResource() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath:org/springframework/core/io/support/ResourceArrayPropertyEditor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
@@ -41,7 +41,7 @@ public class ResourceArrayPropertyEditorTests {
 	}
 
 	@Test
-	public void testPatternResource() throws Exception {
+	public void testPatternResource() {
 		// N.B. this will sometimes fail if you use classpath: instead of classpath*:.
 		// The result depends on the classpath - if test-classes are segregated from classes
 		// and they come first on the classpath (like in Maven) then it breaks, if classes
@@ -67,7 +67,7 @@ public class ResourceArrayPropertyEditorTests {
 		}
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testStrictSystemPropertyReplacement() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor(
 				new PathMatchingResourcePatternResolver(), new StandardEnvironment(),
@@ -75,8 +75,6 @@ public class ResourceArrayPropertyEditorTests {
 		System.setProperty("test.prop", "foo");
 		try {
 			editor.setAsText("${test.prop}-${bar}");
-			Resource[] resources = (Resource[]) editor.getValue();
-			assertEquals("foo-${bar}", resources[0].getFilename());
 		}
 		finally {
 			System.getProperties().remove("test.prop");

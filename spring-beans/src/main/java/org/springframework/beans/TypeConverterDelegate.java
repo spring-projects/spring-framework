@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,7 +255,7 @@ class TypeConverterDelegate {
 						}
 					}
 					String trimmedValue = ((String) convertedValue).trim();
-					if (requiredType.isEnum() && "".equals(trimmedValue)) {
+					if (requiredType.isEnum() && trimmedValue.isEmpty()) {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}
@@ -569,8 +569,7 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		int i = 0;
-		for (; it.hasNext(); i++) {
+		for (int i = 0; it.hasNext(); i++) {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element,
