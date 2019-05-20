@@ -601,8 +601,8 @@
 		<xsd:attribute name="stale-if-error" type="xsd:int" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Adds a "s-maxage" directive in the Cache-Control header.
-	This directive has the same meaning as the "max-age" directive, except it only applies to shared caches.
+	Adds a "stale-if-error" directive in the Cache-Control header.
+	When an error is encountered, a cached stale response may be used for the given number of seconds.
 					]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
