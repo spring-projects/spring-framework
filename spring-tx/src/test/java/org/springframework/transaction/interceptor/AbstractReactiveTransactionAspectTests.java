@@ -48,18 +48,18 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  */
 public abstract class AbstractReactiveTransactionAspectTests {
 
-	protected Method exceptionalMethod;
-
 	protected Method getNameMethod;
 
 	protected Method setNameMethod;
 
+	protected Method exceptionalMethod;
+
 
 	@Before
 	public void setup() throws Exception {
-		exceptionalMethod = TestBean.class.getMethod("exceptional", Throwable.class);
 		getNameMethod = TestBean.class.getMethod("getName");
 		setNameMethod = TestBean.class.getMethod("setName", String.class);
+		exceptionalMethod = TestBean.class.getMethod("exceptional", Throwable.class);
 	}
 
 
@@ -382,11 +382,11 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 	public interface TestBean {
 
-		Mono<Void> exceptional(Throwable t);
-
 		Mono<String> getName();
 
 		Publisher<Void> setName(String name);
+
+		Mono<Void> exceptional(Throwable t);
 	}
 
 
@@ -400,7 +400,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		}
 
 		@Override
-		public Mono<Void> setName(String name) {
+		public Publisher<Void> setName(String name) {
 			return Mono.fromRunnable(() -> this.name = name);
 		}
 

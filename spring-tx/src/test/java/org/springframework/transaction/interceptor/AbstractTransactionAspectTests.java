@@ -48,31 +48,31 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
- * Mock object based tests for transaction aspects.
- * True unit test in that it tests how the transaction aspect uses
- * the PlatformTransactionManager helper, rather than indirectly
- * testing the helper implementation.
+ * Mock object based tests for transaction aspects. A true unit test in that it
+ * tests how the transaction aspect uses the PlatformTransactionManager helper,
+ * rather than indirectly testing the helper implementation.
  *
- * This is a superclass to allow testing both the AOP Alliance MethodInterceptor
+ * <p>This is a superclass to allow testing both the AOP Alliance MethodInterceptor
  * and the AspectJ aspect.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 16.03.2003
  */
 public abstract class AbstractTransactionAspectTests {
-
-	protected Method exceptionalMethod;
 
 	protected Method getNameMethod;
 
 	protected Method setNameMethod;
 
+	protected Method exceptionalMethod;
+
 
 	@Before
 	public void setup() throws Exception {
-		exceptionalMethod = ITestBean.class.getMethod("exceptional", Throwable.class);
 		getNameMethod = ITestBean.class.getMethod("getName");
 		setNameMethod = ITestBean.class.getMethod("setName", String.class);
+		exceptionalMethod = ITestBean.class.getMethod("exceptional", Throwable.class);
 	}
 
 
