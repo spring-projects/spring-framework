@@ -118,6 +118,14 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
+	public void pathNoLeadingSlash() {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/path");
+		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());
+		RequestPredicate predicate = RequestPredicates.path("p*");
+		assertTrue(predicate.test(request));
+	}
+
+	@Test
 	public void pathEncoded() {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/foo%20bar");
 		ServerRequest request = new DefaultServerRequest(servletRequest, emptyList());

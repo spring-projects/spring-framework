@@ -110,6 +110,14 @@ public class RequestPredicatesTests {
 	}
 
 	@Test
+	public void pathNoLeadingSlash() {
+		URI uri = URI.create("http://localhost/path");
+		RequestPredicate predicate = RequestPredicates.path("p*");
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+	}
+
+	@Test
 	public void pathEncoded() {
 		URI uri = URI.create("http://localhost/foo%20bar");
 		RequestPredicate predicate = RequestPredicates.path("/foo bar");
