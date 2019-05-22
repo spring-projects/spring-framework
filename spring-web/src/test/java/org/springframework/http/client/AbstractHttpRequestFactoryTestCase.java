@@ -132,6 +132,7 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 	}
 
 	@Test
+	@SuppressWarnings("try")
 	public void headersAfterExecute() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/status/ok"), HttpMethod.POST);
 
