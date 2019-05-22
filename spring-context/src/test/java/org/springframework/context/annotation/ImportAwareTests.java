@@ -320,32 +320,6 @@ public class ImportAwareTests {
 	}
 
 
-	@Import(LiteConfiguration.class)
-	@Target(ElementType.TYPE)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface EnableLiteConfiguration {
-
-		String value() default "";
-	}
-
-
-	@Configuration(proxyBeanMethods = false)
-	public static class LiteConfiguration implements ImportAware {
-
-		private AnnotationMetadata importMetadata;
-
-		@Override
-		public void setImportMetadata(AnnotationMetadata importMetadata) {
-			this.importMetadata = importMetadata;
-		}
-
-		@Bean
-		public MetadataHolder holder() {
-			return new MetadataHolder(this.importMetadata);
-		}
-	}
-
-
 	public static class MetadataHolder {
 
 		private final AnnotationMetadata importMetadata;
