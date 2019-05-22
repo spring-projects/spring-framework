@@ -39,8 +39,10 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -60,6 +62,21 @@ public class HttpHeadersTests {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
+
+	@Test
+	public void getOrEmpty() {
+		String key = "FOO";
+
+		assertThat(headers.get(key), is(nullValue()));
+		assertThat(headers.getOrEmpty(key), is(empty()));
+
+		headers.add(key, "bar");
+		assertThat(headers.getOrEmpty(key), is(Arrays.asList("bar")));
+
+		headers.remove(key);
+		assertThat(headers.get(key), is(nullValue()));
+		assertThat(headers.getOrEmpty(key), is(empty()));
+	}
 
 	@Test
 	public void getFirst() {

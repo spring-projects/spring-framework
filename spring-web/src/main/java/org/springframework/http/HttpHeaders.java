@@ -71,6 +71,7 @@ import org.springframework.util.StringUtils;
  * @author Brian Clozel
  * @author Juergen Hoeller
  * @author Josh Long
+ * @author Sam Brannen
  * @since 3.0
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
@@ -436,6 +437,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		this.headers = headers;
 	}
 
+
+	/**
+	 * Get the list of header values for the given header name, if any.
+	 * @param headerName the header name
+	 * @return the list of header values, or an empty list
+	 * @since 5.2
+	 */
+	public List<String> getOrEmpty(Object headerName) {
+		List<String> values = get(headerName);
+		return (values != null ? values : Collections.emptyList());
+	}
 
 	/**
 	 * Set the list of acceptable {@linkplain MediaType media types},
