@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -679,6 +679,16 @@ public class AntPathMatcherTests {
 		pathMatcher.setPathSeparator(".");
 		assertEquals("Extension mapping should be disabled with \".\" as path separator",
 				"/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));
+	}
+
+	@Test // gh-22959
+	public void isPattern() {
+		assertTrue(pathMatcher.isPattern("/test/*"));
+		assertTrue(pathMatcher.isPattern("/test/**/name"));
+		assertTrue(pathMatcher.isPattern("/test?"));
+		assertTrue(pathMatcher.isPattern("/test/{name}"));
+		assertFalse(pathMatcher.isPattern("/test/name"));
+		assertFalse(pathMatcher.isPattern("/test/foo{bar"));
 	}
 
 }
