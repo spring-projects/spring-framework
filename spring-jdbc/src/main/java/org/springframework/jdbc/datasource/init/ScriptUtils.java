@@ -234,7 +234,7 @@ public abstract class ScriptUtils {
 								"Missing block comment end delimiter: " + blockCommentEndDelimiter, resource);
 					}
 				}
-				else if (c == ' ' || c == '\n' || c == '\t') {
+				else if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
 					// Avoid multiple adjacent whitespace characters
 					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
 						c = ' ';
