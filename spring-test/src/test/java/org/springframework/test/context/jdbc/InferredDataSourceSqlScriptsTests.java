@@ -34,9 +34,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * Integration tests for {@link Sql @Sql} that verify support for inferring
@@ -61,14 +61,14 @@ public class InferredDataSourceSqlScriptsTests {
 	@Test
 	@Sql(scripts = "data-add-dogbert.sql", config = @SqlConfig(transactionManager = "txMgr1"))
 	public void database1() {
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertUsers(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
 	@Sql(scripts = "data-add-catbert.sql", config = @SqlConfig(transactionManager = "txMgr2"))
 	public void database2() {
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}
 

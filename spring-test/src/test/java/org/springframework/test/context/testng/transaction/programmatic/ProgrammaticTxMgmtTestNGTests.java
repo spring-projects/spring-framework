@@ -39,10 +39,10 @@ import org.springframework.test.context.transaction.programmatic.ProgrammaticTxM
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * This class is a copy of the JUnit-based {@link ProgrammaticTxMgmtTests} class
@@ -136,7 +136,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 
 	@Test
 	public void commitTxAndStartNewTx() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
 		deleteFromTables("user");
@@ -146,7 +146,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 		TestTransaction.flagForCommit();
 		assertThat(TestTransaction.isFlaggedForRollback()).isFalse();
 		TestTransaction.end();
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertThat(TestTransaction.isActive()).isFalse();
 		assertUsers();
 
@@ -154,13 +154,13 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 		assertUsers("Dogbert");
 
 		TestTransaction.start();
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(TestTransaction.isActive()).isTrue();
 	}
 
 	@Test
 	public void commitTxButDoNotStartNewTx() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
 		deleteFromTables("user");
@@ -171,7 +171,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 		assertThat(TestTransaction.isFlaggedForRollback()).isFalse();
 		TestTransaction.end();
 		assertThat(TestTransaction.isActive()).isFalse();
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertUsers();
 
 		executeSqlScript("classpath:/org/springframework/test/context/jdbc/data-add-dogbert.sql", false);
@@ -180,7 +180,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 
 	@Test
 	public void rollbackTxAndStartNewTx() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
 		deleteFromTables("user");
@@ -190,12 +190,12 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 		assertThat(TestTransaction.isFlaggedForRollback()).isTrue();
 		TestTransaction.end();
 		assertThat(TestTransaction.isActive()).isFalse();
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertUsers("Dilbert");
 
 		// Start new transaction with default rollback semantics
 		TestTransaction.start();
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(TestTransaction.isFlaggedForRollback()).isTrue();
 		assertThat(TestTransaction.isActive()).isTrue();
 
@@ -205,7 +205,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 
 	@Test
 	public void rollbackTxButDoNotStartNewTx() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
 		deleteFromTables("user");
@@ -215,14 +215,14 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 		assertThat(TestTransaction.isFlaggedForRollback()).isTrue();
 		TestTransaction.end();
 		assertThat(TestTransaction.isActive()).isFalse();
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertUsers("Dilbert");
 	}
 
 	@Test
 	@Commit
 	public void rollbackTxAndStartNewTxWithDefaultCommitSemantics() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(TestTransaction.isActive()).isTrue();
 		assertUsers("Dilbert");
 		deleteFromTables("user");
@@ -233,12 +233,12 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 		assertThat(TestTransaction.isFlaggedForRollback()).isTrue();
 		TestTransaction.end();
 		assertThat(TestTransaction.isActive()).isFalse();
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertUsers("Dilbert");
 
 		// Start new transaction with default commit semantics
 		TestTransaction.start();
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(TestTransaction.isFlaggedForRollback()).isFalse();
 		assertThat(TestTransaction.isActive()).isTrue();
 

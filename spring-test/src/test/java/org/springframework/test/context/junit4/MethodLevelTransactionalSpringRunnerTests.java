@@ -32,9 +32,9 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * JUnit 4 based integration test which verifies support of Spring's
@@ -85,7 +85,7 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 	@Test
 	@Transactional("transactionManager2")
 	public void modifyTestDataWithinTransaction() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(deletePerson(jdbcTemplate, BOB)).as("Deleting bob").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, JANE)).as("Adding jane").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, SUE)).as("Adding sue").isEqualTo(1);
@@ -94,7 +94,7 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 
 	@Test
 	public void modifyTestDataWithoutTransaction() {
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertThat(addPerson(jdbcTemplate, LUKE)).as("Adding luke").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, LEIA)).as("Adding leia").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, YODA)).as("Adding yoda").isEqualTo(1);

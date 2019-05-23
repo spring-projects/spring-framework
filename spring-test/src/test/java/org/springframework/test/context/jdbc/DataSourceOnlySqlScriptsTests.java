@@ -32,9 +32,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * Integration tests for {@link Sql @Sql} support with only a {@link DataSource}
@@ -61,7 +61,7 @@ public class DataSourceOnlySqlScriptsTests {
 	@Test
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test01_classLevelScripts() {
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertNumUsers(1);
 	}
 
@@ -69,7 +69,7 @@ public class DataSourceOnlySqlScriptsTests {
 	@Sql({ "drop-schema.sql", "schema.sql", "data.sql", "data-add-dogbert.sql" })
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
-		assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertNumUsers(2);
 	}
 

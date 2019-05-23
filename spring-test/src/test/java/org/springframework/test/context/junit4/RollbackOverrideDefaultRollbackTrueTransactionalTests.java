@@ -25,9 +25,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
  * Extension of {@link DefaultRollbackTrueRollbackAnnotationTransactionalTests}
@@ -61,7 +61,7 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalTests
 	@Rollback(false)
 	@Override
 	public void modifyTestDataWithinTransaction() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertThat(addPerson(jdbcTemplate, JANE)).as("Adding jane").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, SUE)).as("Adding sue").isEqualTo(1);
 		assertThat(countRowsInPersonTable(jdbcTemplate)).as("Verifying the number of rows in the person table within a transaction.").isEqualTo(3);

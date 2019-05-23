@@ -31,7 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
-import org.springframework.test.transaction.TransactionTestUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -81,7 +81,7 @@ public class PrimaryDataSourceTests {
 	@Test
 	@Sql("data.sql")
 	public void dataSourceTest() {
-		TransactionTestUtils.assertInTransaction(false);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 		assertThat(JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user")).as("Number of rows in the 'user' table.").isEqualTo(1);
 	}
 

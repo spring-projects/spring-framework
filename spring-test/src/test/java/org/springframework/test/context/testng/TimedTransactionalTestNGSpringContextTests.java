@@ -19,8 +19,9 @@ package org.springframework.test.context.testng;
 import org.testng.annotations.Test;
 
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Timed integration tests for
@@ -36,13 +37,13 @@ public class TimedTransactionalTestNGSpringContextTests extends AbstractTransact
 
 	@Test
 	public void testWithoutTimeout() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 	}
 
 	// TODO Enable TestNG test with timeout once we have a solution.
 	@Test(timeOut = 10000, enabled = false)
 	public void testWithTimeout() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 	}
 
 }

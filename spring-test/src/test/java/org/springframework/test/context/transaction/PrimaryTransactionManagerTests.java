@@ -34,10 +34,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
-import org.springframework.test.transaction.TransactionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -76,7 +76,7 @@ public final class PrimaryTransactionManagerTests {
 	@Test
 	@Transactional
 	public void transactionalTest() {
-		TransactionTestUtils.assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 
 		ClassPathResource resource = new ClassPathResource("/org/springframework/test/context/jdbc/data.sql");
 		new ResourceDatabasePopulator(resource).execute(jdbcTemplate.getDataSource());

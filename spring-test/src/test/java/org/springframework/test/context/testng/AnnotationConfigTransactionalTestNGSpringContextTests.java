@@ -37,9 +37,9 @@ import org.springframework.tests.sample.beans.Pet;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -129,15 +129,15 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	@BeforeMethod
 	void setUp() throws Exception {
 		numSetUpCalls++;
-		if (inTransaction()) {
+		if (TransactionSynchronizationManager.isActualTransactionActive()) {
 			numSetUpCallsInTransaction++;
 		}
-		assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
+		assertNumRowsInPersonTable((TransactionSynchronizationManager.isActualTransactionActive() ? 2 : 1), "before a test method");
 	}
 
 	@Test
 	void modifyTestDataWithinTransaction() {
-		assertInTransaction(true);
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
 		assertNumRowsInPersonTable(4, "in modifyTestDataWithinTransaction()");
@@ -146,10 +146,10 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	@AfterMethod
 	void tearDown() throws Exception {
 		numTearDownCalls++;
-		if (inTransaction()) {
+		if (TransactionSynchronizationManager.isActualTransactionActive()) {
 			numTearDownCallsInTransaction++;
 		}
-		assertNumRowsInPersonTable((inTransaction() ? 4 : 1), "after a test method");
+		assertNumRowsInPersonTable((TransactionSynchronizationManager.isActualTransactionActive() ? 4 : 1), "after a test method");
 	}
 
 	@AfterTransaction
