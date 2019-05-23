@@ -40,10 +40,9 @@ import org.springframework.remoting.RemoteTimeoutException;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -122,7 +121,7 @@ public class JmsInvokerTests {
 				ResponseStoringProducer mockProducer = new ResponseStoringProducer();
 				given(mockExporterSession.createProducer(requestMessage.getJMSReplyTo())).willReturn(mockProducer);
 				exporter.onMessage(requestMessage, mockExporterSession);
-				assertTrue(mockProducer.closed);
+				assertThat(mockProducer.closed).isTrue();
 				return mockProducer.response;
 			}
 		};
@@ -139,12 +138,12 @@ public class JmsInvokerTests {
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
 
-		assertEquals("myname", proxy.getName());
-		assertEquals(99, proxy.getAge());
+		assertThat(proxy.getName()).isEqualTo("myname");
+		assertThat(proxy.getAge()).isEqualTo(99);
 		proxy.setAge(50);
-		assertEquals(50, proxy.getAge());
+		assertThat(proxy.getAge()).isEqualTo(50);
 		proxy.setStringArray(new String[] {"str1", "str2"});
-		assertTrue(Arrays.equals(new String[] {"str1", "str2"}, proxy.getStringArray()));
+		assertThat(Arrays.equals(new String[] {"str1", "str2"}, proxy.getStringArray())).isTrue();
 		assertThatIllegalStateException().isThrownBy(() ->
 			proxy.exceptional(new IllegalStateException()));
 		assertThatExceptionOfType(IllegalAccessException.class).isThrownBy(() ->

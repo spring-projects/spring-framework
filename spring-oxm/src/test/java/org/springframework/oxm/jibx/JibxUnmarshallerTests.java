@@ -24,8 +24,7 @@ import org.junit.Test;
 
 import org.springframework.oxm.AbstractUnmarshallerTests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -61,16 +60,16 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshal
 	@Override
 	protected void testFlights(Object o) {
 		Flights flights = (Flights) o;
-		assertNotNull("Flights is null", flights);
-		assertEquals("Invalid amount of flight elements", 1, flights.sizeFlightList());
+		assertThat(flights).as("Flights is null").isNotNull();
+		assertThat(flights.sizeFlightList()).as("Invalid amount of flight elements").isEqualTo(1);
 		testFlight(flights.getFlight(0));
 	}
 
 	@Override
 	protected void testFlight(Object o) {
 		FlightType flight = (FlightType) o;
-		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", 42L, flight.getNumber());
+		assertThat(flight).as("Flight is null").isNotNull();
+		assertThat(flight.getNumber()).as("Number is invalid").isEqualTo(42L);
 	}
 
 
@@ -90,7 +89,7 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshal
 		testFlights(flights);
 
 		FlightType flight = ((Flights)flights).getFlight(0);
-		assertEquals("Airline is invalid", "Air Libert\u00e9", flight.getAirline());
+		assertThat(flight.getAirline()).as("Airline is invalid").isEqualTo("Air Libert\u00e9");
 	}
 
 }

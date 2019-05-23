@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.springframework.tests.mock.jndi.SimpleNamingContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link JndiPropertySource}.
@@ -98,7 +97,7 @@ public class JndiPropertySourceTests {
 		JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate() {
 			@Override
 			public Object lookup(String jndiName) throws NamingException {
-				assertEquals("my:key", jndiName);
+				assertThat(jndiName).isEqualTo("my:key");
 				return "my:value";
 			}
 		};

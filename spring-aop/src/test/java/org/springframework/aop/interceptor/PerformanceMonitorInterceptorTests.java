@@ -20,8 +20,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -38,14 +38,14 @@ public class PerformanceMonitorInterceptorTests {
 	public void testSuffixAndPrefixAssignment() {
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor();
 
-		assertNotNull(interceptor.getPrefix());
-		assertNotNull(interceptor.getSuffix());
+		assertThat(interceptor.getPrefix()).isNotNull();
+		assertThat(interceptor.getSuffix()).isNotNull();
 
 		interceptor.setPrefix(null);
 		interceptor.setSuffix(null);
 
-		assertNotNull(interceptor.getPrefix());
-		assertNotNull(interceptor.getSuffix());
+		assertThat(interceptor.getPrefix()).isNotNull();
+		assertThat(interceptor.getSuffix()).isNotNull();
 	}
 
 	@Test

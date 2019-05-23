@@ -33,11 +33,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -85,23 +81,24 @@ public class ControllerIntegrationTests {
 
 	@Test
 	public void verifyRootWacSupport() {
-		assertEquals("foo", foo);
-		assertEquals("bar", bar);
+		assertThat(foo).isEqualTo("foo");
+		assertThat(bar).isEqualTo("bar");
 
 		ApplicationContext parent = wac.getParent();
-		assertNotNull(parent);
-		assertTrue(parent instanceof WebApplicationContext);
+		assertThat(parent).isNotNull();
+		boolean condition = parent instanceof WebApplicationContext;
+		assertThat(condition).isTrue();
 		WebApplicationContext root = (WebApplicationContext) parent;
-		assertFalse(root.getBeansOfType(String.class).containsKey("bar"));
+		assertThat(root.getBeansOfType(String.class).containsKey("bar")).isFalse();
 
 		ServletContext childServletContext = wac.getServletContext();
-		assertNotNull(childServletContext);
+		assertThat(childServletContext).isNotNull();
 		ServletContext rootServletContext = root.getServletContext();
-		assertNotNull(rootServletContext);
-		assertSame(childServletContext, rootServletContext);
+		assertThat(rootServletContext).isNotNull();
+		assertThat(rootServletContext).isSameAs(childServletContext);
 
-		assertSame(root, rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
-		assertSame(root, childServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertThat(rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE)).isSameAs(root);
+		assertThat(childServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE)).isSameAs(root);
 	}
 
 }

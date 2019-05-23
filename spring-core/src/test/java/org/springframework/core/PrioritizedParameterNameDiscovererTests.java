@@ -24,8 +24,7 @@ import org.junit.Test;
 
 import org.springframework.tests.sample.objects.TestObject;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PrioritizedParameterNameDiscovererTests {
 
@@ -64,30 +63,30 @@ public class PrioritizedParameterNameDiscovererTests {
 	@Test
 	public void noParametersDiscoverers() {
 		ParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
-		assertNull(pnd.getParameterNames(anyMethod));
-		assertNull(pnd.getParameterNames((Constructor<?>) null));
+		assertThat(pnd.getParameterNames(anyMethod)).isNull();
+		assertThat(pnd.getParameterNames((Constructor<?>) null)).isNull();
 	}
 
 	@Test
 	public void orderedParameterDiscoverers1() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsFooBar);
-		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod)));
-		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames((Constructor<?>) null)));
+		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod))).isTrue();
+		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames((Constructor<?>) null))).isTrue();
 		pnd.addDiscoverer(returnsSomethingElse);
-		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod)));
-		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames((Constructor<?>) null)));
+		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod))).isTrue();
+		assertThat(Arrays.equals(FOO_BAR, pnd.getParameterNames((Constructor<?>) null))).isTrue();
 	}
 
 	@Test
 	public void orderedParameterDiscoverers2() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsSomethingElse);
-		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod)));
-		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames((Constructor<?>) null)));
+		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod))).isTrue();
+		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames((Constructor<?>) null))).isTrue();
 		pnd.addDiscoverer(returnsFooBar);
-		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod)));
-		assertTrue(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames((Constructor<?>) null)));
+		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames(anyMethod))).isTrue();
+		assertThat(Arrays.equals(SOMETHING_ELSE, pnd.getParameterNames((Constructor<?>) null))).isTrue();
 	}
 
 }

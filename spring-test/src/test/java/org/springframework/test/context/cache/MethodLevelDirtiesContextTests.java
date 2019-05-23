@@ -34,9 +34,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.MethodMode.BEFORE_METHOD;
 
 /**
@@ -101,13 +99,13 @@ public class MethodLevelDirtiesContextTests {
 	}
 
 	private void performAssertions(int expectedContextCreationCount) throws Exception {
-		assertNotNull("context must not be null", this.context);
-		assertTrue("context must be active", this.context.isActive());
+		assertThat(this.context).as("context must not be null").isNotNull();
+		assertThat(this.context.isActive()).as("context must be active").isTrue();
 
-		assertNotNull("count must not be null", this.count);
-		assertEquals("count: ", expectedContextCreationCount, this.count.intValue());
+		assertThat(this.count).as("count must not be null").isNotNull();
+		assertThat(this.count.intValue()).as("count: ").isEqualTo(expectedContextCreationCount);
 
-		assertEquals("context creation count: ", expectedContextCreationCount, contextCount.get());
+		assertThat(contextCount.get()).as("context creation count: ").isEqualTo(expectedContextCreationCount);
 	}
 
 }

@@ -28,9 +28,6 @@ import org.junit.Test;
 import org.springframework.util.MBeanTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * @author Rob Harrop
@@ -57,7 +54,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.afterPropertiesSet();
 		try {
 			MBeanServer server = bean.getObject();
-			assertNotNull("The MBeanServer should not be null", server);
+			assertThat(server).as("The MBeanServer should not be null").isNotNull();
 		}
 		finally {
 			bean.destroy();
@@ -71,7 +68,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.afterPropertiesSet();
 		try {
 			MBeanServer server = bean.getObject();
-			assertEquals("The default domain should be foo", "foo", server.getDefaultDomain());
+			assertThat(server.getDefaultDomain()).as("The default domain should be foo").isEqualTo("foo");
 		}
 		finally {
 			bean.destroy();
@@ -87,7 +84,7 @@ public class MBeanServerFactoryBeanTests {
 			bean.afterPropertiesSet();
 			try {
 				MBeanServer otherServer = bean.getObject();
-				assertSame("Existing MBeanServer not located", server, otherServer);
+				assertThat(otherServer).as("Existing MBeanServer not located").isSameAs(server);
 			}
 			finally {
 				bean.destroy();
@@ -104,7 +101,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.setLocateExistingServerIfPossible(true);
 		bean.afterPropertiesSet();
 		try {
-			assertSame(ManagementFactory.getPlatformMBeanServer(), bean.getObject());
+			assertThat(bean.getObject()).isSameAs(ManagementFactory.getPlatformMBeanServer());
 		}
 		finally {
 			bean.destroy();
@@ -117,7 +114,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.setAgentId("");
 		bean.afterPropertiesSet();
 		try {
-			assertSame(ManagementFactory.getPlatformMBeanServer(), bean.getObject());
+			assertThat(bean.getObject()).isSameAs(ManagementFactory.getPlatformMBeanServer());
 		}
 		finally {
 			bean.destroy();

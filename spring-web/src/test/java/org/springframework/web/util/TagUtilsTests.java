@@ -22,11 +22,9 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for the {@link TagUtils} class.
@@ -38,20 +36,19 @@ public class TagUtilsTests {
 
 	@Test
 	public void getScopeSunnyDay() {
-		assertEquals("page", TagUtils.SCOPE_PAGE);
-		assertEquals("application", TagUtils.SCOPE_APPLICATION);
-		assertEquals("session", TagUtils.SCOPE_SESSION);
-		assertEquals("request", TagUtils.SCOPE_REQUEST);
+		assertThat(TagUtils.SCOPE_PAGE).isEqualTo("page");
+		assertThat(TagUtils.SCOPE_APPLICATION).isEqualTo("application");
+		assertThat(TagUtils.SCOPE_SESSION).isEqualTo("session");
+		assertThat(TagUtils.SCOPE_REQUEST).isEqualTo("request");
 
-		assertEquals(PageContext.PAGE_SCOPE, TagUtils.getScope("page"));
-		assertEquals(PageContext.REQUEST_SCOPE, TagUtils.getScope("request"));
-		assertEquals(PageContext.SESSION_SCOPE, TagUtils.getScope("session"));
-		assertEquals(PageContext.APPLICATION_SCOPE, TagUtils.getScope("application"));
+		assertThat(TagUtils.getScope("page")).isEqualTo(PageContext.PAGE_SCOPE);
+		assertThat(TagUtils.getScope("request")).isEqualTo(PageContext.REQUEST_SCOPE);
+		assertThat(TagUtils.getScope("session")).isEqualTo(PageContext.SESSION_SCOPE);
+		assertThat(TagUtils.getScope("application")).isEqualTo(PageContext.APPLICATION_SCOPE);
 
 		// non-existent scope
-		assertEquals("TagUtils.getScope(..) with a non-existent scope argument must " +
-				"just return the default scope (PageContext.PAGE_SCOPE).", PageContext.PAGE_SCOPE,
-				TagUtils.getScope("bla"));
+		assertThat(TagUtils.getScope("bla")).as("TagUtils.getScope(..) with a non-existent scope argument must " +
+				"just return the default scope (PageContext.PAGE_SCOPE).").isEqualTo(PageContext.PAGE_SCOPE);
 	}
 
 	@Test
@@ -87,7 +84,7 @@ public class TagUtilsTests {
 		a.setParent(b);
 		b.setParent(c);
 
-		assertTrue(TagUtils.hasAncestorOfType(a, TagC.class));
+		assertThat(TagUtils.hasAncestorOfType(a, TagC.class)).isTrue();
 	}
 
 	@Test
@@ -99,12 +96,12 @@ public class TagUtilsTests {
 		a.setParent(b);
 		b.setParent(anotherB);
 
-		assertFalse(TagUtils.hasAncestorOfType(a, TagC.class));
+		assertThat(TagUtils.hasAncestorOfType(a, TagC.class)).isFalse();
 	}
 
 	@Test
 	public void hasAncestorOfTypeWhenTagHasNoParent() throws Exception {
-		assertFalse(TagUtils.hasAncestorOfType(new TagA(), TagC.class));
+		assertThat(TagUtils.hasAncestorOfType(new TagA(), TagC.class)).isFalse();
 	}
 
 	@Test

@@ -32,9 +32,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -56,44 +54,44 @@ public class BrokerMessageHandlerTests {
 
 	@Test
 	public void startShouldUpdateIsRunning() {
-		assertFalse(this.handler.isRunning());
+		assertThat(this.handler.isRunning()).isFalse();
 		this.handler.start();
-		assertTrue(this.handler.isRunning());
+		assertThat(this.handler.isRunning()).isTrue();
 	}
 
 	@Test
 	public void stopShouldUpdateIsRunning() {
 
 		this.handler.start();
-		assertTrue(this.handler.isRunning());
+		assertThat(this.handler.isRunning()).isTrue();
 
 		this.handler.stop();
-		assertFalse(this.handler.isRunning());
+		assertThat(this.handler.isRunning()).isFalse();
 	}
 
 	@Test
 	public void startAndStopShouldNotPublishBrokerAvailabilityEvents() {
 		this.handler.start();
 		this.handler.stop();
-		assertEquals(Collections.emptyList(), this.handler.availabilityEvents);
+		assertThat(this.handler.availabilityEvents).isEqualTo(Collections.emptyList());
 	}
 
 	@Test
 	public void handleMessageWhenBrokerNotRunning() {
 		this.handler.handleMessage(new GenericMessage<Object>("payload"));
-		assertEquals(Collections.emptyList(), this.handler.messages);
+		assertThat(this.handler.messages).isEqualTo(Collections.emptyList());
 	}
 
 	@Test
 	public void publishBrokerAvailableEvent() {
 
-		assertFalse(this.handler.isBrokerAvailable());
-		assertEquals(Collections.emptyList(), this.handler.availabilityEvents);
+		assertThat(this.handler.isBrokerAvailable()).isFalse();
+		assertThat(this.handler.availabilityEvents).isEqualTo(Collections.emptyList());
 
 		this.handler.publishBrokerAvailableEvent();
 
-		assertTrue(this.handler.isBrokerAvailable());
-		assertEquals(Arrays.asList(true), this.handler.availabilityEvents);
+		assertThat(this.handler.isBrokerAvailable()).isTrue();
+		assertThat(this.handler.availabilityEvents).isEqualTo(Arrays.asList(true));
 	}
 
 	@Test
@@ -102,19 +100,19 @@ public class BrokerMessageHandlerTests {
 		this.handler.publishBrokerAvailableEvent();
 		this.handler.publishBrokerAvailableEvent();
 
-		assertEquals(Arrays.asList(true), this.handler.availabilityEvents);
+		assertThat(this.handler.availabilityEvents).isEqualTo(Arrays.asList(true));
 	}
 
 	@Test
 	public void publishBrokerUnavailableEvent() {
 
 		this.handler.publishBrokerAvailableEvent();
-		assertTrue(this.handler.isBrokerAvailable());
+		assertThat(this.handler.isBrokerAvailable()).isTrue();
 
 		this.handler.publishBrokerUnavailableEvent();
-		assertFalse(this.handler.isBrokerAvailable());
+		assertThat(this.handler.isBrokerAvailable()).isFalse();
 
-		assertEquals(Arrays.asList(true, false), this.handler.availabilityEvents);
+		assertThat(this.handler.availabilityEvents).isEqualTo(Arrays.asList(true, false));
 	}
 
 	@Test
@@ -124,7 +122,7 @@ public class BrokerMessageHandlerTests {
 		this.handler.publishBrokerUnavailableEvent();
 		this.handler.publishBrokerUnavailableEvent();
 
-		assertEquals(Arrays.asList(true, false), this.handler.availabilityEvents);
+		assertThat(this.handler.availabilityEvents).isEqualTo(Arrays.asList(true, false));
 	}
 
 

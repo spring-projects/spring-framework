@@ -70,13 +70,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for a {@link RequestResponseBodyMethodProcessor} with
@@ -139,9 +135,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		List<SimpleBean> result = (List<SimpleBean>) processor.resolveArgument(
 				paramGenericList, container, request, factory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.get(0).getName());
-		assertEquals("Robert", result.get(1).getName());
+		assertThat(result).isNotNull();
+		assertThat(result.get(0).getName()).isEqualTo("Jad");
+		assertThat(result.get(1).getName()).isEqualTo("Robert");
 	}
 
 	@Test
@@ -159,9 +155,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		MultiValueMap<String, String> result = (MultiValueMap<String, String>) processor.resolveArgument(
 				paramMultiValueMap, container, request, factory);
 
-		assertNotNull(result);
-		assertEquals("apple", result.getFirst("fruit"));
-		assertEquals("kale", result.getFirst("vegetable"));
+		assertThat(result).isNotNull();
+		assertThat(result.getFirst("fruit")).isEqualTo("apple");
+		assertThat(result.getFirst("vegetable")).isEqualTo("kale");
 	}
 
 	@Test
@@ -177,8 +173,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		SimpleBean result = (SimpleBean) processor.resolveArgument(
 				paramSimpleBean, container, request, factory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getName()).isEqualTo("Jad");
 	}
 
 	@Test
@@ -194,8 +190,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		String result = (String) processor.resolveArgument(
 				paramString, container, request, factory);
 
-		assertNotNull(result);
-		assertEquals("foobarbaz", result);
+		assertThat(result).isNotNull();
+		assertThat(result).isEqualTo("foobarbaz");
 	}
 
 	@Test // SPR-9942
@@ -217,8 +213,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		List<Object> advice = Collections.singletonList(new EmptyRequestBodyAdvice());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters, advice);
 		String arg = (String) processor.resolveArgument(paramString, container, request, factory);
-		assertNotNull(arg);
-		assertEquals("default value for empty body", arg);
+		assertThat(arg).isNotNull();
+		assertThat(arg).isEqualTo("default value for empty body");
 	}
 
 	@Test  // SPR-9964
@@ -237,8 +233,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, container, request, factory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getName()).isEqualTo("Jad");
 	}
 
 	@Test  // SPR-14470
@@ -259,9 +255,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		List<SimpleBean> result = (List<SimpleBean>) processor.resolveArgument(
 				methodParam, container, request, factory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.get(0).getName());
-		assertEquals("Robert", result.get(1).getName());
+		assertThat(result).isNotNull();
+		assertThat(result.get(0).getName()).isEqualTo("Jad");
+		assertThat(result.get(1).getName()).isEqualTo("Robert");
 	}
 
 	@Test  // SPR-11225
@@ -282,8 +278,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, container, request, factory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getName()).isEqualTo("Jad");
 	}
 
 	@Test  // SPR-9160
@@ -297,7 +293,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		processor.writeWithMessageConverters("Foo", returnTypeString, request);
 
-		assertEquals("application/json;charset=UTF-8", servletResponse.getHeader("Content-Type"));
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("application/json;charset=UTF-8");
 	}
 
 	@Test
@@ -309,8 +305,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 		processor.handleReturnValue("Foo", returnTypeString, container, request);
 
-		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
-		assertEquals("Foo", servletResponse.getContentAsString());
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
 	}
 
 	@Test  // SPR-13423
@@ -325,8 +321,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 		processor.handleReturnValue(new StringBuilder("Foo"), returnType, container, request);
 
-		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
-		assertEquals("Foo", servletResponse.getContentAsString());
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
 	}
 
 	@Test
@@ -340,7 +336,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		processor.writeWithMessageConverters("Foo", returnTypeString, request);
 
-		assertEquals("text/plain;charset=UTF-8", servletResponse.getHeader("Content-Type"));
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=UTF-8");
 	}
 
 	// SPR-12894
@@ -359,7 +355,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		ClassPathResource resource = new ClassPathResource("logo.jpg", getClass());
 		processor.writeWithMessageConverters(resource, returnType, this.request);
 
-		assertEquals("image/jpeg", this.servletResponse.getHeader("Content-Type"));
+		assertThat(this.servletResponse.getHeader("Content-Type")).isEqualTo("image/jpeg");
 	}
 
 	// SPR-13135
@@ -414,7 +410,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		assertTrue("Failed to recognize type-level @ResponseBody", processor.supportsReturnType(returnType));
+		assertThat(processor.supportsReturnType(returnType)).as("Failed to recognize type-level @ResponseBody").isTrue();
 	}
 
 	@Test
@@ -427,7 +423,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		assertTrue("Failed to recognize type-level @RestController", processor.supportsReturnType(returnType));
+		assertThat(processor.supportsReturnType(returnType)).as("Failed to recognize type-level @RestController").isTrue();
 	}
 
 	@Test
@@ -446,9 +442,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
-		assertFalse(content.contains("\"withView1\":\"with\""));
-		assertTrue(content.contains("\"withView2\":\"with\""));
-		assertFalse(content.contains("\"withoutView\":\"without\""));
+		assertThat(content.contains("\"withView1\":\"with\"")).isFalse();
+		assertThat(content.contains("\"withView2\":\"with\"")).isTrue();
+		assertThat(content.contains("\"withoutView\":\"without\"")).isFalse();
 	}
 
 	@Test
@@ -467,9 +463,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
-		assertFalse(content.contains("\"withView1\":\"with\""));
-		assertTrue(content.contains("\"withView2\":\"with\""));
-		assertFalse(content.contains("\"withoutView\":\"without\""));
+		assertThat(content.contains("\"withView1\":\"with\"")).isFalse();
+		assertThat(content.contains("\"withView2\":\"with\"")).isTrue();
+		assertThat(content.contains("\"withoutView\":\"without\"")).isFalse();
 	}
 
 	@Test  // SPR-12149
@@ -488,9 +484,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
-		assertFalse(content.contains("<withView1>with</withView1>"));
-		assertTrue(content.contains("<withView2>with</withView2>"));
-		assertFalse(content.contains("<withoutView>without</withoutView>"));
+		assertThat(content.contains("<withView1>with</withView1>")).isFalse();
+		assertThat(content.contains("<withView2>with</withView2>")).isTrue();
+		assertThat(content.contains("<withoutView>without</withoutView>")).isFalse();
 	}
 
 	@Test  // SPR-12149
@@ -509,9 +505,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
-		assertFalse(content.contains("<withView1>with</withView1>"));
-		assertTrue(content.contains("<withView2>with</withView2>"));
-		assertFalse(content.contains("<withoutView>without</withoutView>"));
+		assertThat(content.contains("<withView1>with</withView1>")).isFalse();
+		assertThat(content.contains("<withView2>with</withView2>")).isTrue();
+		assertThat(content.contains("<withoutView>without</withoutView>")).isFalse();
 	}
 
 	@Test  // SPR-12501
@@ -530,14 +526,13 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
-		@SuppressWarnings("unchecked")
 		JacksonViewBean result = (JacksonViewBean)
 				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
-		assertNotNull(result);
-		assertEquals("with", result.getWithView1());
-		assertNull(result.getWithView2());
-		assertNull(result.getWithoutView());
+		assertThat(result).isNotNull();
+		assertThat(result.getWithView1()).isEqualTo("with");
+		assertThat(result.getWithView2()).isNull();
+		assertThat(result.getWithoutView()).isNull();
 	}
 
 	@Test  // SPR-12501
@@ -560,11 +555,11 @@ public class RequestResponseBodyMethodProcessorTests {
 		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)
 				processor.resolveArgument( methodParameter, this.container, this.request, this.factory);
 
-		assertNotNull(result);
-		assertNotNull(result.getBody());
-		assertEquals("with", result.getBody().getWithView1());
-		assertNull(result.getBody().getWithView2());
-		assertNull(result.getBody().getWithoutView());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody()).isNotNull();
+		assertThat(result.getBody().getWithView1()).isEqualTo("with");
+		assertThat(result.getBody().getWithView2()).isNull();
+		assertThat(result.getBody().getWithoutView()).isNull();
 	}
 
 	@Test  // SPR-12501
@@ -586,14 +581,13 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewRequestBodyAdvice()));
 
-		@SuppressWarnings("unchecked")
 		JacksonViewBean result = (JacksonViewBean)
 				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
-		assertNotNull(result);
-		assertEquals("with", result.getWithView1());
-		assertNull(result.getWithView2());
-		assertNull(result.getWithoutView());
+		assertThat(result).isNotNull();
+		assertThat(result.getWithView1()).isEqualTo("with");
+		assertThat(result.getWithView2()).isNull();
+		assertThat(result.getWithoutView()).isNull();
 	}
 
 	@Test  // SPR-12501
@@ -619,11 +613,11 @@ public class RequestResponseBodyMethodProcessorTests {
 		HttpEntity<JacksonViewBean> result = (HttpEntity<JacksonViewBean>)
 				processor.resolveArgument(methodParameter, this.container, this.request, this.factory);
 
-		assertNotNull(result);
-		assertNotNull(result.getBody());
-		assertEquals("with", result.getBody().getWithView1());
-		assertNull(result.getBody().getWithView2());
-		assertNull(result.getBody().getWithoutView());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody()).isNotNull();
+		assertThat(result.getBody().getWithView1()).isEqualTo("with");
+		assertThat(result.getBody().getWithView2()).isNull();
+		assertThat(result.getBody().getWithoutView()).isNull();
 	}
 
 	@Test  // SPR-12811
@@ -640,8 +634,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
-		assertTrue(content.contains("\"type\":\"foo\""));
-		assertTrue(content.contains("\"type\":\"bar\""));
+		assertThat(content.contains("\"type\":\"foo\"")).isTrue();
+		assertThat(content.contains("\"type\":\"bar\"")).isTrue();
 	}
 
 	@Test  // SPR-13318
@@ -658,8 +652,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
-		assertTrue(content.contains("\"id\":123"));
-		assertTrue(content.contains("\"name\":\"foo\""));
+		assertThat(content.contains("\"id\":123")).isTrue();
+		assertThat(content.contains("\"name\":\"foo\"")).isTrue();
 	}
 
 	@Test  // SPR-13318
@@ -676,10 +670,10 @@ public class RequestResponseBodyMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
 		String content = this.servletResponse.getContentAsString();
-		assertTrue(content.contains("\"id\":123"));
-		assertTrue(content.contains("\"name\":\"foo\""));
-		assertTrue(content.contains("\"id\":456"));
-		assertTrue(content.contains("\"name\":\"bar\""));
+		assertThat(content.contains("\"id\":123")).isTrue();
+		assertThat(content.contains("\"name\":\"foo\"")).isTrue();
+		assertThat(content.contains("\"id\":456")).isTrue();
+		assertThat(content.contains("\"name\":\"bar\"")).isTrue();
 	}
 
 	@Test  // SPR-13631
@@ -695,7 +689,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		Object returnValue = new JacksonController().defaultCharset();
 		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
 
-		assertEquals("UTF-8", this.servletResponse.getCharacterEncoding());
+		assertThat(this.servletResponse.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
 	@Test  // SPR-14520
@@ -714,7 +708,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		String value = (String) processor.readWithMessageConverters(
 				this.request, methodParameter, methodParameter.getGenericParameterType());
-		assertEquals("foo", value);
+		assertThat(value).isEqualTo("foo");
 	}
 
 	private void assertContentDisposition(RequestResponseBodyMethodProcessor processor,
@@ -725,11 +719,10 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		String header = servletResponse.getHeader("Content-Disposition");
 		if (expectContentDisposition) {
-			assertEquals("Expected 'Content-Disposition' header. Use case: '" + comment + "'",
-					"inline;filename=f.txt", header);
+			assertThat(header).as("Expected 'Content-Disposition' header. Use case: '" + comment + "'").isEqualTo("inline;filename=f.txt");
 		}
 		else {
-			assertNull("Did not expect 'Content-Disposition' header. Use case: '" + comment + "'", header);
+			assertThat(header).as("Did not expect 'Content-Disposition' header. Use case: '" + comment + "'").isNull();
 		}
 
 		this.servletRequest = new MockHttpServletRequest();

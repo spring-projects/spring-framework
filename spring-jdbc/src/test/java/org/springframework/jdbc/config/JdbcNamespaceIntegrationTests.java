@@ -38,8 +38,6 @@ import org.springframework.tests.TestGroup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory.DEFAULT_DATABASE_NAME;
 
 /**
@@ -186,7 +184,7 @@ public class JdbcNamespaceIntegrationTests {
 	}
 
 	private void assertNumRowsInTestTable(JdbcTemplate template, int count) {
-		assertEquals(count, template.queryForObject("select count(*) from T_TEST", Integer.class).intValue());
+		assertThat(template.queryForObject("select count(*) from T_TEST", Integer.class).intValue()).isEqualTo(count);
 	}
 
 	private void assertCorrectSetup(String file, String... dataSources) {
@@ -199,7 +197,7 @@ public class JdbcNamespaceIntegrationTests {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
 				assertNumRowsInTestTable(new JdbcTemplate(dataSource), count);
-				assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+				assertThat(dataSource instanceof AbstractDriverBasedDataSource).isTrue();
 				AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
 				assertThat(adbDataSource.getUrl()).contains(dataSourceName);
 			}
@@ -214,9 +212,9 @@ public class JdbcNamespaceIntegrationTests {
 		try {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
-			assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+			assertThat(dataSource instanceof AbstractDriverBasedDataSource).isTrue();
 			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
-			assertTrue(urlPredicate.test(adbDataSource.getUrl()));
+			assertThat(urlPredicate.test(adbDataSource.getUrl())).isTrue();
 		}
 		finally {
 			context.close();

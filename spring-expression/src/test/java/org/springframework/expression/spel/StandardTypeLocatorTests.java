@@ -24,9 +24,6 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for type comparison
@@ -38,15 +35,15 @@ public class StandardTypeLocatorTests {
 	@Test
 	public void testImports() throws EvaluationException {
 		StandardTypeLocator locator = new StandardTypeLocator();
-		assertEquals(Integer.class,locator.findType("java.lang.Integer"));
-		assertEquals(String.class,locator.findType("java.lang.String"));
+		assertThat(locator.findType("java.lang.Integer")).isEqualTo(Integer.class);
+		assertThat(locator.findType("java.lang.String")).isEqualTo(String.class);
 
 		List<String> prefixes = locator.getImportPrefixes();
-		assertEquals(1,prefixes.size());
-		assertTrue(prefixes.contains("java.lang"));
-		assertFalse(prefixes.contains("java.util"));
+		assertThat(prefixes.size()).isEqualTo(1);
+		assertThat(prefixes.contains("java.lang")).isTrue();
+		assertThat(prefixes.contains("java.util")).isFalse();
 
-		assertEquals(Boolean.class,locator.findType("Boolean"));
+		assertThat(locator.findType("Boolean")).isEqualTo(Boolean.class);
 		// currently does not know about java.util by default
 //		assertEquals(java.util.List.class,locator.findType("List"));
 
@@ -54,7 +51,7 @@ public class StandardTypeLocatorTests {
 				locator.findType("URL"))
 			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.TYPE_NOT_FOUND));
 		locator.registerImport("java.net");
-		assertEquals(java.net.URL.class,locator.findType("URL"));
+		assertThat(locator.findType("URL")).isEqualTo(java.net.URL.class);
 	}
 
 }

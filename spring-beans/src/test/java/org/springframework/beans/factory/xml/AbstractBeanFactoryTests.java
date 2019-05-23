@@ -37,10 +37,6 @@ import org.springframework.tests.sample.beans.factory.DummyFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Subclasses must initialize the bean factory and any other variables they need.
@@ -58,15 +54,15 @@ public abstract class AbstractBeanFactoryTests {
 	 */
 	@Test
 	public void inheritance() {
-		assertTrue(getBeanFactory().containsBean("rod"));
-		assertTrue(getBeanFactory().containsBean("roderick"));
+		assertThat(getBeanFactory().containsBean("rod")).isTrue();
+		assertThat(getBeanFactory().containsBean("roderick")).isTrue();
 		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
 		TestBean roderick = (TestBean) getBeanFactory().getBean("roderick");
-		assertTrue("not == ", rod != roderick);
-		assertTrue("rod.name is Rod", rod.getName().equals("Rod"));
-		assertTrue("rod.age is 31", rod.getAge() == 31);
-		assertTrue("roderick.name is Roderick", roderick.getName().equals("Roderick"));
-		assertTrue("roderick.age was inherited", roderick.getAge() == rod.getAge());
+		assertThat(rod != roderick).as("not == ").isTrue();
+		assertThat(rod.getName().equals("Rod")).as("rod.name is Rod").isTrue();
+		assertThat(rod.getAge() == 31).as("rod.age is 31").isTrue();
+		assertThat(roderick.getName().equals("Roderick")).as("roderick.name is Roderick").isTrue();
+		assertThat(roderick.getAge() == rod.getAge()).as("roderick.age was inherited").isTrue();
 	}
 
 	@Test
@@ -93,26 +89,29 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	public void lifecycleCallbacks() {
 		LifecycleBean lb = (LifecycleBean) getBeanFactory().getBean("lifecycle");
-		assertEquals("lifecycle", lb.getBeanName());
+		assertThat(lb.getBeanName()).isEqualTo("lifecycle");
 		// The dummy business method will throw an exception if the
 		// necessary callbacks weren't invoked in the right order.
 		lb.businessMethod();
-		assertTrue("Not destroyed", !lb.isDestroyed());
+		boolean condition = !lb.isDestroyed();
+		assertThat(condition).as("Not destroyed").isTrue();
 	}
 
 	@Test
 	public void findsValidInstance() {
 		Object o = getBeanFactory().getBean("rod");
-		assertTrue("Rod bean is a TestBean", o instanceof TestBean);
+		boolean condition = o instanceof TestBean;
+		assertThat(condition).as("Rod bean is a TestBean").isTrue();
 		TestBean rod = (TestBean) o;
-		assertTrue("rod.name is Rod", rod.getName().equals("Rod"));
-		assertTrue("rod.age is 31", rod.getAge() == 31);
+		assertThat(rod.getName().equals("Rod")).as("rod.name is Rod").isTrue();
+		assertThat(rod.getAge() == 31).as("rod.age is 31").isTrue();
 	}
 
 	@Test
 	public void getInstanceByMatchingClass() {
 		Object o = getBeanFactory().getBean("rod", TestBean.class);
-		assertTrue("Rod bean is a TestBean", o instanceof TestBean);
+		boolean condition = o instanceof TestBean;
+		assertThat(condition).as("Rod bean is a TestBean").isTrue();
 	}
 
 	@Test
@@ -129,13 +128,15 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	public void getSharedInstanceByMatchingClass() {
 		Object o = getBeanFactory().getBean("rod", TestBean.class);
-		assertTrue("Rod bean is a TestBean", o instanceof TestBean);
+		boolean condition = o instanceof TestBean;
+		assertThat(condition).as("Rod bean is a TestBean").isTrue();
 	}
 
 	@Test
 	public void getSharedInstanceByMatchingClassNoCatch() {
 		Object o = getBeanFactory().getBean("rod", TestBean.class);
-		assertTrue("Rod bean is a TestBean", o instanceof TestBean);
+		boolean condition = o instanceof TestBean;
+		assertThat(condition).as("Rod bean is a TestBean").isTrue();
 	}
 
 	@Test
@@ -152,28 +153,31 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	public void sharedInstancesAreEqual() {
 		Object o = getBeanFactory().getBean("rod");
-		assertTrue("Rod bean1 is a TestBean", o instanceof TestBean);
+		boolean condition1 = o instanceof TestBean;
+		assertThat(condition1).as("Rod bean1 is a TestBean").isTrue();
 		Object o1 = getBeanFactory().getBean("rod");
-		assertTrue("Rod bean2 is a TestBean", o1 instanceof TestBean);
-		assertTrue("Object equals applies", o == o1);
+		boolean condition = o1 instanceof TestBean;
+		assertThat(condition).as("Rod bean2 is a TestBean").isTrue();
+		assertThat(o == o1).as("Object equals applies").isTrue();
 	}
 
 	@Test
 	public void prototypeInstancesAreIndependent() {
 		TestBean tb1 = (TestBean) getBeanFactory().getBean("kathy");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("kathy");
-		assertTrue("ref equal DOES NOT apply", tb1 != tb2);
-		assertTrue("object equal true", tb1.equals(tb2));
+		assertThat(tb1 != tb2).as("ref equal DOES NOT apply").isTrue();
+		assertThat(tb1.equals(tb2)).as("object equal true").isTrue();
 		tb1.setAge(1);
 		tb2.setAge(2);
-		assertTrue("1 age independent = 1", tb1.getAge() == 1);
-		assertTrue("2 age independent = 2", tb2.getAge() == 2);
-		assertTrue("object equal now false", !tb1.equals(tb2));
+		assertThat(tb1.getAge() == 1).as("1 age independent = 1").isTrue();
+		assertThat(tb2.getAge() == 2).as("2 age independent = 2").isTrue();
+		boolean condition = !tb1.equals(tb2);
+		assertThat(condition).as("object equal now false").isTrue();
 	}
 
 	@Test
 	public void notThere() {
-		assertFalse(getBeanFactory().containsBean("Mr Squiggle"));
+		assertThat(getBeanFactory().containsBean("Mr Squiggle")).isFalse();
 		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 				getBeanFactory().getBean("Mr Squiggle"));
 	}
@@ -181,9 +185,10 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	public void validEmpty() {
 		Object o = getBeanFactory().getBean("validEmpty");
-		assertTrue("validEmpty bean is a TestBean", o instanceof TestBean);
+		boolean condition = o instanceof TestBean;
+		assertThat(condition).as("validEmpty bean is a TestBean").isTrue();
 		TestBean ve = (TestBean) o;
-		assertTrue("Valid empty has defaults", ve.getName() == null && ve.getAge() == 0 && ve.getSpouse() == null);
+		assertThat(ve.getName() == null && ve.getAge() == 0 && ve.getSpouse() == null).as("Valid empty has defaults").isTrue();
 	}
 
 	public void xtestTypeMismatch() {
@@ -202,29 +207,30 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	public void grandparentDefinitionFoundInBeanFactory() throws Exception {
 		TestBean dad = (TestBean) getBeanFactory().getBean("father");
-		assertTrue("Dad has correct name", dad.getName().equals("Albert"));
+		assertThat(dad.getName().equals("Albert")).as("Dad has correct name").isTrue();
 	}
 
 	@Test
 	public void factorySingleton() throws Exception {
-		assertTrue(getBeanFactory().isSingleton("&singletonFactory"));
-		assertTrue(getBeanFactory().isSingleton("singletonFactory"));
+		assertThat(getBeanFactory().isSingleton("&singletonFactory")).isTrue();
+		assertThat(getBeanFactory().isSingleton("singletonFactory")).isTrue();
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
-		assertTrue("Singleton from factory has correct name, not " + tb.getName(), tb.getName().equals(DummyFactory.SINGLETON_NAME));
+		assertThat(tb.getName().equals(DummyFactory.SINGLETON_NAME)).as("Singleton from factory has correct name, not " + tb.getName()).isTrue();
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("singletonFactory");
-		assertTrue("Singleton references ==", tb == tb2);
-		assertTrue("FactoryBean is BeanFactoryAware", factory.getBeanFactory() != null);
+		assertThat(tb == tb2).as("Singleton references ==").isTrue();
+		assertThat(factory.getBeanFactory() != null).as("FactoryBean is BeanFactoryAware").isTrue();
 	}
 
 	@Test
 	public void factoryPrototype() throws Exception {
-		assertTrue(getBeanFactory().isSingleton("&prototypeFactory"));
-		assertFalse(getBeanFactory().isSingleton("prototypeFactory"));
+		assertThat(getBeanFactory().isSingleton("&prototypeFactory")).isTrue();
+		assertThat(getBeanFactory().isSingleton("prototypeFactory")).isFalse();
 		TestBean tb = (TestBean) getBeanFactory().getBean("prototypeFactory");
-		assertTrue(!tb.getName().equals(DummyFactory.SINGLETON_NAME));
+		boolean condition = !tb.getName().equals(DummyFactory.SINGLETON_NAME);
+		assertThat(condition).isTrue();
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("prototypeFactory");
-		assertTrue("Prototype references !=", tb != tb2);
+		assertThat(tb != tb2).as("Prototype references !=").isTrue();
 	}
 
 	/**
@@ -233,7 +239,7 @@ public abstract class AbstractBeanFactoryTests {
 	 */
 	@Test
 	public void getFactoryItself() throws Exception {
-		assertNotNull(getBeanFactory().getBean("&singletonFactory"));
+		assertThat(getBeanFactory().getBean("&singletonFactory")).isNotNull();
 	}
 
 	/**
@@ -242,9 +248,9 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	public void factoryIsInitialized() throws Exception {
 		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
-		assertNotNull(tb);
+		assertThat(tb).isNotNull();
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
-		assertTrue("Factory was initialized because it implemented InitializingBean", factory.wasInitialized());
+		assertThat(factory.wasInitialized()).as("Factory was initialized because it implemented InitializingBean").isTrue();
 	}
 
 	/**
@@ -276,7 +282,7 @@ public abstract class AbstractBeanFactoryTests {
 		cbf.registerAlias("rod", alias);
 		Object rod = getBeanFactory().getBean("rod");
 		Object aliasRod = getBeanFactory().getBean(alias);
-		assertTrue(rod == aliasRod);
+		assertThat(rod == aliasRod).isTrue();
 	}
 
 

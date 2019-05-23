@@ -42,8 +42,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link MockMvcHtmlUnitDriverBuilder}.
@@ -105,13 +103,13 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	@Test
 	public void javaScriptEnabledByDefault() {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
-		assertTrue(this.driver.isJavascriptEnabled());
+		assertThat(this.driver.isJavascriptEnabled()).isTrue();
 	}
 
 	@Test
 	public void javaScriptDisabled() {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).javascriptEnabled(false).build();
-		assertFalse(this.driver.isJavascriptEnabled());
+		assertThat(this.driver.isJavascriptEnabled()).isFalse();
 	}
 
 	@Test // SPR-14066

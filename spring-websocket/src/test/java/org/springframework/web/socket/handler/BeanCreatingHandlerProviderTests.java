@@ -25,8 +25,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Test fixture for {@link BeanCreatingHandlerProvider}.
@@ -42,7 +42,7 @@ public class BeanCreatingHandlerProviderTests {
 		BeanCreatingHandlerProvider<SimpleEchoHandler> provider =
 				new BeanCreatingHandlerProvider<>(SimpleEchoHandler.class);
 
-		assertNotNull(provider.getHandler());
+		assertThat(provider.getHandler()).isNotNull();
 	}
 
 	@Test
@@ -55,7 +55,7 @@ public class BeanCreatingHandlerProviderTests {
 				new BeanCreatingHandlerProvider<>(EchoHandler.class);
 		provider.setBeanFactory(context.getBeanFactory());
 
-		assertNotNull(provider.getHandler());
+		assertThat(provider.getHandler()).isNotNull();
 	}
 
 	@Test

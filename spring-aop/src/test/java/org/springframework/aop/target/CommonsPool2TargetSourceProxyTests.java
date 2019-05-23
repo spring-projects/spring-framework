@@ -24,7 +24,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
@@ -42,6 +42,6 @@ public class CommonsPool2TargetSourceProxyTests {
 		reader.loadBeanDefinitions(CONTEXT);
 		beanFactory.preInstantiateSingletons();
 		ITestBean bean = (ITestBean)beanFactory.getBean("testBean");
-		assertTrue(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 	}
 }

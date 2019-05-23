@@ -36,7 +36,6 @@ import org.springframework.tests.sample.beans.TestBean;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
@@ -106,7 +105,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setPropertySources(propertySources);
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("foo");
-		assertEquals(ppc.getAppliedPropertySources().iterator().next(), propertySources.iterator().next());
+		assertThat(propertySources.iterator().next()).isEqualTo(ppc.getAppliedPropertySources().iterator().next());
 	}
 
 	@Test
@@ -126,7 +125,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("${my.name}");
-		assertEquals(ppc.getAppliedPropertySources().iterator().next(), propertySources.iterator().next());
+		assertThat(propertySources.iterator().next()).isEqualTo(ppc.getAppliedPropertySources().iterator().next());
 	}
 
 	@Test

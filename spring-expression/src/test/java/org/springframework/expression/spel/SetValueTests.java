@@ -29,10 +29,6 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests set value expressions.
@@ -90,7 +86,7 @@ public class SetValueTests extends AbstractExpressionTests {
 		// PROPERTYORFIELDREFERENCE
 		// Non existent field (or property):
 		Expression e1 = parser.parseExpression("arrayContainer.wibble");
-		assertFalse("Should not be writable!", e1.isWritable(lContext));
+		assertThat(e1.isWritable(lContext)).as("Should not be writable!").isFalse();
 
 		Expression e2 = parser.parseExpression("arrayContainer.wibble.foo");
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
@@ -101,10 +97,10 @@ public class SetValueTests extends AbstractExpressionTests {
 		// VARIABLE
 		// the variable does not exist (but that is OK, we should be writable)
 		Expression e3 = parser.parseExpression("#madeup1");
-		assertTrue("Should be writable!",e3.isWritable(lContext));
+		assertThat(e3.isWritable(lContext)).as("Should be writable!").isTrue();
 
 		Expression e4 = parser.parseExpression("#madeup2.bar"); // compound expression
-		assertFalse("Should not be writable!",e4.isWritable(lContext));
+		assertThat(e4.isWritable(lContext)).as("Should not be writable!").isFalse();
 
 		// INDEXER
 		// non existent indexer (wibble made up)
@@ -188,8 +184,8 @@ public class SetValueTests extends AbstractExpressionTests {
 	public void testAssign() throws Exception {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parse("publicName='Andy'");
-		assertFalse(e.isWritable(eContext));
-		assertEquals("Andy",e.getValue(eContext));
+		assertThat(e.isWritable(eContext)).isFalse();
+		assertThat(e.getValue(eContext)).isEqualTo("Andy");
 	}
 
 	/*
@@ -199,7 +195,7 @@ public class SetValueTests extends AbstractExpressionTests {
 	public void testSetGenericMapElementRequiresCoercion() throws Exception {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parse("mapOfStringToBoolean[42]");
-		assertNull(e.getValue(eContext));
+		assertThat(e.getValue(eContext)).isNull();
 
 		// Key should be coerced to string representation of 42
 		e.setValue(eContext, "true");
@@ -207,18 +203,18 @@ public class SetValueTests extends AbstractExpressionTests {
 		// All keys should be strings
 		Set<?> ks = parse("mapOfStringToBoolean.keySet()").getValue(eContext, Set.class);
 		for (Object o: ks) {
-			assertEquals(String.class,o.getClass());
+			assertThat(o.getClass()).isEqualTo(String.class);
 		}
 
 		// All values should be booleans
 		Collection<?> vs = parse("mapOfStringToBoolean.values()").getValue(eContext, Collection.class);
 		for (Object o: vs) {
-			assertEquals(Boolean.class, o.getClass());
+			assertThat(o.getClass()).isEqualTo(Boolean.class);
 		}
 
 		// One final test check coercion on the key for a map lookup
 		Object o = e.getValue(eContext);
-		assertEquals(Boolean.TRUE,o);
+		assertThat(o).isEqualTo(Boolean.TRUE);
 	}
 
 
@@ -248,9 +244,9 @@ public class SetValueTests extends AbstractExpressionTests {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
+			assertThat(e.isWritable(lContext)).as("Expression is not writeable but should be").isTrue();
 			e.setValue(lContext, value);
-			assertEquals("Retrieved value was not equal to set value", value, e.getValue(lContext,value.getClass()));
+			assertThat(e.getValue(lContext,value.getClass())).as("Retrieved value was not equal to set value").isEqualTo(value);
 		}
 		catch (EvaluationException | ParseException ex) {
 			throw new AssertionError("Unexpected Exception: " + ex.getMessage(), ex);
@@ -269,7 +265,7 @@ public class SetValueTests extends AbstractExpressionTests {
 				SpelUtilities.printAbstractSyntaxTree(System.out, e);
 			}
 			StandardEvaluationContext lContext = TestScenarioCreator.getTestEvaluationContext();
-			assertTrue("Expression is not writeable but should be", e.isWritable(lContext));
+			assertThat(e.isWritable(lContext)).as("Expression is not writeable but should be").isTrue();
 			e.setValue(lContext, value);
 			Object a = expectedValue;
 			Object b = e.getValue(lContext);

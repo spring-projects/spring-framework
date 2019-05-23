@@ -26,8 +26,7 @@ import javax.persistence.spi.ProviderUtil;
 import org.junit.After;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -73,9 +72,9 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 		}
 		lemfb.afterPropertiesSet();
 
-		assertSame(entityManagerName, actualName);
+		assertThat(actualName).isSameAs(entityManagerName);
 		if (props != null) {
-			assertEquals(props, actualProps);
+			assertThat((Object) actualProps).isEqualTo(props);
 		}
 		checkInvariants(lemfb);
 

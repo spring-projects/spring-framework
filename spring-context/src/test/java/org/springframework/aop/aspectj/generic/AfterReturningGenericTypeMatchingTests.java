@@ -29,7 +29,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests ensuring that after-returning advice for generic parameters bound to
@@ -62,42 +62,42 @@ public class AfterReturningGenericTypeMatchingTests {
 	@Test
 	public void testReturnTypeExactMatching() {
 		testBean.getStrings();
-		assertEquals(1, counterAspect.getStringsInvocationsCount);
-		assertEquals(0, counterAspect.getIntegersInvocationsCount);
+		assertThat(counterAspect.getStringsInvocationsCount).isEqualTo(1);
+		assertThat(counterAspect.getIntegersInvocationsCount).isEqualTo(0);
 
 		counterAspect.reset();
 
 		testBean.getIntegers();
-		assertEquals(0, counterAspect.getStringsInvocationsCount);
-		assertEquals(1, counterAspect.getIntegersInvocationsCount);
+		assertThat(counterAspect.getStringsInvocationsCount).isEqualTo(0);
+		assertThat(counterAspect.getIntegersInvocationsCount).isEqualTo(1);
 	}
 
 	@Test
 	public void testReturnTypeRawMatching() {
 		testBean.getStrings();
-		assertEquals(1, counterAspect.getRawsInvocationsCount);
+		assertThat(counterAspect.getRawsInvocationsCount).isEqualTo(1);
 
 		counterAspect.reset();
 
 		testBean.getIntegers();
-		assertEquals(1, counterAspect.getRawsInvocationsCount);
+		assertThat(counterAspect.getRawsInvocationsCount).isEqualTo(1);
 	}
 
 	@Test
 	public void testReturnTypeUpperBoundMatching() {
 		testBean.getIntegers();
-		assertEquals(1, counterAspect.getNumbersInvocationsCount);
+		assertThat(counterAspect.getNumbersInvocationsCount).isEqualTo(1);
 	}
 
 	@Test
 	public void testReturnTypeLowerBoundMatching() {
 		testBean.getTestBeans();
-		assertEquals(1, counterAspect.getTestBeanInvocationsCount);
+		assertThat(counterAspect.getTestBeanInvocationsCount).isEqualTo(1);
 
 		counterAspect.reset();
 
 		testBean.getEmployees();
-		assertEquals(0, counterAspect.getTestBeanInvocationsCount);
+		assertThat(counterAspect.getTestBeanInvocationsCount).isEqualTo(0);
 	}
 
 }

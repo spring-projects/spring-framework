@@ -32,9 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for {@link DirtiesContext.HierarchyMode}
@@ -99,28 +97,28 @@ public class DirtiesContextWithContextHierarchyTests {
 	}
 
 	private void assertCleanParentContext() {
-		assertEquals("foo", foo.toString());
+		assertThat(foo.toString()).isEqualTo("foo");
 	}
 
 	private void assertCleanChildContext() {
-		assertEquals("baz-child", baz.toString());
+		assertThat(baz.toString()).isEqualTo("baz-child");
 	}
 
 	private void assertDirtyParentContext() {
-		assertEquals("oof", foo.toString());
+		assertThat(foo.toString()).isEqualTo("oof");
 	}
 
 	private void assertDirtyChildContext() {
-		assertEquals("dlihc-zab", baz.toString());
+		assertThat(baz.toString()).isEqualTo("dlihc-zab");
 	}
 
 	// -------------------------------------------------------------------------
 
 	@Before
 	public void verifyContextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNotNull("parent ApplicationContext", context.getParent());
-		assertNull("grandparent ApplicationContext", context.getParent().getParent());
+		assertThat(context).as("child ApplicationContext").isNotNull();
+		assertThat(context.getParent()).as("parent ApplicationContext").isNotNull();
+		assertThat(context.getParent().getParent()).as("grandparent ApplicationContext").isNull();
 	}
 
 	@Test

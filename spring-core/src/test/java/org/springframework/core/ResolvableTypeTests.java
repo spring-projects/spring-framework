@@ -54,9 +54,6 @@ import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
@@ -106,8 +103,8 @@ public class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class);
 		assertThat(type.getType()).isEqualTo(ExtendsList.class);
 		assertThat(type.getRawClass()).isEqualTo(ExtendsList.class);
-		assertTrue(type.isAssignableFrom(ExtendsList.class));
-		assertFalse(type.isAssignableFrom(ArrayList.class));
+		assertThat(type.isAssignableFrom(ExtendsList.class)).isTrue();
+		assertThat(type.isAssignableFrom(ArrayList.class)).isFalse();
 	}
 
 	@Test
@@ -115,8 +112,8 @@ public class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forClass(null);
 		assertThat(type.getType()).isEqualTo(Object.class);
 		assertThat(type.getRawClass()).isEqualTo(Object.class);
-		assertTrue(type.isAssignableFrom(Object.class));
-		assertTrue(type.isAssignableFrom(String.class));
+		assertThat(type.isAssignableFrom(Object.class)).isTrue();
+		assertThat(type.isAssignableFrom(String.class)).isTrue();
 	}
 
 	@Test
@@ -124,8 +121,8 @@ public class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forRawClass(ExtendsList.class);
 		assertThat(type.getType()).isEqualTo(ExtendsList.class);
 		assertThat(type.getRawClass()).isEqualTo(ExtendsList.class);
-		assertTrue(type.isAssignableFrom(ExtendsList.class));
-		assertFalse(type.isAssignableFrom(ArrayList.class));
+		assertThat(type.isAssignableFrom(ExtendsList.class)).isTrue();
+		assertThat(type.isAssignableFrom(ArrayList.class)).isFalse();
 	}
 
 	@Test
@@ -133,8 +130,8 @@ public class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forRawClass(null);
 		assertThat(type.getType()).isEqualTo(Object.class);
 		assertThat(type.getRawClass()).isEqualTo(Object.class);
-		assertTrue(type.isAssignableFrom(Object.class));
-		assertTrue(type.isAssignableFrom(String.class));
+		assertThat(type.isAssignableFrom(Object.class)).isTrue();
+		assertThat(type.isAssignableFrom(String.class)).isTrue();
 	}
 
 	@Test
@@ -186,8 +183,8 @@ public class ResolvableTypeTests {
 		assertThat(type2.resolve()).isEqualTo(List.class);
 		assertThat(type2.getSource()).isSameAs(field2);
 
-		assertEquals(type, type2);
-		assertEquals(type.hashCode(), type2.hashCode());
+		assertThat(type2).isEqualTo(type);
+		assertThat(type2.hashCode()).isEqualTo(type.hashCode());
 	}
 
 	@Test
@@ -899,7 +896,7 @@ public class ResolvableTypeTests {
 		Type sourceType = Methods.class.getMethod("charSequenceReturn").getGenericReturnType();
 		ResolvableType reflectiveType = ResolvableType.forType(sourceType);
 		ResolvableType declaredType = ResolvableType.forType(new ParameterizedTypeReference<List<CharSequence>>() {});
-		assertEquals(reflectiveType, declaredType);
+		assertThat(declaredType).isEqualTo(reflectiveType);
 	}
 
 	@Test
@@ -985,19 +982,19 @@ public class ResolvableTypeTests {
 		assertThatResolvableType(charSequenceType).isAssignableFrom(charSequenceType, stringType).isNotAssignableFrom(objectType);
 		assertThatResolvableType(stringType).isAssignableFrom(stringType).isNotAssignableFrom(objectType, charSequenceType);
 
-		assertTrue(objectType.isAssignableFrom(String.class));
-		assertTrue(objectType.isAssignableFrom(StringBuilder.class));
-		assertTrue(charSequenceType.isAssignableFrom(String.class));
-		assertTrue(charSequenceType.isAssignableFrom(StringBuilder.class));
-		assertTrue(stringType.isAssignableFrom(String.class));
-		assertFalse(stringType.isAssignableFrom(StringBuilder.class));
+		assertThat(objectType.isAssignableFrom(String.class)).isTrue();
+		assertThat(objectType.isAssignableFrom(StringBuilder.class)).isTrue();
+		assertThat(charSequenceType.isAssignableFrom(String.class)).isTrue();
+		assertThat(charSequenceType.isAssignableFrom(StringBuilder.class)).isTrue();
+		assertThat(stringType.isAssignableFrom(String.class)).isTrue();
+		assertThat(stringType.isAssignableFrom(StringBuilder.class)).isFalse();
 
-		assertTrue(objectType.isInstance("a String"));
-		assertTrue(objectType.isInstance(new StringBuilder("a StringBuilder")));
-		assertTrue(charSequenceType.isInstance("a String"));
-		assertTrue(charSequenceType.isInstance(new StringBuilder("a StringBuilder")));
-		assertTrue(stringType.isInstance("a String"));
-		assertFalse(stringType.isInstance(new StringBuilder("a StringBuilder")));
+		assertThat(objectType.isInstance("a String")).isTrue();
+		assertThat(objectType.isInstance(new StringBuilder("a StringBuilder"))).isTrue();
+		assertThat(charSequenceType.isInstance("a String")).isTrue();
+		assertThat(charSequenceType.isInstance(new StringBuilder("a StringBuilder"))).isTrue();
+		assertThat(stringType.isInstance("a String")).isTrue();
+		assertThat(stringType.isInstance(new StringBuilder("a StringBuilder"))).isFalse();
 	}
 
 	@Test
@@ -1282,8 +1279,8 @@ public class ResolvableTypeTests {
 	@Test
 	public void testSpr11219() throws Exception {
 		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
-		assertTrue(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class)));
-		assertEquals("java.util.Collection<org.springframework.core.ResolvableTypeTests$IBase<?>>", type.toString());
+		assertThat(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class))).isTrue();
+		assertThat(type.toString()).isEqualTo("java.util.Collection<org.springframework.core.ResolvableTypeTests$IBase<?>>");
 	}
 
 	@Test
@@ -1301,8 +1298,8 @@ public class ResolvableTypeTests {
 		ResolvableType collectionClass = ResolvableType.forRawClass(Collection.class);
 		ResolvableType setClass = ResolvableType.forRawClass(Set.class);
 		ResolvableType fromReturnType = ResolvableType.forMethodReturnType(Methods.class.getMethod("wildcardSet"));
-		assertTrue(collectionClass.isAssignableFrom(fromReturnType));
-		assertTrue(setClass.isAssignableFrom(fromReturnType));
+		assertThat(collectionClass.isAssignableFrom(fromReturnType)).isTrue();
+		assertThat(setClass.isAssignableFrom(fromReturnType)).isTrue();
 	}
 
 	@Test

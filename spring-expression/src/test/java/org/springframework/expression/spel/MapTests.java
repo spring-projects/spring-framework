@@ -28,10 +28,8 @@ import org.springframework.expression.spel.ast.InlineMap;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test usage of inline maps.
@@ -125,13 +123,14 @@ public class MapTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expression = (SpelExpression) parser.parseExpression(expressionText);
 		SpelNode node = expression.getAST();
-		assertTrue(node instanceof InlineMap);
+		boolean condition = node instanceof InlineMap;
+		assertThat(condition).isTrue();
 		InlineMap inlineMap = (InlineMap) node;
 		if (expectedToBeConstant) {
-			assertTrue(inlineMap.isConstant());
+			assertThat(inlineMap.isConstant()).isTrue();
 		}
 		else {
-			assertFalse(inlineMap.isConstant());
+			assertThat(inlineMap.isConstant()).isFalse();
 		}
 	}
 
@@ -154,35 +153,35 @@ public class MapTests extends AbstractExpressionTests {
 
 		expression = (SpelExpression) parser.parseExpression("foo[T]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("TV", o);
+		assertThat(o).isEqualTo("TV");
 
 		expression = (SpelExpression) parser.parseExpression("foo[t]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("tv", o);
+		assertThat(o).isEqualTo("tv");
 
 		expression = (SpelExpression) parser.parseExpression("foo[NEW]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("VALUE", o);
+		assertThat(o).isEqualTo("VALUE");
 
 		expression = (SpelExpression) parser.parseExpression("foo[new]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("value", o);
+		assertThat(o).isEqualTo("value");
 
 		expression = (SpelExpression) parser.parseExpression("foo['abc.def']");
 		o = expression.getValue(new MapHolder());
-		assertEquals("value", o);
+		assertThat(o).isEqualTo("value");
 
 		expression = (SpelExpression)parser.parseExpression("foo[foo[NEW]]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("37",o);
+		assertThat(o).isEqualTo("37");
 
 		expression = (SpelExpression)parser.parseExpression("foo[foo[new]]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("38",o);
+		assertThat(o).isEqualTo("38");
 
 		expression = (SpelExpression)parser.parseExpression("foo[foo[foo[T]]]");
 		o = expression.getValue(new MapHolder());
-		assertEquals("value",o);
+		assertThat(o).isEqualTo("value");
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

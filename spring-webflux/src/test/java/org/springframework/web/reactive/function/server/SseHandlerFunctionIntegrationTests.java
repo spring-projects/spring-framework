@@ -29,8 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -98,18 +97,18 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
-					assertEquals("0", event.id());
-					assertEquals("foo", event.data());
-					assertEquals("bar", event.comment());
-					assertNull(event.event());
-					assertNull(event.retry());
+					assertThat(event.id()).isEqualTo("0");
+					assertThat(event.data()).isEqualTo("foo");
+					assertThat(event.comment()).isEqualTo("bar");
+					assertThat(event.event()).isNull();
+					assertThat(event.retry()).isNull();
 				})
 				.consumeNextWith( event -> {
-					assertEquals("1", event.id());
-					assertEquals("foo", event.data());
-					assertEquals("bar", event.comment());
-					assertNull(event.event());
-					assertNull(event.retry());
+					assertThat(event.id()).isEqualTo("1");
+					assertThat(event.data()).isEqualTo("foo");
+					assertThat(event.comment()).isEqualTo("bar");
+					assertThat(event.event()).isNull();
+					assertThat(event.retry()).isNull();
 				})
 				.expectComplete()
 				.verify(Duration.ofSeconds(5L));

@@ -33,10 +33,8 @@ import org.springframework.messaging.handler.invocation.ResolvableMethod;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.messaging.handler.annotation.MessagingPredicates.header;
 import static org.springframework.messaging.handler.annotation.MessagingPredicates.headerPlain;
 
@@ -64,15 +62,15 @@ public class HeaderMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.resolvable.annot(headerPlain()).arg()));
-		assertFalse(this.resolver.supportsParameter(this.resolvable.annotNotPresent(Header.class).arg()));
+		assertThat(this.resolver.supportsParameter(this.resolvable.annot(headerPlain()).arg())).isTrue();
+		assertThat(this.resolver.supportsParameter(this.resolvable.annotNotPresent(Header.class).arg())).isFalse();
 	}
 
 	@Test
 	public void resolveArgument() throws Exception {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeader("param1", "foo").build();
 		Object result = this.resolver.resolveArgument(this.resolvable.annot(headerPlain()).arg(), message);
-		assertEquals("foo", result);
+		assertThat(result).isEqualTo("foo");
 	}
 
 	@Test  // SPR-11326
@@ -80,7 +78,7 @@ public class HeaderMethodArgumentResolverTests {
 		TestMessageHeaderAccessor headers = new TestMessageHeaderAccessor();
 		headers.setNativeHeader("param1", "foo");
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-		assertEquals("foo", this.resolver.resolveArgument(this.resolvable.annot(headerPlain()).arg(), message));
+		assertThat(this.resolver.resolveArgument(this.resolvable.annot(headerPlain()).arg(), message)).isEqualTo("foo");
 	}
 
 	@Test
@@ -90,11 +88,11 @@ public class HeaderMethodArgumentResolverTests {
 		headers.setNativeHeader("param1", "native-foo");
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
 
-		assertEquals("foo", this.resolver.resolveArgument(
-				this.resolvable.annot(headerPlain()).arg(), message));
+		assertThat(this.resolver.resolveArgument(
+				this.resolvable.annot(headerPlain()).arg(), message)).isEqualTo("foo");
 
-		assertEquals("native-foo", this.resolver.resolveArgument(
-				this.resolvable.annot(header("nativeHeaders.param1")).arg(), message));
+		assertThat(this.resolver.resolveArgument(
+				this.resolvable.annot(header("nativeHeaders.param1")).arg(), message)).isEqualTo("native-foo");
 	}
 
 	@Test
@@ -108,7 +106,7 @@ public class HeaderMethodArgumentResolverTests {
 	public void resolveArgumentDefaultValue() throws Exception {
 		Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
 		Object result = this.resolver.resolveArgument(this.resolvable.annot(header("name", "bar")).arg(), message);
-		assertEquals("bar", result);
+		assertThat(result).isEqualTo("bar");
 	}
 
 	@Test
@@ -118,7 +116,7 @@ public class HeaderMethodArgumentResolverTests {
 			Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).build();
 			MethodParameter param = this.resolvable.annot(header("name", "#{systemProperties.systemProperty}")).arg();
 			Object result = resolver.resolveArgument(param, message);
-			assertEquals("sysbar", result);
+			assertThat(result).isEqualTo("sysbar");
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -132,7 +130,7 @@ public class HeaderMethodArgumentResolverTests {
 			Message<byte[]> message = MessageBuilder.withPayload(new byte[0]).setHeader("sysbar", "foo").build();
 			MethodParameter param = this.resolvable.annot(header("#{systemProperties.systemProperty}")).arg();
 			Object result = resolver.resolveArgument(param, message);
-			assertEquals("foo", result);
+			assertThat(result).isEqualTo("foo");
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -144,7 +142,7 @@ public class HeaderMethodArgumentResolverTests {
 		Message<String> message = MessageBuilder.withPayload("foo").setHeader("foo", "bar").build();
 		MethodParameter param = this.resolvable.annot(header("foo")).arg(Optional.class, String.class);
 		Object result = resolver.resolveArgument(param, message);
-		assertEquals(Optional.of("bar"), result);
+		assertThat(result).isEqualTo(Optional.of("bar"));
 	}
 
 	@Test
@@ -152,7 +150,7 @@ public class HeaderMethodArgumentResolverTests {
 		Message<String> message = MessageBuilder.withPayload("foo").build();
 		MethodParameter param = this.resolvable.annot(header("foo")).arg(Optional.class, String.class);
 		Object result = resolver.resolveArgument(param, message);
-		assertEquals(Optional.empty(), result);
+		assertThat(result).isEqualTo(Optional.empty());
 	}
 
 

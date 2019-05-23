@@ -32,12 +32,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -184,14 +180,13 @@ public class SubProtocolWebSocketHandlerTests {
 		this.webSocketHandler.start();
 		this.webSocketHandler.handleMessage(session1, new TextMessage("foo"));
 
-		assertTrue(session1.isOpen());
-		assertNull(session1.getCloseStatus());
+		assertThat(session1.isOpen()).isTrue();
+		assertThat(session1.getCloseStatus()).isNull();
 
-		assertFalse(session2.isOpen());
-		assertEquals(CloseStatus.SESSION_NOT_RELIABLE, session2.getCloseStatus());
+		assertThat(session2.isOpen()).isFalse();
+		assertThat(session2.getCloseStatus()).isEqualTo(CloseStatus.SESSION_NOT_RELIABLE);
 
-		assertNotEquals("lastSessionCheckTime not updated", sixtyOneSecondsAgo,
-				handlerAccessor.getPropertyValue("lastSessionCheckTime"));
+		assertThat(handlerAccessor.getPropertyValue("lastSessionCheckTime")).as("lastSessionCheckTime not updated").isNotEqualTo(sixtyOneSecondsAgo);
 	}
 
 }

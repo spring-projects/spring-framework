@@ -29,7 +29,6 @@ import org.springframework.jndi.JndiTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -63,7 +62,7 @@ public class LocalSlsbInvokerInterceptorTests {
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
 			public Object lookup(String name) throws NamingException {
-				assertTrue(jndiName.equals(name));
+				assertThat(jndiName.equals(name)).isTrue();
 				throw nex;
 			}
 		};
@@ -93,7 +92,7 @@ public class LocalSlsbInvokerInterceptorTests {
 		pf.addAdvice(si);
 		BusinessMethods target = (BusinessMethods) pf.getProxy();
 
-		assertTrue(target.targetMethod() == retVal);
+		assertThat(target.targetMethod() == retVal).isTrue();
 
 		verify(mockContext).close();
 		verify(ejb).remove();
@@ -114,7 +113,7 @@ public class LocalSlsbInvokerInterceptorTests {
 		pf.addAdvice(si);
 		BusinessMethods target = (BusinessMethods) pf.getProxy();
 
-		assertTrue(target.targetMethod() == retVal);
+		assertThat(target.targetMethod() == retVal).isTrue();
 
 		verify(mockContext).close();
 		verify(ejb).remove();

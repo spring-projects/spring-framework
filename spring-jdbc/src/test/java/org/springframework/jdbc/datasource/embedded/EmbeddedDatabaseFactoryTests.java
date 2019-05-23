@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Keith Donald
@@ -37,7 +37,7 @@ public class EmbeddedDatabaseFactoryTests {
 		StubDatabasePopulator populator = new StubDatabasePopulator();
 		factory.setDatabasePopulator(populator);
 		EmbeddedDatabase db = factory.getDatabase();
-		assertTrue(populator.populateCalled);
+		assertThat(populator.populateCalled).isTrue();
 		db.shutdown();
 	}
 

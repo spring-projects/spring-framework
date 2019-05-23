@@ -52,7 +52,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -85,7 +85,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
+				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 
@@ -99,8 +99,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(body -> assertEquals(
-						"Map[[fieldPart],[fileParts:foo.txt,fileParts:logo.png],[jsonPart]]", body))
+				.consumeNextWith(body -> assertThat(body).isEqualTo("Map[[fieldPart],[fileParts:foo.txt,fileParts:logo.png],[jsonPart]]"))
 				.verifyComplete();
 	}
 
@@ -114,8 +113,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(body -> assertEquals(
-						"[fieldPart,fileParts:foo.txt,fileParts:logo.png,jsonPart]", body))
+				.consumeNextWith(body -> assertThat(body).isEqualTo("[fieldPart,fileParts:foo.txt,fileParts:logo.png,jsonPart]"))
 				.verifyComplete();
 	}
 
@@ -129,8 +127,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(body -> assertEquals(
-						"[fileParts:foo.txt,fileParts:logo.png]", body))
+				.consumeNextWith(body -> assertThat(body).isEqualTo("[fileParts:foo.txt,fileParts:logo.png]"))
 				.verifyComplete();
 	}
 
@@ -144,8 +141,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(body -> assertEquals(
-						"[fileParts:foo.txt]", body))
+				.consumeNextWith(body -> assertThat(body).isEqualTo("[fileParts:foo.txt]"))
 				.verifyComplete();
 	}
 
@@ -159,8 +155,7 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(body -> assertEquals(
-						"FormBean[fieldValue,[fileParts:foo.txt,fileParts:logo.png]]", body))
+				.consumeNextWith(body -> assertThat(body).isEqualTo("FormBean[fieldValue,[fileParts:foo.txt,fileParts:logo.png]]"))
 				.verifyComplete();
 	}
 
@@ -194,11 +189,11 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 				@RequestPart("fileParts") FilePart fileParts,
 				@RequestPart("jsonPart") Mono<Person> personMono) {
 
-			assertEquals("fieldValue", fieldPart.value());
-			assertEquals("fileParts:foo.txt", partDescription(fileParts));
+			assertThat(fieldPart.value()).isEqualTo("fieldValue");
+			assertThat(partDescription(fileParts)).isEqualTo("fileParts:foo.txt");
 
 			StepVerifier.create(personMono)
-					.consumeNextWith(p -> assertEquals("Jason", p.getName()))
+					.consumeNextWith(p -> assertThat(p.getName()).isEqualTo("Jason"))
 					.verifyComplete();
 		}
 

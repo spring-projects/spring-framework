@@ -23,10 +23,8 @@ import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture with {@link HandlerMethodArgumentResolverComposite}.
@@ -56,8 +54,8 @@ public class HandlerMethodArgumentResolverCompositeTests {
 	public void supportsParameter() {
 		this.resolverComposite.addResolver(new StubArgumentResolver(Integer.class));
 
-		assertTrue(this.resolverComposite.supportsParameter(paramInt));
-		assertFalse(this.resolverComposite.supportsParameter(paramStr));
+		assertThat(this.resolverComposite.supportsParameter(paramInt)).isTrue();
+		assertThat(this.resolverComposite.supportsParameter(paramStr)).isFalse();
 	}
 
 	@Test
@@ -65,7 +63,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 		this.resolverComposite.addResolver(new StubArgumentResolver(55));
 		Object resolvedValue = this.resolverComposite.resolveArgument(paramInt, null, null, null);
 
-		assertEquals(55, resolvedValue);
+		assertThat(resolvedValue).isEqualTo(55);
 	}
 
 	@Test
@@ -74,7 +72,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 		this.resolverComposite.addResolver(new StubArgumentResolver(2));
 		Object resolvedValue = this.resolverComposite.resolveArgument(paramInt, null, null, null);
 
-		assertEquals("Didn't use the first registered resolver", 1, resolvedValue);
+		assertThat(resolvedValue).as("Didn't use the first registered resolver").isEqualTo(1);
 	}
 
 	@Test

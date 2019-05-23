@@ -38,7 +38,7 @@ import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link JettyWebSocketClient}.
@@ -83,8 +83,8 @@ public class JettyWebSocketClientTests {
 
 		this.wsSession = this.client.doHandshake(new TextWebSocketHandler(), headers, new URI(this.wsUrl)).get();
 
-		assertEquals(this.wsUrl, this.wsSession.getUri().toString());
-		assertEquals("echo", this.wsSession.getAcceptedProtocol());
+		assertThat(this.wsSession.getUri().toString()).isEqualTo(this.wsUrl);
+		assertThat(this.wsSession.getAcceptedProtocol()).isEqualTo("echo");
 	}
 
 	@Test
@@ -96,8 +96,8 @@ public class JettyWebSocketClientTests {
 		this.client.setTaskExecutor(new SimpleAsyncTaskExecutor());
 		this.wsSession = this.client.doHandshake(new TextWebSocketHandler(), headers, new URI(this.wsUrl)).get();
 
-		assertEquals(this.wsUrl, this.wsSession.getUri().toString());
-		assertEquals("echo", this.wsSession.getAcceptedProtocol());
+		assertThat(this.wsSession.getUri().toString()).isEqualTo(this.wsUrl);
+		assertThat(this.wsSession.getAcceptedProtocol()).isEqualTo("echo");
 	}
 
 

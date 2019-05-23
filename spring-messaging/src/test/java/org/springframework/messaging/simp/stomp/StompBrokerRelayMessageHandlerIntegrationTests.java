@@ -49,10 +49,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
@@ -140,7 +138,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			}
 		});
 		this.activeMQBroker.stop();
-		assertTrue("Broker did not stop", latch.await(5, TimeUnit.SECONDS));
+		assertThat(latch.await(5, TimeUnit.SECONDS)).as("Broker did not stop").isTrue();
 		logger.debug("Broker stopped");
 	}
 
@@ -263,8 +261,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		public void expectBrokerAvailabilityEvent(boolean isBrokerAvailable) throws InterruptedException {
 			BrokerAvailabilityEvent event = this.eventQueue.poll(20000, TimeUnit.MILLISECONDS);
-			assertNotNull("Times out waiting for BrokerAvailabilityEvent[" + isBrokerAvailable + "]", event);
-			assertEquals(isBrokerAvailable, event.isBrokerAvailable());
+			assertThat(event).as("Times out waiting for BrokerAvailabilityEvent[" + isBrokerAvailable + "]").isNotNull();
+			assertThat(event.isBrokerAvailable()).isEqualTo(isBrokerAvailable);
 		}
 	}
 
@@ -286,9 +284,9 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 					new ArrayList<>(Arrays.<MessageExchange>asList(messageExchanges));
 			while (expectedMessages.size() > 0) {
 				Message<?> message = this.queue.poll(10000, TimeUnit.MILLISECONDS);
-				assertNotNull("Timed out waiting for messages, expected [" + expectedMessages + "]", message);
+				assertThat(message).as("Timed out waiting for messages, expected [" + expectedMessages + "]").isNotNull();
 				MessageExchange match = findMatch(expectedMessages, message);
-				assertNotNull("Unexpected message=" + message + ", expected [" + expectedMessages + "]", match);
+				assertThat(match).as("Unexpected message=" + message + ", expected [" + expectedMessages + "]").isNotNull();
 				expectedMessages.remove(match);
 			}
 		}

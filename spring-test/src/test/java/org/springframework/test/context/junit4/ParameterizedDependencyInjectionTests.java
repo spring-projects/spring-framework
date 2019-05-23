@@ -36,8 +36,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Simple JUnit 4 based integration test which demonstrates how to use JUnit's
@@ -93,18 +92,16 @@ public class ParameterizedDependencyInjectionTests {
 		invocationCount.incrementAndGet();
 
 		// Verifying dependency injection:
-		assertNotNull("The pet field should have been autowired.", this.pet);
+		assertThat(this.pet).as("The pet field should have been autowired.").isNotNull();
 
 		// Verifying 'parameterized' support:
 		Employee employee = this.applicationContext.getBean(this.employeeBeanName, Employee.class);
-		assertEquals("Name of the employee configured as bean [" + this.employeeBeanName + "].", this.employeeName,
-			employee.getName());
+		assertThat(employee.getName()).as("Name of the employee configured as bean [" + this.employeeBeanName + "].").isEqualTo(this.employeeName);
 	}
 
 	@AfterClass
 	public static void verifyNumParameterizedRuns() {
-		assertEquals("Number of times the parameterized test method was executed.", employeeData().length,
-			invocationCount.get());
+		assertThat(invocationCount.get()).as("Number of times the parameterized test method was executed.").isEqualTo(employeeData().length);
 	}
 
 }

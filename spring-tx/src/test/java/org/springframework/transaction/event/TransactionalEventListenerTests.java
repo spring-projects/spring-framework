@@ -46,8 +46,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMPLETION;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_ROLLBACK;
@@ -375,16 +375,16 @@ public class TransactionalEventListenerTests {
 			}
 			for (String phase : phases) {
 				List<Object> eventsForPhase = getEvents(phase);
-				assertEquals("Expected no events for phase '" + phase + "' " +
-						"but got " + eventsForPhase + ":", 0, eventsForPhase.size());
+				assertThat(eventsForPhase.size()).as("Expected no events for phase '" + phase + "' " +
+								"but got " + eventsForPhase + ":").isEqualTo(0);
 			}
 		}
 
 		public void assertEvents(String phase, Object... expected) {
 			List<Object> actual = getEvents(phase);
-			assertEquals("wrong number of events for phase '" + phase + "'", expected.length, actual.size());
+			assertThat(actual.size()).as("wrong number of events for phase '" + phase + "'").isEqualTo(expected.length);
 			for (int i = 0; i < expected.length; i++) {
-				assertEquals("Wrong event for phase '" + phase + "' at index " + i, expected[i], actual.get(i));
+				assertThat(actual.get(i)).as("Wrong event for phase '" + phase + "' at index " + i).isEqualTo(expected[i]);
 			}
 		}
 
@@ -393,8 +393,8 @@ public class TransactionalEventListenerTests {
 			for (Map.Entry<String, List<Object>> entry : this.events.entrySet()) {
 				size += entry.getValue().size();
 			}
-			assertEquals("Wrong number of total events (" + this.events.size() + ") " +
-					"registered phase(s)", number, size);
+			assertThat(size).as("Wrong number of total events (" + this.events.size() + ") " +
+						"registered phase(s)").isEqualTo(number);
 		}
 	}
 

@@ -37,9 +37,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link AbstractView}.
@@ -52,7 +50,6 @@ public class AbstractViewTests {
 
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void resolveAsyncAttributes() {
 
 		TestBean testBean1 = new TestBean("Bean1");
@@ -71,17 +68,17 @@ public class AbstractViewTests {
 		StepVerifier.create(view.render(inMap, null, this.exchange)).verifyComplete();
 
 		Map<String, Object> outMap = view.attributes;
-		assertEquals(testBean1, outMap.get("attr1"));
-		assertEquals(Arrays.asList(testBean1, testBean2), outMap.get("attr2"));
-		assertEquals(testBean2, outMap.get("attr3"));
-		assertEquals(Arrays.asList(testBean1, testBean2), outMap.get("attr4"));
-		assertNull(outMap.get("attr5"));
+		assertThat(outMap.get("attr1")).isEqualTo(testBean1);
+		assertThat(outMap.get("attr2")).isEqualTo(Arrays.asList(testBean1, testBean2));
+		assertThat(outMap.get("attr3")).isEqualTo(testBean2);
+		assertThat(outMap.get("attr4")).isEqualTo(Arrays.asList(testBean1, testBean2));
+		assertThat(outMap.get("attr5")).isNull();
 
-		assertNotNull(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr1"));
-		assertNotNull(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr3"));
-		assertNull(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr2"));
-		assertNull(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr4"));
-		assertNull(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr5"));
+		assertThat(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr1")).isNotNull();
+		assertThat(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr3")).isNotNull();
+		assertThat(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr2")).isNull();
+		assertThat(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr4")).isNull();
+		assertThat(outMap.get(BindingResult.MODEL_KEY_PREFIX + "attr5")).isNull();
 	}
 
 	private static class TestView extends AbstractView {

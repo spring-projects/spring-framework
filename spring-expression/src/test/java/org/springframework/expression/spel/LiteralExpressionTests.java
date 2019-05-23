@@ -25,8 +25,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 /**
  * @author Andy Clement
@@ -45,10 +43,10 @@ public class LiteralExpressionTests {
 		assertThat(lEx.getValue(new Rooty(), String.class)).isInstanceOf(String.class).isEqualTo("somevalue");
 		assertThat(lEx.getValue(ctx, new Rooty())).isInstanceOf(String.class).isEqualTo("somevalue");
 		assertThat(lEx.getValue(ctx, new Rooty(),String.class)).isInstanceOf(String.class).isEqualTo("somevalue");
-		assertEquals("somevalue", lEx.getExpressionString());
-		assertFalse(lEx.isWritable(new StandardEvaluationContext()));
-		assertFalse(lEx.isWritable(new Rooty()));
-		assertFalse(lEx.isWritable(new StandardEvaluationContext(), new Rooty()));
+		assertThat(lEx.getExpressionString()).isEqualTo("somevalue");
+		assertThat(lEx.isWritable(new StandardEvaluationContext())).isFalse();
+		assertThat(lEx.isWritable(new Rooty())).isFalse();
+		assertThat(lEx.isWritable(new StandardEvaluationContext(), new Rooty())).isFalse();
 	}
 
 	static class Rooty {}
@@ -69,14 +67,14 @@ public class LiteralExpressionTests {
 	@Test
 	public void testGetValueType() throws Exception {
 		LiteralExpression lEx = new LiteralExpression("somevalue");
-		assertEquals(String.class, lEx.getValueType());
-		assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext()));
-		assertEquals(String.class, lEx.getValueType(new Rooty()));
-		assertEquals(String.class, lEx.getValueType(new StandardEvaluationContext(), new Rooty()));
-		assertEquals(String.class, lEx.getValueTypeDescriptor().getType());
-		assertEquals(String.class, lEx.getValueTypeDescriptor(new StandardEvaluationContext()).getType());
-		assertEquals(String.class, lEx.getValueTypeDescriptor(new Rooty()).getType());
-		assertEquals(String.class, lEx.getValueTypeDescriptor(new StandardEvaluationContext(), new Rooty()).getType());
+		assertThat(lEx.getValueType()).isEqualTo(String.class);
+		assertThat(lEx.getValueType(new StandardEvaluationContext())).isEqualTo(String.class);
+		assertThat(lEx.getValueType(new Rooty())).isEqualTo(String.class);
+		assertThat(lEx.getValueType(new StandardEvaluationContext(), new Rooty())).isEqualTo(String.class);
+		assertThat(lEx.getValueTypeDescriptor().getType()).isEqualTo(String.class);
+		assertThat(lEx.getValueTypeDescriptor(new StandardEvaluationContext()).getType()).isEqualTo(String.class);
+		assertThat(lEx.getValueTypeDescriptor(new Rooty()).getType()).isEqualTo(String.class);
+		assertThat(lEx.getValueTypeDescriptor(new StandardEvaluationContext(), new Rooty()).getType()).isEqualTo(String.class);
 	}
 
 }

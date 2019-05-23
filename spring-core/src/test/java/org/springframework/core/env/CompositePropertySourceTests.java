@@ -20,7 +20,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link CompositePropertySource}.
@@ -43,7 +43,7 @@ public class CompositePropertySourceTests {
 		int i1 = s.indexOf("name='p1'");
 		int i2 = s.indexOf("name='p2'");
 		int i3 = s.indexOf("name='p3'");
-		assertTrue("Bad order: " + s, ((i1 < i2) && (i2 < i3)));
+		assertThat(((i1 < i2) && (i2 < i3))).as("Bad order: " + s).isTrue();
 	}
 
 }

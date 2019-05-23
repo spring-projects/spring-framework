@@ -27,10 +27,6 @@ import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesC
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link AnnotationAttributes}.
@@ -67,7 +63,7 @@ public class AnnotationAttributesTests {
 		assertThat(attributes.getBoolean("bool1")).isEqualTo(true);
 		assertThat(attributes.getBoolean("bool2")).isEqualTo(false);
 		assertThat(attributes.<Color>getEnum("color")).isEqualTo(Color.RED);
-		assertTrue(attributes.getClass("class").equals(Integer.class));
+		assertThat(attributes.getClass("class").equals(Integer.class)).isTrue();
 		assertThat(attributes.getClassArray("classes")).isEqualTo(new Class<?>[] {Number.class, Short.class, Integer.class});
 		assertThat(attributes.<Integer>getNumber("number")).isEqualTo(42);
 		assertThat(attributes.getAnnotation("anno").<Integer>getNumber("value")).isEqualTo(10);
@@ -101,12 +97,12 @@ public class AnnotationAttributesTests {
 		assertThat(attributes.getClassArray("classes")).isEqualTo(new Class<?>[] {Number.class});
 
 		AnnotationAttributes[] array = attributes.getAnnotationArray("nestedAttributes");
-		assertNotNull(array);
+		assertThat(array).isNotNull();
 		assertThat(array.length).isEqualTo(1);
 		assertThat(array[0].getString("name")).isEqualTo("Dilbert");
 
 		Filter[] filters = attributes.getAnnotationArray("filters", Filter.class);
-		assertNotNull(filters);
+		assertThat(filters).isNotNull();
 		assertThat(filters.length).isEqualTo(1);
 		assertThat(filters[0].pattern()).isEqualTo("foo");
 	}
@@ -123,8 +119,8 @@ public class AnnotationAttributesTests {
 		assertThat(retrievedFilter.pattern()).isEqualTo("foo");
 
 		Filter[] retrievedFilters = attributes.getAnnotationArray("filters", Filter.class);
-		assertNotNull(retrievedFilters);
-		assertEquals(2, retrievedFilters.length);
+		assertThat(retrievedFilters).isNotNull();
+		assertThat(retrievedFilters.length).isEqualTo(2);
 		assertThat(retrievedFilters[1].pattern()).isEqualTo("foo");
 	}
 
@@ -165,12 +161,12 @@ public class AnnotationAttributesTests {
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		attributes.put("value", value);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertEquals(value, attributes.getString(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getString(alias)).isEqualTo(value));
 
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		attributes.put("location1", value);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertEquals(value, attributes.getString(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getString(alias)).isEqualTo(value));
 
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		attributes.put("value", value);
@@ -178,7 +174,7 @@ public class AnnotationAttributesTests {
 		attributes.put("xmlFile", value);
 		attributes.put("groovyScript", value);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertEquals(value, attributes.getString(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getString(alias)).isEqualTo(value));
 	}
 
 	@Test
@@ -189,35 +185,35 @@ public class AnnotationAttributesTests {
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		attributes.put("location1", value);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getStringArray(alias)).isEqualTo(value));
 
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		attributes.put("value", value);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getStringArray(alias)).isEqualTo(value));
 
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		attributes.put("location1", value);
 		attributes.put("value", value);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getStringArray(alias)).isEqualTo(value));
 
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		attributes.put("location1", value);
 		AnnotationUtils.registerDefaultValues(attributes);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getStringArray(alias)).isEqualTo(value));
 
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		attributes.put("value", value);
 		AnnotationUtils.registerDefaultValues(attributes);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getStringArray(alias)).isEqualTo(value));
 
 		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
 		AnnotationUtils.registerDefaultValues(attributes);
 		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
-		aliases.stream().forEach(alias -> assertArrayEquals(new String[] {""}, attributes.getStringArray(alias)));
+		aliases.stream().forEach(alias -> assertThat(attributes.getStringArray(alias)).isEqualTo(new String[] {""}));
 	}
 
 

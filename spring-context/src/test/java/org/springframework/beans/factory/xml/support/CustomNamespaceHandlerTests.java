@@ -62,9 +62,6 @@ import org.springframework.tests.sample.beans.TestBean;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for custom XML namespace handler implementations.
@@ -116,17 +113,17 @@ public class CustomNamespaceHandlerTests {
 	public void testProxyingDecorator() throws Exception {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("debuggingTestBean");
 		assertTestBean(bean);
-		assertTrue(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
-		assertEquals("Incorrect number of advisors", 1, advisors.length);
-		assertEquals("Incorrect advice class", DebugInterceptor.class, advisors[0].getAdvice().getClass());
+		assertThat(advisors.length).as("Incorrect number of advisors").isEqualTo(1);
+		assertThat(advisors[0].getAdvice().getClass()).as("Incorrect advice class").isEqualTo(DebugInterceptor.class);
 	}
 
 	@Test
 	public void testProxyingDecoratorNoInstance() throws Exception {
 		String[] beanNames = this.beanFactory.getBeanNamesForType(ApplicationListener.class);
-		assertTrue(Arrays.asList(beanNames).contains("debuggingTestBeanNoInstance"));
-		assertEquals(ApplicationListener.class, this.beanFactory.getType("debuggingTestBeanNoInstance"));
+		assertThat(Arrays.asList(beanNames).contains("debuggingTestBeanNoInstance")).isTrue();
+		assertThat(this.beanFactory.getType("debuggingTestBeanNoInstance")).isEqualTo(ApplicationListener.class);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				this.beanFactory.getBean("debuggingTestBeanNoInstance"))
 			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(BeanInstantiationException.class));
@@ -136,44 +133,44 @@ public class CustomNamespaceHandlerTests {
 	public void testChainedDecorators() throws Exception {
 		ITestBean bean = (ITestBean) this.beanFactory.getBean("chainedTestBean");
 		assertTestBean(bean);
-		assertTrue(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
-		assertEquals("Incorrect number of advisors", 2, advisors.length);
-		assertEquals("Incorrect advice class", DebugInterceptor.class, advisors[0].getAdvice().getClass());
-		assertEquals("Incorrect advice class", NopInterceptor.class, advisors[1].getAdvice().getClass());
+		assertThat(advisors.length).as("Incorrect number of advisors").isEqualTo(2);
+		assertThat(advisors[0].getAdvice().getClass()).as("Incorrect advice class").isEqualTo(DebugInterceptor.class);
+		assertThat(advisors[1].getAdvice().getClass()).as("Incorrect advice class").isEqualTo(NopInterceptor.class);
 	}
 
 	@Test
 	public void testDecorationViaAttribute() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getBeanDefinition("decorateWithAttribute");
-		assertEquals("foo", beanDefinition.getAttribute("objectName"));
+		assertThat(beanDefinition.getAttribute("objectName")).isEqualTo("foo");
 	}
 
 	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilList() throws Exception {
 		List<?> things = (List<?>) this.beanFactory.getBean("list.of.things");
-		assertNotNull(things);
-		assertEquals(2, things.size());
+		assertThat(things).isNotNull();
+		assertThat(things.size()).isEqualTo(2);
 	}
 
 	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilSet() throws Exception {
 		Set<?> things = (Set<?>) this.beanFactory.getBean("set.of.things");
-		assertNotNull(things);
-		assertEquals(2, things.size());
+		assertThat(things).isNotNull();
+		assertThat(things.size()).isEqualTo(2);
 	}
 
 	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilMap() throws Exception {
 		Map<?, ?> things = (Map<?, ?>) this.beanFactory.getBean("map.of.things");
-		assertNotNull(things);
-		assertEquals(2, things.size());
+		assertThat(things).isNotNull();
+		assertThat(things.size()).isEqualTo(2);
 	}
 
 
 	private void assertTestBean(ITestBean bean) {
-		assertEquals("Invalid name", "Rob Harrop", bean.getName());
-		assertEquals("Invalid age", 23, bean.getAge());
+		assertThat(bean.getName()).as("Invalid name").isEqualTo("Rob Harrop");
+		assertThat(bean.getAge()).as("Invalid age").isEqualTo(23);
 	}
 
 	private Resource getResource() {

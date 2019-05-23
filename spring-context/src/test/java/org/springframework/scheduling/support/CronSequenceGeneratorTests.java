@@ -20,10 +20,8 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -34,20 +32,17 @@ public class CronSequenceGeneratorTests {
 
 	@Test
 	public void at50Seconds() {
-		assertEquals(new Date(2012, 6, 2, 1, 0),
-				new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53, 50)));
+		assertThat(new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53, 50))).isEqualTo(new Date(2012, 6, 2, 1, 0));
 	}
 
 	@Test
 	public void at0Seconds() {
-		assertEquals(new Date(2012, 6, 2, 1, 0),
-				new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53)));
+		assertThat(new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53))).isEqualTo(new Date(2012, 6, 2, 1, 0));
 	}
 
 	@Test
 	public void at0Minutes() {
-		assertEquals(new Date(2012, 6, 2, 1, 0),
-				new CronSequenceGenerator("0 */2 1-4 * * *").next(new Date(2012, 6, 1, 9, 0)));
+		assertThat(new CronSequenceGenerator("0 */2 1-4 * * *").next(new Date(2012, 6, 1, 9, 0))).isEqualTo(new Date(2012, 6, 2, 1, 0));
 	}
 
 	@Test
@@ -86,27 +81,27 @@ public class CronSequenceGeneratorTests {
 
 	@Test
 	public void validExpression() {
-		assertTrue(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * *"));
+		assertThat(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * *")).isTrue();
 	}
 
 	@Test
 	public void invalidExpressionWithLength() {
-		assertFalse(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * * *"));
+		assertThat(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * * *")).isFalse();
 	}
 
 	@Test
 	public void invalidExpressionWithSeconds() {
-		assertFalse(CronSequenceGenerator.isValidExpression("100 */2 1-4 * * *"));
+		assertThat(CronSequenceGenerator.isValidExpression("100 */2 1-4 * * *")).isFalse();
 	}
 
 	@Test
 	public void invalidExpressionWithMonths() {
-		assertFalse(CronSequenceGenerator.isValidExpression("0 */2 1-4 * INVALID *"));
+		assertThat(CronSequenceGenerator.isValidExpression("0 */2 1-4 * INVALID *")).isFalse();
 	}
 
 	@Test
 	public void nullExpression() {
-		assertFalse(CronSequenceGenerator.isValidExpression(null));
+		assertThat(CronSequenceGenerator.isValidExpression(null)).isFalse();
 	}
 
 }

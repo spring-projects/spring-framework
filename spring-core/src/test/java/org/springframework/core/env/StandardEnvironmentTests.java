@@ -30,8 +30,6 @@ import org.springframework.mock.env.MockPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME;
@@ -377,21 +375,21 @@ public class StandardEnvironmentTests {
 	@Test
 	public void suppressGetenvAccessThroughSystemProperty() {
 		System.setProperty("spring.getenv.ignore", "true");
-		assertTrue(environment.getSystemEnvironment().isEmpty());
+		assertThat(environment.getSystemEnvironment().isEmpty()).isTrue();
 		System.clearProperty("spring.getenv.ignore");
 	}
 
 	@Test
 	public void suppressGetenvAccessThroughSpringProperty() {
 		SpringProperties.setProperty("spring.getenv.ignore", "true");
-		assertTrue(environment.getSystemEnvironment().isEmpty());
+		assertThat(environment.getSystemEnvironment().isEmpty()).isTrue();
 		SpringProperties.setProperty("spring.getenv.ignore", null);
 	}
 
 	@Test
 	public void suppressGetenvAccessThroughSpringFlag() {
 		SpringProperties.setFlag("spring.getenv.ignore");
-		assertTrue(environment.getSystemEnvironment().isEmpty());
+		assertThat(environment.getSystemEnvironment().isEmpty()).isTrue();
 		SpringProperties.setProperty("spring.getenv.ignore", null);
 	}
 
@@ -405,7 +403,7 @@ public class StandardEnvironmentTests {
 		{
 			Map<?, ?> systemProperties = environment.getSystemProperties();
 			assertThat(systemProperties).isNotNull();
-			assertSame(systemProperties, System.getProperties());
+			assertThat(System.getProperties()).isSameAs(systemProperties);
 			assertThat(systemProperties.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
 			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isEqualTo(DISALLOWED_PROPERTY_VALUE);
 
@@ -473,7 +471,7 @@ public class StandardEnvironmentTests {
 		{
 			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
 			assertThat(systemEnvironment).isNotNull();
-			assertSame(systemEnvironment, System.getenv());
+			assertThat(System.getenv()).isSameAs(systemEnvironment);
 		}
 
 		SecurityManager oldSecurityManager = System.getSecurityManager();

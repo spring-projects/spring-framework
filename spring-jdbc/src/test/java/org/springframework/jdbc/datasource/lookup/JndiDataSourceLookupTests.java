@@ -21,10 +21,8 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * @author Rick Evans
@@ -40,13 +38,13 @@ public class JndiDataSourceLookupTests {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
 			protected <T> T lookup(String jndiName, Class<T> requiredType) {
-				assertEquals(DATA_SOURCE_NAME, jndiName);
+				assertThat(jndiName).isEqualTo(DATA_SOURCE_NAME);
 				return requiredType.cast(expectedDataSource);
 			}
 		};
 		DataSource dataSource = lookup.getDataSource(DATA_SOURCE_NAME);
-		assertNotNull("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is", dataSource);
-		assertSame(expectedDataSource, dataSource);
+		assertThat(dataSource).as("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is").isNotNull();
+		assertThat(dataSource).isSameAs(expectedDataSource);
 	}
 
 	@Test
@@ -54,7 +52,7 @@ public class JndiDataSourceLookupTests {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override
 			protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
-				assertEquals(DATA_SOURCE_NAME, jndiName);
+				assertThat(jndiName).isEqualTo(DATA_SOURCE_NAME);
 				throw new NamingException();
 			}
 		};

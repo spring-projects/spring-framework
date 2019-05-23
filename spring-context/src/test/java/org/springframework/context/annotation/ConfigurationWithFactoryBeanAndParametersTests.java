@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test case cornering the bug initially raised with SPR-8762, in which a
@@ -38,7 +38,7 @@ public class ConfigurationWithFactoryBeanAndParametersTests {
 	@Test
 	public void test() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(Config.class, Bar.class);
-		assertNotNull(ctx.getBean(Bar.class).foo);
+		assertThat(ctx.getBean(Bar.class).foo).isNotNull();
 	}
 
 

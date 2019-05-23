@@ -23,8 +23,7 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -40,23 +39,23 @@ public class ClassFiltersTests {
 
 	@Test
 	public void testUnion() {
-		assertTrue(exceptionFilter.matches(RuntimeException.class));
-		assertFalse(exceptionFilter.matches(TestBean.class));
-		assertFalse(itbFilter.matches(Exception.class));
-		assertTrue(itbFilter.matches(TestBean.class));
+		assertThat(exceptionFilter.matches(RuntimeException.class)).isTrue();
+		assertThat(exceptionFilter.matches(TestBean.class)).isFalse();
+		assertThat(itbFilter.matches(Exception.class)).isFalse();
+		assertThat(itbFilter.matches(TestBean.class)).isTrue();
 		ClassFilter union = ClassFilters.union(exceptionFilter, itbFilter);
-		assertTrue(union.matches(RuntimeException.class));
-		assertTrue(union.matches(TestBean.class));
+		assertThat(union.matches(RuntimeException.class)).isTrue();
+		assertThat(union.matches(TestBean.class)).isTrue();
 	}
 
 	@Test
 	public void testIntersection() {
-		assertTrue(exceptionFilter.matches(RuntimeException.class));
-		assertTrue(hasRootCauseFilter.matches(NestedRuntimeException.class));
+		assertThat(exceptionFilter.matches(RuntimeException.class)).isTrue();
+		assertThat(hasRootCauseFilter.matches(NestedRuntimeException.class)).isTrue();
 		ClassFilter intersection = ClassFilters.intersection(exceptionFilter, hasRootCauseFilter);
-		assertFalse(intersection.matches(RuntimeException.class));
-		assertFalse(intersection.matches(TestBean.class));
-		assertTrue(intersection.matches(NestedRuntimeException.class));
+		assertThat(intersection.matches(RuntimeException.class)).isFalse();
+		assertThat(intersection.matches(TestBean.class)).isFalse();
+		assertThat(intersection.matches(NestedRuntimeException.class)).isTrue();
 	}
 
 }

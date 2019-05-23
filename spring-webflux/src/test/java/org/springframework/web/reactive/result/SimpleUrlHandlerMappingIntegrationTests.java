@@ -44,8 +44,7 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests with requests mapped via
@@ -73,8 +72,8 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertArrayEquals("foo".getBytes("UTF-8"), response.getBody());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isEqualTo("foo".getBytes("UTF-8"));
 	}
 
 	@Test
@@ -83,8 +82,8 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertArrayEquals("bar".getBytes("UTF-8"), response.getBody());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isEqualTo("bar".getBytes("UTF-8"));
 	}
 
 	@Test
@@ -93,8 +92,8 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals("bar", response.getHeaders().getFirst("foo"));
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test
@@ -105,7 +104,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 			new RestTemplate().exchange(request, byte[].class);
 		}
 		catch (HttpClientErrorException ex) {
-			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+			assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 		}
 	}
 

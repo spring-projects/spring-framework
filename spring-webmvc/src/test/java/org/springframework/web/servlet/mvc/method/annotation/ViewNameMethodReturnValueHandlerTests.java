@@ -26,9 +26,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link ViewNameMethodReturnValueHandler}.
@@ -58,13 +56,13 @@ public class ViewNameMethodReturnValueHandlerTests {
 
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(this.handler.supportsReturnType(this.param));
+		assertThat(this.handler.supportsReturnType(this.param)).isTrue();
 	}
 
 	@Test
 	public void returnViewName() throws Exception {
 		this.handler.handleReturnValue("testView", this.param, this.mavContainer, this.webRequest);
-		assertEquals("testView", this.mavContainer.getViewName());
+		assertThat(this.mavContainer.getViewName()).isEqualTo("testView");
 	}
 
 	@Test
@@ -72,8 +70,8 @@ public class ViewNameMethodReturnValueHandlerTests {
 		ModelMap redirectModel = new RedirectAttributesModelMap();
 		this.mavContainer.setRedirectModel(redirectModel);
 		this.handler.handleReturnValue("redirect:testView", this.param, this.mavContainer, this.webRequest);
-		assertEquals("redirect:testView", this.mavContainer.getViewName());
-		assertSame(redirectModel, this.mavContainer.getModel());
+		assertThat(this.mavContainer.getViewName()).isEqualTo("redirect:testView");
+		assertThat(this.mavContainer.getModel()).isSameAs(redirectModel);
 	}
 
 	@Test
@@ -82,8 +80,8 @@ public class ViewNameMethodReturnValueHandlerTests {
 		this.mavContainer.setRedirectModel(redirectModel);
 		this.handler.setRedirectPatterns("myRedirect:*");
 		this.handler.handleReturnValue("myRedirect:testView", this.param, this.mavContainer, this.webRequest);
-		assertEquals("myRedirect:testView", this.mavContainer.getViewName());
-		assertSame(redirectModel, this.mavContainer.getModel());
+		assertThat(this.mavContainer.getViewName()).isEqualTo("myRedirect:testView");
+		assertThat(this.mavContainer.getModel()).isSameAs(redirectModel);
 	}
 
 	@Test
@@ -92,8 +90,8 @@ public class ViewNameMethodReturnValueHandlerTests {
 		this.mavContainer.setRedirectModel(redirectModel);
 		this.handler.setRedirectPatterns("myRedirect:*");
 		this.handler.handleReturnValue("redirect:testView", this.param, this.mavContainer, this.webRequest);
-		assertEquals("redirect:testView", this.mavContainer.getViewName());
-		assertSame(redirectModel, this.mavContainer.getModel());
+		assertThat(this.mavContainer.getViewName()).isEqualTo("redirect:testView");
+		assertThat(this.mavContainer.getModel()).isSameAs(redirectModel);
 	}
 
 

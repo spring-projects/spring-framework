@@ -30,8 +30,6 @@ import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -44,7 +42,7 @@ public class DataBinderFieldAccessTests {
 	public void bindingNoErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
-		assertTrue(binder.isIgnoreUnknownFields());
+		assertThat(binder.isIgnoreUnknownFields()).isTrue();
 		binder.initDirectFieldAccess();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
@@ -54,13 +52,13 @@ public class DataBinderFieldAccessTests {
 		binder.bind(pvs);
 		binder.close();
 
-		assertTrue("changed name correctly", rod.getName().equals("Rod"));
-		assertTrue("changed age correctly", rod.getAge() == 32);
+		assertThat(rod.getName().equals("Rod")).as("changed name correctly").isTrue();
+		assertThat(rod.getAge() == 32).as("changed age correctly").isTrue();
 
 		Map<?, ?> m = binder.getBindingResult().getModel();
-		assertTrue("There is one element in map", m.size() == 2);
+		assertThat(m.size() == 2).as("There is one element in map").isTrue();
 		FieldAccessBean tb = (FieldAccessBean) m.get("person");
-		assertTrue("Same object", tb.equals(rod));
+		assertThat(tb.equals(rod)).as("Same object").isTrue();
 	}
 
 	@Test
@@ -110,7 +108,7 @@ public class DataBinderFieldAccessTests {
 	public void nestedBindingWithDefaultConversionNoErrors() throws Exception {
 		FieldAccessBean rod = new FieldAccessBean();
 		DataBinder binder = new DataBinder(rod, "person");
-		assertTrue(binder.isIgnoreUnknownFields());
+		assertThat(binder.isIgnoreUnknownFields()).isTrue();
 		binder.initDirectFieldAccess();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("spouse.name", "Kerry"));
@@ -119,8 +117,8 @@ public class DataBinderFieldAccessTests {
 		binder.bind(pvs);
 		binder.close();
 
-		assertEquals("Kerry", rod.getSpouse().getName());
-		assertTrue((rod.getSpouse()).isJedi());
+		assertThat(rod.getSpouse().getName()).isEqualTo("Kerry");
+		assertThat((rod.getSpouse()).isJedi()).isTrue();
 	}
 
 	@Test

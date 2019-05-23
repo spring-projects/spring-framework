@@ -22,7 +22,7 @@ import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Costin Leau
@@ -39,7 +39,7 @@ public class CacheAdviceNamespaceTests extends AbstractCacheAnnotationTests {
 	@Test
 	public void testKeyStrategy() throws Exception {
 		CacheInterceptor bean = this.ctx.getBean("cacheAdviceClass", CacheInterceptor.class);
-		assertSame(this.ctx.getBean("keyGenerator"), bean.getKeyGenerator());
+		assertThat(bean.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator"));
 	}
 
 }

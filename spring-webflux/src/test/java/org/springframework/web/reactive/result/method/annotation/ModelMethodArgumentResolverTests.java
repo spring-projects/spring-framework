@@ -31,9 +31,7 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
@@ -53,14 +51,14 @@ public class ModelMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.resolvable.arg(Model.class)));
-		assertTrue(this.resolver.supportsParameter(this.resolvable.arg(ModelMap.class)));
-		assertTrue(this.resolver.supportsParameter(
-				this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class)));
+		assertThat(this.resolver.supportsParameter(this.resolvable.arg(Model.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.resolvable.arg(ModelMap.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(
+				this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class))).isTrue();
 
-		assertFalse(this.resolver.supportsParameter(this.resolvable.arg(Object.class)));
-		assertFalse(this.resolver.supportsParameter(
-				this.resolvable.annotPresent(RequestBody.class).arg(Map.class, String.class, Object.class)));
+		assertThat(this.resolver.supportsParameter(this.resolvable.arg(Object.class))).isFalse();
+		assertThat(this.resolver.supportsParameter(
+				this.resolvable.annotPresent(RequestBody.class).arg(Map.class, String.class, Object.class))).isFalse();
 	}
 
 	@Test
@@ -73,7 +71,7 @@ public class ModelMethodArgumentResolverTests {
 	private void testResolveArgument(MethodParameter parameter) {
 		BindingContext context = new BindingContext();
 		Object result = this.resolver.resolveArgument(parameter, context, this.exchange).block(Duration.ZERO);
-		assertSame(context.getModel(), result);
+		assertThat(result).isSameAs(context.getModel());
 	}
 
 

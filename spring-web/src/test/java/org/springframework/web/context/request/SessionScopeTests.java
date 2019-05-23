@@ -35,12 +35,7 @@ import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -82,17 +77,17 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		String name = "sessionScopedObject";
-		assertNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNull();
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertEquals(1, count.intValue());
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
-		assertEquals(1, count.intValue());
+		assertThat(count.intValue()).isEqualTo(1);
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
+		assertThat(count.intValue()).isEqualTo(1);
 
 		// should re-propagate updated attribute
 		requestAttributes.requestCompleted();
-		assertEquals(session.getAttribute(name), bean);
-		assertEquals(2, count.intValue());
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(count.intValue()).isEqualTo(2);
 	}
 
 	@Test
@@ -111,14 +106,14 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		String name = "sessionScopedObject";
-		assertNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNull();
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertEquals(1, count.intValue());
+		assertThat(count.intValue()).isEqualTo(1);
 
 		// should re-propagate updated attribute
 		requestAttributes.requestCompleted();
-		assertEquals(session.getAttribute(name), bean);
-		assertEquals(2, count.intValue());
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(count.intValue()).isEqualTo(2);
 	}
 
 	@Test
@@ -130,14 +125,14 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		String name = "sessionScopedDisposableObject";
-		assertNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNull();
 		DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 
 		requestAttributes.requestCompleted();
 		session.invalidate();
-		assertTrue(bean.wasDestroyed());
+		assertThat(bean.wasDestroyed()).isTrue();
 	}
 
 	@Test
@@ -167,14 +162,14 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		String name = "sessionScopedDisposableObject";
-		assertNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNull();
 		DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 
 		requestAttributes.requestCompleted();
 		serializedState = session.serializeState();
-		assertFalse(bean.wasDestroyed());
+		assertThat(bean.wasDestroyed()).isFalse();
 
 		serializedState = (Serializable) SerializationTestUtils.serializeAndDeserialize(serializedState);
 
@@ -186,20 +181,20 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		name = "sessionScopedDisposableObject";
-		assertNotNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNotNull();
 		bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 
 		requestAttributes.requestCompleted();
 		session.invalidate();
-		assertTrue(bean.wasDestroyed());
+		assertThat(bean.wasDestroyed()).isTrue();
 
 		if (beanNameReset) {
-			assertNull(bean.getBeanName());
+			assertThat(bean.getBeanName()).isNull();
 		}
 		else {
-			assertNotNull(bean.getBeanName());
+			assertThat(bean.getBeanName()).isNotNull();
 		}
 	}
 

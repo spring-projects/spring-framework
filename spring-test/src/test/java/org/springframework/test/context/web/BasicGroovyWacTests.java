@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -33,7 +33,7 @@ public class BasicGroovyWacTests extends AbstractBasicWacTests {
 
 	@Test
 	public void groovyFooAutowired() {
-		assertEquals("Groovy Foo", foo);
+		assertThat(foo).isEqualTo("Groovy Foo");
 	}
 
 }

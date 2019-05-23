@@ -40,7 +40,6 @@ import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests the processing of @PropertySource annotations on @Configuration classes.
@@ -57,8 +56,7 @@ public class PropertySourceAnnotationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithExplicitName.class);
 		ctx.refresh();
-		assertTrue("property source p1 was not added",
-				ctx.getEnvironment().getPropertySources().contains("p1"));
+		assertThat(ctx.getEnvironment().getPropertySources().contains("p1")).as("property source p1 was not added").isTrue();
 		assertThat(ctx.getBean(TestBean.class).getName()).isEqualTo("p1TestBean");
 
 		// assert that the property source was added last to the set of sources
@@ -78,8 +76,7 @@ public class PropertySourceAnnotationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithImplicitName.class);
 		ctx.refresh();
-		assertTrue("property source p1 was not added",
-				ctx.getEnvironment().getPropertySources().contains("class path resource [org/springframework/context/annotation/p1.properties]"));
+		assertThat(ctx.getEnvironment().getPropertySources().contains("class path resource [org/springframework/context/annotation/p1.properties]")).as("property source p1 was not added").isTrue();
 		assertThat(ctx.getBean(TestBean.class).getName()).isEqualTo("p1TestBean");
 	}
 
@@ -88,8 +85,8 @@ public class PropertySourceAnnotationTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithTestProfileBeans.class);
 		ctx.refresh();
-		assertTrue(ctx.containsBean("testBean"));
-		assertTrue(ctx.containsBean("testProfileBean"));
+		assertThat(ctx.containsBean("testBean")).isTrue();
+		assertThat(ctx.containsBean("testProfileBean")).isTrue();
 	}
 
 	/**
@@ -139,7 +136,7 @@ public class PropertySourceAnnotationTests {
 			ctx.refresh();
 		}
 		catch (BeanDefinitionStoreException ex) {
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+			assertThat(ex.getCause() instanceof IllegalArgumentException).isTrue();
 		}
 	}
 
@@ -179,7 +176,7 @@ public class PropertySourceAnnotationTests {
 			ctx.refresh();
 		}
 		catch (BeanDefinitionStoreException ex) {
-			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+			assertThat(ex.getCause() instanceof IllegalArgumentException).isTrue();
 		}
 	}
 
@@ -398,7 +395,7 @@ public class PropertySourceAnnotationTests {
 	public static class MyCustomFactory implements PropertySourceFactory {
 
 		@Override
-		public org.springframework.core.env.PropertySource createPropertySource(String name, EncodedResource resource) throws IOException {
+		public org.springframework.core.env.PropertySource<?> createPropertySource(String name, EncodedResource resource) throws IOException {
 			Properties props = PropertiesLoaderUtils.loadProperties(resource);
 			return new org.springframework.core.env.PropertySource<Properties>("my" + name, props) {
 				@Override

@@ -36,8 +36,6 @@ import org.xml.sax.InputSource;
 import org.springframework.tests.XmlContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author Arjen Poutsma
@@ -66,8 +64,8 @@ public class StaxSourceTests {
 	public void streamReaderSourceToStreamResult() throws Exception {
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(XML));
 		StaxSource source = new StaxSource(streamReader);
-		assertEquals("Invalid streamReader returned", streamReader, source.getXMLStreamReader());
-		assertNull("EventReader returned", source.getXMLEventReader());
+		assertThat(source.getXMLStreamReader()).as("Invalid streamReader returned").isEqualTo(streamReader);
+		assertThat((Object) source.getXMLEventReader()).as("EventReader returned").isNull();
 		StringWriter writer = new StringWriter();
 		transformer.transform(source, new StreamResult(writer));
 		assertThat(XmlContent.from(writer)).as("Invalid result").isSimilarTo(XML);
@@ -77,8 +75,8 @@ public class StaxSourceTests {
 	public void streamReaderSourceToDOMResult() throws Exception {
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(XML));
 		StaxSource source = new StaxSource(streamReader);
-		assertEquals("Invalid streamReader returned", streamReader, source.getXMLStreamReader());
-		assertNull("EventReader returned", source.getXMLEventReader());
+		assertThat(source.getXMLStreamReader()).as("Invalid streamReader returned").isEqualTo(streamReader);
+		assertThat((Object) source.getXMLEventReader()).as("EventReader returned").isNull();
 
 		Document expected = documentBuilder.parse(new InputSource(new StringReader(XML)));
 		Document result = documentBuilder.newDocument();
@@ -90,8 +88,8 @@ public class StaxSourceTests {
 	public void eventReaderSourceToStreamResult() throws Exception {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));
 		StaxSource source = new StaxSource(eventReader);
-		assertEquals("Invalid eventReader returned", eventReader, source.getXMLEventReader());
-		assertNull("StreamReader returned", source.getXMLStreamReader());
+		assertThat((Object) source.getXMLEventReader()).as("Invalid eventReader returned").isEqualTo(eventReader);
+		assertThat(source.getXMLStreamReader()).as("StreamReader returned").isNull();
 		StringWriter writer = new StringWriter();
 		transformer.transform(source, new StreamResult(writer));
 		assertThat(XmlContent.from(writer)).as("Invalid result").isSimilarTo(XML);
@@ -101,8 +99,8 @@ public class StaxSourceTests {
 	public void eventReaderSourceToDOMResult() throws Exception {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));
 		StaxSource source = new StaxSource(eventReader);
-		assertEquals("Invalid eventReader returned", eventReader, source.getXMLEventReader());
-		assertNull("StreamReader returned", source.getXMLStreamReader());
+		assertThat((Object) source.getXMLEventReader()).as("Invalid eventReader returned").isEqualTo(eventReader);
+		assertThat(source.getXMLStreamReader()).as("StreamReader returned").isNull();
 
 		Document expected = documentBuilder.parse(new InputSource(new StringReader(XML)));
 		Document result = documentBuilder.newDocument();

@@ -27,9 +27,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
@@ -48,12 +46,12 @@ public class ByteBufferDecoderTests extends AbstractDecoderTestCase<ByteBufferDe
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
-				MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isFalse();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.APPLICATION_JSON)).isTrue();
 	}
 
 	@Override
@@ -87,7 +85,7 @@ public class ByteBufferDecoderTests extends AbstractDecoderTestCase<ByteBufferDe
 	}
 
 	private Consumer<ByteBuffer> expectByteBuffer(ByteBuffer expected) {
-		return actual -> assertEquals(expected, actual);
+		return actual -> assertThat(actual).isEqualTo(expected);
 	}
 
 }

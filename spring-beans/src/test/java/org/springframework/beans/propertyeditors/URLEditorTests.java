@@ -23,10 +23,8 @@ import org.junit.Test;
 
 import org.springframework.util.ClassUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rick Evans
@@ -45,9 +43,10 @@ public class URLEditorTests {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("mailto:juergen.hoeller@interface21.com");
 		Object value = urlEditor.getValue();
-		assertTrue(value instanceof URL);
+		boolean condition = value instanceof URL;
+		assertThat(condition).isTrue();
 		URL url = (URL) value;
-		assertEquals(url.toExternalForm(), urlEditor.getAsText());
+		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
 	}
 
 	@Test
@@ -55,9 +54,10 @@ public class URLEditorTests {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("https://www.springframework.org");
 		Object value = urlEditor.getValue();
-		assertTrue(value instanceof URL);
+		boolean condition = value instanceof URL;
+		assertThat(condition).isTrue();
 		URL url = (URL) value;
-		assertEquals(url.toExternalForm(), urlEditor.getAsText());
+		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
 	}
 
 	@Test
@@ -66,10 +66,12 @@ public class URLEditorTests {
 		urlEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
 		Object value = urlEditor.getValue();
-		assertTrue(value instanceof URL);
+		boolean condition1 = value instanceof URL;
+		assertThat(condition1).isTrue();
 		URL url = (URL) value;
-		assertEquals(url.toExternalForm(), urlEditor.getAsText());
-		assertTrue(!url.getProtocol().startsWith("classpath"));
+		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
+		boolean condition = !url.getProtocol().startsWith("classpath");
+		assertThat(condition).isTrue();
 	}
 
 	@Test
@@ -83,14 +85,14 @@ public class URLEditorTests {
 	public void testSetAsTextWithNull() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText(null);
-		assertNull(urlEditor.getValue());
-		assertEquals("", urlEditor.getAsText());
+		assertThat(urlEditor.getValue()).isNull();
+		assertThat(urlEditor.getAsText()).isEqualTo("");
 	}
 
 	@Test
 	public void testGetAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
-		assertEquals("", urlEditor.getAsText());
+		assertThat(urlEditor.getAsText()).isEqualTo("");
 	}
 
 }

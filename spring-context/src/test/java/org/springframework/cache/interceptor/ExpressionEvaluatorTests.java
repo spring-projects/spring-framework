@@ -38,8 +38,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Costin Leau
@@ -63,16 +61,16 @@ public class ExpressionEvaluatorTests {
 	@Test
 	public void testMultipleCachingSource() {
 		Collection<CacheOperation> ops = getOps("multipleCaching");
-		assertEquals(2, ops.size());
+		assertThat(ops.size()).isEqualTo(2);
 		Iterator<CacheOperation> it = ops.iterator();
 		CacheOperation next = it.next();
-		assertTrue(next instanceof CacheableOperation);
-		assertTrue(next.getCacheNames().contains("test"));
-		assertEquals("#a", next.getKey());
+		assertThat(next instanceof CacheableOperation).isTrue();
+		assertThat(next.getCacheNames().contains("test")).isTrue();
+		assertThat(next.getKey()).isEqualTo("#a");
 		next = it.next();
-		assertTrue(next instanceof CacheableOperation);
-		assertTrue(next.getCacheNames().contains("test"));
-		assertEquals("#b", next.getKey());
+		assertThat(next instanceof CacheableOperation).isTrue();
+		assertThat(next.getCacheNames().contains("test")).isTrue();
+		assertThat(next.getKey()).isEqualTo("#b");
 	}
 
 	@Test
@@ -93,8 +91,8 @@ public class ExpressionEvaluatorTests {
 		Object keyA = this.eval.key(it.next().getKey(), key, evalCtx);
 		Object keyB = this.eval.key(it.next().getKey(), key, evalCtx);
 
-		assertEquals(args[0], keyA);
-		assertEquals(args[1], keyB);
+		assertThat(keyA).isEqualTo(args[0]);
+		assertThat(keyB).isEqualTo(args[1]);
 	}
 
 	@Test

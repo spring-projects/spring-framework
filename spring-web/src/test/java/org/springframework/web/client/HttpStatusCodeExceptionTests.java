@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link HttpStatusCodeException} and subclasses.
@@ -58,7 +57,7 @@ public class HttpStatusCodeExceptionTests {
 	public void emptyStatusText() {
 		HttpStatusCodeException ex = new HttpClientErrorException(HttpStatus.NOT_FOUND, "");
 
-		assertEquals("404 Not Found", ex.getMessage());
+		assertThat(ex.getMessage()).isEqualTo("404 Not Found");
 	}
 
 }

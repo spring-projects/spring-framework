@@ -23,10 +23,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Mark Fisher
@@ -37,7 +35,7 @@ public class ComponentScanParserWithUserDefinedStrategiesTests {
 	public void testCustomBeanNameGenerator() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customNameGeneratorTests.xml");
-		assertTrue(context.containsBean("testing.fooServiceImpl"));
+		assertThat(context.containsBean("testing.fooServiceImpl")).isTrue();
 	}
 
 	@Test
@@ -45,8 +43,8 @@ public class ComponentScanParserWithUserDefinedStrategiesTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customScopeResolverTests.xml");
 		BeanDefinition bd = context.getBeanFactory().getBeanDefinition("fooServiceImpl");
-		assertEquals("myCustomScope", bd.getScope());
-		assertFalse(bd.isSingleton());
+		assertThat(bd.getScope()).isEqualTo("myCustomScope");
+		assertThat(bd.isSingleton()).isFalse();
 	}
 
 	@Test

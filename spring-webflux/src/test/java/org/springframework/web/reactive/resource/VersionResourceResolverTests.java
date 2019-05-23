@@ -34,8 +34,6 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -80,7 +78,7 @@ public class VersionResourceResolverTests {
 				.resolveResourceInternal(null, file, this.locations, this.chain)
 				.block(Duration.ofMillis(5000));
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
 		verify(this.versionStrategy, never()).extractVersion(file);
 	}
@@ -95,7 +93,7 @@ public class VersionResourceResolverTests {
 				.resolveResourceInternal(null, file, this.locations, this.chain)
 				.block(Duration.ofMillis(5000));
 
-		assertNull(actual);
+		assertThat((Object) actual).isNull();
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
 	}
 
@@ -110,7 +108,7 @@ public class VersionResourceResolverTests {
 				.resolveResourceInternal(null, file, this.locations, this.chain)
 				.block(Duration.ofMillis(5000));
 
-		assertNull(actual);
+		assertThat((Object) actual).isNull();
 		verify(this.chain, times(1)).resolveResource(null, file, this.locations);
 		verify(this.versionStrategy, times(1)).extractVersion(file);
 	}
@@ -130,7 +128,7 @@ public class VersionResourceResolverTests {
 				.resolveResourceInternal(null, versionFile, this.locations, this.chain)
 				.block(Duration.ofMillis(5000));
 
-		assertNull(actual);
+		assertThat((Object) actual).isNull();
 		verify(this.versionStrategy, times(1)).removeVersion(versionFile, version);
 	}
 
@@ -151,7 +149,7 @@ public class VersionResourceResolverTests {
 				.resolveResourceInternal(null, versionFile, this.locations, this.chain)
 				.block(Duration.ofMillis(5000));
 
-		assertNull(actual);
+		assertThat((Object) actual).isNull();
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);
 	}
 
@@ -174,10 +172,10 @@ public class VersionResourceResolverTests {
 				.resolveResourceInternal(exchange, versionFile, this.locations, this.chain)
 				.block(Duration.ofMillis(5000));
 
-		assertEquals(expected.getFilename(), actual.getFilename());
+		assertThat(actual.getFilename()).isEqualTo(expected.getFilename());
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);
 		assertThat(actual).isInstanceOf(HttpResource.class);
-		assertEquals("\"" + version + "\"", ((HttpResource)actual).getResponseHeaders().getETag());
+		assertThat(((HttpResource) actual).getResponseHeaders().getETag()).isEqualTo(("\"" + version + "\""));
 	}
 
 	@Test
@@ -189,10 +187,10 @@ public class VersionResourceResolverTests {
 		strategies.put("/**/*.js", jsStrategy);
 		this.resolver.setStrategyMap(strategies);
 
-		assertEquals(catchAllStrategy, this.resolver.getStrategyForPath("foo.css"));
-		assertEquals(catchAllStrategy, this.resolver.getStrategyForPath("foo-js.css"));
-		assertEquals(jsStrategy, this.resolver.getStrategyForPath("foo.js"));
-		assertEquals(jsStrategy, this.resolver.getStrategyForPath("bar/foo.js"));
+		assertThat(this.resolver.getStrategyForPath("foo.css")).isEqualTo(catchAllStrategy);
+		assertThat(this.resolver.getStrategyForPath("foo-js.css")).isEqualTo(catchAllStrategy);
+		assertThat(this.resolver.getStrategyForPath("foo.js")).isEqualTo(jsStrategy);
+		assertThat(this.resolver.getStrategyForPath("bar/foo.js")).isEqualTo(jsStrategy);
 	}
 
 	@Test // SPR-13883

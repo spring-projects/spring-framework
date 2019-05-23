@@ -23,8 +23,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 import org.springframework.jdbc.datasource.init.ScriptStatementFailedException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
 
@@ -205,7 +205,7 @@ public class EmbeddedDatabaseBuilderTests {
 	}
 
 	private void assertNumRowsInTestTable(JdbcTemplate template, int count) {
-		assertEquals(count, template.queryForObject("select count(*) from T_TEST", Integer.class).intValue());
+		assertThat(template.queryForObject("select count(*) from T_TEST", Integer.class).intValue()).isEqualTo(count);
 	}
 
 	private void assertDatabaseCreated(EmbeddedDatabase db) {

@@ -23,9 +23,8 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -68,7 +67,7 @@ public class StandardJUnit4FeaturesTests {
 
 	@Test
 	public void alwaysSucceeds() {
-		assertTrue(true);
+		assertThat(true).isTrue();
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
@@ -94,7 +93,7 @@ public class StandardJUnit4FeaturesTests {
 
 	@Test
 	public void verifyBeforeAnnotation() {
-		assertEquals(1, this.beforeCounter);
+		assertThat(this.beforeCounter).isEqualTo(1);
 	}
 
 	@Test
@@ -102,7 +101,7 @@ public class StandardJUnit4FeaturesTests {
 		// Instead of testing for equality to 1, we just assert that the value
 		// was incremented at least once, since this test class may serve as a
 		// parent class to other tests in a suite, etc.
-		assertTrue(StandardJUnit4FeaturesTests.staticBeforeCounter > 0);
+		assertThat(StandardJUnit4FeaturesTests.staticBeforeCounter > 0).isTrue();
 	}
 
 }

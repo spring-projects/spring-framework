@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.StubMvcResult;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for {@link StatusResultMatchers}.

@@ -29,10 +29,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
@@ -69,7 +67,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
-		assertTrue(date1 != date2);
+		assertThat(date1 != date2).isTrue();
 	}
 
 	@Test
@@ -82,7 +80,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
-		assertTrue(date1 != date2);
+		assertThat(date1 != date2).isTrue();
 	}
 
 	@Test
@@ -92,7 +90,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();
-		assertTrue(date1 != date2);
+		assertThat(date1 != date2).isTrue();
 	}
 
 	@Test
@@ -105,7 +103,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();
-		assertTrue(date1 != date2);
+		assertThat(date1 != date2).isTrue();
 	}
 
 	@Test
@@ -122,7 +120,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		factory.afterPropertiesSet();
 		ObjectFactory<?> objectFactory = factory.getObject();
 		Object actualSingleton = objectFactory.getObject();
-		assertSame(expectedSingleton, actualSingleton);
+		assertThat(actualSingleton).isSameAs(expectedSingleton);
 	}
 
 	@Test
@@ -152,8 +150,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 	@Test
 	public void testEnsureOFBFBReportsThatItActuallyCreatesObjectFactoryInstances() {
-		assertEquals("Must be reporting that it creates ObjectFactory instances (as per class contract).",
-			ObjectFactory.class, new ObjectFactoryCreatingFactoryBean().getObjectType());
+		assertThat(new ObjectFactoryCreatingFactoryBean().getObjectType()).as("Must be reporting that it creates ObjectFactory instances (as per class contract).").isEqualTo(ObjectFactory.class);
 	}
 
 

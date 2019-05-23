@@ -22,8 +22,7 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -66,9 +65,9 @@ public class HandlerExecutionChainTests {
 
 		this.chain.addInterceptor(this.interceptor1);
 		this.chain.addInterceptor(this.interceptor2);
-		assertEquals(2, this.chain.getInterceptors().length);
+		assertThat(this.chain.getInterceptors().length).isEqualTo(2);
 		this.chain.addInterceptor(this.interceptor3);
-		assertEquals(3, this.chain.getInterceptors().length);
+		assertThat(this.chain.getInterceptors().length).isEqualTo(3);
 	}
 
 
@@ -135,7 +134,7 @@ public class HandlerExecutionChainTests {
 			this.chain.applyPreHandle(request, response);
 		}
 		catch (Exception actual) {
-			assertSame(ex, actual);
+			assertThat(actual).isSameAs(ex);
 		}
 		this.chain.triggerAfterCompletion(this.request, this.response, ex);
 

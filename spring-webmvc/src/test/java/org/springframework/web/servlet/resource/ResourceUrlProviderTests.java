@@ -34,9 +34,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -73,7 +70,7 @@ public class ResourceUrlProviderTests {
 	@Test
 	public void getStaticResourceUrl() {
 		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
-		assertEquals("/resources/foo.css", url);
+		assertThat(url).isEqualTo("/resources/foo.css");
 	}
 
 	@Test // SPR-13374
@@ -84,11 +81,11 @@ public class ResourceUrlProviderTests {
 
 		String url = "/resources/foo.css?foo=bar&url=https://example.org";
 		String resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
-		assertEquals("/resources/foo.css?foo=bar&url=https://example.org", resolvedUrl);
+		assertThat(resolvedUrl).isEqualTo("/resources/foo.css?foo=bar&url=https://example.org");
 
 		url = "/resources/foo.css#hash";
 		resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
-		assertEquals("/resources/foo.css#hash", resolvedUrl);
+		assertThat(resolvedUrl).isEqualTo("/resources/foo.css#hash");
 	}
 
 	@Test // SPR-16526
@@ -98,7 +95,7 @@ public class ResourceUrlProviderTests {
 		request.setRequestURI("/contextpath-longer-than-request-path/style.css");
 		String url = "/resources/foo.css";
 		String resolvedUrl = this.urlProvider.getForRequestUrl(request, url);
-		assertNull(resolvedUrl);
+		assertThat((Object) resolvedUrl).isNull();
 	}
 
 	@Test
@@ -114,7 +111,7 @@ public class ResourceUrlProviderTests {
 		this.handler.setResourceResolvers(resolvers);
 
 		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
-		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+		assertThat(url).isEqualTo("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test // SPR-12647
@@ -135,7 +132,7 @@ public class ResourceUrlProviderTests {
 		this.urlProvider.setHandlerMap(this.handlerMap);
 
 		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
-		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+		assertThat(url).isEqualTo("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test // SPR-12592
@@ -148,7 +145,7 @@ public class ResourceUrlProviderTests {
 
 		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
 		assertThat(urlProviderBean.getHandlerMap()).containsKey("/resources/**");
-		assertFalse(urlProviderBean.isAutodetect());
+		assertThat(urlProviderBean.isAutodetect()).isFalse();
 	}
 
 	@Test // SPR-16296
@@ -167,7 +164,7 @@ public class ResourceUrlProviderTests {
 		String lookupForPath = provider.getForLookupPath("/some-pattern/some-lib//some-resource");
 
 		// then
-		assertEquals("/some-pattern/some-path", lookupForPath);
+		assertThat(lookupForPath).isEqualTo("/some-pattern/some-path");
 	}
 
 

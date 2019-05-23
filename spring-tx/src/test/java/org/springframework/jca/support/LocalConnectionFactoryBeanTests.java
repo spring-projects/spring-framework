@@ -21,10 +21,8 @@ import javax.resource.spi.ManagedConnectionFactory;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -46,13 +44,13 @@ public class LocalConnectionFactoryBeanTests {
 	@Test
 	public void testIsSingleton() throws Exception {
 		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
-		assertTrue(factory.isSingleton());
+		assertThat(factory.isSingleton()).isTrue();
 	}
 
 	@Test
 	public void testGetObjectTypeIsNullIfConnectionFactoryHasNotBeenConfigured() throws Exception {
 		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
-		assertNull(factory.getObjectType());
+		assertThat(factory.getObjectType()).isNull();
 	}
 
 	@Test
@@ -63,7 +61,7 @@ public class LocalConnectionFactoryBeanTests {
 		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
 		factory.setManagedConnectionFactory(managedConnectionFactory);
 		factory.afterPropertiesSet();
-		assertEquals(CONNECTION_FACTORY, factory.getObject());
+		assertThat(factory.getObject()).isEqualTo(CONNECTION_FACTORY);
 	}
 
 	@Test

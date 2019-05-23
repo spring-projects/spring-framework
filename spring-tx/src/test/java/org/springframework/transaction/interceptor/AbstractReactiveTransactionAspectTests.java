@@ -33,7 +33,6 @@ import org.springframework.transaction.reactive.TransactionContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -337,8 +336,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		Mono.from(itb.setName(name))
 				.as(StepVerifier::create)
 				.consumeErrorWith(throwable -> {
-					assertEquals(RuntimeException.class, throwable.getClass());
-					assertEquals(ex, throwable.getCause());
+					assertThat(throwable.getClass()).isEqualTo(RuntimeException.class);
+					assertThat(throwable.getCause()).isEqualTo(ex);
 				})
 				.verify();
 

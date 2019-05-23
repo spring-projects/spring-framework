@@ -37,7 +37,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -59,7 +59,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
+				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 
@@ -73,7 +73,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
+				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 
@@ -100,9 +100,9 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 					.flatMap(map -> {
 						Map<String, Part> parts = map.toSingleValueMap();
 						try {
-							assertEquals(2, parts.size());
-							assertEquals("foo.txt", ((FilePart) parts.get("fooPart")).filename());
-							assertEquals("bar", ((FormFieldPart) parts.get("barPart")).value());
+							assertThat(parts.size()).isEqualTo(2);
+							assertThat(((FilePart) parts.get("fooPart")).filename()).isEqualTo("foo.txt");
+							assertThat(((FormFieldPart) parts.get("barPart")).value()).isEqualTo("bar");
 						}
 						catch(Exception e) {
 							return Mono.error(e);
@@ -115,9 +115,9 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 			return request.body(BodyExtractors.toParts()).collectList()
 					.flatMap(parts -> {
 						try {
-							assertEquals(2, parts.size());
-							assertEquals("foo.txt", ((FilePart) parts.get(0)).filename());
-							assertEquals("bar", ((FormFieldPart) parts.get(1)).value());
+							assertThat(parts.size()).isEqualTo(2);
+							assertThat(((FilePart) parts.get(0)).filename()).isEqualTo("foo.txt");
+							assertThat(((FormFieldPart) parts.get(1)).value()).isEqualTo("bar");
 						}
 						catch(Exception e) {
 							return Mono.error(e);

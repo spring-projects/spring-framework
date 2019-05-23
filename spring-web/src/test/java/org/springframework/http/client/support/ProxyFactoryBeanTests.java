@@ -22,8 +22,8 @@ import java.net.Proxy;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma
@@ -70,10 +70,10 @@ public class ProxyFactoryBeanTests {
 
 		Proxy result = factoryBean.getObject();
 
-		assertEquals(type, result.type());
+		assertThat(result.type()).isEqualTo(type);
 		InetSocketAddress address = (InetSocketAddress) result.address();
-		assertEquals(hostname, address.getHostName());
-		assertEquals(port, address.getPort());
+		assertThat(address.getHostName()).isEqualTo(hostname);
+		assertThat(address.getPort()).isEqualTo(port);
 	}
 
 }

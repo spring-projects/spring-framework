@@ -24,8 +24,8 @@ import org.junit.Test;
 
 import org.springframework.jms.support.destination.DestinationResolver;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertSame;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -38,7 +38,7 @@ public class JmsResponseTests {
 	public void destinationDoesNotUseDestinationResolver() throws JMSException {
 		Destination destination = mock(Destination.class);
 		Destination actual = JmsResponse.forDestination("foo", destination).resolveDestination(null, null);
-		assertSame(destination, actual);
+		assertThat(actual).isSameAs(destination);
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class JmsResponseTests {
 		given(destinationResolver.resolveDestinationName(session, "myQueue", false)).willReturn(destination);
 		JmsResponse<String> jmsResponse = JmsResponse.forQueue("foo", "myQueue");
 		Destination actual = jmsResponse.resolveDestination(destinationResolver, session);
-		assertSame(destination, actual);
+		assertThat(actual).isSameAs(destination);
 	}
 
 	@Test

@@ -23,9 +23,7 @@ import org.junit.Test;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link EncodedResource}.
@@ -45,42 +43,42 @@ public class EncodedResourceTests {
 
 	@Test
 	public void equalsWithNullOtherObject() {
-		assertFalse(new EncodedResource(resource).equals(null));
+		assertThat(new EncodedResource(resource).equals(null)).isFalse();
 	}
 
 	@Test
 	public void equalsWithSameEncoding() {
 		EncodedResource er1 = new EncodedResource(resource, UTF8);
 		EncodedResource er2 = new EncodedResource(resource, UTF8);
-		assertEquals(er1, er2);
+		assertThat(er2).isEqualTo(er1);
 	}
 
 	@Test
 	public void equalsWithDifferentEncoding() {
 		EncodedResource er1 = new EncodedResource(resource, UTF8);
 		EncodedResource er2 = new EncodedResource(resource, UTF16);
-		assertNotEquals(er1, er2);
+		assertThat(er2).isNotEqualTo(er1);
 	}
 
 	@Test
 	public void equalsWithSameCharset() {
 		EncodedResource er1 = new EncodedResource(resource, UTF8_CS);
 		EncodedResource er2 = new EncodedResource(resource, UTF8_CS);
-		assertEquals(er1, er2);
+		assertThat(er2).isEqualTo(er1);
 	}
 
 	@Test
 	public void equalsWithDifferentCharset() {
 		EncodedResource er1 = new EncodedResource(resource, UTF8_CS);
 		EncodedResource er2 = new EncodedResource(resource, UTF16_CS);
-		assertNotEquals(er1, er2);
+		assertThat(er2).isNotEqualTo(er1);
 	}
 
 	@Test
 	public void equalsWithEncodingAndCharset() {
 		EncodedResource er1 = new EncodedResource(resource, UTF8);
 		EncodedResource er2 = new EncodedResource(resource, UTF8_CS);
-		assertNotEquals(er1, er2);
+		assertThat(er2).isNotEqualTo(er1);
 	}
 
 }

@@ -34,10 +34,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ErrorsMethodArgumentResolver}.
@@ -60,16 +58,16 @@ public class ErrorsMethodArgumentResolverTests {
 	@Test
 	public void supports() {
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
-		assertTrue(this.resolver.supportsParameter(parameter));
+		assertThat(this.resolver.supportsParameter(parameter)).isTrue();
 
 		parameter = this.testMethod.arg(BindingResult.class);
-		assertTrue(this.resolver.supportsParameter(parameter));
+		assertThat(this.resolver.supportsParameter(parameter)).isTrue();
 
 		parameter = this.testMethod.arg(ResolvableType.forClassWithGenerics(Mono.class, Errors.class));
-		assertTrue(this.resolver.supportsParameter(parameter));
+		assertThat(this.resolver.supportsParameter(parameter)).isTrue();
 
 		parameter = this.testMethod.arg(String.class);
-		assertFalse(this.resolver.supportsParameter(parameter));
+		assertThat(this.resolver.supportsParameter(parameter)).isFalse();
 	}
 
 	@Test
@@ -81,7 +79,7 @@ public class ErrorsMethodArgumentResolverTests {
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
 				.block(Duration.ofMillis(5000));
 
-		assertSame(bindingResult, actual);
+		assertThat(actual).isSameAs(bindingResult);
 	}
 
 	private BindingResult createBindingResult(Foo target, String name) {
@@ -100,7 +98,7 @@ public class ErrorsMethodArgumentResolverTests {
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
 				.block(Duration.ofMillis(5000));
 
-		assertSame(bindingResult, actual);
+		assertThat(actual).isSameAs(bindingResult);
 	}
 
 	@Test

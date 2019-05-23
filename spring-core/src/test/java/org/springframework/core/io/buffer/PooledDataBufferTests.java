@@ -22,9 +22,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -56,9 +55,9 @@ public class PooledDataBufferTests {
 
 		buffer.retain();
 		boolean result = buffer.release();
-		assertFalse(result);
+		assertThat(result).isFalse();
 		result = buffer.release();
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test

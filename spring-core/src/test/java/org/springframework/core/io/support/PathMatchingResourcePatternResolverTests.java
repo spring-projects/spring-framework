@@ -28,9 +28,8 @@ import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * If this test case fails, uncomment diagnostics in the
@@ -69,14 +68,14 @@ public class PathMatchingResourcePatternResolverTests {
 	public void singleResourceOnFileSystem() throws IOException {
 		Resource[] resources =
 				resolver.getResources("org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class");
-		assertEquals(1, resources.length);
+		assertThat(resources.length).isEqualTo(1);
 		assertProtocolAndFilenames(resources, "file", "PathMatchingResourcePatternResolverTests.class");
 	}
 
 	@Test
 	public void singleResourceInJar() throws IOException {
 		Resource[] resources = resolver.getResources("org/reactivestreams/Publisher.class");
-		assertEquals(1, resources.length);
+		assertThat(resources.length).isEqualTo(1);
 		assertProtocolAndFilenames(resources, "jar", "Publisher.class");
 	}
 
@@ -119,7 +118,7 @@ public class PathMatchingResourcePatternResolverTests {
 				break;
 			}
 		}
-		assertTrue("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar", found);
+		assertThat(found).as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar").isTrue();
 	}
 
 
@@ -144,18 +143,17 @@ public class PathMatchingResourcePatternResolverTests {
 //			System.out.println(resources[i]);
 //		}
 
-		assertEquals("Correct number of files found", filenames.length, resources.length);
+		assertThat(resources.length).as("Correct number of files found").isEqualTo(filenames.length);
 		for (Resource resource : resources) {
 			String actualProtocol = resource.getURL().getProtocol();
-			assertEquals(protocol, actualProtocol);
+			assertThat(actualProtocol).isEqualTo(protocol);
 			assertFilenameIn(resource, filenames);
 		}
 	}
 
 	private void assertFilenameIn(Resource resource, String... filenames) {
 		String filename = resource.getFilename();
-		assertTrue(resource + " does not have a filename that matches any of the specified names",
-				Arrays.stream(filenames).anyMatch(filename::endsWith));
+		assertThat(Arrays.stream(filenames).anyMatch(filename::endsWith)).as(resource + " does not have a filename that matches any of the specified names").isTrue();
 	}
 
 }

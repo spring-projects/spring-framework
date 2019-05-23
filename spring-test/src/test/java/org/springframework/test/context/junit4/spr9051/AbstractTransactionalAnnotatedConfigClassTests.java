@@ -34,8 +34,7 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
 
@@ -89,18 +88,17 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 	}
 
 	protected void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
-		assertEquals("the number of rows in the person table (" + testState + ").", expectedNumRows,
-			countRowsInTable("person"));
+		assertThat(countRowsInTable("person")).as("the number of rows in the person table (" + testState + ").").isEqualTo(expectedNumRows);
 	}
 
 	protected void assertAddPerson(final String name) {
-		assertEquals("Adding '" + name + "'", 1, createPerson(name));
+		assertThat(createPerson(name)).as("Adding '" + name + "'").isEqualTo(1);
 	}
 
 	@Test
 	public void autowiringFromConfigClass() {
-		assertNotNull("The employee should have been autowired.", employee);
-		assertEquals("John Smith", employee.getName());
+		assertThat(employee).as("The employee should have been autowired.").isNotNull();
+		assertThat(employee.getName()).isEqualTo("John Smith");
 	}
 
 	@BeforeTransaction
@@ -130,7 +128,7 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 
 	@AfterTransaction
 	public void afterTransaction() {
-		assertEquals("Deleting yoda", 1, deletePerson(YODA));
+		assertThat(deletePerson(YODA)).as("Deleting yoda").isEqualTo(1);
 		assertNumRowsInPersonTable(0, "after a transactional test method");
 	}
 

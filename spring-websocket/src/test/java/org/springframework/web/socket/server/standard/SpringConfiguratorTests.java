@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SpringConfiguratorTests {
 
@@ -67,21 +66,21 @@ public class SpringConfiguratorTests {
 	@Test
 	public void getEndpointPerConnection() throws Exception {
 		PerConnectionEchoEndpoint endpoint = this.configurator.getEndpointInstance(PerConnectionEchoEndpoint.class);
-		assertNotNull(endpoint);
+		assertThat(endpoint).isNotNull();
 	}
 
 	@Test
 	public void getEndpointSingletonByType() throws Exception {
 		EchoEndpoint expected = this.webAppContext.getBean(EchoEndpoint.class);
 		EchoEndpoint actual = this.configurator.getEndpointInstance(EchoEndpoint.class);
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
 	public void getEndpointSingletonByComponentName() throws Exception {
 		ComponentEchoEndpoint expected = this.webAppContext.getBean(ComponentEchoEndpoint.class);
 		ComponentEchoEndpoint actual = this.configurator.getEndpointInstance(ComponentEchoEndpoint.class);
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 

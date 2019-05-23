@@ -33,8 +33,8 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -110,7 +110,7 @@ public class SimpleJdbcCallTests {
 		Number newId = adder.executeObject(Number.class, new MapSqlParameterSource().
 				addValue("amount", 1103).
 				addValue("custid", 3));
-		assertEquals(4, newId.intValue());
+		assertThat(newId.intValue()).isEqualTo(4);
 		verifyAddInvoiceWithoutMetaData(false);
 		verify(connection, atLeastOnce()).close();
 	}
@@ -124,7 +124,7 @@ public class SimpleJdbcCallTests {
 				new SqlParameter("custid", Types.INTEGER),
 				new SqlOutParameter("newid", Types.INTEGER));
 		Number newId = adder.executeObject(Number.class, 1103, 3);
-		assertEquals(4, newId.intValue());
+		assertThat(newId.intValue()).isEqualTo(4);
 		verifyAddInvoiceWithoutMetaData(false);
 		verify(connection, atLeastOnce()).close();
 	}
@@ -136,7 +136,7 @@ public class SimpleJdbcCallTests {
 		Number newId = adder.executeObject(Number.class, new MapSqlParameterSource()
 				.addValue("amount", 1103)
 				.addValue("custid", 3));
-		assertEquals(4, newId.intValue());
+		assertThat(newId.intValue()).isEqualTo(4);
 		verifyAddInvoiceWithMetaData(false);
 		verify(connection, atLeastOnce()).close();
 	}
@@ -146,7 +146,7 @@ public class SimpleJdbcCallTests {
 		initializeAddInvoiceWithMetaData(false);
 		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withProcedureName("add_invoice");
 		Number newId = adder.executeObject(Number.class, 1103, 3);
-		assertEquals(4, newId.intValue());
+		assertThat(newId.intValue()).isEqualTo(4);
 		verifyAddInvoiceWithMetaData(false);
 		verify(connection, atLeastOnce()).close();
 	}
@@ -162,7 +162,7 @@ public class SimpleJdbcCallTests {
 		Number newId = adder.executeFunction(Number.class, new MapSqlParameterSource()
 				.addValue("amount", 1103)
 				.addValue("custid", 3));
-		assertEquals(4, newId.intValue());
+		assertThat(newId.intValue()).isEqualTo(4);
 		verifyAddInvoiceWithoutMetaData(true);
 		verify(connection, atLeastOnce()).close();
 	}
@@ -176,7 +176,7 @@ public class SimpleJdbcCallTests {
 				new SqlParameter("amount", Types.INTEGER),
 				new SqlParameter("custid", Types.INTEGER));
 		Number newId = adder.executeFunction(Number.class, 1103, 3);
-		assertEquals(4, newId.intValue());
+		assertThat(newId.intValue()).isEqualTo(4);
 		verifyAddInvoiceWithoutMetaData(true);
 		verify(connection, atLeastOnce()).close();
 	}
@@ -188,7 +188,7 @@ public class SimpleJdbcCallTests {
 		Number newId = adder.executeFunction(Number.class, new MapSqlParameterSource()
 				.addValue("amount", 1103)
 				.addValue("custid", 3));
-		assertEquals(4, newId.intValue());
+		assertThat(newId.intValue()).isEqualTo(4);
 		verifyAddInvoiceWithMetaData(true);
 		verify(connection, atLeastOnce()).close();
 
@@ -199,7 +199,7 @@ public class SimpleJdbcCallTests {
 		initializeAddInvoiceWithMetaData(true);
 		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withFunctionName("add_invoice");
 		Number newId = adder.executeFunction(Number.class, 1103, 3);
-		assertEquals(4, newId.intValue());
+		assertThat(newId.intValue()).isEqualTo(4);
 		verifyAddInvoiceWithMetaData(true);
 		verify(connection, atLeastOnce()).close();
 
@@ -231,7 +231,7 @@ public class SimpleJdbcCallTests {
 
 
 	private void verifyStatement(SimpleJdbcCall adder, String expected) {
-		assertEquals("Incorrect call statement", expected, adder.getCallString());
+		assertThat(adder.getCallString()).as("Incorrect call statement").isEqualTo(expected);
 	}
 
 	private void initializeAddInvoiceWithoutMetaData(boolean isFunction) throws SQLException {

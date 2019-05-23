@@ -38,9 +38,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
 
 import static java.time.Duration.ofMillis;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link WebHttpHandlerBuilder}.
@@ -55,14 +53,15 @@ public class WebHttpHandlerBuilderTests {
 		context.refresh();
 
 		HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(context).build();
-		assertTrue(httpHandler instanceof HttpWebHandlerAdapter);
-		assertSame(context, ((HttpWebHandlerAdapter) httpHandler).getApplicationContext());
+		boolean condition = httpHandler instanceof HttpWebHandlerAdapter;
+		assertThat(condition).isTrue();
+		assertThat(((HttpWebHandlerAdapter) httpHandler).getApplicationContext()).isSameAs(context);
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		httpHandler.handle(request, response).block(ofMillis(5000));
 
-		assertEquals("FilterB::FilterA", response.getBodyAsString().block(ofMillis(5000)));
+		assertThat(response.getBodyAsString().block(ofMillis(5000))).isEqualTo("FilterB::FilterA");
 	}
 
 	@Test
@@ -72,8 +71,8 @@ public class WebHttpHandlerBuilderTests {
 		context.refresh();
 
 		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
-		builder.filters(filters -> assertEquals(Collections.emptyList(), filters));
-		assertTrue(builder.hasForwardedHeaderTransformer());
+		builder.filters(filters -> assertThat(filters).isEqualTo(Collections.emptyList()));
+		assertThat(builder.hasForwardedHeaderTransformer()).isTrue();
 	}
 
 	@Test  // SPR-15074
@@ -87,7 +86,7 @@ public class WebHttpHandlerBuilderTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		httpHandler.handle(request, response).block(ofMillis(5000));
 
-		assertEquals("ExceptionHandlerB", response.getBodyAsString().block(ofMillis(5000)));
+		assertThat(response.getBodyAsString().block(ofMillis(5000))).isEqualTo("ExceptionHandlerB");
 	}
 
 	@Test
@@ -101,7 +100,7 @@ public class WebHttpHandlerBuilderTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		httpHandler.handle(request, response).block(ofMillis(5000));
 
-		assertEquals("handled", response.getBodyAsString().block(ofMillis(5000)));
+		assertThat(response.getBodyAsString().block(ofMillis(5000))).isEqualTo("handled");
 	}
 
 	@Test  // SPR-16972
@@ -111,8 +110,8 @@ public class WebHttpHandlerBuilderTests {
 		context.refresh();
 
 		WebHttpHandlerBuilder builder = WebHttpHandlerBuilder.applicationContext(context);
-		assertSame(context, ((HttpWebHandlerAdapter) builder.build()).getApplicationContext());
-		assertSame(context, ((HttpWebHandlerAdapter) builder.clone().build()).getApplicationContext());
+		assertThat(((HttpWebHandlerAdapter) builder.build()).getApplicationContext()).isSameAs(context);
+		assertThat(((HttpWebHandlerAdapter) builder.clone().build()).getApplicationContext()).isSameAs(context);
 	}
 
 

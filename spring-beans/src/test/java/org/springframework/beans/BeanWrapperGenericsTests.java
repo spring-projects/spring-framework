@@ -39,9 +39,8 @@ import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -58,8 +57,8 @@ public class BeanWrapperGenericsTests {
 		input.add("4");
 		input.add("5");
 		bw.setPropertyValue("integerSet", input);
-		assertTrue(gb.getIntegerSet().contains(new Integer(4)));
-		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
+		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
+		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
 	}
 
 	@Test
@@ -71,8 +70,8 @@ public class BeanWrapperGenericsTests {
 		input.add("4");
 		input.add("5");
 		bw.setPropertyValue("numberSet", input);
-		assertTrue(gb.getNumberSet().contains(new Integer(4)));
-		assertTrue(gb.getNumberSet().contains(new Integer(5)));
+		assertThat(gb.getNumberSet().contains(new Integer(4))).isTrue();
+		assertThat(gb.getNumberSet().contains(new Integer(5))).isTrue();
 	}
 
 	@Test
@@ -94,8 +93,8 @@ public class BeanWrapperGenericsTests {
 		input.add("http://localhost:8080");
 		input.add("http://localhost:9090");
 		bw.setPropertyValue("resourceList", input);
-		assertEquals(new UrlResource("http://localhost:8080"), gb.getResourceList().get(0));
-		assertEquals(new UrlResource("http://localhost:9090"), gb.getResourceList().get(1));
+		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
+		assertThat(gb.getResourceList().get(1)).isEqualTo(new UrlResource("http://localhost:9090"));
 	}
 
 	@Test
@@ -104,7 +103,7 @@ public class BeanWrapperGenericsTests {
 		gb.setResourceList(new ArrayList<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("resourceList[0]", "http://localhost:8080");
-		assertEquals(new UrlResource("http://localhost:8080"), gb.getResourceList().get(0));
+		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
 	}
 
 	@Test
@@ -115,8 +114,8 @@ public class BeanWrapperGenericsTests {
 		input.put("4", "5");
 		input.put("6", "7");
 		bw.setPropertyValue("shortMap", input);
-		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
-		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
 	}
 
 	@Test
@@ -125,8 +124,8 @@ public class BeanWrapperGenericsTests {
 		gb.setShortMap(new HashMap<>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("shortMap[4]", "5");
-		assertEquals(new Integer(5), bw.getPropertyValue("shortMap[4]"));
-		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
+		assertThat(bw.getPropertyValue("shortMap[4]")).isEqualTo(new Integer(5));
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
 	}
 
 	@Test
@@ -137,8 +136,8 @@ public class BeanWrapperGenericsTests {
 		input.put("4", "5");
 		input.put("6", "7");
 		bw.setPropertyValue("longMap", input);
-		assertEquals("5", gb.getLongMap().get(new Long("4")));
-		assertEquals("7", gb.getLongMap().get(new Long("6")));
+		assertThat(gb.getLongMap().get(new Long("4"))).isEqualTo("5");
+		assertThat(gb.getLongMap().get(new Long("6"))).isEqualTo("7");
 	}
 
 	@Test
@@ -147,8 +146,8 @@ public class BeanWrapperGenericsTests {
 		gb.setLongMap(new HashMap<Long, Integer>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("longMap[4]", "5");
-		assertEquals("5", gb.getLongMap().get(new Long("4")));
-		assertEquals("5", bw.getPropertyValue("longMap[4]"));
+		assertThat(gb.getLongMap().get(new Long("4"))).isEqualTo("5");
+		assertThat(bw.getPropertyValue("longMap[4]")).isEqualTo("5");
 	}
 
 	@Test
@@ -164,8 +163,10 @@ public class BeanWrapperGenericsTests {
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		bw.setPropertyValue("collectionMap", input);
-		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
-		assertTrue(gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList);
+		boolean condition1 = gb.getCollectionMap().get(new Integer(1)) instanceof HashSet;
+		assertThat(condition1).isTrue();
+		boolean condition = gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList;
+		assertThat(condition).isTrue();
 	}
 
 	@Test
@@ -177,7 +178,8 @@ public class BeanWrapperGenericsTests {
 		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(new Integer(1));
 		bw.setPropertyValue("collectionMap[1]", value1);
-		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
+		boolean condition = gb.getCollectionMap().get(new Integer(1)) instanceof HashSet;
+		assertThat(condition).isTrue();
 	}
 
 	@Test
@@ -188,8 +190,8 @@ public class BeanWrapperGenericsTests {
 		input.setProperty("4", "5");
 		input.setProperty("6", "7");
 		bw.setPropertyValue("shortMap", input);
-		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
-		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
 	}
 
 	@Test
@@ -200,8 +202,8 @@ public class BeanWrapperGenericsTests {
 		gb.setListOfLists(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", new Integer(5));
-		assertEquals(new Integer(5), bw.getPropertyValue("listOfLists[0][0]"));
-		assertEquals(new Integer(5), gb.getListOfLists().get(0).get(0));
+		assertThat(bw.getPropertyValue("listOfLists[0][0]")).isEqualTo(new Integer(5));
+		assertThat(gb.getListOfLists().get(0).get(0)).isEqualTo(new Integer(5));
 	}
 
 	@Test
@@ -212,8 +214,8 @@ public class BeanWrapperGenericsTests {
 		gb.setListOfLists(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", "5");
-		assertEquals(new Integer(5), bw.getPropertyValue("listOfLists[0][0]"));
-		assertEquals(new Integer(5), gb.getListOfLists().get(0).get(0));
+		assertThat(bw.getPropertyValue("listOfLists[0][0]")).isEqualTo(new Integer(5));
+		assertThat(gb.getListOfLists().get(0).get(0)).isEqualTo(new Integer(5));
 	}
 
 	@Test
@@ -224,8 +226,8 @@ public class BeanWrapperGenericsTests {
 		gb.setListOfArrays(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfArrays[0][1]", "str3 ");
-		assertEquals("str3 ", bw.getPropertyValue("listOfArrays[0][1]"));
-		assertEquals("str3 ", gb.getListOfArrays().get(0)[1]);
+		assertThat(bw.getPropertyValue("listOfArrays[0][1]")).isEqualTo("str3 ");
+		assertThat(gb.getListOfArrays().get(0)[1]).isEqualTo("str3 ");
 	}
 
 	@Test
@@ -237,8 +239,8 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(String.class, new StringTrimmerEditor(false));
 		bw.setPropertyValue("listOfArrays[0][1]", "str3 ");
-		assertEquals("str3", bw.getPropertyValue("listOfArrays[0][1]"));
-		assertEquals("str3", gb.getListOfArrays().get(0)[1]);
+		assertThat(bw.getPropertyValue("listOfArrays[0][1]")).isEqualTo("str3");
+		assertThat(gb.getListOfArrays().get(0)[1]).isEqualTo("str3");
 	}
 
 	@Test
@@ -249,8 +251,8 @@ public class BeanWrapperGenericsTests {
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfMaps[0][10]", new Long(5));
-		assertEquals(new Long(5), bw.getPropertyValue("listOfMaps[0][10]"));
-		assertEquals(new Long(5), gb.getListOfMaps().get(0).get(10));
+		assertThat(bw.getPropertyValue("listOfMaps[0][10]")).isEqualTo(new Long(5));
+		assertThat(gb.getListOfMaps().get(0).get(10)).isEqualTo(new Long(5));
 	}
 
 	@Test
@@ -261,8 +263,8 @@ public class BeanWrapperGenericsTests {
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfMaps[0][10]", "5");
-		assertEquals(new Long(5), bw.getPropertyValue("listOfMaps[0][10]"));
-		assertEquals(new Long(5), gb.getListOfMaps().get(0).get(10));
+		assertThat(bw.getPropertyValue("listOfMaps[0][10]")).isEqualTo(new Long(5));
+		assertThat(gb.getListOfMaps().get(0).get(10)).isEqualTo(new Long(5));
 	}
 
 	@Test
@@ -273,8 +275,8 @@ public class BeanWrapperGenericsTests {
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", new Long(5));
-		assertEquals(new Long(5), bw.getPropertyValue("mapOfMaps[mykey][10]"));
-		assertEquals(new Long(5), gb.getMapOfMaps().get("mykey").get(10));
+		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(new Long(5));
+		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(new Long(5));
 	}
 
 	@Test
@@ -285,8 +287,8 @@ public class BeanWrapperGenericsTests {
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", "5");
-		assertEquals(new Long(5), bw.getPropertyValue("mapOfMaps[mykey][10]"));
-		assertEquals(new Long(5), gb.getMapOfMaps().get("mykey").get(10));
+		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(new Long(5));
+		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(new Long(5));
 	}
 
 	@Test
@@ -297,8 +299,8 @@ public class BeanWrapperGenericsTests {
 		gb.setMapOfLists(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", new Integer(5));
-		assertEquals(new Integer(5), bw.getPropertyValue("mapOfLists[1][0]"));
-		assertEquals(new Integer(5), gb.getMapOfLists().get(new Integer(1)).get(0));
+		assertThat(bw.getPropertyValue("mapOfLists[1][0]")).isEqualTo(new Integer(5));
+		assertThat(gb.getMapOfLists().get(new Integer(1)).get(0)).isEqualTo(new Integer(5));
 	}
 
 	@Test
@@ -309,8 +311,8 @@ public class BeanWrapperGenericsTests {
 		gb.setMapOfLists(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", "5");
-		assertEquals(new Integer(5), bw.getPropertyValue("mapOfLists[1][0]"));
-		assertEquals(new Integer(5), gb.getMapOfLists().get(new Integer(1)).get(0));
+		assertThat(bw.getPropertyValue("mapOfLists[1][0]")).isEqualTo(new Integer(5));
+		assertThat(gb.getMapOfLists().get(new Integer(1)).get(0)).isEqualTo(new Integer(5));
 	}
 
 	@Test
@@ -323,7 +325,8 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfInteger", map);
 
 		Object obj = gb.getMapOfInteger().get("testKey");
-		assertTrue(obj instanceof Integer);
+		boolean condition = obj instanceof Integer;
+		assertThat(condition).isTrue();
 	}
 
 	@Test
@@ -337,8 +340,9 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfListOfInteger", map);
 
 		Object obj = gb.getMapOfListOfInteger().get("testKey").get(0);
-		assertTrue(obj instanceof Integer);
-		assertEquals(1, ((Integer) obj).intValue());
+		boolean condition = obj instanceof Integer;
+		assertThat(condition).isTrue();
+		assertThat(((Integer) obj).intValue()).isEqualTo(1);
 	}
 
 	@Test
@@ -353,8 +357,9 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("listOfMapOfInteger", list);
 
 		Object obj = gb.getListOfMapOfInteger().get(0).get("testKey");
-		assertTrue(obj instanceof Integer);
-		assertEquals(5, ((Integer) obj).intValue());
+		boolean condition = obj instanceof Integer;
+		assertThat(condition).isTrue();
+		assertThat(((Integer) obj).intValue()).isEqualTo(5);
 	}
 
 	@Test
@@ -368,8 +373,9 @@ public class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfListOfListOfInteger", map);
 
 		Object obj = gb.getMapOfListOfListOfInteger().get("testKey").get(0).get(0);
-		assertTrue(obj instanceof Integer);
-		assertEquals(1, ((Integer) obj).intValue());
+		boolean condition = obj instanceof Integer;
+		assertThat(condition).isTrue();
+		assertThat(((Integer) obj).intValue()).isEqualTo(1);
 	}
 
 	@Test
@@ -385,8 +391,8 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericMap", inputMap);
 
-		assertEquals(new Integer(1), holder.getGenericMap().keySet().iterator().next().get(0));
-		assertEquals(new Long(10), holder.getGenericMap().values().iterator().next().get(0));
+		assertThat(holder.getGenericMap().keySet().iterator().next().get(0)).isEqualTo(new Integer(1));
+		assertThat(holder.getGenericMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
 	}
 
 	@Test
@@ -402,8 +408,8 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericMap", inputMap);
 
-		assertEquals(new Integer(1), holder.getGenericMap().keySet().iterator().next().get(0));
-		assertEquals(new Long(10), holder.getGenericMap().values().iterator().next().get(0));
+		assertThat(holder.getGenericMap().keySet().iterator().next().get(0)).isEqualTo(new Integer(1));
+		assertThat(holder.getGenericMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
 	}
 
 	@Test
@@ -415,8 +421,8 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
 
-		assertEquals(new Integer(1), holder.getGenericIndexedMap().keySet().iterator().next());
-		assertEquals(new Long(10), holder.getGenericIndexedMap().values().iterator().next().get(0));
+		assertThat(holder.getGenericIndexedMap().keySet().iterator().next()).isEqualTo(new Integer(1));
+		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
 	}
 
 	@Test
@@ -428,8 +434,8 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
 
-		assertEquals(new Integer(1), holder.getGenericIndexedMap().keySet().iterator().next());
-		assertEquals(new Long(10), holder.getGenericIndexedMap().values().iterator().next().get(0));
+		assertThat(holder.getGenericIndexedMap().keySet().iterator().next()).isEqualTo(new Integer(1));
+		assertThat(holder.getGenericIndexedMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
 	}
 
 	@Test
@@ -441,8 +447,8 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
 
-		assertEquals(new Integer(1), holder.getDerivedIndexedMap().keySet().iterator().next());
-		assertEquals(new Long(10), holder.getDerivedIndexedMap().values().iterator().next().get(0));
+		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(new Integer(1));
+		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
 	}
 
 	@Test
@@ -454,8 +460,8 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(holder);
 		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
 
-		assertEquals(new Integer(1), holder.getDerivedIndexedMap().keySet().iterator().next());
-		assertEquals(new Long(10), holder.getDerivedIndexedMap().values().iterator().next().get(0));
+		assertThat(holder.getDerivedIndexedMap().keySet().iterator().next()).isEqualTo(new Integer(1));
+		assertThat(holder.getDerivedIndexedMap().values().iterator().next().get(0)).isEqualTo(new Long(10));
 	}
 
 	@Test
@@ -464,9 +470,9 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
 		bw.setPropertyValue("genericListProperty", new String[] {"20", "30"});
-		assertEquals(new Integer(10), gb.getGenericProperty());
-		assertEquals(new Integer(20), gb.getGenericListProperty().get(0));
-		assertEquals(new Integer(30), gb.getGenericListProperty().get(1));
+		assertThat(gb.getGenericProperty()).isEqualTo(new Integer(10));
+		assertThat(gb.getGenericListProperty().get(0)).isEqualTo(new Integer(20));
+		assertThat(gb.getGenericListProperty().get(1)).isEqualTo(new Integer(30));
 	}
 
 	@Test
@@ -475,9 +481,9 @@ public class BeanWrapperGenericsTests {
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("genericProperty", "10");
 		bw.setPropertyValue("genericListProperty", new String[] {"20", "30"});
-		assertEquals(new Integer(10), gb.getGenericProperty().iterator().next());
-		assertEquals(new Integer(20), gb.getGenericListProperty().get(0).iterator().next());
-		assertEquals(new Integer(30), gb.getGenericListProperty().get(1).iterator().next());
+		assertThat(gb.getGenericProperty().iterator().next()).isEqualTo(new Integer(10));
+		assertThat(gb.getGenericListProperty().get(0).iterator().next()).isEqualTo(new Integer(20));
+		assertThat(gb.getGenericListProperty().get(1).iterator().next()).isEqualTo(new Integer(30));
 	}
 
 	@Test
@@ -485,7 +491,7 @@ public class BeanWrapperGenericsTests {
 		Bar bar = new Bar();
 		BeanWrapper bw = new BeanWrapperImpl(bar);
 		bw.setPropertyValue("version", "10");
-		assertEquals(new Double(10.0), bar.getVersion());
+		assertThat(bar.getVersion()).isEqualTo(new Double(10.0));
 	}
 
 	@Test
@@ -493,7 +499,7 @@ public class BeanWrapperGenericsTests {
 		Promotion bean = new Promotion();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.setPropertyValue("id", "10");
-		assertEquals(new Long(10), bean.getId());
+		assertThat(bean.getId()).isEqualTo(new Long(10));
 	}
 
 	@Test
@@ -514,10 +520,10 @@ public class BeanWrapperGenericsTests {
 		Holder<Map<String, Object>> context = new Holder<>(data);
 
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(context);
-		assertEquals("y", bw.getPropertyValue("data['x']"));
+		assertThat(bw.getPropertyValue("data['x']")).isEqualTo("y");
 
 		bw.setPropertyValue("data['message']", "it works!");
-		assertEquals("it works!", data.get("message"));
+		assertThat(data.get("message")).isEqualTo("it works!");
 	}
 
 

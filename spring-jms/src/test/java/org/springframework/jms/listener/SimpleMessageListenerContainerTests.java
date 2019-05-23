@@ -35,12 +35,9 @@ import org.springframework.jms.StubQueue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -65,7 +62,7 @@ public class SimpleMessageListenerContainerTests {
 	@Test
 	public void testSettingMessageListenerToANullType() {
 		this.container.setMessageListener(null);
-		assertNull(this.container.getMessageListener());
+		assertThat(this.container.getMessageListener()).isNull();
 	}
 
 	@Test
@@ -76,10 +73,9 @@ public class SimpleMessageListenerContainerTests {
 
 	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() {
-		assertFalse("The [pubSubLocal] property of SimpleMessageListenerContainer " +
+		assertThat(this.container.isPubSubNoLocal()).as("The [pubSubLocal] property of SimpleMessageListenerContainer " +
 				"must default to false. Change this test (and the " +
-				"attendant Javadoc) if you have changed the default.",
-				this.container.isPubSubNoLocal());
+				"attendant Javadoc) if you have changed the default.").isFalse();
 	}
 
 	@Test
@@ -190,7 +186,7 @@ public class SimpleMessageListenerContainerTests {
 			public void onMessage(Message message, @Nullable Session sess) {
 				try {
 					// Check correct Session passed into SessionAwareMessageListener.
-					assertSame(sess, session);
+					assertThat(session).isSameAs(sess);
 				}
 				catch (Throwable ex) {
 					failure.add("MessageListener execution failed: " + ex);
@@ -238,9 +234,9 @@ public class SimpleMessageListenerContainerTests {
 			@Override
 			public void execute(Runnable task) {
 				listener.executorInvoked = true;
-				assertFalse(listener.listenerInvoked);
+				assertThat(listener.listenerInvoked).isFalse();
 				task.run();
-				assertTrue(listener.listenerInvoked);
+				assertThat(listener.listenerInvoked).isTrue();
 			}
 		});
 		this.container.afterPropertiesSet();
@@ -249,8 +245,8 @@ public class SimpleMessageListenerContainerTests {
 		final Message message = mock(Message.class);
 		messageConsumer.sendMessage(message);
 
-		assertTrue(listener.executorInvoked);
-		assertTrue(listener.listenerInvoked);
+		assertThat(listener.executorInvoked).isTrue();
+		assertThat(listener.listenerInvoked).isTrue();
 
 		verify(connection).setExceptionListener(this.container);
 		verify(connection).start();

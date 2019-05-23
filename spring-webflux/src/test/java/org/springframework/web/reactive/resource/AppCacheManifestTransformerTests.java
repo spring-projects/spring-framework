@@ -30,9 +30,6 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
@@ -81,7 +78,7 @@ public class AppCacheManifestTransformerTests {
 		Resource expected = getResource("foo.css");
 		Resource actual = this.transformer.transform(exchange, expected, this.chain).block(TIMEOUT);
 
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
@@ -90,7 +87,7 @@ public class AppCacheManifestTransformerTests {
 		Resource expected = getResource("error.appcache");
 		Resource actual = this.transformer.transform(exchange, expected, this.chain).block(TIMEOUT);
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -99,7 +96,7 @@ public class AppCacheManifestTransformerTests {
 		Resource resource = getResource("test.appcache");
 		Resource actual = this.transformer.transform(exchange, resource, this.chain).block(TIMEOUT);
 
-		assertNotNull(actual);
+		assertThat(actual).isNotNull();
 		byte[] bytes = FileCopyUtils.copyToByteArray(actual.getInputStream());
 		String content = new String(bytes, "UTF-8");
 

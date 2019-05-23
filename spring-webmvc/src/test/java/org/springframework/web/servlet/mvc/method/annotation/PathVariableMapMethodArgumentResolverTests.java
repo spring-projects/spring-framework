@@ -32,9 +32,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link PathVariableMapMethodArgumentResolver}.
@@ -72,9 +70,9 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(resolver.supportsParameter(paramMap));
-		assertFalse(resolver.supportsParameter(paramNamedMap));
-		assertFalse(resolver.supportsParameter(paramMapNoAnnot));
+		assertThat(resolver.supportsParameter(paramMap)).isTrue();
+		assertThat(resolver.supportsParameter(paramNamedMap)).isFalse();
+		assertThat(resolver.supportsParameter(paramMapNoAnnot)).isFalse();
 	}
 
 	@Test
@@ -86,7 +84,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(paramMap, mavContainer, webRequest, null);
 
-		assertEquals(uriTemplateVars, result);
+		assertThat(result).isEqualTo(uriTemplateVars);
 	}
 
 	@Test
@@ -94,7 +92,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 	public void resolveArgumentNoUriVars() throws Exception {
 		Map<String, String> map = (Map<String, String>) resolver.resolveArgument(paramMap, mavContainer, webRequest, null);
 
-		assertEquals(Collections.emptyMap(), map);
+		assertThat(map).isEqualTo(Collections.emptyMap());
 	}
 
 

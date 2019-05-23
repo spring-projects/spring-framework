@@ -31,7 +31,6 @@ import org.springframework.validation.beanvalidation.BeanValidationPostProcessor
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Juergen Hoeller
@@ -127,7 +126,7 @@ public class BeanValidationPostProcessorTests {
 
 		@PostConstruct
 		public void init() {
-			assertNotNull("Shouldn't be here after constraint checking", this.testBean);
+			assertThat(this.testBean).as("Shouldn't be here after constraint checking").isNotNull();
 		}
 	}
 

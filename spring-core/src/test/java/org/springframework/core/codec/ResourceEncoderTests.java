@@ -33,8 +33,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -51,17 +50,17 @@ public class ResourceEncoderTests extends AbstractEncoderTestCase<ResourceEncode
 	@Override
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Resource.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
-				MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Resource.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+				MimeTypeUtils.APPLICATION_JSON)).isTrue();
 
 		// SPR-15464
-		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
+		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
 	}
 
 	@Override

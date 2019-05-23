@@ -30,10 +30,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ContextPathCompositeHandler}.
@@ -101,8 +99,8 @@ public class ContextPathCompositeHandlerTests {
 
 		new ContextPathCompositeHandler(map).handle(request, new MockServerHttpResponse());
 
-		assertTrue(handler.wasInvoked());
-		assertEquals("/yet/another/path", handler.getRequest().getPath().contextPath().value());
+		assertThat(handler.wasInvoked()).isTrue();
+		assertThat(handler.getRequest().getPath().contextPath().value()).isEqualTo("/yet/another/path");
 	}
 
 	@Test
@@ -117,7 +115,7 @@ public class ContextPathCompositeHandlerTests {
 		ServerHttpResponse response = testHandle("/yet/another/path", map);
 
 		assertNotInvoked(handler1, handler2);
-		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
 
 	@Test // SPR-17144
@@ -138,8 +136,8 @@ public class ContextPathCompositeHandlerTests {
 		new ContextPathCompositeHandler(map).handle(request, response).block(Duration.ofSeconds(5));
 
 		assertNotInvoked(handler);
-		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-		assertTrue(commitInvoked.get());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertThat(commitInvoked.get()).isTrue();
 	}
 
 
@@ -151,12 +149,12 @@ public class ContextPathCompositeHandlerTests {
 	}
 
 	private void assertInvoked(TestHttpHandler handler, String contextPath) {
-		assertTrue(handler.wasInvoked());
-		assertEquals(contextPath, handler.getRequest().getPath().contextPath().value());
+		assertThat(handler.wasInvoked()).isTrue();
+		assertThat(handler.getRequest().getPath().contextPath().value()).isEqualTo(contextPath);
 	}
 
 	private void assertNotInvoked(TestHttpHandler... handlers) {
-		Arrays.stream(handlers).forEach(handler -> assertFalse(handler.wasInvoked()));
+		Arrays.stream(handlers).forEach(handler -> assertThat(handler.wasInvoked()).isFalse());
 	}
 
 

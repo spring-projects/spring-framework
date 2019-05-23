@@ -28,9 +28,8 @@ import test.aop.PerThisAspect;
 
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop
@@ -53,7 +52,7 @@ public class AspectProxyFactoryTests {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(bean);
 		proxyFactory.addAspect(MultiplyReturnValue.class);
 		ITestBean proxy = proxyFactory.getProxy();
-		assertEquals("Multiplication did not occur", bean.getAge() * 2, proxy.getAge());
+		assertThat(proxy.getAge()).as("Multiplication did not occur").isEqualTo((bean.getAge() * 2));
 	}
 
 	@Test
@@ -70,10 +69,10 @@ public class AspectProxyFactoryTests {
 		ITestBean proxy1 = pf1.getProxy();
 		ITestBean proxy2 = pf2.getProxy();
 
-		assertEquals(0, proxy1.getAge());
-		assertEquals(1, proxy1.getAge());
-		assertEquals(0, proxy2.getAge());
-		assertEquals(2, proxy1.getAge());
+		assertThat(proxy1.getAge()).isEqualTo(0);
+		assertThat(proxy1.getAge()).isEqualTo(1);
+		assertThat(proxy2.getAge()).isEqualTo(0);
+		assertThat(proxy1.getAge()).isEqualTo(2);
 	}
 
 	@Test
@@ -84,18 +83,16 @@ public class AspectProxyFactoryTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testSerializable() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
 		ITestBean proxy = proxyFactory.getProxy();
-		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 		ITestBean tb = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
-		assertTrue(tb.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(tb.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testWithInstance() throws Exception {
 		MultiplyReturnValue aspect = new MultiplyReturnValue();
 		int multiple = 3;
@@ -108,10 +105,10 @@ public class AspectProxyFactoryTests {
 		proxyFactory.addAspect(aspect);
 
 		ITestBean proxy = proxyFactory.getProxy();
-		assertEquals(target.getAge() * multiple, proxy.getAge());
+		assertThat(proxy.getAge()).isEqualTo((target.getAge() * multiple));
 
 		ITestBean serializedProxy = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
-		assertEquals(target.getAge() * multiple, serializedProxy.getAge());
+		assertThat(serializedProxy.getAge()).isEqualTo((target.getAge() * multiple));
 	}
 
 	@Test
@@ -122,21 +119,19 @@ public class AspectProxyFactoryTests {
 	}
 
 	@Test  // SPR-13328
-	@SuppressWarnings("unchecked")
 	public void testProxiedVarargsWithEnumArray() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
 		ITestBean proxy = proxyFactory.getProxy();
-		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 	}
 
 	@Test  // SPR-13328
-	@SuppressWarnings("unchecked")
 	public void testUnproxiedVarargsWithEnumArray() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnSetter.class);
 		ITestBean proxy = proxyFactory.getProxy();
-		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 	}
 
 

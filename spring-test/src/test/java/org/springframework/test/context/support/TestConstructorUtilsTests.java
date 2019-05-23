@@ -24,8 +24,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestConstructor;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link TestConstructorUtils}.
@@ -69,12 +68,12 @@ public class TestConstructorUtilsTests {
 
 	private void assertAutowirable(Class<?> testClass) throws NoSuchMethodException {
 		Constructor<?> constructor = testClass.getDeclaredConstructor();
-		assertTrue(TestConstructorUtils.isAutowirableConstructor(constructor, testClass));
+		assertThat(TestConstructorUtils.isAutowirableConstructor(constructor, testClass)).isTrue();
 	}
 
 	private void assertNotAutowirable(Class<?> testClass) throws NoSuchMethodException {
 		Constructor<?> constructor = testClass.getDeclaredConstructor();
-		assertFalse(TestConstructorUtils.isAutowirableConstructor(constructor, testClass));
+		assertThat(TestConstructorUtils.isAutowirableConstructor(constructor, testClass)).isFalse();
 	}
 
 	private void setGlobalFlag() {

@@ -38,8 +38,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests for view resolution with {@code @EnableWebMvc}.
@@ -52,19 +52,19 @@ public class ViewResolutionIntegrationTests {
 	@Test
 	public void freemarker() throws Exception {
 		MockHttpServletResponse response = runTest(FreeMarkerWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 	@Test
 	public void tiles() throws Exception {
 		MockHttpServletResponse response = runTest(TilesWebConfig.class);
-		assertEquals("/WEB-INF/index.jsp", response.getForwardedUrl());
+		assertThat(response.getForwardedUrl()).isEqualTo("/WEB-INF/index.jsp");
 	}
 
 	@Test
 	public void groovyMarkup() throws Exception {
 		MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class ViewResolutionIntegrationTests {
 	@Test
 	public void existingViewResolver() throws Exception {
 		MockHttpServletResponse response = runTest(ExistingViewResolverConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
 	}
 
 

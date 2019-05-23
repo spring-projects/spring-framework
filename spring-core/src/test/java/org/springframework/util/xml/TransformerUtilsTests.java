@@ -27,9 +27,8 @@ import javax.xml.transform.URIResolver;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link TransformerUtils}.
@@ -44,11 +43,11 @@ public class TransformerUtilsTests {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("yes", indent);
+		assertThat(indent).isNotNull();
+		assertThat(indent).isEqualTo("yes");
 		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
-		assertNotNull(indentAmount);
-		assertEquals(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT), indentAmount);
+		assertThat(indentAmount).isNotNull();
+		assertThat(indentAmount).isEqualTo(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT));
 	}
 
 	@Test
@@ -57,11 +56,11 @@ public class TransformerUtilsTests {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer, Integer.valueOf(indentAmountProperty));
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("yes", indent);
+		assertThat(indent).isNotNull();
+		assertThat(indent).isEqualTo("yes");
 		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
-		assertNotNull(indentAmount);
-		assertEquals(indentAmountProperty, indentAmount);
+		assertThat(indentAmount).isNotNull();
+		assertThat(indentAmount).isEqualTo(indentAmountProperty);
 	}
 
 	@Test
@@ -69,8 +68,8 @@ public class TransformerUtilsTests {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.disableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("no", indent);
+		assertThat(indent).isNotNull();
+		assertThat(indent).isEqualTo("no");
 	}
 
 	@Test

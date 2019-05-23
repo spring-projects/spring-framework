@@ -25,9 +25,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests using {@link HeaderWebSessionIdResolver}.
@@ -50,8 +49,7 @@ public class HeaderWebSessionIdResolverTests {
 	public void expireWhenValidThenSetsEmptyHeader() {
 		this.idResolver.expireSession(this.exchange);
 
-		assertEquals(Arrays.asList(""),
-				this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(""));
 	}
 
 	@Test
@@ -60,8 +58,7 @@ public class HeaderWebSessionIdResolverTests {
 
 		this.idResolver.expireSession(this.exchange);
 
-		assertEquals(Arrays.asList(""),
-				this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(""));
 	}
 
 	@Test
@@ -70,8 +67,7 @@ public class HeaderWebSessionIdResolverTests {
 
 		this.idResolver.expireSession(this.exchange);
 
-		assertEquals(Arrays.asList(""),
-				this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(""));
 	}
 
 	@Test
@@ -80,8 +76,7 @@ public class HeaderWebSessionIdResolverTests {
 
 		this.idResolver.setSessionId(this.exchange, id);
 
-		assertEquals(Arrays.asList(id),
-				this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(id));
 	}
 
 	@Test
@@ -91,8 +86,7 @@ public class HeaderWebSessionIdResolverTests {
 
 		this.idResolver.setSessionId(this.exchange, id);
 
-		assertEquals(Arrays.asList(id),
-				this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME));
+		assertThat(this.exchange.getResponse().getHeaders().get(HeaderWebSessionIdResolver.DEFAULT_HEADER_NAME)).isEqualTo(Arrays.asList(id));
 	}
 
 	@Test
@@ -103,8 +97,7 @@ public class HeaderWebSessionIdResolverTests {
 
 		this.idResolver.setSessionId(this.exchange, id);
 
-		assertEquals(Arrays.asList(id),
-				this.exchange.getResponse().getHeaders().get(headerName));
+		assertThat(this.exchange.getResponse().getHeaders().get(headerName)).isEqualTo(Arrays.asList(id));
 	}
 
 	@Test
@@ -117,7 +110,7 @@ public class HeaderWebSessionIdResolverTests {
 	public void resolveSessionIdsWhenNoIdsThenEmpty() {
 		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
 
-		assertTrue(ids.isEmpty());
+		assertThat(ids.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -128,7 +121,7 @@ public class HeaderWebSessionIdResolverTests {
 
 		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
 
-		assertEquals(Arrays.asList(id), ids);
+		assertThat(ids).isEqualTo(Arrays.asList(id));
 	}
 
 	@Test
@@ -141,6 +134,6 @@ public class HeaderWebSessionIdResolverTests {
 
 		List<String> ids = this.idResolver.resolveSessionIds(this.exchange);
 
-		assertEquals(Arrays.asList(id1, id2), ids);
+		assertThat(ids).isEqualTo(Arrays.asList(id1, id2));
 	}
 }

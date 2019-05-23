@@ -45,12 +45,8 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -83,7 +79,7 @@ public class MappingJackson2XmlViewTests {
 
 	@Test
 	public void isExposePathVars() {
-		assertEquals("Must not expose path variables", false, view.isExposePathVariables());
+		assertThat(view.isExposePathVariables()).as("Must not expose path variables").isEqualTo(false);
 	}
 
 	@Test
@@ -95,13 +91,13 @@ public class MappingJackson2XmlViewTests {
 		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
-		assertEquals("no-store", response.getHeader("Cache-Control"));
+		assertThat(response.getHeader("Cache-Control")).isEqualTo("no-store");
 
-		assertEquals(MappingJackson2XmlView.DEFAULT_CONTENT_TYPE, response.getContentType());
+		assertThat(response.getContentType()).isEqualTo(MappingJackson2XmlView.DEFAULT_CONTENT_TYPE);
 
 		String jsonResult = response.getContentAsString();
-		assertTrue(jsonResult.length() > 0);
-		assertEquals(jsonResult.length(), response.getContentLength());
+		assertThat(jsonResult.length() > 0).isTrue();
+		assertThat(response.getContentLength()).isEqualTo(jsonResult.length());
 
 		validateResult();
 	}
@@ -112,12 +108,12 @@ public class MappingJackson2XmlViewTests {
 		model.put("foo", "bar");
 
 		view.render(model, request, response);
-		assertEquals("application/xml", response.getContentType());
+		assertThat(response.getContentType()).isEqualTo("application/xml");
 
 		request.setAttribute(View.SELECTED_CONTENT_TYPE, new MediaType("application", "vnd.example-v2+xml"));
 		view.render(model, request, response);
 
-		assertEquals("application/vnd.example-v2+xml", response.getContentType());
+		assertThat(response.getContentType()).isEqualTo("application/vnd.example-v2+xml");
 	}
 
 	@Test
@@ -130,7 +126,7 @@ public class MappingJackson2XmlViewTests {
 
 		view.render(model, request, response);
 
-		assertNull(response.getHeader("Cache-Control"));
+		assertThat(response.getHeader("Cache-Control")).isNull();
 	}
 
 	@Test
@@ -143,8 +139,8 @@ public class MappingJackson2XmlViewTests {
 		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
-		assertTrue(response.getContentAsString().length() > 0);
-		assertEquals(response.getContentAsString().length(), response.getContentLength());
+		assertThat(response.getContentAsString().length() > 0).isTrue();
+		assertThat(response.getContentLength()).isEqualTo(response.getContentAsString().length());
 
 		validateResult();
 	}
@@ -157,8 +153,8 @@ public class MappingJackson2XmlViewTests {
 
 		view.render(model, request, response);
 
-		assertTrue(response.getContentAsString().length() > 0);
-		assertTrue(response.getContentAsString().contains("<testBeanSimple>custom</testBeanSimple>"));
+		assertThat(response.getContentAsString().length() > 0).isTrue();
+		assertThat(response.getContentAsString().contains("<testBeanSimple>custom</testBeanSimple>")).isTrue();
 
 		validateResult();
 	}
@@ -177,8 +173,8 @@ public class MappingJackson2XmlViewTests {
 		view.render(model, request, response);
 
 		String result = response.getContentAsString();
-		assertTrue(result.length() > 0);
-		assertTrue(result.contains("custom</testBeanSimple>"));
+		assertThat(result.length() > 0).isTrue();
+		assertThat(result.contains("custom</testBeanSimple>")).isTrue();
 
 		validateResult();
 	}
@@ -195,10 +191,10 @@ public class MappingJackson2XmlViewTests {
 		view.render(model, request, response);
 
 		String result = response.getContentAsString();
-		assertTrue(result.length() > 0);
-		assertFalse(result.contains("foo"));
-		assertTrue(result.contains("bar"));
-		assertFalse(result.contains("baz"));
+		assertThat(result.length() > 0).isTrue();
+		assertThat(result.contains("foo")).isFalse();
+		assertThat(result.contains("bar")).isTrue();
+		assertThat(result.contains("baz")).isFalse();
 
 		validateResult();
 	}
@@ -225,18 +221,18 @@ public class MappingJackson2XmlViewTests {
 		view.render(model, request, response);
 
 		String content = response.getContentAsString();
-		assertTrue(content.length() > 0);
-		assertEquals(content.length(), response.getContentLength());
-		assertTrue(content.contains("foo"));
-		assertFalse(content.contains("boo"));
-		assertFalse(content.contains(JsonView.class.getName()));
+		assertThat(content.length() > 0).isTrue();
+		assertThat(response.getContentLength()).isEqualTo(content.length());
+		assertThat(content.contains("foo")).isTrue();
+		assertThat(content.contains("boo")).isFalse();
+		assertThat(content.contains(JsonView.class.getName())).isFalse();
 	}
 
 	private void validateResult() throws Exception {
 		Object xmlResult =
 				jsContext.evaluateString(jsScope, "(" + response.getContentAsString() + ")", "XML Stream", 1, null);
-		assertNotNull("XML Result did not eval as valid JavaScript", xmlResult);
-		assertEquals("application/xml", response.getContentType());
+		assertThat(xmlResult).as("XML Result did not eval as valid JavaScript").isNotNull();
+		assertThat(response.getContentType()).isEqualTo("application/xml");
 	}
 
 

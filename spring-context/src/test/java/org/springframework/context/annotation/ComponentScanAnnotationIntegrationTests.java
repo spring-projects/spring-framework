@@ -62,9 +62,6 @@ import org.springframework.tests.context.SimpleMapScope;
 import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
 /**
@@ -192,7 +189,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void withCustomTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithCustomTypeFilter.class);
-		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("componentScanParserTests.KustomAnnotationAutowiredBean"));
+		assertThat(ctx.getDefaultListableBeanFactory().containsSingleton("componentScanParserTests.KustomAnnotationAutowiredBean")).isFalse();
 		KustomAnnotationAutowiredBean testBean = ctx.getBean("componentScanParserTests.KustomAnnotationAutowiredBean", KustomAnnotationAutowiredBean.class);
 		assertThat(testBean.getDependency()).isNotNull();
 	}
@@ -200,7 +197,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void withAwareTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithAwareTypeFilter.class);
-		assertTrue(ctx.getEnvironment().acceptsProfiles(Profiles.of("the-filter-ran")));
+		assertThat(ctx.getEnvironment().acceptsProfiles(Profiles.of("the-filter-ran"))).isTrue();
 	}
 
 	@Test
@@ -315,10 +312,10 @@ public class ComponentScanAnnotationIntegrationTests {
 		@Override
 		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) {
 			((ConfigurableEnvironment) this.environment).addActiveProfile("the-filter-ran");
-			assertNotNull(this.beanFactory);
-			assertNotNull(this.classLoader);
-			assertNotNull(this.resourceLoader);
-			assertNotNull(this.environment);
+			assertThat(this.beanFactory).isNotNull();
+			assertThat(this.classLoader).isNotNull();
+			assertThat(this.resourceLoader).isNotNull();
+			assertThat(this.environment).isNotNull();
 			return false;
 		}
 

@@ -20,8 +20,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -73,7 +73,7 @@ public class DebugInterceptorTests {
 	}
 
 	private void checkCallCountTotal(DebugInterceptor interceptor) {
-		assertEquals("Intercepted call count not being incremented correctly", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Intercepted call count not being incremented correctly").isEqualTo(1);
 	}
 
 

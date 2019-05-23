@@ -29,7 +29,7 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link ServletCookieValueMethodArgumentResolver}.
@@ -67,7 +67,7 @@ public class ServletCookieValueMethodArgumentResolverTests {
 		request.setCookies(expected);
 
 		Cookie result = (Cookie) resolver.resolveArgument(cookieParameter, null, webRequest, null);
-		assertEquals("Invalid result", expected, result);
+		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class ServletCookieValueMethodArgumentResolverTests {
 		request.setCookies(cookie);
 
 		String result = (String) resolver.resolveArgument(cookieStringParameter, null, webRequest, null);
-		assertEquals("Invalid result", cookie.getValue(), result);
+		assertThat(result).as("Invalid result").isEqualTo(cookie.getValue());
 	}
 
 

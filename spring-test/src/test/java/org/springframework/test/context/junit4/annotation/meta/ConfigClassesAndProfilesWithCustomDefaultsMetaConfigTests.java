@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for meta-annotation attribute override support, relying on
@@ -41,6 +41,6 @@ public class ConfigClassesAndProfilesWithCustomDefaultsMetaConfigTests {
 
 	@Test
 	public void foo() {
-		assertEquals("Dev Foo", foo);
+		assertThat(foo).isEqualTo("Dev Foo");
 	}
 }

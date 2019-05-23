@@ -22,7 +22,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Modified copy of {@link CustomScriptSyntaxSqlScriptsTests} with
@@ -44,7 +44,7 @@ public class GlobalCustomScriptSyntaxSqlScriptsTests extends AbstractTransaction
 	}
 
 	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 }

@@ -25,8 +25,7 @@ import org.junit.Test;
 
 import org.springframework.core.Ordered;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -149,16 +148,16 @@ public class OrderSourceProviderTests {
 
 	private void assertOrder(List<?> actual, Object... expected) {
 		for (int i = 0; i < actual.size(); i++) {
-			assertSame("Wrong instance at index '" + i + "'", expected[i], actual.get(i));
+			assertThat(actual.get(i)).as("Wrong instance at index '" + i + "'").isSameAs(expected[i]);
 		}
-		assertEquals("Wrong number of items", expected.length, actual.size());
+		assertThat(actual.size()).as("Wrong number of items").isEqualTo(expected.length);
 	}
 
 	private void assertOrder(Object[] actual, Object... expected) {
 		for (int i = 0; i < actual.length; i++) {
-			assertSame("Wrong instance at index '" + i + "'", expected[i], actual[i]);
+			assertThat(actual[i]).as("Wrong instance at index '" + i + "'").isSameAs(expected[i]);
 		}
-		assertEquals("Wrong number of items", expected.length, expected.length);
+		assertThat(expected.length).as("Wrong number of items").isEqualTo(expected.length);
 	}
 
 

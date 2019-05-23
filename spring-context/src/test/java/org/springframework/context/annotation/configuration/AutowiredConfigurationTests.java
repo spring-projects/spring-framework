@@ -45,9 +45,6 @@ import org.springframework.tests.sample.beans.Colour;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * System tests covering use of {@link Autowired} and {@link Value} within
@@ -91,7 +88,7 @@ public class AutowiredConfigurationTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				OptionalAutowiredMethodConfig.class);
 
-		assertTrue(context.getBeansOfType(Colour.class).isEmpty());
+		assertThat(context.getBeansOfType(Colour.class).isEmpty()).isTrue();
 		assertThat(context.getBean(TestBean.class).getName()).isEqualTo("");
 	}
 
@@ -104,7 +101,7 @@ public class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config1", new RootBeanDefinition(AutowiredConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
-		assertSame(ctx.getBean(AutowiredConstructorConfig.class).colour, ctx.getBean(Colour.class));
+		assertThat(ctx.getBean(Colour.class)).isSameAs(ctx.getBean(AutowiredConstructorConfig.class).colour);
 	}
 
 	@Test
@@ -116,7 +113,7 @@ public class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config1", new RootBeanDefinition(ObjectFactoryConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
-		assertSame(ctx.getBean(ObjectFactoryConstructorConfig.class).colour, ctx.getBean(Colour.class));
+		assertThat(ctx.getBean(Colour.class)).isSameAs(ctx.getBean(ObjectFactoryConstructorConfig.class).colour);
 	}
 
 	@Test
@@ -128,7 +125,7 @@ public class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config1", new RootBeanDefinition(MultipleConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
-		assertSame(ctx.getBean(MultipleConstructorConfig.class).colour, ctx.getBean(Colour.class));
+		assertThat(ctx.getBean(Colour.class)).isSameAs(ctx.getBean(MultipleConstructorConfig.class).colour);
 	}
 
 	@Test
@@ -177,10 +174,10 @@ public class AutowiredConfigurationTests {
 		System.clearProperty("myProp");
 
 		TestBean testBean = context.getBean("testBean", TestBean.class);
-		assertNull(testBean.getName());
+		assertThat((Object) testBean.getName()).isNull();
 
 		testBean = context.getBean("testBean2", TestBean.class);
-		assertNull(testBean.getName());
+		assertThat((Object) testBean.getName()).isNull();
 
 		System.setProperty("myProp", "foo");
 
@@ -193,10 +190,10 @@ public class AutowiredConfigurationTests {
 		System.clearProperty("myProp");
 
 		testBean = context.getBean("testBean", TestBean.class);
-		assertNull(testBean.getName());
+		assertThat((Object) testBean.getName()).isNull();
 
 		testBean = context.getBean("testBean2", TestBean.class);
-		assertNull(testBean.getName());
+		assertThat((Object) testBean.getName()).isNull();
 	}
 
 	@Test

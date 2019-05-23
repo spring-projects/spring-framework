@@ -27,10 +27,8 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 
 /**
  * @author Rod Johnson
@@ -53,20 +51,20 @@ public class RequestAndSessionScopedBeanTests {
 		HttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 		TestBean target = (TestBean) wac.getBean(targetBeanName);
-		assertEquals("abc", target.getName());
-		assertSame(target, request.getAttribute(targetBeanName));
+		assertThat(target.getName()).isEqualTo("abc");
+		assertThat(request.getAttribute(targetBeanName)).isSameAs(target);
 
 		TestBean target2 = (TestBean) wac.getBean(targetBeanName);
-		assertEquals("abc", target2.getName());
-		assertSame(target2, target);
-		assertSame(target2, request.getAttribute(targetBeanName));
+		assertThat(target2.getName()).isEqualTo("abc");
+		assertThat(target).isSameAs(target2);
+		assertThat(request.getAttribute(targetBeanName)).isSameAs(target2);
 
 		request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 		TestBean target3 = (TestBean) wac.getBean(targetBeanName);
-		assertEquals("abc", target3.getName());
-		assertSame(target3, request.getAttribute(targetBeanName));
-		assertNotSame(target3, target);
+		assertThat(target3.getName()).isEqualTo("abc");
+		assertThat(request.getAttribute(targetBeanName)).isSameAs(target3);
+		assertThat(target).isNotSameAs(target3);
 
 		RequestContextHolder.setRequestAttributes(null);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
@@ -88,8 +86,8 @@ public class RequestAndSessionScopedBeanTests {
 		wac.refresh();
 
 		TestBean target = (TestBean) wac.getBean(targetBeanName);
-		assertEquals("abc", target.getName());
-		assertSame(target, request.getSession().getAttribute(targetBeanName));
+		assertThat(target.getName()).isEqualTo("abc");
+		assertThat(request.getSession().getAttribute(targetBeanName)).isSameAs(target);
 
 		RequestContextHolder.setRequestAttributes(null);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->

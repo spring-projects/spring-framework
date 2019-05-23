@@ -23,8 +23,8 @@ import org.junit.Test;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rick Evans
@@ -48,28 +48,28 @@ public class MapSqlParameterSourceTests {
 	@Test
 	public void sqlParameterValueRegistersSqlType() {
 		MapSqlParameterSource msps = new MapSqlParameterSource("FOO", new SqlParameterValue(Types.NUMERIC, "Foo"));
-		assertEquals("Correct SQL Type not registered", 2, msps.getSqlType("FOO"));
+		assertThat(msps.getSqlType("FOO")).as("Correct SQL Type not registered").isEqualTo(2);
 		MapSqlParameterSource msps2 = new MapSqlParameterSource();
 		msps2.addValues(msps.getValues());
-		assertEquals("Correct SQL Type not registered", 2, msps2.getSqlType("FOO"));
+		assertThat(msps2.getSqlType("FOO")).as("Correct SQL Type not registered").isEqualTo(2);
 	}
 
 	@Test
 	public void toStringShowsParameterDetails() {
 		MapSqlParameterSource source = new MapSqlParameterSource("FOO", new SqlParameterValue(Types.NUMERIC, "Foo"));
-		assertEquals("MapSqlParameterSource {FOO=Foo (type:NUMERIC)}", source.toString());
+		assertThat(source.toString()).isEqualTo("MapSqlParameterSource {FOO=Foo (type:NUMERIC)}");
 	}
 
 	@Test
 	public void toStringShowsCustomSqlType() {
 		MapSqlParameterSource source = new MapSqlParameterSource("FOO", new SqlParameterValue(Integer.MAX_VALUE, "Foo"));
-		assertEquals("MapSqlParameterSource {FOO=Foo (type:" + Integer.MAX_VALUE + ")}", source.toString());
+		assertThat(source.toString()).isEqualTo(("MapSqlParameterSource {FOO=Foo (type:" + Integer.MAX_VALUE + ")}"));
 	}
 
 	@Test
 	public void toStringDoesNotShowTypeUnknown() {
 		MapSqlParameterSource source = new MapSqlParameterSource("FOO", new SqlParameterValue(JdbcUtils.TYPE_UNKNOWN, "Foo"));
-		assertEquals("MapSqlParameterSource {FOO=Foo}", source.toString());
+		assertThat(source.toString()).isEqualTo("MapSqlParameterSource {FOO=Foo}");
 	}
 
 }

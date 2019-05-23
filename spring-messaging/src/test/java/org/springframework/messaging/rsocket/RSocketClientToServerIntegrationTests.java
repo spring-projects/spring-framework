@@ -41,7 +41,7 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Server-side handling of RSocket requests.
@@ -100,9 +100,8 @@ public class RSocketClientToServerIntegrationTests {
 				.thenCancel()
 				.verify(Duration.ofSeconds(5));
 
-		assertEquals(1, interceptor.getRSocketCount());
-		assertEquals("Fire and forget requests did not actually complete handling on the server side",
-				3, interceptor.getFireAndForgetCount(0));
+		assertThat(interceptor.getRSocketCount()).isEqualTo(1);
+		assertThat(interceptor.getFireAndForgetCount(0)).as("Fire and forget requests did not actually complete handling on the server side").isEqualTo(3);
 	}
 
 	@Test

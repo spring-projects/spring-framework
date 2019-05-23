@@ -24,9 +24,8 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson
@@ -50,9 +49,10 @@ public class DeclareParentsTests {
 
 	@Test
 	public void testIntroductionWasMade() {
-		assertTrue(AopUtils.isAopProxy(testBeanProxy));
-		assertFalse("Introduction should not be proxied", AopUtils.isAopProxy(introductionObject));
-		assertTrue("Introduction must have been made", testBeanProxy instanceof Lockable);
+		assertThat(AopUtils.isAopProxy(testBeanProxy)).isTrue();
+		assertThat(AopUtils.isAopProxy(introductionObject)).as("Introduction should not be proxied").isFalse();
+		boolean condition = testBeanProxy instanceof Lockable;
+		assertThat(condition).as("Introduction must have been made").isTrue();
 	}
 
 	// TODO if you change type pattern from org.springframework.beans..*
@@ -62,7 +62,7 @@ public class DeclareParentsTests {
 	@Test
 	public void testLockingWorks() {
 		Lockable lockable = (Lockable) testBeanProxy;
-		assertFalse(lockable.locked());
+		assertThat(lockable.locked()).isFalse();
 
 		// Invoke a non-advised method
 		testBeanProxy.getAge();

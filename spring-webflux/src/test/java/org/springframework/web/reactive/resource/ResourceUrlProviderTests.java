@@ -38,7 +38,6 @@ import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.util.pattern.PathPattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
 /**
@@ -78,7 +77,7 @@ public class ResourceUrlProviderTests {
 		String expected = "/resources/foo.css";
 		String actual = this.urlProvider.getForUriString(expected, this.exchange).block(TIMEOUT);
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test  // SPR-13374
@@ -86,11 +85,11 @@ public class ResourceUrlProviderTests {
 
 		String url = "/resources/foo.css?foo=bar&url=https://example.org";
 		String resolvedUrl = this.urlProvider.getForUriString(url, this.exchange).block(TIMEOUT);
-		assertEquals(url, resolvedUrl);
+		assertThat(resolvedUrl).isEqualTo(url);
 
 		url = "/resources/foo.css#hash";
 		resolvedUrl = this.urlProvider.getForUriString(url, this.exchange).block(TIMEOUT);
-		assertEquals(url, resolvedUrl);
+		assertThat(resolvedUrl).isEqualTo(url);
 	}
 
 	@Test
@@ -105,7 +104,7 @@ public class ResourceUrlProviderTests {
 		String path = "/resources/foo.css";
 		String url = this.urlProvider.getForUriString(path, this.exchange).block(TIMEOUT);
 
-		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+		assertThat(url).isEqualTo("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test  // SPR-12647
@@ -125,7 +124,7 @@ public class ResourceUrlProviderTests {
 
 		String path = "/resources/foo.css";
 		String url = this.urlProvider.getForUriString(path, this.exchange).block(TIMEOUT);
-		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+		assertThat(url).isEqualTo("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test  // SPR-12592

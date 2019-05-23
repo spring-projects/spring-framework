@@ -33,11 +33,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -87,7 +84,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestTask task = new TestTask(1);
 		Future<?> future = executor.submit(task);
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertNull(result);
+		assertThat(result).isNull();
 		assertThreadNamePrefix(task);
 	}
 
@@ -97,7 +94,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		Future<?> future = executor.submit(task);
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
 				future.get(1000, TimeUnit.MILLISECONDS));
-		assertTrue(future.isDone());
+		assertThat(future.isDone()).isTrue();
 	}
 
 	@Test
@@ -124,7 +121,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(future::isDone);
-		assertNull(outcome);
+		assertThat(outcome).isNull();
 		assertThreadNamePrefix(task);
 	}
 
@@ -139,7 +136,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> future.isDone() && outcome != null);
-		assertSame(RuntimeException.class, outcome.getClass());
+		assertThat(outcome.getClass()).isSameAs(RuntimeException.class);
 	}
 
 	@Test
@@ -160,7 +157,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task = new TestCallable(1);
 		Future<String> future = executor.submit(task);
 		String result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertEquals(THREAD_NAME_PREFIX, result.substring(0, THREAD_NAME_PREFIX.length()));
+		assertThat(result.substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
 	}
 
 	@Test
@@ -169,7 +166,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		Future<String> future = executor.submit(task);
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
 				future.get(1000, TimeUnit.MILLISECONDS));
-		assertTrue(future.isDone());
+		assertThat(future.isDone()).isTrue();
 	}
 
 	@Test
@@ -196,7 +193,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> future.isDone() && outcome != null);
-		assertEquals(THREAD_NAME_PREFIX, outcome.toString().substring(0, THREAD_NAME_PREFIX.length()));
+		assertThat(outcome.toString().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
 	}
 
 	@Test
@@ -211,7 +208,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> future.isDone() && outcome != null);
-		assertSame(RuntimeException.class, outcome.getClass());
+		assertThat(outcome.getClass()).isSameAs(RuntimeException.class);
 	}
 
 	@Test
@@ -228,7 +225,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 
 
 	private void assertThreadNamePrefix(TestTask task) {
-		assertEquals(THREAD_NAME_PREFIX, task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length()));
+		assertThat(task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
 	}
 
 	private void await(TestTask task) {
@@ -242,7 +239,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		catch (InterruptedException ex) {
 			throw new IllegalStateException(ex);
 		}
-		assertEquals("latch did not count down,", 0, latch.getCount());
+		assertThat(latch.getCount()).as("latch did not count down,").isEqualTo(0);
 	}
 
 

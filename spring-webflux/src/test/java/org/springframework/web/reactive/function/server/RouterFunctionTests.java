@@ -20,13 +20,12 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 /**
  * @author Arjen Poutsma
  */
-@SuppressWarnings("unchecked")
 public class RouterFunctionTests {
 
 	@Test
@@ -36,7 +35,7 @@ public class RouterFunctionTests {
 		RouterFunction<ServerResponse> routerFunction2 = request -> Mono.just(handlerFunction);
 
 		RouterFunction<ServerResponse> result = routerFunction1.and(routerFunction2);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
@@ -56,7 +55,7 @@ public class RouterFunctionTests {
 				request -> Mono.just(handlerFunction);
 
 		RouterFunction<?> result = routerFunction1.andOther(routerFunction2);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
@@ -73,7 +72,7 @@ public class RouterFunctionTests {
 		RequestPredicate requestPredicate = request -> true;
 
 		RouterFunction<ServerResponse> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
@@ -101,7 +100,7 @@ public class RouterFunctionTests {
 						});
 
 		RouterFunction<EntityResponse<Mono<Integer>>> result = routerFunction.filter(filterFunction);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		MockServerRequest request = MockServerRequest.builder().build();
 		Mono<EntityResponse<Mono<Integer>>> responseMono =

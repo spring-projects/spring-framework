@@ -25,8 +25,8 @@ import org.junit.runners.model.FrameworkMethod;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link SpringJUnit4ClassRunner}.
@@ -62,7 +62,7 @@ public class SpringJUnit4ClassRunnerTests {
 		SpringJUnit4ClassRunner runner = new SpringJUnit4ClassRunner(getClass());
 		long timeout = runner.getSpringTimeout(new FrameworkMethod(getClass().getDeclaredMethod(
 			"springTimeoutWithMetaAnnotation")));
-		assertEquals(10, timeout);
+		assertThat(timeout).isEqualTo(10);
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class SpringJUnit4ClassRunnerTests {
 		SpringJUnit4ClassRunner runner = new SpringJUnit4ClassRunner(getClass());
 		long timeout = runner.getSpringTimeout(new FrameworkMethod(getClass().getDeclaredMethod(
 			"springTimeoutWithMetaAnnotationAndOverride")));
-		assertEquals(42, timeout);
+		assertThat(timeout).isEqualTo(42);
 	}
 
 	// -------------------------------------------------------------------------

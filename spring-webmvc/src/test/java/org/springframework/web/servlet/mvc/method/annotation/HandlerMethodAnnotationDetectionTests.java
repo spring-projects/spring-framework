@@ -50,8 +50,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test various scenarios for detecting method-level and method parameter annotations depending
@@ -134,17 +133,17 @@ public class HandlerMethodAnnotationDetectionTests {
 		request.addHeader("header2", dateB);
 
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
-		assertNotNull(chain);
+		assertThat(chain).isNotNull();
 
 		ModelAndView mav = handlerAdapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
 
-		assertEquals("model attr1:", dateFormat.parse(dateA), mav.getModel().get("attr1"));
-		assertEquals("model attr2:", dateFormat.parse(dateB), mav.getModel().get("attr2"));
+		assertThat(mav.getModel().get("attr1")).as("model attr1:").isEqualTo(dateFormat.parse(dateA));
+		assertThat(mav.getModel().get("attr2")).as("model attr2:").isEqualTo(dateFormat.parse(dateB));
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		exceptionResolver.resolveException(request, response, chain.getHandler(), new Exception("failure"));
-		assertEquals("text/plain;charset=ISO-8859-1", response.getHeader("Content-Type"));
-		assertEquals("failure", response.getContentAsString());
+		assertThat(response.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(response.getContentAsString()).isEqualTo("failure");
 	}
 
 

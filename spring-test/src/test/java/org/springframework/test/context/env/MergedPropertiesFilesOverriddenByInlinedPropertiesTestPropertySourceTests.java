@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for overriding properties from
@@ -37,13 +37,13 @@ public class MergedPropertiesFilesOverriddenByInlinedPropertiesTestPropertySourc
 	@Test
 	@Override
 	public void verifyPropertiesAreAvailableInEnvironment() {
-		assertEquals("inlined", env.getProperty("explicit"));
+		assertThat(env.getProperty("explicit")).isEqualTo("inlined");
 	}
 
 	@Test
 	@Override
 	public void verifyExtendedPropertiesAreAvailableInEnvironment() {
-		assertEquals("inlined2", env.getProperty("extended"));
+		assertThat(env.getProperty("extended")).isEqualTo("inlined2");
 	}
 
 }

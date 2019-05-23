@@ -35,9 +35,8 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop
@@ -57,9 +56,9 @@ public class AnnotationTransactionNamespaceHandlerTests {
 	@Test
 	public void isProxy() throws Exception {
 		TransactionalTestBean bean = getTestBean();
-		assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).as("testBean is not a proxy").isTrue();
 		Map<String, Object> services = this.context.getBeansWithAnnotation(Service.class);
-		assertTrue("Stereotype annotation not visible", services.containsKey("testBean"));
+		assertThat(services.containsKey("testBean")).as("Stereotype annotation not visible").isTrue();
 	}
 
 	@Test
@@ -68,21 +67,21 @@ public class AnnotationTransactionNamespaceHandlerTests {
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
 		// try with transactional
-		assertEquals("Should not have any started transactions", 0, ptm.begun);
+		assertThat(ptm.begun).as("Should not have any started transactions").isEqualTo(0);
 		testBean.findAllFoos();
-		assertEquals("Should have 1 started transaction", 1, ptm.begun);
-		assertEquals("Should have 1 committed transaction", 1, ptm.commits);
+		assertThat(ptm.begun).as("Should have 1 started transaction").isEqualTo(1);
+		assertThat(ptm.commits).as("Should have 1 committed transaction").isEqualTo(1);
 
 		// try with non-transaction
 		testBean.doSomething();
-		assertEquals("Should not have started another transaction", 1, ptm.begun);
+		assertThat(ptm.begun).as("Should not have started another transaction").isEqualTo(1);
 
 		// try with exceptional
 		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
 				testBean.exceptional(new IllegalArgumentException("foo")))
 			.satisfies(ex -> {
-				assertEquals("Should have another started transaction", 2, ptm.begun);
-				assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
+				assertThat(ptm.begun).as("Should have another started transaction").isEqualTo(2);
+				assertThat(ptm.rollbacks).as("Should have 1 rolled back transaction").isEqualTo(1);
 			});
 	}
 
@@ -91,23 +90,23 @@ public class AnnotationTransactionNamespaceHandlerTests {
 		TransactionalTestBean testBean = getTestBean();
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
-		assertEquals("Should not have any started transactions", 0, ptm.begun);
+		assertThat(ptm.begun).as("Should not have any started transactions").isEqualTo(0);
 		testBean.annotationsOnProtectedAreIgnored();
-		assertEquals("Should not have any started transactions", 0, ptm.begun);
+		assertThat(ptm.begun).as("Should not have any started transactions").isEqualTo(0);
 	}
 
 	@Test
 	public void mBeanExportAlsoWorks() throws Exception {
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-		assertEquals("done",
-				server.invoke(ObjectName.getInstance("test:type=TestBean"), "doSomething", new Object[0], new String[0]));
+		Object actual = server.invoke(ObjectName.getInstance("test:type=TestBean"), "doSomething", new Object[0], new String[0]);
+		assertThat(actual).isEqualTo("done");
 	}
 
 	@Test
 	public void transactionalEventListenerRegisteredProperly() {
-		assertTrue(this.context.containsBean(TransactionManagementConfigUtils
-				.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME));
-		assertEquals(1, this.context.getBeansOfType(TransactionalEventListenerFactory.class).size());
+		assertThat(this.context.containsBean(TransactionManagementConfigUtils
+				.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)).isTrue();
+		assertThat(this.context.getBeansOfType(TransactionalEventListenerFactory.class).size()).isEqualTo(1);
 	}
 
 	private TransactionalTestBean getTestBean() {

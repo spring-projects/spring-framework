@@ -37,7 +37,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for static application context with custom application event multicaster.
@@ -89,7 +89,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 	public void events() throws Exception {
 		TestApplicationEventMulticaster.counter = 0;
 		super.events();
-		assertEquals(1, TestApplicationEventMulticaster.counter);
+		assertThat(TestApplicationEventMulticaster.counter).isEqualTo(1);
 	}
 
 

@@ -33,7 +33,7 @@ import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link DefaultControllerSpec}.
@@ -92,13 +92,13 @@ public class DefaultControllerSpecTests {
 				.viewResolvers(viewResolverConsumer)
 				.build();
 
-		assertNotNull(argumentResolverConsumer.getValue());
-		assertNotNull(contenTypeResolverConsumer.getValue());
-		assertNotNull(corsRegistryConsumer.getValue());
-		assertNotNull(formatterConsumer.getValue());
-		assertNotNull(codecsConsumer.getValue());
-		assertNotNull(pathMatchingConsumer.getValue());
-		assertNotNull(viewResolverConsumer.getValue());
+		assertThat(argumentResolverConsumer.getValue()).isNotNull();
+		assertThat(contenTypeResolverConsumer.getValue()).isNotNull();
+		assertThat(corsRegistryConsumer.getValue()).isNotNull();
+		assertThat(formatterConsumer.getValue()).isNotNull();
+		assertThat(codecsConsumer.getValue()).isNotNull();
+		assertThat(pathMatchingConsumer.getValue()).isNotNull();
+		assertThat(viewResolverConsumer.getValue()).isNotNull();
 
 	}
 

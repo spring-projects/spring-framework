@@ -35,9 +35,8 @@ import org.mockito.stubbing.Answer;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -64,7 +63,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
-		assertEquals(content, converter.fromMessage(msg));
+		assertThat(converter.fromMessage(msg)).isEqualTo(content);
 	}
 
 	@Test
@@ -86,7 +85,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
-		assertEquals(content.length, ((byte[]) converter.fromMessage(msg)).length);
+		assertThat(((byte[]) converter.fromMessage(msg)).length).isEqualTo(content.length);
 
 		verify(message).writeBytes(content);
 	}
@@ -108,7 +107,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
-		assertEquals(content, converter.fromMessage(msg));
+		assertThat(converter.fromMessage(msg)).isEqualTo(content);
 
 		verify(message).setObject("key1", "value1");
 		verify(message).setObject("key2", "value2");
@@ -126,7 +125,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(content, session);
-		assertEquals(content, converter.fromMessage(msg));
+		assertThat(converter.fromMessage(msg)).isEqualTo(content);
 	}
 
 	@Test
@@ -148,7 +147,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Message msg = converter.toMessage(message, session);
-		assertSame(message, msg);
+		assertThat(msg).isSameAs(message);
 	}
 
 	@Test
@@ -157,7 +156,7 @@ public class SimpleMessageConverterTests {
 
 		SimpleMessageConverter converter = new SimpleMessageConverter();
 		Object msg = converter.fromMessage(message);
-		assertSame(message, msg);
+		assertThat(msg).isSameAs(message);
 	}
 
 	@Test

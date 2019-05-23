@@ -29,9 +29,8 @@ import org.springframework.mock.web.test.MockFilterChain;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link RelativeRedirectFilter}.
@@ -88,18 +87,18 @@ public class RelativeRedirectFilterTests {
 		this.filter.doFilterInternal(new MockHttpServletRequest(), original, chain);
 
 		HttpServletResponse wrapped1 = (HttpServletResponse) chain.getResponse();
-		assertNotSame(original, wrapped1);
+		assertThat(wrapped1).isNotSameAs(original);
 
 		chain.reset();
 		this.filter.doFilterInternal(new MockHttpServletRequest(), wrapped1, chain);
 		HttpServletResponse current = (HttpServletResponse) chain.getResponse();
-		assertSame(wrapped1, current);
+		assertThat(current).isSameAs(wrapped1);
 
 		chain.reset();
 		HttpServletResponse wrapped2 = new HttpServletResponseWrapper(wrapped1);
 		this.filter.doFilterInternal(new MockHttpServletRequest(), wrapped2, chain);
 		current = (HttpServletResponse) chain.getResponse();
-		assertSame(wrapped2, current);
+		assertThat(current).isSameAs(wrapped2);
 	}
 
 

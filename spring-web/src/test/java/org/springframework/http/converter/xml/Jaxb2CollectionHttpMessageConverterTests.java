@@ -35,9 +35,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for {@link Jaxb2CollectionHttpMessageConverter}.
@@ -70,9 +69,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Test
 	public void canRead() {
-		assertTrue(converter.canRead(rootElementListType, null, null));
-		assertTrue(converter.canRead(rootElementSetType, null, null));
-		assertTrue(converter.canRead(typeSetType, null, null));
+		assertThat(converter.canRead(rootElementListType, null, null)).isTrue();
+		assertThat(converter.canRead(rootElementSetType, null, null)).isTrue();
+		assertThat(converter.canRead(typeSetType, null, null)).isTrue();
 	}
 
 	@Test
@@ -82,9 +81,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 		List<RootElement> result = (List<RootElement>) converter.read(rootElementListType, null, inputMessage);
 
-		assertEquals("Invalid result", 2, result.size());
-		assertEquals("Invalid result", "1", result.get(0).type.s);
-		assertEquals("Invalid result", "2", result.get(1).type.s);
+		assertThat(result.size()).as("Invalid result").isEqualTo(2);
+		assertThat(result.get(0).type.s).as("Invalid result").isEqualTo("1");
+		assertThat(result.get(1).type.s).as("Invalid result").isEqualTo("2");
 	}
 
 	@Test
@@ -94,9 +93,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 		Set<RootElement> result = (Set<RootElement>) converter.read(rootElementSetType, null, inputMessage);
 
-		assertEquals("Invalid result", 2, result.size());
-		assertTrue("Invalid result", result.contains(new RootElement("1")));
-		assertTrue("Invalid result", result.contains(new RootElement("2")));
+		assertThat(result.size()).as("Invalid result").isEqualTo(2);
+		assertThat(result.contains(new RootElement("1"))).as("Invalid result").isTrue();
+		assertThat(result.contains(new RootElement("2"))).as("Invalid result").isTrue();
 	}
 
 	@Test
@@ -106,9 +105,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 		List<TestType> result = (List<TestType>) converter.read(typeListType, null, inputMessage);
 
-		assertEquals("Invalid result", 2, result.size());
-		assertEquals("Invalid result", "1", result.get(0).s);
-		assertEquals("Invalid result", "2", result.get(1).s);
+		assertThat(result.size()).as("Invalid result").isEqualTo(2);
+		assertThat(result.get(0).s).as("Invalid result").isEqualTo("1");
+		assertThat(result.get(1).s).as("Invalid result").isEqualTo("2");
 	}
 
 	@Test
@@ -118,9 +117,9 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 		Set<TestType> result = (Set<TestType>) converter.read(typeSetType, null, inputMessage);
 
-		assertEquals("Invalid result", 2, result.size());
-		assertTrue("Invalid result", result.contains(new TestType("1")));
-		assertTrue("Invalid result", result.contains(new TestType("2")));
+		assertThat(result.size()).as("Invalid result").isEqualTo(2);
+		assertThat(result.contains(new TestType("1"))).as("Invalid result").isTrue();
+		assertThat(result.contains(new TestType("2"))).as("Invalid result").isTrue();
 	}
 
 	@Test
@@ -144,8 +143,8 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 		try {
 			Collection<RootElement> result = converter.read(rootElementListType, null, inputMessage);
-			assertEquals(1, result.size());
-			assertEquals("", result.iterator().next().external);
+			assertThat(result.size()).isEqualTo(1);
+			assertThat(result.iterator().next().external).isEqualTo("");
 		}
 		catch (HttpMessageNotReadableException ex) {
 			// Some parsers raise an exception
@@ -172,8 +171,8 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		};
 
 		Collection<RootElement> result = c.read(rootElementListType, null, inputMessage);
-		assertEquals(1, result.size());
-		assertEquals("Foo Bar", result.iterator().next().external);
+		assertThat(result.size()).isEqualTo(1);
+		assertThat(result.iterator().next().external).isEqualTo("Foo Bar");
 	}
 
 	@Test

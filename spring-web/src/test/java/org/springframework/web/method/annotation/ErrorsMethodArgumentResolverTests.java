@@ -28,8 +28,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertSame;
 
 /**
  * Test fixture with {@link ErrorsMethodArgumentResolver}.
@@ -71,7 +71,7 @@ public class ErrorsMethodArgumentResolverTests {
 		mavContainer.addAllAttributes(bindingResult.getModel());
 
 		Object actual = resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
-		assertSame(actual, bindingResult);
+		assertThat(bindingResult).isSameAs(actual);
 	}
 
 	@Test

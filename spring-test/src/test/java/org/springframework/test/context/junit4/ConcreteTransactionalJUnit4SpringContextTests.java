@@ -33,10 +33,7 @@ import org.springframework.tests.sample.beans.Pet;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
 
@@ -96,28 +93,26 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	@Before
 	public void setUp() {
-		assertEquals("Verifying the number of rows in the person table before a test method.",
-				(inTransaction() ? 2 : 1), countRowsInPersonTable());
+		long expected = (inTransaction() ? 2 : 1);
+		assertThat(countRowsInPersonTable()).as("Verifying the number of rows in the person table before a test method.").isEqualTo(expected);
 	}
 
 	@After
 	public void tearDown() {
-		assertEquals("Verifying the number of rows in the person table after a test method.",
-				(inTransaction() ? 4 : 1), countRowsInPersonTable());
+		long expected = (inTransaction() ? 4 : 1);
+		assertThat(countRowsInPersonTable()).as("Verifying the number of rows in the person table after a test method.").isEqualTo(expected);
 	}
 
 	@BeforeTransaction
 	public void beforeTransaction() {
-		assertEquals("Verifying the number of rows in the person table before a transactional test method.",
-				1, countRowsInPersonTable());
-		assertEquals("Adding yoda", 1, addPerson(YODA));
+		assertThat(countRowsInPersonTable()).as("Verifying the number of rows in the person table before a transactional test method.").isEqualTo(1);
+		assertThat(addPerson(YODA)).as("Adding yoda").isEqualTo(1);
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
-		assertEquals("Deleting yoda", 1, deletePerson(YODA));
-		assertEquals("Verifying the number of rows in the person table after a transactional test method.",
-				1, countRowsInPersonTable());
+		assertThat(deletePerson(YODA)).as("Deleting yoda").isEqualTo(1);
+		assertThat(countRowsInPersonTable()).as("Verifying the number of rows in the person table after a transactional test method.").isEqualTo(1);
 	}
 
 
@@ -125,64 +120,61 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyBeanNameSet() {
 		assertInTransaction(false);
-		assertTrue("The bean name of this test instance should have been set to the fully qualified class name " +
-				"due to BeanNameAware semantics.", this.beanName.startsWith(getClass().getName()));
+		assertThat(this.beanName.startsWith(getClass().getName())).as("The bean name of this test instance should have been set to the fully qualified class name " +
+				"due to BeanNameAware semantics.").isTrue();
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyApplicationContext() {
 		assertInTransaction(false);
-		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				super.applicationContext);
+		assertThat(super.applicationContext).as("The application context should have been set due to ApplicationContextAware semantics.").isNotNull();
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyBeanInitialized() {
 		assertInTransaction(false);
-		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-				this.beanInitialized);
+		assertThat(this.beanInitialized).as("This test bean should have been initialized due to InitializingBean semantics.").isTrue();
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyAnnotationAutowiredFields() {
 		assertInTransaction(false);
-		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
-		assertNotNull("The pet field should have been autowired.", this.pet);
-		assertEquals("Fido", this.pet.getName());
+		assertThat(this.nonrequiredLong).as("The nonrequiredLong property should NOT have been autowired.").isNull();
+		assertThat(this.pet).as("The pet field should have been autowired.").isNotNull();
+		assertThat(this.pet.getName()).isEqualTo("Fido");
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyAnnotationAutowiredMethods() {
 		assertInTransaction(false);
-		assertNotNull("The employee setter method should have been autowired.", this.employee);
-		assertEquals("John Smith", this.employee.getName());
+		assertThat(this.employee).as("The employee setter method should have been autowired.").isNotNull();
+		assertThat(this.employee.getName()).isEqualTo("John Smith");
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyResourceAnnotationWiredFields() {
 		assertInTransaction(false);
-		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
+		assertThat(this.foo).as("The foo field should have been wired via @Resource.").isEqualTo("Foo");
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyResourceAnnotationWiredMethods() {
 		assertInTransaction(false);
-		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
+		assertThat(this.bar).as("The bar method should have been wired via @Resource.").isEqualTo("Bar");
 	}
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
-		assertEquals("Adding jane", 1, addPerson(JANE));
-		assertEquals("Adding sue", 1, addPerson(SUE));
-		assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().",
-				4, countRowsInPersonTable());
+		assertThat(addPerson(JANE)).as("Adding jane").isEqualTo(1);
+		assertThat(addPerson(SUE)).as("Adding sue").isEqualTo(1);
+		assertThat(countRowsInPersonTable()).as("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().").isEqualTo(4);
 	}
 
 

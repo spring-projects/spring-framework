@@ -39,7 +39,7 @@ import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.tags.AbstractTagTests;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -124,21 +124,19 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 
 	protected final void assertContainsAttribute(String output, String attributeName, String attributeValue) {
 		String attributeString = attributeName + "=\"" + attributeValue + "\"";
-		assertTrue("Expected to find attribute '" + attributeName +
+		assertThat(output.contains(attributeString)).as("Expected to find attribute '" + attributeName +
 				"' with value '" + attributeValue +
-				"' in output + '" + output + "'",
-				output.contains(attributeString));
+				"' in output + '" + output + "'").isTrue();
 	}
 
 	protected final void assertAttributeNotPresent(String output, String attributeName) {
-		assertTrue("Unexpected attribute '" + attributeName + "' in output '" + output + "'.",
-				!output.contains(attributeName + "=\""));
+		boolean condition = !output.contains(attributeName + "=\"");
+		assertThat(condition).as("Unexpected attribute '" + attributeName + "' in output '" + output + "'.").isTrue();
 	}
 
 	protected final void assertBlockTagContains(String output, String desiredContents) {
 		String contents = output.substring(output.indexOf(">") + 1, output.lastIndexOf("<"));
-		assertTrue("Expected to find '" + desiredContents + "' in the contents of block tag '" + output + "'",
-				contents.contains(desiredContents));
+		assertThat(contents.contains(desiredContents)).as("Expected to find '" + desiredContents + "' in the contents of block tag '" + output + "'").isTrue();
 	}
 
 }

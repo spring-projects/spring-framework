@@ -30,8 +30,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link StandardMultipartHttpServletRequest}.
@@ -46,8 +44,8 @@ public class StandardMultipartHttpServletRequestTests {
 		StandardMultipartHttpServletRequest request = requestWithPart("file", disposition, "");
 
 		MultipartFile multipartFile = request.getFile("file");
-		assertNotNull(multipartFile);
-		assertEquals("myFile.txt", multipartFile.getOriginalFilename());
+		assertThat(multipartFile).isNotNull();
+		assertThat(multipartFile.getOriginalFilename()).isEqualTo("myFile.txt");
 	}
 
 	@Test  // SPR-13319
@@ -56,8 +54,8 @@ public class StandardMultipartHttpServletRequestTests {
 		StandardMultipartHttpServletRequest request = requestWithPart("file", disposition, "");
 
 		MultipartFile multipartFile = request.getFile("file");
-		assertNotNull(multipartFile);
-		assertEquals("foo-ä-€.html", multipartFile.getOriginalFilename());
+		assertThat(multipartFile).isNotNull();
+		assertThat(multipartFile.getOriginalFilename()).isEqualTo("foo-ä-€.html");
 	}
 
 	@Test  // SPR-15205
@@ -66,8 +64,8 @@ public class StandardMultipartHttpServletRequestTests {
 		StandardMultipartHttpServletRequest request = requestWithPart("file", disposition, "");
 
 		MultipartFile multipartFile = request.getFile("file");
-		assertNotNull(multipartFile);
-		assertEquals("Declaração.pdf", multipartFile.getOriginalFilename());
+		assertThat(multipartFile).isNotNull();
+		assertThat(multipartFile.getOriginalFilename()).isEqualTo("Declaração.pdf");
 	}
 
 	@Test
@@ -77,7 +75,7 @@ public class StandardMultipartHttpServletRequestTests {
 		StandardMultipartHttpServletRequest request = requestWithPart(name, disposition, "myBody");
 		MultipartFile multipartFile = request.getFile(name);
 
-		assertNotNull(multipartFile);
+		assertThat(multipartFile).isNotNull();
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 		map.add(name, multipartFile.getResource());

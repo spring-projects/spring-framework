@@ -26,9 +26,7 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.handler.TestPrincipal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -51,7 +49,7 @@ public class StandardWebSocketSessionTests {
 		TestPrincipal user = new TestPrincipal("joe");
 		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null, user);
 
-		assertSame(user, session.getPrincipal());
+		assertThat(session.getPrincipal()).isSameAs(user);
 	}
 
 	@Test
@@ -65,7 +63,7 @@ public class StandardWebSocketSessionTests {
 		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null);
 		session.initializeNativeSession(nativeSession);
 
-		assertSame(user, session.getPrincipal());
+		assertThat(session.getPrincipal()).isSameAs(user);
 	}
 
 	@Test
@@ -79,7 +77,7 @@ public class StandardWebSocketSessionTests {
 
 		reset(nativeSession);
 
-		assertNull(session.getPrincipal());
+		assertThat(session.getPrincipal()).isNull();
 		verifyNoMoreInteractions(nativeSession);
 	}
 
@@ -96,7 +94,7 @@ public class StandardWebSocketSessionTests {
 
 		reset(nativeSession);
 
-		assertEquals(protocol, session.getAcceptedProtocol());
+		assertThat(session.getAcceptedProtocol()).isEqualTo(protocol);
 		verifyNoMoreInteractions(nativeSession);
 	}
 

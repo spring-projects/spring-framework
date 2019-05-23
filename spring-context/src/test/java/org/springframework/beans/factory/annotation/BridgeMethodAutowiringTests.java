@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BridgeMethodAutowiringTests {
 
@@ -33,7 +33,7 @@ public class BridgeMethodAutowiringTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(UserServiceImpl.class, Foo.class);
 		ctx.refresh();
-		assertNotNull(ctx.getBean(UserServiceImpl.class).object);
+		assertThat(ctx.getBean(UserServiceImpl.class).object).isNotNull();
 	}
 
 

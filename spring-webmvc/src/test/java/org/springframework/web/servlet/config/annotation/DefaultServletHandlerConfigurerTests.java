@@ -28,9 +28,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with a {@link DefaultServletHandlerConfigurer}.
@@ -56,7 +54,7 @@ public class DefaultServletHandlerConfigurerTests {
 
 	@Test
 	public void notEnabled() {
-		assertNull(configurer.buildHandlerMapping());
+		assertThat(configurer.buildHandlerMapping()).isNull();
 	}
 
 	@Test
@@ -65,14 +63,14 @@ public class DefaultServletHandlerConfigurerTests {
 		SimpleUrlHandlerMapping handlerMapping = configurer.buildHandlerMapping();
 		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
 
-		assertNotNull(handler);
-		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
+		assertThat(handler).isNotNull();
+		assertThat(handlerMapping.getOrder()).isEqualTo(Integer.MAX_VALUE);
 
 		handler.handleRequest(new MockHttpServletRequest(), response);
 
 		String expected = "default";
-		assertEquals("The ServletContext was not called with the default servlet name", expected, servletContext.url);
-		assertEquals("The request was not forwarded", expected, response.getForwardedUrl());
+		assertThat(servletContext.url).as("The ServletContext was not called with the default servlet name").isEqualTo(expected);
+		assertThat(response.getForwardedUrl()).as("The request was not forwarded").isEqualTo(expected);
 	}
 
 	@Test
@@ -81,14 +79,14 @@ public class DefaultServletHandlerConfigurerTests {
 		SimpleUrlHandlerMapping handlerMapping = configurer.buildHandlerMapping();
 		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
 
-		assertNotNull(handler);
-		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
+		assertThat(handler).isNotNull();
+		assertThat(handlerMapping.getOrder()).isEqualTo(Integer.MAX_VALUE);
 
 		handler.handleRequest(new MockHttpServletRequest(), response);
 
 		String expected = "defaultServlet";
-		assertEquals("The ServletContext was not called with the default servlet name", expected, servletContext.url);
-		assertEquals("The request was not forwarded", expected, response.getForwardedUrl());
+		assertThat(servletContext.url).as("The ServletContext was not called with the default servlet name").isEqualTo(expected);
+		assertThat(response.getForwardedUrl()).as("The request was not forwarded").isEqualTo(expected);
 	}
 
 

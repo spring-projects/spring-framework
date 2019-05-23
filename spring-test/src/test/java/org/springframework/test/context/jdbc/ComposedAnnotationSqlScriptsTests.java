@@ -27,7 +27,7 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 /**
@@ -48,7 +48,7 @@ public class ComposedAnnotationSqlScriptsTests extends AbstractTransactionalJUni
 		executionPhase = BEFORE_TEST_METHOD
 	)
 	public void composedSqlAnnotation() {
-		assertEquals("Number of rows in the 'user' table.", 1, countRowsInTable("user"));
+		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(1);
 	}
 
 

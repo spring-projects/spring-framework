@@ -29,8 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.pattern.PathPattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.all;
 import static org.springframework.web.reactive.function.server.RequestPredicates.method;
@@ -66,8 +65,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/bar", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/foo/bar", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/foo/bar");
 	}
 
 	@Test
@@ -75,8 +74,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/baz", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/foo/baz", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/foo/baz");
 	}
 
 	@Test
@@ -84,8 +83,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/{foo}/{bar}/{baz}\n{foo=1, bar=2, baz=3}", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/{foo}/{bar}/{baz}\n{foo=1, bar=2, baz=3}");
 	}
 
 	// SPR-16868
@@ -94,8 +93,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/bar", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/{foo}/bar\n{foo=1}", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/{foo}/bar\n{foo=1}");
 
 	}
 
@@ -105,8 +104,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/qux/quux", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/{qux}/quux\n{qux=qux}", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/{qux}/quux\n{qux=qux}");
 
 	}
 
@@ -116,8 +115,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 		ResponseEntity<String> result =
 				restTemplate.postForEntity("http://localhost:" + port + "/qux/quux", "", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("{}", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("{}");
 
 	}
 
@@ -134,8 +133,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 			Map<String, String> pathVariables = request.pathVariables();
 			Map<String, String> attributePathVariables =
 					(Map<String, String>) request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-			assertTrue( (pathVariables.equals(attributePathVariables))
-					|| (pathVariables.isEmpty() && (attributePathVariables == null)));
+			assertThat((pathVariables.equals(attributePathVariables))
+						|| (pathVariables.isEmpty() && (attributePathVariables == null))).isTrue();
 
 			PathPattern pathPattern = matchingPattern(request);
 			String pattern = pathPattern != null ? pathPattern.getPatternString() : "";

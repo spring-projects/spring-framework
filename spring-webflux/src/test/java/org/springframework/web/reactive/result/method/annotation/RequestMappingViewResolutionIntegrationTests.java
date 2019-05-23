@@ -43,8 +43,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@code @RequestMapping} integration tests with view resolution scenarios.
@@ -65,7 +64,7 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 	@Test
 	public void html() throws Exception {
 		String expected = "<html><body>Hello: Jason!</body></html>";
-		assertEquals(expected, performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody());
+		assertThat(performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
@@ -74,8 +73,8 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 		RequestEntity<Void> request = RequestEntity.get(uri).ifNoneMatch("\"deadb33f8badf00d\"").build();
 		ResponseEntity<String> response = getRestTemplate().exchange(request, String.class);
 
-		assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
-		assertNull(response.getBody());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+		assertThat(response.getBody()).isNull();
 	}
 
 	@Test  // SPR-15291
@@ -92,8 +91,8 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 		RequestEntity<Void> request = RequestEntity.get(uri).accept(MediaType.ALL).build();
 		ResponseEntity<Void> response = new RestTemplate(factory).exchange(request, Void.class);
 
-		assertEquals(HttpStatus.SEE_OTHER, response.getStatusCode());
-		assertEquals("/", response.getHeaders().getLocation().toString());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
+		assertThat(response.getHeaders().getLocation().toString()).isEqualTo("/");
 	}
 
 

@@ -41,7 +41,6 @@ import org.springframework.web.bind.annotation.RestController;
 import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 /**
@@ -83,7 +82,7 @@ public class ResponseEntityTests {
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBody(Person.class)
-				.consumeWith(result -> assertEquals(new Person("John"), result.getResponseBody()));
+				.consumeWith(result -> assertThat(result.getResponseBody()).isEqualTo(new Person("John")));
 	}
 
 	@Test

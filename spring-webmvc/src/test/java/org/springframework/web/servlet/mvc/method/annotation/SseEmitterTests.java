@@ -25,8 +25,7 @@ import org.junit.Test;
 
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
 
 
@@ -122,7 +121,7 @@ public class SseEmitterTests {
 
 
 		public void assertSentObjectCount(int size) {
-			assertEquals(size, this.objects.size());
+			assertThat(this.objects.size()).isEqualTo(size);
 		}
 
 		public void assertObject(int index, Object object) {
@@ -130,9 +129,9 @@ public class SseEmitterTests {
 		}
 
 		public void assertObject(int index, Object object, MediaType mediaType) {
-			assertTrue(index <= this.objects.size());
-			assertEquals(object, this.objects.get(index));
-			assertEquals(mediaType, this.mediaTypes.get(index));
+			assertThat(index <= this.objects.size()).isTrue();
+			assertThat(this.objects.get(index)).isEqualTo(object);
+			assertThat(this.mediaTypes.get(index)).isEqualTo(mediaType);
 		}
 
 		@Override

@@ -41,8 +41,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Brian Clozel
@@ -108,8 +107,8 @@ public class WebRequestDataBinderIntegrationTests {
 
 		template.postForLocation(baseUrl + "/parts", parts);
 
-		assertNotNull(bean.getFirstPart());
-		assertNotNull(bean.getSecondPart());
+		assertThat(bean.getFirstPart()).isNotNull();
+		assertThat(bean.getSecondPart()).isNotNull();
 	}
 
 	@Test
@@ -125,8 +124,8 @@ public class WebRequestDataBinderIntegrationTests {
 
 		template.postForLocation(baseUrl + "/partlist", parts);
 
-		assertNotNull(bean.getPartList());
-		assertEquals(parts.get("partList").size(), bean.getPartList().size());
+		assertThat(bean.getPartList()).isNotNull();
+		assertThat(bean.getPartList().size()).isEqualTo(parts.get("partList").size());
 	}
 
 

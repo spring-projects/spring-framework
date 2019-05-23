@@ -21,8 +21,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -39,10 +38,10 @@ public class ScheduledTaskRegistrarTests {
 
 	@Test
 	public void emptyTaskLists() {
-		assertTrue(this.taskRegistrar.getTriggerTaskList().isEmpty());
-		assertTrue(this.taskRegistrar.getCronTaskList().isEmpty());
-		assertTrue(this.taskRegistrar.getFixedRateTaskList().isEmpty());
-		assertTrue(this.taskRegistrar.getFixedDelayTaskList().isEmpty());
+		assertThat(this.taskRegistrar.getTriggerTaskList().isEmpty()).isTrue();
+		assertThat(this.taskRegistrar.getCronTaskList().isEmpty()).isTrue();
+		assertThat(this.taskRegistrar.getFixedRateTaskList().isEmpty()).isTrue();
+		assertThat(this.taskRegistrar.getFixedDelayTaskList().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -51,8 +50,8 @@ public class ScheduledTaskRegistrarTests {
 		List<TriggerTask> triggerTaskList = Collections.singletonList(mockTriggerTask);
 		this.taskRegistrar.setTriggerTasksList(triggerTaskList);
 		List<TriggerTask> retrievedList = this.taskRegistrar.getTriggerTaskList();
-		assertEquals(1, retrievedList.size());
-		assertEquals(mockTriggerTask, retrievedList.get(0));
+		assertThat(retrievedList.size()).isEqualTo(1);
+		assertThat(retrievedList.get(0)).isEqualTo(mockTriggerTask);
 	}
 
 	@Test
@@ -61,8 +60,8 @@ public class ScheduledTaskRegistrarTests {
 		List<CronTask> cronTaskList = Collections.singletonList(mockCronTask);
 		this.taskRegistrar.setCronTasksList(cronTaskList);
 		List<CronTask> retrievedList = this.taskRegistrar.getCronTaskList();
-		assertEquals(1, retrievedList.size());
-		assertEquals(mockCronTask, retrievedList.get(0));
+		assertThat(retrievedList.size()).isEqualTo(1);
+		assertThat(retrievedList.get(0)).isEqualTo(mockCronTask);
 	}
 
 	@Test
@@ -71,8 +70,8 @@ public class ScheduledTaskRegistrarTests {
 		List<IntervalTask> fixedRateTaskList = Collections.singletonList(mockFixedRateTask);
 		this.taskRegistrar.setFixedRateTasksList(fixedRateTaskList);
 		List<IntervalTask> retrievedList = this.taskRegistrar.getFixedRateTaskList();
-		assertEquals(1, retrievedList.size());
-		assertEquals(mockFixedRateTask, retrievedList.get(0));
+		assertThat(retrievedList.size()).isEqualTo(1);
+		assertThat(retrievedList.get(0)).isEqualTo(mockFixedRateTask);
 	}
 
 	@Test
@@ -81,8 +80,8 @@ public class ScheduledTaskRegistrarTests {
 		List<IntervalTask> fixedDelayTaskList = Collections.singletonList(mockFixedDelayTask);
 		this.taskRegistrar.setFixedDelayTasksList(fixedDelayTaskList);
 		List<IntervalTask> retrievedList = this.taskRegistrar.getFixedDelayTaskList();
-		assertEquals(1, retrievedList.size());
-		assertEquals(mockFixedDelayTask, retrievedList.get(0));
+		assertThat(retrievedList.size()).isEqualTo(1);
+		assertThat(retrievedList.get(0)).isEqualTo(mockFixedDelayTask);
 	}
 
 }

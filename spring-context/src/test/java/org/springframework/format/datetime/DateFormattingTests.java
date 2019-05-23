@@ -37,8 +37,6 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Phillip Webb
@@ -81,8 +79,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("millis", "1256961600");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("1256961600", binder.getBindingResult().getFieldValue("millis"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("millis")).isEqualTo("1256961600");
 	}
 
 	@Test
@@ -90,8 +88,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("millisAnnotated", "10/31/09");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("10/31/09", binder.getBindingResult().getFieldValue("millisAnnotated"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("millisAnnotated")).isEqualTo("10/31/09");
 	}
 
 	@Test
@@ -99,8 +97,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("calendarAnnotated", "10/31/09");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("10/31/09", binder.getBindingResult().getFieldValue("calendarAnnotated"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("calendarAnnotated")).isEqualTo("10/31/09");
 	}
 
 	@Test
@@ -108,8 +106,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotated", "10/31/09");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("10/31/09", binder.getBindingResult().getFieldValue("dateAnnotated"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("dateAnnotated")).isEqualTo("10/31/09");
 	}
 
 	@Test
@@ -117,7 +115,7 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotated", new String[]{"10/31/09 12:00 PM"});
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
 	}
 
 	@Test
@@ -125,8 +123,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotated", "Oct X31, 2009");
 		binder.bind(propertyValues);
-		assertEquals(1, binder.getBindingResult().getFieldErrorCount("dateAnnotated"));
-		assertEquals("Oct X31, 2009", binder.getBindingResult().getFieldValue("dateAnnotated"));
+		assertThat(binder.getBindingResult().getFieldErrorCount("dateAnnotated")).isEqualTo(1);
+		assertThat(binder.getBindingResult().getFieldValue("dateAnnotated")).isEqualTo("Oct X31, 2009");
 	}
 
 	@Test
@@ -136,8 +134,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotated", "Oct 031, 2009");
 		binder.bind(propertyValues);
-		assertEquals(1, binder.getBindingResult().getFieldErrorCount("dateAnnotated"));
-		assertEquals("Oct 031, 2009", binder.getBindingResult().getFieldValue("dateAnnotated"));
+		assertThat(binder.getBindingResult().getFieldErrorCount("dateAnnotated")).isEqualTo(1);
+		assertThat(binder.getBindingResult().getFieldValue("dateAnnotated")).isEqualTo("Oct 031, 2009");
 	}
 
 	@Test
@@ -145,8 +143,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotatedPattern", "10/31/09 1:05");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("10/31/09 1:05", binder.getBindingResult().getFieldValue("dateAnnotatedPattern"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("dateAnnotatedPattern")).isEqualTo("10/31/09 1:05");
 	}
 
 	@Test
@@ -154,7 +152,7 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotatedPattern", "02/29/09 12:00 PM");
 		binder.bind(propertyValues);
-		assertEquals(1, binder.getBindingResult().getErrorCount());
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(1);
 	}
 
 	@Test
@@ -162,8 +160,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDate", "2009-10-31");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("2009-10-31", binder.getBindingResult().getFieldValue("isoDate"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("isoDate")).isEqualTo("2009-10-31");
 	}
 
 	@Test
@@ -171,8 +169,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoTime", "12:00:00.000-05:00");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("17:00:00.000Z", binder.getBindingResult().getFieldValue("isoTime"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("isoTime")).isEqualTo("17:00:00.000Z");
 	}
 
 	@Test
@@ -180,8 +178,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDateTime", "2009-10-31T12:00:00.000-08:00");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("2009-10-31T20:00:00.000Z", binder.getBindingResult().getFieldValue("isoDateTime"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("isoDateTime")).isEqualTo("2009-10-31T20:00:00.000Z");
 	}
 
 	@Test
@@ -189,8 +187,8 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("children[0].dateAnnotated", "10/31/09");
 		binder.bind(propertyValues);
-		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("10/31/09", binder.getBindingResult().getFieldValue("children[0].dateAnnotated"));
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("children[0].dateAnnotated")).isEqualTo("10/31/09");
 	}
 
 	@Test
@@ -198,7 +196,7 @@ public class DateFormattingTests {
 		Date date = new Date();
 		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
 		String expected = date.toString();
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -209,7 +207,7 @@ public class DateFormattingTests {
 		Date date = new Date();
 		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
 		String expected = new DateFormatter().print(date, Locale.US);
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test  // SPR-10105
@@ -230,7 +228,7 @@ public class DateFormattingTests {
 		// This is a format that cannot be parsed by new Date(String)
 		String string = "2009-06-01T14:23:05.003+00:00";
 		Date date = this.conversionService.convert(string, Date.class);
-		assertNotNull(date);
+		assertThat(date).isNotNull();
 	}
 
 

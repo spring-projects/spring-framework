@@ -39,9 +39,8 @@ import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.validation.annotation.Validated;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Juergen Hoeller
@@ -71,7 +70,7 @@ public class MethodValidationTests {
 	}
 
 	private void doTestProxyValidation(MyValidInterface proxy) {
-		assertNotNull(proxy.myValidMethod("value", 5));
+		assertThat(proxy.myValidMethod("value", 5)).isNotNull();
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
 				proxy.myValidMethod("value", 15));
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
@@ -83,7 +82,7 @@ public class MethodValidationTests {
 				proxy.myValidAsyncMethod("value", 15));
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
 				proxy.myValidAsyncMethod(null, 5));
-		assertEquals("myValue", proxy.myGenericMethod("myValue"));
+		assertThat(proxy.myGenericMethod("myValue")).isEqualTo("myValue");
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
 				proxy.myGenericMethod(null));
 	}

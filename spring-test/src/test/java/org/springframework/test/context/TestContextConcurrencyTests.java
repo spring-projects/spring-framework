@@ -27,7 +27,6 @@ import org.junit.Test;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toCollection;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests that verify proper concurrency support between a
@@ -77,7 +76,7 @@ public class TestContextConcurrencyTests {
 			});
 			assertThat(actualMethods).isEqualTo(expectedMethods);
 		});
-		assertEquals(0, tcm.getTestContext().attributeNames().length);
+		assertThat(tcm.getTestContext().attributeNames().length).isEqualTo(0);
 	}
 
 
@@ -131,7 +130,7 @@ public class TestContextConcurrencyTests {
 
 		@Override
 		public void afterTestMethod(TestContext testContext) throws Exception {
-			assertEquals(this.methodName.get(), testContext.getAttribute("method"));
+			assertThat(testContext.getAttribute("method")).isEqualTo(this.methodName.get());
 		}
 
 	}

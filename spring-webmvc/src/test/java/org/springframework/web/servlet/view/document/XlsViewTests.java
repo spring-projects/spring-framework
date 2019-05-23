@@ -34,7 +34,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.servlet.View;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for AbstractXlsView and its subclasses.
@@ -66,11 +66,11 @@ public class XlsViewTests {
 		excelView.render(new HashMap<>(), request, response);
 
 		Workbook wb = new HSSFWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
-		assertEquals("Test Sheet", wb.getSheetName(0));
+		assertThat(wb.getSheetName(0)).isEqualTo("Test Sheet");
 		Sheet sheet = wb.getSheet("Test Sheet");
 		Row row = sheet.getRow(0);
 		Cell cell = row.getCell(0);
-		assertEquals("Test Value", cell.getStringCellValue());
+		assertThat(cell.getStringCellValue()).isEqualTo("Test Value");
 	}
 
 	@Test
@@ -90,11 +90,11 @@ public class XlsViewTests {
 		excelView.render(new HashMap<>(), request, response);
 
 		Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
-		assertEquals("Test Sheet", wb.getSheetName(0));
+		assertThat(wb.getSheetName(0)).isEqualTo("Test Sheet");
 		Sheet sheet = wb.getSheet("Test Sheet");
 		Row row = sheet.getRow(0);
 		Cell cell = row.getCell(0);
-		assertEquals("Test Value", cell.getStringCellValue());
+		assertThat(cell.getStringCellValue()).isEqualTo("Test Value");
 	}
 
 	@Test
@@ -114,11 +114,11 @@ public class XlsViewTests {
 		excelView.render(new HashMap<>(), request, response);
 
 		Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(response.getContentAsByteArray()));
-		assertEquals("Test Sheet", wb.getSheetName(0));
+		assertThat(wb.getSheetName(0)).isEqualTo("Test Sheet");
 		Sheet sheet = wb.getSheet("Test Sheet");
 		Row row = sheet.getRow(0);
 		Cell cell = row.getCell(0);
-		assertEquals("Test Value", cell.getStringCellValue());
+		assertThat(cell.getStringCellValue()).isEqualTo("Test Value");
 	}
 
 }

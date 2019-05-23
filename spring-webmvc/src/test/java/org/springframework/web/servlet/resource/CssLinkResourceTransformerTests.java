@@ -31,8 +31,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.resource.EncodedResourceResolver.EncodedResource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link CssLinkResourceTransformer}.
@@ -93,7 +92,7 @@ public class CssLinkResourceTransformerTests {
 		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
 		String result = new String(actual.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
@@ -101,7 +100,7 @@ public class CssLinkResourceTransformerTests {
 		this.request = new MockHttpServletRequest("GET", "/static/foo.css");
 		Resource expected = getResource("foo.css");
 		Resource actual = this.transformerChain.transform(this.request, expected);
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
@@ -120,7 +119,7 @@ public class CssLinkResourceTransformerTests {
 		TransformedResource transformedResource = (TransformedResource) chain.transform(this.request, resource);
 		String result = new String(transformedResource.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 
 		List<Resource> locations = Collections.singletonList(resource);
 		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("https://example.org/fonts/css", locations);
@@ -134,7 +133,7 @@ public class CssLinkResourceTransformerTests {
 		Resource expected = getResource("images/image.png");
 		Resource actual = this.transformerChain.transform(this.request, expected);
 
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
@@ -147,7 +146,7 @@ public class CssLinkResourceTransformerTests {
 		EncodedResource gzipped = new EncodedResource(original, "gzip", ".gz");
 		Resource actual = this.transformerChain.transform(this.request, gzipped);
 
-		assertSame(gzipped, actual);
+		assertThat(actual).isSameAs(gzipped);
 	}
 
 	@Test // https://github.com/spring-projects/spring-framework/issues/22602
@@ -162,7 +161,7 @@ public class CssLinkResourceTransformerTests {
 		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.request, css);
 		String result = new String(actual.getByteArray(), StandardCharsets.UTF_8);
 		result = StringUtils.deleteAny(result, "\r");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	private Resource getResource(String filePath) {

@@ -40,10 +40,9 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rossen Stoyanchev
@@ -99,7 +98,7 @@ public class FreeMarkerViewTests {
 		view.setConfiguration(this.freeMarkerConfig);
 		view.setUrl("test.ftl");
 
-		assertTrue(view.checkResourceExists(Locale.US));
+		assertThat(view.checkResourceExists(Locale.US)).isTrue();
 	}
 
 	@Test
@@ -113,7 +112,7 @@ public class FreeMarkerViewTests {
 		view.render(model, null, this.exchange).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(this.exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf)))
+				.consumeNextWith(buf -> assertThat(asString(buf)).isEqualTo("<html><body>hi FreeMarker</body></html>"))
 				.expectComplete()
 				.verify();
 	}

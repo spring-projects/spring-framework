@@ -63,10 +63,8 @@ import org.springframework.mock.http.client.reactive.test.MockClientHttpResponse
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
 
 /**
@@ -175,8 +173,8 @@ public class BodyExtractorsTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(user -> {
-					assertEquals("foo", user.getUsername());
-					assertNull(user.getPassword());
+					assertThat(user.getUsername()).isEqualTo("foo");
+					assertThat(user.getPassword()).isNull();
 				})
 				.expectComplete()
 				.verify();
@@ -266,12 +264,12 @@ public class BodyExtractorsTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(user -> {
-					assertEquals("foo", user.getUsername());
-					assertNull(user.getPassword());
+					assertThat(user.getUsername()).isEqualTo("foo");
+					assertThat(user.getPassword()).isNull();
 				})
 				.consumeNextWith(user -> {
-					assertEquals("bar", user.getUsername());
-					assertNull(user.getPassword());
+					assertThat(user.getUsername()).isEqualTo("bar");
+					assertThat(user.getPassword()).isNull();
 				})
 				.expectComplete()
 				.verify();
@@ -328,13 +326,13 @@ public class BodyExtractorsTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(form -> {
-					assertEquals("Invalid result", 3, form.size());
-					assertEquals("Invalid result", "value 1", form.getFirst("name 1"));
+					assertThat(form.size()).as("Invalid result").isEqualTo(3);
+					assertThat(form.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 					List<String> values = form.get("name 2");
-					assertEquals("Invalid result", 2, values.size());
-					assertEquals("Invalid result", "value 2+1", values.get(0));
-					assertEquals("Invalid result", "value 2+2", values.get(1));
-					assertNull("Invalid result", form.getFirst("name 3"));
+					assertThat(values.size()).as("Invalid result").isEqualTo(2);
+					assertThat(values.get(0)).as("Invalid result").isEqualTo("value 2+1");
+					assertThat(values.get(1)).as("Invalid result").isEqualTo("value 2+2");
+					assertThat(form.getFirst("name 3")).as("Invalid result").isNull();
 				})
 				.expectComplete()
 				.verify();
@@ -375,24 +373,27 @@ public class BodyExtractorsTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(part -> {
-					assertEquals("text", part.name());
-					assertTrue(part instanceof FormFieldPart);
+					assertThat(part.name()).isEqualTo("text");
+					boolean condition = part instanceof FormFieldPart;
+					assertThat(condition).isTrue();
 					FormFieldPart formFieldPart = (FormFieldPart) part;
-					assertEquals("text default", formFieldPart.value());
+					assertThat(formFieldPart.value()).isEqualTo("text default");
 				})
 				.consumeNextWith(part -> {
-					assertEquals("file1", part.name());
-					assertTrue(part instanceof FilePart);
+					assertThat(part.name()).isEqualTo("file1");
+					boolean condition = part instanceof FilePart;
+					assertThat(condition).isTrue();
 					FilePart filePart = (FilePart) part;
-					assertEquals("a.txt", filePart.filename());
-					assertEquals(MediaType.TEXT_PLAIN, filePart.headers().getContentType());
+					assertThat(filePart.filename()).isEqualTo("a.txt");
+					assertThat(filePart.headers().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 				})
 				.consumeNextWith(part -> {
-					assertEquals("file2", part.name());
-					assertTrue(part instanceof FilePart);
+					assertThat(part.name()).isEqualTo("file2");
+					boolean condition = part instanceof FilePart;
+					assertThat(condition).isTrue();
 					FilePart filePart = (FilePart) part;
-					assertEquals("a.html", filePart.filename());
-					assertEquals(MediaType.TEXT_HTML, filePart.headers().getContentType());
+					assertThat(filePart.filename()).isEqualTo("a.html");
+					assertThat(filePart.headers().getContentType()).isEqualTo(MediaType.TEXT_HTML);
 				})
 				.expectComplete()
 				.verify();
@@ -433,7 +434,8 @@ public class BodyExtractorsTests {
 					body.emit(buffer);
 				})
 				.expectErrorSatisfies(throwable -> {
-					assertTrue(throwable instanceof UnsupportedMediaTypeException);
+					boolean condition = throwable instanceof UnsupportedMediaTypeException;
+					assertThat(condition).isTrue();
 					assertThatExceptionOfType(IllegalReferenceCountException.class).isThrownBy(
 							buffer::release);
 					body.assertCancelled();

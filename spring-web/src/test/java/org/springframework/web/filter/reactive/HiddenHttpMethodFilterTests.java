@@ -31,7 +31,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link HiddenHttpMethodFilter}.
@@ -48,32 +47,32 @@ public class HiddenHttpMethodFilterTests {
 	@Test
 	public void filterWithParameter() {
 		postForm("_method=DELETE").block(Duration.ZERO);
-		assertEquals(HttpMethod.DELETE, this.filterChain.getHttpMethod());
+		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.DELETE);
 	}
 
 	@Test
 	public void filterWithParameterMethodNotAllowed() {
 		postForm("_method=TRACE").block(Duration.ZERO);
-		assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
+		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.POST);
 	}
 
 	@Test
 	public void filterWithNoParameter() {
 		postForm("").block(Duration.ZERO);
-		assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
+		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.POST);
 	}
 
 	@Test
 	public void filterWithEmptyStringParameter() {
 		postForm("_method=").block(Duration.ZERO);
-		assertEquals(HttpMethod.POST, this.filterChain.getHttpMethod());
+		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.POST);
 	}
 
 	@Test
 	public void filterWithDifferentMethodParam() {
 		this.filter.setMethodParamName("_foo");
 		postForm("_foo=DELETE").block(Duration.ZERO);
-		assertEquals(HttpMethod.DELETE, this.filterChain.getHttpMethod());
+		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.DELETE);
 	}
 
 	@Test
@@ -81,7 +80,7 @@ public class HiddenHttpMethodFilterTests {
 		StepVerifier.create(postForm("_method=INVALID"))
 				.consumeErrorWith(error -> {
 					assertThat(error).isInstanceOf(IllegalArgumentException.class);
-					assertEquals("HttpMethod 'INVALID' not supported", error.getMessage());
+					assertThat(error.getMessage()).isEqualTo("HttpMethod 'INVALID' not supported");
 				})
 				.verify();
 	}
@@ -95,7 +94,7 @@ public class HiddenHttpMethodFilterTests {
 						.body("_method=DELETE"));
 
 		this.filter.filter(exchange, this.filterChain).block(Duration.ZERO);
-		assertEquals(HttpMethod.PUT, this.filterChain.getHttpMethod());
+		assertThat(this.filterChain.getHttpMethod()).isEqualTo(HttpMethod.PUT);
 	}
 
 

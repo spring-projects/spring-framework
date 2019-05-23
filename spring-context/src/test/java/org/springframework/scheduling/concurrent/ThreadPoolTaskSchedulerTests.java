@@ -31,11 +31,8 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.ErrorHandler;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Mark Fisher
@@ -62,7 +59,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		scheduler.setErrorHandler(errorHandler);
 		scheduler.execute(task);
 		await(errorHandler);
-		assertNotNull(errorHandler.lastError);
+		assertThat(errorHandler.lastError).isNotNull();
 	}
 
 	@Test
@@ -72,9 +69,9 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		scheduler.setErrorHandler(errorHandler);
 		Future<?> future = scheduler.submit(task);
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertTrue(future.isDone());
-		assertNull(result);
-		assertNotNull(errorHandler.lastError);
+		assertThat(future.isDone()).isTrue();
+		assertThat(result).isNull();
+		assertThat(errorHandler.lastError).isNotNull();
 	}
 
 	@Test
@@ -84,9 +81,9 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		scheduler.setErrorHandler(errorHandler);
 		Future<String> future = scheduler.submit(task);
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertTrue(future.isDone());
-		assertNull(result);
-		assertNotNull(errorHandler.lastError);
+		assertThat(future.isDone()).isTrue();
+		assertThat(result).isNull();
+		assertThat(errorHandler.lastError).isNotNull();
 	}
 
 	@Test
@@ -94,8 +91,8 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		TestTask task = new TestTask(1);
 		Future<?> future = scheduler.schedule(task, new Date());
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertNull(result);
-		assertTrue(future.isDone());
+		assertThat(result).isNull();
+		assertThat(future.isDone()).isTrue();
 		assertThreadNamePrefix(task);
 	}
 
@@ -105,7 +102,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		Future<?> future = scheduler.schedule(task, new Date());
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
 				future.get(1000, TimeUnit.MILLISECONDS));
-		assertTrue(future.isDone());
+		assertThat(future.isDone()).isTrue();
 	}
 
 	@Test
@@ -115,9 +112,9 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		scheduler.setErrorHandler(errorHandler);
 		Future<?> future = scheduler.schedule(task, new Date());
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertTrue(future.isDone());
-		assertNull(result);
-		assertNotNull(errorHandler.lastError);
+		assertThat(future.isDone()).isTrue();
+		assertThat(result).isNull();
+		assertThat(errorHandler.lastError).isNotNull();
 	}
 
 	@Test
@@ -125,7 +122,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		TestTask task = new TestTask(3);
 		Future<?> future = scheduler.schedule(task, new TestTrigger(3));
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertNull(result);
+		assertThat(result).isNull();
 		await(task);
 		assertThreadNamePrefix(task);
 	}
@@ -139,7 +136,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 
 
 	private void assertThreadNamePrefix(TestTask task) {
-		assertEquals(THREAD_NAME_PREFIX, task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length()));
+		assertThat(task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
 	}
 
 	private void await(TestTask task) {
@@ -157,7 +154,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		catch (InterruptedException ex) {
 			throw new IllegalStateException(ex);
 		}
-		assertEquals("latch did not count down,", 0, latch.getCount());
+		assertThat(latch.getCount()).as("latch did not count down,").isEqualTo(0);
 	}
 
 

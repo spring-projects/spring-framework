@@ -37,7 +37,7 @@ import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.server.HandlerFilterFunction.ofResponseProcessor;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -77,11 +77,11 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/normal", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Map<String, String> body = parseBody(result.getBody());
-		assertEquals(2, body.size());
-		assertEquals("foo", body.get("name"));
-		assertEquals("baz", body.get("bar"));
+		assertThat(body.size()).isEqualTo(2);
+		assertThat(body.get("name")).isEqualTo("foo");
+		assertThat(body.get("bar")).isEqualTo("baz");
 	}
 
 	@Test
@@ -89,12 +89,12 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/filter", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Map<String, String> body = parseBody(result.getBody());
-		assertEquals(3, body.size());
-		assertEquals("foo", body.get("name"));
-		assertEquals("baz", body.get("bar"));
-		assertEquals("quux", body.get("qux"));
+		assertThat(body.size()).isEqualTo(3);
+		assertThat(body.get("name")).isEqualTo("foo");
+		assertThat(body.get("bar")).isEqualTo("baz");
+		assertThat(body.get("qux")).isEqualTo("quux");
 	}
 
 	private Map<String, String> parseBody(String body) {

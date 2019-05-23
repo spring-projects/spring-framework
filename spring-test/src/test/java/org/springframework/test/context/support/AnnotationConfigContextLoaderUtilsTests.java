@@ -25,10 +25,8 @@ import org.junit.Test;
 
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.context.support.AnnotationConfigContextLoaderUtils.detectDefaultConfigurationClasses;
 
 /**
@@ -48,22 +46,22 @@ public class AnnotationConfigContextLoaderUtilsTests {
 	@Test
 	public void detectDefaultConfigurationClassesWithoutConfigurationClass() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(NoConfigTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals(0, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).isEqualTo(0);
 	}
 
 	@Test
 	public void detectDefaultConfigurationClassesWithExplicitConfigurationAnnotation() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(ExplicitConfigTestCase.class);
-		assertNotNull(configClasses);
-		assertArrayEquals(new Class<?>[] { ExplicitConfigTestCase.Config.class }, configClasses);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses).isEqualTo(new Class<?>[] { ExplicitConfigTestCase.Config.class });
 	}
 
 	@Test
 	public void detectDefaultConfigurationClassesWithConfigurationMetaAnnotation() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(MetaAnnotatedConfigTestCase.class);
-		assertNotNull(configClasses);
-		assertArrayEquals(new Class<?>[] { MetaAnnotatedConfigTestCase.Config.class }, configClasses);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses).isEqualTo(new Class<?>[] { MetaAnnotatedConfigTestCase.Config.class });
 	}
 
 

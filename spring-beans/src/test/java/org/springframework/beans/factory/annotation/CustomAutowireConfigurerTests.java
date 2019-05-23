@@ -24,7 +24,7 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
@@ -47,7 +47,7 @@ public class CustomAutowireConfigurerTests {
 		bf.setAutowireCandidateResolver(customResolver);
 		cac.postProcessBeanFactory(bf);
 		TestBean testBean = (TestBean) bf.getBean("testBean");
-		assertEquals("#1!", testBean.getName());
+		assertThat(testBean.getName()).isEqualTo("#1!");
 	}
 
 

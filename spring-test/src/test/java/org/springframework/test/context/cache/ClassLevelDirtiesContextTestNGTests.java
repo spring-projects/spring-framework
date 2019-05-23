@@ -38,7 +38,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.testng.TrackingTestNGTestListener;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.cache.ContextCacheTestUtils.assertContextCacheStatistics;
 import static org.springframework.test.context.cache.ContextCacheTestUtils.resetContextCache;
 
@@ -148,12 +148,9 @@ public class ClassLevelDirtiesContextTestNGTests {
 		testNG.setVerbose(0);
 		testNG.run();
 
-		assertEquals("Failures for test class [" + testClass + "].", expectedTestFailureCount,
-			listener.testFailureCount);
-		assertEquals("Tests started for test class [" + testClass + "].", expectedTestStartedCount,
-			listener.testStartCount);
-		assertEquals("Successful tests for test class [" + testClass + "].", expectedTestFinishedCount,
-			listener.testSuccessCount);
+		assertThat(listener.testFailureCount).as("Failures for test class [" + testClass + "].").isEqualTo(expectedTestFailureCount);
+		assertThat(listener.testStartCount).as("Tests started for test class [" + testClass + "].").isEqualTo(expectedTestStartedCount);
+		assertThat(listener.testSuccessCount).as("Successful tests for test class [" + testClass + "].").isEqualTo(expectedTestFinishedCount);
 	}
 
 	private void assertBehaviorForCleanTestCase() {

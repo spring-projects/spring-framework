@@ -30,7 +30,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify the behavior requested in
@@ -76,28 +76,28 @@ public class LookUpTxMgrViaTransactionManagementConfigurerTests {
 
 	@Test
 	public void transactionalTest() {
-		assertEquals(1, txManager1.begun);
-		assertEquals(1, txManager1.inflight);
-		assertEquals(0, txManager1.commits);
-		assertEquals(0, txManager1.rollbacks);
+		assertThat(txManager1.begun).isEqualTo(1);
+		assertThat(txManager1.inflight).isEqualTo(1);
+		assertThat(txManager1.commits).isEqualTo(0);
+		assertThat(txManager1.rollbacks).isEqualTo(0);
 
-		assertEquals(0, txManager2.begun);
-		assertEquals(0, txManager2.inflight);
-		assertEquals(0, txManager2.commits);
-		assertEquals(0, txManager2.rollbacks);
+		assertThat(txManager2.begun).isEqualTo(0);
+		assertThat(txManager2.inflight).isEqualTo(0);
+		assertThat(txManager2.commits).isEqualTo(0);
+		assertThat(txManager2.rollbacks).isEqualTo(0);
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
-		assertEquals(1, txManager1.begun);
-		assertEquals(0, txManager1.inflight);
-		assertEquals(0, txManager1.commits);
-		assertEquals(1, txManager1.rollbacks);
+		assertThat(txManager1.begun).isEqualTo(1);
+		assertThat(txManager1.inflight).isEqualTo(0);
+		assertThat(txManager1.commits).isEqualTo(0);
+		assertThat(txManager1.rollbacks).isEqualTo(1);
 
-		assertEquals(0, txManager2.begun);
-		assertEquals(0, txManager2.inflight);
-		assertEquals(0, txManager2.commits);
-		assertEquals(0, txManager2.rollbacks);
+		assertThat(txManager2.begun).isEqualTo(0);
+		assertThat(txManager2.inflight).isEqualTo(0);
+		assertThat(txManager2.commits).isEqualTo(0);
+		assertThat(txManager2.rollbacks).isEqualTo(0);
 	}
 
 }

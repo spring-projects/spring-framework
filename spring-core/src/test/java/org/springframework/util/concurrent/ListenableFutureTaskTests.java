@@ -24,9 +24,7 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -47,7 +45,7 @@ public class ListenableFutureTaskTests {
 		task.addCallback(new ListenableFutureCallback<String>() {
 			@Override
 			public void onSuccess(String result) {
-				assertEquals(s, result);
+				assertThat(result).isEqualTo(s);
 			}
 			@Override
 			public void onFailure(Throwable ex) {
@@ -56,9 +54,9 @@ public class ListenableFutureTaskTests {
 		});
 		task.run();
 
-		assertSame(s, task.get());
-		assertSame(s, task.completable().get());
-		task.completable().thenAccept(v -> assertSame(s, v));
+		assertThat(task.get()).isSameAs(s);
+		assertThat(task.completable().get()).isSameAs(s);
+		task.completable().thenAccept(v -> assertThat(v).isSameAs(s));
 	}
 
 	@Test
@@ -76,7 +74,7 @@ public class ListenableFutureTaskTests {
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				assertEquals(s, ex.getMessage());
+				assertThat(ex.getMessage()).isEqualTo(s);
 			}
 		});
 		task.run();
@@ -102,9 +100,9 @@ public class ListenableFutureTaskTests {
 		verify(successCallback).onSuccess(s);
 		verifyZeroInteractions(failureCallback);
 
-		assertSame(s, task.get());
-		assertSame(s, task.completable().get());
-		task.completable().thenAccept(v -> assertSame(s, v));
+		assertThat(task.get()).isSameAs(s);
+		assertThat(task.completable().get()).isSameAs(s);
+		task.completable().thenAccept(v -> assertThat(v).isSameAs(s));
 	}
 
 	@Test

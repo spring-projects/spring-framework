@@ -30,7 +30,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Base class for tests using on the DispatcherServlet and HandlerMethod infrastructure classes:
@@ -48,7 +48,7 @@ public abstract class AbstractServletHandlerMethodTests {
 
 
 	protected DispatcherServlet getServlet() {
-		assertNotNull("DispatcherServlet not initialized", servlet);
+		assertThat(servlet).as("DispatcherServlet not initialized").isNotNull();
 		return servlet;
 	}
 

@@ -31,8 +31,8 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -78,7 +78,7 @@ public class ContentRequestMatchersIntegrationTests {
 		}
 		catch (AssertionError error) {
 			String message = error.getMessage();
-			assertTrue(message, message.startsWith("Content type expected:<application/json;charset=UTF-8>"));
+			assertThat(message.startsWith("Content type expected:<application/json;charset=UTF-8>")).as(message).isTrue();
 		}
 	}
 

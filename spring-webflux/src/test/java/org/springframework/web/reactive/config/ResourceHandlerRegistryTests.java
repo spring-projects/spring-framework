@@ -49,10 +49,6 @@ import org.springframework.web.reactive.resource.VersionResourceResolver;
 import org.springframework.web.reactive.resource.WebJarsResourceResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ResourceHandlerRegistry}.
@@ -77,7 +73,7 @@ public class ResourceHandlerRegistryTests {
 	@Test
 	public void noResourceHandlers() throws Exception {
 		this.registry = new ResourceHandlerRegistry(new GenericApplicationContext());
-		assertNull(this.registry.getHandlerMapping());
+		assertThat((Object) this.registry.getHandlerMapping()).isNull();
 	}
 
 	@Test
@@ -90,8 +86,7 @@ public class ResourceHandlerRegistryTests {
 		handler.handle(exchange).block(Duration.ofSeconds(5));
 
 		StepVerifier.create(exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertEquals("test stylesheet content",
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
+				.consumeNextWith(buf -> assertThat(DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)).isEqualTo("test stylesheet content"))
 				.expectComplete()
 				.verify();
 	}
@@ -107,16 +102,16 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void order() {
-		assertEquals(Integer.MAX_VALUE -1, this.registry.getHandlerMapping().getOrder());
+		assertThat(this.registry.getHandlerMapping().getOrder()).isEqualTo(Integer.MAX_VALUE -1);
 
 		this.registry.setOrder(0);
-		assertEquals(0, this.registry.getHandlerMapping().getOrder());
+		assertThat(this.registry.getHandlerMapping().getOrder()).isEqualTo(0);
 	}
 
 	@Test
 	public void hasMappingForPattern() {
-		assertTrue(this.registry.hasMappingForPattern("/resources/**"));
-		assertFalse(this.registry.hasMappingForPattern("/whatever"));
+		assertThat(this.registry.hasMappingForPattern("/resources/**")).isTrue();
+		assertThat(this.registry.hasMappingForPattern("/whatever")).isFalse();
 	}
 
 	@Test

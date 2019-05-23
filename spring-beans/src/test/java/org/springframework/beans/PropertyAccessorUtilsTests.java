@@ -20,8 +20,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -31,15 +30,15 @@ public class PropertyAccessorUtilsTests {
 
 	@Test
 	public void testCanonicalPropertyName() {
-		assertEquals("map", PropertyAccessorUtils.canonicalPropertyName("map"));
-		assertEquals("map[key1]", PropertyAccessorUtils.canonicalPropertyName("map[key1]"));
-		assertEquals("map[key1]", PropertyAccessorUtils.canonicalPropertyName("map['key1']"));
-		assertEquals("map[key1]", PropertyAccessorUtils.canonicalPropertyName("map[\"key1\"]"));
-		assertEquals("map[key1][key2]", PropertyAccessorUtils.canonicalPropertyName("map[key1][key2]"));
-		assertEquals("map[key1][key2]", PropertyAccessorUtils.canonicalPropertyName("map['key1'][\"key2\"]"));
-		assertEquals("map[key1].name", PropertyAccessorUtils.canonicalPropertyName("map[key1].name"));
-		assertEquals("map[key1].name", PropertyAccessorUtils.canonicalPropertyName("map['key1'].name"));
-		assertEquals("map[key1].name", PropertyAccessorUtils.canonicalPropertyName("map[\"key1\"].name"));
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map")).isEqualTo("map");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[key1]")).isEqualTo("map[key1]");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key1']")).isEqualTo("map[key1]");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[\"key1\"]")).isEqualTo("map[key1]");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[key1][key2]")).isEqualTo("map[key1][key2]");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key1'][\"key2\"]")).isEqualTo("map[key1][key2]");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[key1].name")).isEqualTo("map[key1].name");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key1'].name")).isEqualTo("map[key1].name");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[\"key1\"].name")).isEqualTo("map[key1].name");
 	}
 
 	@Test
@@ -51,7 +50,7 @@ public class PropertyAccessorUtilsTests {
 				new String[] {"map", "map[key1]", "map[key1]", "map[key1]", "map[key1][key2]",
 											"map[key1][key2]", "map[key1].name", "map[key1].name", "map[key1].name"};
 
-		assertTrue(Arrays.equals(canonical, PropertyAccessorUtils.canonicalPropertyNames(original)));
+		assertThat(Arrays.equals(canonical, PropertyAccessorUtils.canonicalPropertyNames(original))).isTrue();
 	}
 
 }

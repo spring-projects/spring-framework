@@ -30,7 +30,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -59,8 +59,8 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 		ResponseEntity<Person> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/mono", Person.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("John", result.getBody().getName());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getName()).isEqualTo("John");
 	}
 
 	@Test
@@ -69,11 +69,11 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 		ResponseEntity<List<Person>> result =
 				restTemplate.exchange("http://localhost:" + port + "/flux", HttpMethod.GET, null, reference);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		List<Person> body = result.getBody();
-		assertEquals(2, body.size());
-		assertEquals("John", body.get(0).getName());
-		assertEquals("Jane", body.get(1).getName());
+		assertThat(body.size()).isEqualTo(2);
+		assertThat(body.get(0).getName()).isEqualTo("John");
+		assertThat(body.get(1).getName()).isEqualTo("Jane");
 	}
 
 	@Test
@@ -83,8 +83,8 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 		RequestEntity<Person> requestEntity = RequestEntity.post(uri).body(person);
 		ResponseEntity<Person> result = restTemplate.exchange(requestEntity, Person.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("Jack", result.getBody().getName());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getName()).isEqualTo("Jack");
 	}
 
 

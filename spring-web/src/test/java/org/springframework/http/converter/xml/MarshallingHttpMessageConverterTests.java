@@ -32,10 +32,8 @@ import org.springframework.oxm.MarshallingFailureException;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.UnmarshallingFailureException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -60,9 +58,9 @@ public class MarshallingHttpMessageConverterTests {
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter();
 		converter.setUnmarshaller(unmarshaller);
 
-		assertFalse(converter.canRead(Boolean.class, MediaType.TEXT_PLAIN));
-		assertFalse(converter.canRead(Integer.class, MediaType.TEXT_XML));
-		assertTrue(converter.canRead(String.class, MediaType.TEXT_XML));
+		assertThat(converter.canRead(Boolean.class, MediaType.TEXT_PLAIN)).isFalse();
+		assertThat(converter.canRead(Integer.class, MediaType.TEXT_XML)).isFalse();
+		assertThat(converter.canRead(String.class, MediaType.TEXT_XML)).isTrue();
 	}
 
 	@Test
@@ -75,9 +73,9 @@ public class MarshallingHttpMessageConverterTests {
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter();
 		converter.setMarshaller(marshaller);
 
-		assertFalse(converter.canWrite(Boolean.class, MediaType.TEXT_PLAIN));
-		assertFalse(converter.canWrite(Integer.class, MediaType.TEXT_XML));
-		assertTrue(converter.canWrite(String.class, MediaType.TEXT_XML));
+		assertThat(converter.canWrite(Boolean.class, MediaType.TEXT_PLAIN)).isFalse();
+		assertThat(converter.canWrite(Integer.class, MediaType.TEXT_XML)).isFalse();
+		assertThat(converter.canWrite(String.class, MediaType.TEXT_XML)).isTrue();
 	}
 
 	@Test
@@ -92,7 +90,7 @@ public class MarshallingHttpMessageConverterTests {
 		converter.setUnmarshaller(unmarshaller);
 
 		String result = (String) converter.read(Object.class, inputMessage);
-		assertEquals("Invalid result", body, result);
+		assertThat(result).as("Invalid result").isEqualTo(body);
 	}
 
 	@Test
@@ -136,8 +134,7 @@ public class MarshallingHttpMessageConverterTests {
 		MarshallingHttpMessageConverter converter = new MarshallingHttpMessageConverter(marshaller);
 		converter.write(body, null, outputMessage);
 
-		assertEquals("Invalid content-type", new MediaType("application", "xml"),
-				outputMessage.getHeaders().getContentType());
+		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(new MediaType("application", "xml"));
 	}
 
 	@Test

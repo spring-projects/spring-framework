@@ -21,8 +21,7 @@ import java.io.File;
 import org.junit.After;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -40,17 +39,17 @@ public class FileSystemUtilsTests {
 		File bar = new File(child, "bar.txt");
 		bar.createNewFile();
 
-		assertTrue(root.exists());
-		assertTrue(child.exists());
-		assertTrue(grandchild.exists());
-		assertTrue(bar.exists());
+		assertThat(root.exists()).isTrue();
+		assertThat(child.exists()).isTrue();
+		assertThat(grandchild.exists()).isTrue();
+		assertThat(bar.exists()).isTrue();
 
 		FileSystemUtils.deleteRecursively(root);
 
-		assertFalse(root.exists());
-		assertFalse(child.exists());
-		assertFalse(grandchild.exists());
-		assertFalse(bar.exists());
+		assertThat(root.exists()).isFalse();
+		assertThat(child.exists()).isFalse();
+		assertThat(grandchild.exists()).isFalse();
+		assertThat(bar.exists()).isFalse();
 	}
 
 	@Test
@@ -64,19 +63,19 @@ public class FileSystemUtilsTests {
 		File bar = new File(child, "bar.txt");
 		bar.createNewFile();
 
-		assertTrue(src.exists());
-		assertTrue(child.exists());
-		assertTrue(grandchild.exists());
-		assertTrue(bar.exists());
+		assertThat(src.exists()).isTrue();
+		assertThat(child.exists()).isTrue();
+		assertThat(grandchild.exists()).isTrue();
+		assertThat(bar.exists()).isTrue();
 
 		File dest = new File("./dest");
 		FileSystemUtils.copyRecursively(src, dest);
 
-		assertTrue(dest.exists());
-		assertTrue(new File(dest, child.getName()).exists());
+		assertThat(dest.exists()).isTrue();
+		assertThat(new File(dest, child.getName()).exists()).isTrue();
 
 		FileSystemUtils.deleteRecursively(src);
-		assertFalse(src.exists());
+		assertThat(src.exists()).isFalse();
 	}
 
 

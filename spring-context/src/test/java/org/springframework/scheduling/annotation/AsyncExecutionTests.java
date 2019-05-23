@@ -43,9 +43,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -74,11 +73,11 @@ public class AsyncExecutionTests {
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
-		assertEquals("20", listenableFuture.get());
+		assertThat(listenableFuture.get()).isEqualTo("20");
 		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
-		assertEquals("20", completableFuture.get());
+		assertThat(completableFuture.get()).isEqualTo("20");
 
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
 				asyncTest.returnSomething(0).get())
@@ -114,7 +113,7 @@ public class AsyncExecutionTests {
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -133,9 +132,9 @@ public class AsyncExecutionTests {
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 		Future<String> future2 = asyncTest.returnSomething2(30);
-		assertEquals("30", future2.get());
+		assertThat(future2.get()).isEqualTo("30");
 	}
 
 	@Test
@@ -154,9 +153,9 @@ public class AsyncExecutionTests {
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 		Future<String> future2 = asyncTest.returnSomething2(30);
-		assertEquals("30", future2.get());
+		assertThat(future2.get()).isEqualTo("30");
 	}
 
 	@Test
@@ -171,11 +170,11 @@ public class AsyncExecutionTests {
 		AsyncClassBean asyncTest = context.getBean("asyncTest", AsyncClassBean.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
-		assertEquals("20", listenableFuture.get());
+		assertThat(listenableFuture.get()).isEqualTo("20");
 		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
-		assertEquals("20", completableFuture.get());
+		assertThat(completableFuture.get()).isEqualTo("20");
 
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
 				asyncTest.returnSomething(0).get())
@@ -201,7 +200,7 @@ public class AsyncExecutionTests {
 		AsyncClassBean asyncTest = context.getBean("asyncTest", AsyncClassBean.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -216,7 +215,7 @@ public class AsyncExecutionTests {
 		RegularInterface asyncTest = context.getBean("asyncTest", RegularInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -230,7 +229,7 @@ public class AsyncExecutionTests {
 		RegularInterface asyncTest = context.getBean("asyncTest", RegularInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -245,7 +244,7 @@ public class AsyncExecutionTests {
 		AsyncInterface asyncTest = context.getBean("asyncTest", AsyncInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -259,7 +258,7 @@ public class AsyncExecutionTests {
 		AsyncInterface asyncTest = context.getBean("asyncTest", AsyncInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -274,7 +273,7 @@ public class AsyncExecutionTests {
 		AsyncInterface asyncTest = context.getBean("asyncTest", AsyncInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -288,7 +287,7 @@ public class AsyncExecutionTests {
 		AsyncInterface asyncTest = context.getBean("asyncTest", AsyncInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -304,7 +303,7 @@ public class AsyncExecutionTests {
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -319,7 +318,7 @@ public class AsyncExecutionTests {
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -333,7 +332,7 @@ public class AsyncExecutionTests {
 		AsyncMethodsInterface asyncTest = context.getBean("asyncTest", AsyncMethodsInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
-		assertEquals("20", future.get());
+		assertThat(future.get()).isEqualTo("20");
 	}
 
 	@Test
@@ -373,7 +372,7 @@ public class AsyncExecutionTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> listenerCalled == 2);
-		assertEquals(1, listenerConstructed);
+		assertThat(listenerConstructed).isEqualTo(1);
 	}
 
 	@Test
@@ -396,7 +395,7 @@ public class AsyncExecutionTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> listenerCalled == 2);
-		assertEquals(2, listenerConstructed);
+		assertThat(listenerConstructed).isEqualTo(2);
 	}
 
 
@@ -415,17 +414,19 @@ public class AsyncExecutionTests {
 	public static class AsyncMethodBean {
 
 		public void doNothing(int i) {
-			assertTrue(Thread.currentThread().getName().equals(originalThreadName));
+			assertThat(Thread.currentThread().getName().equals(originalThreadName)).isTrue();
 		}
 
 		@Async
 		public void doSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 		}
 
 		@Async
 		public Future<String> returnSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -437,7 +438,8 @@ public class AsyncExecutionTests {
 
 		@Async
 		public ListenableFuture<String> returnSomethingListenable(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -449,7 +451,8 @@ public class AsyncExecutionTests {
 
 		@Async
 		public CompletableFuture<String> returnSomethingCompletable(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -471,25 +474,28 @@ public class AsyncExecutionTests {
 	public static class AsyncMethodWithQualifierBean {
 
 		public void doNothing(int i) {
-			assertTrue(Thread.currentThread().getName().equals(originalThreadName));
+			assertThat(Thread.currentThread().getName().equals(originalThreadName)).isTrue();
 		}
 
 		@Async("e1")
 		public void doSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			assertTrue(Thread.currentThread().getName().startsWith("e1-"));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName().startsWith("e1-")).isTrue();
 		}
 
 		@MyAsync
 		public Future<String> returnSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			assertTrue(Thread.currentThread().getName().startsWith("e2-"));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName().startsWith("e2-")).isTrue();
 			return new AsyncResult<>(Integer.toString(i));
 		}
 
 		public Future<String> returnSomething2(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
-			assertTrue(Thread.currentThread().getName().startsWith("e0-"));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName().startsWith("e0-")).isTrue();
 			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
@@ -510,11 +516,13 @@ public class AsyncExecutionTests {
 	public static class AsyncClassBean implements Serializable, DisposableBean {
 
 		public void doSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 		}
 
 		public Future<String> returnSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -522,7 +530,8 @@ public class AsyncExecutionTests {
 		}
 
 		public ListenableFuture<String> returnSomethingListenable(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -531,7 +540,8 @@ public class AsyncExecutionTests {
 
 		@Async
 		public CompletableFuture<String> returnSomethingCompletable(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -556,11 +566,13 @@ public class AsyncExecutionTests {
 	public static class AsyncClassBeanWithInterface implements RegularInterface {
 
 		public void doSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 		}
 
 		public Future<String> returnSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
@@ -579,12 +591,14 @@ public class AsyncExecutionTests {
 
 		@Override
 		public void doSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 		}
 
 		@Override
 		public Future<String> returnSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
@@ -599,7 +613,8 @@ public class AsyncExecutionTests {
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(new MethodInterceptor() {
 				@Override
 				public Object invoke(MethodInvocation invocation) throws Throwable {
-					assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+					boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+					assertThat(condition).isTrue();
 					if (Future.class.equals(invocation.getMethod().getReturnType())) {
 						return new AsyncResult<>(invocation.getArguments()[0].toString());
 					}
@@ -644,17 +659,19 @@ public class AsyncExecutionTests {
 
 		@Override
 		public void doNothing(int i) {
-			assertTrue(Thread.currentThread().getName().equals(originalThreadName));
+			assertThat(Thread.currentThread().getName().equals(originalThreadName)).isTrue();
 		}
 
 		@Override
 		public void doSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 		}
 
 		@Override
 		public Future<String> returnSomething(int i) {
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
@@ -669,7 +686,8 @@ public class AsyncExecutionTests {
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(new MethodInterceptor() {
 				@Override
 				public Object invoke(MethodInvocation invocation) throws Throwable {
-					assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+					boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+					assertThat(condition).isTrue();
 					if (Future.class.equals(invocation.getMethod().getReturnType())) {
 						return new AsyncResult<>(invocation.getArguments()[0].toString());
 					}
@@ -704,7 +722,8 @@ public class AsyncExecutionTests {
 		@Async
 		public void onApplicationEvent(ApplicationEvent event) {
 			listenerCalled++;
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 		}
 	}
 
@@ -719,7 +738,8 @@ public class AsyncExecutionTests {
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			listenerCalled++;
-			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
+			assertThat(condition).isTrue();
 		}
 	}
 

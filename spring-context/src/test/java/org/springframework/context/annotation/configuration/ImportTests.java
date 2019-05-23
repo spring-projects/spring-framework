@@ -30,7 +30,6 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * System tests for {@link Import} annotation support.
@@ -259,7 +258,7 @@ public class ImportTests {
 	@DependsOn("org.springframework.context.annotation.configuration.ImportTests$InitBean")
 	static class ThirdLevel {
 		public ThirdLevel() {
-			assertTrue(InitBean.initialized);
+			assertThat(InitBean.initialized).isTrue();
 		}
 
 		@Bean

@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link HiddenHttpMethodFilter}.
@@ -72,8 +72,7 @@ public class HiddenHttpMethodFilterTests {
 			@Override
 			public void doFilter(ServletRequest filterRequest,
 					ServletResponse filterResponse) throws IOException, ServletException {
-				assertEquals("Invalid method", expectedMethod,
-						((HttpServletRequest) filterRequest).getMethod());
+				assertThat(((HttpServletRequest) filterRequest).getMethod()).as("Invalid method").isEqualTo(expectedMethod);
 			}
 		};
 		this.filter.doFilter(request, response, filterChain);

@@ -25,11 +25,8 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcutTests;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson
@@ -50,8 +47,8 @@ public class AspectJPointcutAdvisorTests {
 				new SingletonMetadataAwareAspectInstanceFactory(new AbstractAspectJAdvisorFactoryTests.ExceptionAspect(null), "someBean"),
 				1, "someBean");
 
-		assertSame(Pointcut.TRUE, ajpa.getAspectMetadata().getPerClausePointcut());
-		assertFalse(ajpa.isPerInstance());
+		assertThat(ajpa.getAspectMetadata().getPerClausePointcut()).isSameAs(Pointcut.TRUE);
+		assertThat(ajpa.isPerInstance()).isFalse();
 	}
 
 	@Test
@@ -64,16 +61,17 @@ public class AspectJPointcutAdvisorTests {
 				new SingletonMetadataAwareAspectInstanceFactory(new PerTargetAspect(), "someBean"),
 				1, "someBean");
 
-		assertNotSame(Pointcut.TRUE, ajpa.getAspectMetadata().getPerClausePointcut());
-		assertTrue(ajpa.getAspectMetadata().getPerClausePointcut() instanceof AspectJExpressionPointcut);
-		assertTrue(ajpa.isPerInstance());
+		assertThat(ajpa.getAspectMetadata().getPerClausePointcut()).isNotSameAs(Pointcut.TRUE);
+		boolean condition = ajpa.getAspectMetadata().getPerClausePointcut() instanceof AspectJExpressionPointcut;
+		assertThat(condition).isTrue();
+		assertThat(ajpa.isPerInstance()).isTrue();
 
-		assertTrue(ajpa.getAspectMetadata().getPerClausePointcut().getClassFilter().matches(TestBean.class));
-		assertFalse(ajpa.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(
-				TestBean.class.getMethod("getAge"), TestBean.class));
+		assertThat(ajpa.getAspectMetadata().getPerClausePointcut().getClassFilter().matches(TestBean.class)).isTrue();
+		assertThat(ajpa.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(
+				TestBean.class.getMethod("getAge"), TestBean.class)).isFalse();
 
-		assertTrue(ajpa.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(
-				TestBean.class.getMethod("getSpouse"), TestBean.class));
+		assertThat(ajpa.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(
+				TestBean.class.getMethod("getSpouse"), TestBean.class)).isTrue();
 	}
 
 	@Test

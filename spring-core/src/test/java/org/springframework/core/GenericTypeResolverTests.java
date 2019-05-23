@@ -28,9 +28,6 @@ import java.util.Map;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.springframework.core.GenericTypeResolver.getTypeVariableMap;
 import static org.springframework.core.GenericTypeResolver.resolveReturnTypeArgument;
 import static org.springframework.core.GenericTypeResolver.resolveType;
@@ -46,64 +43,59 @@ public class GenericTypeResolverTests {
 
 	@Test
 	public void simpleInterfaceType() {
-		assertEquals(String.class, resolveTypeArgument(MySimpleInterfaceType.class, MyInterfaceType.class));
+		assertThat(resolveTypeArgument(MySimpleInterfaceType.class, MyInterfaceType.class)).isEqualTo(String.class);
 	}
 
 	@Test
 	public void simpleCollectionInterfaceType() {
-		assertEquals(Collection.class, resolveTypeArgument(MyCollectionInterfaceType.class, MyInterfaceType.class));
+		assertThat(resolveTypeArgument(MyCollectionInterfaceType.class, MyInterfaceType.class)).isEqualTo(Collection.class);
 	}
 
 	@Test
 	public void simpleSuperclassType() {
-		assertEquals(String.class, resolveTypeArgument(MySimpleSuperclassType.class, MySuperclassType.class));
+		assertThat(resolveTypeArgument(MySimpleSuperclassType.class, MySuperclassType.class)).isEqualTo(String.class);
 	}
 
 	@Test
 	public void simpleCollectionSuperclassType() {
-		assertEquals(Collection.class, resolveTypeArgument(MyCollectionSuperclassType.class, MySuperclassType.class));
+		assertThat(resolveTypeArgument(MyCollectionSuperclassType.class, MySuperclassType.class)).isEqualTo(Collection.class);
 	}
 
 	@Test
 	public void nullIfNotResolvable() {
 		GenericClass<String> obj = new GenericClass<>();
-		assertNull(resolveTypeArgument(obj.getClass(), GenericClass.class));
+		assertThat((Object) resolveTypeArgument(obj.getClass(), GenericClass.class)).isNull();
 	}
 
 	@Test
 	public void methodReturnTypes() {
-		assertEquals(Integer.class,
-				resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "integer"), MyInterfaceType.class));
-		assertEquals(String.class,
-				resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "string"), MyInterfaceType.class));
-		assertEquals(null, resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class));
-		assertEquals(null,
-				resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class));
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "integer"), MyInterfaceType.class)).isEqualTo(Integer.class);
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "string"), MyInterfaceType.class)).isEqualTo(String.class);
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class)).isEqualTo(null);
+		assertThat(resolveReturnTypeArgument(findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class)).isEqualTo(null);
 	}
 
 	@Test
 	public void testResolveType() {
 		Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
 		MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
-		assertEquals(MyInterfaceType.class,
-				resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<>()));
+		assertThat(resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<>())).isEqualTo(MyInterfaceType.class);
 
 		Method intArrMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerArrayInputMessage",
 				MyInterfaceType[].class);
 		MethodParameter intArrMessageMethodParam = new MethodParameter(intArrMessageMethod, 0);
-		assertEquals(MyInterfaceType[].class,
-				resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<>()));
+		assertThat(resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<>())).isEqualTo(MyInterfaceType[].class);
 
 		Method genericArrMessageMethod = findMethod(MySimpleTypeWithMethods.class, "readGenericArrayInputMessage",
 				Object[].class);
 		MethodParameter genericArrMessageMethodParam = new MethodParameter(genericArrMessageMethod, 0);
 		Map<TypeVariable, Type> varMap = getTypeVariableMap(MySimpleTypeWithMethods.class);
-		assertEquals(Integer[].class, resolveType(genericArrMessageMethodParam.getGenericParameterType(), varMap));
+		assertThat(resolveType(genericArrMessageMethodParam.getGenericParameterType(), varMap)).isEqualTo(Integer[].class);
 	}
 
 	@Test
 	public void testBoundParameterizedType() {
-		assertEquals(B.class, resolveTypeArgument(TestImpl.class, TestIfc.class));
+		assertThat(resolveTypeArgument(TestImpl.class, TestIfc.class)).isEqualTo(B.class);
 	}
 
 	@Test
@@ -147,13 +139,13 @@ public class GenericTypeResolverTests {
 	@Test  // SPR-11030
 	public void getGenericsCannotBeResolved() throws Exception {
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(List.class, Iterable.class);
-		assertNull(resolved);
+		assertThat((Object) resolved).isNull();
 	}
 
 	@Test  // SPR-11052
 	public void getRawMapTypeCannotBeResolved() throws Exception {
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(Map.class, Map.class);
-		assertNull(resolved);
+		assertThat((Object) resolved).isNull();
 	}
 
 	@Test  // SPR-11044
@@ -174,10 +166,10 @@ public class GenericTypeResolverTests {
 	@Test  // SPR-11763
 	public void resolveIncompleteTypeVariables() {
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
-		assertNotNull(resolved);
-		assertEquals(2, resolved.length);
-		assertEquals(Object.class, resolved[0]);
-		assertEquals(Long.class, resolved[1]);
+		assertThat(resolved).isNotNull();
+		assertThat(resolved.length).isEqualTo(2);
+		assertThat(resolved[0]).isEqualTo(Object.class);
+		assertThat(resolved[1]).isEqualTo(Long.class);
 	}
 
 

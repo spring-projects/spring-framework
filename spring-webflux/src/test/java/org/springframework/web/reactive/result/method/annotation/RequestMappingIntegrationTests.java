@@ -37,9 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests with {@code @RequestMapping} handler methods.
@@ -67,9 +65,9 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 		String url = "http://localhost:" + this.port + "/text";
 		HttpHeaders headers = getRestTemplate().headForHeaders(url);
 		String contentType = headers.getFirst("Content-Type");
-		assertNotNull(contentType);
-		assertEquals("text/html;charset=utf-8", contentType.toLowerCase());
-		assertEquals(3, headers.getContentLength());
+		assertThat(contentType).isNotNull();
+		assertThat(contentType.toLowerCase()).isEqualTo("text/html;charset=utf-8");
+		assertThat(headers.getContentLength()).isEqualTo(3);
 	}
 
 	@Test
@@ -83,13 +81,13 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 				.header("Forwarded", "host=84.198.58.199;proto=https")
 				.build();
 		ResponseEntity<String> entity = getRestTemplate().exchange(request, String.class);
-		assertEquals("https://84.198.58.199/uri", entity.getBody());
+		assertThat(entity.getBody()).isEqualTo("https://84.198.58.199/uri");
 	}
 
 	@Test
 	public void stream() throws Exception {
 		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/stream", new HttpHeaders(), String[].class).getBody());
+		assertThat(performGet("/stream", new HttpHeaders(), String[].class).getBody()).isEqualTo(expected);
 	}
 
 

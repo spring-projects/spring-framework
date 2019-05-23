@@ -23,12 +23,10 @@ import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -42,7 +40,7 @@ public class CompositeIteratorTests {
 	@Test
 	public void testNoIterators() {
 		CompositeIterator<String> it = new CompositeIterator<>();
-		assertFalse(it.hasNext());
+		assertThat(it.hasNext()).isFalse();
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);
 	}
@@ -52,10 +50,10 @@ public class CompositeIteratorTests {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(Arrays.asList("0", "1").iterator());
 		for (int i = 0; i < 2; i++) {
-			assertTrue(it.hasNext());
-			assertEquals(String.valueOf(i), it.next());
+			assertThat(it.hasNext()).isTrue();
+			assertThat(it.next()).isEqualTo(String.valueOf(i));
 		}
-		assertFalse(it.hasNext());
+		assertThat(it.hasNext()).isFalse();
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);
 	}
@@ -67,10 +65,10 @@ public class CompositeIteratorTests {
 		it.add(Arrays.asList("2").iterator());
 		it.add(Arrays.asList("3", "4").iterator());
 		for (int i = 0; i < 5; i++) {
-			assertTrue(it.hasNext());
-			assertEquals(String.valueOf(i), it.next());
+			assertThat(it.hasNext()).isTrue();
+			assertThat(it.next()).isEqualTo(String.valueOf(i));
 		}
-		assertFalse(it.hasNext());
+		assertThat(it.hasNext()).isFalse();
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);

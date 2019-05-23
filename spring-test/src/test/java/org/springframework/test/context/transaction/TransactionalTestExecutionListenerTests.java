@@ -34,10 +34,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
@@ -83,7 +81,7 @@ public class TransactionalTestExecutionListenerTests {
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -221,10 +219,10 @@ public class TransactionalTestExecutionListenerTests {
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
-		assertEquals(invokedInTx, instance.invoked());
+		assertThat(instance.invoked()).isEqualTo(invokedInTx);
 	}
 
 	private void assertBeforeTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
@@ -233,10 +231,10 @@ public class TransactionalTestExecutionListenerTests {
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 	}
 
 	private void assertAfterTestMethod(Class<? extends Invocable> clazz) throws Exception {
@@ -251,12 +249,12 @@ public class TransactionalTestExecutionListenerTests {
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
 		given(tm.getTransaction(BDDMockito.any(TransactionDefinition.class))).willReturn(new SimpleTransactionStatus());
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		listener.afterTestMethod(testContext);
-		assertTrue("callback should have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should have been invoked").isTrue();
 	}
 
 	private void assertAfterTestMethodWithNonTransactionalTestMethod(Class<? extends Invocable> clazz) throws Exception {
@@ -265,17 +263,17 @@ public class TransactionalTestExecutionListenerTests {
 		given(testContext.getTestInstance()).willReturn(instance);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("nonTransactionalTest"));
 
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 		TransactionContextHolder.removeCurrentTransactionContext();
 		listener.beforeTestMethod(testContext);
 		listener.afterTestMethod(testContext);
-		assertFalse("callback should not have been invoked", instance.invoked());
+		assertThat(instance.invoked()).as("callback should not have been invoked").isFalse();
 	}
 
 	private void assertIsRollback(Class<?> clazz, boolean rollback) throws Exception {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("test"));
-		assertEquals(rollback, listener.isRollback(testContext));
+		assertThat(listener.isRollback(testContext)).isEqualTo(rollback);
 	}
 
 

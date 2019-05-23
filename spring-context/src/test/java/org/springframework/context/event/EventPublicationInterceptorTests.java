@@ -31,8 +31,8 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -119,9 +119,9 @@ public class EventPublicationInterceptorTests {
 		testBean.getAge();
 
 		// two events: ContextRefreshedEvent and TestEvent
-		assertTrue("Interceptor must have published 2 events", listener.getEventCount() == 2);
+		assertThat(listener.getEventCount() == 2).as("Interceptor must have published 2 events").isTrue();
 		TestListener otherListener = (TestListener) ctx.getBean("&otherListener");
-		assertTrue("Interceptor must have published 2 events", otherListener.getEventCount() == 2);
+		assertThat(otherListener.getEventCount() == 2).as("Interceptor must have published 2 events").isTrue();
 	}
 
 

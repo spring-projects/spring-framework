@@ -48,8 +48,6 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -89,11 +87,11 @@ public class MessagingMessageListenerAdapterTests {
 		javax.jms.Message replyMessage = listener.buildMessage(session, result);
 
 		verify(session).createTextMessage("Response");
-		assertNotNull("reply should never be null", replyMessage);
-		assertEquals("Response", ((TextMessage) replyMessage).getText());
-		assertEquals("custom header not copied", "bar", replyMessage.getStringProperty("foo"));
-		assertEquals("type header not copied", "msg_type", replyMessage.getJMSType());
-		assertEquals("replyTo header not copied", replyTo, replyMessage.getJMSReplyTo());
+		assertThat(replyMessage).as("reply should never be null").isNotNull();
+		assertThat(((TextMessage) replyMessage).getText()).isEqualTo("Response");
+		assertThat(replyMessage.getStringProperty("foo")).as("custom header not copied").isEqualTo("bar");
+		assertThat(replyMessage.getJMSType()).as("type header not copied").isEqualTo("msg_type");
+		assertThat(replyMessage.getJMSReplyTo()).as("replyTo header not copied").isEqualTo(replyTo);
 	}
 
 	@Test
@@ -127,7 +125,7 @@ public class MessagingMessageListenerAdapterTests {
 		listener.setMessageConverter(messageConverter);
 		Message<?> message = listener.toMessagingMessage(jmsMessage);
 		verify(messageConverter, never()).fromMessage(jmsMessage);
-		assertEquals("FooBar", message.getPayload());
+		assertThat(message.getPayload()).isEqualTo("FooBar");
 		verify(messageConverter, times(1)).fromMessage(jmsMessage);
 	}
 
@@ -154,8 +152,8 @@ public class MessagingMessageListenerAdapterTests {
 		listener.setMessageConverter(messageConverter);
 		listener.onMessage(jmsMessage, session);
 		verify(messageConverter, times(1)).fromMessage(jmsMessage);
-		assertEquals(1, sample.simples.size());
-		assertEquals("FooBar", sample.simples.get(0).getPayload());
+		assertThat(sample.simples.size()).isEqualTo(1);
+		assertThat(sample.simples.get(0).getPayload()).isEqualTo("FooBar");
 	}
 
 	@Test
@@ -170,8 +168,8 @@ public class MessagingMessageListenerAdapterTests {
 		javax.jms.Message replyMessage = listener.buildMessage(session, result);
 
 		verify(messageConverter, times(1)).toMessage("Response", session);
-		assertNotNull("reply should never be null", replyMessage);
-		assertEquals("Response", ((TextMessage) replyMessage).getText());
+		assertThat(replyMessage).as("reply should never be null").isNotNull();
+		assertThat(((TextMessage) replyMessage).getText()).isEqualTo("Response");
 	}
 
 	@Test

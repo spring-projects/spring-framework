@@ -28,9 +28,9 @@ import org.junit.Test;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.tests.aop.advice.MethodCounter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -54,22 +54,22 @@ public class ThrowsAdviceInterceptorTests {
 		Object ret = new Object();
 		MethodInvocation mi = mock(MethodInvocation.class);
 		given(mi.proceed()).willReturn(ret);
-		assertEquals(ret, ti.invoke(mi));
-		assertEquals(0, th.getCalls());
+		assertThat(ti.invoke(mi)).isEqualTo(ret);
+		assertThat(th.getCalls()).isEqualTo(0);
 	}
 
 	@Test
 	public void testNoHandlerMethodForThrowable() throws Throwable {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
-		assertEquals(2, ti.getHandlerMethodCount());
+		assertThat(ti.getHandlerMethodCount()).isEqualTo(2);
 		Exception ex = new Exception();
 		MethodInvocation mi = mock(MethodInvocation.class);
 		given(mi.proceed()).willThrow(ex);
 		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
 				ti.invoke(mi))
 			.isSameAs(ex);
-		assertEquals(0, th.getCalls());
+		assertThat(th.getCalls()).isEqualTo(0);
 	}
 
 	@Test
@@ -84,8 +84,8 @@ public class ThrowsAdviceInterceptorTests {
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
 				ti.invoke(mi))
 			.isSameAs(ex);
-		assertEquals(1, th.getCalls());
-		assertEquals(1, th.getCalls("ioException"));
+		assertThat(th.getCalls()).isEqualTo(1);
+		assertThat(th.getCalls("ioException")).isEqualTo(1);
 	}
 
 	@Test
@@ -99,8 +99,8 @@ public class ThrowsAdviceInterceptorTests {
 		assertThatExceptionOfType(ConnectException.class).isThrownBy(() ->
 				ti.invoke(mi))
 			.isSameAs(ex);
-		assertEquals(1, th.getCalls());
-		assertEquals(1, th.getCalls("remoteException"));
+		assertThat(th.getCalls()).isEqualTo(1);
+		assertThat(th.getCalls("remoteException")).isEqualTo(1);
 	}
 
 	@Test
@@ -124,8 +124,8 @@ public class ThrowsAdviceInterceptorTests {
 		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
 				ti.invoke(mi))
 			.isSameAs(t);
-		assertEquals(1, th.getCalls());
-		assertEquals(1, th.getCalls("remoteException"));
+		assertThat(th.getCalls()).isEqualTo(1);
+		assertThat(th.getCalls("remoteException")).isEqualTo(1);
 	}
 
 

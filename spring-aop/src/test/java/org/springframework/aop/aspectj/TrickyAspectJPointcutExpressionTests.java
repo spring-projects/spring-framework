@@ -34,8 +34,8 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.lang.Nullable;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
@@ -111,10 +111,10 @@ public class TrickyAspectJPointcutExpressionTests {
 		factory.addAdvisor(advisor);
 		TestService bean = (TestService) factory.getProxy();
 
-		assertEquals(0, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(0);
 		assertThatExceptionOfType(TestException.class).isThrownBy(
 				bean::sayHello).withMessageContaining(message);
-		assertEquals(1, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(1);
 	}
 
 

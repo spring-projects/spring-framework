@@ -35,9 +35,7 @@ import org.xml.sax.InputSource;
 
 import org.springframework.util.xml.StaxUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -57,10 +55,11 @@ public class XStreamUnmarshallerTests {
 	}
 
 	private void testFlight(Object o) {
-		assertTrue("Unmarshalled object is not Flights", o instanceof Flight);
+		boolean condition = o instanceof Flight;
+		assertThat(condition).as("Unmarshalled object is not Flights").isTrue();
 		Flight flight = (Flight) o;
-		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", 42L, flight.getFlightNumber());
+		assertThat(flight).as("Flight is null").isNotNull();
+		assertThat(flight.getFlightNumber()).as("Number is invalid").isEqualTo(42L);
 	}
 
 	@Test

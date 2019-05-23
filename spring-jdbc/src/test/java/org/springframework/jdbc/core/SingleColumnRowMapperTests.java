@@ -28,9 +28,8 @@ import org.junit.Test;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.TypeMismatchDataAccessException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -58,7 +57,7 @@ public class SingleColumnRowMapperTests {
 
 		LocalDateTime actualLocalDateTime = rowMapper.mapRow(resultSet, 1);
 
-		assertEquals(timestamp.toLocalDateTime(), actualLocalDateTime);
+		assertThat(actualLocalDateTime).isEqualTo(timestamp.toLocalDateTime());
 	}
 
 	@Test  // SPR-16483
@@ -81,8 +80,8 @@ public class SingleColumnRowMapperTests {
 
 		MyLocalDateTime actualMyLocalDateTime = rowMapper.mapRow(resultSet, 1);
 
-		assertNotNull(actualMyLocalDateTime);
-		assertEquals(timestamp.toLocalDateTime(), actualMyLocalDateTime.value);
+		assertThat(actualMyLocalDateTime).isNotNull();
+		assertThat(actualMyLocalDateTime.value).isEqualTo(timestamp.toLocalDateTime());
 	}
 
 	@Test // SPR-16483

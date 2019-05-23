@@ -181,6 +181,13 @@
 				value="Please use AssertJ asserThat." />
 			<property name="ignoreComments" value="true" />
 		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="maximum" value="0"/>
+			<property name="format" value="org\.junit\.Assert\.assert" />
+			<property name="message"
+				value="Please use AssertJ imports." />
+			<property name="ignoreComments" value="true" />
+		</module>
 
 		<!-- Spring Conventions -->
 		<module name="io.spring.javaformat.checkstyle.check.SpringLambdaCheck">

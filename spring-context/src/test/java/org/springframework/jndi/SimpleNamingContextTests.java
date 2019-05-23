@@ -38,9 +38,8 @@ import org.junit.Test;
 import org.springframework.tests.mock.jndi.SimpleNamingContext;
 import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -59,16 +58,16 @@ public class SimpleNamingContextTests {
 		builder.bind("myobject", obj);
 
 		Context context1 = factory.getInitialContext(null);
-		assertTrue("Correct DataSource registered", context1.lookup("java:comp/env/jdbc/myds") == ds);
-		assertTrue("Correct Object registered", context1.lookup("myobject") == obj);
+		assertThat(context1.lookup("java:comp/env/jdbc/myds") == ds).as("Correct DataSource registered").isTrue();
+		assertThat(context1.lookup("myobject") == obj).as("Correct Object registered").isTrue();
 
 		Hashtable<String, String> env2 = new Hashtable<>();
 		env2.put("key1", "value1");
 		Context context2 = factory.getInitialContext(env2);
-		assertTrue("Correct DataSource registered", context2.lookup("java:comp/env/jdbc/myds") == ds);
-		assertTrue("Correct Object registered", context2.lookup("myobject") == obj);
-		assertTrue("Correct environment", context2.getEnvironment() != env2);
-		assertTrue("Correct key1", "value1".equals(context2.getEnvironment().get("key1")));
+		assertThat(context2.lookup("java:comp/env/jdbc/myds") == ds).as("Correct DataSource registered").isTrue();
+		assertThat(context2.lookup("myobject") == obj).as("Correct Object registered").isTrue();
+		assertThat(context2.getEnvironment() != env2).as("Correct environment").isTrue();
+		assertThat("value1".equals(context2.getEnvironment().get("key1"))).as("Correct key1").isTrue();
 
 		Integer i = new Integer(0);
 		context1.rebind("myinteger", i);
@@ -79,29 +78,29 @@ public class SimpleNamingContextTests {
 		context3.rename("java:comp/env/jdbc/myds", "jdbc/myds");
 		context3.unbind("myobject");
 
-		assertTrue("Correct environment", context3.getEnvironment() != context2.getEnvironment());
+		assertThat(context3.getEnvironment() != context2.getEnvironment()).as("Correct environment").isTrue();
 		context3.addToEnvironment("key2", "value2");
-		assertTrue("key2 added", "value2".equals(context3.getEnvironment().get("key2")));
+		assertThat("value2".equals(context3.getEnvironment().get("key2"))).as("key2 added").isTrue();
 		context3.removeFromEnvironment("key1");
-		assertTrue("key1 removed", context3.getEnvironment().get("key1") == null);
+		assertThat(context3.getEnvironment().get("key1") == null).as("key1 removed").isTrue();
 
-		assertTrue("Correct DataSource registered", context1.lookup("jdbc/myds") == ds);
+		assertThat(context1.lookup("jdbc/myds") == ds).as("Correct DataSource registered").isTrue();
 		assertThatExceptionOfType(NameNotFoundException.class).isThrownBy(() ->
 				context1.lookup("myobject"));
-		assertTrue("Correct Integer registered", context1.lookup("myinteger") == i);
-		assertTrue("Correct String registered", context1.lookup("mystring") == s);
+		assertThat(context1.lookup("myinteger") == i).as("Correct Integer registered").isTrue();
+		assertThat(context1.lookup("mystring") == s).as("Correct String registered").isTrue();
 
-		assertTrue("Correct DataSource registered", context2.lookup("jdbc/myds") == ds);
+		assertThat(context2.lookup("jdbc/myds") == ds).as("Correct DataSource registered").isTrue();
 		assertThatExceptionOfType(NameNotFoundException.class).isThrownBy(() ->
 				context2.lookup("myobject"));
-		assertTrue("Correct Integer registered", context2.lookup("myinteger") == i);
-		assertTrue("Correct String registered", context2.lookup("mystring") == s);
+		assertThat(context2.lookup("myinteger") == i).as("Correct Integer registered").isTrue();
+		assertThat(context2.lookup("mystring") == s).as("Correct String registered").isTrue();
 
-		assertTrue("Correct DataSource registered", context3.lookup("jdbc/myds") == ds);
+		assertThat(context3.lookup("jdbc/myds") == ds).as("Correct DataSource registered").isTrue();
 		assertThatExceptionOfType(NameNotFoundException.class).isThrownBy(() ->
 				context3.lookup("myobject"));
-		assertTrue("Correct Integer registered", context3.lookup("myinteger") == i);
-		assertTrue("Correct String registered", context3.lookup("mystring") == s);
+		assertThat(context3.lookup("myinteger") == i).as("Correct Integer registered").isTrue();
+		assertThat(context3.lookup("mystring") == s).as("Correct String registered").isTrue();
 
 		Map<String, Binding> bindingMap = new HashMap<>();
 		NamingEnumeration<?> bindingEnum = context3.listBindings("");
@@ -109,8 +108,9 @@ public class SimpleNamingContextTests {
 			Binding binding = (Binding) bindingEnum.nextElement();
 			bindingMap.put(binding.getName(), binding);
 		}
-		assertTrue("Correct jdbc subcontext", bindingMap.get("jdbc").getObject() instanceof Context);
-		assertTrue("Correct jdbc subcontext", SimpleNamingContext.class.getName().equals(bindingMap.get("jdbc").getClassName()));
+		boolean condition = bindingMap.get("jdbc").getObject() instanceof Context;
+		assertThat(condition).as("Correct jdbc subcontext").isTrue();
+		assertThat(SimpleNamingContext.class.getName().equals(bindingMap.get("jdbc").getClassName())).as("Correct jdbc subcontext").isTrue();
 
 		Context jdbcContext = (Context) context3.lookup("jdbc");
 		jdbcContext.bind("mydsX", ds);
@@ -121,14 +121,14 @@ public class SimpleNamingContextTests {
 			subBindingMap.put(binding.getName(), binding);
 		}
 
-		assertTrue("Correct DataSource registered", ds.equals(subBindingMap.get("myds").getObject()));
-		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(subBindingMap.get("myds").getClassName()));
-		assertTrue("Correct DataSource registered", ds.equals(subBindingMap.get("mydsX").getObject()));
-		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(subBindingMap.get("mydsX").getClassName()));
-		assertTrue("Correct Integer registered", i.equals(bindingMap.get("myinteger").getObject()));
-		assertTrue("Correct Integer registered", Integer.class.getName().equals(bindingMap.get("myinteger").getClassName()));
-		assertTrue("Correct String registered", s.equals(bindingMap.get("mystring").getObject()));
-		assertTrue("Correct String registered", String.class.getName().equals(bindingMap.get("mystring").getClassName()));
+		assertThat(ds.equals(subBindingMap.get("myds").getObject())).as("Correct DataSource registered").isTrue();
+		assertThat(StubDataSource.class.getName().equals(subBindingMap.get("myds").getClassName())).as("Correct DataSource registered").isTrue();
+		assertThat(ds.equals(subBindingMap.get("mydsX").getObject())).as("Correct DataSource registered").isTrue();
+		assertThat(StubDataSource.class.getName().equals(subBindingMap.get("mydsX").getClassName())).as("Correct DataSource registered").isTrue();
+		assertThat(i.equals(bindingMap.get("myinteger").getObject())).as("Correct Integer registered").isTrue();
+		assertThat(Integer.class.getName().equals(bindingMap.get("myinteger").getClassName())).as("Correct Integer registered").isTrue();
+		assertThat(s.equals(bindingMap.get("mystring").getObject())).as("Correct String registered").isTrue();
+		assertThat(String.class.getName().equals(bindingMap.get("mystring").getClassName())).as("Correct String registered").isTrue();
 
 		context1.createSubcontext("jdbc").bind("sub/subds", ds);
 
@@ -138,7 +138,7 @@ public class SimpleNamingContextTests {
 			NameClassPair pair = (NameClassPair) pairEnum.next();
 			pairMap.put(pair.getName(), pair.getClassName());
 		}
-		assertTrue("Correct sub subcontext", SimpleNamingContext.class.getName().equals(pairMap.get("sub")));
+		assertThat(SimpleNamingContext.class.getName().equals(pairMap.get("sub"))).as("Correct sub subcontext").isTrue();
 
 		Context subContext = (Context) context2.lookup("jdbc/sub");
 		Map<String, String> subPairMap = new HashMap<>();
@@ -148,9 +148,9 @@ public class SimpleNamingContextTests {
 			subPairMap.put(pair.getName(), pair.getClassName());
 		}
 
-		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(subPairMap.get("subds")));
-		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(pairMap.get("myds")));
-		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(pairMap.get("mydsX")));
+		assertThat(StubDataSource.class.getName().equals(subPairMap.get("subds"))).as("Correct DataSource registered").isTrue();
+		assertThat(StubDataSource.class.getName().equals(pairMap.get("myds"))).as("Correct DataSource registered").isTrue();
+		assertThat(StubDataSource.class.getName().equals(pairMap.get("mydsX"))).as("Correct DataSource registered").isTrue();
 
 		pairMap.clear();
 		pairEnum = context1.list("jdbc/");
@@ -158,8 +158,8 @@ public class SimpleNamingContextTests {
 			NameClassPair pair = (NameClassPair) pairEnum.next();
 			pairMap.put(pair.getName(), pair.getClassName());
 		}
-		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(pairMap.get("myds")));
-		assertTrue("Correct DataSource registered", StubDataSource.class.getName().equals(pairMap.get("mydsX")));
+		assertThat(StubDataSource.class.getName().equals(pairMap.get("myds"))).as("Correct DataSource registered").isTrue();
+		assertThat(StubDataSource.class.getName().equals(pairMap.get("mydsX"))).as("Correct DataSource registered").isTrue();
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class SimpleNamingContextTests {
 		builder.bind(name, o);
 		// Check it affects JNDI
 		Context ctx = new InitialContext();
-		assertTrue(ctx.lookup(name) == o);
+		assertThat(ctx.lookup(name) == o).isTrue();
 		// Check it returns mutable contexts
 		ctx.unbind(name);
 		InitialContext badCtx1 = new InitialContext();
@@ -188,7 +188,7 @@ public class SimpleNamingContextTests {
 				badCtx2.lookup(name));
 		Object o2 = new Object();
 		builder.bind(name, o2);
-		assertEquals(badCtx2.lookup(name), o2);
+		assertThat(o2).isEqualTo(badCtx2.lookup(name));
 	}
 
 

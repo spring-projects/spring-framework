@@ -34,10 +34,7 @@ import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -96,9 +93,9 @@ public class DefaultWebSessionManagerTests {
 		WebSession session = this.sessionManager.getSession(this.exchange).block();
 		this.exchange.getResponse().setComplete().block();
 
-		assertSame(this.createSession, session);
-		assertFalse(session.isStarted());
-		assertFalse(session.isExpired());
+		assertThat(session).isSameAs(this.createSession);
+		assertThat(session.isStarted()).isFalse();
+		assertThat(session.isExpired()).isFalse();
 		verify(this.createSession, never()).save();
 		verify(this.sessionIdResolver, never()).setSessionId(any(), any());
 	}
@@ -108,7 +105,7 @@ public class DefaultWebSessionManagerTests {
 
 		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.emptyList());
 		WebSession session = this.sessionManager.getSession(this.exchange).block();
-		assertSame(this.createSession, session);
+		assertThat(session).isSameAs(this.createSession);
 		String sessionId = this.createSession.getId();
 
 		given(this.createSession.isStarted()).willReturn(true);
@@ -126,8 +123,8 @@ public class DefaultWebSessionManagerTests {
 		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(Collections.singletonList(sessionId));
 
 		WebSession actual = this.sessionManager.getSession(this.exchange).block();
-		assertNotNull(actual);
-		assertEquals(sessionId, actual.getId());
+		assertThat(actual).isNotNull();
+		assertThat(actual.getId()).isEqualTo(sessionId);
 	}
 
 	@Test
@@ -139,7 +136,7 @@ public class DefaultWebSessionManagerTests {
 		given(this.sessionIdResolver.resolveSessionIds(this.exchange)).willReturn(ids);
 		WebSession actual = this.sessionManager.getSession(this.exchange).block();
 
-		assertNotNull(actual);
-		assertEquals(this.updateSession.getId(), actual.getId());
+		assertThat(actual).isNotNull();
+		assertThat(actual.getId()).isEqualTo(this.updateSession.getId());
 	}
 }

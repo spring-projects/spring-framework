@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cache.CacheTestUtils.assertCacheHit;
 import static org.springframework.cache.CacheTestUtils.assertCacheMiss;
 
@@ -95,7 +95,7 @@ public class EnableCachingIntegrationTests {
 		service.getWithCondition(key);
 		assertCacheMiss(key, cache);
 
-		assertEquals(2, this.context.getBean(BeanConditionConfig.Bar.class).count);
+		assertThat(this.context.getBean(BeanConditionConfig.Bar.class).count).isEqualTo(2);
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class EnableCachingIntegrationTests {
 		value = service.getWithCondition(key);
 		assertCacheHit(key, value, cache);
 
-		assertEquals(2, this.context.getBean(BeanConditionConfig.Bar.class).count);
+		assertThat(this.context.getBean(BeanConditionConfig.Bar.class).count).isEqualTo(2);
 	}
 
 	private Cache getCache() {

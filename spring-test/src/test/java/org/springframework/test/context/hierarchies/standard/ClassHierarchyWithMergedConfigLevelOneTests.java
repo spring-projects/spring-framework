@@ -28,9 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -88,12 +86,12 @@ public class ClassHierarchyWithMergedConfigLevelOneTests {
 
 	@Test
 	public void loadContextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNotNull("parent ApplicationContext", context.getParent());
-		assertNull("grandparent ApplicationContext", context.getParent().getParent());
-		assertEquals("parent", parent);
-		assertEquals("parent + user", user);
-		assertEquals("from UserConfig", beanFromUserConfig);
+		assertThat(context).as("child ApplicationContext").isNotNull();
+		assertThat(context.getParent()).as("parent ApplicationContext").isNotNull();
+		assertThat(context.getParent().getParent()).as("grandparent ApplicationContext").isNull();
+		assertThat(parent).isEqualTo("parent");
+		assertThat(user).isEqualTo("parent + user");
+		assertThat(beanFromUserConfig).isEqualTo("from UserConfig");
 	}
 
 }

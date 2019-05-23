@@ -33,12 +33,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture with {@link ModelAndViewResolverMethodReturnValueHandler}.
@@ -73,9 +69,9 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 
 		handler.handleReturnValue(testBean, returnType, mavContainer, request);
 
-		assertEquals("viewName", mavContainer.getViewName());
-		assertSame(testBean, mavContainer.getModel().get("modelAttrName"));
-		assertFalse(mavContainer.isRequestHandled());
+		assertThat(mavContainer.getViewName()).isEqualTo("viewName");
+		assertThat(mavContainer.getModel().get("modelAttrName")).isSameAs(testBean);
+		assertThat(mavContainer.isRequestHandled()).isFalse();
 	}
 
 	@Test
@@ -91,9 +87,9 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(null, returnType, mavContainer, request);
 
-		assertNull(mavContainer.getView());
-		assertNull(mavContainer.getViewName());
-		assertTrue(mavContainer.getModel().isEmpty());
+		assertThat(mavContainer.getView()).isNull();
+		assertThat(mavContainer.getViewName()).isNull();
+		assertThat(mavContainer.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -108,7 +104,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(new TestBean(), returnType, mavContainer, request);
 
-		assertTrue(mavContainer.containsAttribute("testBean"));
+		assertThat(mavContainer.containsAttribute("testBean")).isTrue();
 	}
 
 

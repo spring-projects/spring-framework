@@ -34,8 +34,7 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StopWatch;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -67,10 +66,10 @@ public class AnnotationProcessorPerformanceTests {
 		sw.start("prototype");
 		for (int i = 0; i < 100000; i++) {
 			TestBean tb = (TestBean) ctx.getBean("test");
-			assertSame(spouse, tb.getSpouse());
+			assertThat(tb.getSpouse()).isSameAs(spouse);
 		}
 		sw.stop();
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		assertThat(sw.getTotalTimeMillis() < 4000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test
@@ -89,10 +88,10 @@ public class AnnotationProcessorPerformanceTests {
 		sw.start("prototype");
 		for (int i = 0; i < 100000; i++) {
 			TestBean tb = (TestBean) ctx.getBean("test");
-			assertSame(spouse, tb.getSpouse());
+			assertThat(tb.getSpouse()).isSameAs(spouse);
 		}
 		sw.stop();
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		assertThat(sw.getTotalTimeMillis() < 4000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test
@@ -110,10 +109,10 @@ public class AnnotationProcessorPerformanceTests {
 		sw.start("prototype");
 		for (int i = 0; i < 100000; i++) {
 			TestBean tb = (TestBean) ctx.getBean("test");
-			assertSame(spouse, tb.getSpouse());
+			assertThat(tb.getSpouse()).isSameAs(spouse);
 		}
 		sw.stop();
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		assertThat(sw.getTotalTimeMillis() < 4000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test
@@ -132,10 +131,10 @@ public class AnnotationProcessorPerformanceTests {
 		sw.start("prototype");
 		for (int i = 0; i < 100000; i++) {
 			TestBean tb = (TestBean) ctx.getBean("test");
-			assertSame(spouse, tb.getSpouse());
+			assertThat(tb.getSpouse()).isSameAs(spouse);
 		}
 		sw.stop();
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 6000);
+		assertThat(sw.getTotalTimeMillis() < 6000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 

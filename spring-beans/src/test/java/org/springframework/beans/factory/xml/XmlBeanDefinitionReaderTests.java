@@ -31,10 +31,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ObjectUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rick Evans
@@ -110,19 +108,19 @@ public class XmlBeanDefinitionReaderTests {
 	}
 
 	private void testBeanDefinitions(BeanDefinitionRegistry registry) {
-		assertEquals(24, registry.getBeanDefinitionCount());
-		assertEquals(24, registry.getBeanDefinitionNames().length);
-		assertTrue(Arrays.asList(registry.getBeanDefinitionNames()).contains("rod"));
-		assertTrue(Arrays.asList(registry.getBeanDefinitionNames()).contains("aliased"));
-		assertTrue(registry.containsBeanDefinition("rod"));
-		assertTrue(registry.containsBeanDefinition("aliased"));
-		assertEquals(TestBean.class.getName(), registry.getBeanDefinition("rod").getBeanClassName());
-		assertEquals(TestBean.class.getName(), registry.getBeanDefinition("aliased").getBeanClassName());
-		assertTrue(registry.isAlias("youralias"));
+		assertThat(registry.getBeanDefinitionCount()).isEqualTo(24);
+		assertThat(registry.getBeanDefinitionNames().length).isEqualTo(24);
+		assertThat(Arrays.asList(registry.getBeanDefinitionNames()).contains("rod")).isTrue();
+		assertThat(Arrays.asList(registry.getBeanDefinitionNames()).contains("aliased")).isTrue();
+		assertThat(registry.containsBeanDefinition("rod")).isTrue();
+		assertThat(registry.containsBeanDefinition("aliased")).isTrue();
+		assertThat(registry.getBeanDefinition("rod").getBeanClassName()).isEqualTo(TestBean.class.getName());
+		assertThat(registry.getBeanDefinition("aliased").getBeanClassName()).isEqualTo(TestBean.class.getName());
+		assertThat(registry.isAlias("youralias")).isTrue();
 		String[] aliases = registry.getAliases("aliased");
-		assertEquals(2, aliases.length);
-		assertTrue(ObjectUtils.containsElement(aliases, "myalias"));
-		assertTrue(ObjectUtils.containsElement(aliases, "youralias"));
+		assertThat(aliases.length).isEqualTo(2);
+		assertThat(ObjectUtils.containsElement(aliases, "myalias")).isTrue();
+		assertThat(ObjectUtils.containsElement(aliases, "youralias")).isTrue();
 	}
 
 	@Test
@@ -140,7 +138,7 @@ public class XmlBeanDefinitionReaderTests {
 		Resource resource = new ClassPathResource(resourceName, getClass());
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);
 		TestBean bean = (TestBean) factory.getBean("testBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 	}
 
 }

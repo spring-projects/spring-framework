@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Chris Beams
@@ -323,7 +322,7 @@ public class ExtendedBeanInfoTests {
 
 		assertThat(hasReadMethodForProperty(bi, "foo")).isTrue();
 		assertThat(hasReadMethodForProperty(ebi, "foo")).isTrue();
-		assertEquals(hasWriteMethodForProperty(bi, "foo"), hasWriteMethodForProperty(ebi, "foo"));
+		assertThat(hasWriteMethodForProperty(ebi, "foo")).isEqualTo(hasWriteMethodForProperty(bi, "foo"));
 	}
 
 	@Test
@@ -338,7 +337,7 @@ public class ExtendedBeanInfoTests {
 
 		assertThat(hasIndexedReadMethodForProperty(bi, "foos")).isTrue();
 		assertThat(hasIndexedReadMethodForProperty(ebi, "foos")).isTrue();
-		assertEquals(hasIndexedWriteMethodForProperty(bi, "foos"), hasIndexedWriteMethodForProperty(ebi, "foos"));
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "foos")).isEqualTo(hasIndexedWriteMethodForProperty(bi, "foos"));
 	}
 
 	/**
@@ -849,10 +848,10 @@ public class ExtendedBeanInfoTests {
 
 		// ExtendedBeanInfo needs to behave exactly like BeanInfo...
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
-		assertEquals(hasReadMethod, hasReadMethodForProperty(ebi, "address"));
-		assertEquals(hasWriteMethod, hasWriteMethodForProperty(ebi, "address"));
-		assertEquals(hasIndexedReadMethod, hasIndexedReadMethodForProperty(ebi, "address"));
-		assertEquals(hasIndexedWriteMethod, hasIndexedWriteMethodForProperty(ebi, "address"));
+		assertThat(hasReadMethodForProperty(ebi, "address")).isEqualTo(hasReadMethod);
+		assertThat(hasWriteMethodForProperty(ebi, "address")).isEqualTo(hasWriteMethod);
+		assertThat(hasIndexedReadMethodForProperty(ebi, "address")).isEqualTo(hasIndexedReadMethod);
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "address")).isEqualTo(hasIndexedWriteMethod);
 	}
 
 	@Test

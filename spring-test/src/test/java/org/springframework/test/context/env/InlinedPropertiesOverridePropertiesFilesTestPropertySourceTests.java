@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource} support with
@@ -50,8 +50,8 @@ public class InlinedPropertiesOverridePropertiesFilesTestPropertySourceTests {
 
 	@Test
 	public void inlinedPropertyOverridesValueFromPropertiesFile() {
-		assertEquals("inlined", env.getProperty("explicit"));
-		assertEquals("inlined", this.explicit);
+		assertThat(env.getProperty("explicit")).isEqualTo("inlined");
+		assertThat(this.explicit).isEqualTo("inlined");
 	}
 
 

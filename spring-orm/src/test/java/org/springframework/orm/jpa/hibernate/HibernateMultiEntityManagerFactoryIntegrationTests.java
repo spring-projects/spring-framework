@@ -25,10 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Hibernate-specific JPA tests with multiple EntityManagerFactory instances.
@@ -50,11 +48,12 @@ public class HibernateMultiEntityManagerFactoryIntegrationTests extends Abstract
 
 	@Test
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
-		assertTrue("Must have introduced config interface", this.entityManagerFactory instanceof EntityManagerFactoryInfo);
+		boolean condition = this.entityManagerFactory instanceof EntityManagerFactoryInfo;
+		assertThat(condition).as("Must have introduced config interface").isTrue();
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) this.entityManagerFactory;
-		assertEquals("Drivers", emfi.getPersistenceUnitName());
-		assertNotNull("PersistenceUnitInfo must be available", emfi.getPersistenceUnitInfo());
-		assertNotNull("Raw EntityManagerFactory must be available", emfi.getNativeEntityManagerFactory());
+		assertThat(emfi.getPersistenceUnitName()).isEqualTo("Drivers");
+		assertThat(emfi.getPersistenceUnitInfo()).as("PersistenceUnitInfo must be available").isNotNull();
+		assertThat(emfi.getNativeEntityManagerFactory()).as("Raw EntityManagerFactory must be available").isNotNull();
 	}
 
 	@Test

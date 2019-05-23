@@ -37,11 +37,8 @@ import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ServerWebExchangeMethodArgumentResolver}.
@@ -61,18 +58,18 @@ public class ServerWebExchangeMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerWebExchange.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpRequest.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(HttpMethod.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Locale.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(TimeZone.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(ZoneId.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(UriComponentsBuilder.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(UriBuilder.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(ServerWebExchange.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpRequest.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(ServerHttpResponse.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(HttpMethod.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Locale.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(TimeZone.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(ZoneId.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(UriComponentsBuilder.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(UriBuilder.class))).isTrue();
 
-		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(WebSession.class)));
-		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(WebSession.class))).isFalse();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(String.class))).isFalse();
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.resolver.supportsParameter(this.testMethod.arg(Mono.class, ServerWebExchange.class)))
 			.withMessageStartingWith("ServerWebExchangeMethodArgumentResolver does not support reactive type wrapper");
@@ -90,7 +87,7 @@ public class ServerWebExchangeMethodArgumentResolverTests {
 
 	private void testResolveArgument(MethodParameter parameter, Object expected) {
 		Mono<Object> mono = this.resolver.resolveArgument(parameter, new BindingContext(), this.exchange);
-		assertEquals(expected, mono.block());
+		assertThat(mono.block()).isEqualTo(expected);
 	}
 
 	@Test
@@ -98,9 +95,9 @@ public class ServerWebExchangeMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.arg(UriComponentsBuilder.class);
 		Object value = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block();
 
-		assertNotNull(value);
-		assertEquals(UriComponentsBuilder.class, value.getClass());
-		assertEquals("https://example.org:9999/next", ((UriComponentsBuilder) value).path("/next").toUriString());
+		assertThat(value).isNotNull();
+		assertThat(value.getClass()).isEqualTo(UriComponentsBuilder.class);
+		assertThat(((UriComponentsBuilder) value).path("/next").toUriString()).isEqualTo("https://example.org:9999/next");
 	}
 
 

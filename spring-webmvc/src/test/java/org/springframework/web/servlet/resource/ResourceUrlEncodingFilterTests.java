@@ -29,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@code ResourceUrlEncodingFilter}.
@@ -94,7 +94,7 @@ public class ResourceUrlEncodingFilterTests {
 			request.setRequestURI("/forwarded");
 			request.setContextPath("/");
 			String result = ((HttpServletResponse) res).encodeURL("/context/resources/bar.css");
-			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
+			assertThat(result).isEqualTo("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css");
 		});
 	}
 
@@ -161,7 +161,7 @@ public class ResourceUrlEncodingFilterTests {
 		this.filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> {
 			req.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.urlProvider);
 			String result = ((HttpServletResponse) res).encodeURL(url);
-			assertEquals(expected, result);
+			assertThat(result).isEqualTo(expected);
 		});
 	}
 

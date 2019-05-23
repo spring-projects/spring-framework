@@ -25,8 +25,7 @@ import org.springframework.tests.sample.beans.CustomEnum;
 import org.springframework.tests.sample.beans.GenericBean;
 import org.springframework.web.servlet.support.BindStatus;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -71,9 +70,9 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 		this.tag.setValue("VALUE_1");
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getWriter().toString();
 
@@ -84,11 +83,11 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 	}
 
 	private void assertOptionTagOpened(String output) {
-		assertTrue(output.startsWith("<option"));
+		assertThat(output.startsWith("<option")).isTrue();
 	}
 
 	private void assertOptionTagClosed(String output) {
-		assertTrue(output.endsWith("</option>"));
+		assertThat(output.endsWith("</option>")).isTrue();
 	}
 
 }

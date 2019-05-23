@@ -36,7 +36,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Base class for tests that read or write data buffers with a rule to check
@@ -96,7 +96,7 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 			String value =
 					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
 			DataBufferUtils.release(dataBuffer);
-			assertEquals(expected, value);
+			assertThat(value).isEqualTo(expected);
 		};
 	}
 
@@ -139,7 +139,7 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 						}
 						continue;
 					}
-					assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
+					assertThat(total).as("ByteBuf Leak: " + total + " unreleased allocations").isEqualTo(0);
 				}
 			}
 		}

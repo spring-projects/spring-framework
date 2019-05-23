@@ -51,9 +51,6 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
@@ -94,7 +91,7 @@ public class DispatcherHandlerErrorTests {
 		// SPR-17475
 		AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
 		StepVerifier.create(mono).consumeErrorWith(exceptionRef::set).verify();
-		StepVerifier.create(mono).consumeErrorWith(ex -> assertNotSame(exceptionRef.get(), ex)).verify();
+		StepVerifier.create(mono).consumeErrorWith(ex -> assertThat(ex).isNotSameAs(exceptionRef.get())).verify();
 	}
 
 	@Test
@@ -103,7 +100,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
+				.consumeErrorWith(error -> assertThat(error).isSameAs(EXCEPTION))
 				.verify();
 	}
 
@@ -113,7 +110,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
+				.consumeErrorWith(error -> assertThat(error).isSameAs(EXCEPTION))
 				.verify();
 	}
 
@@ -150,7 +147,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertSame(EXCEPTION, error))
+				.consumeErrorWith(error -> assertThat(error).isSameAs(EXCEPTION))
 				.verify();
 	}
 
@@ -162,7 +159,7 @@ public class DispatcherHandlerErrorTests {
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, handlers);
 		webHandler.handle(exchange).block(Duration.ofSeconds(5));
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exchange.getResponse().getStatusCode());
+		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 

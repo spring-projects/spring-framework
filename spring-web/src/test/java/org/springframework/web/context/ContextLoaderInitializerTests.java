@@ -27,7 +27,7 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test case for {@link AbstractContextLoaderInitializer}.
@@ -55,15 +55,17 @@ public class ContextLoaderInitializerTests {
 	public void register() throws ServletException {
 		initializer.onStartup(servletContext);
 
-		assertTrue(eventListener instanceof ContextLoaderListener);
+		boolean condition1 = eventListener instanceof ContextLoaderListener;
+		assertThat(condition1).isTrue();
 		ContextLoaderListener cll = (ContextLoaderListener) eventListener;
 		cll.contextInitialized(new ServletContextEvent(servletContext));
 
 		WebApplicationContext applicationContext = WebApplicationContextUtils
 				.getRequiredWebApplicationContext(servletContext);
 
-		assertTrue(applicationContext.containsBean(BEAN_NAME));
-		assertTrue(applicationContext.getBean(BEAN_NAME) instanceof MyBean);
+		assertThat(applicationContext.containsBean(BEAN_NAME)).isTrue();
+		boolean condition = applicationContext.getBean(BEAN_NAME) instanceof MyBean;
+		assertThat(condition).isTrue();
 	}
 
 	private class MyMockServletContext extends MockServletContext {

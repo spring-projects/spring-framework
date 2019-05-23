@@ -32,7 +32,7 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based unit test which verifies proper
@@ -135,8 +135,7 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 			logger.debug("Processed  locations: " + ObjectUtils.nullSafeToString(processedLocations));
 		}
 
-		assertArrayEquals("Verifying locations for test [" + this.testClass + "].", this.expectedLocations,
-			processedLocations);
+		assertThat(processedLocations).as("Verifying locations for test [" + this.testClass + "].").isEqualTo(this.expectedLocations);
 	}
 
 }

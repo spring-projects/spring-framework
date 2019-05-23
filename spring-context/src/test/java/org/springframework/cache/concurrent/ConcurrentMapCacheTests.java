@@ -28,10 +28,8 @@ import org.junit.Test;
 import org.springframework.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.core.serializer.support.SerializationDelegate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Costin Leau
@@ -77,14 +75,14 @@ public class ConcurrentMapCacheTests
 
 	@Test
 	public void testIsStoreByReferenceByDefault() {
-		assertFalse(this.cache.isStoreByValue());
+		assertThat(this.cache.isStoreByValue()).isFalse();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSerializer() {
 		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
-		assertTrue(serializeCache.isStoreByValue());
+		assertThat(serializeCache.isStoreByValue()).isTrue();
 
 		Object key = createRandomKey();
 		List<String> content = new ArrayList<>();
@@ -92,8 +90,8 @@ public class ConcurrentMapCacheTests
 		serializeCache.put(key, content);
 		content.remove(0);
 		List<String> entry = (List<String>) serializeCache.get(key).get();
-		assertEquals(3, entry.size());
-		assertEquals("one", entry.get(0));
+		assertThat(entry.size()).isEqualTo(3);
+		assertThat(entry.get(0)).isEqualTo("one");
 	}
 
 	@Test

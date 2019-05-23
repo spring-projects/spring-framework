@@ -23,10 +23,8 @@ import org.junit.Test;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
@@ -39,8 +37,8 @@ public class ResourceArrayPropertyEditorTests {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath:org/springframework/core/io/support/ResourceArrayPropertyEditor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
-		assertNotNull(resources);
-		assertTrue(resources[0].exists());
+		assertThat(resources).isNotNull();
+		assertThat(resources[0].exists()).isTrue();
 	}
 
 	@Test
@@ -52,8 +50,8 @@ public class ResourceArrayPropertyEditorTests {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath*:org/springframework/core/io/support/Resource*Editor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
-		assertNotNull(resources);
-		assertTrue(resources[0].exists());
+		assertThat(resources).isNotNull();
+		assertThat(resources[0].exists()).isTrue();
 	}
 
 	@Test
@@ -63,7 +61,7 @@ public class ResourceArrayPropertyEditorTests {
 		try {
 			editor.setAsText("${test.prop}");
 			Resource[] resources = (Resource[]) editor.getValue();
-			assertEquals("foo", resources[0].getFilename());
+			assertThat(resources[0].getFilename()).isEqualTo("foo");
 		}
 		finally {
 			System.getProperties().remove("test.prop");

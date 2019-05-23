@@ -22,11 +22,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link RequestConditionHolder}.
@@ -44,7 +41,7 @@ public class RequestConditionHolderTests {
 		RequestConditionHolder params2 = new RequestConditionHolder(new ParamsRequestCondition("name2"));
 		RequestConditionHolder expected = new RequestConditionHolder(new ParamsRequestCondition("name1", "name2"));
 
-		assertEquals(expected, params1.combine(params2));
+		assertThat(params1.combine(params2)).isEqualTo(expected);
 	}
 
 	@Test
@@ -52,9 +49,9 @@ public class RequestConditionHolderTests {
 		RequestConditionHolder empty = new RequestConditionHolder(null);
 		RequestConditionHolder notEmpty = new RequestConditionHolder(new ParamsRequestCondition("name"));
 
-		assertSame(empty, empty.combine(empty));
-		assertSame(notEmpty, notEmpty.combine(empty));
-		assertSame(notEmpty, empty.combine(notEmpty));
+		assertThat(empty.combine(empty)).isSameAs(empty);
+		assertThat(notEmpty.combine(empty)).isSameAs(notEmpty);
+		assertThat(empty.combine(notEmpty)).isSameAs(notEmpty);
 	}
 
 	@Test
@@ -72,8 +69,8 @@ public class RequestConditionHolderTests {
 		RequestMethodsRequestCondition expected = new RequestMethodsRequestCondition(RequestMethod.GET);
 
 		RequestConditionHolder holder = custom.getMatchingCondition(this.exchange);
-		assertNotNull(holder);
-		assertEquals(expected,  holder.getCondition());
+		assertThat(holder).isNotNull();
+		assertThat(holder.getCondition()).isEqualTo(expected);
 	}
 
 	@Test
@@ -81,13 +78,13 @@ public class RequestConditionHolderTests {
 		RequestMethodsRequestCondition rm = new RequestMethodsRequestCondition(RequestMethod.POST);
 		RequestConditionHolder custom = new RequestConditionHolder(rm);
 
-		assertNull(custom.getMatchingCondition(this.exchange));
+		assertThat(custom.getMatchingCondition(this.exchange)).isNull();
 	}
 
 	@Test
 	public void matchEmpty() {
 		RequestConditionHolder empty = new RequestConditionHolder(null);
-		assertSame(empty, empty.getMatchingCondition(this.exchange));
+		assertThat(empty.getMatchingCondition(this.exchange)).isSameAs(empty);
 	}
 
 	@Test
@@ -95,8 +92,8 @@ public class RequestConditionHolderTests {
 		RequestConditionHolder params11 = new RequestConditionHolder(new ParamsRequestCondition("1"));
 		RequestConditionHolder params12 = new RequestConditionHolder(new ParamsRequestCondition("1", "2"));
 
-		assertEquals(1, params11.compareTo(params12, this.exchange));
-		assertEquals(-1, params12.compareTo(params11, this.exchange));
+		assertThat(params11.compareTo(params12, this.exchange)).isEqualTo(1);
+		assertThat(params12.compareTo(params11, this.exchange)).isEqualTo(-1);
 	}
 
 	@Test
@@ -105,9 +102,9 @@ public class RequestConditionHolderTests {
 		RequestConditionHolder empty2 = new RequestConditionHolder(null);
 		RequestConditionHolder notEmpty = new RequestConditionHolder(new ParamsRequestCondition("name"));
 
-		assertEquals(0, empty.compareTo(empty2, this.exchange));
-		assertEquals(-1, notEmpty.compareTo(empty, this.exchange));
-		assertEquals(1, empty.compareTo(notEmpty, this.exchange));
+		assertThat(empty.compareTo(empty2, this.exchange)).isEqualTo(0);
+		assertThat(notEmpty.compareTo(empty, this.exchange)).isEqualTo(-1);
+		assertThat(empty.compareTo(notEmpty, this.exchange)).isEqualTo(1);
 	}
 
 	@Test

@@ -18,8 +18,7 @@ package org.springframework.core;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -33,12 +32,12 @@ public class SimpleAliasRegistryTests {
 		registry.registerAlias("testAlias", "testAlias2");
 		registry.registerAlias("testAlias2", "testAlias3");
 
-		assertTrue(registry.hasAlias("test", "testAlias"));
-		assertTrue(registry.hasAlias("test", "testAlias2"));
-		assertTrue(registry.hasAlias("test", "testAlias3"));
-		assertSame("test", registry.canonicalName("testAlias"));
-		assertSame("test", registry.canonicalName("testAlias2"));
-		assertSame("test", registry.canonicalName("testAlias3"));
+		assertThat(registry.hasAlias("test", "testAlias")).isTrue();
+		assertThat(registry.hasAlias("test", "testAlias2")).isTrue();
+		assertThat(registry.hasAlias("test", "testAlias3")).isTrue();
+		assertThat(registry.canonicalName("testAlias")).isSameAs("test");
+		assertThat(registry.canonicalName("testAlias2")).isSameAs("test");
+		assertThat(registry.canonicalName("testAlias3")).isSameAs("test");
 	}
 
 	@Test  // SPR-17191
@@ -46,19 +45,19 @@ public class SimpleAliasRegistryTests {
 		SimpleAliasRegistry registry = new SimpleAliasRegistry();
 		registry.registerAlias("name", "alias_a");
 		registry.registerAlias("name", "alias_b");
-		assertTrue(registry.hasAlias("name", "alias_a"));
-		assertTrue(registry.hasAlias("name", "alias_b"));
+		assertThat(registry.hasAlias("name", "alias_a")).isTrue();
+		assertThat(registry.hasAlias("name", "alias_b")).isTrue();
 
 		registry.registerAlias("real_name", "name");
-		assertTrue(registry.hasAlias("real_name", "name"));
-		assertTrue(registry.hasAlias("real_name", "alias_a"));
-		assertTrue(registry.hasAlias("real_name", "alias_b"));
+		assertThat(registry.hasAlias("real_name", "name")).isTrue();
+		assertThat(registry.hasAlias("real_name", "alias_a")).isTrue();
+		assertThat(registry.hasAlias("real_name", "alias_b")).isTrue();
 
 		registry.registerAlias("name", "alias_c");
-		assertTrue(registry.hasAlias("real_name", "name"));
-		assertTrue(registry.hasAlias("real_name", "alias_a"));
-		assertTrue(registry.hasAlias("real_name", "alias_b"));
-		assertTrue(registry.hasAlias("real_name", "alias_c"));
+		assertThat(registry.hasAlias("real_name", "name")).isTrue();
+		assertThat(registry.hasAlias("real_name", "alias_a")).isTrue();
+		assertThat(registry.hasAlias("real_name", "alias_b")).isTrue();
+		assertThat(registry.hasAlias("real_name", "alias_c")).isTrue();
 	}
 
 }

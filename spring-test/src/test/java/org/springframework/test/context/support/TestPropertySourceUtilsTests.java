@@ -30,12 +30,10 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -160,7 +158,7 @@ public class TestPropertySourceUtilsTests {
 
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertEquals(0, propertySources.size());
+		assertThat(propertySources.size()).isEqualTo(0);
 
 		String pair = "key = value";
 		ByteArrayResource resource = new ByteArrayResource(pair.getBytes(), "from inlined property: " + pair);
@@ -168,8 +166,8 @@ public class TestPropertySourceUtilsTests {
 		given(resourceLoader.getResource(anyString())).willReturn(resource);
 
 		addPropertiesFilesToEnvironment(environment, resourceLoader, FOO_LOCATIONS);
-		assertEquals(1, propertySources.size());
-		assertEquals("value", environment.getProperty("key"));
+		assertThat(propertySources.size()).isEqualTo(1);
+		assertThat(environment.getProperty("key")).isEqualTo("value");
 	}
 
 	@Test
@@ -220,10 +218,10 @@ public class TestPropertySourceUtilsTests {
 		ConfigurableEnvironment environment = new MockEnvironment();
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertEquals(0, propertySources.size());
+		assertThat(propertySources.size()).isEqualTo(0);
 		addInlinedPropertiesToEnvironment(environment, asArray("  "));
-		assertEquals(1, propertySources.size());
-		assertEquals(0, ((Map) propertySources.iterator().next().getSource()).size());
+		assertThat(propertySources.size()).isEqualTo(1);
+		assertThat(((Map) propertySources.iterator().next().getSource()).size()).isEqualTo(0);
 	}
 
 	@Test
@@ -238,9 +236,9 @@ public class TestPropertySourceUtilsTests {
 			String[] expectedProperties) {
 
 		MergedTestPropertySources mergedPropertySources = buildMergedTestPropertySources(testClass);
-		assertNotNull(mergedPropertySources);
-		assertArrayEquals(expectedLocations, mergedPropertySources.getLocations());
-		assertArrayEquals(expectedProperties, mergedPropertySources.getProperties());
+		assertThat(mergedPropertySources).isNotNull();
+		assertThat(mergedPropertySources.getLocations()).isEqualTo(expectedLocations);
+		assertThat(mergedPropertySources.getProperties()).isEqualTo(expectedProperties);
 	}
 
 

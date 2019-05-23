@@ -31,10 +31,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with
@@ -64,22 +61,21 @@ public class MapMethodProcessorTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.processor.supportsParameter(
-				this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class)));
-		assertFalse(this.processor.supportsParameter(
-				this.resolvable.annotPresent(RequestBody.class).arg(Map.class, String.class, Object.class)));
+		assertThat(this.processor.supportsParameter(
+				this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class))).isTrue();
+		assertThat(this.processor.supportsParameter(
+				this.resolvable.annotPresent(RequestBody.class).arg(Map.class, String.class, Object.class))).isFalse();
 	}
 
 	@Test
 	public void supportsReturnType() {
-		assertTrue(this.processor.supportsReturnType(this.resolvable.returnType()));
+		assertThat(this.processor.supportsReturnType(this.resolvable.returnType())).isTrue();
 	}
 
 	@Test
 	public void resolveArgumentValue() throws Exception {
 		MethodParameter param = this.resolvable.annotNotPresent().arg(Map.class, String.class, Object.class);
-		assertSame(this.mavContainer.getModel(),
-				this.processor.resolveArgument(param, this.mavContainer, this.webRequest, null));
+		assertThat(this.processor.resolveArgument(param, this.mavContainer, this.webRequest, null)).isSameAs(this.mavContainer.getModel());
 	}
 
 	@Test
@@ -90,8 +86,8 @@ public class MapMethodProcessorTests {
 		this.processor.handleReturnValue(
 				returnValue , this.resolvable.returnType(), this.mavContainer, this.webRequest);
 
-		assertEquals("value1", mavContainer.getModel().get("attr1"));
-		assertEquals("value2", mavContainer.getModel().get("attr2"));
+		assertThat(mavContainer.getModel().get("attr1")).isEqualTo("value1");
+		assertThat(mavContainer.getModel().get("attr2")).isEqualTo("value2");
 	}
 
 

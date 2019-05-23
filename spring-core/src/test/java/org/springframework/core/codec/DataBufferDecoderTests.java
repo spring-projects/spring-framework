@@ -27,9 +27,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
@@ -48,12 +46,12 @@ public class DataBufferDecoderTests extends AbstractDecoderTestCase<DataBufferDe
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(DataBuffer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(DataBuffer.class),
-				MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(DataBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isFalse();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(DataBuffer.class),
+				MimeTypeUtils.APPLICATION_JSON)).isTrue();
 	}
 
 	@Override
@@ -87,7 +85,7 @@ public class DataBufferDecoderTests extends AbstractDecoderTestCase<DataBufferDe
 		return actual -> {
 			byte[] actualBytes = new byte[actual.readableByteCount()];
 			actual.read(actualBytes);
-			assertArrayEquals(expected, actualBytes);
+			assertThat(actualBytes).isEqualTo(expected);
 
 			DataBufferUtils.release(actual);
 		};

@@ -35,8 +35,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -54,7 +53,7 @@ public class DefaultMultipartMessageReaderTests extends AbstractDataBufferAlloca
 
 	@Test
 	public void canRead() {
-		assertTrue(this.reader.canRead(forClass(Part.class), MediaType.MULTIPART_FORM_DATA));
+		assertThat(this.reader.canRead(forClass(Part.class), MediaType.MULTIPART_FORM_DATA)).isTrue();
 	}
 
 	@Test
@@ -66,7 +65,7 @@ public class DefaultMultipartMessageReaderTests extends AbstractDataBufferAlloca
 
 		StepVerifier.create(result)
 				.consumeNextWith(part -> {
-					assertTrue(part.headers().isEmpty());
+					assertThat(part.headers().isEmpty()).isTrue();
 					part.content().subscribe(DataBufferUtils::release);
 				})
 				.verifyComplete();
@@ -129,18 +128,20 @@ public class DefaultMultipartMessageReaderTests extends AbstractDataBufferAlloca
 	}
 
 	private static void testBrowserFormField(Part part, String name, String value) {
-		assertTrue(part instanceof FormFieldPart);
-		assertEquals(name, part.name());
+		boolean condition = part instanceof FormFieldPart;
+		assertThat(condition).isTrue();
+		assertThat(part.name()).isEqualTo(name);
 		FormFieldPart formField = (FormFieldPart) part;
-		assertEquals(value, formField.value());
+		assertThat(formField.value()).isEqualTo(value);
 	}
 
 	private static void testBrowserFile(Part part, String name, String filename, String contents) {
 		try {
-			assertTrue(part instanceof FilePart);
-			assertEquals(name, part.name());
+			boolean condition = part instanceof FilePart;
+			assertThat(condition).isTrue();
+			assertThat(part.name()).isEqualTo(name);
 			FilePart file = (FilePart) part;
-			assertEquals(filename, file.filename());
+			assertThat(file.filename()).isEqualTo(filename);
 
 			Path tempFile = Files.createTempFile("DefaultMultipartMessageReaderTests", null);
 
@@ -170,7 +171,7 @@ public class DefaultMultipartMessageReaderTests extends AbstractDataBufferAlloca
 	private static void verifyContents(Path tempFile, String contents) {
 		try {
 			String result = String.join("", Files.readAllLines(tempFile));
-			assertEquals(contents, result);
+			assertThat(result).isEqualTo(contents);
 		}
 		catch (IOException ex) {
 			throw new AssertionError(ex);

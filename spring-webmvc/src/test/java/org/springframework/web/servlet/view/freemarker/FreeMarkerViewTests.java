@@ -44,11 +44,9 @@ import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -111,7 +109,7 @@ public class FreeMarkerViewTests {
 		model.put("myattr", "myvalue");
 		fv.render(model, request, response);
 
-		assertEquals(AbstractView.DEFAULT_CONTENT_TYPE, response.getContentType());
+		assertThat(response.getContentType()).isEqualTo(AbstractView.DEFAULT_CONTENT_TYPE);
 	}
 
 	@Test
@@ -143,7 +141,7 @@ public class FreeMarkerViewTests {
 		model.put("myattr", "myvalue");
 		fv.render(model, request, response);
 
-		assertEquals("myContentType", response.getContentType());
+		assertThat(response.getContentType()).isEqualTo("myContentType");
 	}
 
 	@Test
@@ -163,19 +161,19 @@ public class FreeMarkerViewTests {
 		vr.setApplicationContext(wac);
 
 		View view = vr.resolveViewName("test", Locale.CANADA);
-		assertEquals("Correct view class", FreeMarkerView.class, view.getClass());
-		assertEquals("Correct URL", "prefix_test_suffix", ((FreeMarkerView) view).getUrl());
+		assertThat(view.getClass()).as("Correct view class").isEqualTo(FreeMarkerView.class);
+		assertThat(((FreeMarkerView) view).getUrl()).as("Correct URL").isEqualTo("prefix_test_suffix");
 
 		view = vr.resolveViewName("non-existing", Locale.CANADA);
-		assertNull(view);
+		assertThat(view).isNull();
 
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
-		assertEquals("Correct view class", RedirectView.class, view.getClass());
-		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+		assertThat(view.getClass()).as("Correct view class").isEqualTo(RedirectView.class);
+		assertThat(((RedirectView) view).getUrl()).as("Correct URL").isEqualTo("myUrl");
 
 		view = vr.resolveViewName("forward:myUrl", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
-		assertEquals("Correct URL", "myUrl", ((InternalResourceView) view).getUrl());
+		assertThat(view.getClass()).as("Correct view class").isEqualTo(InternalResourceView.class);
+		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("myUrl");
 	}
 
 
@@ -191,10 +189,11 @@ public class FreeMarkerViewTests {
 				return new Template(name, new StringReader("test"), this) {
 					@Override
 					public void process(Object model, Writer writer) throws TemplateException, IOException {
-						assertEquals(Locale.US, locale);
-						assertTrue(model instanceof AllHttpScopesHashModel);
+						assertThat(locale).isEqualTo(Locale.US);
+						boolean condition = model instanceof AllHttpScopesHashModel;
+						assertThat(condition).isTrue();
 						AllHttpScopesHashModel fmModel = (AllHttpScopesHashModel) model;
-						assertEquals("myvalue", fmModel.get("myattr").toString());
+						assertThat(fmModel.get("myattr").toString()).isEqualTo("myvalue");
 					}
 				};
 			}

@@ -32,8 +32,7 @@ import org.springframework.test.context.TestContextTestUtils;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.cache.ContextCacheTestUtils.assertContextCacheStatistics;
 
 /**
@@ -58,7 +57,7 @@ public class ContextCacheTests {
 	}
 
 	private void assertParentContextCount(int expected) {
-		assertEquals("parent context count", expected, contextCache.getParentContextCount());
+		assertThat(contextCache.getParentContextCount()).as("parent context count").isEqualTo(expected);
 	}
 
 	private MergedContextConfiguration getMergedContextConfiguration(TestContext testContext) {
@@ -71,7 +70,7 @@ public class ContextCacheTests {
 	}
 
 	private void loadCtxAndAssertStats(Class<?> testClass, int expectedSize, int expectedHitCount, int expectedMissCount) {
-		assertNotNull(loadContext(testClass));
+		assertThat(loadContext(testClass)).isNotNull();
 		assertContextCacheStatistics(contextCache, testClass.getName(), expectedSize, expectedHitCount,
 			expectedMissCount);
 	}

@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.test.transaction.TransactionTestUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that ensure that <em>primary</em> data sources are
@@ -82,8 +82,7 @@ public class PrimaryDataSourceTests {
 	@Sql("data.sql")
 	public void dataSourceTest() {
 		TransactionTestUtils.assertInTransaction(false);
-		assertEquals("Number of rows in the 'user' table.", 1,
-			JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user"));
+		assertThat(JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user")).as("Number of rows in the 'user' table.").isEqualTo(1);
 	}
 
 }

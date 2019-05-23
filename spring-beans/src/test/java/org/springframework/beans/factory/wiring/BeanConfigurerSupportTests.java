@@ -23,9 +23,8 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -54,7 +53,7 @@ public class BeanConfigurerSupportTests {
 		configurer.setBeanFactory(new DefaultListableBeanFactory());
 		configurer.configureBean(beanInstance);
 		verify(resolver).resolveWiringInfo(beanInstance);
-		assertNull(beanInstance.getName());
+		assertThat(beanInstance.getName()).isNull();
 	}
 
 	@Test
@@ -62,7 +61,7 @@ public class BeanConfigurerSupportTests {
 		TestBean beanInstance = new TestBean();
 		BeanConfigurerSupport configurer = new StubBeanConfigurerSupport();
 		configurer.configureBean(beanInstance);
-		assertNull(beanInstance.getName());
+		assertThat(beanInstance.getName()).isNull();
 	}
 
 	@Test
@@ -78,7 +77,7 @@ public class BeanConfigurerSupportTests {
 		configurer.setBeanFactory(factory);
 		configurer.afterPropertiesSet();
 		configurer.configureBean(beanInstance);
-		assertEquals("Bean is evidently not being configured (for some reason)", "Harriet Wheeler", beanInstance.getName());
+		assertThat(beanInstance.getName()).as("Bean is evidently not being configured (for some reason)").isEqualTo("Harriet Wheeler");
 	}
 
 	@Test
@@ -98,7 +97,7 @@ public class BeanConfigurerSupportTests {
 		configurer.setBeanFactory(factory);
 		configurer.setBeanWiringInfoResolver(resolver);
 		configurer.configureBean(beanInstance);
-		assertEquals("Bean is evidently not being configured (for some reason)", "David Gavurin", beanInstance.getSpouse().getName());
+		assertThat(beanInstance.getSpouse().getName()).as("Bean is evidently not being configured (for some reason)").isEqualTo("David Gavurin");
 	}
 
 	@Test
@@ -118,7 +117,7 @@ public class BeanConfigurerSupportTests {
 		configurer.setBeanFactory(factory);
 		configurer.setBeanWiringInfoResolver(resolver);
 		configurer.configureBean(beanInstance);
-		assertEquals("Bean is evidently not being configured (for some reason)", "David Gavurin", beanInstance.getSpouse().getName());
+		assertThat(beanInstance.getSpouse().getName()).as("Bean is evidently not being configured (for some reason)").isEqualTo("David Gavurin");
 	}
 
 

@@ -26,8 +26,8 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertTrue;
 
 /**
  * SpelEvaluationException tests (SPR-16544).
@@ -72,7 +72,7 @@ public class SpelExceptionTests {
 			}
 		});
 		boolean result = spelExpression.getValue(ctx, Boolean.class);
-		assertTrue(result);
+		assertThat(result).isTrue();
 
 	}
 
@@ -111,7 +111,7 @@ public class SpelExceptionTests {
 			}
 		});
 		boolean result = spelExpression.getValue(ctx, Boolean.class);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class SpelExceptionTests {
 			}
 		});
 		boolean result = spelExpression.getValue(ctx, Boolean.class);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
@@ -156,7 +156,7 @@ public class SpelExceptionTests {
 			}
 		});
 		boolean result = spelExpression.getValue(ctx, Boolean.class);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 }

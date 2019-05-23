@@ -22,10 +22,8 @@ import org.junit.Test;
 
 import org.springframework.transaction.TransactionDefinition;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for {@link TransactionAttributeSourceEditor}.
@@ -47,7 +45,7 @@ public class TransactionAttributeSourceEditorTests {
 		TransactionAttributeSource tas = (TransactionAttributeSource) editor.getValue();
 
 		Method m = Object.class.getMethod("hashCode");
-		assertNull(tas.getTransactionAttribute(m, null));
+		assertThat(tas.getTransactionAttribute(m, null)).isNull();
 	}
 
 	@Test
@@ -109,12 +107,12 @@ public class TransactionAttributeSourceEditorTests {
 	private void checkTransactionProperties(TransactionAttributeSource tas, Method method, int propagationBehavior) {
 		TransactionAttribute ta = tas.getTransactionAttribute(method, null);
 		if (propagationBehavior >= 0) {
-			assertNotNull(ta);
-			assertEquals(TransactionDefinition.ISOLATION_DEFAULT, ta.getIsolationLevel());
-			assertEquals(propagationBehavior, ta.getPropagationBehavior());
+			assertThat(ta).isNotNull();
+			assertThat(ta.getIsolationLevel()).isEqualTo(TransactionDefinition.ISOLATION_DEFAULT);
+			assertThat(ta.getPropagationBehavior()).isEqualTo(propagationBehavior);
 		}
 		else {
-			assertNull(ta);
+			assertThat(ta).isNull();
 		}
 	}
 

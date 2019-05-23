@@ -32,10 +32,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -65,13 +61,13 @@ public class ExtractingResponseErrorHandlerTests {
 	@Test
 	public void hasError() throws Exception {
 		given(this.response.getRawStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT.value());
-		assertTrue(this.errorHandler.hasError(this.response));
+		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
 		given(this.response.getRawStatusCode()).willReturn(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		assertTrue(this.errorHandler.hasError(this.response));
+		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
 		given(this.response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		assertFalse(this.errorHandler.hasError(this.response));
+		assertThat(this.errorHandler.hasError(this.response)).isFalse();
 	}
 
 	@Test
@@ -80,13 +76,13 @@ public class ExtractingResponseErrorHandlerTests {
 				.singletonMap(HttpStatus.Series.CLIENT_ERROR, null));
 
 		given(this.response.getRawStatusCode()).willReturn(HttpStatus.I_AM_A_TEAPOT.value());
-		assertTrue(this.errorHandler.hasError(this.response));
+		assertThat(this.errorHandler.hasError(this.response)).isTrue();
 
 		given(this.response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
-		assertFalse(this.errorHandler.hasError(this.response));
+		assertThat(this.errorHandler.hasError(this.response)).isFalse();
 
 		given(this.response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		assertFalse(this.errorHandler.hasError(this.response));
+		assertThat(this.errorHandler.hasError(this.response)).isFalse();
 	}
 
 	@Test
@@ -135,8 +131,8 @@ public class ExtractingResponseErrorHandlerTests {
 		assertThatExceptionOfType(HttpClientErrorException.class).isThrownBy(() ->
 				this.errorHandler.handleError(this.response))
 			.satisfies(ex -> {
-				assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-				assertArrayEquals(body, ex.getResponseBodyAsByteArray());
+				assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+				assertThat(ex.getResponseBodyAsByteArray()).isEqualTo(body);
 			});
 	}
 

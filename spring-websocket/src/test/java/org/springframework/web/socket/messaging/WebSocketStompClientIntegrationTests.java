@@ -49,7 +49,6 @@ import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrate
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link WebSocketStompClient}.
@@ -119,7 +118,7 @@ public class WebSocketStompClientIntegrationTests {
 		TestHandler testHandler = new TestHandler("/topic/foo", "payload");
 		this.stompClient.connect(url, testHandler);
 
-		assertTrue(testHandler.awaitForMessageCount(1, 5000));
+		assertThat(testHandler.awaitForMessageCount(1, 5000)).isTrue();
 		assertThat(testHandler.getReceived()).containsExactly("payload");
 	}
 

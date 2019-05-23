@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -37,7 +37,7 @@ public class BootstrapWithInterfaceTests implements BootstrapWithTestInterface {
 
 	@Test
 	public void injectedBean() {
-		assertEquals("foo", foo);
+		assertThat(foo).isEqualTo("foo");
 	}
 
 }

@@ -22,8 +22,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.cors.CorsConfiguration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link UrlBasedCorsConfigurationSource}.
@@ -40,7 +39,7 @@ public class UrlBasedCorsConfigurationSourceTests {
 	@Test
 	public void empty() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/bar/test.html"));
-		assertNull(this.configSource.getCorsConfiguration(exchange));
+		assertThat(this.configSource.getCorsConfiguration(exchange)).isNull();
 	}
 
 	@Test
@@ -49,10 +48,10 @@ public class UrlBasedCorsConfigurationSourceTests {
 		this.configSource.registerCorsConfiguration("/bar/**", config);
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo/test.html"));
-		assertNull(this.configSource.getCorsConfiguration(exchange));
+		assertThat(this.configSource.getCorsConfiguration(exchange)).isNull();
 
 		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/bar/test.html"));
-		assertEquals(config, this.configSource.getCorsConfiguration(exchange));
+		assertThat(this.configSource.getCorsConfiguration(exchange)).isEqualTo(config);
 	}
 
 }

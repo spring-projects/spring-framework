@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.test.context.TestExecutionListeners;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Verifies support for JUnit 4.7 {@link Rule Rules} in conjunction with the
@@ -44,11 +44,11 @@ public class SpringJUnit47ClassRunnerRuleTests {
 
 	@Test
 	public void testA() {
-		assertEquals("testA", name.getMethodName());
+		assertThat(name.getMethodName()).isEqualTo("testA");
 	}
 
 	@Test
 	public void testB() {
-		assertEquals("testB", name.getMethodName());
+		assertThat(name.getMethodName()).isEqualTo("testB");
 	}
 }

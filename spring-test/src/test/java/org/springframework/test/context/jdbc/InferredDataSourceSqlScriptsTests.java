@@ -35,7 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
@@ -77,7 +77,7 @@ public class InferredDataSourceSqlScriptsTests {
 		Collections.sort(expected);
 		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
 		Collections.sort(actual);
-		assertEquals("Users in database;", expected, actual);
+		assertThat(actual).as("Users in database;").isEqualTo(expected);
 	}
 
 

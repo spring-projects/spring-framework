@@ -59,9 +59,6 @@ import static java.time.Instant.ofEpochMilli;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -172,20 +169,19 @@ public class HttpEntityMethodProcessorMockTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("HttpEntity parameter not supported", processor.supportsParameter(paramHttpEntity));
-		assertTrue("RequestEntity parameter not supported", processor.supportsParameter(paramRequestEntity));
-		assertFalse("ResponseEntity parameter supported", processor.supportsParameter(paramResponseEntity));
-		assertFalse("non-entity parameter supported", processor.supportsParameter(paramInt));
+		assertThat(processor.supportsParameter(paramHttpEntity)).as("HttpEntity parameter not supported").isTrue();
+		assertThat(processor.supportsParameter(paramRequestEntity)).as("RequestEntity parameter not supported").isTrue();
+		assertThat(processor.supportsParameter(paramResponseEntity)).as("ResponseEntity parameter supported").isFalse();
+		assertThat(processor.supportsParameter(paramInt)).as("non-entity parameter supported").isFalse();
 	}
 
 	@Test
 	public void supportsReturnType() {
-		assertTrue("ResponseEntity return type not supported", processor.supportsReturnType(returnTypeResponseEntity));
-		assertTrue("HttpEntity return type not supported", processor.supportsReturnType(returnTypeHttpEntity));
-		assertTrue("Custom HttpEntity subclass not supported", processor.supportsReturnType(returnTypeHttpEntitySubclass));
-		assertFalse("RequestEntity parameter supported",
-				processor.supportsReturnType(paramRequestEntity));
-		assertFalse("non-ResponseBody return type supported", processor.supportsReturnType(returnTypeInt));
+		assertThat(processor.supportsReturnType(returnTypeResponseEntity)).as("ResponseEntity return type not supported").isTrue();
+		assertThat(processor.supportsReturnType(returnTypeHttpEntity)).as("HttpEntity return type not supported").isTrue();
+		assertThat(processor.supportsReturnType(returnTypeHttpEntitySubclass)).as("Custom HttpEntity subclass not supported").isTrue();
+		assertThat(processor.supportsReturnType(paramRequestEntity)).as("RequestEntity parameter supported").isFalse();
+		assertThat(processor.supportsReturnType(returnTypeInt)).as("non-ResponseBody return type supported").isFalse();
 	}
 
 	@Test
@@ -201,9 +197,9 @@ public class HttpEntityMethodProcessorMockTests {
 
 		Object result = processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
 
-		assertTrue(result instanceof HttpEntity);
-		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
-		assertEquals("Invalid argument", body, ((HttpEntity<?>) result).getBody());
+		assertThat(result instanceof HttpEntity).isTrue();
+		assertThat(mavContainer.isRequestHandled()).as("The requestHandled flag shouldn't change").isFalse();
+		assertThat(((HttpEntity<?>) result).getBody()).as("Invalid argument").isEqualTo(body);
 	}
 
 	@Test
@@ -223,14 +219,14 @@ public class HttpEntityMethodProcessorMockTests {
 
 		Object result = processor.resolveArgument(paramRequestEntity, mavContainer, webRequest, null);
 
-		assertTrue(result instanceof RequestEntity);
-		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
+		assertThat(result instanceof RequestEntity).isTrue();
+		assertThat(mavContainer.isRequestHandled()).as("The requestHandled flag shouldn't change").isFalse();
 		RequestEntity<?> requestEntity = (RequestEntity<?>) result;
-		assertEquals("Invalid method", HttpMethod.GET, requestEntity.getMethod());
+		assertThat(requestEntity.getMethod()).as("Invalid method").isEqualTo(HttpMethod.GET);
 		// using default port (which is 80), so do not need to append the port (-1 means ignore)
 		URI uri = new URI("http", null, "www.example.com", -1, "/path", null, null);
-		assertEquals("Invalid url", uri, requestEntity.getUrl());
-		assertEquals("Invalid argument", body, requestEntity.getBody());
+		assertThat(requestEntity.getUrl()).as("Invalid url").isEqualTo(uri);
+		assertThat(requestEntity.getBody()).as("Invalid argument").isEqualTo(body);
 	}
 
 	@Test
@@ -264,7 +260,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 		verify(stringHttpMessageConverter).write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 	}
 
@@ -278,7 +274,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 		verify(stringHttpMessageConverter).write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
@@ -300,7 +296,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 		verify(stringHttpMessageConverter).write(eq("Foo"), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
 	}
 
@@ -352,8 +348,8 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals("headerValue", servletResponse.getHeader("headerName"));
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(servletResponse.getHeader("headerName")).isEqualTo("headerValue");
 	}
 
 	@Test
@@ -367,8 +363,8 @@ public class HttpEntityMethodProcessorMockTests {
 
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
 		verify(stringHttpMessageConverter).write(eq("body"), eq(TEXT_PLAIN), outputMessage.capture());
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals("headerValue", outputMessage.getValue().getHeaders().get("header").get(0));
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(outputMessage.getValue().getHeaders().get("header").get(0)).isEqualTo("headerValue");
 	}
 
 	@Test
@@ -525,7 +521,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		then(resourceMessageConverter).should(times(1)).write(
 				any(ByteArrayResource.class), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		assertEquals(200, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
 	}
 
 	@Test
@@ -542,7 +538,7 @@ public class HttpEntityMethodProcessorMockTests {
 		then(resourceRegionMessageConverter).should(times(1)).write(
 				anyCollection(), eq(APPLICATION_OCTET_STREAM),
 				argThat(outputMessage -> "bytes".equals(outputMessage.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES))));
-		assertEquals(206, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(206);
 	}
 
 	@Test
@@ -558,7 +554,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		then(resourceRegionMessageConverter).should(never()).write(
 				anyCollection(), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		assertEquals(416, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(416);
 	}
 
 	@Test //SPR-16754
@@ -574,7 +570,7 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
 		then(resourceMessageConverter).should(times(1)).write(
 				any(InputStreamResource.class), eq(APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		assertEquals(200, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
 		assertThat(servletResponse.getHeader(HttpHeaders.ACCEPT_RANGES)).isNull();
 	}
 
@@ -591,7 +587,7 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityResource, mavContainer, webRequest);
 
 		then(resourceRegionMessageConverter).should(never()).write(anyCollection(), any(), any());
-		assertEquals(206, servletResponse.getStatus());
+		assertThat(servletResponse.getStatus()).isEqualTo(206);
 	}
 
 	@Test  //SPR-14767
@@ -670,8 +666,8 @@ public class HttpEntityMethodProcessorMockTests {
 		initStringMessageConversion(TEXT_PLAIN);
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(Arrays.asList(expected), servletResponse.getHeaders("Vary"));
+		assertThat(mavContainer.isRequestHandled()).isTrue();
+		assertThat(servletResponse.getHeaders("Vary")).isEqualTo(Arrays.asList(expected));
 		verify(stringHttpMessageConverter).write(eq("Foo"), eq(TEXT_PLAIN), isA(HttpOutputMessage.class));
 	}
 
@@ -689,21 +685,21 @@ public class HttpEntityMethodProcessorMockTests {
 	private void assertConditionalResponse(HttpStatus status, String body, String etag, long lastModified)
 			throws IOException {
 
-		assertEquals(status.value(), servletResponse.getStatus());
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(servletResponse.getStatus()).isEqualTo(status.value());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 		if (body != null) {
 			assertResponseBody(body);
 		}
 		else {
-			assertEquals(0, servletResponse.getContentAsByteArray().length);
+			assertThat(servletResponse.getContentAsByteArray().length).isEqualTo(0);
 		}
 		if (etag != null) {
-			assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
-			assertEquals(etag, servletResponse.getHeader(HttpHeaders.ETAG));
+			assertThat(servletResponse.getHeaderValues(HttpHeaders.ETAG).size()).isEqualTo(1);
+			assertThat(servletResponse.getHeader(HttpHeaders.ETAG)).isEqualTo(etag);
 		}
 		if (lastModified != -1) {
-			assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
-			assertEquals(lastModified / 1000, servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000);
+			assertThat(servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size()).isEqualTo(1);
+			assertThat((servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000)).isEqualTo((lastModified / 1000));
 		}
 	}
 

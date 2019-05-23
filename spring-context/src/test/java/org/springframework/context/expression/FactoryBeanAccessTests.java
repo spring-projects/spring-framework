@@ -29,8 +29,8 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for expressions accessing beans and factory beans.
@@ -44,12 +44,12 @@ public class FactoryBeanAccessTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.setBeanResolver(new SimpleBeanResolver());
 		Expression expr = new SpelExpressionParser().parseRaw("@car.colour");
-		assertEquals("red", expr.getValue(context));
+		assertThat(expr.getValue(context)).isEqualTo("red");
 		expr = new SpelExpressionParser().parseRaw("&car.class.name");
-		assertEquals(CarFactoryBean.class.getName(), expr.getValue(context));
+		assertThat(expr.getValue(context)).isEqualTo(CarFactoryBean.class.getName());
 
 		expr = new SpelExpressionParser().parseRaw("@boat.colour");
-		assertEquals("blue",expr.getValue(context));
+		assertThat(expr.getValue(context)).isEqualTo("blue");
 		Expression notFactoryExpr = new SpelExpressionParser().parseRaw("&boat.class.name");
 		assertThatExceptionOfType(BeanIsNotAFactoryException.class).isThrownBy(() ->
 				notFactoryExpr.getValue(context));

@@ -44,11 +44,8 @@ import org.springframework.messaging.rsocket.RSocketRequester.ResponseSpec;
 import org.springframework.util.MimeTypeUtils;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link DefaultRSocketRequester}.
@@ -97,9 +94,9 @@ public class DefaultRSocketRequesterTests {
 	private void testSinglePayload(Function<RequestSpec, ResponseSpec> mapper, String expectedValue) {
 		mapper.apply(this.requester.route("toA")).send().block(Duration.ofSeconds(5));
 
-		assertEquals("fireAndForget", this.rsocket.getSavedMethodName());
-		assertEquals("toA", this.rsocket.getSavedPayload().getMetadataUtf8());
-		assertEquals(expectedValue, this.rsocket.getSavedPayload().getDataUtf8());
+		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("fireAndForget");
+		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("toA");
+		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEqualTo(expectedValue);
 	}
 
 	@Test
@@ -122,20 +119,18 @@ public class DefaultRSocketRequesterTests {
 		this.rsocket.reset();
 		mapper.apply(this.requester.route("toA")).retrieveFlux(String.class).blockLast(Duration.ofSeconds(5));
 
-		assertEquals("requestChannel", this.rsocket.getSavedMethodName());
+		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestChannel");
 		List<Payload> payloads = this.rsocket.getSavedPayloadFlux().collectList().block(Duration.ofSeconds(5));
-		assertNotNull(payloads);
+		assertThat(payloads).isNotNull();
 
 		if (Arrays.equals(new String[] {""}, expectedValues)) {
-			assertEquals(1, payloads.size());
-			assertEquals("toA", payloads.get(0).getMetadataUtf8());
-			assertEquals("", payloads.get(0).getDataUtf8());
+			assertThat(payloads.size()).isEqualTo(1);
+			assertThat(payloads.get(0).getMetadataUtf8()).isEqualTo("toA");
+			assertThat(payloads.get(0).getDataUtf8()).isEqualTo("");
 		}
 		else {
-			assertArrayEquals(new String[] {"toA", "", ""},
-					payloads.stream().map(Payload::getMetadataUtf8).toArray(String[]::new));
-			assertArrayEquals(expectedValues,
-					payloads.stream().map(Payload::getDataUtf8).toArray(String[]::new));
+			assertThat(payloads.stream().map(Payload::getMetadataUtf8).toArray(String[]::new)).isEqualTo(new String[] {"toA", "", ""});
+			assertThat(payloads.stream().map(Payload::getDataUtf8).toArray(String[]::new)).isEqualTo(expectedValues);
 		}
 	}
 
@@ -144,9 +139,9 @@ public class DefaultRSocketRequesterTests {
 		String value = "bodyA";
 		this.requester.route("toA").data(value).send().block(Duration.ofSeconds(5));
 
-		assertEquals("fireAndForget", this.rsocket.getSavedMethodName());
-		assertEquals("toA", this.rsocket.getSavedPayload().getMetadataUtf8());
-		assertEquals("bodyA", this.rsocket.getSavedPayload().getDataUtf8());
+		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("fireAndForget");
+		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("toA");
+		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEqualTo("bodyA");
 	}
 
 	@Test
@@ -156,7 +151,7 @@ public class DefaultRSocketRequesterTests {
 		Mono<String> response = this.requester.route("").data("").retrieveMono(String.class);
 
 		StepVerifier.create(response).expectNext(value).expectComplete().verify(Duration.ofSeconds(5));
-		assertEquals("requestResponse", this.rsocket.getSavedMethodName());
+		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestResponse");
 	}
 
 	@Test
@@ -166,8 +161,8 @@ public class DefaultRSocketRequesterTests {
 		this.rsocket.setPayloadMonoToReturn(mono);
 		this.requester.route("").data("").retrieveMono(Void.class).block(Duration.ofSeconds(5));
 
-		assertTrue(consumed.get());
-		assertEquals("requestResponse", this.rsocket.getSavedMethodName());
+		assertThat(consumed.get()).isTrue();
+		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestResponse");
 	}
 
 	@Test
@@ -177,7 +172,7 @@ public class DefaultRSocketRequesterTests {
 		Flux<String> response = this.requester.route("").data("").retrieveFlux(String.class);
 
 		StepVerifier.create(response).expectNext(values).expectComplete().verify(Duration.ofSeconds(5));
-		assertEquals("requestStream", this.rsocket.getSavedMethodName());
+		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestStream");
 	}
 
 	@Test
@@ -188,8 +183,8 @@ public class DefaultRSocketRequesterTests {
 		this.rsocket.setPayloadFluxToReturn(flux);
 		this.requester.route("").data("").retrieveFlux(Void.class).blockLast(Duration.ofSeconds(5));
 
-		assertTrue(consumed.get());
-		assertEquals("requestStream", this.rsocket.getSavedMethodName());
+		assertThat(consumed.get()).isTrue();
+		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestStream");
 	}
 
 	@Test

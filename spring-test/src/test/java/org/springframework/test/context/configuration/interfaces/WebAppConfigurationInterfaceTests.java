@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -38,7 +38,7 @@ public class WebAppConfigurationInterfaceTests implements WebAppConfigurationTes
 
 	@Test
 	public void wacLoaded() {
-		assertNotNull(wac);
+		assertThat(wac).isNotNull();
 	}
 
 }

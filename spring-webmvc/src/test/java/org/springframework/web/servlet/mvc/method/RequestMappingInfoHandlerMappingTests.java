@@ -60,10 +60,6 @@ import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * Test fixture with {@link RequestMappingInfoHandlerMapping}.
@@ -105,7 +101,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		RequestMappingInfo info = RequestMappingInfo.paths(patterns).build();
 		Set<String> actual = this.handlerMapping.getMappingPathPatterns(info);
 
-		assertEquals(new HashSet<>(Arrays.asList(patterns)), actual);
+		assertThat(actual).isEqualTo(new HashSet<>(Arrays.asList(patterns)));
 	}
 
 	@Test
@@ -113,14 +109,14 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		HandlerMethod handlerMethod = getHandler(request);
 
-		assertEquals(this.fooMethod.getMethod(), handlerMethod.getMethod());
+		assertThat(handlerMethod.getMethod()).isEqualTo(this.fooMethod.getMethod());
 	}
 
 	@Test
 	public void getHandlerGlobMatch() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bar");
 		HandlerMethod handlerMethod = getHandler(request);
-		assertEquals(this.barMethod.getMethod(), handlerMethod.getMethod());
+		assertThat(handlerMethod.getMethod()).isEqualTo(this.barMethod.getMethod());
 	}
 
 	@Test
@@ -128,12 +124,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		HandlerMethod handlerMethod = getHandler(request);
 
-		assertEquals(this.emptyMethod.getMethod(), handlerMethod.getMethod());
+		assertThat(handlerMethod.getMethod()).isEqualTo(this.emptyMethod.getMethod());
 
 		request = new MockHttpServletRequest("GET", "/");
 		handlerMethod = getHandler(request);
 
-		assertEquals(this.emptyMethod.getMethod(), handlerMethod.getMethod());
+		assertThat(handlerMethod.getMethod()).isEqualTo(this.emptyMethod.getMethod());
 	}
 
 	@Test
@@ -142,7 +138,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		request.setParameter("p", "anything");
 		HandlerMethod handlerMethod = getHandler(request);
 
-		assertEquals(this.fooParamMethod.getMethod(), handlerMethod.getMethod());
+		assertThat(handlerMethod.getMethod()).isEqualTo(this.fooParamMethod.getMethod());
 	}
 
 	@Test
@@ -209,13 +205,13 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.getHandler(request);
 
 		String name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
-		assertEquals(Collections.singleton(MediaType.APPLICATION_XML), request.getAttribute(name));
+		assertThat(request.getAttribute(name)).isEqualTo(Collections.singleton(MediaType.APPLICATION_XML));
 
 		request = new MockHttpServletRequest("GET", "/content");
 		request.addHeader("Accept", "application/json");
 		this.handlerMapping.getHandler(request);
 
-		assertNull("Negated expression shouldn't be listed as producible type", request.getAttribute(name));
+		assertThat(request.getAttribute(name)).as("Negated expression shouldn't be listed as producible type").isNull();
 	}
 
 	@Test
@@ -230,12 +226,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		mapping.setApplicationContext(new StaticWebApplicationContext());
 
 		HandlerExecutionChain chain = mapping.getHandler(new MockHttpServletRequest("GET", path));
-		assertNotNull(chain);
-		assertNotNull(chain.getInterceptors());
-		assertSame(interceptor, chain.getInterceptors()[0]);
+		assertThat(chain).isNotNull();
+		assertThat(chain.getInterceptors()).isNotNull();
+		assertThat(chain.getInterceptors()[0]).isSameAs(interceptor);
 
 		chain = mapping.getHandler(new MockHttpServletRequest("GET", "/invalid"));
-		assertNull(chain);
+		assertThat(chain).isNull();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -249,9 +245,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Map<String, String> uriVariables = (Map<String, String>) request.getAttribute(name);
 
-		assertNotNull(uriVariables);
-		assertEquals("1", uriVariables.get("path1"));
-		assertEquals("2", uriVariables.get("path2"));
+		assertThat(uriVariables).isNotNull();
+		assertThat(uriVariables.get("path1")).isEqualTo("1");
+		assertThat(uriVariables.get("path2")).isEqualTo("2");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -270,9 +266,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Map<String, String> uriVariables = (Map<String, String>) request.getAttribute(name);
 
-		assertNotNull(uriVariables);
-		assertEquals("group", uriVariables.get("group"));
-		assertEquals("a/b", uriVariables.get("identifier"));
+		assertThat(uriVariables).isNotNull();
+		assertThat(uriVariables.get("group")).isEqualTo("group");
+		assertThat(uriVariables.get("identifier")).isEqualTo("a/b");
 	}
 
 	@Test
@@ -281,7 +277,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		this.handlerMapping.handleMatch(key, "/1/2", request);
 
-		assertEquals("/{path1}/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo("/{path1}/2");
 	}
 
 	@Test // gh-22543
@@ -289,7 +285,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		String path = "";
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
 		this.handlerMapping.handleMatch(RequestMappingInfo.paths().build(), path, request);
-		assertEquals(path, request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).isEqualTo(path);
 	}
 
 	@Test
@@ -305,10 +301,10 @@ public class RequestMappingInfoHandlerMappingTests {
 		matrixVariables = getMatrixVariables(request, "cars");
 		uriVariables = getUriTemplateVariables(request);
 
-		assertNotNull(matrixVariables);
-		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
-		assertEquals("2012", matrixVariables.getFirst("year"));
-		assertEquals("cars", uriVariables.get("cars"));
+		assertThat(matrixVariables).isNotNull();
+		assertThat(matrixVariables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
+		assertThat(matrixVariables.getFirst("year")).isEqualTo("2012");
+		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 
 		// URI var with regex for path variable, and URI var for matrix params..
 		request = new MockHttpServletRequest();
@@ -317,11 +313,11 @@ public class RequestMappingInfoHandlerMappingTests {
 		matrixVariables = getMatrixVariables(request, "params");
 		uriVariables = getUriTemplateVariables(request);
 
-		assertNotNull(matrixVariables);
-		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
-		assertEquals("2012", matrixVariables.getFirst("year"));
-		assertEquals("cars", uriVariables.get("cars"));
-		assertEquals(";colors=red,blue,green;year=2012", uriVariables.get("params"));
+		assertThat(matrixVariables).isNotNull();
+		assertThat(matrixVariables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
+		assertThat(matrixVariables.getFirst("year")).isEqualTo("2012");
+		assertThat(uriVariables.get("cars")).isEqualTo("cars");
+		assertThat(uriVariables.get("params")).isEqualTo(";colors=red,blue,green;year=2012");
 
 		// URI var with regex for path variable, and (empty) URI var for matrix params..
 		request = new MockHttpServletRequest();
@@ -330,9 +326,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		matrixVariables = getMatrixVariables(request, "params");
 		uriVariables = getUriTemplateVariables(request);
 
-		assertNull(matrixVariables);
-		assertEquals("cars", uriVariables.get("cars"));
-		assertEquals("", uriVariables.get("params"));
+		assertThat(matrixVariables).isNull();
+		assertThat(uriVariables.get("cars")).isEqualTo("cars");
+		assertThat(uriVariables.get("params")).isEqualTo("");
 
 		// SPR-11897
 		request = new MockHttpServletRequest();
@@ -341,11 +337,11 @@ public class RequestMappingInfoHandlerMappingTests {
 		matrixVariables = getMatrixVariables(request, "foo");
 		uriVariables = getUriTemplateVariables(request);
 
-		assertNotNull(matrixVariables);
-		assertEquals(2, matrixVariables.size());
-		assertEquals("42", matrixVariables.getFirst("a"));
-		assertEquals("c", matrixVariables.getFirst("b"));
-		assertEquals("a=42", uriVariables.get("foo"));
+		assertThat(matrixVariables).isNotNull();
+		assertThat(matrixVariables.size()).isEqualTo(2);
+		assertThat(matrixVariables.getFirst("a")).isEqualTo("42");
+		assertThat(matrixVariables.getFirst("b")).isEqualTo("c");
+		assertThat(uriVariables.get("foo")).isEqualTo("a=42");
 	}
 
 	@Test // SPR-10140, SPR-16867
@@ -365,15 +361,15 @@ public class RequestMappingInfoHandlerMappingTests {
 		MultiValueMap<String, String> matrixVariables = getMatrixVariables(request, "cars");
 		Map<String, String> uriVariables = getUriTemplateVariables(request);
 
-		assertNotNull(matrixVariables);
-		assertEquals(Collections.singletonList("a/b"), matrixVariables.get("mvar"));
-		assertEquals("cars", uriVariables.get("cars"));
+		assertThat(matrixVariables).isNotNull();
+		assertThat(matrixVariables.get("mvar")).isEqualTo(Collections.singletonList("a/b"));
+		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 	}
 
 
 	private HandlerMethod getHandler(MockHttpServletRequest request) throws Exception {
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
-		assertNotNull(chain);
+		assertThat(chain).isNotNull();
 		return (HandlerMethod) chain.getHandler();
 	}
 
@@ -393,9 +389,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		Object result = new InvocableHandlerMethod(handlerMethod).invokeForRequest(webRequest, mavContainer);
 
-		assertNotNull(result);
-		assertEquals(HttpHeaders.class, result.getClass());
-		assertEquals(allowHeader, ((HttpHeaders) result).getFirst("Allow"));
+		assertThat(result).isNotNull();
+		assertThat(result.getClass()).isEqualTo(HttpHeaders.class);
+		assertThat(((HttpHeaders) result).getFirst("Allow")).isEqualTo(allowHeader);
 	}
 
 	private void testHttpMediaTypeNotAcceptableException(String url) throws Exception {

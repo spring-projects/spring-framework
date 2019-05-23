@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
@@ -56,7 +55,7 @@ public class SimpleClientHttpResponseTests {
 		assertThat(StreamUtils.copyToString(responseStream, StandardCharsets.UTF_8)).isEqualTo("Spring");
 
 		this.response.close();
-		assertTrue(is.isClosed());
+		assertThat(is.isClosed()).isTrue();
 		verify(this.connection, never()).disconnect();
 	}
 
@@ -74,7 +73,7 @@ public class SimpleClientHttpResponseTests {
 
 		this.response.close();
 		assertThat(is.available()).isEqualTo(0);
-		assertTrue(is.isClosed());
+		assertThat(is.isClosed()).isTrue();
 		verify(this.connection, never()).disconnect();
 	}
 
@@ -91,7 +90,7 @@ public class SimpleClientHttpResponseTests {
 
 		this.response.close();
 		assertThat(is.available()).isEqualTo(0);
-		assertTrue(is.isClosed());
+		assertThat(is.isClosed()).isTrue();
 		verify(this.connection, never()).disconnect();
 	}
 
@@ -117,7 +116,7 @@ public class SimpleClientHttpResponseTests {
 
 		this.response.close();
 		assertThat(is.available()).isEqualTo(0);
-		assertTrue(is.isClosed());
+		assertThat(is.isClosed()).isTrue();
 		verify(this.connection, never()).disconnect();
 	}
 

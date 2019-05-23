@@ -30,9 +30,6 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -53,13 +50,13 @@ public class DefaultResponseErrorHandlerTests {
 	@Test
 	public void hasErrorTrue() throws Exception {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
-		assertTrue(handler.hasError(response));
+		assertThat(handler.hasError(response)).isTrue();
 	}
 
 	@Test
 	public void hasErrorFalse() throws Exception {
 		given(response.getRawStatusCode()).willReturn(HttpStatus.OK.value());
-		assertFalse(handler.hasError(response));
+		assertThat(handler.hasError(response)).isFalse();
 	}
 
 	@Test
@@ -113,7 +110,7 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		assertFalse(handler.hasError(response));
+		assertThat(handler.hasError(response)).isFalse();
 	}
 
 	@Test // SPR-9406
@@ -138,7 +135,7 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		assertTrue(handler.hasError(response));
+		assertThat(handler.hasError(response)).isTrue();
 	}
 
 	@Test
@@ -163,7 +160,7 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getStatusText()).willReturn("Custom status code");
 		given(response.getHeaders()).willReturn(headers);
 
-		assertTrue(handler.hasError(response));
+		assertThat(handler.hasError(response)).isTrue();
 	}
 
 	@Test
@@ -190,9 +187,9 @@ public class DefaultResponseErrorHandlerTests {
 		given(response.getHeaders()).willReturn(headers);
 		given(response.getBody()).willReturn(body);
 
-		assertFalse(handler.hasError(response));
-		assertFalse(body.isClosed());
-		assertEquals("Hello World", StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8));
+		assertThat(handler.hasError(response)).isFalse();
+		assertThat(body.isClosed()).isFalse();
+		assertThat(StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8)).isEqualTo("Hello World");
 	}
 
 

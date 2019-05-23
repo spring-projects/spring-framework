@@ -32,9 +32,8 @@ import org.springframework.test.context.junit4.orm.domain.Person;
 import org.springframework.test.context.junit4.orm.service.PersonService;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
@@ -62,18 +61,18 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 	@Before
 	public void setup() {
 		assertInTransaction(true);
-		assertNotNull("PersonService should have been autowired.", personService);
-		assertNotNull("SessionFactory should have been autowired.", sessionFactory);
+		assertThat(personService).as("PersonService should have been autowired.").isNotNull();
+		assertThat(sessionFactory).as("SessionFactory should have been autowired.").isNotNull();
 	}
 
 
 	@Test
 	public void findSam() {
 		Person sam = personService.findByName(SAM);
-		assertNotNull("Should be able to find Sam", sam);
+		assertThat(sam).as("Should be able to find Sam").isNotNull();
 		DriversLicense driversLicense = sam.getDriversLicense();
-		assertNotNull("Sam's driver's license should not be null", driversLicense);
-		assertEquals("Verifying Sam's driver's license number", Long.valueOf(1234), driversLicense.getNumber());
+		assertThat(driversLicense).as("Sam's driver's license should not be null").isNotNull();
+		assertThat(driversLicense.getNumber()).as("Verifying Sam's driver's license number").isEqualTo(Long.valueOf(1234));
 	}
 
 	@Test  // SPR-16956
@@ -85,7 +84,7 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		Session session = sessionFactory.getCurrentSession();
 		session.flush();
 		session.refresh(sam);
-		assertEquals("Sam", sam.getName());
+		assertThat(sam.getName()).isEqualTo("Sam");
 	}
 
 	@Test
@@ -94,9 +93,9 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		Person juergen = new Person(JUERGEN, driversLicense);
 		int numRows = countRowsInTable("person");
 		personService.save(juergen);
-		assertEquals("Verifying number of rows in the 'person' table.", numRows + 1, countRowsInTable("person"));
-		assertNotNull("Should be able to save and retrieve Juergen", personService.findByName(JUERGEN));
-		assertNotNull("Juergen's ID should have been set", juergen.getId());
+		assertThat(countRowsInTable("person")).as("Verifying number of rows in the 'person' table.").isEqualTo((numRows + 1));
+		assertThat(personService.findByName(JUERGEN)).as("Should be able to save and retrieve Juergen").isNotNull();
+		assertThat(juergen.getId()).as("Juergen's ID should have been set").isNotNull();
 	}
 
 	@Test
@@ -130,7 +129,7 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 
 	private void updateSamWithNullDriversLicense() {
 		Person sam = personService.findByName(SAM);
-		assertNotNull("Should be able to find Sam", sam);
+		assertThat(sam).as("Should be able to find Sam").isNotNull();
 		sam.setDriversLicense(null);
 		personService.save(sam);
 	}

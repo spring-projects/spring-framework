@@ -49,11 +49,6 @@ import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ResourceHandlerRegistry}.
@@ -85,7 +80,7 @@ public class ResourceHandlerRegistryTests {
 	@Test
 	public void noResourceHandlers() throws Exception {
 		this.registry = new ResourceHandlerRegistry(new GenericWebApplicationContext(), new MockServletContext());
-		assertNull(this.registry.getHandlerMapping());
+		assertThat((Object) this.registry.getHandlerMapping()).isNull();
 	}
 
 	@Test
@@ -97,15 +92,15 @@ public class ResourceHandlerRegistryTests {
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		handler.handleRequest(request, this.response);
 
-		assertEquals("test stylesheet content", this.response.getContentAsString());
+		assertThat(this.response.getContentAsString()).isEqualTo("test stylesheet content");
 	}
 
 	@Test
 	public void cachePeriod() {
-		assertEquals(-1, getHandler("/resources/**").getCacheSeconds());
+		assertThat(getHandler("/resources/**").getCacheSeconds()).isEqualTo(-1);
 
 		this.registration.setCachePeriod(0);
-		assertEquals(0, getHandler("/resources/**").getCacheSeconds());
+		assertThat(getHandler("/resources/**").getCacheSeconds()).isEqualTo(0);
 	}
 
 	@Test
@@ -119,16 +114,16 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void order() {
-		assertEquals(Integer.MAX_VALUE -1, registry.getHandlerMapping().getOrder());
+		assertThat(registry.getHandlerMapping().getOrder()).isEqualTo(Integer.MAX_VALUE -1);
 
 		registry.setOrder(0);
-		assertEquals(0, registry.getHandlerMapping().getOrder());
+		assertThat(registry.getHandlerMapping().getOrder()).isEqualTo(0);
 	}
 
 	@Test
 	public void hasMappingForPattern() {
-		assertTrue(this.registry.hasMappingForPattern("/resources/**"));
-		assertFalse(this.registry.hasMappingForPattern("/whatever"));
+		assertThat(this.registry.hasMappingForPattern("/resources/**")).isTrue();
+		assertThat(this.registry.hasMappingForPattern("/whatever")).isFalse();
 	}
 
 	@Test
@@ -233,14 +228,14 @@ public class ResourceHandlerRegistryTests {
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		UrlResource resource = (UrlResource) handler.getLocations().get(1);
-		assertEquals("file:/tmp", resource.getURL().toString());
-		assertNotNull(handler.getUrlPathHelper());
+		assertThat(resource.getURL().toString()).isEqualTo("file:/tmp");
+		assertThat(handler.getUrlPathHelper()).isNotNull();
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		PathResourceResolver resolver = (PathResourceResolver) resolvers.get(resolvers.size()-1);
 		Map<Resource, Charset> locationCharsets = resolver.getLocationCharsets();
-		assertEquals(1, locationCharsets.size());
-		assertEquals(StandardCharsets.ISO_8859_1, locationCharsets.values().iterator().next());
+		assertThat(locationCharsets.size()).isEqualTo(1);
+		assertThat(locationCharsets.values().iterator().next()).isEqualTo(StandardCharsets.ISO_8859_1);
 	}
 
 	private ResourceHttpRequestHandler getHandler(String pathPattern) {

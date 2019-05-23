@@ -27,7 +27,7 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -58,7 +58,7 @@ public class ConcurrencyThrottleInterceptorTests {
 		Advised advised = (Advised) serializedProxy;
 		ConcurrencyThrottleInterceptor serializedCti =
 				(ConcurrencyThrottleInterceptor) advised.getAdvisors()[0].getAdvice();
-		assertEquals(cti.getConcurrencyLimit(), serializedCti.getConcurrencyLimit());
+		assertThat(serializedCti.getConcurrencyLimit()).isEqualTo(cti.getConcurrencyLimit());
 		serializedProxy.getAge();
 	}
 

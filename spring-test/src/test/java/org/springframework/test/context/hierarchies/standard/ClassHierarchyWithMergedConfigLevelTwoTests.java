@@ -26,7 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -57,7 +57,7 @@ public class ClassHierarchyWithMergedConfigLevelTwoTests extends ClassHierarchyW
 	@Override
 	public void loadContextHierarchy() {
 		super.loadContextHierarchy();
-		assertEquals("parent + user + order", order);
+		assertThat(order).isEqualTo("parent + user + order");
 	}
 
 }

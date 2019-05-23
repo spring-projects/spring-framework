@@ -35,7 +35,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link WebSocketAnnotationMethodMessageHandler}.
@@ -73,7 +73,7 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		TestControllerAdvice controllerAdvice = this.applicationContext.getBean(TestControllerAdvice.class);
-		assertTrue(controllerAdvice.isExceptionHandled());
+		assertThat(controllerAdvice.isExceptionHandled()).isTrue();
 	}
 
 

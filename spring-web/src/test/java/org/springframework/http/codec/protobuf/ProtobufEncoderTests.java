@@ -33,9 +33,7 @@ import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -61,11 +59,11 @@ public class ProtobufEncoderTests extends AbstractEncoderTestCase<ProtobufEncode
 	@Override
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(forClass(Msg.class), null));
-		assertTrue(this.encoder.canEncode(forClass(Msg.class), PROTOBUF_MIME_TYPE));
-		assertTrue(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM));
-		assertFalse(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_JSON));
-		assertFalse(this.encoder.canEncode(forClass(Object.class), PROTOBUF_MIME_TYPE));
+		assertThat(this.encoder.canEncode(forClass(Msg.class), null)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(Msg.class), PROTOBUF_MIME_TYPE)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(Msg.class), MediaType.APPLICATION_JSON)).isFalse();
+		assertThat(this.encoder.canEncode(forClass(Object.class), PROTOBUF_MIME_TYPE)).isFalse();
 	}
 
 	@Override
@@ -76,7 +74,7 @@ public class ProtobufEncoderTests extends AbstractEncoderTestCase<ProtobufEncode
 		testEncodeAll(input, Msg.class, step -> step
 				.consumeNextWith(dataBuffer -> {
 					try {
-						assertEquals(this.msg1, Msg.parseFrom(dataBuffer.asInputStream()));
+						assertThat(Msg.parseFrom(dataBuffer.asInputStream())).isEqualTo(this.msg1);
 
 					}
 					catch (IOException ex) {
@@ -102,7 +100,7 @@ public class ProtobufEncoderTests extends AbstractEncoderTestCase<ProtobufEncode
 	protected final Consumer<DataBuffer> expect(Msg msg) {
 		return dataBuffer -> {
 			try {
-				assertEquals(msg, Msg.parseDelimitedFrom(dataBuffer.asInputStream()));
+				assertThat(Msg.parseDelimitedFrom(dataBuffer.asInputStream())).isEqualTo(msg);
 
 			}
 			catch (IOException ex) {

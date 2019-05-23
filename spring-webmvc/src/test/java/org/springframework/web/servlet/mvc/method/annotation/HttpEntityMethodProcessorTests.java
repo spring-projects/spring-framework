@@ -47,10 +47,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} delegating to
@@ -107,8 +104,8 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>) processor.resolveArgument(
 				paramSimpleBean, mavContainer, webRequest, binderFactory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getBody().getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody().getName()).isEqualTo("Jad");
 	}
 
 	@Test  // SPR-12861
@@ -123,8 +120,8 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntity<?> result = (HttpEntity<?>) processor.resolveArgument(this.paramSimpleBean,
 				this.mavContainer, this.webRequest, this.binderFactory);
 
-		assertNotNull(result);
-		assertNull(result.getBody());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody()).isNull();
 	}
 
 	@Test
@@ -141,9 +138,9 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntity<List<SimpleBean>> result = (HttpEntity<List<SimpleBean>>) processor.resolveArgument(
 				paramList, mavContainer, webRequest, binderFactory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getBody().get(0).getName());
-		assertEquals("Robert", result.getBody().get(1).getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody().get(0).getName()).isEqualTo("Jad");
+		assertThat(result.getBody().get(1).getName()).isEqualTo("Robert");
 	}
 
 	@Test
@@ -164,8 +161,8 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>)
 				processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
 
-		assertNotNull(result);
-		assertEquals("Jad", result.getBody().getName());
+		assertThat(result).isNotNull();
+		assertThat(result.getBody().getName()).isEqualTo("Jad");
 	}
 
 	@Test  // SPR-12811
@@ -182,8 +179,8 @@ public class HttpEntityMethodProcessorTests {
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
 
 		String content = this.servletResponse.getContentAsString();
-		assertTrue(content.contains("\"type\":\"foo\""));
-		assertTrue(content.contains("\"type\":\"bar\""));
+		assertThat(content.contains("\"type\":\"foo\"")).isTrue();
+		assertThat(content.contains("\"type\":\"bar\"")).isTrue();
 	}
 
 	@Test  // SPR-13423
@@ -199,8 +196,8 @@ public class HttpEntityMethodProcessorTests {
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 		processor.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 
-		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
-		assertEquals("Foo", servletResponse.getContentAsString());
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
+		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
 	}
 
 

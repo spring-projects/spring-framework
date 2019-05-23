@@ -52,7 +52,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -120,19 +119,19 @@ public class RequestContextHolderTests {
 
 	@Test
 	public void requestScopedController() throws Exception {
-		assertTrue("request-scoped controller must be a CGLIB proxy", AopUtils.isCglibProxy(this.requestScopedController));
+		assertThat(AopUtils.isCglibProxy(this.requestScopedController)).as("request-scoped controller must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/requestScopedController").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 
 	@Test
 	public void requestScopedService() throws Exception {
-		assertTrue("request-scoped service must be a CGLIB proxy", AopUtils.isCglibProxy(this.requestScopedService));
+		assertThat(AopUtils.isCglibProxy(this.requestScopedService)).as("request-scoped service must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/requestScopedService").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 
 	@Test
 	public void sessionScopedService() throws Exception {
-		assertTrue("session-scoped service must be a CGLIB proxy", AopUtils.isCglibProxy(this.sessionScopedService));
+		assertThat(AopUtils.isCglibProxy(this.sessionScopedService)).as("session-scoped service must be a CGLIB proxy").isTrue();
 		this.mockMvc.perform(get("/sessionScopedService").requestAttr(FROM_MVC_TEST_MOCK, FROM_MVC_TEST_MOCK));
 	}
 

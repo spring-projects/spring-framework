@@ -21,10 +21,9 @@ import java.security.ProtectionDomain;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for the {@link ReflectiveLoadTimeWeaver} class.
@@ -56,7 +55,7 @@ public class ReflectiveLoadTimeWeaverTests {
 				return "CAFEDEAD".getBytes();
 			}
 		});
-		assertEquals(1, classLoader.getNumTimesGetThrowawayClassLoaderCalled());
+		assertThat(classLoader.getNumTimesGetThrowawayClassLoaderCalled()).isEqualTo(1);
 	}
 
 	@Test
@@ -69,7 +68,7 @@ public class ReflectiveLoadTimeWeaverTests {
 	public void testGetThrowawayClassLoaderWithClassLoaderThatDoesNotExposeAGetThrowawayClassLoaderMethodYieldsFallbackClassLoader() {
 		ReflectiveLoadTimeWeaver weaver = new ReflectiveLoadTimeWeaver(new JustAddTransformerClassLoader());
 		ClassLoader throwawayClassLoader = weaver.getThrowawayClassLoader();
-		assertNotNull(throwawayClassLoader);
+		assertThat(throwawayClassLoader).isNotNull();
 	}
 
 	@Test
@@ -77,8 +76,8 @@ public class ReflectiveLoadTimeWeaverTests {
 		TotallyCompliantClassLoader classLoader = new TotallyCompliantClassLoader();
 		ReflectiveLoadTimeWeaver weaver = new ReflectiveLoadTimeWeaver(classLoader);
 		ClassLoader throwawayClassLoader = weaver.getThrowawayClassLoader();
-		assertNotNull(throwawayClassLoader);
-		assertEquals(1, classLoader.getNumTimesGetThrowawayClassLoaderCalled());
+		assertThat(throwawayClassLoader).isNotNull();
+		assertThat(classLoader.getNumTimesGetThrowawayClassLoaderCalled()).isEqualTo(1);
 	}
 
 

@@ -91,12 +91,6 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for {@link MessageBrokerBeanDefinitionParser}.
@@ -112,7 +106,6 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void simpleBroker() throws Exception {
 		loadBeanDefinitions("websocket-config-broker-simple.xml");
 
@@ -122,20 +115,20 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(suhm.getUrlMap()).hasSize(4);
 
 		HttpRequestHandler httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/foo");
-		assertNotNull(httpRequestHandler);
+		assertThat(httpRequestHandler).isNotNull();
 		assertThat(httpRequestHandler).isInstanceOf(WebSocketHttpRequestHandler.class);
 
 		WebSocketHttpRequestHandler wsHttpRequestHandler = (WebSocketHttpRequestHandler) httpRequestHandler;
 		HandshakeHandler handshakeHandler = wsHttpRequestHandler.getHandshakeHandler();
-		assertNotNull(handshakeHandler);
-		assertTrue(handshakeHandler instanceof TestHandshakeHandler);
+		assertThat(handshakeHandler).isNotNull();
+		assertThat(handshakeHandler instanceof TestHandshakeHandler).isTrue();
 		List<HandshakeInterceptor> interceptors = wsHttpRequestHandler.getHandshakeInterceptors();
 		assertThat(interceptors).extracting("class").containsExactly(FooTestInterceptor.class,
 				BarTestInterceptor.class, OriginHandshakeInterceptor.class);
 
 		WebSocketSession session = new TestWebSocketSession("id");
 		wsHttpRequestHandler.getWebSocketHandler().afterConnectionEstablished(session);
-		assertEquals(true, session.getAttributes().get("decorated"));
+		assertThat(session.getAttributes().get("decorated")).isEqualTo(true);
 
 		WebSocketHandler wsHandler = wsHttpRequestHandler.getWebSocketHandler();
 		assertThat(wsHandler).isInstanceOf(ExceptionWebSocketHandlerDecorator.class);
@@ -145,74 +138,74 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(wsHandler).isInstanceOf(TestWebSocketHandlerDecorator.class);
 		wsHandler = ((TestWebSocketHandlerDecorator) wsHandler).getDelegate();
 		assertThat(wsHandler).isInstanceOf(SubProtocolWebSocketHandler.class);
-		assertSame(wsHandler, this.appContext.getBean(MessageBrokerBeanDefinitionParser.WEB_SOCKET_HANDLER_BEAN_NAME));
+		assertThat(this.appContext.getBean(MessageBrokerBeanDefinitionParser.WEB_SOCKET_HANDLER_BEAN_NAME)).isSameAs(wsHandler);
 
 		SubProtocolWebSocketHandler subProtocolWsHandler = (SubProtocolWebSocketHandler) wsHandler;
-		assertEquals(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"), subProtocolWsHandler.getSubProtocols());
-		assertEquals(25 * 1000, subProtocolWsHandler.getSendTimeLimit());
-		assertEquals(1024 * 1024, subProtocolWsHandler.getSendBufferSizeLimit());
-		assertEquals(30 * 1000, subProtocolWsHandler.getTimeToFirstMessage());
+		assertThat(subProtocolWsHandler.getSubProtocols()).isEqualTo(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
+		assertThat(subProtocolWsHandler.getSendTimeLimit()).isEqualTo(25 * 1000);
+		assertThat(subProtocolWsHandler.getSendBufferSizeLimit()).isEqualTo(1024 * 1024);
+		assertThat(subProtocolWsHandler.getTimeToFirstMessage()).isEqualTo(30 * 1000);
 
 		Map<String, SubProtocolHandler> handlerMap = subProtocolWsHandler.getProtocolHandlerMap();
 		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) handlerMap.get("v12.stomp");
-		assertNotNull(stompHandler);
-		assertEquals(128 * 1024, stompHandler.getMessageSizeLimit());
-		assertNotNull(stompHandler.getErrorHandler());
-		assertEquals(TestStompErrorHandler.class, stompHandler.getErrorHandler().getClass());
+		assertThat(stompHandler).isNotNull();
+		assertThat(stompHandler.getMessageSizeLimit()).isEqualTo(128 * 1024);
+		assertThat(stompHandler.getErrorHandler()).isNotNull();
+		assertThat(stompHandler.getErrorHandler().getClass()).isEqualTo(TestStompErrorHandler.class);
 
-		assertNotNull(new DirectFieldAccessor(stompHandler).getPropertyValue("eventPublisher"));
+		assertThat(new DirectFieldAccessor(stompHandler).getPropertyValue("eventPublisher")).isNotNull();
 
 		httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/test/**");
-		assertNotNull(httpRequestHandler);
+		assertThat(httpRequestHandler).isNotNull();
 		assertThat(httpRequestHandler).isInstanceOf(SockJsHttpRequestHandler.class);
 
 		SockJsHttpRequestHandler sockJsHttpRequestHandler = (SockJsHttpRequestHandler) httpRequestHandler;
 		wsHandler = unwrapWebSocketHandler(sockJsHttpRequestHandler.getWebSocketHandler());
-		assertNotNull(wsHandler);
+		assertThat(wsHandler).isNotNull();
 		assertThat(wsHandler).isInstanceOf(SubProtocolWebSocketHandler.class);
-		assertNotNull(sockJsHttpRequestHandler.getSockJsService());
+		assertThat(sockJsHttpRequestHandler.getSockJsService()).isNotNull();
 		assertThat(sockJsHttpRequestHandler.getSockJsService()).isInstanceOf(DefaultSockJsService.class);
 
 		DefaultSockJsService defaultSockJsService = (DefaultSockJsService) sockJsHttpRequestHandler.getSockJsService();
 		WebSocketTransportHandler wsTransportHandler = (WebSocketTransportHandler) defaultSockJsService
 				.getTransportHandlers().get(TransportType.WEBSOCKET);
-		assertNotNull(wsTransportHandler.getHandshakeHandler());
+		assertThat(wsTransportHandler.getHandshakeHandler()).isNotNull();
 		assertThat(wsTransportHandler.getHandshakeHandler()).isInstanceOf(TestHandshakeHandler.class);
-		assertFalse(defaultSockJsService.shouldSuppressCors());
+		assertThat(defaultSockJsService.shouldSuppressCors()).isFalse();
 
 		ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) defaultSockJsService.getTaskScheduler();
 		ScheduledThreadPoolExecutor executor = scheduler.getScheduledThreadPoolExecutor();
-		assertEquals(Runtime.getRuntime().availableProcessors(), executor.getCorePoolSize());
-		assertTrue(executor.getRemoveOnCancelPolicy());
+		assertThat(executor.getCorePoolSize()).isEqualTo(Runtime.getRuntime().availableProcessors());
+		assertThat(executor.getRemoveOnCancelPolicy()).isTrue();
 
 		interceptors = defaultSockJsService.getHandshakeInterceptors();
 		assertThat(interceptors).extracting("class").containsExactly(FooTestInterceptor.class,
 				BarTestInterceptor.class, OriginHandshakeInterceptor.class);
-		assertTrue(defaultSockJsService.getAllowedOrigins().contains("https://mydomain3.com"));
-		assertTrue(defaultSockJsService.getAllowedOrigins().contains("https://mydomain4.com"));
+		assertThat(defaultSockJsService.getAllowedOrigins().contains("https://mydomain3.com")).isTrue();
+		assertThat(defaultSockJsService.getAllowedOrigins().contains("https://mydomain4.com")).isTrue();
 
 		SimpUserRegistry userRegistry = this.appContext.getBean(SimpUserRegistry.class);
-		assertNotNull(userRegistry);
-		assertEquals(DefaultSimpUserRegistry.class, userRegistry.getClass());
+		assertThat(userRegistry).isNotNull();
+		assertThat(userRegistry.getClass()).isEqualTo(DefaultSimpUserRegistry.class);
 
 		UserDestinationResolver userDestResolver = this.appContext.getBean(UserDestinationResolver.class);
-		assertNotNull(userDestResolver);
+		assertThat(userDestResolver).isNotNull();
 		assertThat(userDestResolver).isInstanceOf(DefaultUserDestinationResolver.class);
 		DefaultUserDestinationResolver defaultUserDestResolver = (DefaultUserDestinationResolver) userDestResolver;
-		assertEquals("/personal/", defaultUserDestResolver.getDestinationPrefix());
+		assertThat(defaultUserDestResolver.getDestinationPrefix()).isEqualTo("/personal/");
 
 		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);
-		assertNotNull(userDestHandler);
+		assertThat(userDestHandler).isNotNull();
 
 		SimpleBrokerMessageHandler brokerMessageHandler = this.appContext.getBean(SimpleBrokerMessageHandler.class);
-		assertNotNull(brokerMessageHandler);
+		assertThat(brokerMessageHandler).isNotNull();
 		Collection<String> prefixes = brokerMessageHandler.getDestinationPrefixes();
-		assertEquals(Arrays.asList("/topic", "/queue"), new ArrayList<>(prefixes));
+		assertThat(new ArrayList<>(prefixes)).isEqualTo(Arrays.asList("/topic", "/queue"));
 		DefaultSubscriptionRegistry registry = (DefaultSubscriptionRegistry) brokerMessageHandler.getSubscriptionRegistry();
-		assertEquals("my-selector", registry.getSelectorHeaderName());
-		assertNotNull(brokerMessageHandler.getTaskScheduler());
-		assertArrayEquals(new long[] {15000, 15000}, brokerMessageHandler.getHeartbeatValue());
-		assertTrue(brokerMessageHandler.isPreservePublishOrder());
+		assertThat(registry.getSelectorHeaderName()).isEqualTo("my-selector");
+		assertThat(brokerMessageHandler.getTaskScheduler()).isNotNull();
+		assertThat(brokerMessageHandler.getHeartbeatValue()).isEqualTo(new long[] {15000, 15000});
+		assertThat(brokerMessageHandler.isPreservePublishOrder()).isTrue();
 
 		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(SimpAnnotationMethodMessageHandler.class,
 						UserDestinationMessageHandler.class, SimpleBrokerMessageHandler.class);
@@ -228,12 +221,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
 				this.appContext.getBean("brokerChannelExecutor", ThreadPoolTaskExecutor.class));
 
-		assertNotNull(this.appContext.getBean("webSocketScopeConfigurer", CustomScopeConfigurer.class));
+		assertThat(this.appContext.getBean("webSocketScopeConfigurer", CustomScopeConfigurer.class)).isNotNull();
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(registry);
 		Object pathMatcher = accessor.getPropertyValue("pathMatcher");
 		String pathSeparator = (String) new DirectFieldAccessor(pathMatcher).getPropertyValue("pathSeparator");
-		assertEquals(".", pathSeparator);
+		assertThat(pathSeparator).isEqualTo(".");
 	}
 
 	@Test
@@ -241,41 +234,41 @@ public class MessageBrokerBeanDefinitionParserTests {
 		loadBeanDefinitions("websocket-config-broker-relay.xml");
 
 		HandlerMapping hm = this.appContext.getBean(HandlerMapping.class);
-		assertNotNull(hm);
+		assertThat(hm).isNotNull();
 		assertThat(hm).isInstanceOf(SimpleUrlHandlerMapping.class);
 
 		SimpleUrlHandlerMapping suhm = (SimpleUrlHandlerMapping) hm;
 		assertThat(suhm.getUrlMap()).hasSize(1);
-		assertEquals(2, suhm.getOrder());
+		assertThat(suhm.getOrder()).isEqualTo(2);
 
 		HttpRequestHandler httpRequestHandler = (HttpRequestHandler) suhm.getUrlMap().get("/foo/**");
-		assertNotNull(httpRequestHandler);
+		assertThat(httpRequestHandler).isNotNull();
 		assertThat(httpRequestHandler).isInstanceOf(SockJsHttpRequestHandler.class);
 		SockJsHttpRequestHandler sockJsHttpRequestHandler = (SockJsHttpRequestHandler) httpRequestHandler;
 		WebSocketHandler wsHandler = unwrapWebSocketHandler(sockJsHttpRequestHandler.getWebSocketHandler());
-		assertNotNull(wsHandler);
+		assertThat(wsHandler).isNotNull();
 		assertThat(wsHandler).isInstanceOf(SubProtocolWebSocketHandler.class);
-		assertNotNull(sockJsHttpRequestHandler.getSockJsService());
+		assertThat(sockJsHttpRequestHandler.getSockJsService()).isNotNull();
 
 		UserDestinationResolver userDestResolver = this.appContext.getBean(UserDestinationResolver.class);
-		assertNotNull(userDestResolver);
+		assertThat(userDestResolver).isNotNull();
 		assertThat(userDestResolver).isInstanceOf(DefaultUserDestinationResolver.class);
 		DefaultUserDestinationResolver defaultUserDestResolver = (DefaultUserDestinationResolver) userDestResolver;
-		assertEquals("/user/", defaultUserDestResolver.getDestinationPrefix());
+		assertThat(defaultUserDestResolver.getDestinationPrefix()).isEqualTo("/user/");
 
 		StompBrokerRelayMessageHandler messageBroker = this.appContext.getBean(StompBrokerRelayMessageHandler.class);
-		assertNotNull(messageBroker);
-		assertEquals("clientlogin", messageBroker.getClientLogin());
-		assertEquals("clientpass", messageBroker.getClientPasscode());
-		assertEquals("syslogin", messageBroker.getSystemLogin());
-		assertEquals("syspass", messageBroker.getSystemPasscode());
-		assertEquals("relayhost", messageBroker.getRelayHost());
-		assertEquals(1234, messageBroker.getRelayPort());
-		assertEquals("spring.io", messageBroker.getVirtualHost());
-		assertEquals(5000, messageBroker.getSystemHeartbeatReceiveInterval());
-		assertEquals(5000, messageBroker.getSystemHeartbeatSendInterval());
+		assertThat(messageBroker).isNotNull();
+		assertThat(messageBroker.getClientLogin()).isEqualTo("clientlogin");
+		assertThat(messageBroker.getClientPasscode()).isEqualTo("clientpass");
+		assertThat(messageBroker.getSystemLogin()).isEqualTo("syslogin");
+		assertThat(messageBroker.getSystemPasscode()).isEqualTo("syspass");
+		assertThat(messageBroker.getRelayHost()).isEqualTo("relayhost");
+		assertThat(messageBroker.getRelayPort()).isEqualTo(1234);
+		assertThat(messageBroker.getVirtualHost()).isEqualTo("spring.io");
+		assertThat(messageBroker.getSystemHeartbeatReceiveInterval()).isEqualTo(5000);
+		assertThat(messageBroker.getSystemHeartbeatSendInterval()).isEqualTo(5000);
 		assertThat(messageBroker.getDestinationPrefixes()).containsExactlyInAnyOrder("/topic","/queue");
-		assertTrue(messageBroker.isPreservePublishOrder());
+		assertThat(messageBroker.isPreservePublishOrder()).isTrue();
 
 		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(SimpAnnotationMethodMessageHandler.class,
 				UserDestinationMessageHandler.class, StompBrokerRelayMessageHandler.class);
@@ -293,18 +286,18 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		String destination = "/topic/unresolved-user-destination";
 		UserDestinationMessageHandler userDestHandler = this.appContext.getBean(UserDestinationMessageHandler.class);
-		assertEquals(destination, userDestHandler.getBroadcastDestination());
-		assertNotNull(messageBroker.getSystemSubscriptions());
-		assertSame(userDestHandler, messageBroker.getSystemSubscriptions().get(destination));
+		assertThat(userDestHandler.getBroadcastDestination()).isEqualTo(destination);
+		assertThat(messageBroker.getSystemSubscriptions()).isNotNull();
+		assertThat(messageBroker.getSystemSubscriptions().get(destination)).isSameAs(userDestHandler);
 
 		destination = "/topic/simp-user-registry";
 		UserRegistryMessageHandler userRegistryHandler = this.appContext.getBean(UserRegistryMessageHandler.class);
-		assertEquals(destination, userRegistryHandler.getBroadcastDestination());
-		assertNotNull(messageBroker.getSystemSubscriptions());
-		assertSame(userRegistryHandler, messageBroker.getSystemSubscriptions().get(destination));
+		assertThat(userRegistryHandler.getBroadcastDestination()).isEqualTo(destination);
+		assertThat(messageBroker.getSystemSubscriptions()).isNotNull();
+		assertThat(messageBroker.getSystemSubscriptions().get(destination)).isSameAs(userRegistryHandler);
 
 		SimpUserRegistry userRegistry = this.appContext.getBean(SimpUserRegistry.class);
-		assertEquals(MultiServerUserRegistry.class, userRegistry.getClass());
+		assertThat(userRegistry.getClass()).isEqualTo(MultiServerUserRegistry.class);
 
 		String name = "webSocketMessageBrokerStats";
 		WebSocketMessageBrokerStats stats = this.appContext.getBean(name, WebSocketMessageBrokerStats.class);
@@ -321,7 +314,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, " +
 				"completed tasks = \\d\\]";
 
-		assertTrue("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual, actual.matches(expected));
+		assertThat(actual.matches(expected)).as("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual).isTrue();
 	}
 
 	@Test
@@ -331,19 +324,19 @@ public class MessageBrokerBeanDefinitionParserTests {
 		SimpAnnotationMethodMessageHandler annotationMethodMessageHandler =
 				this.appContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
-		assertNotNull(annotationMethodMessageHandler);
+		assertThat(annotationMethodMessageHandler).isNotNull();
 		MessageConverter messageConverter = annotationMethodMessageHandler.getMessageConverter();
-		assertNotNull(messageConverter);
-		assertTrue(messageConverter instanceof CompositeMessageConverter);
+		assertThat(messageConverter).isNotNull();
+		assertThat(messageConverter instanceof CompositeMessageConverter).isTrue();
 
 		String name = MessageBrokerBeanDefinitionParser.MESSAGE_CONVERTER_BEAN_NAME;
 		CompositeMessageConverter compositeMessageConverter = this.appContext.getBean(name, CompositeMessageConverter.class);
-		assertNotNull(compositeMessageConverter);
+		assertThat(compositeMessageConverter).isNotNull();
 
 		name = MessageBrokerBeanDefinitionParser.MESSAGING_TEMPLATE_BEAN_NAME;
 		SimpMessagingTemplate simpMessagingTemplate = this.appContext.getBean(name, SimpMessagingTemplate.class);
-		assertNotNull(simpMessagingTemplate);
-		assertEquals("/personal/", simpMessagingTemplate.getUserDestinationPrefix());
+		assertThat(simpMessagingTemplate).isNotNull();
+		assertThat(simpMessagingTemplate.getUserDestinationPrefix()).isEqualTo("/personal/");
 
 		List<MessageConverter> converters = compositeMessageConverter.getConverters();
 		assertThat(converters).hasSize(3);
@@ -352,12 +345,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertThat(converters.get(2)).isInstanceOf(MappingJackson2MessageConverter.class);
 
 		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
-		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
+		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 
 		DirectFieldAccessor handlerAccessor = new DirectFieldAccessor(annotationMethodMessageHandler);
 		Object pathMatcher = handlerAccessor.getPropertyValue("pathMatcher");
 		String pathSeparator = (String) new DirectFieldAccessor(pathMatcher).getPropertyValue("pathSeparator");
-		assertEquals(".", pathSeparator);
+		assertThat(pathSeparator).isEqualTo(".");
 	}
 
 	@Test
@@ -368,8 +361,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 				this.appContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		Validator validator = annotationMethodMessageHandler.getValidator();
-		assertNotNull(validator);
-		assertSame(this.appContext.getBean("myValidator"), validator);
+		assertThat(validator).isNotNull();
+		assertThat(validator).isSameAs(this.appContext.getBean("myValidator"));
 		assertThat(validator).isInstanceOf(TestValidator.class);
 
 		List<Class<? extends MessageHandler>> subscriberTypes = Arrays.asList(SimpAnnotationMethodMessageHandler.class,
@@ -395,7 +388,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 
 		testExecutor("clientInboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
 		testExecutor("clientOutboundChannel", Runtime.getRuntime().availableProcessors() * 2, Integer.MAX_VALUE, 60);
-		assertFalse(this.appContext.containsBean("brokerChannelExecutor"));
+		assertThat(this.appContext.containsBean("brokerChannelExecutor")).isFalse();
 	}
 
 	@Test
@@ -405,14 +398,14 @@ public class MessageBrokerBeanDefinitionParserTests {
 		SimpAnnotationMethodMessageHandler handler = this.appContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		List<HandlerMethodArgumentResolver> customResolvers = handler.getCustomArgumentResolvers();
-		assertEquals(2, customResolvers.size());
-		assertTrue(handler.getArgumentResolvers().contains(customResolvers.get(0)));
-		assertTrue(handler.getArgumentResolvers().contains(customResolvers.get(1)));
+		assertThat(customResolvers.size()).isEqualTo(2);
+		assertThat(handler.getArgumentResolvers().contains(customResolvers.get(0))).isTrue();
+		assertThat(handler.getArgumentResolvers().contains(customResolvers.get(1))).isTrue();
 
 		List<HandlerMethodReturnValueHandler> customHandlers = handler.getCustomReturnValueHandlers();
-		assertEquals(2, customHandlers.size());
-		assertTrue(handler.getReturnValueHandlers().contains(customHandlers.get(0)));
-		assertTrue(handler.getReturnValueHandlers().contains(customHandlers.get(1)));
+		assertThat(customHandlers.size()).isEqualTo(2);
+		assertThat(handler.getReturnValueHandlers().contains(customHandlers.get(0))).isTrue();
+		assertThat(handler.getReturnValueHandlers().contains(customHandlers.get(1))).isTrue();
 	}
 
 	@Test
@@ -420,10 +413,10 @@ public class MessageBrokerBeanDefinitionParserTests {
 		loadBeanDefinitions("websocket-config-broker-converters.xml");
 
 		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
-		assertNotNull(compositeConverter);
+		assertThat(compositeConverter).isNotNull();
 
-		assertEquals(4, compositeConverter.getConverters().size());
-		assertEquals(StringMessageConverter.class, compositeConverter.getConverters().iterator().next().getClass());
+		assertThat(compositeConverter.getConverters().size()).isEqualTo(4);
+		assertThat(compositeConverter.getConverters().iterator().next().getClass()).isEqualTo(StringMessageConverter.class);
 	}
 
 	@Test
@@ -431,10 +424,10 @@ public class MessageBrokerBeanDefinitionParserTests {
 		loadBeanDefinitions("websocket-config-broker-converters-defaults-off.xml");
 
 		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
-		assertNotNull(compositeConverter);
+		assertThat(compositeConverter).isNotNull();
 
-		assertEquals(1, compositeConverter.getConverters().size());
-		assertEquals(StringMessageConverter.class, compositeConverter.getConverters().iterator().next().getClass());
+		assertThat(compositeConverter.getConverters().size()).isEqualTo(1);
+		assertThat(compositeConverter.getConverters().iterator().next().getClass()).isEqualTo(StringMessageConverter.class);
 	}
 
 
@@ -444,20 +437,20 @@ public class MessageBrokerBeanDefinitionParserTests {
 		AbstractSubscribableChannel channel = this.appContext.getBean(channelName, AbstractSubscribableChannel.class);
 		for (Class<? extends  MessageHandler> subscriberType : subscriberTypes) {
 			MessageHandler subscriber = this.appContext.getBean(subscriberType);
-			assertNotNull("No subscription for " + subscriberType, subscriber);
-			assertTrue(channel.hasSubscription(subscriber));
+			assertThat(subscriber).as("No subscription for " + subscriberType).isNotNull();
+			assertThat(channel.hasSubscription(subscriber)).isTrue();
 		}
 		List<ChannelInterceptor> interceptors = channel.getInterceptors();
-		assertEquals(interceptorCount, interceptors.size());
-		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
+		assertThat(interceptors.size()).isEqualTo(interceptorCount);
+		assertThat(interceptors.get(interceptors.size() - 1).getClass()).isEqualTo(ImmutableMessageChannelInterceptor.class);
 	}
 
 	private void testExecutor(String channelName, int corePoolSize, int maxPoolSize, int keepAliveSeconds) {
 		ThreadPoolTaskExecutor taskExecutor =
 				this.appContext.getBean(channelName + "Executor", ThreadPoolTaskExecutor.class);
-		assertEquals(corePoolSize, taskExecutor.getCorePoolSize());
-		assertEquals(maxPoolSize, taskExecutor.getMaxPoolSize());
-		assertEquals(keepAliveSeconds, taskExecutor.getKeepAliveSeconds());
+		assertThat(taskExecutor.getCorePoolSize()).isEqualTo(corePoolSize);
+		assertThat(taskExecutor.getMaxPoolSize()).isEqualTo(maxPoolSize);
+		assertThat(taskExecutor.getKeepAliveSeconds()).isEqualTo(keepAliveSeconds);
 	}
 
 	private void loadBeanDefinitions(String fileName) {

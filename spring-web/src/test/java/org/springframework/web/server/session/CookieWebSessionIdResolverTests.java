@@ -22,8 +22,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link CookieWebSessionIdResolver}.
@@ -41,10 +40,10 @@ public class CookieWebSessionIdResolverTests {
 		this.resolver.setSessionId(exchange, "123");
 
 		MultiValueMap<String, ResponseCookie> cookies = exchange.getResponse().getCookies();
-		assertEquals(1, cookies.size());
+		assertThat(cookies.size()).isEqualTo(1);
 		ResponseCookie cookie = cookies.getFirst(this.resolver.getCookieName());
-		assertNotNull(cookie);
-		assertEquals("SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax", cookie.toString());
+		assertThat(cookie).isNotNull();
+		assertThat(cookie.toString()).isEqualTo("SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
 	}
 
 	@Test
@@ -58,10 +57,10 @@ public class CookieWebSessionIdResolverTests {
 		this.resolver.setSessionId(exchange, "123");
 
 		MultiValueMap<String, ResponseCookie> cookies = exchange.getResponse().getCookies();
-		assertEquals(1, cookies.size());
+		assertThat(cookies.size()).isEqualTo(1);
 		ResponseCookie cookie = cookies.getFirst(this.resolver.getCookieName());
-		assertNotNull(cookie);
-		assertEquals("SESSION=123; Path=/; Domain=example.org; HttpOnly; SameSite=Strict", cookie.toString());
+		assertThat(cookie).isNotNull();
+		assertThat(cookie.toString()).isEqualTo("SESSION=123; Path=/; Domain=example.org; HttpOnly; SameSite=Strict");
 	}
 
 }

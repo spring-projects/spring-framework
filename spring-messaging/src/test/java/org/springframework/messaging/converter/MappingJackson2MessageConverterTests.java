@@ -35,13 +35,7 @@ import org.springframework.util.MimeType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.within;
 
 /**
  * Test fixture for {@link MappingJackson2MessageConverter}.
@@ -56,8 +50,8 @@ public class MappingJackson2MessageConverterTests {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		assertThat(converter.getSupportedMimeTypes())
 				.contains(new MimeType("application", "json"));
-		assertFalse(converter.getObjectMapper().getDeserializationConfig()
-				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertThat(converter.getObjectMapper().getDeserializationConfig()
+		.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 	}
 
 	@Test  // SPR-12724
@@ -65,8 +59,8 @@ public class MappingJackson2MessageConverterTests {
 		MimeType mimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(mimetype);
 		assertThat(converter.getSupportedMimeTypes()).contains(mimetype);
-		assertFalse(converter.getObjectMapper().getDeserializationConfig()
-				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertThat(converter.getObjectMapper().getDeserializationConfig()
+		.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 	}
 
 	@Test  // SPR-12724
@@ -75,8 +69,8 @@ public class MappingJackson2MessageConverterTests {
 		MimeType xmlMimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(jsonMimetype, xmlMimetype);
 		assertThat(converter.getSupportedMimeTypes()).contains(jsonMimetype, xmlMimetype);
-		assertFalse(converter.getObjectMapper().getDeserializationConfig()
-				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		assertThat(converter.getObjectMapper().getDeserializationConfig()
+		.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 	}
 
 	@Test
@@ -92,12 +86,12 @@ public class MappingJackson2MessageConverterTests {
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean actual = (MyBean) converter.fromMessage(message, MyBean.class);
 
-		assertEquals("Foo", actual.getString());
-		assertEquals(42, actual.getNumber());
-		assertEquals(42F, actual.getFraction(), 0F);
-		assertArrayEquals(new String[]{"Foo", "Bar"}, actual.getArray());
-		assertTrue(actual.isBool());
-		assertArrayEquals(new byte[]{0x1, 0x2}, actual.getBytes());
+		assertThat(actual.getString()).isEqualTo("Foo");
+		assertThat(actual.getNumber()).isEqualTo(42);
+		assertThat(actual.getFraction()).isCloseTo(42F, within(0F));
+		assertThat(actual.getArray()).isEqualTo(new String[]{"Foo", "Bar"});
+		assertThat(actual.isBool()).isTrue();
+		assertThat(actual.getBytes()).isEqualTo(new byte[]{0x1, 0x2});
 	}
 
 	@Test
@@ -109,12 +103,12 @@ public class MappingJackson2MessageConverterTests {
 		@SuppressWarnings("unchecked")
 		HashMap<String, Object> actual = (HashMap<String, Object>) converter.fromMessage(message, HashMap.class);
 
-		assertEquals("Foo", actual.get("string"));
-		assertEquals(42, actual.get("number"));
-		assertEquals(42D, (Double) actual.get("fraction"), 0D);
-		assertEquals(Arrays.asList("Foo", "Bar"), actual.get("array"));
-		assertEquals(Boolean.TRUE, actual.get("bool"));
-		assertEquals("AQI=", actual.get("bytes"));
+		assertThat(actual.get("string")).isEqualTo("Foo");
+		assertThat(actual.get("number")).isEqualTo(42);
+		assertThat((Double) actual.get("fraction")).isCloseTo(42D, within(0D));
+		assertThat(actual.get("array")).isEqualTo(Arrays.asList("Foo", "Bar"));
+		assertThat(actual.get("bool")).isEqualTo(Boolean.TRUE);
+		assertThat(actual.get("bytes")).isEqualTo("AQI=");
 	}
 
 	@Test // gh-22386
@@ -122,7 +116,7 @@ public class MappingJackson2MessageConverterTests {
 		MyBean myBean = new MyBean();
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		Message<?> message = MessageBuilder.withPayload(myBean).build();
-		assertSame(myBean, converter.fromMessage(message, MyBean.class));
+		assertThat(converter.fromMessage(message, MyBean.class)).isSameAs(myBean);
 	}
 
 	@Test
@@ -140,7 +134,7 @@ public class MappingJackson2MessageConverterTests {
 		String payload = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean myBean = (MyBean)converter.fromMessage(message, MyBean.class);
-		assertEquals("string", myBean.getString());
+		assertThat(myBean.getString()).isEqualTo("string");
 	}
 
 	@Test // SPR-16252
@@ -153,8 +147,8 @@ public class MappingJackson2MessageConverterTests {
 		MethodParameter param = new MethodParameter(method, 0);
 		Object actual = converter.fromMessage(message, List.class, param);
 
-		assertNotNull(actual);
-		assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L), actual);
+		assertThat(actual).isNotNull();
+		assertThat(actual).isEqualTo(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L));
 	}
 
 	@Test // SPR-16486
@@ -167,8 +161,8 @@ public class MappingJackson2MessageConverterTests {
 		MethodParameter param = new MethodParameter(method, 0);
 		Object actual = converter.fromMessage(message, MyBean.class, param);
 
-		assertTrue(actual instanceof MyBean);
-		assertEquals("foo", ((MyBean) actual).getString());
+		assertThat(actual instanceof MyBean).isTrue();
+		assertThat(((MyBean) actual).getString()).isEqualTo("foo");
 	}
 
 	@Test
@@ -185,14 +179,13 @@ public class MappingJackson2MessageConverterTests {
 		Message<?> message = converter.toMessage(payload, null);
 		String actual = new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
 
-		assertTrue(actual.contains("\"string\":\"Foo\""));
-		assertTrue(actual.contains("\"number\":42"));
-		assertTrue(actual.contains("fraction\":42.0"));
-		assertTrue(actual.contains("\"array\":[\"Foo\",\"Bar\"]"));
-		assertTrue(actual.contains("\"bool\":true"));
-		assertTrue(actual.contains("\"bytes\":\"AQI=\""));
-		assertEquals("Invalid content-type", new MimeType("application", "json"),
-				message.getHeaders().get(MessageHeaders.CONTENT_TYPE, MimeType.class));
+		assertThat(actual.contains("\"string\":\"Foo\"")).isTrue();
+		assertThat(actual.contains("\"number\":42")).isTrue();
+		assertThat(actual.contains("fraction\":42.0")).isTrue();
+		assertThat(actual.contains("\"array\":[\"Foo\",\"Bar\"]")).isTrue();
+		assertThat(actual.contains("\"bool\":true")).isTrue();
+		assertThat(actual.contains("\"bytes\":\"AQI=\"")).isTrue();
+		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE, MimeType.class)).as("Invalid content-type").isEqualTo(new MimeType("application", "json"));
 	}
 
 	@Test
@@ -205,8 +198,8 @@ public class MappingJackson2MessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertEquals("\"" + payload + "\"", new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE));
-		assertEquals(contentType, message.getHeaders().get(MessageHeaders.CONTENT_TYPE));
+		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE)).isEqualTo(("\"" + payload + "\""));
+		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
 	@Test
@@ -221,8 +214,8 @@ public class MappingJackson2MessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertEquals("\"" + payload + "\"", message.getPayload());
-		assertEquals(contentType, message.getHeaders().get(MessageHeaders.CONTENT_TYPE));
+		assertThat(message.getPayload()).isEqualTo(("\"" + payload + "\""));
+		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
 	@Test
@@ -242,9 +235,9 @@ public class MappingJackson2MessageConverterTests {
 		method = getClass().getDeclaredMethod("jsonViewPayload", JacksonViewBean.class);
 		MethodParameter param = new MethodParameter(method, 0);
 		JacksonViewBean back = (JacksonViewBean) converter.fromMessage(message, JacksonViewBean.class, param);
-		assertNull(back.getWithView1());
-		assertEquals("with", back.getWithView2());
-		assertNull(back.getWithoutView());
+		assertThat(back.getWithView1()).isNull();
+		assertThat(back.getWithView2()).isEqualTo("with");
+		assertThat(back.getWithoutView()).isNull();
 	}
 
 

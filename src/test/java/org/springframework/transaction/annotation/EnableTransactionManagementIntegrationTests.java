@@ -44,7 +44,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for the @EnableTransactionManagement annotation.
@@ -101,15 +101,12 @@ public class EnableTransactionManagementIntegrationTests {
 	public void repositoryUsesAspectJAdviceMode() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, AspectJTxConfig.class);
-		try {
-			ctx.refresh();
-		}
-		catch (Exception ex) {
-			// this test is a bit fragile, but gets the job done, proving that an
-			// attempt was made to look up the AJ aspect. It's due to classpath issues
-			// in .integration-tests that it's not found.
-			assertTrue(ex.getMessage().contains("AspectJJtaTransactionManagementConfiguration"));
-		}
+		// this test is a bit fragile, but gets the job done, proving that an
+		// attempt was made to look up the AJ aspect. It's due to classpath issues
+		// in .integration-tests that it's not found.
+		assertThatExceptionOfType(Exception.class).isThrownBy(
+				ctx::refresh)
+			.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
 	}
 
 	@Test
@@ -157,8 +154,7 @@ public class EnableTransactionManagementIntegrationTests {
 
 	private void assertTxProxying(AnnotationConfigApplicationContext ctx) {
 		FooRepository repo = ctx.getBean(FooRepository.class);
-		boolean isTxProxy = isTxProxy(repo);
-		assertTrue("FooRepository is not a TX proxy", isTxProxy);
+		assertThat(isTxProxy(repo)).isTrue();
 		// trigger a transaction
 		repo.findAll();
 	}

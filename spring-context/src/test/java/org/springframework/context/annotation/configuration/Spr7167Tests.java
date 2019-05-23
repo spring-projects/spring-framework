@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class Spr7167Tests {
 
@@ -42,7 +41,7 @@ public class Spr7167Tests {
 				.isEqualTo("post processed by MyPostProcessor");
 
 		MyConfig config = ctx.getBean(MyConfig.class);
-		assertTrue("Config class was not enhanced", ClassUtils.isCglibProxy(config));
+		assertThat(ClassUtils.isCglibProxy(config)).as("Config class was not enhanced").isTrue();
 	}
 
 }

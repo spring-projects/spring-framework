@@ -24,12 +24,9 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * Test suite for {@link FastByteArrayOutputStream}.
@@ -48,7 +45,7 @@ public class FastByteArrayOutputStreamTests {
 	@Test
 	public void size() throws Exception {
 		this.os.write(this.helloBytes);
-		assertEquals(this.os.size(), this.helloBytes.length);
+		assertThat(this.helloBytes.length).isEqualTo(this.os.size());
 	}
 
 	@Test
@@ -57,7 +54,7 @@ public class FastByteArrayOutputStreamTests {
 		int sizeBefore = this.os.size();
 		this.os.resize(64);
 		assertByteArrayEqualsString(this.os);
-		assertEquals(sizeBefore, this.os.size());
+		assertThat(this.os.size()).isEqualTo(sizeBefore);
 	}
 
 	@Test
@@ -66,8 +63,8 @@ public class FastByteArrayOutputStreamTests {
 		for (int i = 0; i < 10; i++) {
 			this.os.write(1);
 		}
-		assertEquals(10, this.os.size());
-		assertArrayEquals(this.os.toByteArray(), new byte[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
+		assertThat(this.os.size()).isEqualTo(10);
+		assertThat(new byte[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}).isEqualTo(this.os.toByteArray());
 	}
 
 	@Test
@@ -81,7 +78,7 @@ public class FastByteArrayOutputStreamTests {
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
 		this.os.reset();
-		assertEquals(0, this.os.size());
+		assertThat(this.os.size()).isEqualTo(0);
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
 	}
@@ -97,8 +94,8 @@ public class FastByteArrayOutputStreamTests {
 	public void toByteArrayUnsafe() throws Exception {
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
-		assertSame(this.os.toByteArrayUnsafe(), this.os.toByteArrayUnsafe());
-		assertArrayEquals(this.os.toByteArray(), this.helloBytes);
+		assertThat(this.os.toByteArrayUnsafe()).isSameAs(this.os.toByteArrayUnsafe());
+		assertThat(this.helloBytes).isEqualTo(this.os.toByteArray());
 	}
 
 	@Test
@@ -107,7 +104,7 @@ public class FastByteArrayOutputStreamTests {
 		assertByteArrayEqualsString(this.os);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		this.os.writeTo(baos);
-		assertArrayEquals(baos.toByteArray(), this.helloBytes);
+		assertThat(this.helloBytes).isEqualTo(baos.toByteArray());
 	}
 
 	@Test
@@ -120,23 +117,23 @@ public class FastByteArrayOutputStreamTests {
 	@Test
 	public void getInputStream() throws Exception {
 		this.os.write(this.helloBytes);
-		assertNotNull(this.os.getInputStream());
+		assertThat(this.os.getInputStream()).isNotNull();
 	}
 
 	@Test
 	public void getInputStreamAvailable() throws Exception {
 		this.os.write(this.helloBytes);
-		assertEquals(this.os.getInputStream().available(), this.helloBytes.length);
+		assertThat(this.helloBytes.length).isEqualTo(this.os.getInputStream().available());
 	}
 
 	@Test
 	public void getInputStreamRead() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
-		assertEquals(inputStream.read(), this.helloBytes[0]);
-		assertEquals(inputStream.read(), this.helloBytes[1]);
-		assertEquals(inputStream.read(), this.helloBytes[2]);
-		assertEquals(inputStream.read(), this.helloBytes[3]);
+		assertThat(this.helloBytes[0]).isEqualTo((byte) inputStream.read());
+		assertThat(this.helloBytes[1]).isEqualTo((byte) inputStream.read());
+		assertThat(this.helloBytes[2]).isEqualTo((byte) inputStream.read());
+		assertThat(this.helloBytes[3]).isEqualTo((byte) inputStream.read());
 	}
 
 	@Test
@@ -145,7 +142,7 @@ public class FastByteArrayOutputStreamTests {
 		this.os.write(bytes);
 		InputStream inputStream = this.os.getInputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		assertEquals(bais.read(), inputStream.read());
+		assertThat(inputStream.read()).isEqualTo(bais.read());
 	}
 
 	@Test
@@ -154,9 +151,9 @@ public class FastByteArrayOutputStreamTests {
 		InputStream inputStream = this.os.getInputStream();
 		byte[] actual = new byte[inputStream.available()];
 		int bytesRead = inputStream.read(actual);
-		assertEquals(this.helloBytes.length, bytesRead);
-		assertArrayEquals(this.helloBytes, actual);
-		assertEquals(0, inputStream.available());
+		assertThat(bytesRead).isEqualTo(this.helloBytes.length);
+		assertThat(actual).isEqualTo(this.helloBytes);
+		assertThat(inputStream.available()).isEqualTo(0);
 	}
 
 	@Test
@@ -165,30 +162,30 @@ public class FastByteArrayOutputStreamTests {
 		InputStream inputStream = os.getInputStream();
 		byte[] actual = new byte[inputStream.available() + 1];
 		int bytesRead = inputStream.read(actual);
-		assertEquals(this.helloBytes.length, bytesRead);
+		assertThat(bytesRead).isEqualTo(this.helloBytes.length);
 		for (int i = 0; i < bytesRead; i++) {
-			assertEquals(this.helloBytes[i], actual[i]);
+			assertThat(actual[i]).isEqualTo(this.helloBytes[i]);
 		}
-		assertEquals(0, actual[this.helloBytes.length]);
-		assertEquals(0, inputStream.available());
+		assertThat(actual[this.helloBytes.length]).isEqualTo((byte) 0);
+		assertThat(inputStream.available()).isEqualTo(0);
 	}
 
 	@Test
 	public void getInputStreamSkip() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
-		assertEquals(inputStream.read(), this.helloBytes[0]);
-		assertEquals(1, inputStream.skip(1));
-		assertEquals(inputStream.read(), this.helloBytes[2]);
-		assertEquals(this.helloBytes.length - 3, inputStream.available());
+		assertThat(this.helloBytes[0]).isEqualTo((byte) inputStream.read());
+		assertThat(inputStream.skip(1)).isEqualTo(1);
+		assertThat(this.helloBytes[2]).isEqualTo((byte) inputStream.read());
+		assertThat(inputStream.available()).isEqualTo((this.helloBytes.length - 3));
 	}
 
 	@Test
 	public void getInputStreamSkipAll() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
-		assertEquals(inputStream.skip(1000), this.helloBytes.length);
-		assertEquals(0, inputStream.available());
+		assertThat(this.helloBytes.length).isEqualTo(inputStream.skip(1000));
+		assertThat(inputStream.available()).isEqualTo(0);
 	}
 
 	@Test
@@ -199,7 +196,7 @@ public class FastByteArrayOutputStreamTests {
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
 		builder.append("\"");
 		String actual = builder.toString();
-		assertEquals("\"0b10a8db164e0754105b7a99be72e3fe5\"", actual);
+		assertThat(actual).isEqualTo("\"0b10a8db164e0754105b7a99be72e3fe5\"");
 	}
 
 	@Test
@@ -213,12 +210,12 @@ public class FastByteArrayOutputStreamTests {
 		DigestUtils.appendMd5DigestAsHex(inputStream, builder);
 		builder.append("\"");
 		String actual = builder.toString();
-		assertEquals("\"06225ca1e4533354c516e74512065331d\"", actual);
+		assertThat(actual).isEqualTo("\"06225ca1e4533354c516e74512065331d\"");
 	}
 
 
 	private void assertByteArrayEqualsString(FastByteArrayOutputStream actual) {
-		assertArrayEquals(this.helloBytes, actual.toByteArray());
+		assertThat(actual.toByteArray()).isEqualTo(this.helloBytes);
 	}
 
 }

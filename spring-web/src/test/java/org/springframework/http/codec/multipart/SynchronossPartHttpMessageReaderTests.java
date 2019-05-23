@@ -39,10 +39,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
@@ -61,25 +58,25 @@ public class SynchronossPartHttpMessageReaderTests {
 
 	@Test
 	public void canRead() {
-		assertTrue(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				forClassWithGenerics(MultiValueMap.class, String.class, Part.class),
-				MediaType.MULTIPART_FORM_DATA));
+				MediaType.MULTIPART_FORM_DATA)).isTrue();
 
-		assertFalse(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
-				MediaType.MULTIPART_FORM_DATA));
+				MediaType.MULTIPART_FORM_DATA)).isFalse();
 
-		assertFalse(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				forClassWithGenerics(MultiValueMap.class, String.class, String.class),
-				MediaType.MULTIPART_FORM_DATA));
+				MediaType.MULTIPART_FORM_DATA)).isFalse();
 
-		assertFalse(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				forClassWithGenerics(Map.class, String.class, String.class),
-				MediaType.MULTIPART_FORM_DATA));
+				MediaType.MULTIPART_FORM_DATA)).isFalse();
 
-		assertFalse(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				forClassWithGenerics(MultiValueMap.class, String.class, Part.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isFalse();
 	}
 
 	@Test
@@ -87,24 +84,26 @@ public class SynchronossPartHttpMessageReaderTests {
 		ServerHttpRequest request = generateMultipartRequest();
 		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 		MultiValueMap<String, Part> parts = this.reader.readMono(elementType, request, emptyMap()).block();
-		assertEquals(2, parts.size());
+		assertThat(parts.size()).isEqualTo(2);
 
-		assertTrue(parts.containsKey("fooPart"));
+		assertThat(parts.containsKey("fooPart")).isTrue();
 		Part part = parts.getFirst("fooPart");
-		assertTrue(part instanceof FilePart);
-		assertEquals("fooPart", part.name());
-		assertEquals("foo.txt", ((FilePart) part).filename());
+		boolean condition1 = part instanceof FilePart;
+		assertThat(condition1).isTrue();
+		assertThat(part.name()).isEqualTo("fooPart");
+		assertThat(((FilePart) part).filename()).isEqualTo("foo.txt");
 		DataBuffer buffer = DataBufferUtils.join(part.content()).block();
-		assertEquals(12, buffer.readableByteCount());
+		assertThat(buffer.readableByteCount()).isEqualTo(12);
 		byte[] byteContent = new byte[12];
 		buffer.read(byteContent);
-		assertEquals("Lorem Ipsum.", new String(byteContent));
+		assertThat(new String(byteContent)).isEqualTo("Lorem Ipsum.");
 
-		assertTrue(parts.containsKey("barPart"));
+		assertThat(parts.containsKey("barPart")).isTrue();
 		part = parts.getFirst("barPart");
-		assertTrue(part instanceof FormFieldPart);
-		assertEquals("barPart", part.name());
-		assertEquals("bar", ((FormFieldPart) part).value());
+		boolean condition = part instanceof FormFieldPart;
+		assertThat(condition).isTrue();
+		assertThat(part.name()).isEqualTo("barPart");
+		assertThat(((FormFieldPart) part).value()).isEqualTo("bar");
 	}
 
 	@Test // SPR-16545
@@ -113,16 +112,16 @@ public class SynchronossPartHttpMessageReaderTests {
 		ResolvableType elementType = forClassWithGenerics(MultiValueMap.class, String.class, Part.class);
 		MultiValueMap<String, Part> parts = this.reader.readMono(elementType, request, emptyMap()).block();
 
-		assertNotNull(parts);
+		assertThat(parts).isNotNull();
 		FilePart part = (FilePart) parts.getFirst("fooPart");
-		assertNotNull(part);
+		assertThat(part).isNotNull();
 
 		File dest = new File(System.getProperty("java.io.tmpdir") + "/" + part.filename());
 		part.transferTo(dest).block(Duration.ofSeconds(5));
 
-		assertTrue(dest.exists());
-		assertEquals(12, dest.length());
-		assertTrue(dest.delete());
+		assertThat(dest.exists()).isTrue();
+		assertThat(dest.length()).isEqualTo(12);
+		assertThat(dest.delete()).isTrue();
 	}
 
 	@Test

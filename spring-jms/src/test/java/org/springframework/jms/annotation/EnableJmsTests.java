@@ -45,11 +45,8 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.stereotype.Component;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Stephane Nicoll
@@ -111,8 +108,8 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		JmsListenerContainerTestFactory factory =
 				context.getBean(JmsListenerContainerTestFactory.class);
 		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
-		assertTrue(container.isAutoStartup());
-		assertTrue(container.isStarted());
+		assertThat(container.isAutoStartup()).isTrue();
+		assertThat(container.isStarted()).isTrue();
 	}
 
 	@Test
@@ -122,11 +119,11 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		JmsListenerContainerTestFactory factory =
 				context.getBean(JmsListenerContainerTestFactory.class);
 		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
-		assertFalse(container.isAutoStartup());
-		assertFalse(container.isStarted());
+		assertThat(container.isAutoStartup()).isFalse();
+		assertThat(container.isStarted()).isFalse();
 		JmsListenerEndpointRegistry registry = context.getBean(JmsListenerEndpointRegistry.class);
 		registry.start();
-		assertTrue(container.isStarted());
+		assertThat(container.isStarted()).isTrue();
 	}
 
 	@Override
@@ -162,19 +159,19 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 			EnableJmsDefaultContainerFactoryConfig.class, ComposedJmsListenersBean.class)) {
 			JmsListenerContainerTestFactory simpleFactory = context.getBean("jmsListenerContainerFactory",
 				JmsListenerContainerTestFactory.class);
-			assertEquals(2, simpleFactory.getListenerContainers().size());
+			assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(2);
 
 			MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
 				"first").getEndpoint();
-			assertEquals("first", first.getId());
-			assertEquals("orderQueue", first.getDestination());
-			assertNull(first.getConcurrency());
+			assertThat(first.getId()).isEqualTo("first");
+			assertThat(first.getDestination()).isEqualTo("orderQueue");
+			assertThat(first.getConcurrency()).isNull();
 
 			MethodJmsListenerEndpoint second = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
 				"second").getEndpoint();
-			assertEquals("second", second.getId());
-			assertEquals("billingQueue", second.getDestination());
-			assertEquals("2-10", second.getConcurrency());
+			assertThat(second.getId()).isEqualTo("second");
+			assertThat(second.getDestination()).isEqualTo("billingQueue");
+			assertThat(second.getConcurrency()).isEqualTo("2-10");
 		}
 	}
 
@@ -193,14 +190,14 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 				EnableJmsDefaultContainerFactoryConfig.class, LazyBean.class);
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
-		assertEquals(0, defaultFactory.getListenerContainers().size());
+		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(0);
 
 		context.getBean(LazyBean.class);  // trigger lazy resolution
-		assertEquals(1, defaultFactory.getListenerContainers().size());
+		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
 		MessageListenerTestContainer container = defaultFactory.getListenerContainers().get(0);
-		assertTrue("Should have been started " + container, container.isStarted());
+		assertThat(container.isStarted()).as("Should have been started " + container).isTrue();
 		context.close();  // close and stop the listeners
-		assertTrue("Should have been stopped " + container, container.isStopped());
+		assertThat(container.isStopped()).as("Should have been stopped " + container).isTrue();
 	}
 
 

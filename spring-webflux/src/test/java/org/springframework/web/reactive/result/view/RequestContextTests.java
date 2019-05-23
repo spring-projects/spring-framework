@@ -26,7 +26,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link RequestContext}.
@@ -51,7 +51,7 @@ public class RequestContextTests {
 	@Test
 	public void testGetContextUrl() throws Exception {
 		RequestContext context = new RequestContext(this.exchange, this.model, this.applicationContext);
-		assertEquals("/foo/bar", context.getContextUrl("bar"));
+		assertThat(context.getContextUrl("bar")).isEqualTo("/foo/bar");
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class RequestContextTests {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		map.put("spam", "bucket");
-		assertEquals("/foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
+		assertThat(context.getContextUrl("{foo}?spam={spam}", map)).isEqualTo("/foo/bar?spam=bucket");
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class RequestContextTests {
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar baz");
 		map.put("spam", "&bucket=");
-		assertEquals("/foo/bar%20baz?spam=%26bucket%3D", context.getContextUrl("{foo}?spam={spam}", map));
+		assertThat(context.getContextUrl("{foo}?spam={spam}", map)).isEqualTo("/foo/bar%20baz?spam=%26bucket%3D");
 	}
 
 }

@@ -31,9 +31,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -53,11 +51,11 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON));
-		assertFalse(this.decoder.canDecode(forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Object.class), MimeTypeUtils.APPLICATION_JSON)).isFalse();
 	}
 
 
@@ -70,7 +68,7 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 				.consumeNextWith(resource -> {
 					try {
 						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
-						assertEquals("foobar", new String(bytes));
+						assertThat(new String(bytes)).isEqualTo("foobar");
 					}
 					catch (IOException ex) {
 						throw new AssertionError(ex.getMessage(), ex);
@@ -92,8 +90,8 @@ public class ResourceDecoderTests extends AbstractDecoderTestCase<ResourceDecode
 							Resource resource = (Resource) value;
 							try {
 								byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
-								assertEquals("foobar", new String(bytes));
-								assertEquals("testFile", resource.getFilename());
+								assertThat(new String(bytes)).isEqualTo("foobar");
+								assertThat(resource.getFilename()).isEqualTo("testFile");
 							}
 							catch (IOException ex) {
 								throw new AssertionError(ex.getMessage(), ex);

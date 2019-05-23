@@ -19,7 +19,7 @@ package org.springframework.util;
 import org.junit.Test;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -30,8 +30,8 @@ public class ExceptionTypeFilterTests {
 	public void subClassMatch() {
 		ExceptionTypeFilter filter = new ExceptionTypeFilter(
 				asList(RuntimeException.class), null, true);
-		assertTrue(filter.match(RuntimeException.class));
-		assertTrue(filter.match(IllegalStateException.class));
+		assertThat(filter.match(RuntimeException.class)).isTrue();
+		assertThat(filter.match(IllegalStateException.class)).isTrue();
 	}
 
 }

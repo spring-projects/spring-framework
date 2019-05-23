@@ -33,7 +33,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rossen Stoyanchev
@@ -50,7 +49,6 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void basicTest() throws Exception {
 		URI url = new URI("http://localhost:" + port);
@@ -59,18 +57,18 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 				RequestEntity.get(url).header("Cookie", header).build(), Void.class);
 
 		Map<String, List<HttpCookie>> requestCookies = this.cookieHandler.requestCookies;
-		assertEquals(2, requestCookies.size());
+		assertThat(requestCookies.size()).isEqualTo(2);
 
 		List<HttpCookie> list = requestCookies.get("SID");
-		assertEquals(1, list.size());
-		assertEquals("31d4d96e407aad42", list.iterator().next().getValue());
+		assertThat(list.size()).isEqualTo(1);
+		assertThat(list.iterator().next().getValue()).isEqualTo("31d4d96e407aad42");
 
 		list = requestCookies.get("lang");
-		assertEquals(1, list.size());
-		assertEquals("en-US", list.iterator().next().getValue());
+		assertThat(list.size()).isEqualTo(1);
+		assertThat(list.iterator().next().getValue()).isEqualTo("en-US");
 
 		List<String> headerValues = response.getHeaders().get("Set-Cookie");
-		assertEquals(2, headerValues.size());
+		assertThat(headerValues.size()).isEqualTo(2);
 
 		List<String> cookie0 = splitCookie(headerValues.get(0));
 		assertThat(cookie0.remove("SID=31d4d96e407aad42")).as("SID").isTrue();

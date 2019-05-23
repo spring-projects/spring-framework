@@ -23,7 +23,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for SPR-10668.
@@ -36,7 +36,7 @@ public class Spr10668Tests {
 	@Test
 	public void testSelfInjectHierarchy() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ChildConfig.class);
-		assertNotNull(context.getBean(MyComponent.class));
+		assertThat(context.getBean(MyComponent.class)).isNotNull();
 		context.close();
 	}
 

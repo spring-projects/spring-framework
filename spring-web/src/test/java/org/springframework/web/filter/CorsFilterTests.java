@@ -30,9 +30,8 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.cors.CorsConfiguration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Unit tests for {@link CorsFilter}.
@@ -62,8 +61,8 @@ public class CorsFilterTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
-			assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-			assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
+			assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isNull();
+			assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS)).isNull();
 		};
 		filter.doFilter(request, response, filterChain);
 	}
@@ -79,8 +78,8 @@ public class CorsFilterTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
-			assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-			assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
+			assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isNull();
+			assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS)).isNull();
 		};
 		filter.doFilter(request, response, filterChain);
 	}
@@ -94,8 +93,8 @@ public class CorsFilterTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
-			assertEquals("https://domain2.com", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-			assertEquals("header3, header4", response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
+			assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("https://domain2.com");
+			assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS)).isEqualTo("header3, header4");
 		};
 		filter.doFilter(request, response, filterChain);
 	}
@@ -111,7 +110,7 @@ public class CorsFilterTests {
 		FilterChain filterChain = (filterRequest, filterResponse) ->
 			fail("Invalid requests must not be forwarded to the filter chain");
 		filter.doFilter(request, response, filterChain);
-		assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isNull();
 	}
 
 	@Test
@@ -127,10 +126,10 @@ public class CorsFilterTests {
 				fail("Preflight requests must not be forwarded to the filter chain");
 		filter.doFilter(request, response, filterChain);
 
-		assertEquals("https://domain2.com", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("header1, header2", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS));
-		assertEquals("header3, header4", response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
-		assertEquals(123L, Long.parseLong(response.getHeader(HttpHeaders.ACCESS_CONTROL_MAX_AGE)));
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("https://domain2.com");
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).isEqualTo("header1, header2");
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS)).isEqualTo("header3, header4");
+		assertThat(Long.parseLong(response.getHeader(HttpHeaders.ACCESS_CONTROL_MAX_AGE))).isEqualTo(123L);
 	}
 
 	@Test
@@ -146,7 +145,7 @@ public class CorsFilterTests {
 				fail("Preflight requests must not be forwarded to the filter chain");
 		filter.doFilter(request, response, filterChain);
 
-		assertNull(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertThat(response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isNull();
 	}
 
 }

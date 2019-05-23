@@ -54,10 +54,6 @@ import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -116,10 +112,11 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testBeanProperties() throws Exception {
-		assertTrue("datasource ok", this.template.getDataSource() == this.dataSource);
-		assertTrue("ignores warnings by default", this.template.isIgnoreWarnings());
+		assertThat(this.template.getDataSource() == this.dataSource).as("datasource ok").isTrue();
+		assertThat(this.template.isIgnoreWarnings()).as("ignores warnings by default").isTrue();
 		this.template.setIgnoreWarnings(false);
-		assertTrue("can set NOT to ignore warnings", !this.template.isIgnoreWarnings());
+		boolean condition = !this.template.isIgnoreWarnings();
+		assertThat(condition).as("can set NOT to ignore warnings").isTrue();
 	}
 
 	@Test
@@ -129,7 +126,7 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willReturn(1);
 		Dispatcher d = new Dispatcher(idParam, sql);
 		int rowsAffected = this.template.update(d);
-		assertTrue("1 update affected 1 row", rowsAffected == 1);
+		assertThat(rowsAffected == 1).as("1 update affected 1 row").isTrue();
 		verify(this.preparedStatement).setInt(1, idParam);
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
@@ -226,9 +223,9 @@ public class JdbcTemplateTests {
 
 		// Match
 		String[] forenames = sh.getStrings();
-		assertTrue("same length", forenames.length == results.length);
+		assertThat(forenames.length == results.length).as("same length").isTrue();
 		for (int i = 0; i < forenames.length; i++) {
-			assertTrue("Row " + i + " matches", forenames[i].equals(results[i]));
+			assertThat(forenames[i].equals(results[i])).as("Row " + i + " matches").isTrue();
 		}
 
 		if (fetchSize != null) {
@@ -272,12 +269,12 @@ public class JdbcTemplateTests {
 		String result = this.template.execute(new ConnectionCallback<String>() {
 			@Override
 			public String doInConnection(Connection con) {
-				assertTrue(con instanceof ConnectionProxy);
-				assertSame(JdbcTemplateTests.this.connection, ((ConnectionProxy) con).getTargetConnection());
+				assertThat(con instanceof ConnectionProxy).isTrue();
+				assertThat(((ConnectionProxy) con).getTargetConnection()).isSameAs(JdbcTemplateTests.this.connection);
 				return "test";
 			}
 		});
-		assertEquals("test", result);
+		assertThat(result).isEqualTo("test");
 	}
 
 	@Test
@@ -293,7 +290,7 @@ public class JdbcTemplateTests {
 			}
 		});
 
-		assertEquals("test", result);
+		assertThat(result).isEqualTo("test");
 		verify(this.preparedStatement).setFetchSize(10);
 		verify(this.preparedStatement).setMaxRows(20);
 		verify(this.preparedStatement).close();
@@ -352,7 +349,7 @@ public class JdbcTemplateTests {
 		given(this.connection.createStatement()).willReturn(this.statement);
 
 		int actualRowsAffected = this.template.update(sql);
-		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
+		assertThat(actualRowsAffected == rowsAffected).as("Actual rows affected is correct").isTrue();
 		verify(this.statement).close();
 		verify(this.connection).close();
 	}
@@ -368,7 +365,7 @@ public class JdbcTemplateTests {
 
 		int actualRowsAffected = this.template.update(sql,
 				4, new SqlParameterValue(Types.NUMERIC, 2, Float.valueOf(1.4142f)));
-		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
+		assertThat(actualRowsAffected == rowsAffected).as("Actual rows affected is correct").isTrue();
 		verify(this.preparedStatement).setObject(1, 4);
 		verify(this.preparedStatement).setObject(2, Float.valueOf(1.4142f), Types.NUMERIC, 2);
 		verify(this.preparedStatement).close();
@@ -399,7 +396,7 @@ public class JdbcTemplateTests {
 		given(this.connection.createStatement()).willReturn(this.statement);
 
 		int actualRowsAffected = this.template.update(sql);
-		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
+		assertThat(actualRowsAffected == rowsAffected).as("Actual rows affected is correct").isTrue();
 
 		verify(this.statement).close();
 		verify(this.connection).close();
@@ -417,7 +414,7 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
 
 		verify(this.statement).addBatch(sql[0]);
 		verify(this.statement).addBatch(sql[1]);
@@ -457,7 +454,7 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
 
 		verify(this.statement, never()).addBatch(anyString());
 		verify(this.statement).close();
@@ -506,9 +503,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -547,9 +544,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -584,9 +581,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -621,9 +618,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, never()).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -652,9 +649,9 @@ public class JdbcTemplateTests {
 		};
 
 		int[] actualRowsAffected = this.template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, never()).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -703,7 +700,7 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, Collections.emptyList());
-		assertTrue("executed 0 updates", actualRowsAffected.length == 0);
+		assertThat(actualRowsAffected.length == 0).as("executed 0 updates").isTrue();
 	}
 
 	@Test
@@ -719,9 +716,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, ids);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setObject(1, 100);
@@ -744,9 +741,9 @@ public class JdbcTemplateTests {
 		this.template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = this.template.batchUpdate(sql, ids, sqlTypes);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setObject(1, 100, sqlTypes[0]);
 		verify(this.preparedStatement).setObject(1, 200, sqlTypes[0]);
@@ -768,10 +765,10 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[][] actualRowsAffected = template.batchUpdate(sql, ids, 2, setter);
-		assertEquals("executed 2 updates", 2, actualRowsAffected[0].length);
-		assertEquals(rowsAffected1[0], actualRowsAffected[0][0]);
-		assertEquals(rowsAffected1[1], actualRowsAffected[0][1]);
-		assertEquals(rowsAffected2[0], actualRowsAffected[1][0]);
+		assertThat(actualRowsAffected[0].length).as("executed 2 updates").isEqualTo(2);
+		assertThat(actualRowsAffected[0][0]).isEqualTo(rowsAffected1[0]);
+		assertThat(actualRowsAffected[0][1]).isEqualTo(rowsAffected1[1]);
+		assertThat(actualRowsAffected[1][0]).isEqualTo(rowsAffected2[0]);
 
 		verify(this.preparedStatement, times(3)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids.get(0));
@@ -860,7 +857,7 @@ public class JdbcTemplateTests {
 
 		PreparedStatementSetter pss = ps -> ps.setString(1, name);
 		int actualRowsUpdated = new JdbcTemplate(this.dataSource).update(sql, pss);
-		assertEquals("updated correct # of rows", actualRowsUpdated, expectedRowsUpdated);
+		assertThat(expectedRowsUpdated).as("updated correct # of rows").isEqualTo(actualRowsUpdated);
 		verify(this.preparedStatement).setString(1, name);
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
@@ -1057,19 +1054,18 @@ public class JdbcTemplateTests {
 		given(this.callableStatement.getUpdateCount()).willReturn(-1);
 		given(this.callableStatement.getObject(1)).willReturn("X");
 
-		assertTrue("default should have been NOT case insensitive",
-				!this.template.isResultsMapCaseInsensitive());
+		boolean condition = !this.template.isResultsMapCaseInsensitive();
+		assertThat(condition).as("default should have been NOT case insensitive").isTrue();
 
 		this.template.setResultsMapCaseInsensitive(true);
-		assertTrue("now it should have been set to case insensitive",
-				this.template.isResultsMapCaseInsensitive());
+		assertThat(this.template.isResultsMapCaseInsensitive()).as("now it should have been set to case insensitive").isTrue();
 
 		Map<String, Object> out = this.template.call(
 				conn -> conn.prepareCall("my query"), Collections.singletonList(new SqlOutParameter("a", 12)));
 
 		assertThat(out).isInstanceOf(LinkedCaseInsensitiveMap.class);
-		assertNotNull("we should have gotten the result with upper case", out.get("A"));
-		assertNotNull("we should have gotten the result with lower case", out.get("a"));
+		assertThat(out.get("A")).as("we should have gotten the result with upper case").isNotNull();
+		assertThat(out.get("a")).as("we should have gotten the result with lower case").isNotNull();
 		verify(this.callableStatement).close();
 		verify(this.connection).close();
 	}
@@ -1089,8 +1085,8 @@ public class JdbcTemplateTests {
 		given(this.resultSet.getObject(2)).willReturn("second value");
 
 		Map<String, Object> map = this.template.queryForMap("my query");
-		assertEquals(1, map.size());
-		assertEquals("first value", map.get("x"));
+		assertThat(map.size()).isEqualTo(1);
+		assertThat(map.get("x")).isEqualTo("first value");
 	}
 
 

@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based integration test which verifies that
@@ -43,7 +43,7 @@ public class OptionalContextConfigurationSpringRunnerTests {
 
 	@Test
 	public void contextConfigurationAnnotationIsOptional() {
-		assertEquals("foo", foo);
+		assertThat(foo).isEqualTo("foo");
 	}
 
 

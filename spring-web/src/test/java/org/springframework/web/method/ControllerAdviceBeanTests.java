@@ -24,9 +24,7 @@ import org.junit.Test;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Brian Clozel
@@ -103,13 +101,13 @@ public class ControllerAdviceBeanTests {
 	}
 
 	private void assertApplicable(String message, ControllerAdviceBean controllerAdvice, Class<?> controllerBeanType) {
-		assertNotNull(controllerAdvice);
-		assertTrue(message, controllerAdvice.isApplicableToBeanType(controllerBeanType));
+		assertThat(controllerAdvice).isNotNull();
+		assertThat(controllerAdvice.isApplicableToBeanType(controllerBeanType)).as(message).isTrue();
 	}
 
 	private void assertNotApplicable(String message, ControllerAdviceBean controllerAdvice, Class<?> controllerBeanType) {
-		assertNotNull(controllerAdvice);
-		assertFalse(message, controllerAdvice.isApplicableToBeanType(controllerBeanType));
+		assertThat(controllerAdvice).isNotNull();
+		assertThat(controllerAdvice.isApplicableToBeanType(controllerBeanType)).as(message).isFalse();
 	}
 
 

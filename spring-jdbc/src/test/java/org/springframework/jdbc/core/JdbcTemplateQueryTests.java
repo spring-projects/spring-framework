@@ -33,10 +33,8 @@ import org.junit.Test;
 
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -91,9 +89,9 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, true, false);
 		given(this.resultSet.getObject(1)).willReturn(11, 12);
 		List<Map<String, Object>> li = this.template.queryForList(sql);
-		assertEquals("All rows returned", 2, li.size());
-		assertEquals("First row is Integer", 11, ((Integer) li.get(0).get("age")).intValue());
-		assertEquals("Second row is Integer", 12, ((Integer) li.get(1).get("age")).intValue());
+		assertThat(li.size()).as("All rows returned").isEqualTo(2);
+		assertThat(((Integer) li.get(0).get("age")).intValue()).as("First row is Integer").isEqualTo(11);
+		assertThat(((Integer) li.get(1).get("age")).intValue()).as("Second row is Integer").isEqualTo(12);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -103,7 +101,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < 3";
 		given(this.resultSet.next()).willReturn(false);
 		List<Map<String, Object>> li = this.template.queryForList(sql);
-		assertEquals("All rows returned", 0, li.size());
+		assertThat(li.size()).as("All rows returned").isEqualTo(0);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -114,8 +112,8 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1)).willReturn(11);
 		List<Map<String, Object>> li = this.template.queryForList(sql);
-		assertEquals("All rows returned", 1, li.size());
-		assertEquals("First row is Integer", 11, ((Integer) li.get(0).get("age")).intValue());
+		assertThat(li.size()).as("All rows returned").isEqualTo(1);
+		assertThat(((Integer) li.get(0).get("age")).intValue()).as("First row is Integer").isEqualTo(11);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -126,8 +124,8 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(11);
 		List<Integer> li = this.template.queryForList(sql, Integer.class);
-		assertEquals("All rows returned", 1, li.size());
-		assertEquals("Element is Integer", 11, li.get(0).intValue());
+		assertThat(li.size()).as("All rows returned").isEqualTo(1);
+		assertThat(li.get(0).intValue()).as("Element is Integer").isEqualTo(11);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -138,7 +136,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1)).willReturn(11);
 		Map<String, Object> map = this.template.queryForMap(sql);
-		assertEquals("Wow is Integer", 11, ((Integer) map.get("age")).intValue());
+		assertThat(((Integer) map.get("age")).intValue()).as("Wow is Integer").isEqualTo(11);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -165,7 +163,8 @@ public class JdbcTemplateQueryTests {
 				return rs.getInt(1);
 			}
 		});
-		assertTrue("Correct result type", o instanceof Integer);
+		boolean condition = o instanceof Integer;
+		assertThat(condition).as("Correct result type").isTrue();
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -175,7 +174,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getString(1)).willReturn("myvalue");
-		assertEquals("myvalue", this.template.queryForObject(sql, String.class));
+		assertThat(this.template.queryForObject(sql, String.class)).isEqualTo("myvalue");
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -185,7 +184,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1, BigInteger.class)).willReturn(new BigInteger("22"));
-		assertEquals(new BigInteger("22"), this.template.queryForObject(sql, BigInteger.class));
+		assertThat(this.template.queryForObject(sql, BigInteger.class)).isEqualTo(new BigInteger("22"));
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -195,7 +194,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getBigDecimal(1)).willReturn(new BigDecimal("22.5"));
-		assertEquals(new BigDecimal("22.5"), this.template.queryForObject(sql, BigDecimal.class));
+		assertThat(this.template.queryForObject(sql, BigDecimal.class)).isEqualTo(new BigDecimal("22.5"));
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -205,7 +204,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		assertEquals(Integer.valueOf(22), this.template.queryForObject(sql, Integer.class));
+		assertThat(this.template.queryForObject(sql, Integer.class)).isEqualTo(Integer.valueOf(22));
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -216,7 +215,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(0);
 		given(this.resultSet.wasNull()).willReturn(true);
-		assertNull(this.template.queryForObject(sql, Integer.class));
+		assertThat(this.template.queryForObject(sql, Integer.class)).isNull();
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -227,7 +226,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
 		int i = this.template.queryForObject(sql, Integer.class).intValue();
-		assertEquals("Return of an int", 22, i);
+		assertThat(i).as("Return of an int").isEqualTo(22);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -238,7 +237,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
 		int i = this.template.queryForObject(sql, int.class);
-		assertEquals("Return of an int", 22, i);
+		assertThat(i).as("Return of an int").isEqualTo(22);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -249,7 +248,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
 		long l = this.template.queryForObject(sql, Long.class).longValue();
-		assertEquals("Return of a long", 87, l);
+		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -260,7 +259,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
 		long l = this.template.queryForObject(sql, long.class);
-		assertEquals("Return of a long", 87, l);
+		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
 	}
@@ -279,9 +278,9 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, true, false);
 		given(this.resultSet.getObject(1)).willReturn(11, 12);
 		List<Map<String, Object>> li = this.template.queryForList(sql, new Object[] {3});
-		assertEquals("All rows returned", 2, li.size());
-		assertEquals("First row is Integer", 11, ((Integer) li.get(0).get("age")).intValue());
-		assertEquals("Second row is Integer", 12, ((Integer) li.get(1).get("age")).intValue());
+		assertThat(li.size()).as("All rows returned").isEqualTo(2);
+		assertThat(((Integer) li.get(0).get("age")).intValue()).as("First row is Integer").isEqualTo(11);
+		assertThat(((Integer) li.get(1).get("age")).intValue()).as("Second row is Integer").isEqualTo(12);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -292,7 +291,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID < ?";
 		given(this.resultSet.next()).willReturn(false);
 		List<Map<String, Object>> li = this.template.queryForList(sql, new Object[] {3});
-		assertEquals("All rows returned", 0, li.size());
+		assertThat(li.size()).as("All rows returned").isEqualTo(0);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -304,8 +303,8 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1)).willReturn(11);
 		List<Map<String, Object>> li = this.template.queryForList(sql, new Object[] {3});
-		assertEquals("All rows returned", 1, li.size());
-		assertEquals("First row is Integer", 11, ((Integer) li.get(0).get("age")).intValue());
+		assertThat(li.size()).as("All rows returned").isEqualTo(1);
+		assertThat(((Integer) li.get(0).get("age")).intValue()).as("First row is Integer").isEqualTo(11);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -317,8 +316,8 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(11);
 		List<Integer> li = this.template.queryForList(sql, new Object[] {3}, Integer.class);
-		assertEquals("All rows returned", 1, li.size());
-		assertEquals("First row is Integer", 11, li.get(0).intValue());
+		assertThat(li.size()).as("All rows returned").isEqualTo(1);
+		assertThat(li.get(0).intValue()).as("First row is Integer").isEqualTo(11);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -330,7 +329,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getObject(1)).willReturn(11);
 		Map<String, Object> map = this.template.queryForMap(sql, new Object[] {3});
-		assertEquals("Row is Integer", 11, ((Integer) map.get("age")).intValue());
+		assertThat(((Integer) map.get("age")).intValue()).as("Row is Integer").isEqualTo(11);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -347,7 +346,8 @@ public class JdbcTemplateQueryTests {
 				return rs.getInt(1);
 			}
 		});
-		assertTrue("Correct result type", o instanceof Integer);
+		boolean condition = o instanceof Integer;
+		assertThat(condition).as("Correct result type").isTrue();
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -359,7 +359,8 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
 		Object o = this.template.queryForObject(sql, new Object[] {3}, Integer.class);
-		assertTrue("Correct result type", o instanceof Integer);
+		boolean condition = o instanceof Integer;
+		assertThat(condition).as("Correct result type").isTrue();
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -371,7 +372,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
 		int i = this.template.queryForObject(sql, new Object[] {3}, Integer.class).intValue();
-		assertEquals("Return of an int", 22, i);
+		assertThat(i).as("Return of an int").isEqualTo(22);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -383,7 +384,7 @@ public class JdbcTemplateQueryTests {
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
 		long l = this.template.queryForObject(sql, new Object[] {3}, Long.class).longValue();
-		assertEquals("Return of a long", 87, l);
+		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();

@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests ReflectionUtils methods as used against CGLIB-generated classes created
@@ -48,7 +47,7 @@ public class ReflectionUtilsIntegrationTests {
 		assertThat(m1MethodCount).isEqualTo(1);
 		for (Method method : methods) {
 			if (method.getName().contains("m1")) {
-				assertEquals(method.getReturnType(), Integer.class);
+				assertThat(Integer.class).isEqualTo(method.getReturnType());
 			}
 		}
 	}

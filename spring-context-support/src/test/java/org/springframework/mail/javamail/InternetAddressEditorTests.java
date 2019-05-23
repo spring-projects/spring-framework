@@ -18,8 +18,8 @@ package org.springframework.mail.javamail;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Brian Hanafee
@@ -37,37 +37,37 @@ public class InternetAddressEditorTests {
 
 	@Test
 	public void uninitialized() {
-		assertEquals("Uninitialized editor did not return empty value string", EMPTY, editor.getAsText());
+		assertThat(editor.getAsText()).as("Uninitialized editor did not return empty value string").isEqualTo(EMPTY);
 	}
 
 	@Test
 	public void setNull() {
 		editor.setAsText(null);
-		assertEquals("Setting null did not result in empty value string", EMPTY, editor.getAsText());
+		assertThat(editor.getAsText()).as("Setting null did not result in empty value string").isEqualTo(EMPTY);
 	}
 
 	@Test
 	public void setEmpty() {
 		editor.setAsText(EMPTY);
-		assertEquals("Setting empty string did not result in empty value string", EMPTY, editor.getAsText());
+		assertThat(editor.getAsText()).as("Setting empty string did not result in empty value string").isEqualTo(EMPTY);
 	}
 
 	@Test
 	public void allWhitespace() {
 		editor.setAsText(" ");
-		assertEquals("All whitespace was not recognized", EMPTY, editor.getAsText());
+		assertThat(editor.getAsText()).as("All whitespace was not recognized").isEqualTo(EMPTY);
 	}
 
 	@Test
 	public void simpleGoodAddress() {
 		editor.setAsText(SIMPLE);
-		assertEquals("Simple email address failed", SIMPLE, editor.getAsText());
+		assertThat(editor.getAsText()).as("Simple email address failed").isEqualTo(SIMPLE);
 	}
 
 	@Test
 	public void excessWhitespace() {
 		editor.setAsText(" " + SIMPLE + " ");
-		assertEquals("Whitespace was not stripped", SIMPLE, editor.getAsText());
+		assertThat(editor.getAsText()).as("Whitespace was not stripped").isEqualTo(SIMPLE);
 	}
 
 	@Test

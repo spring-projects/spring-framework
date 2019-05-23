@@ -41,10 +41,6 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests invocation of methods.
@@ -103,15 +99,15 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		eContext.setVariable("bar", 3);
 		Object o = expr.getValue(eContext);
-		assertEquals(3, o);
-		assertEquals(1, parser.parseExpression("counter").getValue(eContext));
+		assertThat(o).isEqualTo(3);
+		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(1);
 
 		// Now the expression has cached that throwException(int) is the right thing to call
 		// Let's change 'bar' to be a PlaceOfBirth which indicates the cached reference is
 		// out of date.
 		eContext.setVariable("bar", new PlaceOfBirth("London"));
 		o = expr.getValue(eContext);
-		assertEquals("London", o);
+		assertThat(o).isEqualTo("London");
 		// That confirms the logic to mark the cached reference stale and retry is working
 
 		// Now let's cause the method to exit via exception and ensure it doesn't cause a retry.
@@ -119,8 +115,8 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		// First, switch back to throwException(int)
 		eContext.setVariable("bar", 3);
 		o = expr.getValue(eContext);
-		assertEquals(3, o);
-		assertEquals(2, parser.parseExpression("counter").getValue(eContext));
+		assertThat(o).isEqualTo(3);
+		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(2);
 
 
 		// Now cause it to throw an exception:
@@ -130,14 +126,14 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 			.isNotInstanceOf(SpelEvaluationException.class);
 
 		// If counter is 4 then the method got called twice!
-		assertEquals(3, parser.parseExpression("counter").getValue(eContext));
+		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(3);
 
 		eContext.setVariable("bar", 4);
 		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() ->
 				expr.getValue(eContext));
 
 		// If counter is 5 then the method got called twice!
-		assertEquals(4, parser.parseExpression("counter").getValue(eContext));
+		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(4);
 	}
 
 	/**
@@ -189,24 +185,24 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		// Filter will be called but not do anything, so first doit() will be invoked
 		SpelExpression expr = (SpelExpression) parser.parseExpression("doit(1)");
 		String result = expr.getValue(context, String.class);
-		assertEquals("1", result);
-		assertTrue(filter.filterCalled);
+		assertThat(result).isEqualTo("1");
+		assertThat(filter.filterCalled).isTrue();
 
 		// Filter will now remove non @Anno annotated methods
 		filter.removeIfNotAnnotated = true;
 		filter.filterCalled = false;
 		expr = (SpelExpression) parser.parseExpression("doit(1)");
 		result = expr.getValue(context, String.class);
-		assertEquals("double 1.0", result);
-		assertTrue(filter.filterCalled);
+		assertThat(result).isEqualTo("double 1.0");
+		assertThat(filter.filterCalled).isTrue();
 
 		// check not called for other types
 		filter.filterCalled = false;
 		context.setRootObject(new String("abc"));
 		expr = (SpelExpression) parser.parseExpression("charAt(0)");
 		result = expr.getValue(context, String.class);
-		assertEquals("a", result);
-		assertFalse(filter.filterCalled);
+		assertThat(result).isEqualTo("a");
+		assertThat(filter.filterCalled).isFalse();
 
 		// check de-registration works
 		filter.filterCalled = false;
@@ -214,8 +210,8 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		context.setRootObject(new TestObject());
 		expr = (SpelExpression) parser.parseExpression("doit(1)");
 		result = expr.getValue(context, String.class);
-		assertEquals("1", result);
-		assertFalse(filter.filterCalled);
+		assertThat(result).isEqualTo("1");
+		assertThat(filter.filterCalled).isFalse();
 	}
 
 	@Test
@@ -224,20 +220,20 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// reflective method accessor is the only one by default
 		List<MethodResolver> methodResolvers = ctx.getMethodResolvers();
-		assertEquals(1, methodResolvers.size());
+		assertThat(methodResolvers.size()).isEqualTo(1);
 
 		MethodResolver dummy = new DummyMethodResolver();
 		ctx.addMethodResolver(dummy);
-		assertEquals(2, ctx.getMethodResolvers().size());
+		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
 
 		List<MethodResolver> copy = new ArrayList<>();
 		copy.addAll(ctx.getMethodResolvers());
-		assertTrue(ctx.removeMethodResolver(dummy));
-		assertFalse(ctx.removeMethodResolver(dummy));
-		assertEquals(1, ctx.getMethodResolvers().size());
+		assertThat(ctx.removeMethodResolver(dummy)).isTrue();
+		assertThat(ctx.removeMethodResolver(dummy)).isFalse();
+		assertThat(ctx.getMethodResolvers().size()).isEqualTo(1);
 
 		ctx.setMethodResolvers(copy);
-		assertEquals(2, ctx.getMethodResolvers().size());
+		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
 	}
 
 	@Test
@@ -273,7 +269,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	public void testMethodOfClass() throws Exception {
 		Expression expression = parser.parseExpression("getName()");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
-		assertEquals("java.lang.String", value);
+		assertThat(value).isEqualTo("java.lang.String");
 	}
 
 	@Test
@@ -292,7 +288,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		});
 		Expression expression = parser.parseExpression("@service.handleBytes(#root)");
 		byte[] outBytes = expression.getValue(context, byte[].class);
-		assertSame(bytes, outBytes);
+		assertThat(outBytes).isSameAs(bytes);
 	}
 
 

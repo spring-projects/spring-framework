@@ -36,7 +36,6 @@ import org.springframework.tests.sample.beans.ResourceTestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Keith Donald
@@ -49,7 +48,7 @@ public class ConversionServiceFactoryBeanTests {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
 		ConversionService service = factory.getObject();
-		assertTrue(service.canConvert(String.class, Integer.class));
+		assertThat(service.canConvert(String.class, Integer.class)).isTrue();
 	}
 
 	@Test
@@ -88,10 +87,10 @@ public class ConversionServiceFactoryBeanTests {
 		factory.setConverters(converters);
 		factory.afterPropertiesSet();
 		ConversionService service = factory.getObject();
-		assertTrue(service.canConvert(String.class, Integer.class));
-		assertTrue(service.canConvert(String.class, Foo.class));
-		assertTrue(service.canConvert(String.class, Bar.class));
-		assertTrue(service.canConvert(String.class, Baz.class));
+		assertThat(service.canConvert(String.class, Integer.class)).isTrue();
+		assertThat(service.canConvert(String.class, Foo.class)).isTrue();
+		assertThat(service.canConvert(String.class, Bar.class)).isTrue();
+		assertThat(service.canConvert(String.class, Baz.class)).isTrue();
 	}
 
 	@Test
@@ -117,14 +116,14 @@ public class ConversionServiceFactoryBeanTests {
 	private void doTestConversionServiceInApplicationContext(String fileName, Class<?> resourceClass) {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext(fileName, getClass());
 		ResourceTestBean tb = ctx.getBean("resourceTestBean", ResourceTestBean.class);
-		assertTrue(resourceClass.isInstance(tb.getResource()));
-		assertTrue(tb.getResourceArray().length > 0);
-		assertTrue(resourceClass.isInstance(tb.getResourceArray()[0]));
-		assertTrue(tb.getResourceMap().size() == 1);
-		assertTrue(resourceClass.isInstance(tb.getResourceMap().get("key1")));
-		assertTrue(tb.getResourceArrayMap().size() == 1);
-		assertTrue(tb.getResourceArrayMap().get("key1").length > 0);
-		assertTrue(resourceClass.isInstance(tb.getResourceArrayMap().get("key1")[0]));
+		assertThat(resourceClass.isInstance(tb.getResource())).isTrue();
+		assertThat(tb.getResourceArray().length > 0).isTrue();
+		assertThat(resourceClass.isInstance(tb.getResourceArray()[0])).isTrue();
+		assertThat(tb.getResourceMap().size() == 1).isTrue();
+		assertThat(resourceClass.isInstance(tb.getResourceMap().get("key1"))).isTrue();
+		assertThat(tb.getResourceArrayMap().size() == 1).isTrue();
+		assertThat(tb.getResourceArrayMap().get("key1").length > 0).isTrue();
+		assertThat(resourceClass.isInstance(tb.getResourceArrayMap().get("key1")[0])).isTrue();
 	}
 
 
@@ -140,7 +139,7 @@ public class ConversionServiceFactoryBeanTests {
 	public static class ComplexConstructorArgument {
 
 		public ComplexConstructorArgument(Map<String, Class<?>> map) {
-			assertTrue(!map.isEmpty());
+			assertThat(!map.isEmpty()).isTrue();
 			assertThat(map.keySet().iterator().next()).isInstanceOf(String.class);
 			assertThat(map.values().iterator().next()).isInstanceOf(Class.class);
 		}

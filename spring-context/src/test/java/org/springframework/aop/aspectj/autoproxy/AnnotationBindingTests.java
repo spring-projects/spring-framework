@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Adrian Colyer
@@ -42,13 +42,13 @@ public class AnnotationBindingTests {
 
 	@Test
 	public void testAnnotationBindingInAroundAdvice() {
-		assertEquals("this value", testBean.doThis());
-		assertEquals("that value", testBean.doThat());
+		assertThat(testBean.doThis()).isEqualTo("this value");
+		assertThat(testBean.doThat()).isEqualTo("that value");
 	}
 
 	@Test
 	public void testNoMatchingWithoutAnnotationPresent() {
-		assertEquals("doTheOther", testBean.doTheOther());
+		assertThat(testBean.doTheOther()).isEqualTo("doTheOther");
 	}
 
 }

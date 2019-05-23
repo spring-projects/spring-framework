@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for
@@ -45,7 +45,7 @@ public class RequestMappingInfoHandlerMethodMappingNamingStrategyTests {
 
 		HandlerMethodMappingNamingStrategy<RequestMappingInfo> strategy = new RequestMappingInfoHandlerMethodMappingNamingStrategy();
 
-		assertEquals("foo", strategy.getName(handlerMethod, rmi));
+		assertThat(strategy.getName(handlerMethod, rmi)).isEqualTo("foo");
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class RequestMappingInfoHandlerMethodMappingNamingStrategyTests {
 
 		HandlerMethodMappingNamingStrategy<RequestMappingInfo> strategy = new RequestMappingInfoHandlerMethodMappingNamingStrategy();
 
-		assertEquals("TC#handle", strategy.getName(handlerMethod, rmi));
+		assertThat(strategy.getName(handlerMethod, rmi)).isEqualTo("TC#handle");
 	}
 
 

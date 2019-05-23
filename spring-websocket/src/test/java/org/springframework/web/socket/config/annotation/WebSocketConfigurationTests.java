@@ -39,7 +39,7 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for WebSocket Java server-side configuration.
@@ -70,7 +70,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/ws").get();
 
 		TestHandler serverHandler = this.wac.getBean(TestHandler.class);
-		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
+		assertThat(serverHandler.connectLatch.await(2, TimeUnit.SECONDS)).isTrue();
 
 		session.close();
 	}
@@ -81,7 +81,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/sockjs/websocket").get();
 
 		TestHandler serverHandler = this.wac.getBean(TestHandler.class);
-		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
+		assertThat(serverHandler.connectLatch.await(2, TimeUnit.SECONDS)).isTrue();
 
 		session.close();
 	}

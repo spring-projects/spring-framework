@@ -25,7 +25,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.lang.Nullable;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Colin Sampaleanu
@@ -53,8 +53,8 @@ public class DelegatingNavigationHandlerTests {
 		beanFactory.addBean("jsfNavigationHandler", targetHandler);
 
 		delNavHandler.handleNavigation(facesContext, "fromAction", "myViewId");
-		assertEquals("fromAction", targetHandler.lastFromAction);
-		assertEquals("myViewId", targetHandler.lastOutcome);
+		assertThat(targetHandler.lastFromAction).isEqualTo("fromAction");
+		assertThat(targetHandler.lastOutcome).isEqualTo("myViewId");
 	}
 
 	@Test
@@ -63,12 +63,12 @@ public class DelegatingNavigationHandlerTests {
 		beanFactory.addBean("jsfNavigationHandler", targetHandler);
 
 		delNavHandler.handleNavigation(facesContext, "fromAction", "myViewId");
-		assertEquals("fromAction", targetHandler.lastFromAction);
-		assertEquals("myViewId", targetHandler.lastOutcome);
+		assertThat(targetHandler.lastFromAction).isEqualTo("fromAction");
+		assertThat(targetHandler.lastOutcome).isEqualTo("myViewId");
 
 		// Original handler must have been invoked as well...
-		assertEquals("fromAction", origNavHandler.lastFromAction);
-		assertEquals("myViewId", origNavHandler.lastOutcome);
+		assertThat(origNavHandler.lastFromAction).isEqualTo("fromAction");
+		assertThat(origNavHandler.lastOutcome).isEqualTo("myViewId");
 	}
 
 

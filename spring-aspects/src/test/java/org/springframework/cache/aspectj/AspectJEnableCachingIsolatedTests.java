@@ -43,10 +43,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -72,14 +69,14 @@ public class AspectJEnableCachingIsolatedTests {
 	public void testKeyStrategy() {
 		load(EnableCachingConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
-		assertSame(this.ctx.getBean("keyGenerator", KeyGenerator.class), aspect.getKeyGenerator());
+		assertThat(aspect.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator", KeyGenerator.class));
 	}
 
 	@Test
 	public void testCacheErrorHandler() {
 		load(EnableCachingConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
-		assertSame(this.ctx.getBean("errorHandler", CacheErrorHandler.class), aspect.getErrorHandler());
+		assertThat(aspect.getErrorHandler()).isSameAs(this.ctx.getBean("errorHandler", CacheErrorHandler.class));
 	}
 
 
@@ -96,7 +93,7 @@ public class AspectJEnableCachingIsolatedTests {
 			load(MultiCacheManagerConfig.class);
 		}
 		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("bean of type CacheManager"));
+			assertThat(ex.getMessage().contains("bean of type CacheManager")).isTrue();
 		}
 	}
 
@@ -112,8 +109,9 @@ public class AspectJEnableCachingIsolatedTests {
 		}
 		catch (BeanCreationException ex) {
 			Throwable root = ex.getRootCause();
-			assertTrue(root instanceof IllegalStateException);
-			assertTrue(ex.getMessage().contains("implementations of CachingConfigurer"));
+			boolean condition = root instanceof IllegalStateException;
+			assertThat(condition).isTrue();
+			assertThat(ex.getMessage().contains("implementations of CachingConfigurer")).isTrue();
 		}
 	}
 
@@ -123,7 +121,7 @@ public class AspectJEnableCachingIsolatedTests {
 			load(EmptyConfig.class);
 		}
 		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("no bean of type CacheManager"));
+			assertThat(ex.getMessage().contains("no bean of type CacheManager")).isTrue();
 		}
 	}
 
@@ -132,10 +130,9 @@ public class AspectJEnableCachingIsolatedTests {
 	public void emptyConfigSupport() {
 		load(EmptyConfigSupportConfig.class);
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
-		assertNotNull(aspect.getCacheResolver());
-		assertEquals(SimpleCacheResolver.class, aspect.getCacheResolver().getClass());
-		assertSame(this.ctx.getBean(CacheManager.class),
-				((SimpleCacheResolver) aspect.getCacheResolver()).getCacheManager());
+		assertThat(aspect.getCacheResolver()).isNotNull();
+		assertThat(aspect.getCacheResolver().getClass()).isEqualTo(SimpleCacheResolver.class);
+		assertThat(((SimpleCacheResolver) aspect.getCacheResolver()).getCacheManager()).isSameAs(this.ctx.getBean(CacheManager.class));
 	}
 
 	@Test
@@ -143,8 +140,8 @@ public class AspectJEnableCachingIsolatedTests {
 		load(FullCachingConfig.class);
 
 		AnnotationCacheAspect aspect = this.ctx.getBean(AnnotationCacheAspect.class);
-		assertSame(this.ctx.getBean("cacheResolver"), aspect.getCacheResolver());
-		assertSame(this.ctx.getBean("keyGenerator"), aspect.getKeyGenerator());
+		assertThat(aspect.getCacheResolver()).isSameAs(this.ctx.getBean("cacheResolver"));
+		assertThat(aspect.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator"));
 	}
 
 

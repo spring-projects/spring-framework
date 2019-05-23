@@ -35,9 +35,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
@@ -49,30 +47,30 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 
 	@Test
 	public void canWrite() {
-		assertTrue(this.writer.canWrite(
+		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
 		// No generic information
-		assertTrue(this.writer.canWrite(
+		assertThat(this.writer.canWrite(
 				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
-		assertFalse(this.writer.canWrite(
+		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
-				null));
+				null)).isFalse();
 
-		assertFalse(this.writer.canWrite(
+		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, String.class),
-				null));
+				null)).isFalse();
 
-		assertFalse(this.writer.canWrite(
+		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isFalse();
 
-		assertFalse(this.writer.canWrite(
+		assertThat(this.writer.canWrite(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
-				MediaType.MULTIPART_FORM_DATA));
+				MediaType.MULTIPART_FORM_DATA)).isFalse();
 	}
 
 	@Test
@@ -91,15 +89,15 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTestCase {
 				.expectComplete()
 				.verify();
 		HttpHeaders headers = response.getHeaders();
-		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", headers.getContentType().toString());
-		assertEquals(expected.length(), headers.getContentLength());
+		assertThat(headers.getContentType().toString()).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		assertThat(headers.getContentLength()).isEqualTo(expected.length());
 	}
 
 	private Consumer<DataBuffer> stringConsumer(String expected) {
 		return dataBuffer -> {
 			String value = DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
 			DataBufferUtils.release(dataBuffer);
-			assertEquals(expected, value);
+			assertThat(value).isEqualTo(expected);
 		};
 	}
 

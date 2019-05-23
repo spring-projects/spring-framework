@@ -56,8 +56,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests use of @EnableAsync on @Configuration classes.
@@ -163,7 +161,7 @@ public class EnableAsyncTests {
 		ctx.refresh();
 
 		Object bean = ctx.getBean(CustomAsyncBean.class);
-		assertTrue(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 		boolean isAsyncAdvised = false;
 		for (Advisor advisor : ((Advised) bean).getAdvisors()) {
 			if (advisor instanceof AsyncAnnotationAdvisor) {
@@ -171,7 +169,7 @@ public class EnableAsyncTests {
 				break;
 			}
 		}
-		assertTrue("bean was not async advised as expected", isAsyncAdvised);
+		assertThat(isAsyncAdvised).as("bean was not async advised as expected").isTrue();
 
 		ctx.close();
 	}
@@ -234,7 +232,7 @@ public class EnableAsyncTests {
 		Method method = ReflectionUtils.findMethod(AsyncBean.class, "fail");
 		TestableAsyncUncaughtExceptionHandler exceptionHandler =
 				(TestableAsyncUncaughtExceptionHandler) ctx.getBean("exceptionHandler");
-		assertFalse("handler should not have been called yet", exceptionHandler.isCalled());
+		assertThat(exceptionHandler.isCalled()).as("handler should not have been called yet").isFalse();
 		// Act
 		asyncBean.fail();
 		// Assert
@@ -272,7 +270,7 @@ public class EnableAsyncTests {
 		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
 		TestableAsyncUncaughtExceptionHandler exceptionHandler =
 				(TestableAsyncUncaughtExceptionHandler) ctx.getBean("exceptionHandler");
-		assertFalse("handler should not have been called yet", exceptionHandler.isCalled());
+		assertThat(exceptionHandler.isCalled()).as("handler should not have been called yet").isFalse();
 		Method method = ReflectionUtils.findMethod(AsyncBean.class, "fail");
 		// Act
 		asyncBean.fail();

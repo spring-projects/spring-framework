@@ -29,10 +29,9 @@ import java.util.Set;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.core.annotation.AnnotatedElementUtils.findMergedRepeatableAnnotations;
 import static org.springframework.core.annotation.AnnotatedElementUtils.getMergedRepeatableAnnotations;
 
@@ -112,8 +111,8 @@ public class ComposedRepeatableAnnotationsTests {
 	public void getNoninheritedComposedRepeatableAnnotationsOnSuperclass() {
 		Class<?> element = SubNoninheritedRepeatableClass.class;
 		Set<Noninherited> annotations = getMergedRepeatableAnnotations(element, Noninherited.class);
-		assertNotNull(annotations);
-		assertEquals(0, annotations.size());
+		assertThat(annotations).isNotNull();
+		assertThat(annotations.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -213,39 +212,39 @@ public class ComposedRepeatableAnnotationsTests {
 	}
 
 	private void assertGetRepeatableAnnotations(AnnotatedElement element) {
-		assertNotNull(element);
+		assertThat(element).isNotNull();
 
 		Set<PeteRepeat> peteRepeats = getMergedRepeatableAnnotations(element, PeteRepeat.class);
-		assertNotNull(peteRepeats);
-		assertEquals(3, peteRepeats.size());
+		assertThat(peteRepeats).isNotNull();
+		assertThat(peteRepeats.size()).isEqualTo(3);
 
 		Iterator<PeteRepeat> iterator = peteRepeats.iterator();
-		assertEquals("A", iterator.next().value());
-		assertEquals("B", iterator.next().value());
-		assertEquals("C", iterator.next().value());
+		assertThat(iterator.next().value()).isEqualTo("A");
+		assertThat(iterator.next().value()).isEqualTo("B");
+		assertThat(iterator.next().value()).isEqualTo("C");
 	}
 
 	private void assertFindRepeatableAnnotations(AnnotatedElement element) {
-		assertNotNull(element);
+		assertThat(element).isNotNull();
 
 		Set<PeteRepeat> peteRepeats = findMergedRepeatableAnnotations(element, PeteRepeat.class);
-		assertNotNull(peteRepeats);
-		assertEquals(3, peteRepeats.size());
+		assertThat(peteRepeats).isNotNull();
+		assertThat(peteRepeats.size()).isEqualTo(3);
 
 		Iterator<PeteRepeat> iterator = peteRepeats.iterator();
-		assertEquals("A", iterator.next().value());
-		assertEquals("B", iterator.next().value());
-		assertEquals("C", iterator.next().value());
+		assertThat(iterator.next().value()).isEqualTo("A");
+		assertThat(iterator.next().value()).isEqualTo("B");
+		assertThat(iterator.next().value()).isEqualTo("C");
 	}
 
 	private void assertNoninheritedRepeatableAnnotations(Set<Noninherited> annotations) {
-		assertNotNull(annotations);
-		assertEquals(3, annotations.size());
+		assertThat(annotations).isNotNull();
+		assertThat(annotations.size()).isEqualTo(3);
 
 		Iterator<Noninherited> iterator = annotations.iterator();
-		assertEquals("A", iterator.next().value());
-		assertEquals("B", iterator.next().value());
-		assertEquals("C", iterator.next().value());
+		assertThat(iterator.next().value()).isEqualTo("A");
+		assertThat(iterator.next().value()).isEqualTo("B");
+		assertThat(iterator.next().value()).isEqualTo("C");
 	}
 
 

@@ -23,9 +23,7 @@ import org.junit.Test;
 import org.springframework.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.cache.Cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Ben Manes
@@ -70,13 +68,15 @@ public class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<Caffeine
 		Object key = new Object();
 		Object value = null;
 
-		assertNull(cache.get(key));
-		assertNull(cache.putIfAbsent(key, value));
-		assertEquals(value, cache.get(key).get());
+		assertThat(cache.get(key)).isNull();
+		assertThat(cache.putIfAbsent(key, value)).isNull();
+		assertThat(cache.get(key).get()).isEqualTo(value);
 		Cache.ValueWrapper wrapper = cache.putIfAbsent(key, "anotherValue");
-		assertNotNull(wrapper); // A value is set but is 'null'
-		assertEquals(null, wrapper.get());
-		assertEquals(value, cache.get(key).get()); // not changed
+		// A value is set but is 'null'
+		assertThat(wrapper).isNotNull();
+		assertThat(wrapper.get()).isEqualTo(null);
+		// not changed
+		assertThat(cache.get(key).get()).isEqualTo(value);
 	}
 
 }

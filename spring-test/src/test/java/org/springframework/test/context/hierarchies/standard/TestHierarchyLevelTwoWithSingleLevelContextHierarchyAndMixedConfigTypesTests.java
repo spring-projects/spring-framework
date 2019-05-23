@@ -25,9 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -54,12 +52,12 @@ public class TestHierarchyLevelTwoWithSingleLevelContextHierarchyAndMixedConfigT
 	@Test
 	@Override
 	public void loadContextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNotNull("parent ApplicationContext", context.getParent());
-		assertNull("grandparent ApplicationContext", context.getParent().getParent());
-		assertEquals("foo-level-2", foo);
-		assertEquals("bar", bar);
-		assertEquals("baz", baz);
+		assertThat(context).as("child ApplicationContext").isNotNull();
+		assertThat(context.getParent()).as("parent ApplicationContext").isNotNull();
+		assertThat(context.getParent().getParent()).as("grandparent ApplicationContext").isNull();
+		assertThat(foo).isEqualTo("foo-level-2");
+		assertThat(bar).isEqualTo("bar");
+		assertThat(baz).isEqualTo("baz");
 	}
 
 }

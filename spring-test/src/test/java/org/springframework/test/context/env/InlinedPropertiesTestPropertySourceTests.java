@@ -28,7 +28,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertArrayEquals;
 import static org.springframework.test.context.support.TestPropertySourceUtils.INLINED_PROPERTIES_PROPERTY_SOURCE_NAME;
 
 /**
@@ -74,7 +73,7 @@ public class InlinedPropertiesTestPropertySourceTests {
 			"key.value.1", "key.value.2", "key.value.3" };
 		EnumerablePropertySource eps = (EnumerablePropertySource) env.getPropertySources().get(
 			INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertArrayEquals(expectedPropertyNames, eps.getPropertyNames());
+		assertThat(eps.getPropertyNames()).isEqualTo(expectedPropertyNames);
 	}
 
 

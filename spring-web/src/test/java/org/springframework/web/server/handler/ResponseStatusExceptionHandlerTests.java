@@ -28,8 +28,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
@@ -58,21 +57,21 @@ public class ResponseStatusExceptionHandlerTests {
 	public void handleResponseStatusException() {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
+		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
 	public void handleNestedResponseStatusException() {
 		Throwable ex = new Exception(new ResponseStatusException(HttpStatus.BAD_REQUEST, ""));
 		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
-		assertEquals(HttpStatus.BAD_REQUEST, this.exchange.getResponse().getStatusCode());
+		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
 	public void unresolvedException() {
 		Throwable expected = new IllegalStateException();
 		Mono<Void> mono = this.handler.handle(this.exchange, expected);
-		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(expected, actual)).verify();
+		StepVerifier.create(mono).consumeErrorWith(actual -> assertThat(actual).isSameAs(expected)).verify();
 	}
 
 	@Test  // SPR-16231
@@ -81,7 +80,7 @@ public class ResponseStatusExceptionHandlerTests {
 		this.exchange.getResponse().setStatusCode(HttpStatus.CREATED);
 		Mono<Void> mono = this.exchange.getResponse().setComplete()
 				.then(Mono.defer(() -> this.handler.handle(this.exchange, ex)));
-		StepVerifier.create(mono).consumeErrorWith(actual -> assertSame(ex, actual)).verify();
+		StepVerifier.create(mono).consumeErrorWith(actual -> assertThat(actual).isSameAs(ex)).verify();
 	}
 
 }

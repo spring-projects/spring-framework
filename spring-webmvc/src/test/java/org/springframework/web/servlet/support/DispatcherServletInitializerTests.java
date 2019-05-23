@@ -30,9 +30,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test case for {@link AbstractDispatcherServletInitializer}.
@@ -61,23 +59,24 @@ public class DispatcherServletInitializerTests {
 	public void register() throws ServletException {
 		initializer.onStartup(servletContext);
 
-		assertEquals(1, servlets.size());
-		assertNotNull(servlets.get(SERVLET_NAME));
+		assertThat(servlets.size()).isEqualTo(1);
+		assertThat(servlets.get(SERVLET_NAME)).isNotNull();
 
 		DispatcherServlet servlet = (DispatcherServlet) servlets.get(SERVLET_NAME);
-		assertEquals(MyDispatcherServlet.class, servlet.getClass());
+		assertThat(servlet.getClass()).isEqualTo(MyDispatcherServlet.class);
 		WebApplicationContext servletContext = servlet.getWebApplicationContext();
 
-		assertTrue(servletContext.containsBean("bean"));
-		assertTrue(servletContext.getBean("bean") instanceof MyBean);
+		assertThat(servletContext.containsBean("bean")).isTrue();
+		boolean condition = servletContext.getBean("bean") instanceof MyBean;
+		assertThat(condition).isTrue();
 
-		assertEquals(1, registrations.size());
-		assertNotNull(registrations.get(SERVLET_NAME));
+		assertThat(registrations.size()).isEqualTo(1);
+		assertThat(registrations.get(SERVLET_NAME)).isNotNull();
 
 		MockServletRegistration registration = registrations.get(SERVLET_NAME);
-		assertEquals(Collections.singleton(SERVLET_MAPPING), registration.getMappings());
-		assertEquals(1, registration.getLoadOnStartup());
-		assertEquals(ROLE_NAME, registration.getRunAsRole());
+		assertThat(registration.getMappings()).isEqualTo(Collections.singleton(SERVLET_MAPPING));
+		assertThat(registration.getLoadOnStartup()).isEqualTo(1);
+		assertThat(registration.getRunAsRole()).isEqualTo(ROLE_NAME);
 	}
 
 

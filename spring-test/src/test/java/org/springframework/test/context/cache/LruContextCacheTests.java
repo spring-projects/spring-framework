@@ -28,8 +28,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -71,8 +71,8 @@ public class LruContextCacheTests {
 	@Test
 	public void maxCacheSizeOne() {
 		DefaultContextCache cache = new DefaultContextCache(1);
-		assertEquals(0, cache.size());
-		assertEquals(1, cache.getMaxSize());
+		assertThat(cache.size()).isEqualTo(0);
+		assertThat(cache.getMaxSize()).isEqualTo(1);
 
 		cache.put(fooConfig, fooContext);
 		assertCacheContents(cache, "Foo");
@@ -90,8 +90,8 @@ public class LruContextCacheTests {
 	@Test
 	public void maxCacheSizeThree() {
 		DefaultContextCache cache = new DefaultContextCache(3);
-		assertEquals(0, cache.size());
-		assertEquals(3, cache.getMaxSize());
+		assertThat(cache.size()).isEqualTo(0);
+		assertThat(cache.getMaxSize()).isEqualTo(3);
 
 		cache.put(fooConfig, fooContext);
 		assertCacheContents(cache, "Foo");
@@ -171,7 +171,7 @@ public class LruContextCacheTests {
 			.collect(toList());
 		// @formatter:on
 
-		assertEquals(asList(expectedNames), actualNames);
+		assertThat(actualNames).isEqualTo(asList(expectedNames));
 	}
 
 

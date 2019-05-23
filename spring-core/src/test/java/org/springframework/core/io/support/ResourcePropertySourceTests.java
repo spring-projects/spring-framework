@@ -25,7 +25,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link ResourcePropertySource}.
@@ -47,57 +46,57 @@ public class ResourcePropertySourceTests {
 	@Test
 	public void withLocationAndGeneratedName() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource(PROPERTIES_LOCATION);
-		assertEquals("bar", ps.getProperty("foo"));
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
 		assertThat(ps.getName()).isEqualTo(PROPERTIES_RESOURCE_DESCRIPTION);
 	}
 
 	@Test
 	public void xmlWithLocationAndGeneratedName() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource(XML_PROPERTIES_LOCATION);
-		assertEquals("bar", ps.getProperty("foo"));
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
 		assertThat(ps.getName()).isEqualTo(XML_PROPERTIES_RESOURCE_DESCRIPTION);
 	}
 
 	@Test
 	public void withLocationAndExplicitName() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource("ps1", PROPERTIES_LOCATION);
-		assertEquals("bar", ps.getProperty("foo"));
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
 		assertThat(ps.getName()).isEqualTo("ps1");
 	}
 
 	@Test
 	public void withLocationAndExplicitNameAndExplicitClassLoader() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource("ps1", PROPERTIES_LOCATION, getClass().getClassLoader());
-		assertEquals("bar", ps.getProperty("foo"));
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
 		assertThat(ps.getName()).isEqualTo("ps1");
 	}
 
 	@Test
 	public void withLocationAndGeneratedNameAndExplicitClassLoader() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource(PROPERTIES_LOCATION, getClass().getClassLoader());
-		assertEquals("bar", ps.getProperty("foo"));
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
 		assertThat(ps.getName()).isEqualTo(PROPERTIES_RESOURCE_DESCRIPTION);
 	}
 
 	@Test
 	public void withResourceAndGeneratedName() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource(new ClassPathResource(PROPERTIES_PATH));
-		assertEquals("bar", ps.getProperty("foo"));
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
 		assertThat(ps.getName()).isEqualTo(PROPERTIES_RESOURCE_DESCRIPTION);
 	}
 
 	@Test
 	public void withResourceAndExplicitName() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource("ps1", new ClassPathResource(PROPERTIES_PATH));
-		assertEquals("bar", ps.getProperty("foo"));
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
 		assertThat(ps.getName()).isEqualTo("ps1");
 	}
 
 	@Test
 	public void withResourceHavingNoDescription() throws IOException {
 		PropertySource<?> ps = new ResourcePropertySource(new ByteArrayResource("foo=bar".getBytes(), ""));
-		assertEquals("bar", ps.getProperty("foo"));
-		assertEquals("Byte array resource []", ps.getName());
+		assertThat(ps.getProperty("foo")).isEqualTo("bar");
+		assertThat(ps.getName()).isEqualTo("Byte array resource []");
 	}
 
 }

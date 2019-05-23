@@ -38,11 +38,7 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for with a server-side session.
@@ -71,17 +67,17 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String id = extractSessionId(response.getHeaders());
-		assertNotNull(id);
-		assertEquals(1, this.handler.getSessionRequestCount());
+		assertThat(id).isNotNull();
+		assertThat(this.handler.getSessionRequestCount()).isEqualTo(1);
 
 		request = RequestEntity.get(createUri()).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNull(response.getHeaders().get("Set-Cookie"));
-		assertEquals(2, this.handler.getSessionRequestCount());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getHeaders().get("Set-Cookie")).isNull();
+		assertThat(this.handler.getSessionRequestCount()).isEqualTo(2);
 	}
 
 	@Test
@@ -91,33 +87,33 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String id = extractSessionId(response.getHeaders());
-		assertNotNull(id);
-		assertEquals(1, this.handler.getSessionRequestCount());
+		assertThat(id).isNotNull();
+		assertThat(this.handler.getSessionRequestCount()).isEqualTo(1);
 
 		// Second request: same session
 		request = RequestEntity.get(createUri()).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNull(response.getHeaders().get("Set-Cookie"));
-		assertEquals(2, this.handler.getSessionRequestCount());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getHeaders().get("Set-Cookie")).isNull();
+		assertThat(this.handler.getSessionRequestCount()).isEqualTo(2);
 
 		// Now fast-forward by 31 minutes
 		InMemoryWebSessionStore store = (InMemoryWebSessionStore) this.sessionManager.getSessionStore();
 		WebSession session = store.retrieveSession(id).block();
-		assertNotNull(session);
+		assertThat(session).isNotNull();
 		store.setClock(Clock.offset(store.getClock(), Duration.ofMinutes(31)));
 
 		// Third request: expired session, new session created
 		request = RequestEntity.get(createUri()).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		id = extractSessionId(response.getHeaders());
-		assertNotNull("Expected new session id", id);
-		assertEquals(1, this.handler.getSessionRequestCount());
+		assertThat(id).as("Expected new session id").isNotNull();
+		assertThat(this.handler.getSessionRequestCount()).isEqualTo(1);
 	}
 
 	@Test
@@ -127,9 +123,9 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String id = extractSessionId(response.getHeaders());
-		assertNotNull(id);
+		assertThat(id).isNotNull();
 
 		// Now fast-forward by 31 minutes
 		InMemoryWebSessionStore store = (InMemoryWebSessionStore) this.sessionManager.getSessionStore();
@@ -140,10 +136,10 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String value = response.getHeaders().getFirst("Set-Cookie");
-		assertNotNull(value);
-		assertTrue("Actual value: " + value, value.contains("Max-Age=0"));
+		assertThat(value).isNotNull();
+		assertThat(value.contains("Max-Age=0")).as("Actual value: " + value).isTrue();
 	}
 
 	@Test
@@ -153,21 +149,21 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String oldId = extractSessionId(response.getHeaders());
-		assertNotNull(oldId);
-		assertEquals(1, this.handler.getSessionRequestCount());
+		assertThat(oldId).isNotNull();
+		assertThat(this.handler.getSessionRequestCount()).isEqualTo(1);
 
 		// Second request: session id changes
 		URI uri = new URI("http://localhost:" + this.port + "/?changeId");
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + oldId).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String newId = extractSessionId(response.getHeaders());
-		assertNotNull("Expected new session id", newId);
-		assertNotEquals(oldId, newId);
-		assertEquals(2, this.handler.getSessionRequestCount());
+		assertThat(newId).as("Expected new session id").isNotNull();
+		assertThat(newId).isNotEqualTo(oldId);
+		assertThat(this.handler.getSessionRequestCount()).isEqualTo(2);
 	}
 
 	@Test
@@ -177,25 +173,25 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String id = extractSessionId(response.getHeaders());
-		assertNotNull(id);
+		assertThat(id).isNotNull();
 
 		// Second request: invalidates session
 		URI uri = new URI("http://localhost:" + this.port + "/?invalidate");
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String value = response.getHeaders().getFirst("Set-Cookie");
-		assertNotNull(value);
-		assertTrue("Actual value: " + value, value.contains("Max-Age=0"));
+		assertThat(value).isNotNull();
+		assertThat(value.contains("Max-Age=0")).as("Actual value: " + value).isTrue();
 	}
 
 	private String extractSessionId(HttpHeaders headers) {
 		List<String> headerValues = headers.get("Set-Cookie");
-		assertNotNull(headerValues);
-		assertEquals(1, headerValues.size());
+		assertThat(headerValues).isNotNull();
+		assertThat(headerValues.size()).isEqualTo(1);
 
 		for (String s : headerValues.get(0).split(";")){
 			if (s.startsWith("SESSION=")) {

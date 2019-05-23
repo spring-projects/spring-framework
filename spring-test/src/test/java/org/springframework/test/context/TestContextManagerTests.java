@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based unit test for {@link TestContextManager}, which verifies proper
@@ -53,7 +53,7 @@ public class TestContextManagerTests {
 	@Test
 	public void listenerExecutionOrder() throws Exception {
 		// @formatter:off
-		assertEquals("Registered TestExecutionListeners", 3, this.testContextManager.getTestExecutionListeners().size());
+		assertThat(this.testContextManager.getTestExecutionListeners().size()).as("Registered TestExecutionListeners").isEqualTo(3);
 
 		this.testContextManager.beforeTestMethod(this, this.testMethod);
 		assertExecutionOrder("beforeTestMethod",
@@ -104,8 +104,7 @@ public class TestContextManagerTests {
 	}
 
 	private static void assertExecutionOrder(String usageContext, String... expectedBeforeTestMethodCalls) {
-		assertEquals("execution order (" + usageContext + ") ==>", Arrays.asList(expectedBeforeTestMethodCalls),
-			executionOrder);
+		assertThat(executionOrder).as("execution order (" + usageContext + ") ==>").isEqualTo(Arrays.asList(expectedBeforeTestMethodCalls));
 	}
 
 

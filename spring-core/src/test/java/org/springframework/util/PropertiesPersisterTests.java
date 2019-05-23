@@ -25,8 +25,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -107,8 +106,8 @@ public class PropertiesPersisterTests {
 		else {
 			persister.load(props, new ByteArrayInputStream(propString.getBytes()));
 		}
-		assertEquals("message1", props.getProperty("code1"));
-		assertEquals("message2", props.getProperty("code2"));
+		assertThat(props.getProperty("code1")).isEqualTo("message1");
+		assertThat(props.getProperty("code2")).isEqualTo("message2");
 		return props;
 	}
 
@@ -126,10 +125,10 @@ public class PropertiesPersisterTests {
 			propCopy = new String(propOut.toByteArray());
 		}
 		if (header != null) {
-			assertTrue(propCopy.contains(header));
+			assertThat(propCopy.contains(header)).isTrue();
 		}
-		assertTrue(propCopy.contains("\ncode1=message1"));
-		assertTrue(propCopy.contains("\ncode2=message2"));
+		assertThat(propCopy.contains("\ncode1=message1")).isTrue();
+		assertThat(propCopy.contains("\ncode2=message2")).isTrue();
 		return propCopy;
 	}
 

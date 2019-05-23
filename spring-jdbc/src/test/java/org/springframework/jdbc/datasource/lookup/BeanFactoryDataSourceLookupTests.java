@@ -23,10 +23,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -50,9 +49,9 @@ public class BeanFactoryDataSourceLookupTests {
 		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
 		lookup.setBeanFactory(beanFactory);
 		DataSource dataSource = lookup.getDataSource(DATASOURCE_BEAN_NAME);
-		assertNotNull("A DataSourceLookup implementation must *never* return null from " +
-				"getDataSource(): this one obviously (and incorrectly) is", dataSource);
-		assertSame(expectedDataSource, dataSource);
+		assertThat(dataSource).as("A DataSourceLookup implementation must *never* return null from " +
+				"getDataSource(): this one obviously (and incorrectly) is").isNotNull();
+		assertThat(dataSource).isSameAs(expectedDataSource);
 	}
 
 	@Test

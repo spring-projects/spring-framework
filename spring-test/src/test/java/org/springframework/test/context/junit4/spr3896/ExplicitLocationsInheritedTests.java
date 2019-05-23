@@ -22,8 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based integration test for verifying support for the
@@ -44,7 +43,7 @@ public class ExplicitLocationsInheritedTests extends ExplicitLocationsBaseTests 
 
 	@Test
 	public void verifyPetSetFromExtendedContextConfig() {
-		assertNotNull("The pet should have been autowired.", this.pet);
-		assertEquals("Fido", this.pet.getName());
+		assertThat(this.pet).as("The pet should have been autowired.").isNotNull();
+		assertThat(this.pet.getName()).isEqualTo("Fido");
 	}
 }

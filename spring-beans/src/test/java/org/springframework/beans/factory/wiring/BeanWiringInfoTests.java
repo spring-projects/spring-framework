@@ -18,9 +18,8 @@ package org.springframework.beans.factory.wiring;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for the BeanWiringInfo class.
@@ -63,25 +62,25 @@ public class BeanWiringInfoTests {
 	@Test
 	public void usingAutowireCtorIndicatesAutowiring() throws Exception {
 		BeanWiringInfo info = new BeanWiringInfo(BeanWiringInfo.AUTOWIRE_BY_NAME, true);
-		assertTrue(info.indicatesAutowiring());
+		assertThat(info.indicatesAutowiring()).isTrue();
 	}
 
 	@Test
 	public void usingBeanNameCtorDoesNotIndicateAutowiring() throws Exception {
 		BeanWiringInfo info = new BeanWiringInfo("fooService");
-		assertFalse(info.indicatesAutowiring());
+		assertThat(info.indicatesAutowiring()).isFalse();
 	}
 
 	@Test
 	public void noDependencyCheckValueIsPreserved() throws Exception {
 		BeanWiringInfo info = new BeanWiringInfo(BeanWiringInfo.AUTOWIRE_BY_NAME, true);
-		assertTrue(info.getDependencyCheck());
+		assertThat(info.getDependencyCheck()).isTrue();
 	}
 
 	@Test
 	public void dependencyCheckValueIsPreserved() throws Exception {
 		BeanWiringInfo info = new BeanWiringInfo(BeanWiringInfo.AUTOWIRE_BY_TYPE, false);
-		assertFalse(info.getDependencyCheck());
+		assertThat(info.getDependencyCheck()).isFalse();
 	}
 
 }

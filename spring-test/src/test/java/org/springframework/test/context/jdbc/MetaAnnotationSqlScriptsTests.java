@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for using {@link Sql @Sql} and
@@ -53,7 +53,7 @@ public class MetaAnnotationSqlScriptsTests extends AbstractTransactionalJUnit4Sp
 	}
 
 	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 

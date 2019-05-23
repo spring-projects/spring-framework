@@ -18,8 +18,8 @@ package org.springframework.jndi;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson
@@ -38,7 +38,7 @@ public class JndiTemplateEditorTests {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		je.setAsText("");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
-		assertTrue(jt.getEnvironment() == null);
+		assertThat(jt.getEnvironment() == null).isTrue();
 	}
 
 	@Test
@@ -49,9 +49,9 @@ public class JndiTemplateEditorTests {
 		// to look anything up
 		je.setAsText("jndiInitialSomethingOrOther=org.springframework.myjndi.CompleteRubbish\nfoo=bar");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
-		assertTrue(jt.getEnvironment().size() == 2);
-		assertTrue(jt.getEnvironment().getProperty("jndiInitialSomethingOrOther").equals("org.springframework.myjndi.CompleteRubbish"));
-		assertTrue(jt.getEnvironment().getProperty("foo").equals("bar"));
+		assertThat(jt.getEnvironment().size() == 2).isTrue();
+		assertThat(jt.getEnvironment().getProperty("jndiInitialSomethingOrOther").equals("org.springframework.myjndi.CompleteRubbish")).isTrue();
+		assertThat(jt.getEnvironment().getProperty("foo").equals("bar")).isTrue();
 	}
 
 }

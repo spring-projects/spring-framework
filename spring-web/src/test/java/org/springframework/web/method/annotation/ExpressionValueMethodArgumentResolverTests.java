@@ -31,9 +31,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link ExpressionValueMethodArgumentResolver}.
@@ -77,9 +75,9 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() throws Exception {
-		assertTrue(resolver.supportsParameter(paramSystemProperty));
-		assertTrue(resolver.supportsParameter(paramContextPath));
-		assertFalse(resolver.supportsParameter(paramNotSupported));
+		assertThat(resolver.supportsParameter(paramSystemProperty)).isTrue();
+		assertThat(resolver.supportsParameter(paramContextPath)).isTrue();
+		assertThat(resolver.supportsParameter(paramNotSupported)).isFalse();
 	}
 
 	@Test
@@ -88,7 +86,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		Object value = resolver.resolveArgument(paramSystemProperty, null, webRequest, null);
 		System.clearProperty("systemProperty");
 
-		assertEquals("22", value);
+		assertThat(value).isEqualTo("22");
 	}
 
 	@Test
@@ -96,7 +94,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		webRequest.getNativeRequest(MockHttpServletRequest.class).setContextPath("/contextPath");
 		Object value = resolver.resolveArgument(paramContextPath, null, webRequest, null);
 
-		assertEquals("/contextPath", value);
+		assertThat(value).isEqualTo("/contextPath");
 	}
 
 	public void params(@Value("#{systemProperties.systemProperty}") int param1,

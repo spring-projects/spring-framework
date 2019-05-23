@@ -40,9 +40,7 @@ import org.springframework.jca.cci.core.InteractionCallback;
 import org.springframework.jca.cci.core.RecordCreator;
 import org.springframework.jca.cci.core.RecordExtractor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -128,7 +126,8 @@ public class CciTemplateTests {
 		ct.setOutputRecordCreator(new RecordCreator() {
 			@Override
 			public Record createRecord(RecordFactory recordFactory) {
-				assertTrue(recordFactory instanceof NotSupportedRecordFactory);
+				boolean condition = recordFactory instanceof NotSupportedRecordFactory;
+				assertThat(condition).isTrue();
 				return outputRecord;
 			}
 		});
@@ -341,7 +340,7 @@ public class CciTemplateTests {
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
 		ct.setOutputRecordCreator(creator);
-		assertEquals(obj, ct.execute(interactionSpec, generator, extractor));
+		assertThat(ct.execute(interactionSpec, generator, extractor)).isEqualTo(obj);
 
 		verify(interaction).close();
 		verify(connection).close();
@@ -534,7 +533,7 @@ public class CciTemplateTests {
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
 		Record tmpOutputRecord = ct.execute(interactionSpec, inputOutputRecord);
-		assertNull(tmpOutputRecord);
+		assertThat(tmpOutputRecord).isNull();
 
 		verify(interaction).execute(interactionSpec, inputOutputRecord);
 		verify(interaction).close();

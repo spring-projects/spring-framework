@@ -25,9 +25,7 @@ import org.junit.Before;
 
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -49,21 +47,21 @@ public abstract class AbstractEntityManagerFactoryBeanTests {
 
 	@After
 	public void tearDown() throws Exception {
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
-		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
+		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 	}
 
 	protected void checkInvariants(AbstractEntityManagerFactoryBean demf) {
-		assertTrue(EntityManagerFactory.class.isAssignableFrom(demf.getObjectType()));
+		assertThat(EntityManagerFactory.class.isAssignableFrom(demf.getObjectType())).isTrue();
 		Object gotObject = demf.getObject();
-		assertTrue("Object created by factory implements EntityManagerFactoryInfo",
-				gotObject instanceof EntityManagerFactoryInfo);
+		boolean condition = gotObject instanceof EntityManagerFactoryInfo;
+		assertThat(condition).as("Object created by factory implements EntityManagerFactoryInfo").isTrue();
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) demf.getObject();
-		assertSame("Successive invocations of getObject() return same object", emfi, demf.getObject());
-		assertSame(emfi, demf.getObject());
-		assertSame(emfi.getNativeEntityManagerFactory(), mockEmf);
+		assertThat(demf.getObject()).as("Successive invocations of getObject() return same object").isSameAs(emfi);
+		assertThat(demf.getObject()).isSameAs(emfi);
+		assertThat(mockEmf).isSameAs(emfi.getNativeEntityManagerFactory());
 	}
 
 

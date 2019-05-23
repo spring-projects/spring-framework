@@ -34,13 +34,8 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link ObjectToStringHttpMessageConverter} class.
@@ -69,37 +64,37 @@ public class ObjectToStringHttpMessageConverterTests {
 
 	@Test
 	public void canRead() {
-		assertFalse(this.converter.canRead(Math.class, null));
-		assertFalse(this.converter.canRead(Resource.class, null));
+		assertThat(this.converter.canRead(Math.class, null)).isFalse();
+		assertThat(this.converter.canRead(Resource.class, null)).isFalse();
 
-		assertTrue(this.converter.canRead(Locale.class, null));
-		assertTrue(this.converter.canRead(BigInteger.class, null));
+		assertThat(this.converter.canRead(Locale.class, null)).isTrue();
+		assertThat(this.converter.canRead(BigInteger.class, null)).isTrue();
 
-		assertFalse(this.converter.canRead(BigInteger.class, MediaType.TEXT_HTML));
-		assertFalse(this.converter.canRead(BigInteger.class, MediaType.TEXT_XML));
-		assertFalse(this.converter.canRead(BigInteger.class, MediaType.APPLICATION_XML));
+		assertThat(this.converter.canRead(BigInteger.class, MediaType.TEXT_HTML)).isFalse();
+		assertThat(this.converter.canRead(BigInteger.class, MediaType.TEXT_XML)).isFalse();
+		assertThat(this.converter.canRead(BigInteger.class, MediaType.APPLICATION_XML)).isFalse();
 	}
 
 	@Test
 	public void canWrite() {
-		assertFalse(this.converter.canWrite(Math.class, null));
-		assertFalse(this.converter.canWrite(Resource.class, null));
+		assertThat(this.converter.canWrite(Math.class, null)).isFalse();
+		assertThat(this.converter.canWrite(Resource.class, null)).isFalse();
 
-		assertTrue(this.converter.canWrite(Locale.class, null));
-		assertTrue(this.converter.canWrite(Double.class, null));
+		assertThat(this.converter.canWrite(Locale.class, null)).isTrue();
+		assertThat(this.converter.canWrite(Double.class, null)).isTrue();
 
-		assertFalse(this.converter.canWrite(BigInteger.class, MediaType.TEXT_HTML));
-		assertFalse(this.converter.canWrite(BigInteger.class, MediaType.TEXT_XML));
-		assertFalse(this.converter.canWrite(BigInteger.class, MediaType.APPLICATION_XML));
+		assertThat(this.converter.canWrite(BigInteger.class, MediaType.TEXT_HTML)).isFalse();
+		assertThat(this.converter.canWrite(BigInteger.class, MediaType.TEXT_XML)).isFalse();
+		assertThat(this.converter.canWrite(BigInteger.class, MediaType.APPLICATION_XML)).isFalse();
 
-		assertTrue(this.converter.canWrite(BigInteger.class, MediaType.valueOf("text/*")));
+		assertThat(this.converter.canWrite(BigInteger.class, MediaType.valueOf("text/*"))).isTrue();
 	}
 
 	@Test
 	public void defaultCharset() throws IOException {
 		this.converter.write(Integer.valueOf(5), null, response);
 
-		assertEquals("ISO-8859-1", servletResponse.getCharacterEncoding());
+		assertThat(servletResponse.getCharacterEncoding()).isEqualTo("ISO-8859-1");
 	}
 
 	@Test
@@ -108,7 +103,7 @@ public class ObjectToStringHttpMessageConverterTests {
 		ObjectToStringHttpMessageConverter converter = new ObjectToStringHttpMessageConverter(cs, StandardCharsets.UTF_16);
 		converter.write((byte) 31, null, this.response);
 
-		assertEquals("UTF-16", this.servletResponse.getCharacterEncoding());
+		assertThat(this.servletResponse.getCharacterEncoding()).isEqualTo("UTF-16");
 	}
 
 	@Test
@@ -116,7 +111,7 @@ public class ObjectToStringHttpMessageConverterTests {
 		this.converter.setWriteAcceptCharset(true);
 		this.converter.write(new Date(), null, this.response);
 
-		assertNotNull(this.servletResponse.getHeader("Accept-Charset"));
+		assertThat(this.servletResponse.getHeader("Accept-Charset")).isNotNull();
 	}
 
 	@Test
@@ -124,7 +119,7 @@ public class ObjectToStringHttpMessageConverterTests {
 		this.converter.setWriteAcceptCharset(false);
 		this.converter.write(new Date(), null, this.response);
 
-		assertNull(this.servletResponse.getHeader("Accept-Charset"));
+		assertThat(this.servletResponse.getHeader("Accept-Charset")).isNull();
 	}
 
 	@Test
@@ -133,31 +128,31 @@ public class ObjectToStringHttpMessageConverterTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		request.setContent(shortValue.toString().getBytes(StringHttpMessageConverter.DEFAULT_CHARSET));
-		assertEquals(shortValue, this.converter.read(Short.class, new ServletServerHttpRequest(request)));
+		assertThat(this.converter.read(Short.class, new ServletServerHttpRequest(request))).isEqualTo(shortValue);
 
 		Float floatValue = Float.valueOf(123);
 		request = new MockHttpServletRequest();
 		request.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		request.setCharacterEncoding("UTF-16");
 		request.setContent(floatValue.toString().getBytes("UTF-16"));
-		assertEquals(floatValue, this.converter.read(Float.class, new ServletServerHttpRequest(request)));
+		assertThat(this.converter.read(Float.class, new ServletServerHttpRequest(request))).isEqualTo(floatValue);
 
 		Long longValue = Long.valueOf(55819182821331L);
 		request = new MockHttpServletRequest();
 		request.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		request.setCharacterEncoding("UTF-8");
 		request.setContent(longValue.toString().getBytes("UTF-8"));
-		assertEquals(longValue, this.converter.read(Long.class, new ServletServerHttpRequest(request)));
+		assertThat(this.converter.read(Long.class, new ServletServerHttpRequest(request))).isEqualTo(longValue);
 	}
 
 	@Test
 	public void write() throws IOException {
 		this.converter.write((byte) -8, null, this.response);
 
-		assertEquals("ISO-8859-1", this.servletResponse.getCharacterEncoding());
-		assertTrue(this.servletResponse.getContentType().startsWith(MediaType.TEXT_PLAIN_VALUE));
-		assertEquals(2, this.servletResponse.getContentLength());
-		assertArrayEquals(new byte[] { '-', '8' }, this.servletResponse.getContentAsByteArray());
+		assertThat(this.servletResponse.getCharacterEncoding()).isEqualTo("ISO-8859-1");
+		assertThat(this.servletResponse.getContentType().startsWith(MediaType.TEXT_PLAIN_VALUE)).isTrue();
+		assertThat(this.servletResponse.getContentLength()).isEqualTo(2);
+		assertThat(this.servletResponse.getContentAsByteArray()).isEqualTo(new byte[] { '-', '8' });
 	}
 
 	@Test
@@ -165,11 +160,11 @@ public class ObjectToStringHttpMessageConverterTests {
 		MediaType contentType = new MediaType("text", "plain", StandardCharsets.UTF_16);
 		this.converter.write(Integer.valueOf(958), contentType, this.response);
 
-		assertEquals("UTF-16", this.servletResponse.getCharacterEncoding());
-		assertTrue(this.servletResponse.getContentType().startsWith(MediaType.TEXT_PLAIN_VALUE));
-		assertEquals(8, this.servletResponse.getContentLength());
+		assertThat(this.servletResponse.getCharacterEncoding()).isEqualTo("UTF-16");
+		assertThat(this.servletResponse.getContentType().startsWith(MediaType.TEXT_PLAIN_VALUE)).isTrue();
+		assertThat(this.servletResponse.getContentLength()).isEqualTo(8);
 		// First two bytes: byte order mark
-		assertArrayEquals(new byte[] { -2, -1, 0, '9', 0, '5', 0, '8' }, this.servletResponse.getContentAsByteArray());
+		assertThat(this.servletResponse.getContentAsByteArray()).isEqualTo(new byte[] { -2, -1, 0, '9', 0, '5', 0, '8' });
 	}
 
 	@Test

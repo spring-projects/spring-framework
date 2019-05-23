@@ -26,8 +26,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -61,8 +61,6 @@ public class DefaultJpaDialectTests {
 	@Test
 	public void testTranslateException() {
 		OptimisticLockException ex = new OptimisticLockException();
-		assertEquals(
-				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex).getCause(),
-				dialect.translateExceptionIfPossible(ex).getCause());
+		assertThat(dialect.translateExceptionIfPossible(ex).getCause()).isEqualTo(EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex).getCause());
 	}
 }

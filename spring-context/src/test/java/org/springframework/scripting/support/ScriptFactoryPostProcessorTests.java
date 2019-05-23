@@ -31,11 +31,9 @@ import org.springframework.scripting.groovy.GroovyScriptFactory;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -86,7 +84,7 @@ public class ScriptFactoryPostProcessorTests {
 
 	@Test
 	public void testDoesNothingWhenPostProcessingNonScriptFactoryTypeBeforeInstantiation() throws Exception {
-		assertNull(new ScriptFactoryPostProcessor().postProcessBeforeInstantiation(getClass(), "a.bean"));
+		assertThat(new ScriptFactoryPostProcessor().postProcessBeforeInstantiation(getClass(), "a.bean")).isNull();
 	}
 
 	@Test
@@ -106,14 +104,14 @@ public class ScriptFactoryPostProcessorTests {
 		ctx.refresh();
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
-		assertEquals(MESSAGE_TEXT, messenger.getMessage());
+		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
 		// cool; now let's change the script and check the refresh behaviour...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
 		Messenger refreshedMessenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		// the updated script surrounds the message in quotes before returning...
-		assertEquals(EXPECTED_CHANGED_MESSAGE_TEXT, refreshedMessenger.getMessage());
+		assertThat(refreshedMessenger.getMessage()).isEqualTo(EXPECTED_CHANGED_MESSAGE_TEXT);
 	}
 
 	@Test
@@ -127,14 +125,13 @@ public class ScriptFactoryPostProcessorTests {
 		ctx.refresh();
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
-		assertEquals(MESSAGE_TEXT, messenger.getMessage());
+		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
 		// cool; now let's change the script and check the refresh behaviour...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
 		Messenger refreshedMessenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
-		assertEquals("Script seems to have been refreshed (must not be as no refreshCheckDelay set on ScriptFactoryPostProcessor)",
-				MESSAGE_TEXT, refreshedMessenger.getMessage());
+		assertThat(refreshedMessenger.getMessage()).as("Script seems to have been refreshed (must not be as no refreshCheckDelay set on ScriptFactoryPostProcessor)").isEqualTo(MESSAGE_TEXT);
 	}
 
 	@Test
@@ -152,17 +149,17 @@ public class ScriptFactoryPostProcessorTests {
 		ctx.refresh();
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
-		assertEquals(MESSAGE_TEXT, messenger.getMessage());
+		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
 		// cool; now let's change the script and check the refresh behaviour...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
 		source.setScript(CHANGED_SCRIPT);
 		Messenger refreshedMessenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
 		// the updated script surrounds the message in quotes before returning...
-		assertEquals(EXPECTED_CHANGED_MESSAGE_TEXT, refreshedMessenger.getMessage());
+		assertThat(refreshedMessenger.getMessage()).isEqualTo(EXPECTED_CHANGED_MESSAGE_TEXT);
 		// ok, is this change reflected in the reference that the collaborator has?
 		DefaultMessengerService collaborator = (DefaultMessengerService) ctx.getBean(collaboratorBeanName);
-		assertEquals(EXPECTED_CHANGED_MESSAGE_TEXT, collaborator.getMessage());
+		assertThat(collaborator.getMessage()).isEqualTo(EXPECTED_CHANGED_MESSAGE_TEXT);
 	}
 
 	@Test
@@ -202,7 +199,7 @@ public class ScriptFactoryPostProcessorTests {
 		ctx.refresh();
 
 		Messenger messenger = (Messenger) ctx.getBean(MESSENGER_BEAN_NAME);
-		assertEquals(MESSAGE_TEXT, messenger.getMessage());
+		assertThat(messenger.getMessage()).isEqualTo(MESSAGE_TEXT);
 		// cool; now let's change the script and check the refresh behaviour...
 		pauseToLetRefreshDelayKickIn(DEFAULT_SECONDS_TO_PAUSE);
 		StaticScriptSource source = getScriptSource(ctx);
@@ -231,7 +228,7 @@ public class ScriptFactoryPostProcessorTests {
 
 		Messenger messenger1 = (Messenger) ctx.getBean(BEAN_WITH_DEPENDENCY_NAME);
 		Messenger messenger2 = (Messenger) ctx.getBean(BEAN_WITH_DEPENDENCY_NAME);
-		assertNotSame(messenger1, messenger2);
+		assertThat(messenger2).isNotSameAs(messenger1);
 	}
 
 	private static StaticScriptSource getScriptSource(GenericApplicationContext ctx) throws Exception {

@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.jmx.JmxTestBean;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -32,7 +32,7 @@ public abstract class AbstractAutodetectTests {
 		JmxTestBean bean = new JmxTestBean();
 
 		AutodetectCapableMBeanInfoAssembler assembler = getAssembler();
-		assertTrue("The bean should be included", assembler.includeBean(bean.getClass(), "testBean"));
+		assertThat(assembler.includeBean(bean.getClass(), "testBean")).as("The bean should be included").isTrue();
 	}
 
 	protected abstract AutodetectCapableMBeanInfoAssembler getAssembler();

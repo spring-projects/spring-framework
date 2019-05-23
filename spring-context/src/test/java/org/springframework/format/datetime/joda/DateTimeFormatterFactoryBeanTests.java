@@ -41,7 +41,6 @@ public class DateTimeFormatterFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	public void getObjectType() {
 		assertThat(factory.getObjectType()).isEqualTo(DateTimeFormatter.class);
 	}

@@ -21,7 +21,6 @@ import java.util.List;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for {@link WebSocketExtension}
@@ -35,10 +34,10 @@ public class WebSocketExtensionTests {
 		assertThat(extensions).hasSize(1);
 		WebSocketExtension extension = extensions.get(0);
 
-		assertEquals("x-test-extension", extension.getName());
-		assertEquals(2, extension.getParameters().size());
-		assertEquals("bar", extension.getParameters().get("foo"));
-		assertEquals("baz", extension.getParameters().get("bar"));
+		assertThat(extension.getName()).isEqualTo("x-test-extension");
+		assertThat(extension.getParameters().size()).isEqualTo(2);
+		assertThat(extension.getParameters().get("foo")).isEqualTo("bar");
+		assertThat(extension.getParameters().get("bar")).isEqualTo("baz");
 	}
 
 	@Test

@@ -21,8 +21,8 @@ import org.junit.Test;
 
 import org.springframework.context.support.GenericXmlApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
@@ -37,11 +37,11 @@ public class GroovyAspectIntegrationTests {
 		TestService bean = context.getBean("javaBean", TestService.class);
 		LogUserAdvice logAdvice = context.getBean(LogUserAdvice.class);
 
-		assertEquals(0, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(0);
 		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
 				bean::sayHello)
 			.withMessage("TestServiceImpl");
-		assertEquals(1, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(1);
 	}
 
 	@Test
@@ -50,11 +50,11 @@ public class GroovyAspectIntegrationTests {
 		TestService bean = context.getBean("groovyBean", TestService.class);
 		LogUserAdvice logAdvice = context.getBean(LogUserAdvice.class);
 
-		assertEquals(0, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(0);
 		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
 				bean::sayHello)
 			.withMessage("GroovyServiceImpl");
-		assertEquals(1, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(1);
 	}
 
 
@@ -64,13 +64,13 @@ public class GroovyAspectIntegrationTests {
 		TestService bean = context.getBean("groovyBean", TestService.class);
 		LogUserAdvice logAdvice = context.getBean(LogUserAdvice.class);
 
-		assertEquals(0, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(0);
 		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
 				bean::sayHello)
 			.withMessage("GroovyServiceImpl");
 		// No proxy here because the pointcut only applies to the concrete class, not the interface
-		assertEquals(0, logAdvice.getCountThrows());
-		assertEquals(0, logAdvice.getCountBefore());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(0);
+		assertThat(logAdvice.getCountBefore()).isEqualTo(0);
 	}
 
 	@Test
@@ -79,12 +79,12 @@ public class GroovyAspectIntegrationTests {
 		TestService bean = context.getBean("groovyBean", TestService.class);
 		LogUserAdvice logAdvice = context.getBean(LogUserAdvice.class);
 
-		assertEquals(0, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(0);
 		assertThatExceptionOfType(RuntimeException.class).isThrownBy(
 				bean::sayHello)
 			.withMessage("GroovyServiceImpl");
-		assertEquals(1, logAdvice.getCountBefore());
-		assertEquals(1, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountBefore()).isEqualTo(1);
+		assertThat(logAdvice.getCountThrows()).isEqualTo(1);
 	}
 
 	@After

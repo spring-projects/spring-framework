@@ -26,7 +26,7 @@ import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 ///CLOVER:OFF
 

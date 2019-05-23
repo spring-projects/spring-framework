@@ -45,11 +45,8 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -108,12 +105,12 @@ public class ModelAttributeMethodProcessorTests {
 
 	@Test
 	public void supportedParameters() throws Exception {
-		assertTrue(this.processor.supportsParameter(this.paramNamedValidModelAttr));
-		assertTrue(this.processor.supportsParameter(this.paramModelAttr));
+		assertThat(this.processor.supportsParameter(this.paramNamedValidModelAttr)).isTrue();
+		assertThat(this.processor.supportsParameter(this.paramModelAttr)).isTrue();
 
-		assertFalse(this.processor.supportsParameter(this.paramErrors));
-		assertFalse(this.processor.supportsParameter(this.paramInt));
-		assertFalse(this.processor.supportsParameter(this.paramNonSimpleType));
+		assertThat(this.processor.supportsParameter(this.paramErrors)).isFalse();
+		assertThat(this.processor.supportsParameter(this.paramInt)).isFalse();
+		assertThat(this.processor.supportsParameter(this.paramNonSimpleType)).isFalse();
 	}
 
 	@Test
@@ -121,32 +118,32 @@ public class ModelAttributeMethodProcessorTests {
 		processor = new ModelAttributeMethodProcessor(true);
 
 		// Only non-simple types, even if not annotated
-		assertTrue(this.processor.supportsParameter(this.paramNamedValidModelAttr));
-		assertTrue(this.processor.supportsParameter(this.paramErrors));
-		assertTrue(this.processor.supportsParameter(this.paramModelAttr));
-		assertTrue(this.processor.supportsParameter(this.paramNonSimpleType));
+		assertThat(this.processor.supportsParameter(this.paramNamedValidModelAttr)).isTrue();
+		assertThat(this.processor.supportsParameter(this.paramErrors)).isTrue();
+		assertThat(this.processor.supportsParameter(this.paramModelAttr)).isTrue();
+		assertThat(this.processor.supportsParameter(this.paramNonSimpleType)).isTrue();
 
-		assertFalse(this.processor.supportsParameter(this.paramInt));
+		assertThat(this.processor.supportsParameter(this.paramInt)).isFalse();
 	}
 
 	@Test
 	public void supportedReturnTypes() throws Exception {
 		processor = new ModelAttributeMethodProcessor(false);
-		assertTrue(this.processor.supportsReturnType(returnParamNamedModelAttr));
-		assertFalse(this.processor.supportsReturnType(returnParamNonSimpleType));
+		assertThat(this.processor.supportsReturnType(returnParamNamedModelAttr)).isTrue();
+		assertThat(this.processor.supportsReturnType(returnParamNonSimpleType)).isFalse();
 	}
 
 	@Test
 	public void supportedReturnTypesInDefaultResolutionMode() throws Exception {
 		processor = new ModelAttributeMethodProcessor(true);
-		assertTrue(this.processor.supportsReturnType(returnParamNamedModelAttr));
-		assertTrue(this.processor.supportsReturnType(returnParamNonSimpleType));
+		assertThat(this.processor.supportsReturnType(returnParamNamedModelAttr)).isTrue();
+		assertThat(this.processor.supportsReturnType(returnParamNonSimpleType)).isTrue();
 	}
 
 	@Test
 	public void bindExceptionRequired() throws Exception {
-		assertTrue(this.processor.isBindExceptionRequired(null, this.paramNonSimpleType));
-		assertFalse(this.processor.isBindExceptionRequired(null, this.paramNamedValidModelAttr));
+		assertThat(this.processor.isBindExceptionRequired(null, this.paramNonSimpleType)).isTrue();
+		assertThat(this.processor.isBindExceptionRequired(null, this.paramNamedValidModelAttr)).isFalse();
 	}
 
 	@Test
@@ -178,8 +175,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
 
-		assertTrue(dataBinder.isBindInvoked());
-		assertTrue(dataBinder.isValidateInvoked());
+		assertThat(dataBinder.isBindInvoked()).isTrue();
+		assertThat(dataBinder.isValidateInvoked()).isTrue();
 	}
 
 	@Test
@@ -197,8 +194,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
 
-		assertFalse(dataBinder.isBindInvoked());
-		assertTrue(dataBinder.isValidateInvoked());
+		assertThat(dataBinder.isBindInvoked()).isFalse();
+		assertThat(dataBinder.isValidateInvoked()).isTrue();
 	}
 
 	@Test
@@ -213,8 +210,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		this.processor.resolveArgument(this.paramBindingDisabledAttr, this.container, this.request, factory);
 
-		assertFalse(dataBinder.isBindInvoked());
-		assertTrue(dataBinder.isValidateInvoked());
+		assertThat(dataBinder.isBindInvoked()).isFalse();
+		assertThat(dataBinder.isValidateInvoked()).isTrue();
 	}
 
 	@Test
@@ -250,21 +247,21 @@ public class ModelAttributeMethodProcessorTests {
 		this.processor.resolveArgument(this.paramModelAttr, this.container, this.request, binderFactory);
 
 		Object[] values = this.container.getModel().values().toArray();
-		assertSame("Resolved attribute should be updated to be last", testBean, values[1]);
-		assertSame("BindingResult of resolved attr should be last", dataBinder.getBindingResult(), values[2]);
+		assertThat(values[1]).as("Resolved attribute should be updated to be last").isSameAs(testBean);
+		assertThat(values[2]).as("BindingResult of resolved attr should be last").isSameAs(dataBinder.getBindingResult());
 	}
 
 	@Test
 	public void handleAnnotatedReturnValue() throws Exception {
 		this.processor.handleReturnValue("expected", this.returnParamNamedModelAttr, this.container, this.request);
-		assertEquals("expected", this.container.getModel().get("modelAttrName"));
+		assertThat(this.container.getModel().get("modelAttrName")).isEqualTo("expected");
 	}
 
 	@Test
 	public void handleNotAnnotatedReturnValue() throws Exception {
 		TestBean testBean = new TestBean("expected");
 		this.processor.handleReturnValue(testBean, this.returnParamNonSimpleType, this.container, this.request);
-		assertSame(testBean, this.container.getModel().get("testBean"));
+		assertThat(this.container.getModel().get("testBean")).isSameAs(testBean);
 	}
 
 

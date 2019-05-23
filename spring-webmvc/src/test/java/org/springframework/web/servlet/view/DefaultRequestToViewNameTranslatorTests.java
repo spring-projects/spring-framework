@@ -21,8 +21,7 @@ import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rick Evans
@@ -134,9 +133,8 @@ public class DefaultRequestToViewNameTranslatorTests {
 
 	private void assertViewName(String expectedViewName) {
 		String actualViewName = this.translator.getViewName(this.request);
-		assertNotNull(actualViewName);
-		assertEquals("Did not get the expected viewName from the DefaultRequestToViewNameTranslator.getViewName(..)",
-				expectedViewName, actualViewName);
+		assertThat(actualViewName).isNotNull();
+		assertThat(actualViewName).as("Did not get the expected viewName from the DefaultRequestToViewNameTranslator.getViewName(..)").isEqualTo(expectedViewName);
 	}
 
 }

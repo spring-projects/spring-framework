@@ -22,8 +22,8 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop
@@ -39,7 +39,7 @@ public class PasswordInputTagTests extends InputTagTests {
 	public void passwordValueIsNotRenderedByDefault() throws Exception {
 		this.getTag().setPath("name");
 
-		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
+		assertThat(this.getTag().doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -57,7 +57,7 @@ public class PasswordInputTagTests extends InputTagTests {
 		this.getTag().setPath("name");
 		this.getPasswordTag().setShowPassword(true);
 
-		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
+		assertThat(this.getTag().doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -75,7 +75,7 @@ public class PasswordInputTagTests extends InputTagTests {
 		this.getTag().setPath("name");
 		this.getPasswordTag().setShowPassword(false);
 
-		assertEquals(Tag.SKIP_BODY, this.getTag().doStartTag());
+		assertThat(this.getTag().doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);

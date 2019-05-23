@@ -28,8 +28,6 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests cornering the bug exposed in SPR-6779.
@@ -52,8 +50,7 @@ public class ImportedConfigurationClassEnhancementTests {
 	private void autowiredConfigClassIsEnhanced(Class<?>... configClasses) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClasses);
 		Config config = ctx.getBean(Config.class);
-		assertTrue("autowired config class has not been enhanced",
-				ClassUtils.isCglibProxy(config.autowiredConfig));
+		assertThat(ClassUtils.isCglibProxy(config.autowiredConfig)).as("autowired config class has not been enhanced").isTrue();
 	}
 
 
@@ -82,7 +79,7 @@ public class ImportedConfigurationClassEnhancementTests {
 	public void importingNonConfigurationClassCausesBeanDefinitionParsingException() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigThatImportsNonConfigClass.class);
 		ConfigThatImportsNonConfigClass config = ctx.getBean(ConfigThatImportsNonConfigClass.class);
-		assertSame(ctx.getBean(TestBean.class), config.testBean);
+		assertThat(config.testBean).isSameAs(ctx.getBean(TestBean.class));
 	}
 
 

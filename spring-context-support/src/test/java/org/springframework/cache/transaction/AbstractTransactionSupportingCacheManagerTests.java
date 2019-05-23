@@ -24,8 +24,6 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Shared tests for {@link CacheManager} that inherit from
@@ -76,10 +74,10 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 		T cacheManager = getCacheManager(false);
 		String cacheName = name.getMethodName();
 		addNativeCache(cacheName);
-		assertFalse(cacheManager.getCacheNames().contains(cacheName));
+		assertThat(cacheManager.getCacheNames().contains(cacheName)).isFalse();
 		try {
 			assertThat(cacheManager.getCache(cacheName)).isInstanceOf(getCacheType());
-			assertTrue(cacheManager.getCacheNames().contains(cacheName));
+			assertThat(cacheManager.getCacheNames().contains(cacheName)).isTrue();
 		}
 		finally {
 			removeNativeCache(cacheName);
@@ -90,7 +88,7 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 	public void getOnUnknownCache() {
 		T cacheManager = getCacheManager(false);
 		String cacheName = name.getMethodName();
-		assertFalse(cacheManager.getCacheNames().contains(cacheName));
+		assertThat(cacheManager.getCacheNames().contains(cacheName)).isFalse();
 		assertThat(cacheManager.getCache(cacheName)).isNull();
 	}
 
@@ -104,12 +102,12 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 	public void getTransactionalOnNewCache() {
 		String cacheName = name.getMethodName();
 		T cacheManager = getCacheManager(true);
-		assertFalse(cacheManager.getCacheNames().contains(cacheName));
+		assertThat(cacheManager.getCacheNames().contains(cacheName)).isFalse();
 		addNativeCache(cacheName);
 		try {
 			assertThat(cacheManager.getCache(cacheName))
 					.isInstanceOf(TransactionAwareCacheDecorator.class);
-			assertTrue(cacheManager.getCacheNames().contains(cacheName));
+			assertThat(cacheManager.getCacheNames().contains(cacheName)).isTrue();
 		}
 		finally {
 			removeNativeCache(cacheName);

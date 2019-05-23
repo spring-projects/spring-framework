@@ -49,8 +49,7 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
@@ -160,18 +159,18 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	private void verifyPersonEvents(Flux<ServerSentEvent<Person>> result) {
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
-					assertEquals("0", event.id());
-					assertEquals(new Person("foo 0"), event.data());
-					assertEquals("bar 0", event.comment());
-					assertNull(event.event());
-					assertNull(event.retry());
+					assertThat(event.id()).isEqualTo("0");
+					assertThat(event.data()).isEqualTo(new Person("foo 0"));
+					assertThat(event.comment()).isEqualTo("bar 0");
+					assertThat(event.event()).isNull();
+					assertThat(event.retry()).isNull();
 				})
 				.consumeNextWith( event -> {
-					assertEquals("1", event.id());
-					assertEquals(new Person("foo 1"), event.data());
-					assertEquals("bar 1", event.comment());
-					assertNull(event.event());
-					assertNull(event.retry());
+					assertThat(event.id()).isEqualTo("1");
+					assertThat(event.data()).isEqualTo(new Person("foo 1"));
+					assertThat(event.comment()).isEqualTo("bar 1");
+					assertThat(event.event()).isNull();
+					assertThat(event.retry()).isNull();
 				})
 				.thenCancel()
 				.verify(Duration.ofSeconds(5L));

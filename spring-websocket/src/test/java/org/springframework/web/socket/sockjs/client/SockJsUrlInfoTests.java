@@ -23,8 +23,6 @@ import org.junit.Test;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@code SockJsUrlInfo}.
@@ -37,13 +35,13 @@ public class SockJsUrlInfoTests {
 	public void serverId() throws Exception {
 		SockJsUrlInfo info = new SockJsUrlInfo(new URI("https://example.com"));
 		int serverId = Integer.valueOf(info.getServerId());
-		assertTrue("Invalid serverId: " + serverId, serverId >= 0 && serverId < 1000);
+		assertThat(serverId >= 0 && serverId < 1000).as("Invalid serverId: " + serverId).isTrue();
 	}
 
 	@Test
 	public void sessionId() throws Exception {
 		SockJsUrlInfo info = new SockJsUrlInfo(new URI("https://example.com"));
-		assertEquals("Invalid sessionId: " + info.getSessionId(), 32, info.getSessionId().length());
+		assertThat(info.getSessionId().length()).as("Invalid sessionId: " + info.getSessionId()).isEqualTo(32);
 	}
 
 	@Test

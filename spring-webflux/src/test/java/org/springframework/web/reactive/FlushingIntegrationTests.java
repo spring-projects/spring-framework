@@ -32,7 +32,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for server response flushing behavior.
@@ -77,7 +77,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 		try {
 			StepVerifier.create(result)
-					.consumeNextWith(value -> assertEquals(64 * 1024, value.length()))
+					.consumeNextWith(value -> assertThat(value.length()).isEqualTo((64 * 1024)))
 					.expectComplete()
 					.verify(Duration.ofSeconds(10L));
 		}

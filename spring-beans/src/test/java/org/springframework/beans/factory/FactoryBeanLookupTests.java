@@ -26,7 +26,6 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Written with the intention of reproducing SPR-7318.
@@ -52,13 +51,13 @@ public class FactoryBeanLookupTests {
 	@Test
 	public void factoryBeanLookupByType() {
 		FooFactoryBean fooFactory = beanFactory.getBean(FooFactoryBean.class);
-		assertNotNull(fooFactory);
+		assertThat(fooFactory).isNotNull();
 	}
 
 	@Test
 	public void factoryBeanLookupByTypeAndNameDereference() {
 		FooFactoryBean fooFactory = beanFactory.getBean("&fooFactory", FooFactoryBean.class);
-		assertNotNull(fooFactory);
+		assertThat(fooFactory).isNotNull();
 	}
 
 	@Test
@@ -70,7 +69,7 @@ public class FactoryBeanLookupTests {
 	@Test
 	public void factoryBeanObjectLookupByNameAndType() {
 		Foo foo = beanFactory.getBean("fooFactory", Foo.class);
-		assertNotNull(foo);
+		assertThat(foo).isNotNull();
 	}
 }
 

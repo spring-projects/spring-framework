@@ -36,8 +36,6 @@ import org.springframework.ui.freemarker.SpringTemplateLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -62,7 +60,7 @@ public class FreeMarkerConfigurerTests {
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		fcfb.afterPropertiesSet();
 		Configuration cfg = fcfb.getObject();
-		assertTrue(cfg.getTemplateLoader() instanceof SpringTemplateLoader);
+		assertThat(cfg.getTemplateLoader() instanceof SpringTemplateLoader).isTrue();
 	}
 
 	@Test
@@ -90,7 +88,7 @@ public class FreeMarkerConfigurerTests {
 		assertThat(fcfb.getObject()).isInstanceOf(Configuration.class);
 		Configuration fc = fcfb.getObject();
 		Template ft = fc.getTemplate("test");
-		assertEquals("test", FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap()));
+		assertThat(FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap())).isEqualTo("test");
 	}
 
 	@Test  // SPR-12448

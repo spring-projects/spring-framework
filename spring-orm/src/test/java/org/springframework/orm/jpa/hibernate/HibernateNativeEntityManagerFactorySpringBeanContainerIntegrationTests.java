@@ -35,12 +35,8 @@ import org.springframework.orm.jpa.hibernate.beans.MultiplePrototypesInSpringCon
 import org.springframework.orm.jpa.hibernate.beans.NoDefinitionInSpringContextTestBean;
 import org.springframework.orm.jpa.hibernate.beans.SinglePrototypeInSpringContextTestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * Hibernate-specific SpringBeanContainer integration tests.
@@ -75,96 +71,96 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 	@Test
 	public void testCanRetrieveBeanByTypeWithJpaCompliantOptions() {
 		BeanContainer beanContainer = getBeanContainer();
-		assertNotNull(beanContainer);
+		assertThat(beanContainer).isNotNull();
 
 		ContainedBean<SinglePrototypeInSpringContextTestBean> bean = beanContainer.getBean(
 				SinglePrototypeInSpringContextTestBean.class,
 				JpaLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		SinglePrototypeInSpringContextTestBean instance = bean.getBeanInstance();
-		assertNotNull(instance);
-		assertSame(applicationContext, instance.getApplicationContext());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getApplicationContext()).isSameAs(applicationContext);
 	}
 
 	@Test
 	public void testCanRetrieveBeanByNameWithJpaCompliantOptions() {
 		BeanContainer beanContainer = getBeanContainer();
-		assertNotNull(beanContainer);
+		assertThat(beanContainer).isNotNull();
 
 		ContainedBean<MultiplePrototypesInSpringContextTestBean> bean = beanContainer.getBean(
 				"multiple-1", MultiplePrototypesInSpringContextTestBean.class,
 				JpaLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		MultiplePrototypesInSpringContextTestBean instance = bean.getBeanInstance();
-		assertNotNull(instance);
-		assertEquals("multiple-1", instance.getName());
-		assertSame(applicationContext, instance.getApplicationContext());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getName()).isEqualTo("multiple-1");
+		assertThat(instance.getApplicationContext()).isSameAs(applicationContext);
 	}
 
 	@Test
 	public void testCanRetrieveBeanByTypeWithNativeOptions() {
 		BeanContainer beanContainer = getBeanContainer();
-		assertNotNull(beanContainer);
+		assertThat(beanContainer).isNotNull();
 
 		ContainedBean<SinglePrototypeInSpringContextTestBean> bean = beanContainer.getBean(
 				SinglePrototypeInSpringContextTestBean.class,
 				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		SinglePrototypeInSpringContextTestBean instance = bean.getBeanInstance();
-		assertNotNull(instance);
-		assertEquals("single", instance.getName());
-		assertSame(applicationContext, instance.getApplicationContext());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getName()).isEqualTo("single");
+		assertThat(instance.getApplicationContext()).isSameAs(applicationContext);
 
 		ContainedBean<SinglePrototypeInSpringContextTestBean> bean2 = beanContainer.getBean(
 				SinglePrototypeInSpringContextTestBean.class,
 				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
-		assertNotNull(bean2);
+		assertThat(bean2).isNotNull();
 		SinglePrototypeInSpringContextTestBean instance2 = bean2.getBeanInstance();
-		assertNotNull(instance2);
+		assertThat(instance2).isNotNull();
 		// Due to the lifecycle options, and because the bean has the "prototype" scope, we should not return the same instance
-		assertNotSame(instance, instance2);
+		assertThat(instance2).isNotSameAs(instance);
 	}
 
 	@Test
 	public void testCanRetrieveBeanByNameWithNativeOptions() {
 		BeanContainer beanContainer = getBeanContainer();
-		assertNotNull(beanContainer);
+		assertThat(beanContainer).isNotNull();
 
 		ContainedBean<MultiplePrototypesInSpringContextTestBean> bean = beanContainer.getBean(
 				"multiple-1", MultiplePrototypesInSpringContextTestBean.class,
 				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		MultiplePrototypesInSpringContextTestBean instance = bean.getBeanInstance();
-		assertNotNull(instance);
-		assertEquals("multiple-1", instance.getName());
-		assertSame(applicationContext, instance.getApplicationContext());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getName()).isEqualTo("multiple-1");
+		assertThat(instance.getApplicationContext()).isSameAs(applicationContext);
 
 		ContainedBean<MultiplePrototypesInSpringContextTestBean> bean2 = beanContainer.getBean(
 				"multiple-1", MultiplePrototypesInSpringContextTestBean.class,
 				NativeLifecycleOptions.INSTANCE, IneffectiveBeanInstanceProducer.INSTANCE
 		);
 
-		assertNotNull(bean2);
+		assertThat(bean2).isNotNull();
 		MultiplePrototypesInSpringContextTestBean instance2 = bean2.getBeanInstance();
-		assertNotNull(instance2);
+		assertThat(instance2).isNotNull();
 		// Due to the lifecycle options, and because the bean has the "prototype" scope, we should not return the same instance
-		assertNotSame(instance, instance2);
+		assertThat(instance2).isNotSameAs(instance);
 	}
 
 	@Test
 	public void testCanRetrieveFallbackBeanByTypeWithJpaCompliantOptions() {
 		BeanContainer beanContainer = getBeanContainer();
-		assertNotNull(beanContainer);
+		assertThat(beanContainer).isNotNull();
 		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
 
 		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
@@ -172,20 +168,20 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 				JpaLifecycleOptions.INSTANCE, fallbackProducer
 		);
 
-		assertEquals(1, fallbackProducer.currentUnnamedInstantiationCount());
-		assertEquals(0, fallbackProducer.currentNamedInstantiationCount());
+		assertThat(fallbackProducer.currentUnnamedInstantiationCount()).isEqualTo(1);
+		assertThat(fallbackProducer.currentNamedInstantiationCount()).isEqualTo(0);
 
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
-		assertNotNull(instance);
-		assertEquals(BeanSource.FALLBACK, instance.getSource());
-		assertNull(instance.getApplicationContext());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getSource()).isEqualTo(BeanSource.FALLBACK);
+		assertThat(instance.getApplicationContext()).isNull();
 	}
 
 	@Test
 	public void testCanRetrieveFallbackBeanByNameWithJpaCompliantOptions() {
 		BeanContainer beanContainer = getBeanContainer();
-		assertNotNull(beanContainer);
+		assertThat(beanContainer).isNotNull();
 		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
 
 		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
@@ -193,21 +189,21 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 				JpaLifecycleOptions.INSTANCE, fallbackProducer
 		);
 
-		assertEquals(0, fallbackProducer.currentUnnamedInstantiationCount());
-		assertEquals(1, fallbackProducer.currentNamedInstantiationCount());
+		assertThat(fallbackProducer.currentUnnamedInstantiationCount()).isEqualTo(0);
+		assertThat(fallbackProducer.currentNamedInstantiationCount()).isEqualTo(1);
 
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
-		assertNotNull(instance);
-		assertEquals(BeanSource.FALLBACK, instance.getSource());
-		assertEquals("some name", instance.getName());
-		assertNull(instance.getApplicationContext());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getSource()).isEqualTo(BeanSource.FALLBACK);
+		assertThat(instance.getName()).isEqualTo("some name");
+		assertThat(instance.getApplicationContext()).isNull();
 	}
 
 	@Test
 	public void testCanRetrieveFallbackBeanByTypeWithNativeOptions() {
 		BeanContainer beanContainer = getBeanContainer();
-		assertNotNull(beanContainer);
+		assertThat(beanContainer).isNotNull();
 		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
 
 		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
@@ -215,20 +211,20 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 				NativeLifecycleOptions.INSTANCE, fallbackProducer
 		);
 
-		assertEquals(1, fallbackProducer.currentUnnamedInstantiationCount());
-		assertEquals(0, fallbackProducer.currentNamedInstantiationCount());
+		assertThat(fallbackProducer.currentUnnamedInstantiationCount()).isEqualTo(1);
+		assertThat(fallbackProducer.currentNamedInstantiationCount()).isEqualTo(0);
 
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
-		assertNotNull(instance);
-		assertEquals(BeanSource.FALLBACK, instance.getSource());
-		assertNull(instance.getApplicationContext());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getSource()).isEqualTo(BeanSource.FALLBACK);
+		assertThat(instance.getApplicationContext()).isNull();
 	}
 
 	@Test
 	public void testCanRetrieveFallbackBeanByNameWithNativeOptions() {
 		BeanContainer beanContainer = getBeanContainer();
-		assertNotNull(beanContainer);
+		assertThat(beanContainer).isNotNull();
 		NoDefinitionInSpringContextTestBeanInstanceProducer fallbackProducer = new NoDefinitionInSpringContextTestBeanInstanceProducer();
 
 		ContainedBean<NoDefinitionInSpringContextTestBean> bean = beanContainer.getBean(
@@ -236,15 +232,15 @@ public class HibernateNativeEntityManagerFactorySpringBeanContainerIntegrationTe
 				NativeLifecycleOptions.INSTANCE, fallbackProducer
 		);
 
-		assertEquals(0, fallbackProducer.currentUnnamedInstantiationCount());
-		assertEquals(1, fallbackProducer.currentNamedInstantiationCount());
+		assertThat(fallbackProducer.currentUnnamedInstantiationCount()).isEqualTo(0);
+		assertThat(fallbackProducer.currentNamedInstantiationCount()).isEqualTo(1);
 
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		NoDefinitionInSpringContextTestBean instance = bean.getBeanInstance();
-		assertNotNull(instance);
-		assertEquals(BeanSource.FALLBACK, instance.getSource());
-		assertEquals("some name", instance.getName());
-		assertNull(instance.getApplicationContext());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getSource()).isEqualTo(BeanSource.FALLBACK);
+		assertThat(instance.getName()).isEqualTo("some name");
+		assertThat(instance.getApplicationContext()).isNull();
 	}
 
 	@Test

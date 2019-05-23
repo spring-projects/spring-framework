@@ -20,9 +20,8 @@ import org.junit.Test;
 
 import org.springframework.test.context.MergedContextConfiguration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link AnnotationConfigContextLoader}.
@@ -53,47 +52,47 @@ public class AnnotationConfigContextLoaderTests {
 	@Test
 	public void detectDefaultConfigurationClassesForAnnotatedInnerClass() {
 		Class<?>[] configClasses = contextLoader.detectDefaultConfigurationClasses(ContextConfigurationInnerClassTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals("annotated static ContextConfiguration should be considered.", 1, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).as("annotated static ContextConfiguration should be considered.").isEqualTo(1);
 
 		configClasses = contextLoader.detectDefaultConfigurationClasses(AnnotatedFooConfigInnerClassTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals("annotated static FooConfig should be considered.", 1, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).as("annotated static FooConfig should be considered.").isEqualTo(1);
 	}
 
 	@Test
 	public void detectDefaultConfigurationClassesForMultipleAnnotatedInnerClasses() {
 		Class<?>[] configClasses = contextLoader.detectDefaultConfigurationClasses(MultipleStaticConfigurationClassesTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals("multiple annotated static classes should be considered.", 2, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).as("multiple annotated static classes should be considered.").isEqualTo(2);
 	}
 
 	@Test
 	public void detectDefaultConfigurationClassesForNonAnnotatedInnerClass() {
 		Class<?>[] configClasses = contextLoader.detectDefaultConfigurationClasses(PlainVanillaFooConfigInnerClassTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals("non-annotated static FooConfig should NOT be considered.", 0, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).as("non-annotated static FooConfig should NOT be considered.").isEqualTo(0);
 	}
 
 	@Test
 	public void detectDefaultConfigurationClassesForFinalAnnotatedInnerClass() {
 		Class<?>[] configClasses = contextLoader.detectDefaultConfigurationClasses(FinalConfigInnerClassTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals("final annotated static Config should NOT be considered.", 0, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).as("final annotated static Config should NOT be considered.").isEqualTo(0);
 	}
 
 	@Test
 	public void detectDefaultConfigurationClassesForPrivateAnnotatedInnerClass() {
 		Class<?>[] configClasses = contextLoader.detectDefaultConfigurationClasses(PrivateConfigInnerClassTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals("private annotated inner classes should NOT be considered.", 0, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).as("private annotated inner classes should NOT be considered.").isEqualTo(0);
 	}
 
 	@Test
 	public void detectDefaultConfigurationClassesForNonStaticAnnotatedInnerClass() {
 		Class<?>[] configClasses = contextLoader.detectDefaultConfigurationClasses(NonStaticConfigInnerClassesTestCase.class);
-		assertNotNull(configClasses);
-		assertEquals("non-static annotated inner classes should NOT be considered.", 0, configClasses.length);
+		assertThat(configClasses).isNotNull();
+		assertThat(configClasses.length).as("non-static annotated inner classes should NOT be considered.").isEqualTo(0);
 	}
 
 }

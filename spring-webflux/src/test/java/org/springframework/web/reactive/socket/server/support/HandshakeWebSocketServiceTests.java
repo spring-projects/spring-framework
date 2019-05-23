@@ -33,7 +33,6 @@ import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -62,7 +61,7 @@ public class HandshakeWebSocketServiceTests {
 		service.handleRequest(exchange, mock(WebSocketHandler.class)).block();
 
 		HandshakeInfo info = upgradeStrategy.handshakeInfo;
-		assertNotNull(info);
+		assertThat(info).isNotNull();
 
 		Map<String, Object> attributes = info.getAttributes();
 		assertThat(attributes)

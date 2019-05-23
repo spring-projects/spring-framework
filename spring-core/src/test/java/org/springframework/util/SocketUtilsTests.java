@@ -24,10 +24,9 @@ import javax.net.ServerSocketFactory;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.util.SocketUtils.PORT_RANGE_MAX;
 import static org.springframework.util.SocketUtils.PORT_RANGE_MIN;
 
@@ -71,7 +70,7 @@ public class SocketUtilsTests {
 	public void findAvailableTcpPortWithMinPortEqualToMaxPort() {
 		int minMaxPort = SocketUtils.findAvailableTcpPort();
 		int port = SocketUtils.findAvailableTcpPort(minMaxPort, minMaxPort);
-		assertEquals(minMaxPort, port);
+		assertThat(port).isEqualTo(minMaxPort);
 	}
 
 	@Test
@@ -230,12 +229,12 @@ public class SocketUtilsTests {
 		assertAvailablePorts(ports, numRequested, minPort, maxPort);
 	}
 	private void assertPortInRange(int port, int minPort, int maxPort) {
-		assertTrue("port [" + port + "] >= " + minPort, port >= minPort);
-		assertTrue("port [" + port + "] <= " + maxPort, port <= maxPort);
+		assertThat(port >= minPort).as("port [" + port + "] >= " + minPort).isTrue();
+		assertThat(port <= maxPort).as("port [" + port + "] <= " + maxPort).isTrue();
 	}
 
 	private void assertAvailablePorts(SortedSet<Integer> ports, int numRequested, int minPort, int maxPort) {
-		assertEquals("number of ports requested", numRequested, ports.size());
+		assertThat(ports.size()).as("number of ports requested").isEqualTo(numRequested);
 		for (int port : ports) {
 			assertPortInRange(port, minPort, maxPort);
 		}

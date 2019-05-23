@@ -59,7 +59,7 @@ public class SystemEnvironmentPropertySourceTests {
 		envMap.put("akey", "avalue");
 
 		assertThat(ps.containsProperty("akey")).isEqualTo(true);
-		assertThat(ps.getProperty("akey")).isEqualTo((Object)"avalue");
+		assertThat(ps.getProperty("akey")).isEqualTo("avalue");
 	}
 
 	@Test
@@ -67,7 +67,7 @@ public class SystemEnvironmentPropertySourceTests {
 		envMap.put("a.key", "a.value");
 
 		assertThat(ps.containsProperty("a.key")).isEqualTo(true);
-		assertThat(ps.getProperty("a.key")).isEqualTo((Object)"a.value");
+		assertThat(ps.getProperty("a.key")).isEqualTo("a.value");
 	}
 
 	@Test
@@ -77,8 +77,8 @@ public class SystemEnvironmentPropertySourceTests {
 		assertThat(ps.containsProperty("a_key")).isEqualTo(true);
 		assertThat(ps.containsProperty("a.key")).isEqualTo(true);
 
-		assertThat(ps.getProperty("a_key")).isEqualTo((Object)"a_value");
-		assertThat( ps.getProperty("a.key")).isEqualTo((Object)"a_value");
+		assertThat(ps.getProperty("a_key")).isEqualTo("a_value");
+		assertThat( ps.getProperty("a.key")).isEqualTo("a_value");
 	}
 
 	@Test
@@ -86,8 +86,8 @@ public class SystemEnvironmentPropertySourceTests {
 		envMap.put("a_key", "a_value");
 		envMap.put("a.key", "a.value");
 
-		assertThat(ps.getProperty("a_key")).isEqualTo((Object)"a_value");
-		assertThat( ps.getProperty("a.key")).isEqualTo((Object)"a.value");
+		assertThat(ps.getProperty("a_key")).isEqualTo("a_value");
+		assertThat( ps.getProperty("a.key")).isEqualTo("a.value");
 	}
 
 	@Test
@@ -171,7 +171,7 @@ public class SystemEnvironmentPropertySourceTests {
 		};
 
 		assertThat(ps.containsProperty("A_KEY")).isEqualTo(true);
-		assertThat(ps.getProperty("A_KEY")).isEqualTo((Object)"a_value");
+		assertThat(ps.getProperty("A_KEY")).isEqualTo("a_value");
 	}
 
 }

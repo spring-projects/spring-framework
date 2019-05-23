@@ -24,8 +24,6 @@ import org.springframework.beans.FatalBeanException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for the {@link RollbackRuleAttribute} class.
@@ -41,19 +39,19 @@ public class RollbackRuleTests {
 	@Test
 	public void foundImmediatelyWithString() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
-		assertEquals(0, rr.getDepth(new Exception()));
+		assertThat(rr.getDepth(new Exception())).isEqualTo(0);
 	}
 
 	@Test
 	public void foundImmediatelyWithClass() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class);
-		assertEquals(0, rr.getDepth(new Exception()));
+		assertThat(rr.getDepth(new Exception())).isEqualTo(0);
 	}
 
 	@Test
 	public void notFound() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.io.IOException.class.getName());
-		assertEquals(-1, rr.getDepth(new MyRuntimeException("")));
+		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(-1);
 	}
 
 	@Test
@@ -66,10 +64,10 @@ public class RollbackRuleTests {
 	@Test
 	public void alwaysTrueForThrowable() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Throwable.class.getName());
-		assertTrue(rr.getDepth(new MyRuntimeException("")) > 0);
-		assertTrue(rr.getDepth(new IOException()) > 0);
-		assertTrue(rr.getDepth(new FatalBeanException(null,null)) > 0);
-		assertTrue(rr.getDepth(new RuntimeException()) > 0);
+		assertThat(rr.getDepth(new MyRuntimeException("")) > 0).isTrue();
+		assertThat(rr.getDepth(new IOException()) > 0).isTrue();
+		assertThat(rr.getDepth(new FatalBeanException(null,null)) > 0).isTrue();
+		assertThat(rr.getDepth(new RuntimeException()) > 0).isTrue();
 	}
 
 	@Test

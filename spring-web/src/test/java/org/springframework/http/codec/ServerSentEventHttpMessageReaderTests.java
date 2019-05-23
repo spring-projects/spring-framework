@@ -32,10 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ServerSentEventHttpMessageReader}.
@@ -50,14 +47,14 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 
 	@Test
 	public void cantRead() {
-		assertFalse(messageReader.canRead(ResolvableType.forClass(Object.class), new MediaType("foo", "bar")));
-		assertFalse(messageReader.canRead(ResolvableType.forClass(Object.class), null));
+		assertThat(messageReader.canRead(ResolvableType.forClass(Object.class), new MediaType("foo", "bar"))).isFalse();
+		assertThat(messageReader.canRead(ResolvableType.forClass(Object.class), null)).isFalse();
 	}
 
 	@Test
 	public void canRead() {
-		assertTrue(messageReader.canRead(ResolvableType.forClass(Object.class), new MediaType("text", "event-stream")));
-		assertTrue(messageReader.canRead(ResolvableType.forClass(ServerSentEvent.class), new MediaType("foo", "bar")));
+		assertThat(messageReader.canRead(ResolvableType.forClass(Object.class), new MediaType("text", "event-stream"))).isTrue();
+		assertThat(messageReader.canRead(ResolvableType.forClass(ServerSentEvent.class), new MediaType("foo", "bar"))).isTrue();
 	}
 
 	@Test
@@ -74,18 +71,18 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 
 		StepVerifier.create(events)
 				.consumeNextWith(event -> {
-					assertEquals("c42", event.id());
-					assertEquals("foo", event.event());
-					assertEquals(Duration.ofMillis(123), event.retry());
-					assertEquals("bla\nbla bla\nbla bla bla", event.comment());
-					assertEquals("bar", event.data());
+					assertThat(event.id()).isEqualTo("c42");
+					assertThat(event.event()).isEqualTo("foo");
+					assertThat(event.retry()).isEqualTo(Duration.ofMillis(123));
+					assertThat(event.comment()).isEqualTo("bla\nbla bla\nbla bla bla");
+					assertThat(event.data()).isEqualTo("bar");
 				})
 				.consumeNextWith(event -> {
-					assertEquals("c43", event.id());
-					assertEquals("bar", event.event());
-					assertEquals(Duration.ofMillis(456), event.retry());
-					assertNull(event.comment());
-					assertEquals("baz", event.data());
+					assertThat(event.id()).isEqualTo("c43");
+					assertThat(event.event()).isEqualTo("bar");
+					assertThat(event.retry()).isEqualTo(Duration.ofMillis(456));
+					assertThat(event.comment()).isNull();
+					assertThat(event.data()).isEqualTo("baz");
 				})
 				.expectComplete()
 				.verify();
@@ -106,18 +103,18 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 
 		StepVerifier.create(events)
 				.consumeNextWith(event -> {
-					assertEquals("c42", event.id());
-					assertEquals("foo", event.event());
-					assertEquals(Duration.ofMillis(123), event.retry());
-					assertEquals("bla\nbla bla\nbla bla bla", event.comment());
-					assertEquals("bar", event.data());
+					assertThat(event.id()).isEqualTo("c42");
+					assertThat(event.event()).isEqualTo("foo");
+					assertThat(event.retry()).isEqualTo(Duration.ofMillis(123));
+					assertThat(event.comment()).isEqualTo("bla\nbla bla\nbla bla bla");
+					assertThat(event.data()).isEqualTo("bar");
 				})
 				.consumeNextWith(event -> {
-					assertEquals("c43", event.id());
-					assertEquals("bar", event.event());
-					assertEquals(Duration.ofMillis(456), event.retry());
-					assertNull(event.comment());
-					assertEquals("baz", event.data());
+					assertThat(event.id()).isEqualTo("c43");
+					assertThat(event.event()).isEqualTo("bar");
+					assertThat(event.retry()).isEqualTo(Duration.ofMillis(456));
+					assertThat(event.comment()).isNull();
+					assertThat(event.data()).isEqualTo("baz");
 				})
 				.expectComplete()
 				.verify();
@@ -150,12 +147,12 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 
 		StepVerifier.create(data)
 				.consumeNextWith(pojo -> {
-					assertEquals("foofoo", pojo.getFoo());
-					assertEquals("barbar", pojo.getBar());
+					assertThat(pojo.getFoo()).isEqualTo("foofoo");
+					assertThat(pojo.getBar()).isEqualTo("barbar");
 				})
 				.consumeNextWith(pojo -> {
-					assertEquals("foofoofoo", pojo.getFoo());
-					assertEquals("barbarbar", pojo.getBar());
+					assertThat(pojo.getFoo()).isEqualTo("foofoofoo");
+					assertThat(pojo.getBar()).isEqualTo("barbarbar");
 				})
 				.expectComplete()
 				.verify();
@@ -172,7 +169,7 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 				.cast(String.class)
 				.block(Duration.ZERO);
 
-		assertEquals(body, actual);
+		assertThat(actual).isEqualTo(body);
 	}
 
 	@Test

@@ -25,9 +25,6 @@ import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rick Evans
@@ -53,28 +50,28 @@ public class BeanPropertySqlParameterSourceTests {
 	@Test
 	public void successfulPropertyAccess() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
-		assertTrue(Arrays.asList(source.getReadablePropertyNames()).contains("name"));
-		assertTrue(Arrays.asList(source.getReadablePropertyNames()).contains("age"));
-		assertEquals("tb", source.getValue("name"));
-		assertEquals(99, source.getValue("age"));
-		assertEquals(Types.VARCHAR, source.getSqlType("name"));
-		assertEquals(Types.INTEGER, source.getSqlType("age"));
+		assertThat(Arrays.asList(source.getReadablePropertyNames()).contains("name")).isTrue();
+		assertThat(Arrays.asList(source.getReadablePropertyNames()).contains("age")).isTrue();
+		assertThat(source.getValue("name")).isEqualTo("tb");
+		assertThat(source.getValue("age")).isEqualTo(99);
+		assertThat(source.getSqlType("name")).isEqualTo(Types.VARCHAR);
+		assertThat(source.getSqlType("age")).isEqualTo(Types.INTEGER);
 	}
 
 	@Test
 	public void successfulPropertyAccessWithOverriddenSqlType() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean("tb", 99));
 		source.registerSqlType("age", Types.NUMERIC);
-		assertEquals("tb", source.getValue("name"));
-		assertEquals(99, source.getValue("age"));
-		assertEquals(Types.VARCHAR, source.getSqlType("name"));
-		assertEquals(Types.NUMERIC, source.getSqlType("age"));
+		assertThat(source.getValue("name")).isEqualTo("tb");
+		assertThat(source.getValue("age")).isEqualTo(99);
+		assertThat(source.getSqlType("name")).isEqualTo(Types.VARCHAR);
+		assertThat(source.getSqlType("age")).isEqualTo(Types.NUMERIC);
 	}
 
 	@Test
 	public void hasValueWhereTheUnderlyingBeanHasNoSuchProperty() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new TestBean());
-		assertFalse(source.hasValue("thisPropertyDoesNotExist"));
+		assertThat(source.hasValue("thisPropertyDoesNotExist")).isFalse();
 	}
 
 	@Test
@@ -87,7 +84,7 @@ public class BeanPropertySqlParameterSourceTests {
 	@Test
 	public void hasValueWhereTheUnderlyingBeanPropertyIsNotReadable() {
 		BeanPropertySqlParameterSource source = new BeanPropertySqlParameterSource(new NoReadableProperties());
-		assertFalse(source.hasValue("noOp"));
+		assertThat(source.hasValue("noOp")).isFalse();
 	}
 
 	@Test

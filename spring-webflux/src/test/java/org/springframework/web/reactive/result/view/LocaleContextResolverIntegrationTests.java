@@ -43,7 +43,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.i18n.FixedLocaleContextResolver;
 import org.springframework.web.server.i18n.LocaleContextResolver;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
@@ -70,8 +70,8 @@ public class LocaleContextResolverIntegrationTests extends AbstractRequestMappin
 
 		StepVerifier.create(result)
 				.consumeNextWith(response -> {
-					assertEquals(HttpStatus.OK, response.statusCode());
-					assertEquals(Locale.GERMANY, response.headers().asHttpHeaders().getContentLanguage());
+					assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
+					assertThat(response.headers().asHttpHeaders().getContentLanguage()).isEqualTo(Locale.GERMANY);
 				})
 				.verifyComplete();
 	}

@@ -39,9 +39,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
@@ -70,15 +68,15 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 	@Test
 	public void canWrite() {
-		assertTrue(this.messageWriter.canWrite(forClass(Object.class), null));
-		assertFalse(this.messageWriter.canWrite(forClass(Object.class), new MediaType("foo", "bar")));
+		assertThat(this.messageWriter.canWrite(forClass(Object.class), null)).isTrue();
+		assertThat(this.messageWriter.canWrite(forClass(Object.class), new MediaType("foo", "bar"))).isFalse();
 
-		assertTrue(this.messageWriter.canWrite(null, MediaType.TEXT_EVENT_STREAM));
-		assertTrue(this.messageWriter.canWrite(forClass(ServerSentEvent.class), new MediaType("foo", "bar")));
+		assertThat(this.messageWriter.canWrite(null, MediaType.TEXT_EVENT_STREAM)).isTrue();
+		assertThat(this.messageWriter.canWrite(forClass(ServerSentEvent.class), new MediaType("foo", "bar"))).isTrue();
 
 		// SPR-15464
-		assertTrue(this.messageWriter.canWrite(ResolvableType.NONE, MediaType.TEXT_EVENT_STREAM));
-		assertFalse(this.messageWriter.canWrite(ResolvableType.NONE, new MediaType("foo", "bar")));
+		assertThat(this.messageWriter.canWrite(ResolvableType.NONE, MediaType.TEXT_EVENT_STREAM)).isTrue();
+		assertThat(this.messageWriter.canWrite(ResolvableType.NONE, new MediaType("foo", "bar"))).isFalse();
 	}
 
 	@Test
@@ -127,12 +125,12 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		MediaType mediaType = new MediaType("text", "event-stream", charset);
 		testWrite(source, mediaType, outputMessage, String.class);
 
-		assertEquals(mediaType, outputMessage.getHeaders().getContentType());
+		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(mediaType);
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(dataBuffer -> {
 					String value = DataBufferTestUtils.dumpString(dataBuffer, charset);
 					DataBufferUtils.release(dataBuffer);
-					assertEquals("data:\u00A3\n\n", value);
+					assertThat(value).isEqualTo("data:\u00A3\n\n");
 				})
 				.expectComplete()
 				.verify();
@@ -176,12 +174,12 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		MediaType mediaType = new MediaType("text", "event-stream", charset);
 		testWrite(source, mediaType, outputMessage, Pojo.class);
 
-		assertEquals(mediaType, outputMessage.getHeaders().getContentType());
+		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(mediaType);
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(dataBuffer -> {
 					String value = DataBufferTestUtils.dumpString(dataBuffer, charset);
 					DataBufferUtils.release(dataBuffer);
-					assertEquals("data:{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}\n\n", value);
+					assertThat(value).isEqualTo("data:{\"foo\":\"foo\uD834\uDD1E\",\"bar\":\"bar\uD834\uDD1E\"}\n\n");
 				})
 				.expectComplete()
 				.verify();

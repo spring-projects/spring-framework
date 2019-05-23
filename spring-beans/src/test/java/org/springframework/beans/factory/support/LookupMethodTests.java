@@ -23,10 +23,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Karl Pietrzak
@@ -48,43 +46,43 @@ public class LookupMethodTests {
 	@Test
 	public void testWithoutConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		Object expected = bean.get();
-		assertEquals(TestBean.class, expected.getClass());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
 	}
 
 	@Test
 	public void testWithOverloadedArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		TestBean expected = bean.get("haha");
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
+		assertThat(expected.getName()).isEqualTo("haha");
 	}
 
 	@Test
 	public void testWithOneConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		TestBean expected = bean.getOneArgument("haha");
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
+		assertThat(expected.getName()).isEqualTo("haha");
 	}
 
 	@Test
 	public void testWithTwoConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		TestBean expected = bean.getTwoArguments("haha", 72);
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
-		assertEquals(72, expected.getAge());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
+		assertThat(expected.getName()).isEqualTo("haha");
+		assertThat(expected.getAge()).isEqualTo(72);
 	}
 
 	@Test
 	public void testWithThreeArgsShouldFail() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		assertThatExceptionOfType(AbstractMethodError.class).as("does not have a three arg constructor").isThrownBy(() ->
 			bean.getThreeArguments("name", 1, 2));
 	}
@@ -92,11 +90,11 @@ public class LookupMethodTests {
 	@Test
 	public void testWithOverriddenLookupMethod() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("extendedBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		TestBean expected = bean.getOneArgument("haha");
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
-		assertTrue(expected.isJedi());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
+		assertThat(expected.getName()).isEqualTo("haha");
+		assertThat(expected.isJedi()).isTrue();
 	}
 
 

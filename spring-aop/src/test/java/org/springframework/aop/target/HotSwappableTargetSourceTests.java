@@ -31,8 +31,8 @@ import org.springframework.tests.sample.beans.SerializablePerson;
 import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
@@ -70,13 +70,13 @@ public class HotSwappableTargetSourceTests {
 	@Test
 	public void testBasicFunctionality() {
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		assertEquals(INITIAL_COUNT, proxied.getCount());
+		assertThat(proxied.getCount()).isEqualTo(INITIAL_COUNT);
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 1, proxied.getCount());
+		assertThat(proxied.getCount()).isEqualTo((INITIAL_COUNT + 1));
 
 		proxied = (SideEffectBean) beanFactory.getBean("swappable");
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 2, proxied.getCount());
+		assertThat(proxied.getCount()).isEqualTo((INITIAL_COUNT + 2));
 	}
 
 	@Test
@@ -85,25 +85,25 @@ public class HotSwappableTargetSourceTests {
 		SideEffectBean target2 = (SideEffectBean) beanFactory.getBean("target2");
 
 		SideEffectBean proxied = (SideEffectBean) beanFactory.getBean("swappable");
-		assertEquals(target1.getCount(), proxied.getCount());
+		assertThat(proxied.getCount()).isEqualTo(target1.getCount());
 		proxied.doWork();
-		assertEquals(INITIAL_COUNT + 1, proxied.getCount());
+		assertThat(proxied.getCount()).isEqualTo((INITIAL_COUNT + 1));
 
 		HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 		Object old = swapper.swap(target2);
-		assertEquals("Correct old target was returned", target1, old);
+		assertThat(old).as("Correct old target was returned").isEqualTo(target1);
 
 		// TODO should be able to make this assertion: need to fix target handling
 		// in AdvisedSupport
 		//assertEquals(target2, ((Advised) proxied).getTarget());
 
-		assertEquals(20, proxied.getCount());
+		assertThat(proxied.getCount()).isEqualTo(20);
 		proxied.doWork();
-		assertEquals(21, target2.getCount());
+		assertThat(target2.getCount()).isEqualTo(21);
 
 		// Swap it back
 		swapper.swap(target1);
-		assertEquals(target1.getCount(), proxied.getCount());
+		assertThat(proxied.getCount()).isEqualTo(target1.getCount());
 	}
 
 	@Test
@@ -130,16 +130,16 @@ public class HotSwappableTargetSourceTests {
 		pf.addAdvisor(new DefaultPointcutAdvisor(new SerializableNopInterceptor()));
 		Person p = (Person) pf.getProxy();
 
-		assertEquals(sp1.getName(), p.getName());
+		assertThat(p.getName()).isEqualTo(sp1.getName());
 		hts.swap(sp2);
-		assertEquals(sp2.getName(), p.getName());
+		assertThat(p.getName()).isEqualTo(sp2.getName());
 
 		p = (Person) SerializationTestUtils.serializeAndDeserialize(p);
 		// We need to get a reference to the client-side targetsource
 		hts = (HotSwappableTargetSource) ((Advised) p).getTargetSource();
-		assertEquals(sp2.getName(), p.getName());
+		assertThat(p.getName()).isEqualTo(sp2.getName());
 		hts.swap(sp1);
-		assertEquals(sp1.getName(), p.getName());
+		assertThat(p.getName()).isEqualTo(sp1.getName());
 
 	}
 

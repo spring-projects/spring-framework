@@ -26,10 +26,9 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSes
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestHttpSockJsSession;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -48,7 +47,7 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
 		handleRequest(new XhrReceivingTransportHandler());
 
-		assertEquals(204, this.servletResponse.getStatus());
+		assertThat(this.servletResponse.getStatus()).isEqualTo(204);
 	}
 
 	@Test
@@ -82,7 +81,7 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 		transportHandler.initialize(sockJsConfig);
 		assertThatExceptionOfType(SockJsMessageDeliveryException.class).isThrownBy(() ->
 				transportHandler.handleRequest(this.request, this.response, wsHandler, session));
-		assertNull(session.getCloseStatus());
+		assertThat(session.getCloseStatus()).isNull();
 	}
 
 
@@ -93,7 +92,7 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 		transportHandler.initialize(new StubSockJsServiceConfig());
 		transportHandler.handleRequest(this.request, this.response, wsHandler, session);
 
-		assertEquals("text/plain;charset=UTF-8", this.response.getHeaders().getContentType().toString());
+		assertThat(this.response.getHeaders().getContentType().toString()).isEqualTo("text/plain;charset=UTF-8");
 		verify(wsHandler).handleMessage(session, new TextMessage("x"));
 	}
 
@@ -105,7 +104,7 @@ public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests
 
 		new XhrReceivingTransportHandler().handleRequest(this.request, this.response, wsHandler, session);
 
-		assertEquals(500, this.servletResponse.getStatus());
+		assertThat(this.servletResponse.getStatus()).isEqualTo(500);
 		verifyNoMoreInteractions(wsHandler);
 	}
 

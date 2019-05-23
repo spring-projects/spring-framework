@@ -33,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 /**
@@ -74,8 +74,7 @@ public class DataSourceOnlySqlScriptsTests {
 	}
 
 	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected,
-			JdbcTestUtils.countRowsInTable(jdbcTemplate, "user"));
+		assertThat(JdbcTestUtils.countRowsInTable(jdbcTemplate, "user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 

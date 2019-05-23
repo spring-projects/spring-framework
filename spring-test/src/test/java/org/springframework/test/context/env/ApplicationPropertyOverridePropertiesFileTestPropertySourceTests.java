@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource}
@@ -50,7 +50,7 @@ public class ApplicationPropertyOverridePropertiesFileTestPropertySourceTests {
 
 	@Test
 	public void verifyPropertiesAreAvailableInEnvironment() {
-		assertEquals("test override", env.getProperty("explicit"));
+		assertThat(env.getProperty("explicit")).isEqualTo("test override");
 	}
 
 

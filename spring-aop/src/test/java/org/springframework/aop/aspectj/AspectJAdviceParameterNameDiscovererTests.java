@@ -23,9 +23,8 @@ import org.junit.Test;
 
 import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer.AmbiguousBindingException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for the {@link AspectJAdviceParameterNameDiscoverer} class.
@@ -236,8 +235,7 @@ public class AspectJAdviceParameterNameDiscovererTests {
 	protected void assertParameterNames(
 			Method method, String pointcut, String returning, String throwing, String[] parameterNames) {
 
-		assertEquals("bad test specification, must have same number of parameter names as method arguments",
-				method.getParameterCount(), parameterNames.length);
+		assertThat(parameterNames.length).as("bad test specification, must have same number of parameter names as method arguments").isEqualTo(method.getParameterCount());
 
 		AspectJAdviceParameterNameDiscoverer discoverer = new AspectJAdviceParameterNameDiscoverer(pointcut);
 		discoverer.setRaiseExceptions(true);
@@ -248,16 +246,14 @@ public class AspectJAdviceParameterNameDiscovererTests {
 		String formattedExpectedNames = format(parameterNames);
 		String formattedActualNames = format(discoveredNames);
 
-		assertEquals("Expecting " + parameterNames.length + " parameter names in return set '" +
+		assertThat(discoveredNames.length).as("Expecting " + parameterNames.length + " parameter names in return set '" +
 				formattedExpectedNames + "', but found " + discoveredNames.length +
-				" '" + formattedActualNames + "'",
-				parameterNames.length, discoveredNames.length);
+				" '" + formattedActualNames + "'").isEqualTo(parameterNames.length);
 
 		for (int i = 0; i < discoveredNames.length; i++) {
-			assertNotNull("Parameter names must never be null", discoveredNames[i]);
-			assertEquals("Expecting parameter " + i + " to be named '" +
-					parameterNames[i] + "' but was '" + discoveredNames[i] + "'",
-					parameterNames[i], discoveredNames[i]);
+			assertThat(discoveredNames[i]).as("Parameter names must never be null").isNotNull();
+			assertThat(discoveredNames[i]).as("Expecting parameter " + i + " to be named '" +
+						parameterNames[i] + "' but was '" + discoveredNames[i] + "'").isEqualTo(parameterNames[i]);
 		}
 	}
 

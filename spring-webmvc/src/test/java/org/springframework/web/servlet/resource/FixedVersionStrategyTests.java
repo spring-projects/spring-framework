@@ -19,9 +19,8 @@ package org.springframework.web.servlet.resource;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for {@link FixedVersionStrategy}.
@@ -53,24 +52,24 @@ public class FixedVersionStrategyTests {
 
 	@Test
 	public void extractVersion() {
-		assertEquals(VERSION, this.strategy.extractVersion(VERSION + "/" + PATH));
-		assertNull(this.strategy.extractVersion(PATH));
+		assertThat(this.strategy.extractVersion(VERSION + "/" + PATH)).isEqualTo(VERSION);
+		assertThat(this.strategy.extractVersion(PATH)).isNull();
 	}
 
 	@Test
 	public void removeVersion() {
-		assertEquals("/" + PATH, this.strategy.removeVersion(VERSION + "/" + PATH, VERSION));
+		assertThat(this.strategy.removeVersion(VERSION + "/" + PATH, VERSION)).isEqualTo(("/" + PATH));
 	}
 
 	@Test
 	public void addVersion() {
-		assertEquals(VERSION + "/" + PATH, this.strategy.addVersion("/" + PATH, VERSION));
+		assertThat(this.strategy.addVersion("/" + PATH, VERSION)).isEqualTo((VERSION + "/" + PATH));
 	}
 
 	@Test  // SPR-13727
 	public void addVersionRelativePath() {
 		String relativePath = "../" + PATH;
-		assertEquals(relativePath, this.strategy.addVersion(relativePath, VERSION));
+		assertThat(this.strategy.addVersion(relativePath, VERSION)).isEqualTo(relativePath);
 	}
 
 }

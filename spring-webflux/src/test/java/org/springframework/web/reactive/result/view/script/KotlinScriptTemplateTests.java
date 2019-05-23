@@ -32,7 +32,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
@@ -48,7 +48,7 @@ public class KotlinScriptTemplateTests {
 		model.put("foo", "Foo");
 		String url = "org/springframework/web/reactive/result/view/script/kotlin/template.kts";
 		MockServerHttpResponse response = render(url, model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>", response.getBodyAsString().block());
+		assertThat(response.getBodyAsString().block()).isEqualTo("<html><body>\n<p>Bonjour Foo</p>\n</body></html>");
 	}
 
 	@Ignore
@@ -58,7 +58,7 @@ public class KotlinScriptTemplateTests {
 		model.put("foo", "Foo");
 		String url = "org/springframework/web/reactive/result/view/script/kotlin/template.kts";
 		MockServerHttpResponse response = render(url, model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>", response.getBodyAsString().block());
+		assertThat(response.getBodyAsString().block()).isEqualTo("<html><body>\n<p>Hello Foo</p>\n</body></html>");
 	}
 
 	@Ignore
@@ -72,8 +72,7 @@ public class KotlinScriptTemplateTests {
 		String url = "org/springframework/web/reactive/result/view/script/kotlin/eval.kts";
 		Class<?> configClass = ScriptTemplatingConfigurationWithoutRenderFunction.class;
 		MockServerHttpResponse response = render(url, model, Locale.ENGLISH, configClass);
-		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
-				response.getBodyAsString().block());
+		assertThat(response.getBodyAsString().block()).isEqualTo("<html><body>\n<p>Hello Foo</p>\n</body></html>");
 	}
 
 

@@ -42,8 +42,6 @@ import org.springframework.util.PathMatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Test fixture for
@@ -86,7 +84,7 @@ public class MethodMessageHandlerTests {
 
 		Map<String, HandlerMethod> handlerMethods = this.messageHandler.getHandlerMethods();
 
-		assertNotNull(handlerMethods);
+		assertThat(handlerMethods).isNotNull();
 		assertThat(handlerMethods).hasSize(3);
 	}
 
@@ -98,7 +96,7 @@ public class MethodMessageHandlerTests {
 
 		this.messageHandler.handleMessage(toDestination("/test/handlerPathMatchFoo"));
 
-		assertEquals("pathMatchWildcard", this.testController.method);
+		assertThat(this.testController.method).isEqualTo("pathMatchWildcard");
 	}
 
 	@Test
@@ -112,7 +110,7 @@ public class MethodMessageHandlerTests {
 
 		this.messageHandler.handleMessage(toDestination("/test/bestmatch/bar/path"));
 
-		assertEquals("bestMatch", this.testController.method);
+		assertThat(this.testController.method).isEqualTo("bestMatch");
 	}
 
 	@Test
@@ -120,8 +118,8 @@ public class MethodMessageHandlerTests {
 
 		this.messageHandler.handleMessage(toDestination("/test/handlerArgumentResolver"));
 
-		assertEquals("handlerArgumentResolver", this.testController.method);
-		assertNotNull(this.testController.arguments.get("message"));
+		assertThat(this.testController.method).isEqualTo("handlerArgumentResolver");
+		assertThat(this.testController.arguments.get("message")).isNotNull();
 	}
 
 	@Test
@@ -129,8 +127,8 @@ public class MethodMessageHandlerTests {
 
 		this.messageHandler.handleMessage(toDestination("/test/handlerThrowsExc"));
 
-		assertEquals("illegalStateException", this.testController.method);
-		assertNotNull(this.testController.arguments.get("exception"));
+		assertThat(this.testController.method).isEqualTo("illegalStateException");
+		assertThat(this.testController.arguments.get("exception")).isNotNull();
 	}
 
 	private Message<?> toDestination(String destination) {

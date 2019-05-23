@@ -29,8 +29,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -54,29 +53,29 @@ public class MappedInterceptorTests {
 	@Test
 	public void noPatterns() {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(null, null, this.interceptor);
-		assertTrue(mappedInterceptor.matches("/foo", pathMatcher));
+		assertThat(mappedInterceptor.matches("/foo", pathMatcher)).isTrue();
 	}
 
 	@Test
 	public void includePattern() {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] { "/foo/*" }, this.interceptor);
 
-		assertTrue(mappedInterceptor.matches("/foo/bar", pathMatcher));
-		assertFalse(mappedInterceptor.matches("/bar/foo", pathMatcher));
+		assertThat(mappedInterceptor.matches("/foo/bar", pathMatcher)).isTrue();
+		assertThat(mappedInterceptor.matches("/bar/foo", pathMatcher)).isFalse();
 	}
 
 	@Test
 	public void includePatternWithMatrixVariables() {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] { "/foo*/*" }, this.interceptor);
-		assertTrue(mappedInterceptor.matches("/foo;q=1/bar;s=2", pathMatcher));
+		assertThat(mappedInterceptor.matches("/foo;q=1/bar;s=2", pathMatcher)).isTrue();
 	}
 
 	@Test
 	public void excludePattern() {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(null, new String[] { "/admin/**" }, this.interceptor);
 
-		assertTrue(mappedInterceptor.matches("/foo", pathMatcher));
-		assertFalse(mappedInterceptor.matches("/admin/foo", pathMatcher));
+		assertThat(mappedInterceptor.matches("/foo", pathMatcher)).isTrue();
+		assertThat(mappedInterceptor.matches("/admin/foo", pathMatcher)).isFalse();
 	}
 
 	@Test
@@ -84,8 +83,8 @@ public class MappedInterceptorTests {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(
 				new String[] { "/**" }, new String[] { "/admin/**" }, this.interceptor);
 
-		assertTrue(mappedInterceptor.matches("/foo", pathMatcher));
-		assertFalse(mappedInterceptor.matches("/admin/foo", pathMatcher));
+		assertThat(mappedInterceptor.matches("/foo", pathMatcher)).isTrue();
+		assertThat(mappedInterceptor.matches("/admin/foo", pathMatcher)).isFalse();
 	}
 
 	@Test
@@ -93,8 +92,8 @@ public class MappedInterceptorTests {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] { "/foo/[0-9]*" }, this.interceptor);
 		mappedInterceptor.setPathMatcher(new TestPathMatcher());
 
-		assertTrue(mappedInterceptor.matches("/foo/123", pathMatcher));
-		assertFalse(mappedInterceptor.matches("/foo/bar", pathMatcher));
+		assertThat(mappedInterceptor.matches("/foo/123", pathMatcher)).isTrue();
+		assertThat(mappedInterceptor.matches("/foo/bar", pathMatcher)).isFalse();
 	}
 
 	@Test

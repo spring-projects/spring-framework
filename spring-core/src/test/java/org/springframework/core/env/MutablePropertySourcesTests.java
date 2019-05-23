@@ -25,10 +25,6 @@ import org.springframework.mock.env.MockPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Chris Beams
@@ -99,11 +95,11 @@ public class MutablePropertySourcesTests {
 		assertThat(sources.precedenceOf(PropertySource.named("f"))).isEqualTo(5);
 		assertThat(sources.precedenceOf(PropertySource.named("g"))).isEqualTo(6);
 
-		assertEquals(sources.remove("a"), PropertySource.named("a"));
+		assertThat(PropertySource.named("a")).isEqualTo(sources.remove("a"));
 		assertThat(sources.size()).isEqualTo(6);
 		assertThat(sources.contains("a")).isFalse();
 
-		assertNull(sources.remove("a"));
+		assertThat((Object) sources.remove("a")).isNull();
 		assertThat(sources.size()).isEqualTo(6);
 
 		String bogusPS = "bogus";
@@ -150,19 +146,19 @@ public class MutablePropertySourcesTests {
 		sources.addLast(new MockPropertySource("test"));
 
 		Iterator<PropertySource<?>> it = sources.iterator();
-		assertTrue(it.hasNext());
-		assertEquals("test", it.next().getName());
+		assertThat(it.hasNext()).isTrue();
+		assertThat(it.next().getName()).isEqualTo("test");
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
 				it::remove);
-		assertFalse(it.hasNext());
+		assertThat(it.hasNext()).isFalse();
 	}
 
 	@Test
 	public void iteratorIsEmptyForEmptySources() {
 		MutablePropertySources sources = new MutablePropertySources();
 		Iterator<PropertySource<?>> it = sources.iterator();
-		assertFalse(it.hasNext());
+		assertThat(it.hasNext()).isFalse();
 	}
 
 	@Test

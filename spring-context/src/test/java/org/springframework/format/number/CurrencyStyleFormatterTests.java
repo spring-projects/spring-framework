@@ -23,8 +23,8 @@ import java.util.Locale;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Keith Donald
@@ -36,12 +36,12 @@ public class CurrencyStyleFormatterTests {
 
 	@Test
 	public void formatValue() {
-		assertEquals("$23.00", formatter.print(new BigDecimal("23"), Locale.US));
+		assertThat(formatter.print(new BigDecimal("23"), Locale.US)).isEqualTo("$23.00");
 	}
 
 	@Test
 	public void parseValue() throws ParseException {
-		assertEquals(new BigDecimal("23.56"), formatter.parse("$23.56", Locale.US));
+		assertThat(formatter.parse("$23.56", Locale.US)).isEqualTo(new BigDecimal("23.56"));
 	}
 
 	@Test
@@ -53,12 +53,12 @@ public class CurrencyStyleFormatterTests {
 	@Test
 	public void parseValueDefaultRoundDown() throws ParseException {
 		this.formatter.setRoundingMode(RoundingMode.DOWN);
-		assertEquals(new BigDecimal("23.56"), formatter.parse("$23.567", Locale.US));
+		assertThat(formatter.parse("$23.567", Locale.US)).isEqualTo(new BigDecimal("23.56"));
 	}
 
 	@Test
 	public void parseWholeValue() throws ParseException {
-		assertEquals(new BigDecimal("23.00"), formatter.parse("$23", Locale.US));
+		assertThat(formatter.parse("$23", Locale.US)).isEqualTo(new BigDecimal("23.00"));
 	}
 
 	@Test

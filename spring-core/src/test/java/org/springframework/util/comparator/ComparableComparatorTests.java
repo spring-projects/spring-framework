@@ -20,8 +20,8 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link ComparableComparator}.
@@ -37,7 +37,7 @@ public class ComparableComparatorTests {
 		Comparator<String> c = new ComparableComparator<>();
 		String s1 = "abc";
 		String s2 = "cde";
-		assertTrue(c.compare(s1, s2) < 0);
+		assertThat(c.compare(s1, s2) < 0).isTrue();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

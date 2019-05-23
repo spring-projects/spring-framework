@@ -48,12 +48,9 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -87,7 +84,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void validateJmsTemplate() {
-		assertSame(this.jmsTemplate, this.messagingTemplate.getJmsTemplate());
+		assertThat(this.messagingTemplate.getJmsTemplate()).isSameAs(this.jmsTemplate);
 	}
 
 	@Test
@@ -125,10 +122,10 @@ public class JmsMessagingTemplateTests {
 	private void assertPayloadConverter(JmsMessagingTemplate messagingTemplate,
 			MessageConverter messageConverter) {
 		MessageConverter jmsMessageConverter = messagingTemplate.getJmsMessageConverter();
-		assertNotNull(jmsMessageConverter);
-		assertEquals(MessagingMessageConverter.class, jmsMessageConverter.getClass());
-		assertSame(messageConverter, new DirectFieldAccessor(jmsMessageConverter)
-				.getPropertyValue("payloadConverter"));
+		assertThat(jmsMessageConverter).isNotNull();
+		assertThat(jmsMessageConverter.getClass()).isEqualTo(MessagingMessageConverter.class);
+		assertThat(new DirectFieldAccessor(jmsMessageConverter)
+				.getPropertyValue("payloadConverter")).isSameAs(messageConverter);
 	}
 
 	@Test
@@ -199,7 +196,7 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend(destination, "my Payload");
 		verify(this.jmsTemplate).send(eq(destination), this.messageCreator.capture());
 		TextMessage textMessage = createTextMessage(this.messageCreator.getValue());
-		assertEquals("my Payload", textMessage.getText());
+		assertThat(textMessage.getText()).isEqualTo("my Payload");
 	}
 
 	@Test
@@ -207,7 +204,7 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend("myQueue", "my Payload");
 		verify(this.jmsTemplate).send(eq("myQueue"), this.messageCreator.capture());
 		TextMessage textMessage = createTextMessage(this.messageCreator.getValue());
-		assertEquals("my Payload", textMessage.getText());
+		assertThat(textMessage.getText()).isEqualTo("my Payload");
 	}
 
 	@Test
@@ -218,7 +215,7 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend("my Payload");
 		verify(this.jmsTemplate).send(eq(destination), this.messageCreator.capture());
 		TextMessage textMessage = createTextMessage(this.messageCreator.getValue());
-		assertEquals("my Payload", textMessage.getText());
+		assertThat(textMessage.getText()).isEqualTo("my Payload");
 	}
 
 	@Test
@@ -228,7 +225,7 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.convertAndSend("my Payload");
 		verify(this.jmsTemplate).send(eq("myQueue"), this.messageCreator.capture());
 		TextMessage textMessage = createTextMessage(this.messageCreator.getValue());
-		assertEquals("my Payload", textMessage.getText());
+		assertThat(textMessage.getText()).isEqualTo("my Payload");
 	}
 
 	@Test
@@ -333,7 +330,7 @@ public class JmsMessagingTemplateTests {
 		given(this.jmsTemplate.receive(destination)).willReturn(jmsMessage);
 
 		String payload = this.messagingTemplate.receiveAndConvert(destination, String.class);
-		assertEquals("my Payload", payload);
+		assertThat(payload).isEqualTo("my Payload");
 		verify(this.jmsTemplate).receive(destination);
 	}
 
@@ -343,7 +340,7 @@ public class JmsMessagingTemplateTests {
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
 		String payload = this.messagingTemplate.receiveAndConvert("myQueue", String.class);
-		assertEquals("my Payload", payload);
+		assertThat(payload).isEqualTo("my Payload");
 		verify(this.jmsTemplate).receive("myQueue");
 	}
 
@@ -355,7 +352,7 @@ public class JmsMessagingTemplateTests {
 		given(this.jmsTemplate.receive(destination)).willReturn(jmsMessage);
 
 		String payload = this.messagingTemplate.receiveAndConvert(String.class);
-		assertEquals("my Payload", payload);
+		assertThat(payload).isEqualTo("my Payload");
 		verify(this.jmsTemplate).receive(destination);
 	}
 
@@ -366,7 +363,7 @@ public class JmsMessagingTemplateTests {
 		given(this.jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
 
 		String payload = this.messagingTemplate.receiveAndConvert(String.class);
-		assertEquals("my Payload", payload);
+		assertThat(payload).isEqualTo("my Payload");
 		verify(this.jmsTemplate).receive("myQueue");
 	}
 
@@ -378,7 +375,7 @@ public class JmsMessagingTemplateTests {
 		this.messagingTemplate.setMessageConverter(new GenericMessageConverter());
 
 		Integer payload = this.messagingTemplate.receiveAndConvert("myQueue", Integer.class);
-		assertEquals(Integer.valueOf(123), payload);
+		assertThat(payload).isEqualTo(Integer.valueOf(123));
 		verify(this.jmsTemplate).receive("myQueue");
 	}
 
@@ -395,7 +392,7 @@ public class JmsMessagingTemplateTests {
 	public void receiveAndConvertNoInput() {
 		given(this.jmsTemplate.receive("myQueue")).willReturn(null);
 
-		assertNull(this.messagingTemplate.receiveAndConvert("myQueue", String.class));
+		assertThat(this.messagingTemplate.receiveAndConvert("myQueue", String.class)).isNull();
 	}
 
 	@Test
@@ -462,7 +459,7 @@ public class JmsMessagingTemplateTests {
 
 		String reply = this.messagingTemplate.convertSendAndReceive(destination, "my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
-		assertEquals("My reply", reply);
+		assertThat(reply).isEqualTo("My reply");
 	}
 
 	@Test
@@ -472,7 +469,7 @@ public class JmsMessagingTemplateTests {
 
 		String reply = this.messagingTemplate.convertSendAndReceive("myQueue", "my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
-		assertEquals("My reply", reply);
+		assertThat(reply).isEqualTo("My reply");
 	}
 
 	@Test
@@ -484,7 +481,7 @@ public class JmsMessagingTemplateTests {
 
 		String reply = this.messagingTemplate.convertSendAndReceive("my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq(destination), any());
-		assertEquals("My reply", reply);
+		assertThat(reply).isEqualTo("My reply");
 	}
 
 	@Test
@@ -495,7 +492,7 @@ public class JmsMessagingTemplateTests {
 
 		String reply = this.messagingTemplate.convertSendAndReceive("my Payload", String.class);
 		verify(this.jmsTemplate, times(1)).sendAndReceive(eq("myQueue"), any());
-		assertEquals("My reply", reply);
+		assertThat(reply).isEqualTo("My reply");
 	}
 
 	@Test
@@ -634,8 +631,8 @@ public class JmsMessagingTemplateTests {
 	private void assertTextMessage(MessageCreator messageCreator) {
 		try {
 			TextMessage jmsMessage = createTextMessage(messageCreator);
-			assertEquals("Wrong body message", "Hello", jmsMessage.getText());
-			assertEquals("Invalid foo property", "bar", jmsMessage.getStringProperty("foo"));
+			assertThat(jmsMessage.getText()).as("Wrong body message").isEqualTo("Hello");
+			assertThat(jmsMessage.getStringProperty("foo")).as("Invalid foo property").isEqualTo("bar");
 		}
 		catch (JMSException e) {
 			throw new IllegalStateException("Wrong text message", e);
@@ -643,9 +640,9 @@ public class JmsMessagingTemplateTests {
 	}
 
 	private void assertTextMessage(Message<?> message) {
-		assertNotNull("message should not be null", message);
-		assertEquals("Wrong payload", "Hello", message.getPayload());
-		assertEquals("Invalid foo property", "bar", message.getHeaders().get("foo"));
+		assertThat(message).as("message should not be null").isNotNull();
+		assertThat(message.getPayload()).as("Wrong payload").isEqualTo("Hello");
+		assertThat(message.getHeaders().get("foo")).as("Invalid foo property").isEqualTo("bar");
 	}
 
 

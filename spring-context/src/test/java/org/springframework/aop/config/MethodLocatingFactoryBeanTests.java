@@ -23,10 +23,8 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -49,12 +47,12 @@ public class MethodLocatingFactoryBeanTests {
 
 	@Test
 	public void testIsSingleton() {
-		assertTrue(factory.isSingleton());
+		assertThat(factory.isSingleton()).isTrue();
 	}
 
 	@Test
 	public void testGetObjectType() {
-		assertEquals(Method.class, factory.getObjectType());
+		assertThat(factory.getObjectType()).isEqualTo(Method.class);
 	}
 
 	@Test
@@ -104,10 +102,11 @@ public class MethodLocatingFactoryBeanTests {
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
 		Object result = factory.getObject();
-		assertNotNull(result);
-		assertTrue(result instanceof Method);
+		assertThat(result).isNotNull();
+		boolean condition = result instanceof Method;
+		assertThat(condition).isTrue();
 		Method method = (Method) result;
-		assertEquals("Bingo", method.invoke("Bingo"));
+		assertThat(method.invoke("Bingo")).isEqualTo("Bingo");
 	}
 
 	@Test

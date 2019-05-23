@@ -33,9 +33,6 @@ import org.springframework.dao.TypeMismatchDataAccessException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * @author Juergen Hoeller
@@ -47,7 +44,7 @@ public class DataAccessUtilsTests {
 	public void withEmptyCollection() {
 		Collection<String> col = new HashSet<>();
 
-		assertNull(DataAccessUtils.uniqueResult(col));
+		assertThat(DataAccessUtils.uniqueResult(col)).isNull();
 
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.requiredUniqueResult(col))
@@ -98,12 +95,12 @@ public class DataAccessUtilsTests {
 		Collection<Integer> col = new HashSet<>(1);
 		col.add(5);
 
-		assertEquals(Integer.valueOf(5), DataAccessUtils.uniqueResult(col));
-		assertEquals(Integer.valueOf(5), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(Integer.valueOf(5), DataAccessUtils.objectResult(col, Integer.class));
-		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
-		assertEquals(5, DataAccessUtils.intResult(col));
-		assertEquals(5, DataAccessUtils.longResult(col));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.objectResult(col, Integer.class)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
+		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
 	}
 
 	@Test
@@ -113,12 +110,12 @@ public class DataAccessUtilsTests {
 		col.add(i);
 		col.add(i);
 
-		assertEquals(Integer.valueOf(5), DataAccessUtils.uniqueResult(col));
-		assertEquals(Integer.valueOf(5), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(Integer.valueOf(5), DataAccessUtils.objectResult(col, Integer.class));
-		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
-		assertEquals(5, DataAccessUtils.intResult(col));
-		assertEquals(5, DataAccessUtils.longResult(col));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.objectResult(col, Integer.class)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
+		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
 	}
 
 	@Test
@@ -138,12 +135,12 @@ public class DataAccessUtilsTests {
 		Collection<Long> col = new HashSet<>(1);
 		col.add(5L);
 
-		assertEquals(Long.valueOf(5L), DataAccessUtils.uniqueResult(col));
-		assertEquals(Long.valueOf(5L), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(Long.valueOf(5L), DataAccessUtils.objectResult(col, Long.class));
-		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
-		assertEquals(5, DataAccessUtils.intResult(col));
-		assertEquals(5, DataAccessUtils.longResult(col));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.objectResult(col, Long.class)).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
+		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
 	}
 
 	@Test
@@ -151,9 +148,9 @@ public class DataAccessUtilsTests {
 		Collection<String> col = new HashSet<>(1);
 		col.add("test1");
 
-		assertEquals("test1", DataAccessUtils.uniqueResult(col));
-		assertEquals("test1", DataAccessUtils.requiredUniqueResult(col));
-		assertEquals("test1", DataAccessUtils.objectResult(col, String.class));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo("test1");
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo("test1");
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("test1");
 
 		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.intResult(col));
@@ -168,10 +165,10 @@ public class DataAccessUtilsTests {
 		Collection<Date> col = new HashSet<>(1);
 		col.add(date);
 
-		assertEquals(date, DataAccessUtils.uniqueResult(col));
-		assertEquals(date, DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(date, DataAccessUtils.objectResult(col, Date.class));
-		assertEquals(date.toString(), DataAccessUtils.objectResult(col, String.class));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo(date);
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(date);
+		assertThat(DataAccessUtils.objectResult(col, Date.class)).isEqualTo(date);
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo(date.toString());
 
 		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
 				DataAccessUtils.intResult(col));
@@ -184,7 +181,7 @@ public class DataAccessUtilsTests {
 	public void exceptionTranslationWithNoTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException();
-		assertSame(in, DataAccessUtils.translateIfNecessary(in, mpet));
+		assertThat(DataAccessUtils.translateIfNecessary(in, mpet)).isSameAs(in);
 	}
 
 	@Test
@@ -193,7 +190,7 @@ public class DataAccessUtilsTests {
 		RuntimeException in = new RuntimeException("in");
 		InvalidDataAccessApiUsageException out = new InvalidDataAccessApiUsageException("out");
 		mpet.addTranslation(in, out);
-		assertSame(out, DataAccessUtils.translateIfNecessary(in, mpet));
+		assertThat(DataAccessUtils.translateIfNecessary(in, mpet)).isSameAs(out);
 	}
 
 	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(

@@ -28,8 +28,7 @@ import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -65,11 +64,11 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, user, "123", sourceDestination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(sourceDestination, actual.getSourceDestination());
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("/queue/foo-user123", actual.getTargetDestinations().iterator().next());
-		assertEquals(sourceDestination, actual.getSubscribeDestination());
-		assertEquals(user.getName(), actual.getUser());
+		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user123");
+		assertThat(actual.getSubscribeDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getUser()).isEqualTo(user.getName());
 	}
 
 	@Test // SPR-14044
@@ -81,9 +80,9 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, user, "123", destination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("jms.queue.call-user123", actual.getTargetDestinations().iterator().next());
-		assertEquals(destination, actual.getSubscribeDestination());
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("jms.queue.call-user123");
+		assertThat(actual.getSubscribeDestination()).isEqualTo(destination);
 	}
 
 	@Test // SPR-11325
@@ -97,8 +96,8 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, user, "456", "/user/queue/foo");
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("/queue/foo-user456", actual.getTargetDestinations().iterator().next());
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user456");
 	}
 
 	@Test
@@ -107,11 +106,11 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, null, "123", sourceDestination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(sourceDestination, actual.getSourceDestination());
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("/queue/foo-user" + "123", actual.getTargetDestinations().iterator().next());
-		assertEquals(sourceDestination, actual.getSubscribeDestination());
-		assertNull(actual.getUser());
+		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo(("/queue/foo-user" + "123"));
+		assertThat(actual.getSubscribeDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getUser()).isNull();
 	}
 
 	@Test
@@ -120,8 +119,8 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.UNSUBSCRIBE, user, "123", "/user/queue/foo");
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("/queue/foo-user123", actual.getTargetDestinations().iterator().next());
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user123");
 	}
 
 	@Test
@@ -131,11 +130,11 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.MESSAGE, user, "123", sourceDestination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(sourceDestination, actual.getSourceDestination());
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("/queue/foo-user123", actual.getTargetDestinations().iterator().next());
-		assertEquals("/user/queue/foo", actual.getSubscribeDestination());
-		assertEquals(user.getName(), actual.getUser());
+		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user123");
+		assertThat(actual.getSubscribeDestination()).isEqualTo("/user/queue/foo");
+		assertThat(actual.getUser()).isEqualTo(user.getName());
 	}
 
 	@Test // SPR-14044
@@ -147,9 +146,9 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.MESSAGE, user, "123", destination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("jms.queue.call-user123", actual.getTargetDestinations().iterator().next());
-		assertEquals("/user/jms.queue.call", actual.getSubscribeDestination());
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("jms.queue.call-user123");
+		assertThat(actual.getSubscribeDestination()).isEqualTo("/user/jms.queue.call");
 	}
 
 	@Test // SPR-12444
@@ -166,11 +165,11 @@ public class DefaultUserDestinationResolverTests {
 
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(sourceDestination, actual.getSourceDestination());
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("/queue/foo-user456", actual.getTargetDestinations().iterator().next());
-		assertEquals("/user/queue/foo", actual.getSubscribeDestination());
-		assertEquals(otherUser.getName(), actual.getUser());
+		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user456");
+		assertThat(actual.getSubscribeDestination()).isEqualTo("/user/queue/foo");
+		assertThat(actual.getUser()).isEqualTo(otherUser.getName());
 	}
 
 	@Test
@@ -186,8 +185,8 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.MESSAGE, new TestPrincipal("joe"), null, destination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("/queue/foo-useropenid123", actual.getTargetDestinations().iterator().next());
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-useropenid123");
 	}
 
 	@Test
@@ -196,11 +195,11 @@ public class DefaultUserDestinationResolverTests {
 		Message<?> message = createMessage(SimpMessageType.MESSAGE, null, "123", sourceDestination);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
 
-		assertEquals(sourceDestination, actual.getSourceDestination());
-		assertEquals(1, actual.getTargetDestinations().size());
-		assertEquals("/queue/foo-user123", actual.getTargetDestinations().iterator().next());
-		assertEquals("/user/queue/foo", actual.getSubscribeDestination());
-		assertNull(actual.getUser());
+		assertThat(actual.getSourceDestination()).isEqualTo(sourceDestination);
+		assertThat(actual.getTargetDestinations().size()).isEqualTo(1);
+		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo("/queue/foo-user123");
+		assertThat(actual.getSubscribeDestination()).isEqualTo("/user/queue/foo");
+		assertThat(actual.getUser()).isNull();
 	}
 
 	@Test
@@ -210,22 +209,22 @@ public class DefaultUserDestinationResolverTests {
 		TestPrincipal user = new TestPrincipal("joe");
 		Message<?> message = createMessage(SimpMessageType.MESSAGE, user, "123", null);
 		UserDestinationResult actual = this.resolver.resolveDestination(message);
-		assertNull(actual);
+		assertThat(actual).isNull();
 
 		// not a user destination
 		message = createMessage(SimpMessageType.MESSAGE, user, "123", "/queue/foo");
 		actual = this.resolver.resolveDestination(message);
-		assertNull(actual);
+		assertThat(actual).isNull();
 
 		// subscribe + not a user destination
 		message = createMessage(SimpMessageType.SUBSCRIBE, user, "123", "/queue/foo");
 		actual = this.resolver.resolveDestination(message);
-		assertNull(actual);
+		assertThat(actual).isNull();
 
 		// no match on message type
 		message = createMessage(SimpMessageType.CONNECT, user, "123", "user/joe/queue/foo");
 		actual = this.resolver.resolveDestination(message);
-		assertNull(actual);
+		assertThat(actual).isNull();
 	}
 
 	private Message<?> createMessage(SimpMessageType type, Principal user, String sessionId, String destination) {

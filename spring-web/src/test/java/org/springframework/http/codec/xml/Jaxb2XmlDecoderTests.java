@@ -39,9 +39,7 @@ import org.springframework.http.codec.xml.jaxb.XmlType;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithName;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithNameAndNamespace;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
@@ -75,16 +73,16 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTestCase {
 
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_XML));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_XML));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_JSON));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(TypePojo.class),
-				MediaType.APPLICATION_XML));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(getClass()),
-				MediaType.APPLICATION_XML));
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				MediaType.TEXT_XML)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				MediaType.APPLICATION_JSON)).isFalse();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(TypePojo.class),
+				MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(getClass()),
+				MediaType.APPLICATION_XML)).isFalse();
 	}
 
 	@Test
@@ -95,7 +93,7 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTestCase {
 
 		StepVerifier.create(result)
 				.consumeNextWith(events -> {
-					assertEquals(8, events.size());
+					assertThat(events.size()).isEqualTo(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foofoo");
@@ -118,7 +116,7 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTestCase {
 
 		StepVerifier.create(result)
 				.consumeNextWith(events -> {
-					assertEquals(8, events.size());
+					assertThat(events.size()).isEqualTo(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foo");
@@ -129,7 +127,7 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTestCase {
 					assertEndElement(events.get(7), "pojo");
 				})
 				.consumeNextWith(events -> {
-					assertEquals(8, events.size());
+					assertThat(events.size()).isEqualTo(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foofoo");
@@ -144,18 +142,18 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTestCase {
 	}
 
 	private static void assertStartElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event.isStartElement());
-		assertEquals(expectedLocalName, event.asStartElement().getName().getLocalPart());
+		assertThat(event.isStartElement()).isTrue();
+		assertThat(event.asStartElement().getName().getLocalPart()).isEqualTo(expectedLocalName);
 	}
 
 	private static void assertEndElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event.isEndElement());
-		assertEquals(expectedLocalName, event.asEndElement().getName().getLocalPart());
+		assertThat(event.isEndElement()).isTrue();
+		assertThat(event.asEndElement().getName().getLocalPart()).isEqualTo(expectedLocalName);
 	}
 
 	private static void assertCharacters(XMLEvent event, String expectedData) {
-		assertTrue(event.isCharacters());
-		assertEquals(expectedData, event.asCharacters().getData());
+		assertThat(event.isCharacters()).isTrue();
+		assertThat(event.asCharacters().getData()).isEqualTo(expectedData);
 	}
 
 	@Test
@@ -224,22 +222,16 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTestCase {
 
 	@Test
 	public void toExpectedQName() {
-		assertEquals(new QName("pojo"), this.decoder.toQName(Pojo.class));
-		assertEquals(new QName("pojo"), this.decoder.toQName(TypePojo.class));
+		assertThat(this.decoder.toQName(Pojo.class)).isEqualTo(new QName("pojo"));
+		assertThat(this.decoder.toQName(TypePojo.class)).isEqualTo(new QName("pojo"));
 
-		assertEquals(new QName("namespace", "name"),
-				this.decoder.toQName(XmlRootElementWithNameAndNamespace.class));
-		assertEquals(new QName("namespace", "name"),
-				this.decoder.toQName(XmlRootElementWithName.class));
-		assertEquals(new QName("namespace", "xmlRootElement"),
-				this.decoder.toQName(XmlRootElement.class));
+		assertThat(this.decoder.toQName(XmlRootElementWithNameAndNamespace.class)).isEqualTo(new QName("namespace", "name"));
+		assertThat(this.decoder.toQName(XmlRootElementWithName.class)).isEqualTo(new QName("namespace", "name"));
+		assertThat(this.decoder.toQName(XmlRootElement.class)).isEqualTo(new QName("namespace", "xmlRootElement"));
 
-		assertEquals(new QName("namespace", "name"),
-				this.decoder.toQName(XmlTypeWithNameAndNamespace.class));
-		assertEquals(new QName("namespace", "name"),
-				this.decoder.toQName(XmlTypeWithName.class));
-		assertEquals(new QName("namespace", "xmlType"),
-				this.decoder.toQName(XmlType.class));
+		assertThat(this.decoder.toQName(XmlTypeWithNameAndNamespace.class)).isEqualTo(new QName("namespace", "name"));
+		assertThat(this.decoder.toQName(XmlTypeWithName.class)).isEqualTo(new QName("namespace", "name"));
+		assertThat(this.decoder.toQName(XmlType.class)).isEqualTo(new QName("namespace", "xmlType"));
 
 	}
 

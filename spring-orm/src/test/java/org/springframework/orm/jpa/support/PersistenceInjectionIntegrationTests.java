@@ -23,7 +23,7 @@ import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.support.PersistenceInjectionTests.DefaultPublicPersistenceContextSetter;
 import org.springframework.orm.jpa.support.PersistenceInjectionTests.DefaultPublicPersistenceUnitSetterNamedPerson;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -41,12 +41,12 @@ public class PersistenceInjectionIntegrationTests extends AbstractEntityManagerF
 
 	@Test
 	public void testDefaultPersistenceContextSetterInjection() {
-		assertNotNull(defaultSetterInjected.getEntityManager());
+		assertThat(defaultSetterInjected.getEntityManager()).isNotNull();
 	}
 
 	@Test
 	public void testSetterInjectionOfNamedPersistenceContext() {
-		assertNotNull(namedSetterInjected.getEntityManagerFactory());
+		assertThat(namedSetterInjected.getEntityManagerFactory()).isNotNull();
 	}
 
 }

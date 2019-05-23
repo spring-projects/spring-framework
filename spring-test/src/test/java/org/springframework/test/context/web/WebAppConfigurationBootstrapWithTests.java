@@ -29,8 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfigurationBootstrapWithTests.CustomWebTestContextBootstrapper;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit-based integration tests that verify support for loading a
@@ -54,8 +53,8 @@ public class WebAppConfigurationBootstrapWithTests {
 	public void webApplicationContextIsLoaded() {
 		// from: src/test/webapp/resources/Spring.js
 		Resource resource = wac.getResource("/resources/Spring.js");
-		assertNotNull(resource);
-		assertTrue(resource.exists());
+		assertThat(resource).isNotNull();
+		assertThat(resource.exists()).isTrue();
 	}
 
 

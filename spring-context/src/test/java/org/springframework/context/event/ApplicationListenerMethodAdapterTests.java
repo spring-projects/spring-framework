@@ -31,9 +31,9 @@ import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -165,7 +165,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "handleGenericString", GenericTestEvent.class);
 		ApplicationListenerMethodAdapter adapter = createTestInstance(method);
-		assertEquals(0, adapter.getOrder());
+		assertThat(adapter.getOrder()).isEqualTo(0);
 	}
 
 	@Test
@@ -173,7 +173,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "handleRaw", ApplicationEvent.class);
 		ApplicationListenerMethodAdapter adapter = createTestInstance(method);
-		assertEquals(42, adapter.getOrder());
+		assertThat(adapter.getOrder()).isEqualTo(42);
 	}
 
 	@Test
@@ -331,8 +331,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 
 	private void supportsEventType(boolean match, Method method, ResolvableType eventType) {
 		ApplicationListenerMethodAdapter adapter = createTestInstance(method);
-		assertEquals("Wrong match for event '" + eventType + "' on " + method,
-				match, adapter.supportsEventType(eventType));
+		assertThat(adapter.supportsEventType(eventType)).as("Wrong match for event '" + eventType + "' on " + method).isEqualTo(match);
 	}
 
 	private void invokeListener(Method method, ApplicationEvent event) {

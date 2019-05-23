@@ -26,9 +26,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -58,14 +56,14 @@ public class MetaHierarchyLevelTwoTests extends MetaHierarchyLevelOneTests {
 
 	@Test
 	public void bar() {
-		assertEquals("Prod Bar", bar);
+		assertThat(bar).isEqualTo("Prod Bar");
 	}
 
 	@Test
 	public void contextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNotNull("parent ApplicationContext", context.getParent());
-		assertNull("grandparent ApplicationContext", context.getParent().getParent());
+		assertThat(context).as("child ApplicationContext").isNotNull();
+		assertThat(context.getParent()).as("parent ApplicationContext").isNotNull();
+		assertThat(context.getParent().getParent()).as("grandparent ApplicationContext").isNull();
 	}
 
 }

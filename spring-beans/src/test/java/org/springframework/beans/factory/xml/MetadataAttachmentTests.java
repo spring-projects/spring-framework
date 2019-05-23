@@ -24,7 +24,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -44,21 +44,21 @@ public class MetadataAttachmentTests {
 	@Test
 	public void metadataAttachment() throws Exception {
 		BeanDefinition beanDefinition1 = this.beanFactory.getMergedBeanDefinition("testBean1");
-		assertEquals("bar", beanDefinition1.getAttribute("foo"));
+		assertThat(beanDefinition1.getAttribute("foo")).isEqualTo("bar");
 	}
 
 	@Test
 	public void metadataIsInherited() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("testBean2");
-		assertEquals("Metadata not inherited", "bar", beanDefinition.getAttribute("foo"));
-		assertEquals("Child metdata not attached", "123", beanDefinition.getAttribute("abc"));
+		assertThat(beanDefinition.getAttribute("foo")).as("Metadata not inherited").isEqualTo("bar");
+		assertThat(beanDefinition.getAttribute("abc")).as("Child metdata not attached").isEqualTo("123");
 	}
 
 	@Test
 	public void propertyMetadata() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("testBean3");
 		PropertyValue pv = beanDefinition.getPropertyValues().getPropertyValue("name");
-		assertEquals("Harrop", pv.getAttribute("surname"));
+		assertThat(pv.getAttribute("surname")).isEqualTo("Harrop");
 	}
 
 }

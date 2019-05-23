@@ -39,7 +39,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that ensure that <em>primary</em> transaction managers
@@ -85,8 +85,7 @@ public final class PrimaryTransactionManagerTests {
 	}
 
 	private void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table", expected,
-				JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user"));
+		assertThat(JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user")).as("Number of rows in the 'user' table").isEqualTo(expected);
 	}
 
 

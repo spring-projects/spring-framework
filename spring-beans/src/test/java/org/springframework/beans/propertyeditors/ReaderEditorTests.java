@@ -22,10 +22,8 @@ import org.junit.Test;
 
 import org.springframework.util.ClassUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for the {@link ReaderEditor} class.
@@ -50,10 +48,11 @@ public class ReaderEditorTests {
 			ReaderEditor editor = new ReaderEditor();
 			editor.setAsText(resource);
 			Object value = editor.getValue();
-			assertNotNull(value);
-			assertTrue(value instanceof Reader);
+			assertThat(value).isNotNull();
+			boolean condition = value instanceof Reader;
+			assertThat(condition).isTrue();
 			reader = (Reader) value;
-			assertTrue(reader.ready());
+			assertThat(reader.ready()).isTrue();
 		}
 		finally {
 			if (reader != null) {
@@ -72,12 +71,12 @@ public class ReaderEditorTests {
 
 	@Test
 	public void testGetAsTextReturnsNullByDefault() throws Exception {
-		assertNull(new ReaderEditor().getAsText());
+		assertThat(new ReaderEditor().getAsText()).isNull();
 		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class";
 		ReaderEditor editor = new ReaderEditor();
 		editor.setAsText(resource);
-		assertNull(editor.getAsText());
+		assertThat(editor.getAsText()).isNull();
 	}
 
 }

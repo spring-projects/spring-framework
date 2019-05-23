@@ -59,9 +59,6 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -196,32 +193,29 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 	}
 
 	private void testSupports() throws Exception {
-		assertTrue("Jaxb2Marshaller does not support Flights class", marshaller.supports(Flights.class));
-		assertTrue("Jaxb2Marshaller does not support Flights generic type", marshaller.supports((Type)Flights.class));
+		assertThat(marshaller.supports(Flights.class)).as("Jaxb2Marshaller does not support Flights class").isTrue();
+		assertThat(marshaller.supports((Type)Flights.class)).as("Jaxb2Marshaller does not support Flights generic type").isTrue();
 
-		assertFalse("Jaxb2Marshaller supports FlightType class", marshaller.supports(FlightType.class));
-		assertFalse("Jaxb2Marshaller supports FlightType type", marshaller.supports((Type)FlightType.class));
+		assertThat(marshaller.supports(FlightType.class)).as("Jaxb2Marshaller supports FlightType class").isFalse();
+		assertThat(marshaller.supports((Type)FlightType.class)).as("Jaxb2Marshaller supports FlightType type").isFalse();
 
 		Method method = ObjectFactory.class.getDeclaredMethod("createFlight", FlightType.class);
-		assertTrue("Jaxb2Marshaller does not support JAXBElement<FlightsType>",
-				marshaller.supports(method.getGenericReturnType()));
+		assertThat(marshaller.supports(method.getGenericReturnType())).as("Jaxb2Marshaller does not support JAXBElement<FlightsType>").isTrue();
 
 		marshaller.setSupportJaxbElementClass(true);
 		JAXBElement<FlightType> flightTypeJAXBElement = new JAXBElement<>(new QName("https://springframework.org", "flight"), FlightType.class,
 				new FlightType());
-		assertTrue("Jaxb2Marshaller does not support JAXBElement<FlightsType>", marshaller.supports(flightTypeJAXBElement.getClass()));
+		assertThat(marshaller.supports(flightTypeJAXBElement.getClass())).as("Jaxb2Marshaller does not support JAXBElement<FlightsType>").isTrue();
 
-		assertFalse("Jaxb2Marshaller supports class not in context path", marshaller.supports(DummyRootElement.class));
-		assertFalse("Jaxb2Marshaller supports type not in context path", marshaller.supports((Type)DummyRootElement.class));
+		assertThat(marshaller.supports(DummyRootElement.class)).as("Jaxb2Marshaller supports class not in context path").isFalse();
+		assertThat(marshaller.supports((Type)DummyRootElement.class)).as("Jaxb2Marshaller supports type not in context path").isFalse();
 		method = getClass().getDeclaredMethod("createDummyRootElement");
-		assertFalse("Jaxb2Marshaller supports JAXBElement not in context path",
-				marshaller.supports(method.getGenericReturnType()));
+		assertThat(marshaller.supports(method.getGenericReturnType())).as("Jaxb2Marshaller supports JAXBElement not in context path").isFalse();
 
-		assertFalse("Jaxb2Marshaller supports class not in context path", marshaller.supports(DummyType.class));
-		assertFalse("Jaxb2Marshaller supports type not in context path", marshaller.supports((Type)DummyType.class));
+		assertThat(marshaller.supports(DummyType.class)).as("Jaxb2Marshaller supports class not in context path").isFalse();
+		assertThat(marshaller.supports((Type)DummyType.class)).as("Jaxb2Marshaller supports type not in context path").isFalse();
 		method = getClass().getDeclaredMethod("createDummyType");
-		assertFalse("Jaxb2Marshaller supports JAXBElement not in context path",
-				marshaller.supports(method.getGenericReturnType()));
+		assertThat(marshaller.supports(method.getGenericReturnType())).as("Jaxb2Marshaller supports JAXBElement not in context path").isFalse();
 
 		testSupportsPrimitives();
 		testSupportsStandardClasses();
@@ -233,8 +227,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Type returnType = method.getGenericReturnType();
-				assertTrue("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(9) + ">",
-						marshaller.supports(returnType));
+				assertThat(marshaller.supports(returnType)).as("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(9) + ">").isTrue();
 				try {
 					// make sure the marshalling does not result in errors
 					Object returnValue = method.invoke(primitives);
@@ -258,8 +251,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Type returnType = method.getGenericReturnType();
-				assertTrue("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(13) + ">",
-						marshaller.supports(returnType));
+				assertThat(marshaller.supports(returnType)).as("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(13) + ">").isTrue();
 				try {
 					// make sure the marshalling does not result in errors
 					Object returnValue = method.invoke(standardClasses);
@@ -282,11 +274,11 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(DummyRootElement.class, DummyType.class);
 		marshaller.afterPropertiesSet();
-		assertTrue("Jaxb2Marshaller does not support XmlRootElement class", marshaller.supports(DummyRootElement.class));
-		assertTrue("Jaxb2Marshaller does not support XmlRootElement generic type", marshaller.supports((Type)DummyRootElement.class));
+		assertThat(marshaller.supports(DummyRootElement.class)).as("Jaxb2Marshaller does not support XmlRootElement class").isTrue();
+		assertThat(marshaller.supports((Type)DummyRootElement.class)).as("Jaxb2Marshaller does not support XmlRootElement generic type").isTrue();
 
-		assertFalse("Jaxb2Marshaller supports DummyType class", marshaller.supports(DummyType.class));
-		assertFalse("Jaxb2Marshaller supports DummyType type", marshaller.supports((Type)DummyType.class));
+		assertThat(marshaller.supports(DummyType.class)).as("Jaxb2Marshaller supports DummyType class").isFalse();
+		assertThat(marshaller.supports((Type)DummyType.class)).as("Jaxb2Marshaller supports DummyType type").isFalse();
 	}
 
 
@@ -306,7 +298,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		BinaryObject object = new BinaryObject(bytes, dataHandler);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
-		assertTrue("No XML written", writer.toString().length() > 0);
+		assertThat(writer.toString().length() > 0).as("No XML written").isTrue();
 		verify(mimeContainer, times(3)).addAttachment(isA(String.class), isA(DataHandler.class));
 	}
 
@@ -341,8 +333,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		SAXSource result = sourceCaptor.getValue();
-		assertEquals(true, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(false, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
+		assertThat(result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl")).isEqualTo(true);
+		assertThat(result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities")).isEqualTo(false);
 
 		// 2. external-general-entities and dtd support enabled
 
@@ -354,8 +346,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		result = sourceCaptor.getValue();
-		assertEquals(false, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(true, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
+		assertThat(result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl")).isEqualTo(false);
+		assertThat(result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities")).isEqualTo(true);
 	}
 
 	@Test  // SPR-10806
@@ -375,8 +367,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		SAXSource result = sourceCaptor.getValue();
-		assertEquals(true, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(false, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
+		assertThat(result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl")).isEqualTo(true);
+		assertThat(result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities")).isEqualTo(false);
 
 		// 2. external-general-entities and dtd support enabled
 
@@ -388,8 +380,8 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshalle
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		result = sourceCaptor.getValue();
-		assertEquals(false, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
-		assertEquals(true, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
+		assertThat(result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl")).isEqualTo(false);
+		assertThat(result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities")).isEqualTo(true);
 	}
 
 

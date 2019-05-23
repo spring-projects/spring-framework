@@ -21,8 +21,8 @@ import org.junit.Test;
 
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rod Johnson
@@ -56,49 +56,49 @@ public class TransactionAspectTests {
 	@Test
 	public void testCommitOnAnnotatedClass() throws Throwable {
 		txManager.clear();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 		annotationOnlyOnClassWithNoInterface.echo(null);
-		assertEquals(1, txManager.commits);
+		assertThat(txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void commitOnAnnotatedProtectedMethod() throws Throwable {
 		txManager.clear();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 		beanWithAnnotatedProtectedMethod.doInTransaction();
-		assertEquals(1, txManager.commits);
+		assertThat(txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void commitOnAnnotatedPrivateMethod() throws Throwable {
 		txManager.clear();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 		beanWithAnnotatedPrivateMethod.doSomething();
-		assertEquals(1, txManager.commits);
+		assertThat(txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void commitOnNonAnnotatedNonPublicMethodInTransactionalType() throws Throwable {
 		txManager.clear();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 		annotationOnlyOnClassWithNoInterface.nonTransactionalMethod();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 	}
 
 	@Test
 	public void commitOnAnnotatedMethod() throws Throwable {
 		txManager.clear();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 		methodAnnotationOnly.echo(null);
-		assertEquals(1, txManager.commits);
+		assertThat(txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void notTransactional() throws Throwable {
 		txManager.clear();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 		new NotTransactional().noop();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 	}
 
 	@Test
@@ -149,23 +149,25 @@ public class TransactionAspectTests {
 
 	protected void testRollback(TransactionOperationCallback toc, boolean rollback) throws Throwable {
 		txManager.clear();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 		try {
 			toc.performTransactionalOperation();
 		}
 		finally {
-			assertEquals(1, txManager.begun);
-			assertEquals(rollback ? 0 : 1, txManager.commits);
-			assertEquals(rollback ? 1 : 0, txManager.rollbacks);
+			assertThat(txManager.begun).isEqualTo(1);
+			long expected1 = rollback ? 0 : 1;
+			assertThat(txManager.commits).isEqualTo(expected1);
+			long expected = rollback ? 1 : 0;
+			assertThat(txManager.rollbacks).isEqualTo(expected);
 		}
 	}
 
 	protected void testNotTransactional(TransactionOperationCallback toc, Throwable expected) throws Throwable {
 		txManager.clear();
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 		assertThatExceptionOfType(Throwable.class).isThrownBy(
 				toc::performTransactionalOperation).isSameAs(expected);
-		assertEquals(0, txManager.begun);
+		assertThat(txManager.begun).isEqualTo(0);
 	}
 
 

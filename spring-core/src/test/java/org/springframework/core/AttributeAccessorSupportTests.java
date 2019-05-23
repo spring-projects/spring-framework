@@ -20,9 +20,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -40,22 +38,22 @@ public class AttributeAccessorSupportTests {
 	@Test
 	public void setAndGet() throws Exception {
 		this.attributeAccessor.setAttribute(NAME, VALUE);
-		assertEquals(VALUE, this.attributeAccessor.getAttribute(NAME));
+		assertThat(this.attributeAccessor.getAttribute(NAME)).isEqualTo(VALUE);
 	}
 
 	@Test
 	public void setAndHas() throws Exception {
-		assertFalse(this.attributeAccessor.hasAttribute(NAME));
+		assertThat(this.attributeAccessor.hasAttribute(NAME)).isFalse();
 		this.attributeAccessor.setAttribute(NAME, VALUE);
-		assertTrue(this.attributeAccessor.hasAttribute(NAME));
+		assertThat(this.attributeAccessor.hasAttribute(NAME)).isTrue();
 	}
 
 	@Test
 	public void remove() throws Exception {
-		assertFalse(this.attributeAccessor.hasAttribute(NAME));
+		assertThat(this.attributeAccessor.hasAttribute(NAME)).isFalse();
 		this.attributeAccessor.setAttribute(NAME, VALUE);
-		assertEquals(VALUE, this.attributeAccessor.removeAttribute(NAME));
-		assertFalse(this.attributeAccessor.hasAttribute(NAME));
+		assertThat(this.attributeAccessor.removeAttribute(NAME)).isEqualTo(VALUE);
+		assertThat(this.attributeAccessor.hasAttribute(NAME)).isFalse();
 	}
 
 	@Test
@@ -64,8 +62,8 @@ public class AttributeAccessorSupportTests {
 		this.attributeAccessor.setAttribute("abc", "123");
 		String[] attributeNames = this.attributeAccessor.attributeNames();
 		Arrays.sort(attributeNames);
-		assertTrue(Arrays.binarySearch(attributeNames, NAME) > -1);
-		assertTrue(Arrays.binarySearch(attributeNames, "abc") > -1);
+		assertThat(Arrays.binarySearch(attributeNames, NAME) > -1).isTrue();
+		assertThat(Arrays.binarySearch(attributeNames, "abc") > -1).isTrue();
 	}
 
 	@SuppressWarnings("serial")

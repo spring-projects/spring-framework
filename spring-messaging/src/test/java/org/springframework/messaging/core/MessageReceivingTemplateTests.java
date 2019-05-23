@@ -27,11 +27,9 @@ import org.springframework.messaging.converter.GenericMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.support.GenericMessage;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for receiving operations in {@link AbstractMessagingTemplate}.
@@ -56,8 +54,8 @@ public class MessageReceivingTemplateTests {
 		this.template.setReceiveMessage(expected);
 		Message<?> actual = this.template.receive();
 
-		assertEquals("home", this.template.destination);
-		assertSame(expected, actual);
+		assertThat(this.template.destination).isEqualTo("home");
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
@@ -72,8 +70,8 @@ public class MessageReceivingTemplateTests {
 		this.template.setReceiveMessage(expected);
 		Message<?> actual = this.template.receive("somewhere");
 
-		assertEquals("somewhere", this.template.destination);
-		assertSame(expected, actual);
+		assertThat(this.template.destination).isEqualTo("somewhere");
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
@@ -83,8 +81,8 @@ public class MessageReceivingTemplateTests {
 		this.template.setReceiveMessage(expected);
 		String payload = this.template.receiveAndConvert(String.class);
 
-		assertEquals("home", this.template.destination);
-		assertSame("payload", payload);
+		assertThat(this.template.destination).isEqualTo("home");
+		assertThat(payload).isSameAs("payload");
 	}
 
 	@Test
@@ -93,8 +91,8 @@ public class MessageReceivingTemplateTests {
 		this.template.setReceiveMessage(expected);
 		String payload = this.template.receiveAndConvert("somewhere", String.class);
 
-		assertEquals("somewhere", this.template.destination);
-		assertSame("payload", payload);
+		assertThat(this.template.destination).isEqualTo("somewhere");
+		assertThat(payload).isSameAs("payload");
 	}
 
 	@Test
@@ -118,8 +116,8 @@ public class MessageReceivingTemplateTests {
 			this.template.receiveAndConvert(Writer.class);
 		}
 		catch (MessageConversionException ex) {
-			assertTrue("Invalid exception message '" + ex.getMessage() + "'", ex.getMessage().contains("payload"));
-			assertSame(expected, ex.getFailedMessage());
+			assertThat(ex.getMessage().contains("payload")).as("Invalid exception message '" + ex.getMessage() + "'").isTrue();
+			assertThat(ex.getFailedMessage()).isSameAs(expected);
 		}
 	}
 

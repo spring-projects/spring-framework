@@ -21,8 +21,8 @@ import org.mockito.Mockito;
 
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link ResourceDatabasePopulator}.
@@ -53,22 +53,22 @@ public class ResourceDatabasePopulatorTests {
 	@Test
 	public void constructWithResource() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1);
-		assertEquals(1, databasePopulator.scripts.size());
+		assertThat(databasePopulator.scripts.size()).isEqualTo(1);
 	}
 
 	@Test
 	public void constructWithMultipleResources() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
-		assertEquals(2, databasePopulator.scripts.size());
+		assertThat(databasePopulator.scripts.size()).isEqualTo(2);
 	}
 
 	@Test
 	public void constructWithMultipleResourcesAndThenAddScript() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(script1, script2);
-		assertEquals(2, databasePopulator.scripts.size());
+		assertThat(databasePopulator.scripts.size()).isEqualTo(2);
 
 		databasePopulator.addScript(script3);
-		assertEquals(3, databasePopulator.scripts.size());
+		assertThat(databasePopulator.scripts.size()).isEqualTo(3);
 	}
 
 	@Test
@@ -102,13 +102,13 @@ public class ResourceDatabasePopulatorTests {
 	@Test
 	public void setScriptsAndThenAddScript() {
 		ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
-		assertEquals(0, databasePopulator.scripts.size());
+		assertThat(databasePopulator.scripts.size()).isEqualTo(0);
 
 		databasePopulator.setScripts(script1, script2);
-		assertEquals(2, databasePopulator.scripts.size());
+		assertThat(databasePopulator.scripts.size()).isEqualTo(2);
 
 		databasePopulator.addScript(script3);
-		assertEquals(3, databasePopulator.scripts.size());
+		assertThat(databasePopulator.scripts.size()).isEqualTo(3);
 	}
 
 }

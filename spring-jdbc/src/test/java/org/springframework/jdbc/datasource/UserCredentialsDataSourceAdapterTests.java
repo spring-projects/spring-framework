@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -42,7 +42,7 @@ public class UserCredentialsDataSourceAdapterTests {
 		adapter.setTargetDataSource(dataSource);
 		adapter.setUsername("user");
 		adapter.setPassword("pw");
-		assertEquals(connection, adapter.getConnection());
+		assertThat(adapter.getConnection()).isEqualTo(connection);
 	}
 
 	@Test
@@ -52,7 +52,7 @@ public class UserCredentialsDataSourceAdapterTests {
 		given(dataSource.getConnection()).willReturn(connection);
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
 		adapter.setTargetDataSource(dataSource);
-		assertEquals(connection, adapter.getConnection());
+		assertThat(adapter.getConnection()).isEqualTo(connection);
 	}
 
 	@Test
@@ -66,7 +66,7 @@ public class UserCredentialsDataSourceAdapterTests {
 
 		adapter.setCredentialsForCurrentThread("user", "pw");
 		try {
-			assertEquals(connection, adapter.getConnection());
+			assertThat(adapter.getConnection()).isEqualTo(connection);
 		}
 		finally {
 			adapter.removeCredentialsFromCurrentThread();

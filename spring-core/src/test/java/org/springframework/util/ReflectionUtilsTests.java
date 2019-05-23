@@ -33,11 +33,6 @@ import org.springframework.tests.sample.objects.TestObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop
@@ -50,22 +45,22 @@ public class ReflectionUtilsTests {
 	@Test
 	public void findField() {
 		Field field = ReflectionUtils.findField(TestObjectSubclassWithPublicField.class, "publicField", String.class);
-		assertNotNull(field);
-		assertEquals("publicField", field.getName());
-		assertEquals(String.class, field.getType());
-		assertTrue("Field should be public.", Modifier.isPublic(field.getModifiers()));
+		assertThat(field).isNotNull();
+		assertThat(field.getName()).isEqualTo("publicField");
+		assertThat(field.getType()).isEqualTo(String.class);
+		assertThat(Modifier.isPublic(field.getModifiers())).as("Field should be public.").isTrue();
 
 		field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "prot", String.class);
-		assertNotNull(field);
-		assertEquals("prot", field.getName());
-		assertEquals(String.class, field.getType());
-		assertTrue("Field should be protected.", Modifier.isProtected(field.getModifiers()));
+		assertThat(field).isNotNull();
+		assertThat(field.getName()).isEqualTo("prot");
+		assertThat(field.getType()).isEqualTo(String.class);
+		assertThat(Modifier.isProtected(field.getModifiers())).as("Field should be protected.").isTrue();
 
 		field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
-		assertNotNull(field);
-		assertEquals("name", field.getName());
-		assertEquals(String.class, field.getType());
-		assertTrue("Field should be private.", Modifier.isPrivate(field.getModifiers()));
+		assertThat(field).isNotNull();
+		assertThat(field.getName()).isEqualTo("name");
+		assertThat(field.getType()).isEqualTo(String.class);
+		assertThat(Modifier.isPrivate(field.getModifiers())).as("Field should be private.").isTrue();
 	}
 
 	@Test
@@ -76,11 +71,11 @@ public class ReflectionUtilsTests {
 		ReflectionUtils.makeAccessible(field);
 
 		ReflectionUtils.setField(field, testBean, "FooBar");
-		assertNotNull(testBean.getName());
-		assertEquals("FooBar", testBean.getName());
+		assertThat(testBean.getName()).isNotNull();
+		assertThat(testBean.getName()).isEqualTo("FooBar");
 
 		ReflectionUtils.setField(field, testBean, null);
-		assertNull(testBean.getName());
+		assertThat((Object) testBean.getName()).isNull();
 	}
 
 	@Test
@@ -94,26 +89,26 @@ public class ReflectionUtilsTests {
 		Method setName = TestObject.class.getMethod("setName", String.class);
 
 		Object name = ReflectionUtils.invokeMethod(getName, bean);
-		assertEquals("Incorrect name returned", rob, name);
+		assertThat(name).as("Incorrect name returned").isEqualTo(rob);
 
 		String juergen = "Juergen Hoeller";
 		ReflectionUtils.invokeMethod(setName, bean, juergen);
-		assertEquals("Incorrect name set", juergen, bean.getName());
+		assertThat(bean.getName()).as("Incorrect name set").isEqualTo(juergen);
 	}
 
 	@Test
 	public void declaresException() throws Exception {
 		Method remoteExMethod = A.class.getDeclaredMethod("foo", Integer.class);
-		assertTrue(ReflectionUtils.declaresException(remoteExMethod, RemoteException.class));
-		assertTrue(ReflectionUtils.declaresException(remoteExMethod, ConnectException.class));
-		assertFalse(ReflectionUtils.declaresException(remoteExMethod, NoSuchMethodException.class));
-		assertFalse(ReflectionUtils.declaresException(remoteExMethod, Exception.class));
+		assertThat(ReflectionUtils.declaresException(remoteExMethod, RemoteException.class)).isTrue();
+		assertThat(ReflectionUtils.declaresException(remoteExMethod, ConnectException.class)).isTrue();
+		assertThat(ReflectionUtils.declaresException(remoteExMethod, NoSuchMethodException.class)).isFalse();
+		assertThat(ReflectionUtils.declaresException(remoteExMethod, Exception.class)).isFalse();
 
 		Method illegalExMethod = B.class.getDeclaredMethod("bar", String.class);
-		assertTrue(ReflectionUtils.declaresException(illegalExMethod, IllegalArgumentException.class));
-		assertTrue(ReflectionUtils.declaresException(illegalExMethod, NumberFormatException.class));
-		assertFalse(ReflectionUtils.declaresException(illegalExMethod, IllegalStateException.class));
-		assertFalse(ReflectionUtils.declaresException(illegalExMethod, Exception.class));
+		assertThat(ReflectionUtils.declaresException(illegalExMethod, IllegalArgumentException.class)).isTrue();
+		assertThat(ReflectionUtils.declaresException(illegalExMethod, NumberFormatException.class)).isTrue();
+		assertThat(ReflectionUtils.declaresException(illegalExMethod, IllegalStateException.class)).isFalse();
+		assertThat(ReflectionUtils.declaresException(illegalExMethod, Exception.class)).isFalse();
 	}
 
 	@Test
@@ -157,8 +152,8 @@ public class ReflectionUtilsTests {
 		testValidCopy(src, dest);
 
 		// Check subclass fields were copied
-		assertEquals(src.magic, dest.magic);
-		assertEquals(src.prot, dest.prot);
+		assertThat(dest.magic).isEqualTo(src.magic);
+		assertThat(dest.prot).isEqualTo(src.prot);
 	}
 
 	@Test
@@ -168,7 +163,7 @@ public class ReflectionUtilsTests {
 		dest.magic = 11;
 		testValidCopy(src, dest);
 		// Should have left this one alone
-		assertEquals(11, dest.magic);
+		assertThat(dest.magic).isEqualTo(11);
 	}
 
 	@Test
@@ -183,11 +178,11 @@ public class ReflectionUtilsTests {
 		src.setName("freddie");
 		src.setAge(15);
 		src.setSpouse(new TestObject());
-		assertFalse(src.getAge() == dest.getAge());
+		assertThat(src.getAge() == dest.getAge()).isFalse();
 
 		ReflectionUtils.shallowCopyFieldState(src, dest);
-		assertEquals(src.getAge(), dest.getAge());
-		assertEquals(src.getSpouse(), dest.getSpouse());
+		assertThat(dest.getAge()).isEqualTo(src.getAge());
+		assertThat(dest.getSpouse()).isEqualTo(src.getSpouse());
 	}
 
 	@Test
@@ -199,11 +194,11 @@ public class ReflectionUtilsTests {
 				return Modifier.isProtected(m.getModifiers());
 			}
 		});
-		assertFalse(mc.getMethodNames().isEmpty());
-		assertTrue("Must find protected method on Object", mc.getMethodNames().contains("clone"));
-		assertTrue("Must find protected method on Object", mc.getMethodNames().contains("finalize"));
-		assertFalse("Public, not protected", mc.getMethodNames().contains("hashCode"));
-		assertFalse("Public, not protected", mc.getMethodNames().contains("absquatulate"));
+		assertThat(mc.getMethodNames().isEmpty()).isFalse();
+		assertThat(mc.getMethodNames().contains("clone")).as("Must find protected method on Object").isTrue();
+		assertThat(mc.getMethodNames().contains("finalize")).as("Must find protected method on Object").isTrue();
+		assertThat(mc.getMethodNames().contains("hashCode")).as("Public, not protected").isFalse();
+		assertThat(mc.getMethodNames().contains("absquatulate")).as("Public, not protected").isFalse();
 	}
 
 	@Test
@@ -216,20 +211,20 @@ public class ReflectionUtilsTests {
 				++absquatulateCount;
 			}
 		}
-		assertEquals("Found 2 absquatulates", 2, absquatulateCount);
+		assertThat(absquatulateCount).as("Found 2 absquatulates").isEqualTo(2);
 	}
 
 	@Test
 	public void findMethod() throws Exception {
-		assertNotNull(ReflectionUtils.findMethod(B.class, "bar", String.class));
-		assertNotNull(ReflectionUtils.findMethod(B.class, "foo", Integer.class));
-		assertNotNull(ReflectionUtils.findMethod(B.class, "getClass"));
+		assertThat(ReflectionUtils.findMethod(B.class, "bar", String.class)).isNotNull();
+		assertThat(ReflectionUtils.findMethod(B.class, "foo", Integer.class)).isNotNull();
+		assertThat(ReflectionUtils.findMethod(B.class, "getClass")).isNotNull();
 	}
 
 	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
 	@Test
 	public void findMethodWithVarArgs() throws Exception {
-		assertNotNull(ReflectionUtils.findMethod(B.class, "add", int.class, int.class, int.class));
+		assertThat(ReflectionUtils.findMethod(B.class, "add", int.class, int.class, int.class)).isNotNull();
 	}
 
 	@Test
@@ -260,14 +255,14 @@ public class ReflectionUtilsTests {
 			public void m1$1() {
 			}
 		}
-		assertTrue(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$123")));
-		assertTrue(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$0")));
-		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$$0")));
-		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$")));
-		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1")));
-		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1")));
-		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1$")));
-		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1$1")));
+		assertThat(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$123"))).isTrue();
+		assertThat(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$0"))).isTrue();
+		assertThat(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$$0"))).isFalse();
+		assertThat(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$"))).isFalse();
+		assertThat(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1"))).isFalse();
+		assertThat(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1"))).isFalse();
+		assertThat(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1$"))).isFalse();
+		assertThat(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1$1"))).isFalse();
 	}
 
 	@Test
@@ -326,8 +321,8 @@ public class ReflectionUtilsTests {
 			}
 		}
 		assertThat(m1MethodCount).isEqualTo(1);
-		assertTrue(ObjectUtils.containsElement(methods, Leaf.class.getMethod("m1")));
-		assertFalse(ObjectUtils.containsElement(methods, Parent.class.getMethod("m1")));
+		assertThat(ObjectUtils.containsElement(methods, Leaf.class.getMethod("m1"))).isTrue();
+		assertThat(ObjectUtils.containsElement(methods, Parent.class.getMethod("m1"))).isFalse();
 	}
 
 	@Test

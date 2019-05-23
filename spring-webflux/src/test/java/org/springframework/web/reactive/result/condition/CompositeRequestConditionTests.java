@@ -23,10 +23,8 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link CompositeRequestCondition}.
@@ -62,7 +60,7 @@ public class CompositeRequestConditionTests {
 		CompositeRequestCondition cond2 = new CompositeRequestCondition(this.param2, this.header2);
 		CompositeRequestCondition cond3 = new CompositeRequestCondition(this.param3, this.header3);
 
-		assertEquals(cond3, cond1.combine(cond2));
+		assertThat(cond1.combine(cond2)).isEqualTo(cond3);
 	}
 
 	@Test
@@ -70,9 +68,9 @@ public class CompositeRequestConditionTests {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
 		CompositeRequestCondition notEmpty = new CompositeRequestCondition(this.param1);
 
-		assertSame(empty, empty.combine(empty));
-		assertSame(notEmpty, notEmpty.combine(empty));
-		assertSame(notEmpty, empty.combine(notEmpty));
+		assertThat(empty.combine(empty)).isSameAs(empty);
+		assertThat(notEmpty.combine(empty)).isSameAs(notEmpty);
+		assertThat(empty.combine(notEmpty)).isSameAs(notEmpty);
 	}
 
 	@Test
@@ -94,19 +92,19 @@ public class CompositeRequestConditionTests {
 		CompositeRequestCondition composite1 = new CompositeRequestCondition(this.param1, condition1);
 		CompositeRequestCondition composite2 = new CompositeRequestCondition(this.param1, condition2);
 
-		assertEquals(composite2, composite1.getMatchingCondition(exchange));
+		assertThat(composite1.getMatchingCondition(exchange)).isEqualTo(composite2);
 	}
 
 	@Test
 	public void noMatch() {
 		CompositeRequestCondition cond = new CompositeRequestCondition(this.param1);
-		assertNull(cond.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/"))));
+		assertThat(cond.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/")))).isNull();
 	}
 
 	@Test
 	public void matchEmpty() {
 		CompositeRequestCondition empty = new CompositeRequestCondition();
-		assertSame(empty, empty.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/"))));
+		assertThat(empty.getMatchingCondition(MockServerWebExchange.from(MockServerHttpRequest.get("/")))).isSameAs(empty);
 	}
 
 	@Test
@@ -115,8 +113,8 @@ public class CompositeRequestConditionTests {
 		CompositeRequestCondition cond3 = new CompositeRequestCondition(this.param3);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
-		assertEquals(1, cond1.compareTo(cond3, exchange));
-		assertEquals(-1, cond3.compareTo(cond1, exchange));
+		assertThat(cond1.compareTo(cond3, exchange)).isEqualTo(1);
+		assertThat(cond3.compareTo(cond1, exchange)).isEqualTo(-1);
 	}
 
 	@Test
@@ -125,9 +123,9 @@ public class CompositeRequestConditionTests {
 		CompositeRequestCondition notEmpty = new CompositeRequestCondition(this.param1);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
-		assertEquals(0, empty.compareTo(empty, exchange));
-		assertEquals(-1, notEmpty.compareTo(empty, exchange));
-		assertEquals(1, empty.compareTo(notEmpty, exchange));
+		assertThat(empty.compareTo(empty, exchange)).isEqualTo(0);
+		assertThat(notEmpty.compareTo(empty, exchange)).isEqualTo(-1);
+		assertThat(empty.compareTo(notEmpty, exchange)).isEqualTo(1);
 	}
 
 	@Test

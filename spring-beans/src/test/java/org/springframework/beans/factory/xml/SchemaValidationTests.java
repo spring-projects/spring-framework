@@ -24,9 +24,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Rob Harrop
@@ -60,8 +59,8 @@ public class SchemaValidationTests {
 		reader.loadBeanDefinitions(new ClassPathResource("schemaValidated.xml", getClass()));
 
 		TestBean foo = (TestBean) bf.getBean("fooBean");
-		assertNotNull("Spouse is null", foo.getSpouse());
-		assertEquals("Incorrect number of friends", 2, foo.getFriends().size());
+		assertThat(foo.getSpouse()).as("Spouse is null").isNotNull();
+		assertThat(foo.getFriends().size()).as("Incorrect number of friends").isEqualTo(2);
 	}
 
 }

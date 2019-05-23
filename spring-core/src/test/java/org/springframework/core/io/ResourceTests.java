@@ -34,9 +34,6 @@ import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for various {@link Resource} implementations.
@@ -51,45 +48,45 @@ public class ResourceTests {
 	@Test
 	public void testByteArrayResource() throws IOException {
 		Resource resource = new ByteArrayResource("testString".getBytes());
-		assertTrue(resource.exists());
-		assertFalse(resource.isOpen());
+		assertThat(resource.exists()).isTrue();
+		assertThat(resource.isOpen()).isFalse();
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
-		assertEquals("testString", content);
-		assertEquals(resource, new ByteArrayResource("testString".getBytes()));
+		assertThat(content).isEqualTo("testString");
+		assertThat(new ByteArrayResource("testString".getBytes())).isEqualTo(resource);
 	}
 
 	@Test
 	public void testByteArrayResourceWithDescription() throws IOException {
 		Resource resource = new ByteArrayResource("testString".getBytes(), "my description");
-		assertTrue(resource.exists());
-		assertFalse(resource.isOpen());
+		assertThat(resource.exists()).isTrue();
+		assertThat(resource.isOpen()).isFalse();
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
-		assertEquals("testString", content);
-		assertTrue(resource.getDescription().contains("my description"));
-		assertEquals(resource, new ByteArrayResource("testString".getBytes()));
+		assertThat(content).isEqualTo("testString");
+		assertThat(resource.getDescription().contains("my description")).isTrue();
+		assertThat(new ByteArrayResource("testString".getBytes())).isEqualTo(resource);
 	}
 
 	@Test
 	public void testInputStreamResource() throws IOException {
 		InputStream is = new ByteArrayInputStream("testString".getBytes());
 		Resource resource = new InputStreamResource(is);
-		assertTrue(resource.exists());
-		assertTrue(resource.isOpen());
+		assertThat(resource.exists()).isTrue();
+		assertThat(resource.isOpen()).isTrue();
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
-		assertEquals("testString", content);
-		assertEquals(resource, new InputStreamResource(is));
+		assertThat(content).isEqualTo("testString");
+		assertThat(new InputStreamResource(is)).isEqualTo(resource);
 	}
 
 	@Test
 	public void testInputStreamResourceWithDescription() throws IOException {
 		InputStream is = new ByteArrayInputStream("testString".getBytes());
 		Resource resource = new InputStreamResource(is, "my description");
-		assertTrue(resource.exists());
-		assertTrue(resource.isOpen());
+		assertThat(resource.exists()).isTrue();
+		assertThat(resource.isOpen()).isTrue();
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
-		assertEquals("testString", content);
-		assertTrue(resource.getDescription().contains("my description"));
-		assertEquals(resource, new InputStreamResource(is));
+		assertThat(content).isEqualTo("testString");
+		assertThat(resource.getDescription().contains("my description")).isTrue();
+		assertThat(new InputStreamResource(is)).isEqualTo(resource);
 	}
 
 	@Test
@@ -97,15 +94,15 @@ public class ResourceTests {
 		Resource resource = new ClassPathResource("org/springframework/core/io/Resource.class");
 		doTestResource(resource);
 		Resource resource2 = new ClassPathResource("org/springframework/core/../core/io/./Resource.class");
-		assertEquals(resource, resource2);
+		assertThat(resource2).isEqualTo(resource);
 		Resource resource3 = new ClassPathResource("org/springframework/core/").createRelative("../core/io/./Resource.class");
-		assertEquals(resource, resource3);
+		assertThat(resource3).isEqualTo(resource);
 
 		// Check whether equal/hashCode works in a HashSet.
 		HashSet<Resource> resources = new HashSet<>();
 		resources.add(resource);
 		resources.add(resource2);
-		assertEquals(1, resources.size());
+		assertThat(resources.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -113,15 +110,14 @@ public class ResourceTests {
 		Resource resource =
 				new ClassPathResource("org/springframework/core/io/Resource.class", getClass().getClassLoader());
 		doTestResource(resource);
-		assertEquals(resource,
-				new ClassPathResource("org/springframework/core/../core/io/./Resource.class", getClass().getClassLoader()));
+		assertThat(new ClassPathResource("org/springframework/core/../core/io/./Resource.class", getClass().getClassLoader())).isEqualTo(resource);
 	}
 
 	@Test
 	public void testClassPathResourceWithClass() throws IOException {
 		Resource resource = new ClassPathResource("Resource.class", getClass());
 		doTestResource(resource);
-		assertEquals(resource, new ClassPathResource("Resource.class", getClass()));
+		assertThat(new ClassPathResource("Resource.class", getClass())).isEqualTo(resource);
 	}
 
 	@Test
@@ -129,7 +125,7 @@ public class ResourceTests {
 		String file = getClass().getResource("Resource.class").getFile();
 		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
-		assertEquals(new FileSystemResource(file), resource);
+		assertThat(resource).isEqualTo(new FileSystemResource(file));
 	}
 
 	@Test
@@ -137,64 +133,64 @@ public class ResourceTests {
 		Path filePath = Paths.get(getClass().getResource("Resource.class").toURI());
 		Resource resource = new FileSystemResource(filePath);
 		doTestResource(resource);
-		assertEquals(new FileSystemResource(filePath), resource);
+		assertThat(resource).isEqualTo(new FileSystemResource(filePath));
 	}
 
 	@Test
 	public void testFileSystemResourceWithPlainPath() {
 		Resource resource = new FileSystemResource("core/io/Resource.class");
-		assertEquals(resource, new FileSystemResource("core/../core/io/./Resource.class"));
+		assertThat(new FileSystemResource("core/../core/io/./Resource.class")).isEqualTo(resource);
 	}
 
 	@Test
 	public void testUrlResource() throws IOException {
 		Resource resource = new UrlResource(getClass().getResource("Resource.class"));
 		doTestResource(resource);
-		assertEquals(new UrlResource(getClass().getResource("Resource.class")), resource);
+		assertThat(resource).isEqualTo(new UrlResource(getClass().getResource("Resource.class")));
 
 		Resource resource2 = new UrlResource("file:core/io/Resource.class");
-		assertEquals(resource2, new UrlResource("file:core/../core/io/./Resource.class"));
+		assertThat(new UrlResource("file:core/../core/io/./Resource.class")).isEqualTo(resource2);
 
-		assertEquals("test.txt", new UrlResource("file:/dir/test.txt?argh").getFilename());
-		assertEquals("test.txt", new UrlResource("file:\\dir\\test.txt?argh").getFilename());
-		assertEquals("test.txt", new UrlResource("file:\\dir/test.txt?argh").getFilename());
+		assertThat(new UrlResource("file:/dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
+		assertThat(new UrlResource("file:\\dir\\test.txt?argh").getFilename()).isEqualTo("test.txt");
+		assertThat(new UrlResource("file:\\dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
 	}
 
 	private void doTestResource(Resource resource) throws IOException {
-		assertEquals("Resource.class", resource.getFilename());
-		assertTrue(resource.getURL().getFile().endsWith("Resource.class"));
-		assertTrue(resource.exists());
-		assertTrue(resource.isReadable());
-		assertTrue(resource.contentLength() > 0);
-		assertTrue(resource.lastModified() > 0);
+		assertThat(resource.getFilename()).isEqualTo("Resource.class");
+		assertThat(resource.getURL().getFile().endsWith("Resource.class")).isTrue();
+		assertThat(resource.exists()).isTrue();
+		assertThat(resource.isReadable()).isTrue();
+		assertThat(resource.contentLength() > 0).isTrue();
+		assertThat(resource.lastModified() > 0).isTrue();
 
 		Resource relative1 = resource.createRelative("ClassPathResource.class");
-		assertEquals("ClassPathResource.class", relative1.getFilename());
-		assertTrue(relative1.getURL().getFile().endsWith("ClassPathResource.class"));
-		assertTrue(relative1.exists());
-		assertTrue(relative1.isReadable());
-		assertTrue(relative1.contentLength() > 0);
-		assertTrue(relative1.lastModified() > 0);
+		assertThat(relative1.getFilename()).isEqualTo("ClassPathResource.class");
+		assertThat(relative1.getURL().getFile().endsWith("ClassPathResource.class")).isTrue();
+		assertThat(relative1.exists()).isTrue();
+		assertThat(relative1.isReadable()).isTrue();
+		assertThat(relative1.contentLength() > 0).isTrue();
+		assertThat(relative1.lastModified() > 0).isTrue();
 
 		Resource relative2 = resource.createRelative("support/ResourcePatternResolver.class");
-		assertEquals("ResourcePatternResolver.class", relative2.getFilename());
-		assertTrue(relative2.getURL().getFile().endsWith("ResourcePatternResolver.class"));
-		assertTrue(relative2.exists());
-		assertTrue(relative2.isReadable());
-		assertTrue(relative2.contentLength() > 0);
-		assertTrue(relative2.lastModified() > 0);
+		assertThat(relative2.getFilename()).isEqualTo("ResourcePatternResolver.class");
+		assertThat(relative2.getURL().getFile().endsWith("ResourcePatternResolver.class")).isTrue();
+		assertThat(relative2.exists()).isTrue();
+		assertThat(relative2.isReadable()).isTrue();
+		assertThat(relative2.contentLength() > 0).isTrue();
+		assertThat(relative2.lastModified() > 0).isTrue();
 
 		Resource relative3 = resource.createRelative("../SpringVersion.class");
-		assertEquals("SpringVersion.class", relative3.getFilename());
-		assertTrue(relative3.getURL().getFile().endsWith("SpringVersion.class"));
-		assertTrue(relative3.exists());
-		assertTrue(relative3.isReadable());
-		assertTrue(relative3.contentLength() > 0);
-		assertTrue(relative3.lastModified() > 0);
+		assertThat(relative3.getFilename()).isEqualTo("SpringVersion.class");
+		assertThat(relative3.getURL().getFile().endsWith("SpringVersion.class")).isTrue();
+		assertThat(relative3.exists()).isTrue();
+		assertThat(relative3.isReadable()).isTrue();
+		assertThat(relative3.contentLength() > 0).isTrue();
+		assertThat(relative3.lastModified() > 0).isTrue();
 
 		Resource relative4 = resource.createRelative("X.class");
-		assertFalse(relative4.exists());
-		assertFalse(relative4.isReadable());
+		assertThat(relative4.exists()).isFalse();
+		assertThat(relative4.isReadable()).isFalse();
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
 				relative4::contentLength);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
@@ -205,27 +201,27 @@ public class ResourceTests {
 	public void testClassPathResourceWithRelativePath() throws IOException {
 		Resource resource = new ClassPathResource("dir/");
 		Resource relative = resource.createRelative("subdir");
-		assertEquals(new ClassPathResource("dir/subdir"), relative);
+		assertThat(relative).isEqualTo(new ClassPathResource("dir/subdir"));
 	}
 
 	@Test
 	public void testFileSystemResourceWithRelativePath() throws IOException {
 		Resource resource = new FileSystemResource("dir/");
 		Resource relative = resource.createRelative("subdir");
-		assertEquals(new FileSystemResource("dir/subdir"), relative);
+		assertThat(relative).isEqualTo(new FileSystemResource("dir/subdir"));
 	}
 
 	@Test
 	public void testUrlResourceWithRelativePath() throws IOException {
 		Resource resource = new UrlResource("file:dir/");
 		Resource relative = resource.createRelative("subdir");
-		assertEquals(new UrlResource("file:dir/subdir"), relative);
+		assertThat(relative).isEqualTo(new UrlResource("file:dir/subdir"));
 	}
 
 	@Ignore @Test // this test is quite slow. TODO: re-enable with JUnit categories
 	public void testNonFileResourceExists() throws Exception {
 		Resource resource = new UrlResource("https://www.springframework.org");
-		assertTrue(resource.exists());
+		assertThat(resource.exists()).isTrue();
 	}
 
 	@Test
@@ -280,7 +276,7 @@ public class ResourceTests {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
-			assertTrue(buffer.limit() > 0);
+			assertThat(buffer.limit() > 0).isTrue();
 		}
 		finally {
 			if (channel != null) {

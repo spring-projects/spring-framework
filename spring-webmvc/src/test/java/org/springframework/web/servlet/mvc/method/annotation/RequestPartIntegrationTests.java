@@ -66,8 +66,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
@@ -178,7 +177,7 @@ public class RequestPartIntegrationTests {
 		this.restTemplate.setMessageConverters(Collections.singletonList(converter));
 
 		ResponseEntity<Void> responseEntity = restTemplate.exchange(requestEntity, Void.class);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 	private void testCreate(String url, String basename) {
@@ -192,7 +191,7 @@ public class RequestPartIntegrationTests {
 		parts.add("iso-8859-1-data", new HttpEntity<>(new byte[] {(byte) 0xC4}, headers)); // SPR-13096
 
 		URI location = restTemplate.postForLocation(url, parts);
-		assertEquals("http://localhost:8080/test/" + basename + "/logo.jpg", location.toString());
+		assertThat(location.toString()).isEqualTo(("http://localhost:8080/test/" + basename + "/logo.jpg"));
 	}
 
 
@@ -239,7 +238,7 @@ public class RequestPartIntegrationTests {
 				@RequestPart(name = "empty-data", required = false) TestData emptyData,
 				@RequestPart(name = "iso-8859-1-data") byte[] iso88591Data) {
 
-			assertArrayEquals(new byte[]{(byte) 0xC4}, iso88591Data);
+			assertThat(iso88591Data).isEqualTo(new byte[]{(byte) 0xC4});
 
 			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.get().getOriginalFilename();
 			HttpHeaders headers = new HttpHeaders();
@@ -249,7 +248,7 @@ public class RequestPartIntegrationTests {
 
 		@RequestMapping(value = "/spr13319", method = POST, consumes = "multipart/form-data")
 		public ResponseEntity<Void> create(@RequestPart("file") MultipartFile multipartFile) {
-			assertEquals("élève.txt", multipartFile.getOriginalFilename());
+			assertThat(multipartFile.getOriginalFilename()).isEqualTo("élève.txt");
 			return ResponseEntity.ok().build();
 		}
 	}

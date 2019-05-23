@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test class that verifies proper detection of a default
@@ -42,7 +42,7 @@ public class DefaultScriptDetectionXmlSupersedesGroovySpringContextTests {
 
 	@Test
 	public final void foo() {
-		assertEquals("The foo field should have been autowired.", "Foo", this.foo);
+		assertThat(this.foo).as("The foo field should have been autowired.").isEqualTo("Foo");
 	}
 
 }

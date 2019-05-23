@@ -44,9 +44,7 @@ import org.springframework.util.ReflectionUtils;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.core.ResolvableType.forClass;
@@ -86,7 +84,7 @@ public class EncoderHttpMessageWriterTests {
 	public void getWritableMediaTypes() {
 		configureEncoder(MimeTypeUtils.TEXT_HTML, MimeTypeUtils.TEXT_XML);
 		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(this.encoder);
-		assertEquals(Arrays.asList(TEXT_HTML, TEXT_XML), writer.getWritableMediaTypes());
+		assertThat(writer.getWritableMediaTypes()).isEqualTo(Arrays.asList(TEXT_HTML, TEXT_XML));
 	}
 
 	@Test
@@ -95,8 +93,8 @@ public class EncoderHttpMessageWriterTests {
 		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		given(this.encoder.canEncode(forClass(String.class), TEXT_HTML)).willReturn(true);
 
-		assertTrue(writer.canWrite(forClass(String.class), TEXT_HTML));
-		assertFalse(writer.canWrite(forClass(String.class), TEXT_XML));
+		assertThat(writer.canWrite(forClass(String.class), TEXT_HTML)).isTrue();
+		assertThat(writer.canWrite(forClass(String.class), TEXT_XML)).isFalse();
 	}
 
 	@Test
@@ -105,8 +103,8 @@ public class EncoderHttpMessageWriterTests {
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Flux.empty(), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS);
 
-		assertEquals(TEXT_PLAIN, response.getHeaders().getContentType());
-		assertEquals(TEXT_PLAIN, this.mediaTypeCaptor.getValue());
+		assertThat(response.getHeaders().getContentType()).isEqualTo(TEXT_PLAIN);
+		assertThat(this.mediaTypeCaptor.getValue()).isEqualTo(TEXT_PLAIN);
 	}
 
 	@Test
@@ -126,8 +124,8 @@ public class EncoderHttpMessageWriterTests {
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Flux.empty(), forClass(String.class), negotiatedMediaType, this.response, NO_HINTS);
 
-		assertEquals(defaultContentType, this.response.getHeaders().getContentType());
-		assertEquals(defaultContentType, this.mediaTypeCaptor.getValue());
+		assertThat(this.response.getHeaders().getContentType()).isEqualTo(defaultContentType);
+		assertThat(this.mediaTypeCaptor.getValue()).isEqualTo(defaultContentType);
 	}
 
 	@Test
@@ -136,8 +134,8 @@ public class EncoderHttpMessageWriterTests {
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Flux.empty(), forClass(String.class), TEXT_HTML, response, NO_HINTS);
 
-		assertEquals(new MediaType("text", "html", UTF_8), this.response.getHeaders().getContentType());
-		assertEquals(new MediaType("text", "html", UTF_8), this.mediaTypeCaptor.getValue());
+		assertThat(this.response.getHeaders().getContentType()).isEqualTo(new MediaType("text", "html", UTF_8));
+		assertThat(this.mediaTypeCaptor.getValue()).isEqualTo(new MediaType("text", "html", UTF_8));
 	}
 
 	@Test
@@ -147,8 +145,8 @@ public class EncoderHttpMessageWriterTests {
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Flux.empty(), forClass(String.class), negotiatedMediaType, this.response, NO_HINTS);
 
-		assertEquals(negotiatedMediaType, this.response.getHeaders().getContentType());
-		assertEquals(negotiatedMediaType, this.mediaTypeCaptor.getValue());
+		assertThat(this.response.getHeaders().getContentType()).isEqualTo(negotiatedMediaType);
+		assertThat(this.mediaTypeCaptor.getValue()).isEqualTo(negotiatedMediaType);
 	}
 
 	@Test
@@ -160,8 +158,8 @@ public class EncoderHttpMessageWriterTests {
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Flux.empty(), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS);
 
-		assertEquals(outputMessageMediaType, this.response.getHeaders().getContentType());
-		assertEquals(outputMessageMediaType, this.mediaTypeCaptor.getValue());
+		assertThat(this.response.getHeaders().getContentType()).isEqualTo(outputMessageMediaType);
+		assertThat(this.mediaTypeCaptor.getValue()).isEqualTo(outputMessageMediaType);
 	}
 
 	@Test
@@ -172,7 +170,7 @@ public class EncoderHttpMessageWriterTests {
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Mono.just("body"), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS).block();
 
-		assertEquals(4, this.response.getHeaders().getContentLength());
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(4);
 	}
 
 	@Test // gh-22952
@@ -192,7 +190,7 @@ public class EncoderHttpMessageWriterTests {
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Mono.empty(), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS).block();
 		StepVerifier.create(this.response.getBody()).expectComplete();
-		assertEquals(0, this.response.getHeaders().getContentLength());
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(0);
 	}
 
 	@Test  // gh-22936
@@ -205,9 +203,9 @@ public class EncoderHttpMessageWriterTests {
 		Method method = ReflectionUtils.findMethod(writer.getClass(), "isStreamingMediaType", MediaType.class);
 		ReflectionUtils.makeAccessible(method);
 
-		assertTrue((Boolean) method.invoke(writer, streamingMediaType));
-		assertFalse((Boolean) method.invoke(writer, new MediaType(TEXT_PLAIN, Collections.singletonMap("streaming", "false"))));
-		assertFalse((Boolean) method.invoke(writer, TEXT_HTML));
+		assertThat((boolean) (Boolean) method.invoke(writer, streamingMediaType)).isTrue();
+		assertThat((boolean) (Boolean) method.invoke(writer, new MediaType(TEXT_PLAIN, Collections.singletonMap("streaming", "false")))).isFalse();
+		assertThat((boolean) (Boolean) method.invoke(writer, TEXT_HTML)).isFalse();
 	}
 
 	private void configureEncoder(MimeType... mimeTypes) {

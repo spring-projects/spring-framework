@@ -23,7 +23,7 @@ import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Costin Leau
@@ -42,7 +42,7 @@ public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests
 	public void testKeyStrategy() {
 		CacheInterceptor ci = this.ctx.getBean(
 				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
-		assertSame(this.ctx.getBean("keyGenerator"), ci.getKeyGenerator());
+		assertThat(ci.getKeyGenerator()).isSameAs(this.ctx.getBean("keyGenerator"));
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests
 				"/org/springframework/cache/config/annotationDrivenCacheNamespace-resolver.xml");
 
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
-		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		assertThat(ci.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
 		context.close();
 	}
 
@@ -61,7 +61,7 @@ public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests
 				"/org/springframework/cache/config/annotationDrivenCacheNamespace-manager-resolver.xml");
 
 		CacheInterceptor ci = context.getBean(CacheInterceptor.class);
-		assertSame(context.getBean("cacheResolver"), ci.getCacheResolver());
+		assertThat(ci.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
 		context.close();
 	}
 
@@ -69,7 +69,7 @@ public class AnnotationNamespaceDrivenTests extends AbstractCacheAnnotationTests
 	public void testCacheErrorHandler() {
 		CacheInterceptor ci = this.ctx.getBean(
 				"org.springframework.cache.interceptor.CacheInterceptor#0", CacheInterceptor.class);
-		assertSame(this.ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
+		assertThat(ci.getErrorHandler()).isSameAs(this.ctx.getBean("errorHandler", CacheErrorHandler.class));
 	}
 
 }

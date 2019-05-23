@@ -29,7 +29,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -49,11 +49,9 @@ public class StaxStreamXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(CONTENT));
 		streamReader.nextTag();  // skip to root
-		assertEquals("Invalid element", new QName("http://springframework.org/spring-ws", "root"),
-				streamReader.getName());
+		assertThat(streamReader.getName()).as("Invalid element").isEqualTo(new QName("http://springframework.org/spring-ws", "root"));
 		streamReader.nextTag();  // skip to child
-		assertEquals("Invalid element", new QName("http://springframework.org/spring-ws", "child"),
-				streamReader.getName());
+		assertThat(streamReader.getName()).as("Invalid element").isEqualTo(new QName("http://springframework.org/spring-ws", "child"));
 		StaxStreamXMLReader xmlReader = new StaxStreamXMLReader(streamReader);
 
 		ContentHandler contentHandler = mock(ContentHandler.class);

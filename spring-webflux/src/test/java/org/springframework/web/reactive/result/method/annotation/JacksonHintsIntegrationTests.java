@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
@@ -56,47 +56,47 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 	@Test
 	public void jsonViewResponse() throws Exception {
 		String expected = "{\"withView1\":\"with\"}";
-		assertEquals(expected, performGet("/response/raw", MediaType.APPLICATION_JSON, String.class).getBody());
+		assertThat(performGet("/response/raw", MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void jsonViewWithMonoResponse() throws Exception {
 		String expected = "{\"withView1\":\"with\"}";
-		assertEquals(expected, performGet("/response/mono", MediaType.APPLICATION_JSON, String.class).getBody());
+		assertThat(performGet("/response/mono", MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test  // SPR-16098
 	public void jsonViewWithMonoResponseEntity() throws Exception {
 		String expected = "{\"withView1\":\"with\"}";
-		assertEquals(expected, performGet("/response/entity", MediaType.APPLICATION_JSON, String.class).getBody());
+		assertThat(performGet("/response/entity", MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void jsonViewWithFluxResponse() throws Exception {
 		String expected = "[{\"withView1\":\"with\"},{\"withView1\":\"with\"}]";
-		assertEquals(expected, performGet("/response/flux", MediaType.APPLICATION_JSON, String.class).getBody());
+		assertThat(performGet("/response/flux", MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void jsonViewWithRequest() throws Exception {
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
-		assertEquals(expected, performPost("/request/raw", MediaType.APPLICATION_JSON,
-				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON, String.class).getBody());
+		assertThat(performPost("/request/raw", MediaType.APPLICATION_JSON,
+				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void jsonViewWithMonoRequest() throws Exception {
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
-		assertEquals(expected, performPost("/request/mono", MediaType.APPLICATION_JSON,
-				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON, String.class).getBody());
+		assertThat(performPost("/request/mono", MediaType.APPLICATION_JSON,
+				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test  // SPR-16098
 	public void jsonViewWithEntityMonoRequest() throws Exception {
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
-		assertEquals(expected, performPost("/request/entity/mono", MediaType.APPLICATION_JSON,
+		assertThat(performPost("/request/entity/mono", MediaType.APPLICATION_JSON,
 				new JacksonViewBean("with", "with", "without"),
-				MediaType.APPLICATION_JSON, String.class).getBody());
+				MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test  // SPR-16098
@@ -104,10 +104,10 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 		String expected = "[" +
 				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}," +
 				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}]";
-		assertEquals(expected, performPost("/request/entity/flux", MediaType.APPLICATION_JSON,
+		assertThat(performPost("/request/entity/flux", MediaType.APPLICATION_JSON,
 				Arrays.asList(new JacksonViewBean("with", "with", "without"),
 						new JacksonViewBean("with", "with", "without")),
-				MediaType.APPLICATION_JSON, String.class).getBody());
+				MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
@@ -118,8 +118,8 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 		List<JacksonViewBean> beans = Arrays.asList(
 				new JacksonViewBean("with", "with", "without"),
 				new JacksonViewBean("with", "with", "without"));
-		assertEquals(expected, performPost("/request/flux", MediaType.APPLICATION_JSON, beans,
-				MediaType.APPLICATION_JSON, String.class).getBody());
+		assertThat(performPost("/request/flux", MediaType.APPLICATION_JSON, beans,
+				MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
 

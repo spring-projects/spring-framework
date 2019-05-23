@@ -26,11 +26,8 @@ import org.junit.Test;
 
 import org.springframework.orm.jpa.domain.Person;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * An application-managed entity manager can join an existing transaction,
@@ -46,14 +43,14 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 	@SuppressWarnings("unchecked")
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = entityManagerFactory.createEntityManager();
-		assertTrue(Proxy.isProxyClass(em.getClass()));
+		assertThat(Proxy.isProxyClass(em.getClass())).isTrue();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertNotNull(people);
+		assertThat(people).isNotNull();
 
-		assertTrue("Should be open to start with", em.isOpen());
+		assertThat(em.isOpen()).as("Should be open to start with").isTrue();
 		em.close();
-		assertFalse("Close should work on application managed EM", em.isOpen());
+		assertThat(em.isOpen()).as("Close should work on application managed EM").isFalse();
 	}
 
 	@Test
@@ -92,12 +89,12 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		em.persist(p);
 
 		em.flush();
-		assertEquals("1 row must have been inserted", 1, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("1 row must have been inserted").isEqualTo(1);
 	}
 
 	@Test
 	public void testStateClean() {
-		assertEquals("Should be no people from previous transactions", 0, countRowsInTable("person"));
+		assertThat(countRowsInTable("person")).as("Should be no people from previous transactions").isEqualTo(0);
 	}
 
 	@Test
@@ -108,27 +105,27 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		doInstantiateAndSave(em);
 		endTransaction();
 
-		assertFalse(em.getTransaction().isActive());
+		assertThat(em.getTransaction().isActive()).isFalse();
 
 		startNewTransaction();
 		// Call any method: should cause automatic tx invocation
-		assertFalse(em.contains(new Person()));
+		assertThat(em.contains(new Person())).isFalse();
 
-		assertFalse(em.getTransaction().isActive());
+		assertThat(em.getTransaction().isActive()).isFalse();
 		em.joinTransaction();
 
-		assertTrue(em.getTransaction().isActive());
+		assertThat(em.getTransaction().isActive()).isTrue();
 
 		doInstantiateAndSave(em);
 		setComplete();
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have committed back", 1, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("Tx must have committed back").isEqualTo(1);
 
 		// Now clean up the database
 		startNewTransaction();
 		em.joinTransaction();
 		deleteAllPeopleUsingEntityManager(em);
-		assertEquals("People have been killed", 0, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("People have been killed").isEqualTo(0);
 		setComplete();
 	}
 
@@ -142,7 +139,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		em.joinTransaction();
 		doInstantiateAndSave(em);
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have been rolled back", 0, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("Tx must have been rolled back").isEqualTo(0);
 	}
 
 	@Test
@@ -153,7 +150,7 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 
 		setComplete();
 		endTransaction();	// Should rollback
-		assertEquals("Tx must have committed back", 1, countRowsInTable(em, "person"));
+		assertThat(countRowsInTable(em, "person")).as("Tx must have committed back").isEqualTo(1);
 
 		// Now clean up the database
 		deleteFromTables("person");

@@ -35,7 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link Sql @Sql} that verify support for multiple
@@ -76,7 +76,7 @@ public class MultipleDataSourcesAndTransactionManagersSqlScriptsTests {
 		Collections.sort(expected);
 		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
 		Collections.sort(actual);
-		assertEquals("Users in database;", expected, actual);
+		assertThat(actual).as("Users in database;").isEqualTo(expected);
 	}
 
 

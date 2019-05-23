@@ -30,8 +30,7 @@ import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link PrincipalMethodArgumentResolver}.
@@ -48,9 +47,9 @@ public class PrincipalMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Principal.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Mono.class, Principal.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Single.class, Principal.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Principal.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Mono.class, Principal.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Single.class, Principal.class))).isTrue();
 	}
 
 
@@ -63,17 +62,17 @@ public class PrincipalMethodArgumentResolverTests {
 
 		MethodParameter param = this.testMethod.arg(Principal.class);
 		Object actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertSame(user, actual);
+		assertThat(actual).isSameAs(user);
 
 		param = this.testMethod.arg(Mono.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertTrue(Mono.class.isAssignableFrom(actual.getClass()));
-		assertSame(user, ((Mono<?>) actual).block());
+		assertThat(Mono.class.isAssignableFrom(actual.getClass())).isTrue();
+		assertThat(((Mono<?>) actual).block()).isSameAs(user);
 
 		param = this.testMethod.arg(Single.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertTrue(Single.class.isAssignableFrom(actual.getClass()));
-		assertSame(user, ((Single<?>) actual).blockingGet());
+		assertThat(Single.class.isAssignableFrom(actual.getClass())).isTrue();
+		assertThat(((Single<?>) actual).blockingGet()).isSameAs(user);
 	}
 
 

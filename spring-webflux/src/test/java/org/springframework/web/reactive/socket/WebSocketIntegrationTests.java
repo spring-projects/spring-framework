@@ -38,7 +38,6 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Integration tests with server-side {@link WebSocketHandler}s.
@@ -71,7 +70,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 				.then())
 				.block(TIMEOUT);
 
-		assertEquals(input.collectList().block(TIMEOUT), output.collectList().block(TIMEOUT));
+		assertThat(output.collectList().block(TIMEOUT)).isEqualTo(input.collectList().block(TIMEOUT));
 	}
 
 	@Test
@@ -99,9 +98,9 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 
 		HandshakeInfo info = infoRef.get();
 		assertThat(info.getHeaders().getFirst("Upgrade")).isEqualToIgnoringCase("websocket");
-		assertEquals(protocol, info.getHeaders().getFirst("Sec-WebSocket-Protocol"));
-		assertEquals("Wrong protocol accepted", protocol, info.getSubProtocol());
-		assertEquals("Wrong protocol detected on the server side", protocol, output.block(TIMEOUT));
+		assertThat(info.getHeaders().getFirst("Sec-WebSocket-Protocol")).isEqualTo(protocol);
+		assertThat(info.getSubProtocol()).as("Wrong protocol accepted").isEqualTo(protocol);
+		assertThat(output.block(TIMEOUT)).as("Wrong protocol detected on the server side").isEqualTo(protocol);
 	}
 
 	@Test
@@ -117,7 +116,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 						.then())
 				.block(TIMEOUT);
 
-		assertEquals("my-header:my-value", output.block(TIMEOUT));
+		assertThat(output.block(TIMEOUT)).isEqualTo("my-header:my-value");
 	}
 
 	@Test

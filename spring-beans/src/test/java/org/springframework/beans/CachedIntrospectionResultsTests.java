@@ -26,8 +26,6 @@ import org.springframework.core.OverridingClassLoader;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -39,30 +37,30 @@ public class CachedIntrospectionResultsTests {
 	@Test
 	public void acceptAndClearClassLoader() throws Exception {
 		BeanWrapper bw = new BeanWrapperImpl(TestBean.class);
-		assertTrue(bw.isWritableProperty("name"));
-		assertTrue(bw.isWritableProperty("age"));
-		assertTrue(CachedIntrospectionResults.strongClassCache.containsKey(TestBean.class));
+		assertThat(bw.isWritableProperty("name")).isTrue();
+		assertThat(bw.isWritableProperty("age")).isTrue();
+		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(TestBean.class)).isTrue();
 
 		ClassLoader child = new OverridingClassLoader(getClass().getClassLoader());
 		Class<?> tbClass = child.loadClass("org.springframework.tests.sample.beans.TestBean");
-		assertFalse(CachedIntrospectionResults.strongClassCache.containsKey(tbClass));
+		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(tbClass)).isFalse();
 		CachedIntrospectionResults.acceptClassLoader(child);
 		bw = new BeanWrapperImpl(tbClass);
-		assertTrue(bw.isWritableProperty("name"));
-		assertTrue(bw.isWritableProperty("age"));
-		assertTrue(CachedIntrospectionResults.strongClassCache.containsKey(tbClass));
+		assertThat(bw.isWritableProperty("name")).isTrue();
+		assertThat(bw.isWritableProperty("age")).isTrue();
+		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(tbClass)).isTrue();
 		CachedIntrospectionResults.clearClassLoader(child);
-		assertFalse(CachedIntrospectionResults.strongClassCache.containsKey(tbClass));
+		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(tbClass)).isFalse();
 
-		assertTrue(CachedIntrospectionResults.strongClassCache.containsKey(TestBean.class));
+		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(TestBean.class)).isTrue();
 	}
 
 	@Test
 	public void clearClassLoaderForSystemClassLoader() throws Exception {
 		BeanUtils.getPropertyDescriptors(ArrayList.class);
-		assertTrue(CachedIntrospectionResults.strongClassCache.containsKey(ArrayList.class));
+		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(ArrayList.class)).isTrue();
 		CachedIntrospectionResults.clearClassLoader(ArrayList.class.getClassLoader());
-		assertFalse(CachedIntrospectionResults.strongClassCache.containsKey(ArrayList.class));
+		assertThat(CachedIntrospectionResults.strongClassCache.containsKey(ArrayList.class)).isFalse();
 	}
 
 	@Test

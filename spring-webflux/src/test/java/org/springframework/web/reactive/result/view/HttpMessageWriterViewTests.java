@@ -38,8 +38,8 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link HttpMessageWriterView}.
@@ -56,10 +56,9 @@ public class HttpMessageWriterViewTests {
 
 	@Test
 	public void supportedMediaTypes() throws Exception {
-		assertEquals(Arrays.asList(
+		assertThat(this.view.getSupportedMediaTypes()).isEqualTo(Arrays.asList(
 				MediaType.APPLICATION_JSON,
-				MediaType.parseMediaType("application/*+json")),
-				this.view.getSupportedMediaTypes());
+				MediaType.parseMediaType("application/*+json")));
 	}
 
 	@Test
@@ -69,7 +68,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo2", Collections.singleton("bar2"));
 		this.model.addAttribute("foo3", Collections.singleton("bar3"));
 
-		assertEquals("[\"bar2\"]", doRender());
+		assertThat(doRender()).isEqualTo("[\"bar2\"]");
 	}
 
 	@Test
@@ -77,7 +76,7 @@ public class HttpMessageWriterViewTests {
 		this.view.setModelKeys(Collections.singleton("foo2"));
 		this.model.addAttribute("foo1", "bar1");
 
-		assertEquals("", doRender());
+		assertThat(doRender()).isEqualTo("");
 	}
 
 	@Test
@@ -86,7 +85,7 @@ public class HttpMessageWriterViewTests {
 		this.view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
 		this.model.addAttribute("foo1", "bar1");
 
-		assertEquals("", doRender());
+		assertThat(doRender()).isEqualTo("");
 	}
 
 	@Test
@@ -96,7 +95,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo2", Collections.singleton("bar2"));
 		this.model.addAttribute("foo3", Collections.singleton("bar3"));
 
-		assertEquals("{\"foo1\":[\"bar1\"],\"foo2\":[\"bar2\"]}", doRender());
+		assertThat(doRender()).isEqualTo("{\"foo1\":[\"bar1\"],\"foo2\":[\"bar2\"]}");
 	}
 
 	@Test
@@ -122,7 +121,7 @@ public class HttpMessageWriterViewTests {
 		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange).block(Duration.ZERO);
 
 		StepVerifier.create(this.exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}", dumpString(buf)))
+				.consumeNextWith(buf -> assertThat(dumpString(buf)).isEqualTo("{\"foo\":\"f\",\"bar\":\"b\"}"))
 				.expectComplete()
 				.verify();
 	}

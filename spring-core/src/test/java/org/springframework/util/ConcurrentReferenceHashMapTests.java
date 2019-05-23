@@ -41,7 +41,6 @@ import org.springframework.util.comparator.NullSafeComparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Tests for {@link ConcurrentReferenceHashMap}.
@@ -278,7 +277,7 @@ public class ConcurrentReferenceHashMapTests {
 		assertThat(this.map.remove(123, "456")).isFalse();
 		assertThat(this.map.get(123)).isEqualTo("123");
 		assertThat(this.map.remove(123, "123")).isTrue();
-		assertFalse(this.map.containsKey(123));
+		assertThat(this.map.containsKey(123)).isFalse();
 		assertThat(this.map.isEmpty()).isTrue();
 	}
 
@@ -288,7 +287,7 @@ public class ConcurrentReferenceHashMapTests {
 		assertThat(this.map.remove(123, "456")).isFalse();
 		assertThat(this.map.get(123)).isNull();
 		assertThat(this.map.remove(123, null)).isTrue();
-		assertFalse(this.map.containsKey(123));
+		assertThat(this.map.containsKey(123)).isFalse();
 		assertThat(this.map.isEmpty()).isTrue();
 	}
 

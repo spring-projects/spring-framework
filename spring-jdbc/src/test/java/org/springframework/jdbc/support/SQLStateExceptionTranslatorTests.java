@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.UncategorizedSQLException;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -46,8 +46,8 @@ public class SQLStateExceptionTranslatorTests {
 		}
 		catch (BadSqlGrammarException ex) {
 			// OK
-			assertTrue("SQL is correct", sql.equals(ex.getSql()));
-			assertTrue("Exception matches", sex.equals(ex.getSQLException()));
+			assertThat(sql.equals(ex.getSql())).as("SQL is correct").isTrue();
+			assertThat(sex.equals(ex.getSQLException())).as("Exception matches").isTrue();
 		}
 	}
 
@@ -59,8 +59,8 @@ public class SQLStateExceptionTranslatorTests {
 		}
 		catch (UncategorizedSQLException ex) {
 			// OK
-			assertTrue("SQL is correct", sql.equals(ex.getSql()));
-			assertTrue("Exception matches", sex.equals(ex.getSQLException()));
+			assertThat(sql.equals(ex.getSql())).as("SQL is correct").isTrue();
+			assertThat(sex.equals(ex.getSQLException())).as("Exception matches").isTrue();
 		}
 	}
 
@@ -89,8 +89,8 @@ public class SQLStateExceptionTranslatorTests {
 		}
 		catch (UncategorizedSQLException ex) {
 			// OK
-			assertTrue("SQL is correct", sql.equals(ex.getSql()));
-			assertTrue("Exception matches", sex.equals(ex.getSQLException()));
+			assertThat(sql.equals(ex.getSql())).as("SQL is correct").isTrue();
+			assertThat(sex.equals(ex.getSQLException())).as("Exception matches").isTrue();
 		}
 	}
 

@@ -23,9 +23,7 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -50,21 +48,21 @@ public class BeanNameGenerationTests {
 
 		String targetName = className + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR + "0";
 		GeneratedNameBean topLevel1 = (GeneratedNameBean) beanFactory.getBean(targetName);
-		assertNotNull(topLevel1);
+		assertThat(topLevel1).isNotNull();
 
 		targetName = className + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR + "1";
 		GeneratedNameBean topLevel2 = (GeneratedNameBean) beanFactory.getBean(targetName);
-		assertNotNull(topLevel2);
+		assertThat(topLevel2).isNotNull();
 
 		GeneratedNameBean child1 = topLevel1.getChild();
-		assertNotNull(child1.getBeanName());
-		assertTrue(child1.getBeanName().startsWith(className));
+		assertThat(child1.getBeanName()).isNotNull();
+		assertThat(child1.getBeanName().startsWith(className)).isTrue();
 
 		GeneratedNameBean child2 = topLevel2.getChild();
-		assertNotNull(child2.getBeanName());
-		assertTrue(child2.getBeanName().startsWith(className));
+		assertThat(child2.getBeanName()).isNotNull();
+		assertThat(child2.getBeanName().startsWith(className)).isTrue();
 
-		assertFalse(child1.getBeanName().equals(child2.getBeanName()));
+		assertThat(child1.getBeanName().equals(child2.getBeanName())).isFalse();
 	}
 
 }

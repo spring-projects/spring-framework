@@ -20,10 +20,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 
 /**
  * @author Rick Evans
@@ -42,14 +41,14 @@ public class ManagedMapTests {
 		child.put("three", "three");
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
-		assertEquals("merge() obviously did not work.", 3, mergedMap.size());
+		assertThat(mergedMap.size()).as("merge() obviously did not work.").isEqualTo(3);
 	}
 
 	@Test
 	public void mergeWithNullParent() {
 		ManagedMap child = new ManagedMap();
 		child.setMergeEnabled(true);
-		assertSame(child, child.merge(null));
+		assertThat(child.merge(null)).isSameAs(child);
 	}
 
 	@Test
@@ -74,7 +73,7 @@ public class ManagedMapTests {
 		ManagedMap child = new ManagedMap();
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
-		assertEquals("merge() obviously did not work.", 2, mergedMap.size());
+		assertThat(mergedMap.size()).as("merge() obviously did not work.").isEqualTo(2);
 	}
 
 	@Test
@@ -87,8 +86,8 @@ public class ManagedMapTests {
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
 		// child value for 'one' must override parent value...
-		assertEquals("merge() obviously did not work.", 2, mergedMap.size());
-		assertEquals("Parent value not being overridden during merge().", "fork", mergedMap.get("one"));
+		assertThat(mergedMap.size()).as("merge() obviously did not work.").isEqualTo(2);
+		assertThat(mergedMap.get("one")).as("Parent value not being overridden during merge().").isEqualTo("fork");
 	}
 
 }

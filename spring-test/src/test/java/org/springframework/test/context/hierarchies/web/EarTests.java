@@ -27,9 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -60,9 +58,10 @@ public class EarTests {
 
 	@Test
 	public void verifyEarConfig() {
-		assertFalse(context instanceof WebApplicationContext);
-		assertNull(context.getParent());
-		assertEquals("ear", ear);
+		boolean condition = context instanceof WebApplicationContext;
+		assertThat(condition).isFalse();
+		assertThat(context.getParent()).isNull();
+		assertThat(ear).isEqualTo("ear");
 	}
 
 }

@@ -27,8 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -52,13 +51,13 @@ public class StringHttpMessageConverterTests {
 
 	@Test
 	public void canRead() {
-		assertTrue(this.converter.canRead(String.class, MediaType.TEXT_PLAIN));
+		assertThat(this.converter.canRead(String.class, MediaType.TEXT_PLAIN)).isTrue();
 	}
 
 	@Test
 	public void canWrite() {
-		assertTrue(this.converter.canWrite(String.class, MediaType.TEXT_PLAIN));
-		assertTrue(this.converter.canWrite(String.class, MediaType.ALL));
+		assertThat(this.converter.canWrite(String.class, MediaType.TEXT_PLAIN)).isTrue();
+		assertThat(this.converter.canWrite(String.class, MediaType.ALL)).isTrue();
 	}
 
 	@Test
@@ -68,7 +67,7 @@ public class StringHttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(TEXT_PLAIN_UTF_8);
 		String result = this.converter.read(String.class, inputMessage);
 
-		assertEquals("Invalid result", body, result);
+		assertThat(result).as("Invalid result").isEqualTo(body);
 	}
 
 	@Test
@@ -77,10 +76,10 @@ public class StringHttpMessageConverterTests {
 		this.converter.write(body, null, this.outputMessage);
 
 		HttpHeaders headers = this.outputMessage.getHeaders();
-		assertEquals(body, this.outputMessage.getBodyAsString(StandardCharsets.ISO_8859_1));
-		assertEquals(new MediaType("text", "plain", StandardCharsets.ISO_8859_1), headers.getContentType());
-		assertEquals(body.getBytes(StandardCharsets.ISO_8859_1).length, headers.getContentLength());
-		assertTrue(headers.getAcceptCharset().isEmpty());
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.ISO_8859_1)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.ISO_8859_1).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -89,10 +88,10 @@ public class StringHttpMessageConverterTests {
 		this.converter.write(body, TEXT_PLAIN_UTF_8, this.outputMessage);
 
 		HttpHeaders headers = this.outputMessage.getHeaders();
-		assertEquals(body, this.outputMessage.getBodyAsString(StandardCharsets.UTF_8));
-		assertEquals(TEXT_PLAIN_UTF_8, headers.getContentType());
-		assertEquals(body.getBytes(StandardCharsets.UTF_8).length, headers.getContentLength());
-		assertTrue(headers.getAcceptCharset().isEmpty());
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(TEXT_PLAIN_UTF_8);
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.UTF_8).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 
 	@Test  // SPR-8867
@@ -104,10 +103,10 @@ public class StringHttpMessageConverterTests {
 		headers.setContentType(TEXT_PLAIN_UTF_8);
 		this.converter.write(body, requestedContentType, this.outputMessage);
 
-		assertEquals(body, this.outputMessage.getBodyAsString(StandardCharsets.UTF_8));
-		assertEquals(TEXT_PLAIN_UTF_8, headers.getContentType());
-		assertEquals(body.getBytes(StandardCharsets.UTF_8).length, headers.getContentLength());
-		assertTrue(headers.getAcceptCharset().isEmpty());
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(TEXT_PLAIN_UTF_8);
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.UTF_8).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 
 }

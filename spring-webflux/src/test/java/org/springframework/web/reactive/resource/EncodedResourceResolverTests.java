@@ -42,9 +42,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link EncodedResourceResolver}.
@@ -110,13 +108,14 @@ public class EncodedResourceResolverTests {
 		String file = "js/foo.js";
 		Resource actual = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource(file + ".gz").getDescription(), actual.getDescription());
-		assertEquals(getResource(file).getFilename(), actual.getFilename());
+		assertThat(actual.getDescription()).isEqualTo(getResource(file + ".gz").getDescription());
+		assertThat(actual.getFilename()).isEqualTo(getResource(file).getFilename());
 
-		assertTrue(actual instanceof HttpResource);
+		boolean condition = actual instanceof HttpResource;
+		assertThat(condition).isTrue();
 		HttpHeaders headers = ((HttpResource) actual).getResponseHeaders();
-		assertEquals("gzip", headers.getFirst(HttpHeaders.CONTENT_ENCODING));
-		assertEquals("Accept-Encoding", headers.getFirst(HttpHeaders.VARY));
+		assertThat(headers.getFirst(HttpHeaders.CONTENT_ENCODING)).isEqualTo("gzip");
+		assertThat(headers.getFirst(HttpHeaders.VARY)).isEqualTo("Accept-Encoding");
 	}
 
 	@Test
@@ -128,9 +127,10 @@ public class EncodedResourceResolverTests {
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
 		Resource actual = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource("foo.css.gz").getDescription(), actual.getDescription());
-		assertEquals(getResource("foo.css").getFilename(), actual.getFilename());
-		assertTrue(actual instanceof HttpResource);
+		assertThat(actual.getDescription()).isEqualTo(getResource("foo.css.gz").getDescription());
+		assertThat(actual.getFilename()).isEqualTo(getResource("foo.css").getFilename());
+		boolean condition = actual instanceof HttpResource;
+		assertThat(condition).isTrue();
 	}
 
 	@Test
@@ -144,18 +144,20 @@ public class EncodedResourceResolverTests {
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource(file + ".gz").getDescription(), resolved.getDescription());
-		assertEquals(getResource(file).getFilename(), resolved.getFilename());
-		assertTrue(resolved instanceof HttpResource);
+		assertThat(resolved.getDescription()).isEqualTo(getResource(file + ".gz").getDescription());
+		assertThat(resolved.getFilename()).isEqualTo(getResource(file).getFilename());
+		boolean condition = resolved instanceof HttpResource;
+		assertThat(condition).isTrue();
 
 		// 2. Resolve unencoded resource
 
 		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/js/foo.js"));
 		resolved = this.resolver.resolveResource(exchange, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource(file).getDescription(), resolved.getDescription());
-		assertEquals(getResource(file).getFilename(), resolved.getFilename());
-		assertFalse(resolved instanceof HttpResource);
+		assertThat(resolved.getDescription()).isEqualTo(getResource(file).getDescription());
+		assertThat(resolved.getFilename()).isEqualTo(getResource(file).getFilename());
+		boolean condition1 = resolved instanceof HttpResource;
+		assertThat(condition1).isFalse();
 	}
 
 	@Test  // SPR-13149
@@ -164,8 +166,8 @@ public class EncodedResourceResolverTests {
 		String file = "js/foo.js";
 		Resource resolved = this.resolver.resolveResource(null, file, this.locations).block(TIMEOUT);
 
-		assertEquals(getResource(file).getDescription(), resolved.getDescription());
-		assertEquals(getResource(file).getFilename(), resolved.getFilename());
+		assertThat(resolved.getDescription()).isEqualTo(getResource(file).getDescription());
+		assertThat(resolved.getFilename()).isEqualTo(getResource(file).getFilename());
 	}
 
 	private Resource getResource(String filePath) {

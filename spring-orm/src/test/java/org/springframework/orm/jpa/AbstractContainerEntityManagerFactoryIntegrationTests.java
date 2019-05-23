@@ -29,12 +29,9 @@ import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for LocalContainerEntityManagerFactoryBean.
@@ -48,16 +45,17 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
-		assertTrue("Must have introduced config interface", entityManagerFactory instanceof EntityManagerFactoryInfo);
+		boolean condition = entityManagerFactory instanceof EntityManagerFactoryInfo;
+		assertThat(condition).as("Must have introduced config interface").isTrue();
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
-		assertEquals("Person", emfi.getPersistenceUnitName());
-		assertNotNull("PersistenceUnitInfo must be available", emfi.getPersistenceUnitInfo());
-		assertNotNull("Raw EntityManagerFactory must be available", emfi.getNativeEntityManagerFactory());
+		assertThat(emfi.getPersistenceUnitName()).isEqualTo("Person");
+		assertThat(emfi.getPersistenceUnitInfo()).as("PersistenceUnitInfo must be available").isNotNull();
+		assertThat(emfi.getNativeEntityManagerFactory()).as("Raw EntityManagerFactory must be available").isNotNull();
 	}
 
 	@Test
 	public void testStateClean() {
-		assertEquals("Should be no people from previous transactions", 0, countRowsInTable("person"));
+		assertThat(countRowsInTable("person")).as("Should be no people from previous transactions").isEqualTo(0);
 	}
 
 	@Test
@@ -77,20 +75,19 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	public void testJdbcTx2() {
-		assertEquals("Any previous tx must have been rolled back", 0, countRowsInTable("person"));
+		assertThat(countRowsInTable("person")).as("Any previous tx must have been rolled back").isEqualTo(0);
 		executeSqlScript("/org/springframework/orm/jpa/insertPerson.sql");
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testEntityManagerProxyIsProxy() {
-		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
+		assertThat(Proxy.isProxyClass(sharedEntityManager.getClass())).isTrue();
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		q.getResultList();
 
-		assertTrue("Should be open to start with", sharedEntityManager.isOpen());
+		assertThat(sharedEntityManager.isOpen()).as("Should be open to start with").isTrue();
 		sharedEntityManager.close();
-		assertTrue("Close should have been silently ignored", sharedEntityManager.isOpen());
+		assertThat(sharedEntityManager.isOpen()).as("Close should have been silently ignored").isTrue();
 	}
 
 	@Test
@@ -127,10 +124,10 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 			startNewTransaction();
 			sharedEntityManager.clear();
 			Person newTony = entityManagerFactory.createEntityManager().getReference(Person.class, tony.getId());
-			assertNotSame(newTony, tony);
+			assertThat(tony).isNotSameAs(newTony);
 			endTransaction();
 
-			assertNotNull(newTony.getDriversLicense());
+			assertThat(newTony.getDriversLicense()).isNotNull();
 
 			newTony.getDriversLicense().getSerialNumber();
 		}
@@ -146,12 +143,12 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		String firstName = "Tony";
 		insertPerson(firstName);
 
-		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
+		assertThat(Proxy.isProxyClass(sharedEntityManager.getClass())).isTrue();
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 
-		assertEquals(1, people.size());
-		assertEquals(firstName, people.get(0).getFirstName());
+		assertThat(people.size()).isEqualTo(1);
+		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
 	}
 
 	protected void insertPerson(String firstName) {
@@ -171,14 +168,14 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	protected void testInstantiateAndSave(EntityManager em) {
-		assertEquals("Should be no people from previous transactions", 0, countRowsInTable("person"));
+		assertThat(countRowsInTable("person")).as("Should be no people from previous transactions").isEqualTo(0);
 		Person p = new Person();
 		p.setFirstName("Tony");
 		p.setLastName("Blair");
 		em.persist(p);
 
 		em.flush();
-		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
+		assertThat(countRowsInTable("person")).as("1 row must have been inserted").isEqualTo(1);
 	}
 
 	@Test
@@ -187,7 +184,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertEquals(0, people.size());
+		assertThat(people.size()).isEqualTo(0);
 		assertThatExceptionOfType(NoResultException.class).isThrownBy(
 				q::getSingleResult);
 	}
@@ -200,7 +197,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertEquals(0, people.size());
+		assertThat(people.size()).isEqualTo(0);
 		assertThatExceptionOfType(NoResultException.class).isThrownBy(
 				q::getSingleResult);
 	}
@@ -211,7 +208,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = this.sharedEntityManager.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
-		assertEquals(0, people.size());
+		assertThat(people.size()).isEqualTo(0);
 		assertThatExceptionOfType(NoResultException.class).isThrownBy(
 				q::getSingleResult);
 	}
@@ -225,7 +222,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = em.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
-		assertEquals(0, people.size());
+		assertThat(people.size()).isEqualTo(0);
 		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
 				q.getSingleResult())
 			.withMessageContaining("closed");
@@ -240,8 +237,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	public void testCanSerializeProxies() throws Exception {
-		assertNotNull(SerializationTestUtils.serializeAndDeserialize(entityManagerFactory));
-		assertNotNull(SerializationTestUtils.serializeAndDeserialize(sharedEntityManager));
+		assertThat(SerializationTestUtils.serializeAndDeserialize(entityManagerFactory)).isNotNull();
+		assertThat(SerializationTestUtils.serializeAndDeserialize(sharedEntityManager)).isNotNull();
 	}
 
 }

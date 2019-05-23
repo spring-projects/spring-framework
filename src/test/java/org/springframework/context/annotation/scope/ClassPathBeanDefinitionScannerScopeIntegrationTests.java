@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.context.annotation.ScopedProxyMode.DEFAULT;
 import static org.springframework.context.annotation.ScopedProxyMode.INTERFACES;
 import static org.springframework.context.annotation.ScopedProxyMode.NO;
@@ -83,18 +81,18 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("singleton");
 
 		// should not be a proxy
-		assertFalse(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributes);
 		// not a proxy so this should not have changed
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 
 		// singleton bean, so name should be modified even after lookup
 		ScopedTestBean bean2 = (ScopedTestBean) context.getBean("singleton");
-		assertEquals(MODIFIED_NAME, bean2.getName());
+		assertThat(bean2.getName()).isEqualTo(MODIFIED_NAME);
 	}
 
 	@Test
@@ -104,18 +102,18 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("singleton");
 
 		// should not be a proxy
-		assertFalse(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributes);
 		// not a proxy so this should not have changed
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 
 		// singleton bean, so name should be modified even after lookup
 		ScopedTestBean bean2 = (ScopedTestBean) context.getBean("singleton");
-		assertEquals(MODIFIED_NAME, bean2.getName());
+		assertThat(bean2.getName()).isEqualTo(MODIFIED_NAME);
 	}
 
 	@Test
@@ -125,18 +123,18 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("singleton");
 
 		// should not be a proxy
-		assertFalse(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributes);
 		// not a proxy so this should not have changed
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 
 		// singleton bean, so name should be modified even after lookup
 		ScopedTestBean bean2 = (ScopedTestBean) context.getBean("singleton");
-		assertEquals(MODIFIED_NAME, bean2.getName());
+		assertThat(bean2.getName()).isEqualTo(MODIFIED_NAME);
 	}
 
 	@Test
@@ -146,18 +144,18 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("request");
 
 		// should not be a proxy
-		assertFalse(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributes);
 		// not a proxy so this should not have changed
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 
 		// but a newly retrieved bean should have the default name
 		ScopedTestBean bean2 = (ScopedTestBean) context.getBean("request");
-		assertEquals(DEFAULT_NAME, bean2.getName());
+		assertThat(bean2.getName()).isEqualTo(DEFAULT_NAME);
 	}
 
 	@Test
@@ -167,18 +165,19 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("request");
 
 		// should be dynamic proxy, implementing both interfaces
-		assertTrue(AopUtils.isJdkDynamicProxy(bean));
-		assertTrue(bean instanceof AnotherScopeTestInterface);
+		assertThat(AopUtils.isJdkDynamicProxy(bean)).isTrue();
+		boolean condition = bean instanceof AnotherScopeTestInterface;
+		assertThat(condition).isTrue();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributes);
 		// this is a proxy so it should be reset to default
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 	}
 
 	@Test
@@ -188,18 +187,19 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("request");
 
 		// should be a class-based proxy
-		assertTrue(AopUtils.isCglibProxy(bean));
-		assertTrue(bean instanceof RequestScopedTestBean);
+		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		boolean condition = bean instanceof RequestScopedTestBean;
+		assertThat(condition).isTrue();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributes);
 		// this is a proxy so it should be reset to default
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 
 		RequestContextHolder.setRequestAttributes(oldRequestAttributes);
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 	}
 
 	@Test
@@ -209,18 +209,18 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		ScopedTestBean bean = (ScopedTestBean) context.getBean("session");
 
 		// should not be a proxy
-		assertFalse(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
 		// not a proxy so this should not have changed
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 
 		// but a newly retrieved bean should have the default name
 		ScopedTestBean bean2 = (ScopedTestBean) context.getBean("session");
-		assertEquals(DEFAULT_NAME, bean2.getName());
+		assertThat(bean2.getName()).isEqualTo(DEFAULT_NAME);
 	}
 
 	@Test
@@ -230,24 +230,25 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("session");
 
 		// should be dynamic proxy, implementing both interfaces
-		assertTrue(AopUtils.isJdkDynamicProxy(bean));
-		assertTrue(bean instanceof AnotherScopeTestInterface);
+		assertThat(AopUtils.isJdkDynamicProxy(bean)).isTrue();
+		boolean condition = bean instanceof AnotherScopeTestInterface;
+		assertThat(condition).isTrue();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
 		// this is a proxy so it should be reset to default
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		IScopedTestBean bean2 = (IScopedTestBean) context.getBean("session");
-		assertEquals(MODIFIED_NAME, bean2.getName());
+		assertThat(bean2.getName()).isEqualTo(MODIFIED_NAME);
 		bean2.setName(DEFAULT_NAME);
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 	}
 
 	@Test
@@ -257,25 +258,27 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		IScopedTestBean bean = (IScopedTestBean) context.getBean("session");
 
 		// should be a class-based proxy
-		assertTrue(AopUtils.isCglibProxy(bean));
-		assertTrue(bean instanceof ScopedTestBean);
-		assertTrue(bean instanceof SessionScopedTestBean);
+		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
+		boolean condition1 = bean instanceof ScopedTestBean;
+		assertThat(condition1).isTrue();
+		boolean condition = bean instanceof SessionScopedTestBean;
+		assertThat(condition).isTrue();
 
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
 		// this is a proxy so it should be reset to default
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 		bean.setName(MODIFIED_NAME);
 
 		IScopedTestBean bean2 = (IScopedTestBean) context.getBean("session");
-		assertEquals(MODIFIED_NAME, bean2.getName());
+		assertThat(bean2.getName()).isEqualTo(MODIFIED_NAME);
 		bean2.setName(DEFAULT_NAME);
-		assertEquals(DEFAULT_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(DEFAULT_NAME);
 
 		RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
-		assertEquals(MODIFIED_NAME, bean.getName());
+		assertThat(bean.getName()).isEqualTo(MODIFIED_NAME);
 	}
 
 

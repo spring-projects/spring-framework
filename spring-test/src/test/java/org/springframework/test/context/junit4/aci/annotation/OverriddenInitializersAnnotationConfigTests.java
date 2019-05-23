@@ -22,8 +22,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.aci.DevProfileInitializer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for {@link ApplicationContextInitializer
@@ -39,8 +38,8 @@ public class OverriddenInitializersAnnotationConfigTests extends SingleInitializ
 	@Test
 	@Override
 	public void activeBeans() {
-		assertEquals("foo", foo);
-		assertNull(bar);
-		assertEquals("dev profile config", baz);
+		assertThat(foo).isEqualTo("foo");
+		assertThat(bar).isNull();
+		assertThat(baz).isEqualTo("dev profile config");
 	}
 }

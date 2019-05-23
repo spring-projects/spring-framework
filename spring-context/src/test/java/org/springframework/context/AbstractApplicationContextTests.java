@@ -30,9 +30,8 @@ import org.springframework.beans.factory.xml.AbstractListableBeanFactoryTests;
 import org.springframework.tests.sample.beans.LifecycleBean;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson
@@ -76,69 +75,71 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	@Test
 	public void contextAwareSingletonWasCalledBack() throws Exception {
 		ACATester aca = (ACATester) applicationContext.getBean("aca");
-		assertTrue("has had context set", aca.getApplicationContext() == applicationContext);
+		assertThat(aca.getApplicationContext() == applicationContext).as("has had context set").isTrue();
 		Object aca2 = applicationContext.getBean("aca");
-		assertTrue("Same instance", aca == aca2);
-		assertTrue("Says is singleton", applicationContext.isSingleton("aca"));
+		assertThat(aca == aca2).as("Same instance").isTrue();
+		assertThat(applicationContext.isSingleton("aca")).as("Says is singleton").isTrue();
 	}
 
 	@Test
 	public void contextAwarePrototypeWasCalledBack() throws Exception {
 		ACATester aca = (ACATester) applicationContext.getBean("aca-prototype");
-		assertTrue("has had context set", aca.getApplicationContext() == applicationContext);
+		assertThat(aca.getApplicationContext() == applicationContext).as("has had context set").isTrue();
 		Object aca2 = applicationContext.getBean("aca-prototype");
-		assertTrue("NOT Same instance", aca != aca2);
-		assertTrue("Says is prototype", !applicationContext.isSingleton("aca-prototype"));
+		assertThat(aca != aca2).as("NOT Same instance").isTrue();
+		boolean condition = !applicationContext.isSingleton("aca-prototype");
+		assertThat(condition).as("Says is prototype").isTrue();
 	}
 
 	@Test
 	public void parentNonNull() {
-		assertTrue("parent isn't null", applicationContext.getParent() != null);
+		assertThat(applicationContext.getParent() != null).as("parent isn't null").isTrue();
 	}
 
 	@Test
 	public void grandparentNull() {
-		assertTrue("grandparent is null", applicationContext.getParent().getParent() == null);
+		assertThat(applicationContext.getParent().getParent() == null).as("grandparent is null").isTrue();
 	}
 
 	@Test
 	public void overrideWorked() throws Exception {
 		TestBean rod = (TestBean) applicationContext.getParent().getBean("rod");
-		assertTrue("Parent's name differs", rod.getName().equals("Roderick"));
+		assertThat(rod.getName().equals("Roderick")).as("Parent's name differs").isTrue();
 	}
 
 	@Test
 	public void grandparentDefinitionFound() throws Exception {
 		TestBean dad = (TestBean) applicationContext.getBean("father");
-		assertTrue("Dad has correct name", dad.getName().equals("Albert"));
+		assertThat(dad.getName().equals("Albert")).as("Dad has correct name").isTrue();
 	}
 
 	@Test
 	public void grandparentTypedDefinitionFound() throws Exception {
 		TestBean dad = applicationContext.getBean("father", TestBean.class);
-		assertTrue("Dad has correct name", dad.getName().equals("Albert"));
+		assertThat(dad.getName().equals("Albert")).as("Dad has correct name").isTrue();
 	}
 
 	@Test
 	public void closeTriggersDestroy() {
 		LifecycleBean lb = (LifecycleBean) applicationContext.getBean("lifecycle");
-		assertTrue("Not destroyed", !lb.isDestroyed());
+		boolean condition = !lb.isDestroyed();
+		assertThat(condition).as("Not destroyed").isTrue();
 		applicationContext.close();
 		if (applicationContext.getParent() != null) {
 			((ConfigurableApplicationContext) applicationContext.getParent()).close();
 		}
-		assertTrue("Destroyed", lb.isDestroyed());
+		assertThat(lb.isDestroyed()).as("Destroyed").isTrue();
 		applicationContext.close();
 		if (applicationContext.getParent() != null) {
 			((ConfigurableApplicationContext) applicationContext.getParent()).close();
 		}
-		assertTrue("Destroyed", lb.isDestroyed());
+		assertThat(lb.isDestroyed()).as("Destroyed").isTrue();
 	}
 
 	@Test
 	public void messageSource() throws NoSuchMessageException {
-		assertEquals("message1", applicationContext.getMessage("code1", null, Locale.getDefault()));
-		assertEquals("message2", applicationContext.getMessage("code2", null, Locale.getDefault()));
+		assertThat(applicationContext.getMessage("code1", null, Locale.getDefault())).isEqualTo("message1");
+		assertThat(applicationContext.getMessage("code2", null, Locale.getDefault())).isEqualTo("message2");
 		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
 				applicationContext.getMessage("code0", null, Locale.getDefault()));
 	}
@@ -165,11 +166,11 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 			MyEvent event) {
 		listener.zeroCounter();
 		parentListener.zeroCounter();
-		assertTrue("0 events before publication", listener.getEventCount() == 0);
-		assertTrue("0 parent events before publication", parentListener.getEventCount() == 0);
+		assertThat(listener.getEventCount() == 0).as("0 events before publication").isTrue();
+		assertThat(parentListener.getEventCount() == 0).as("0 parent events before publication").isTrue();
 		this.applicationContext.publishEvent(event);
-		assertTrue("1 events after publication, not " + listener.getEventCount(), listener.getEventCount() == 1);
-		assertTrue("1 parent events after publication", parentListener.getEventCount() == 1);
+		assertThat(listener.getEventCount() == 1).as("1 events after publication, not " + listener.getEventCount()).isTrue();
+		assertThat(parentListener.getEventCount() == 1).as("1 parent events after publication").isTrue();
 	}
 
 	@Test
@@ -178,9 +179,9 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 		//assertTrue("listeners include beanThatListens", Arrays.asList(listenerNames).contains("beanThatListens"));
 		BeanThatListens b = (BeanThatListens) applicationContext.getBean("beanThatListens");
 		b.zero();
-		assertTrue("0 events before publication", b.getEventCount() == 0);
+		assertThat(b.getEventCount() == 0).as("0 events before publication").isTrue();
 		this.applicationContext.publishEvent(new MyEvent(this));
-		assertTrue("1 events after publication, not " + b.getEventCount(), b.getEventCount() == 1);
+		assertThat(b.getEventCount() == 1).as("1 events after publication, not " + b.getEventCount()).isTrue();
 	}
 
 

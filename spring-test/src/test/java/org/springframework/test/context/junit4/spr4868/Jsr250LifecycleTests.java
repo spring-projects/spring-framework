@@ -34,7 +34,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that investigate the applicability of JSR-250 lifecycle
@@ -107,13 +107,13 @@ public class Jsr250LifecycleTests {
 	@Test
 	public void test1() {
 		logger.info("test1()");
-		assertNotNull(lifecycleBean);
+		assertThat(lifecycleBean).isNotNull();
 	}
 
 	@Test
 	public void test2() {
 		logger.info("test2()");
-		assertNotNull(lifecycleBean);
+		assertThat(lifecycleBean).isNotNull();
 	}
 
 }

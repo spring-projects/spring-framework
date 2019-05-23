@@ -18,10 +18,7 @@ package org.springframework.beans.propertyeditors;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rick Evans
@@ -34,13 +31,14 @@ public class StringArrayPropertyEditorTests {
 		StringArrayPropertyEditor editor = new StringArrayPropertyEditor();
 		editor.setAsText("0,1,2");
 		Object value = editor.getValue();
-		assertNotNull(value);
-		assertTrue(value instanceof String[]);
+		assertThat(value).isNotNull();
+		boolean condition = value instanceof String[];
+		assertThat(condition).isTrue();
 		String[] array = (String[]) value;
 		for (int i = 0; i < array.length; ++i) {
-			assertEquals("" + i, array[i]);
+			assertThat(array[i]).isEqualTo(("" + i));
 		}
-		assertEquals("0,1,2", editor.getAsText());
+		assertThat(editor.getAsText()).isEqualTo("0,1,2");
 	}
 
 	@Test
@@ -50,9 +48,9 @@ public class StringArrayPropertyEditorTests {
 		Object value = editor.getValue();
 		String[] array = (String[]) value;
 		for (int i = 0; i < array.length; ++i) {
-			assertEquals("" + i, array[i]);
+			assertThat(array[i]).isEqualTo(("" + i));
 		}
-		assertEquals("0,1,2", editor.getAsText());
+		assertThat(editor.getAsText()).isEqualTo("0,1,2");
 	}
 
 	@Test
@@ -62,10 +60,10 @@ public class StringArrayPropertyEditorTests {
 		Object value = editor.getValue();
 		String[] array = (String[]) value;
 		for (int i = 0; i < array.length; ++i) {
-			assertEquals(3, array[i].length());
-			assertEquals("" + i, array[i].trim());
+			assertThat(array[i].length()).isEqualTo(3);
+			assertThat(array[i].trim()).isEqualTo(("" + i));
 		}
-		assertEquals("  0,1  , 2 ", editor.getAsText());
+		assertThat(editor.getAsText()).isEqualTo("  0,1  , 2 ");
 	}
 
 	@Test
@@ -73,12 +71,13 @@ public class StringArrayPropertyEditorTests {
 		StringArrayPropertyEditor editor = new StringArrayPropertyEditor(":");
 		editor.setAsText("0:1:2");
 		Object value = editor.getValue();
-		assertTrue(value instanceof String[]);
+		boolean condition = value instanceof String[];
+		assertThat(condition).isTrue();
 		String[] array = (String[]) value;
 		for (int i = 0; i < array.length; ++i) {
-			assertEquals("" + i, array[i]);
+			assertThat(array[i]).isEqualTo(("" + i));
 		}
-		assertEquals("0:1:2", editor.getAsText());
+		assertThat(editor.getAsText()).isEqualTo("0:1:2");
 	}
 
 	@Test
@@ -86,12 +85,13 @@ public class StringArrayPropertyEditorTests {
 		StringArrayPropertyEditor editor = new StringArrayPropertyEditor(",", "\r\n", false);
 		editor.setAsText("0\r,1,\n2");
 		Object value = editor.getValue();
-		assertTrue(value instanceof String[]);
+		boolean condition = value instanceof String[];
+		assertThat(condition).isTrue();
 		String[] array = (String[]) value;
 		for (int i = 0; i < array.length; ++i) {
-			assertEquals("" + i, array[i]);
+			assertThat(array[i]).isEqualTo(("" + i));
 		}
-		assertEquals("0,1,2", editor.getAsText());
+		assertThat(editor.getAsText()).isEqualTo("0,1,2");
 	}
 
 	@Test
@@ -99,15 +99,16 @@ public class StringArrayPropertyEditorTests {
 		StringArrayPropertyEditor editor = new StringArrayPropertyEditor();
 		editor.setAsText("");
 		Object value = editor.getValue();
-		assertTrue(value instanceof String[]);
-		assertEquals(0, ((String[]) value).length);
+		boolean condition = value instanceof String[];
+		assertThat(condition).isTrue();
+		assertThat(((String[]) value).length).isEqualTo(0);
 	}
 
 	@Test
 	public void withEmptyArrayAsNull() throws Exception {
 		StringArrayPropertyEditor editor = new StringArrayPropertyEditor(",", true);
 		editor.setAsText("");
-		assertNull(editor.getValue());
+		assertThat(editor.getValue()).isNull();
 	}
 
 }

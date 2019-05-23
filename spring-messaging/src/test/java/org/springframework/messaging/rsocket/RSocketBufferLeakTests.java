@@ -61,7 +61,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for scenarios that could lead to Payload and/or DataBuffer leaks.
@@ -348,7 +348,7 @@ public class RSocketBufferLeakTests {
 			while (true) {
 				try {
 					int count = info.getReferenceCount();
-					assertTrue("Leaked payload (refCnt=" + count + "): " + info, count == 0);
+					assertThat(count == 0).as("Leaked payload (refCnt=" + count + "): " + info).isTrue();
 					break;
 				}
 				catch (AssertionError ex) {

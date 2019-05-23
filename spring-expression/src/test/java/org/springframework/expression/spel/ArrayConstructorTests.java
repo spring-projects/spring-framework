@@ -21,9 +21,7 @@ import org.junit.Test;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test construction of arrays.
@@ -121,8 +119,8 @@ public class ArrayConstructorTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression e = parser.parseExpression(expression);
 		Object o = e.getValue();
-		assertNotNull(o);
-		assertTrue(o.getClass().isArray());
+		assertThat(o).isNotNull();
+		assertThat(o.getClass().isArray()).isTrue();
 		StringBuilder s = new StringBuilder();
 		s.append('[');
 		if (o instanceof int[]) {
@@ -201,7 +199,7 @@ public class ArrayConstructorTests extends AbstractExpressionTests {
 			throw new IllegalStateException("Not supported " + o.getClass());
 		}
 		s.append(']');
-		assertEquals(expectedToString, s.toString());
+		assertThat(s.toString()).isEqualTo(expectedToString);
 		return s.toString();
 	}
 

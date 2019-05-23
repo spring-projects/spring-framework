@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
@@ -42,11 +42,11 @@ public class Spr12526Tests {
 
 		condition.setCondition(true);
 		FirstService firstService = (FirstService) ctx.getBean(Service.class);
-		assertNotNull("FirstService.dependency is null", firstService.getDependency());
+		assertThat(firstService.getDependency()).as("FirstService.dependency is null").isNotNull();
 
 		condition.setCondition(false);
 		SecondService secondService = (SecondService) ctx.getBean(Service.class);
-		assertNotNull("SecondService.dependency is null", secondService.getDependency());
+		assertThat(secondService.getDependency()).as("SecondService.dependency is null").isNotNull();
 	}
 
 

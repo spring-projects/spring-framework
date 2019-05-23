@@ -25,9 +25,6 @@ import org.springframework.util.ConcurrencyThrottleSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rick Evans
@@ -40,7 +37,7 @@ public class SimpleAsyncTaskExecutorTests {
 	public void cannotExecuteWhenConcurrencyIsSwitchedOff() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
 		executor.setConcurrencyLimit(ConcurrencyThrottleSupport.NO_CONCURRENCY);
-		assertTrue(executor.isThrottleActive());
+		assertThat(executor.isThrottleActive()).isTrue();
 		assertThatIllegalStateException().isThrownBy(() ->
 				executor.execute(new NoOpRunnable()));
 	}
@@ -48,7 +45,7 @@ public class SimpleAsyncTaskExecutorTests {
 	@Test
 	public void throttleIsNotActiveByDefault() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
-		assertFalse("Concurrency throttle must not default to being active (on)", executor.isThrottleActive());
+		assertThat(executor.isThrottleActive()).as("Concurrency throttle must not default to being active (on)").isFalse();
 	}
 
 	@Test
@@ -72,7 +69,7 @@ public class SimpleAsyncTaskExecutorTests {
 		});
 		ThreadNameHarvester task = new ThreadNameHarvester(monitor);
 		executeAndWait(executor, task, monitor);
-		assertEquals("test", task.getThreadName());
+		assertThat(task.getThreadName()).isEqualTo("test");
 	}
 
 	@Test

@@ -29,8 +29,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
@@ -87,7 +87,7 @@ public class InitializeDatabaseIntegrationTests {
 		DataSource dataSource = context.getBean("dataSource", DataSource.class);
 		assertCorrectSetup(dataSource);
 		JdbcTemplate t = new JdbcTemplate(dataSource);
-		assertEquals("Dave", t.queryForObject("select name from T_TEST", String.class));
+		assertThat(t.queryForObject("select name from T_TEST", String.class)).isEqualTo("Dave");
 	}
 
 	@Test
@@ -109,12 +109,12 @@ public class InitializeDatabaseIntegrationTests {
 		context = new ClassPathXmlApplicationContext("org/springframework/jdbc/config/jdbc-initialize-cache-config.xml");
 		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
 		CacheData cache = context.getBean(CacheData.class);
-		assertEquals(1, cache.getCachedData().size());
+		assertThat(cache.getCachedData().size()).isEqualTo(1);
 	}
 
 	private void assertCorrectSetup(DataSource dataSource) {
 		JdbcTemplate jt = new JdbcTemplate(dataSource);
-		assertEquals(1, jt.queryForObject("select count(*) from T_TEST", Integer.class).intValue());
+		assertThat(jt.queryForObject("select count(*) from T_TEST", Integer.class).intValue()).isEqualTo(1);
 	}
 
 

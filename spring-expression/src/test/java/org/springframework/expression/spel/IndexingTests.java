@@ -37,8 +37,7 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("rawtypes")
 public class IndexingTests {
@@ -50,11 +49,11 @@ public class IndexingTests {
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.HashMap<?, ?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
-		assertEquals(property, expression.getValue(this, Map.class));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.HashMap<?, ?>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
+		assertThat(expression.getValue(this, Map.class)).isEqualTo(property);
 		expression = parser.parseExpression("property['foo']");
-		assertEquals("bar", expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo("bar");
 	}
 
 	@FieldAnnotation
@@ -71,11 +70,11 @@ public class IndexingTests {
 		context.addPropertyAccessor(new MapAccessor());
 		context.setRootObject(property);
 		Expression expression = parser.parseExpression("property");
-		assertEquals("java.util.HashMap<?, ?>", expression.getValueTypeDescriptor(context).toString());
-		assertEquals(map, expression.getValue(context));
-		assertEquals(map, expression.getValue(context, Map.class));
+		assertThat(expression.getValueTypeDescriptor(context).toString()).isEqualTo("java.util.HashMap<?, ?>");
+		assertThat(expression.getValue(context)).isEqualTo(map);
+		assertThat(expression.getValue(context, Map.class)).isEqualTo(map);
 		expression = parser.parseExpression("property['foo']");
-		assertEquals("bar", expression.getValue(context));
+		assertThat(expression.getValue(context)).isEqualTo("bar");
 	}
 
 	public static class MapAccessor implements PropertyAccessor {
@@ -116,12 +115,12 @@ public class IndexingTests {
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.HashMap<?, ?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.HashMap<?, ?>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property['foo']");
-		assertEquals("bar", expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo("bar");
 		expression.setValue(this, "baz");
-		assertEquals("baz", expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo("baz");
 	}
 
 	@Test
@@ -131,12 +130,12 @@ public class IndexingTests {
 		this.parameterizedMap = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("parameterizedMap");
-		assertEquals("java.util.HashMap<java.lang.Integer, java.lang.Integer>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.HashMap<java.lang.Integer, java.lang.Integer>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("parameterizedMap['9']");
-		assertEquals(3, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(3);
 		expression.setValue(this, "37");
-		assertEquals(37, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(37);
 	}
 
 	public Map<Integer, Integer> parameterizedMap;
@@ -145,12 +144,12 @@ public class IndexingTests {
 	public void setPropertyContainingMapAutoGrow() {
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, false));
 		Expression expression = parser.parseExpression("parameterizedMap");
-		assertEquals("java.util.Map<java.lang.Integer, java.lang.Integer>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.Map<java.lang.Integer, java.lang.Integer>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("parameterizedMap['9']");
-		assertEquals(null, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(null);
 		expression.setValue(this, "37");
-		assertEquals(37, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(37);
 	}
 
 	@Test
@@ -160,10 +159,10 @@ public class IndexingTests {
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
-		assertEquals("bar", expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo("bar");
 	}
 
 	@Test
@@ -173,12 +172,12 @@ public class IndexingTests {
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
-		assertEquals(3, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(3);
 		expression.setValue(this, "4");
-		assertEquals("4", expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo("4");
 	}
 
 	@Test
@@ -187,14 +186,14 @@ public class IndexingTests {
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression expression = parser.parseExpression("property");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
 		try {
 			expression.setValue(this, "4");
 		}
 		catch (EvaluationException ex) {
-			assertTrue(ex.getMessage().startsWith("EL1053E"));
+			assertThat(ex.getMessage().startsWith("EL1053E")).isTrue();
 		}
 	}
 
@@ -205,10 +204,10 @@ public class IndexingTests {
 		this.parameterizedList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("parameterizedList");
-		assertEquals("java.util.ArrayList<java.lang.Integer>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.ArrayList<java.lang.Integer>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("parameterizedList[0]");
-		assertEquals(3, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(3);
 	}
 
 	public List<Integer> parameterizedList;
@@ -220,10 +219,10 @@ public class IndexingTests {
 		this.parameterizedListOfList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("parameterizedListOfList[0]");
-		assertEquals("java.util.Arrays$ArrayList<java.lang.Integer>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property.get(0), expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.Arrays$ArrayList<java.lang.Integer>");
+		assertThat(expression.getValue(this)).isEqualTo(property.get(0));
 		expression = parser.parseExpression("parameterizedListOfList[0][0]");
-		assertEquals(3, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(3);
 	}
 
 	public List<List<Integer>> parameterizedListOfList;
@@ -235,12 +234,12 @@ public class IndexingTests {
 		this.parameterizedList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("parameterizedList");
-		assertEquals("java.util.ArrayList<java.lang.Integer>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.ArrayList<java.lang.Integer>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("parameterizedList[0]");
-		assertEquals(3, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(3);
 		expression.setValue(this, "4");
-		assertEquals(4, expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo(4);
 	}
 
 	@Test
@@ -248,14 +247,14 @@ public class IndexingTests {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.lang.Object", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.lang.Object");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
 		try {
-			assertEquals("bar", expression.getValue(this));
+			assertThat(expression.getValue(this)).isEqualTo("bar");
 		}
 		catch (EvaluationException ex) {
-			assertTrue(ex.getMessage().startsWith("EL1027E"));
+			assertThat(ex.getMessage().startsWith("EL1027E")).isTrue();
 		}
 	}
 
@@ -266,14 +265,14 @@ public class IndexingTests {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
 		try {
-			assertEquals("bar", expression.getValue(this));
+			assertThat(expression.getValue(this)).isEqualTo("bar");
 		}
 		catch (EvaluationException ex) {
-			assertTrue(ex.getMessage().startsWith("EL1053E"));
+			assertThat(ex.getMessage().startsWith("EL1053E")).isTrue();
 		}
 	}
 
@@ -284,14 +283,14 @@ public class IndexingTests {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
 		Expression expression = parser.parseExpression("property2");
-		assertEquals("java.util.ArrayList<?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property2, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.ArrayList<?>");
+		assertThat(expression.getValue(this)).isEqualTo(property2);
 		expression = parser.parseExpression("property2[0]");
 		try {
-			assertEquals("bar", expression.getValue(this));
+			assertThat(expression.getValue(this)).isEqualTo("bar");
 		}
 		catch (EvaluationException ex) {
-			assertTrue(ex.getMessage().startsWith("EL1053E"));
+			assertThat(ex.getMessage().startsWith("EL1053E")).isTrue();
 		}
 	}
 
@@ -303,10 +302,10 @@ public class IndexingTests {
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("property");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.lang.String[]", expression.getValueTypeDescriptor(this).toString());
-		assertEquals(property, expression.getValue(this));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.lang.String[]");
+		assertThat(expression.getValue(this)).isEqualTo(property);
 		expression = parser.parseExpression("property[0]");
-		assertEquals("bar", expression.getValue(this));
+		assertThat(expression.getValue(this)).isEqualTo("bar");
 	}
 
 	@Test
@@ -314,8 +313,8 @@ public class IndexingTests {
 		listOfScalarNotGeneric = new ArrayList();
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric");
-		assertEquals("java.util.ArrayList<?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals("", expression.getValue(this, String.class));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.ArrayList<?>");
+		assertThat(expression.getValue(this, String.class)).isEqualTo("");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -326,15 +325,15 @@ public class IndexingTests {
 		listNotGeneric.add(6);
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listNotGeneric");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>", expression.getValueTypeDescriptor(this).toString());
-		assertEquals("5,6", expression.getValue(this, String.class));
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.ArrayList<?>");
+		assertThat(expression.getValue(this, String.class)).isEqualTo("5,6");
 	}
 
 	@Test
 	public void resolveCollectionElementTypeNull() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listNotGeneric");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.List<?>", expression.getValueTypeDescriptor(this).toString());
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.List<?>");
 	}
 
 	@FieldAnnotation
@@ -354,7 +353,7 @@ public class IndexingTests {
 		mapNotGeneric.put("bonusAmount", 7.17);
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("mapNotGeneric");
-		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.HashMap<?, ?>", expression.getValueTypeDescriptor(this).toString());
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.HashMap<?, ?>");
 	}
 
 	@FieldAnnotation
@@ -367,7 +366,7 @@ public class IndexingTests {
 		listOfScalarNotGeneric.add("5");
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric[0]");
-		assertEquals(new Integer(5), expression.getValue(this, Integer.class));
+		assertThat(expression.getValue(this, Integer.class)).isEqualTo(new Integer(5));
 	}
 
 	public List listOfScalarNotGeneric;
@@ -382,7 +381,7 @@ public class IndexingTests {
 		listOfMapsNotGeneric.add(map);
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfMapsNotGeneric[0]['fruit']");
-		assertEquals("apple", expression.getValue(this, String.class));
+		assertThat(expression.getValue(this, String.class)).isEqualTo("apple");
 	}
 
 	public List listOfMapsNotGeneric;

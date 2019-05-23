@@ -35,10 +35,8 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 
 import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.util.ClassUtils.convertClassNameToResourcePath;
 
 /**
@@ -73,7 +71,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByValueTestBean testBean = (QualifiedByValueTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("Larry", person.getName());
+		assertThat(person.getName()).isEqualTo("Larry");
 	}
 
 	@Test
@@ -98,7 +96,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByParentValueTestBean testBean = (QualifiedByParentValueTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("ParentLarry", person.getName());
+		assertThat(person.getName()).isEqualTo("ParentLarry");
 	}
 
 	@Test
@@ -110,8 +108,8 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByBeanNameTestBean testBean = (QualifiedByBeanNameTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarryBean", person.getName());
-		assertTrue(testBean.myProps != null && testBean.myProps.isEmpty());
+		assertThat(person.getName()).isEqualTo("LarryBean");
+		assertThat(testBean.myProps != null && testBean.myProps.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -123,7 +121,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByFieldNameTestBean testBean = (QualifiedByFieldNameTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarryBean", person.getName());
+		assertThat(person.getName()).isEqualTo("LarryBean");
 	}
 
 	@Test
@@ -135,7 +133,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByParameterNameTestBean testBean = (QualifiedByParameterNameTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarryBean", person.getName());
+		assertThat(person.getName()).isEqualTo("LarryBean");
 	}
 
 	@Test
@@ -147,7 +145,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByAliasTestBean testBean = (QualifiedByAliasTestBean) context.getBean("testBean");
 		Person person = testBean.getStooge();
-		assertEquals("LarryBean", person.getName());
+		assertThat(person.getName()).isEqualTo("LarryBean");
 	}
 
 	@Test
@@ -159,7 +157,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByAnnotationTestBean testBean = (QualifiedByAnnotationTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarrySpecial", person.getName());
+		assertThat(person.getName()).isEqualTo("LarrySpecial");
 	}
 
 	@Test
@@ -171,7 +169,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByCustomValueTestBean testBean = (QualifiedByCustomValueTestBean) context.getBean("testBean");
 		Person person = testBean.getCurly();
-		assertEquals("Curly", person.getName());
+		assertThat(person.getName()).isEqualTo("Curly");
 	}
 
 	@Test
@@ -183,7 +181,7 @@ public class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByAnnotationValueTestBean testBean = (QualifiedByAnnotationValueTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("LarrySpecial", person.getName());
+		assertThat(person.getName()).isEqualTo("LarrySpecial");
 	}
 
 	@Test
@@ -210,8 +208,8 @@ public class QualifierAnnotationTests {
 
 		MultiQualifierClient testBean = (MultiQualifierClient) context.getBean("testBean");
 
-		assertNotNull( testBean.factoryTheta);
-		assertNotNull( testBean.implTheta);
+		assertThat(testBean.factoryTheta).isNotNull();
+		assertThat(testBean.implTheta).isNotNull();
 	}
 
 	@Test

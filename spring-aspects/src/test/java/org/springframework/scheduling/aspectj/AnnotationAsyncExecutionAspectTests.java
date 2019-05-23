@@ -39,8 +39,6 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Unit tests for {@link AnnotationAsyncExecutionAspect}.
@@ -71,9 +69,9 @@ public class AnnotationAsyncExecutionAspectTests {
 		ClassWithoutAsyncAnnotation obj = new ClassWithoutAsyncAnnotation();
 		obj.incrementAsync();
 		executor.waitForCompletion();
-		assertEquals(1, obj.counter);
-		assertEquals(1, executor.submitStartCounter);
-		assertEquals(1, executor.submitCompleteCounter);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(1);
+		assertThat(executor.submitCompleteCounter).isEqualTo(1);
 	}
 
 	@Test
@@ -81,19 +79,19 @@ public class AnnotationAsyncExecutionAspectTests {
 		ClassWithoutAsyncAnnotation obj = new ClassWithoutAsyncAnnotation();
 		Future<Integer> future = obj.incrementReturningAFuture();
 		// No need to executor.waitForCompletion() as future.get() will have the same effect
-		assertEquals(5, future.get().intValue());
-		assertEquals(1, obj.counter);
-		assertEquals(1, executor.submitStartCounter);
-		assertEquals(1, executor.submitCompleteCounter);
+		assertThat(future.get().intValue()).isEqualTo(5);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(1);
+		assertThat(executor.submitCompleteCounter).isEqualTo(1);
 	}
 
 	@Test
 	public void syncMethodGetsRoutedSynchronously() {
 		ClassWithoutAsyncAnnotation obj = new ClassWithoutAsyncAnnotation();
 		obj.increment();
-		assertEquals(1, obj.counter);
-		assertEquals(0, executor.submitStartCounter);
-		assertEquals(0, executor.submitCompleteCounter);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(0);
+		assertThat(executor.submitCompleteCounter).isEqualTo(0);
 	}
 
 	@Test
@@ -103,19 +101,19 @@ public class AnnotationAsyncExecutionAspectTests {
 		ClassWithAsyncAnnotation obj = new ClassWithAsyncAnnotation();
 		obj.increment();
 		executor.waitForCompletion();
-		assertEquals(1, obj.counter);
-		assertEquals(1, executor.submitStartCounter);
-		assertEquals(1, executor.submitCompleteCounter);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(1);
+		assertThat(executor.submitCompleteCounter).isEqualTo(1);
 	}
 
 	@Test
 	public void methodReturningFutureInAsyncClassGetsRoutedAsynchronouslyAndReturnsAFuture() throws InterruptedException, ExecutionException {
 		ClassWithAsyncAnnotation obj = new ClassWithAsyncAnnotation();
 		Future<Integer> future = obj.incrementReturningAFuture();
-		assertEquals(5, future.get().intValue());
-		assertEquals(1, obj.counter);
-		assertEquals(1, executor.submitStartCounter);
-		assertEquals(1, executor.submitCompleteCounter);
+		assertThat(future.get().intValue()).isEqualTo(5);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(1);
+		assertThat(executor.submitCompleteCounter).isEqualTo(1);
 	}
 
 	/*
@@ -154,7 +152,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		TestableAsyncUncaughtExceptionHandler exceptionHandler = new TestableAsyncUncaughtExceptionHandler();
 		AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(exceptionHandler);
 		try {
-			assertFalse("Handler should not have been called", exceptionHandler.isCalled());
+			assertThat(exceptionHandler.isCalled()).as("Handler should not have been called").isFalse();
 			ClassWithException obj = new ClassWithException();
 			obj.failWithVoid();
 			exceptionHandler.await(3000);
@@ -171,7 +169,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		TestableAsyncUncaughtExceptionHandler exceptionHandler = new TestableAsyncUncaughtExceptionHandler(true);
 		AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(exceptionHandler);
 		try {
-			assertFalse("Handler should not have been called", exceptionHandler.isCalled());
+			assertThat(exceptionHandler.isCalled()).as("Handler should not have been called").isFalse();
 			ClassWithException obj = new ClassWithException();
 			obj.failWithVoid();
 			exceptionHandler.await(3000);

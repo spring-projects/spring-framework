@@ -43,7 +43,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.tests.MockitoUtils;
 import org.springframework.tests.MockitoUtils.InvocationArgumentsAdapter;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -135,8 +135,8 @@ public abstract class AbstractStaxXMLReaderTestCase {
 		transformer.transform(source, result);
 
 		Node node1 = result.getNode().getFirstChild().getFirstChild();
-		assertEquals(" ", node1.getTextContent());
-		assertEquals(" Some text ", node1.getNextSibling().getTextContent());
+		assertThat(node1.getTextContent()).isEqualTo(" ");
+		assertThat(node1.getNextSibling().getTextContent()).isEqualTo(" Some text ");
 	}
 
 	@Test

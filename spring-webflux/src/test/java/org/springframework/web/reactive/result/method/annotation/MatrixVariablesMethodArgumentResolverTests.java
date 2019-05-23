@@ -37,10 +37,8 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebInputException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.web.method.MvcAnnotationPredicates.matrixAttribute;
 
 /**
@@ -67,13 +65,13 @@ public class MatrixVariablesMethodArgumentResolverTests {
 	@Test
 	public void supportsParameter() {
 
-		assertFalse(this.resolver.supportsParameter(this.testMethod.arg(String.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(String.class))).isFalse();
 
-		assertTrue(this.resolver.supportsParameter(this.testMethod
-				.annot(matrixAttribute().noName()).arg(List.class, String.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod
+				.annot(matrixAttribute().noName()).arg(List.class, String.class))).isTrue();
 
-		assertTrue(this.resolver.supportsParameter(this.testMethod
-				.annot(matrixAttribute().name("year")).arg(int.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod
+				.annot(matrixAttribute().name("year")).arg(int.class))).isTrue();
 	}
 
 	@Test
@@ -84,8 +82,7 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		params.add("colors", "blue");
 		MethodParameter param = this.testMethod.annot(matrixAttribute().noName()).arg(List.class, String.class);
 
-		assertEquals(Arrays.asList("red", "green", "blue"),
-				this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO));
+		assertThat(this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO)).isEqualTo(Arrays.asList("red", "green", "blue"));
 	}
 
 	@Test
@@ -95,14 +92,14 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(matrixAttribute().name("year")).arg(int.class);
 
 		Object actual = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
-		assertEquals(2006, actual);
+		assertThat(actual).isEqualTo(2006);
 	}
 
 	@Test
 	public void resolveArgumentDefaultValue() throws Exception {
 		MethodParameter param = this.testMethod.annot(matrixAttribute().name("year")).arg(int.class);
 		Object actual = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
-		assertEquals(2013, actual);
+		assertThat(actual).isEqualTo(2013);
 	}
 
 	@Test
@@ -129,10 +126,9 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(matrixAttribute().name("year")).arg(int.class);
 
 		Object actual = this.resolver.resolveArgument(param, new BindingContext(), this.exchange).block(Duration.ZERO);
-		assertEquals(2013, actual);
+		assertThat(actual).isEqualTo(2013);
 	}
 
-	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> getVariablesFor(String pathVarName) {
 		Map<String, MultiValueMap<String, String>> matrixVariables =
 				this.exchange.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);

@@ -29,8 +29,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_16;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
@@ -49,19 +48,19 @@ public class CharSequenceEncoderTests
 
 	@Override
 	public void canEncode() throws Exception {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(String.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuffer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class),
-				MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(StringBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isFalse();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.APPLICATION_JSON)).isFalse();
 
 		// SPR-15464
-		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
+		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
 	}
 
 	@Override
@@ -81,8 +80,7 @@ public class CharSequenceEncoderTests
 				.forEach(charset -> {
 					int capacity = this.encoder.calculateCapacity(sequence, charset);
 					int length = sequence.length();
-					assertTrue(String.format("%s has capacity %d; length %d", charset, capacity, length),
-							capacity >= length);
+					assertThat(capacity >= length).as(String.format("%s has capacity %d; length %d", charset, capacity, length)).isTrue();
 				});
 
 	}

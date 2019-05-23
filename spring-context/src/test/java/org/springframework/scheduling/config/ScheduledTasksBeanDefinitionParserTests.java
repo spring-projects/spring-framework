@@ -31,7 +31,6 @@ import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mark Fisher
@@ -60,7 +59,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 	public void checkScheduler() {
 		Object schedulerBean = this.context.getBean("testScheduler");
 		Object schedulerRef = new DirectFieldAccessor(this.registrar).getPropertyValue("taskScheduler");
-		assertEquals(schedulerBean, schedulerRef);
+		assertThat(schedulerRef).isEqualTo(schedulerBean);
 	}
 
 	@Test
@@ -68,47 +67,47 @@ public class ScheduledTasksBeanDefinitionParserTests {
 		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedRateTasks");
 		Runnable runnable = tasks.get(0).getRunnable();
-		assertEquals(ScheduledMethodRunnable.class, runnable.getClass());
+		assertThat(runnable.getClass()).isEqualTo(ScheduledMethodRunnable.class);
 		Object targetObject = ((ScheduledMethodRunnable) runnable).getTarget();
 		Method targetMethod = ((ScheduledMethodRunnable) runnable).getMethod();
-		assertEquals(this.testBean, targetObject);
-		assertEquals("test", targetMethod.getName());
+		assertThat(targetObject).isEqualTo(this.testBean);
+		assertThat(targetMethod.getName()).isEqualTo("test");
 	}
 
 	@Test
 	public void fixedRateTasks() {
 		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedRateTasks");
-		assertEquals(3, tasks.size());
-		assertEquals(1000L, tasks.get(0).getInterval());
-		assertEquals(2000L, tasks.get(1).getInterval());
-		assertEquals(4000L, tasks.get(2).getInterval());
-		assertEquals(500, tasks.get(2).getInitialDelay());
+		assertThat(tasks.size()).isEqualTo(3);
+		assertThat(tasks.get(0).getInterval()).isEqualTo(1000L);
+		assertThat(tasks.get(1).getInterval()).isEqualTo(2000L);
+		assertThat(tasks.get(2).getInterval()).isEqualTo(4000L);
+		assertThat(tasks.get(2).getInitialDelay()).isEqualTo(500);
 	}
 
 	@Test
 	public void fixedDelayTasks() {
 		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedDelayTasks");
-		assertEquals(2, tasks.size());
-		assertEquals(3000L, tasks.get(0).getInterval());
-		assertEquals(3500L, tasks.get(1).getInterval());
-		assertEquals(250, tasks.get(1).getInitialDelay());
+		assertThat(tasks.size()).isEqualTo(2);
+		assertThat(tasks.get(0).getInterval()).isEqualTo(3000L);
+		assertThat(tasks.get(1).getInterval()).isEqualTo(3500L);
+		assertThat(tasks.get(1).getInitialDelay()).isEqualTo(250);
 	}
 
 	@Test
 	public void cronTasks() {
 		List<CronTask> tasks = (List<CronTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("cronTasks");
-		assertEquals(1, tasks.size());
-		assertEquals("*/4 * 9-17 * * MON-FRI", tasks.get(0).getExpression());
+		assertThat(tasks.size()).isEqualTo(1);
+		assertThat(tasks.get(0).getExpression()).isEqualTo("*/4 * 9-17 * * MON-FRI");
 	}
 
 	@Test
 	public void triggerTasks() {
 		List<TriggerTask> tasks = (List<TriggerTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("triggerTasks");
-		assertEquals(1, tasks.size());
+		assertThat(tasks.size()).isEqualTo(1);
 		assertThat(tasks.get(0).getTrigger()).isInstanceOf(TestTrigger.class);
 	}
 

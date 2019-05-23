@@ -35,8 +35,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link ImportResource} support.
@@ -50,25 +48,25 @@ public class ImportResourceTests {
 	@Test
 	public void importXml() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlConfig.class);
-		assertTrue("did not contain java-declared bean", ctx.containsBean("javaDeclaredBean"));
-		assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
+		assertThat(ctx.containsBean("javaDeclaredBean")).as("did not contain java-declared bean").isTrue();
+		assertThat(ctx.containsBean("xmlDeclaredBean")).as("did not contain xml-declared bean").isTrue();
 		TestBean tb = ctx.getBean("javaDeclaredBean", TestBean.class);
-		assertEquals("myName", tb.getName());
+		assertThat(tb.getName()).isEqualTo("myName");
 		ctx.close();
 	}
 
 	@Test
 	public void importXmlIsInheritedFromSuperclassDeclarations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(FirstLevelSubConfig.class);
-		assertTrue(ctx.containsBean("xmlDeclaredBean"));
+		assertThat(ctx.containsBean("xmlDeclaredBean")).isTrue();
 		ctx.close();
 	}
 
 	@Test
 	public void importXmlIsMergedFromSuperclassDeclarations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SecondLevelSubConfig.class);
-		assertTrue("failed to pick up second-level-declared XML bean", ctx.containsBean("secondLevelXmlDeclaredBean"));
-		assertTrue("failed to pick up parent-declared XML bean", ctx.containsBean("xmlDeclaredBean"));
+		assertThat(ctx.containsBean("secondLevelXmlDeclaredBean")).as("failed to pick up second-level-declared XML bean").isTrue();
+		assertThat(ctx.containsBean("xmlDeclaredBean")).as("failed to pick up parent-declared XML bean").isTrue();
 		ctx.close();
 	}
 
@@ -76,17 +74,17 @@ public class ImportResourceTests {
 	public void importXmlWithNamespaceConfig() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlWithAopNamespaceConfig.class);
 		Object bean = ctx.getBean("proxiedXmlBean");
-		assertTrue(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 		ctx.close();
 	}
 
 	@Test
 	public void importXmlWithOtherConfigurationClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlWithConfigurationClass.class);
-		assertTrue("did not contain java-declared bean", ctx.containsBean("javaDeclaredBean"));
-		assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
+		assertThat(ctx.containsBean("javaDeclaredBean")).as("did not contain java-declared bean").isTrue();
+		assertThat(ctx.containsBean("xmlDeclaredBean")).as("did not contain xml-declared bean").isTrue();
 		TestBean tb = ctx.getBean("javaDeclaredBean", TestBean.class);
-		assertEquals("myName", tb.getName());
+		assertThat(tb.getName()).isEqualTo("myName");
 		ctx.close();
 	}
 
@@ -98,7 +96,7 @@ public class ImportResourceTests {
 		ctx.getEnvironment().getPropertySources().addFirst(propertySource);
 		ctx.register(ImportXmlConfig.class);
 		ctx.refresh();
-		assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
+		assertThat(ctx.containsBean("xmlDeclaredBean")).as("did not contain xml-declared bean").isTrue();
 		ctx.close();
 	}
 
@@ -113,7 +111,7 @@ public class ImportResourceTests {
 	@Test
 	public void importNonXmlResource() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportNonXmlResourceConfig.class);
-		assertTrue(ctx.containsBean("propertiesDeclaredBean"));
+		assertThat(ctx.containsBean("propertiesDeclaredBean")).isTrue();
 		ctx.close();
 	}
 

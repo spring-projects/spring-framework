@@ -41,11 +41,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolverCompo
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -83,7 +80,7 @@ public class ModelFactoryTests {
 		HandlerMethod handlerMethod = createHandlerMethod("handle");
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 
-		assertEquals(Boolean.TRUE, this.mavContainer.getModel().get("modelAttr"));
+		assertThat(this.mavContainer.getModel().get("modelAttr")).isEqualTo(Boolean.TRUE);
 	}
 
 	@Test
@@ -92,7 +89,7 @@ public class ModelFactoryTests {
 		HandlerMethod handlerMethod = createHandlerMethod("handle");
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 
-		assertEquals(Boolean.TRUE, this.mavContainer.getModel().get("name"));
+		assertThat(this.mavContainer.getModel().get("name")).isEqualTo(Boolean.TRUE);
 	}
 
 	@Test
@@ -101,7 +98,7 @@ public class ModelFactoryTests {
 		HandlerMethod handlerMethod = createHandlerMethod("handle");
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 
-		assertEquals(Boolean.TRUE, this.mavContainer.getModel().get("boolean"));
+		assertThat(this.mavContainer.getModel().get("boolean")).isEqualTo(Boolean.TRUE);
 	}
 
 	@Test
@@ -110,8 +107,8 @@ public class ModelFactoryTests {
 		HandlerMethod handlerMethod = createHandlerMethod("handle");
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 
-		assertTrue(this.mavContainer.containsAttribute("name"));
-		assertNull(this.mavContainer.getModel().get("name"));
+		assertThat(this.mavContainer.containsAttribute("name")).isTrue();
+		assertThat(this.mavContainer.getModel().get("name")).isNull();
 	}
 
 	@Test
@@ -120,8 +117,8 @@ public class ModelFactoryTests {
 		HandlerMethod handlerMethod = createHandlerMethod("handle");
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 
-		assertTrue(this.mavContainer.containsAttribute("foo"));
-		assertTrue(this.mavContainer.isBindingDisabled("foo"));
+		assertThat(this.mavContainer.containsAttribute("foo")).isTrue();
+		assertThat(this.mavContainer.isBindingDisabled("foo")).isTrue();
 	}
 
 	@Test
@@ -133,9 +130,9 @@ public class ModelFactoryTests {
 		HandlerMethod handlerMethod = createHandlerMethod("handle");
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 
-		assertTrue(this.mavContainer.containsAttribute("foo"));
-		assertSame(foo, this.mavContainer.getModel().get("foo"));
-		assertTrue(this.mavContainer.isBindingDisabled("foo"));
+		assertThat(this.mavContainer.containsAttribute("foo")).isTrue();
+		assertThat(this.mavContainer.getModel().get("foo")).isSameAs(foo);
+		assertThat(this.mavContainer.isBindingDisabled("foo")).isTrue();
 	}
 
 	@Test
@@ -146,7 +143,7 @@ public class ModelFactoryTests {
 		HandlerMethod handlerMethod = createHandlerMethod("handle");
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
 
-		assertEquals("sessionAttrValue", this.mavContainer.getModel().get("sessionAttr"));
+		assertThat(this.mavContainer.getModel().get("sessionAttr")).isEqualTo("sessionAttrValue");
 	}
 
 	@Test
@@ -160,7 +157,7 @@ public class ModelFactoryTests {
 		this.attributeStore.storeAttribute(this.webRequest, "sessionAttr", "sessionAttrValue");
 
 		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
-		assertEquals("sessionAttrValue", this.mavContainer.getModel().get("sessionAttr"));
+		assertThat(this.mavContainer.getModel().get("sessionAttr")).isEqualTo("sessionAttrValue");
 	}
 
 	@Test
@@ -177,10 +174,10 @@ public class ModelFactoryTests {
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
 		modelFactory.updateModel(this.webRequest, container);
 
-		assertEquals(command, container.getModel().get(commandName));
+		assertThat(container.getModel().get(commandName)).isEqualTo(command);
 		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + commandName;
-		assertSame(dataBinder.getBindingResult(), container.getModel().get(bindingResultKey));
-		assertEquals(2, container.getModel().size());
+		assertThat(container.getModel().get(bindingResultKey)).isSameAs(dataBinder.getBindingResult());
+		assertThat(container.getModel().size()).isEqualTo(2);
 	}
 
 	@Test
@@ -197,8 +194,8 @@ public class ModelFactoryTests {
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
 		modelFactory.updateModel(this.webRequest, container);
 
-		assertEquals(attribute, container.getModel().get(attributeName));
-		assertEquals(attribute, this.attributeStore.retrieveAttribute(this.webRequest, attributeName));
+		assertThat(container.getModel().get(attributeName)).isEqualTo(attribute);
+		assertThat(this.attributeStore.retrieveAttribute(this.webRequest, attributeName)).isEqualTo(attribute);
 	}
 
 	@Test
@@ -219,8 +216,8 @@ public class ModelFactoryTests {
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
 		modelFactory.updateModel(this.webRequest, container);
 
-		assertEquals(attribute, container.getModel().get(attributeName));
-		assertNull(this.attributeStore.retrieveAttribute(this.webRequest, attributeName));
+		assertThat(container.getModel().get(attributeName)).isEqualTo(attribute);
+		assertThat(this.attributeStore.retrieveAttribute(this.webRequest, attributeName)).isNull();
 	}
 
 	@Test  // SPR-12542
@@ -242,9 +239,9 @@ public class ModelFactoryTests {
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
 		modelFactory.updateModel(this.webRequest, container);
 
-		assertEquals(queryParam, container.getModel().get(queryParamName));
-		assertEquals(1, container.getModel().size());
-		assertEquals(attribute, this.attributeStore.retrieveAttribute(this.webRequest, attributeName));
+		assertThat(container.getModel().get(queryParamName)).isEqualTo(queryParam);
+		assertThat(container.getModel().size()).isEqualTo(1);
+		assertThat(this.attributeStore.retrieveAttribute(this.webRequest, attributeName)).isEqualTo(attribute);
 	}
 
 

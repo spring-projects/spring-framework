@@ -26,12 +26,8 @@ import org.springframework.mock.web.test.MockAsyncContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -60,9 +56,9 @@ public class StandardServletAsyncWebRequestTests {
 
 	@Test
 	public void isAsyncStarted() throws Exception {
-		assertFalse(this.asyncRequest.isAsyncStarted());
+		assertThat(this.asyncRequest.isAsyncStarted()).isFalse();
 		this.asyncRequest.startAsync();
-		assertTrue(this.asyncRequest.isAsyncStarted());
+		assertThat(this.asyncRequest.isAsyncStarted()).isTrue();
 	}
 
 	@Test
@@ -70,10 +66,10 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.startAsync();
 
 		MockAsyncContext context = (MockAsyncContext) this.request.getAsyncContext();
-		assertNotNull(context);
-		assertEquals("Timeout value not set", 44 * 1000, context.getTimeout());
-		assertEquals(1, context.getListeners().size());
-		assertSame(this.asyncRequest, context.getListeners().get(0));
+		assertThat(context).isNotNull();
+		assertThat(context.getTimeout()).as("Timeout value not set").isEqualTo((44 * 1000));
+		assertThat(context.getListeners().size()).isEqualTo(1);
+		assertThat(context.getListeners().get(0)).isSameAs(this.asyncRequest);
 	}
 
 	@Test
@@ -84,8 +80,8 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.startAsync();	// idempotent
 
 		MockAsyncContext context = (MockAsyncContext) this.request.getAsyncContext();
-		assertNotNull(context);
-		assertEquals(1, context.getListeners().size());
+		assertThat(context).isNotNull();
+		assertThat(context.getListeners().size()).isEqualTo(1);
 	}
 
 	@Test
@@ -107,7 +103,7 @@ public class StandardServletAsyncWebRequestTests {
 	@Test
 	public void onTimeoutDefaultBehavior() throws Exception {
 		this.asyncRequest.onTimeout(new AsyncEvent(new MockAsyncContext(this.request, this.response)));
-		assertEquals(200, this.response.getStatus());
+		assertThat(this.response.getStatus()).isEqualTo(200);
 	}
 
 	@Test
@@ -144,7 +140,7 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.onComplete(new AsyncEvent(this.request.getAsyncContext()));
 
 		verify(handler).run();
-		assertTrue(this.asyncRequest.isAsyncComplete());
+		assertThat(this.asyncRequest.isAsyncComplete()).isTrue();
 	}
 
 	// SPR-13292
@@ -171,6 +167,6 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.onComplete(new AsyncEvent(this.request.getAsyncContext()));
 
 		verify(handler).run();
-		assertTrue(this.asyncRequest.isAsyncComplete());
+		assertThat(this.asyncRequest.isAsyncComplete()).isTrue();
 	}
 }

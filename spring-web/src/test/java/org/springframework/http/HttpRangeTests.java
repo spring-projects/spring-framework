@@ -27,8 +27,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.support.ResourceRegion;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -61,48 +61,48 @@ public class HttpRangeTests {
 	@Test
 	public void byteRange() {
 		HttpRange range = HttpRange.createByteRange(0, 499);
-		assertEquals(0, range.getRangeStart(1000));
-		assertEquals(499, range.getRangeEnd(1000));
+		assertThat(range.getRangeStart(1000)).isEqualTo(0);
+		assertThat(range.getRangeEnd(1000)).isEqualTo(499);
 	}
 
 	@Test
 	public void byteRangeWithoutLastPosition() {
 		HttpRange range = HttpRange.createByteRange(9500);
-		assertEquals(9500, range.getRangeStart(10000));
-		assertEquals(9999, range.getRangeEnd(10000));
+		assertThat(range.getRangeStart(10000)).isEqualTo(9500);
+		assertThat(range.getRangeEnd(10000)).isEqualTo(9999);
 	}
 
 	@Test
 	public void byteRangeOfZeroLength() {
 		HttpRange range = HttpRange.createByteRange(9500, 9500);
-		assertEquals(9500, range.getRangeStart(10000));
-		assertEquals(9500, range.getRangeEnd(10000));
+		assertThat(range.getRangeStart(10000)).isEqualTo(9500);
+		assertThat(range.getRangeEnd(10000)).isEqualTo(9500);
 	}
 
 	@Test
 	public void suffixRange() {
 		HttpRange range = HttpRange.createSuffixRange(500);
-		assertEquals(500, range.getRangeStart(1000));
-		assertEquals(999, range.getRangeEnd(1000));
+		assertThat(range.getRangeStart(1000)).isEqualTo(500);
+		assertThat(range.getRangeEnd(1000)).isEqualTo(999);
 	}
 
 	@Test
 	public void suffixRangeShorterThanRepresentation() {
 		HttpRange range = HttpRange.createSuffixRange(500);
-		assertEquals(0, range.getRangeStart(350));
-		assertEquals(349, range.getRangeEnd(350));
+		assertThat(range.getRangeStart(350)).isEqualTo(0);
+		assertThat(range.getRangeEnd(350)).isEqualTo(349);
 	}
 
 	@Test
 	public void parseRanges() {
 		List<HttpRange> ranges = HttpRange.parseRanges("bytes=0-0,500-,-1");
-		assertEquals(3, ranges.size());
-		assertEquals(0, ranges.get(0).getRangeStart(1000));
-		assertEquals(0, ranges.get(0).getRangeEnd(1000));
-		assertEquals(500, ranges.get(1).getRangeStart(1000));
-		assertEquals(999, ranges.get(1).getRangeEnd(1000));
-		assertEquals(999, ranges.get(2).getRangeStart(1000));
-		assertEquals(999, ranges.get(2).getRangeEnd(1000));
+		assertThat(ranges.size()).isEqualTo(3);
+		assertThat(ranges.get(0).getRangeStart(1000)).isEqualTo(0);
+		assertThat(ranges.get(0).getRangeEnd(1000)).isEqualTo(0);
+		assertThat(ranges.get(1).getRangeStart(1000)).isEqualTo(500);
+		assertThat(ranges.get(1).getRangeEnd(1000)).isEqualTo(999);
+		assertThat(ranges.get(2).getRangeStart(1000)).isEqualTo(999);
+		assertThat(ranges.get(2).getRangeEnd(1000)).isEqualTo(999);
 	}
 
 	@Test
@@ -114,7 +114,7 @@ public class HttpRangeTests {
 			atLimit.append(",").append(i).append("-").append(i + 1);
 		}
 		List<HttpRange> ranges = HttpRange.parseRanges(atLimit.toString());
-		assertEquals(100, ranges.size());
+		assertThat(ranges.size()).isEqualTo(100);
 
 		// 2. Above limit..
 		StringBuilder aboveLimit = new StringBuilder("bytes=0-0");
@@ -131,7 +131,7 @@ public class HttpRangeTests {
 		ranges.add(HttpRange.createByteRange(0, 499));
 		ranges.add(HttpRange.createByteRange(9500));
 		ranges.add(HttpRange.createSuffixRange(500));
-		assertEquals("Invalid Range header", "bytes=0-499, 9500-, -500", HttpRange.toString(ranges));
+		assertThat(HttpRange.toString(ranges)).as("Invalid Range header").isEqualTo("bytes=0-499, 9500-, -500");
 	}
 
 	@Test
@@ -140,9 +140,9 @@ public class HttpRangeTests {
 		ByteArrayResource resource = new ByteArrayResource(bytes);
 		HttpRange range = HttpRange.createByteRange(0, 5);
 		ResourceRegion region = range.toResourceRegion(resource);
-		assertEquals(resource, region.getResource());
-		assertEquals(0L, region.getPosition());
-		assertEquals(6L, region.getCount());
+		assertThat(region.getResource()).isEqualTo(resource);
+		assertThat(region.getPosition()).isEqualTo(0L);
+		assertThat(region.getCount()).isEqualTo(6L);
 	}
 
 	@Test
@@ -163,7 +163,6 @@ public class HttpRangeTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void toResourceRegionExceptionLength() throws IOException {
 		InputStreamResource resource = mock(InputStreamResource.class);
 		given(resource.contentLength()).willThrow(IOException.class);
@@ -180,7 +179,7 @@ public class HttpRangeTests {
 		// 1. Below length
 		List<HttpRange> belowLengthRanges = HttpRange.parseRanges("bytes=0-1,2-3");
 		List<ResourceRegion> regions = HttpRange.toResourceRegions(belowLengthRanges, resource);
-		assertEquals(2, regions.size());
+		assertThat(regions.size()).isEqualTo(2);
 
 		// 2. At length
 		List<HttpRange> atLengthRanges = HttpRange.parseRanges("bytes=0-1,2-4");

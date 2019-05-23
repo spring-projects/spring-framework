@@ -42,10 +42,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -89,8 +85,8 @@ public class GroovyMarkupViewTests {
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(view);
 		TemplateEngine engine = (TemplateEngine) accessor.getPropertyValue("engine");
-		assertNotNull(engine);
-		assertEquals(TestTemplateEngine.class, engine.getClass());
+		assertThat(engine).isNotNull();
+		assertThat(engine.getClass()).isEqualTo(TestTemplateEngine.class);
 	}
 
 	@Test
@@ -101,32 +97,32 @@ public class GroovyMarkupViewTests {
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(view);
 		TemplateEngine engine = (TemplateEngine) accessor.getPropertyValue("engine");
-		assertNotNull(engine);
-		assertEquals(TestTemplateEngine.class, engine.getClass());
+		assertThat(engine).isNotNull();
+		assertThat(engine.getClass()).isEqualTo(TestTemplateEngine.class);
 	}
 
 	@Test
 	public void checkResource() throws Exception {
 		GroovyMarkupView view = createViewWithUrl("test.tpl");
-		assertTrue(view.checkResource(Locale.US));
+		assertThat(view.checkResource(Locale.US)).isTrue();
 	}
 
 	@Test
 	public void checkMissingResource() throws Exception {
 		GroovyMarkupView view = createViewWithUrl("missing.tpl");
-		assertFalse(view.checkResource(Locale.US));
+		assertThat(view.checkResource(Locale.US)).isFalse();
 	}
 
 	@Test
 	public void checkI18nResource() throws Exception {
 		GroovyMarkupView view = createViewWithUrl("i18n.tpl");
-		assertTrue(view.checkResource(Locale.FRENCH));
+		assertThat(view.checkResource(Locale.FRENCH)).isTrue();
 	}
 
 	@Test
 	public void checkI18nResourceMissingLocale() throws Exception {
 		GroovyMarkupView view = createViewWithUrl("i18n.tpl");
-		assertTrue(view.checkResource(Locale.CHINESE));
+		assertThat(view.checkResource(Locale.CHINESE)).isTrue();
 	}
 
 	@Test
@@ -142,21 +138,20 @@ public class GroovyMarkupViewTests {
 		Map<String, Object> model = new HashMap<>();
 		model.put("name", "Spring");
 		MockHttpServletResponse response = renderViewWithModel("i18n.tpl", model, Locale.FRANCE);
-		assertEquals("<p>Bonjour Spring</p>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<p>Bonjour Spring</p>");
 
 		response = renderViewWithModel("i18n.tpl", model, Locale.GERMANY);
-		assertEquals("<p>Include German</p><p>Hallo Spring</p>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<p>Include German</p><p>Hallo Spring</p>");
 
 		response = renderViewWithModel("i18n.tpl", model, new Locale("es"));
-		assertEquals("<p>Include Default</p><p>Hola Spring</p>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<p>Include Default</p><p>Hola Spring</p>");
 	}
 
 	@Test
 	public void renderLayoutTemplate() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		MockHttpServletResponse response = renderViewWithModel("content.tpl", model, Locale.US);
-		assertEquals("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>",
-				response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>");
 	}
 
 

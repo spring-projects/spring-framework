@@ -21,10 +21,8 @@ import org.junit.Test;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ValidationUtils}.
@@ -56,8 +54,8 @@ public class ValidationUtilsTests {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		ValidationUtils.invokeValidator(new EmptyValidator(), tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY", errors.getFieldError("name").getCode());
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY");
 	}
 
 	@Test
@@ -68,12 +66,12 @@ public class ValidationUtilsTests {
 		tb.setName(" ");
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		testValidator.validate(tb, errors);
-		assertFalse(errors.hasFieldErrors("name"));
+		assertThat(errors.hasFieldErrors("name")).isFalse();
 
 		tb.setName("Roddy");
 		errors = new BeanPropertyBindingResult(tb, "tb");
 		testValidator.validate(tb, errors);
-		assertFalse(errors.hasFieldErrors("name"));
+		assertThat(errors.hasFieldErrors("name")).isFalse();
 	}
 
 	@Test
@@ -82,8 +80,8 @@ public class ValidationUtilsTests {
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		Validator testValidator = new EmptyValidator();
 		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY", errors.getFieldError("name").getCode());
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY");
 	}
 
 	@Test
@@ -92,8 +90,8 @@ public class ValidationUtilsTests {
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		Validator testValidator = new EmptyValidator();
 		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY", errors.getFieldError("name").getCode());
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY");
 	}
 
 	@Test
@@ -102,16 +100,16 @@ public class ValidationUtilsTests {
 
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY_OR_WHITESPACE", new Object[] {"arg"});
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
-		assertEquals("arg", errors.getFieldError("name").getArguments()[0]);
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
+		assertThat(errors.getFieldError("name").getArguments()[0]).isEqualTo("arg");
 
 		errors = new BeanPropertyBindingResult(tb, "tb");
 		ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY_OR_WHITESPACE", new Object[] {"arg"}, "msg");
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
-		assertEquals("arg", errors.getFieldError("name").getArguments()[0]);
-		assertEquals("msg", errors.getFieldError("name").getDefaultMessage());
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
+		assertThat(errors.getFieldError("name").getArguments()[0]).isEqualTo("arg");
+		assertThat(errors.getFieldError("name").getDefaultMessage()).isEqualTo("msg");
 	}
 
 	@Test
@@ -122,28 +120,28 @@ public class ValidationUtilsTests {
 		// Test null
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
 
 		// Test empty String
 		tb.setName("");
 		errors = new BeanPropertyBindingResult(tb, "tb");
 		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
 
 		// Test whitespace String
 		tb.setName(" ");
 		errors = new BeanPropertyBindingResult(tb, "tb");
 		testValidator.validate(tb, errors);
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
 
 		// Test OK
 		tb.setName("Roddy");
 		errors = new BeanPropertyBindingResult(tb, "tb");
 		testValidator.validate(tb, errors);
-		assertFalse(errors.hasFieldErrors("name"));
+		assertThat(errors.hasFieldErrors("name")).isFalse();
 	}
 
 	@Test
@@ -153,16 +151,16 @@ public class ValidationUtilsTests {
 
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", new Object[] {"arg"});
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
-		assertEquals("arg", errors.getFieldError("name").getArguments()[0]);
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
+		assertThat(errors.getFieldError("name").getArguments()[0]).isEqualTo("arg");
 
 		errors = new BeanPropertyBindingResult(tb, "tb");
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", new Object[] {"arg"}, "msg");
-		assertTrue(errors.hasFieldErrors("name"));
-		assertEquals("EMPTY_OR_WHITESPACE", errors.getFieldError("name").getCode());
-		assertEquals("arg", errors.getFieldError("name").getArguments()[0]);
-		assertEquals("msg", errors.getFieldError("name").getDefaultMessage());
+		assertThat(errors.hasFieldErrors("name")).isTrue();
+		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
+		assertThat(errors.getFieldError("name").getArguments()[0]).isEqualTo("arg");
+		assertThat(errors.getFieldError("name").getDefaultMessage()).isEqualTo("msg");
 	}
 
 

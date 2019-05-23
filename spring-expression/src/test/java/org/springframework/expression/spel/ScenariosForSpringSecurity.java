@@ -35,8 +35,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 ///CLOVER:OFF
 /**
@@ -54,11 +53,11 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 		ctx.setRootObject(new Person("Ben"));
 		Boolean value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		assertThat((boolean) value).isFalse();
 
 		ctx.setRootObject(new Manager("Luke"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 	}
 
 	@Test
@@ -74,11 +73,11 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 		ctx.setRootObject(new Person("Andy"));
 		Boolean value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 
 		ctx.setRootObject(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		assertThat((boolean) value).isFalse();
 
 		// (2) Or register an accessor that can understand 'p' and return the right person
 		expr = parser.parseRaw("p.name == principal.name");
@@ -89,11 +88,11 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 		pAccessor.setPerson(new Person("Andy"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 
 		pAccessor.setPerson(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		assertThat((boolean) value).isFalse();
 	}
 
 	@Test
@@ -110,12 +109,12 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 
 		ctx.setRootObject(new Manager("Luke"));
 		ctx.setVariable("a",1.043d);
 		value = expr.getValue(ctx,Boolean.class);
-		assertFalse(value);
+		assertThat((boolean) value).isFalse();
 	}
 
 	// Here i'm going to change which hasRole() executes and make it one of my own Java methods
@@ -136,7 +135,7 @@ public class ScenariosForSpringSecurity extends AbstractExpressionTests {
 
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		value = expr.getValue(ctx,Boolean.class);
-		assertTrue(value);
+		assertThat((boolean) value).isTrue();
 
 //			ctx.setRootObject(new Manager("Luke"));
 //			ctx.setVariable("a",1.043d);

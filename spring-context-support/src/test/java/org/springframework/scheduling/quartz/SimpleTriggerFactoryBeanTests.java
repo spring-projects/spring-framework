@@ -21,7 +21,7 @@ import java.text.ParseException;
 import org.junit.Test;
 import org.quartz.SimpleTrigger;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -36,8 +36,8 @@ public class SimpleTriggerFactoryBeanTests {
 		factory.setRepeatInterval(1000L);
 		factory.afterPropertiesSet();
 		SimpleTrigger trigger = factory.getObject();
-		assertEquals(5, trigger.getRepeatCount());
-		assertEquals(1000L, trigger.getRepeatInterval());
+		assertThat(trigger.getRepeatCount()).isEqualTo(5);
+		assertThat(trigger.getRepeatInterval()).isEqualTo(1000L);
 	}
 
 }

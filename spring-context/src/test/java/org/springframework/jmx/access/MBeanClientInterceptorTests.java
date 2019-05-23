@@ -37,13 +37,10 @@ import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
 import org.springframework.util.SocketUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -92,7 +89,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 	public void testProxyClassIsDifferent() throws Exception {
 		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
-		assertTrue("The proxy class should be different than the base class", (proxy.getClass() != IJmxTestBean.class));
+		assertThat((proxy.getClass() != IJmxTestBean.class)).as("The proxy class should be different than the base class").isTrue();
 	}
 
 	@Test
@@ -101,8 +98,8 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		IJmxTestBean proxy1 = getProxy();
 		IJmxTestBean proxy2 = getProxy();
 
-		assertNotSame("The proxies should NOT be the same", proxy1, proxy2);
-		assertSame("The proxy classes should be the same", proxy1.getClass(), proxy2.getClass());
+		assertThat(proxy2).as("The proxies should NOT be the same").isNotSameAs(proxy1);
+		assertThat(proxy2.getClass()).as("The proxy classes should be the same").isSameAs(proxy1.getClass());
 	}
 
 	@Test
@@ -110,7 +107,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assumeTrue(runTests);
 		IJmxTestBean proxy1 = getProxy();
 		int age = proxy1.getAge();
-		assertEquals("The age should be 100", 100, age);
+		assertThat(age).as("The age should be 100").isEqualTo(100);
 	}
 
 	@Test
@@ -118,7 +115,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
 		proxy.setName("Rob Harrop");
-		assertEquals("The name of the bean should have been updated", "Rob Harrop", target.getName());
+		assertThat(target.getName()).as("The name of the bean should have been updated").isEqualTo("Rob Harrop");
 	}
 
 	@Test
@@ -158,7 +155,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
 		long result = proxy.myOperation();
-		assertEquals("The operation should return 1", 1, result);
+		assertThat(result).as("The operation should return 1").isEqualTo(1);
 	}
 
 	@Test
@@ -166,7 +163,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assumeTrue(runTests);
 		IJmxTestBean proxy = getProxy();
 		int result = proxy.add(1, 2);
-		assertEquals("The operation should return 3", 3, result);
+		assertThat(result).as("The operation should return 3").isEqualTo(3);
 	}
 
 	@Test
@@ -208,8 +205,8 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 		// should now be able to access data via the lazy proxy
 		try {
-			assertEquals("Rob Harrop", bean.getName());
-			assertEquals(100, bean.getAge());
+			assertThat(bean.getName()).isEqualTo("Rob Harrop");
+			assertThat(bean.getAge()).isEqualTo(100);
 		}
 		finally {
 			connector.stop();
@@ -227,8 +224,8 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 		// should now be able to access data via the lazy proxy
 		try {
-			assertEquals("Rob Harrop", bean.getName());
-			assertEquals(100, bean.getAge());
+			assertThat(bean.getName()).isEqualTo("Rob Harrop");
+			assertThat(bean.getAge()).isEqualTo(100);
 		}
 		finally {
 			connector.stop();

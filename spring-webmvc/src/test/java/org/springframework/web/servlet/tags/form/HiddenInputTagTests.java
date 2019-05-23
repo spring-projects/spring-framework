@@ -24,9 +24,8 @@ import org.junit.Test;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop
@@ -53,7 +52,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	public void render() throws Exception {
 		this.tag.setPath("name");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 
@@ -73,7 +72,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
 		exposeBindingResult(errors);
 
-		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 
@@ -122,11 +121,11 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	}
 
 	private void assertTagClosed(String output) {
-		assertTrue(output.endsWith("/>"));
+		assertThat(output.endsWith("/>")).isTrue();
 	}
 
 	private void assertTagOpened(String output) {
-		assertTrue(output.startsWith("<input "));
+		assertThat(output.startsWith("<input ")).isTrue();
 	}
 
 	@Override

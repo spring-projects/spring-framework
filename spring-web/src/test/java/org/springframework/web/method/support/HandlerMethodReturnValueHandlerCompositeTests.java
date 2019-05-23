@@ -21,9 +21,8 @@ import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -64,8 +63,8 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(this.handlers.supportsReturnType(this.integerType));
-		assertFalse(this.handlers.supportsReturnType(this.stringType));
+		assertThat(this.handlers.supportsReturnType(this.integerType)).isTrue();
+		assertThat(this.handlers.supportsReturnType(this.stringType)).isFalse();
 	}
 
 	@Test

@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -51,7 +51,7 @@ public class MethodInvocationTests {
 		m, null, null, is // list
 	);
 		Object rv = invocation.proceed();
-		assertTrue("correct response", rv == returnValue);
+		assertThat(rv == returnValue).as("correct response").isTrue();
 	}
 
 	/**

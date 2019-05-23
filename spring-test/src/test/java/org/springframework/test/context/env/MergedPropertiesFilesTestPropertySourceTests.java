@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for contributing additional properties
@@ -35,7 +35,7 @@ public class MergedPropertiesFilesTestPropertySourceTests extends
 
 	@Test
 	public void verifyExtendedPropertiesAreAvailableInEnvironment() {
-		assertEquals(42, env.getProperty("extended", Integer.class).intValue());
+		assertThat(env.getProperty("extended", Integer.class).intValue()).isEqualTo(42);
 	}
 
 }

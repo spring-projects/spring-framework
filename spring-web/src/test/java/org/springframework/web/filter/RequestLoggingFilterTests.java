@@ -33,11 +33,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link AbstractRequestLoggingFilter} and subclasses.
@@ -60,13 +56,13 @@ public class RequestLoggingFilterTests {
 		FilterChain filterChain = new NoOpFilterChain();
 		filter.doFilter(request, response, filterChain);
 
-		assertNotNull(filter.beforeRequestMessage);
-		assertTrue(filter.beforeRequestMessage.contains("uri=/hotel"));
-		assertFalse(filter.beforeRequestMessage.contains("booking=42"));
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.contains("uri=/hotel")).isTrue();
+		assertThat(filter.beforeRequestMessage.contains("booking=42")).isFalse();
 
-		assertNotNull(filter.afterRequestMessage);
-		assertTrue(filter.afterRequestMessage.contains("uri=/hotel"));
-		assertFalse(filter.afterRequestMessage.contains("booking=42"));
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains("uri=/hotel")).isTrue();
+		assertThat(filter.afterRequestMessage.contains("booking=42")).isFalse();
 	}
 
 	@Test
@@ -81,11 +77,11 @@ public class RequestLoggingFilterTests {
 		FilterChain filterChain = new NoOpFilterChain();
 		filter.doFilter(request, response, filterChain);
 
-		assertNotNull(filter.beforeRequestMessage);
-		assertTrue(filter.beforeRequestMessage.contains("[uri=/hotels?booking=42]"));
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.contains("[uri=/hotels?booking=42]")).isTrue();
 
-		assertNotNull(filter.afterRequestMessage);
-		assertTrue(filter.afterRequestMessage.contains("[uri=/hotels?booking=42]"));
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains("[uri=/hotels?booking=42]")).isTrue();
 	}
 
 	@Test
@@ -98,11 +94,11 @@ public class RequestLoggingFilterTests {
 		FilterChain filterChain = new NoOpFilterChain();
 		filter.doFilter(request, response, filterChain);
 
-		assertNotNull(filter.beforeRequestMessage);
-		assertTrue(filter.beforeRequestMessage.contains("[uri=/hotels]"));
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage.contains("[uri=/hotels]")).isTrue();
 
-		assertNotNull(filter.afterRequestMessage);
-		assertTrue(filter.afterRequestMessage.contains("[uri=/hotels]"));
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains("[uri=/hotels]")).isTrue();
 	}
 
 	@Test
@@ -117,13 +113,11 @@ public class RequestLoggingFilterTests {
 		filter.setHeaderPredicate(name -> !name.equalsIgnoreCase("token"));
 		filter.doFilter(request, response, filterChain);
 
-		assertNotNull(filter.beforeRequestMessage);
-		assertEquals("Before request [uri=/hotels;headers=[Content-Type:\"application/json\", token:\"masked\"]]",
-				filter.beforeRequestMessage);
+		assertThat(filter.beforeRequestMessage).isNotNull();
+		assertThat(filter.beforeRequestMessage).isEqualTo("Before request [uri=/hotels;headers=[Content-Type:\"application/json\", token:\"masked\"]]");
 
-		assertNotNull(filter.afterRequestMessage);
-		assertEquals("After request [uri=/hotels;headers=[Content-Type:\"application/json\", token:\"masked\"]]",
-				filter.afterRequestMessage);
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage).isEqualTo("After request [uri=/hotels;headers=[Content-Type:\"application/json\", token:\"masked\"]]");
 	}
 
 	@Test
@@ -139,13 +133,13 @@ public class RequestLoggingFilterTests {
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
 			((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
 			byte[] buf = FileCopyUtils.copyToByteArray(filterRequest.getInputStream());
-			assertArrayEquals(requestBody, buf);
+			assertThat(buf).isEqualTo(requestBody);
 		};
 
 		filter.doFilter(request, response, filterChain);
 
-		assertNotNull(filter.afterRequestMessage);
-		assertTrue(filter.afterRequestMessage.contains("Hello World"));
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains("Hello World")).isTrue();
 	}
 
 	@Test
@@ -161,13 +155,13 @@ public class RequestLoggingFilterTests {
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
 			((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
 			String buf = FileCopyUtils.copyToString(filterRequest.getReader());
-			assertEquals(requestBody, buf);
+			assertThat(buf).isEqualTo(requestBody);
 		};
 
 		filter.doFilter(request, response, filterChain);
 
-		assertNotNull(filter.afterRequestMessage);
-		assertTrue(filter.afterRequestMessage.contains(requestBody));
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains(requestBody)).isTrue();
 	}
 
 	@Test
@@ -184,17 +178,17 @@ public class RequestLoggingFilterTests {
 		FilterChain filterChain = (filterRequest, filterResponse) -> {
 			((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
 			byte[] buf = FileCopyUtils.copyToByteArray(filterRequest.getInputStream());
-			assertArrayEquals(requestBody, buf);
+			assertThat(buf).isEqualTo(requestBody);
 			ContentCachingRequestWrapper wrapper =
 					WebUtils.getNativeRequest(filterRequest, ContentCachingRequestWrapper.class);
-			assertArrayEquals("Hel".getBytes(StandardCharsets.UTF_8), wrapper.getContentAsByteArray());
+			assertThat(wrapper.getContentAsByteArray()).isEqualTo("Hel".getBytes(StandardCharsets.UTF_8));
 		};
 
 		filter.doFilter(request, response, filterChain);
 
-		assertNotNull(filter.afterRequestMessage);
-		assertTrue(filter.afterRequestMessage.contains("Hel"));
-		assertFalse(filter.afterRequestMessage.contains("Hello World"));
+		assertThat(filter.afterRequestMessage).isNotNull();
+		assertThat(filter.afterRequestMessage.contains("Hel")).isTrue();
+		assertThat(filter.afterRequestMessage.contains("Hello World")).isFalse();
 	}
 
 

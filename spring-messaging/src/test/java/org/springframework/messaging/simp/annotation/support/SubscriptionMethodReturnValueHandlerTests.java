@@ -45,11 +45,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -113,9 +109,9 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(this.handler.supportsReturnType(this.subscribeEventReturnType));
-		assertFalse(this.handler.supportsReturnType(this.subscribeEventSendToReturnType));
-		assertFalse(this.handler.supportsReturnType(this.messageMappingReturnType));
+		assertThat(this.handler.supportsReturnType(this.subscribeEventReturnType)).isTrue();
+		assertThat(this.handler.supportsReturnType(this.subscribeEventSendToReturnType)).isFalse();
+		assertThat(this.handler.supportsReturnType(this.messageMappingReturnType)).isFalse();
 	}
 
 	@Test
@@ -130,18 +126,18 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		this.handler.handleReturnValue(PAYLOAD, this.subscribeEventReturnType, inputMessage);
 
 		verify(this.messageChannel).send(this.messageCaptor.capture());
-		assertNotNull(this.messageCaptor.getValue());
+		assertThat(this.messageCaptor.getValue()).isNotNull();
 
 		Message<?> message = this.messageCaptor.getValue();
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
 
-		assertNull("SimpMessageHeaderAccessor should have disabled id", headerAccessor.getId());
-		assertNull("SimpMessageHeaderAccessor should have disabled timestamp", headerAccessor.getTimestamp());
-		assertEquals(sessionId, headerAccessor.getSessionId());
-		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
-		assertEquals(destination, headerAccessor.getDestination());
-		assertEquals(MIME_TYPE, headerAccessor.getContentType());
-		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
+		assertThat(headerAccessor.getId()).as("SimpMessageHeaderAccessor should have disabled id").isNull();
+		assertThat(headerAccessor.getTimestamp()).as("SimpMessageHeaderAccessor should have disabled timestamp").isNull();
+		assertThat(headerAccessor.getSessionId()).isEqualTo(sessionId);
+		assertThat(headerAccessor.getSubscriptionId()).isEqualTo(subscriptionId);
+		assertThat(headerAccessor.getDestination()).isEqualTo(destination);
+		assertThat(headerAccessor.getContentType()).isEqualTo(MIME_TYPE);
+		assertThat(headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER)).isEqualTo(this.subscribeEventReturnType);
 	}
 
 	@Test
@@ -163,11 +159,11 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor(captor.getValue(), SimpMessageHeaderAccessor.class);
 
-		assertNotNull(headerAccessor);
-		assertTrue(headerAccessor.isMutable());
-		assertEquals(sessionId, headerAccessor.getSessionId());
-		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
-		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
+		assertThat(headerAccessor).isNotNull();
+		assertThat(headerAccessor.isMutable()).isTrue();
+		assertThat(headerAccessor.getSessionId()).isEqualTo(sessionId);
+		assertThat(headerAccessor.getSubscriptionId()).isEqualTo(subscriptionId);
+		assertThat(headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER)).isEqualTo(this.subscribeEventReturnType);
 	}
 
 	@Test
@@ -183,9 +179,9 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel).send(this.messageCaptor.capture());
 		Message<?> message = this.messageCaptor.getValue();
-		assertNotNull(message);
+		assertThat(message).isNotNull();
 
-		assertEquals("{\"withView1\":\"with\"}", new String((byte[]) message.getPayload(), StandardCharsets.UTF_8));
+		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_8)).isEqualTo("{\"withView1\":\"with\"}");
 	}
 
 

@@ -30,7 +30,6 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link AppCacheManifestTransformer}.
@@ -82,7 +81,7 @@ public class AppCacheManifestTransformerTests {
 		Resource resource = getResource("foo.css");
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
 
-		assertEquals(resource, result);
+		assertThat(result).isEqualTo(resource);
 	}
 
 	@Test
@@ -91,7 +90,7 @@ public class AppCacheManifestTransformerTests {
 		Resource resource = getResource("error.appcache");
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
 
-		assertEquals(resource, result);
+		assertThat(result).isEqualTo(resource);
 	}
 
 	@Test

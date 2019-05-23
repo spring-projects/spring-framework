@@ -21,8 +21,8 @@ import javax.naming.NameNotFoundException;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -50,7 +50,7 @@ public class JndiTemplateTests {
 		};
 
 		Object o2 = jt.lookup(name);
-		assertEquals(o, o2);
+		assertThat(o2).isEqualTo(o);
 		verify(context).close();
 	}
 

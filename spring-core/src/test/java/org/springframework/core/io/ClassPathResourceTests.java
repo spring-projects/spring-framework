@@ -22,10 +22,8 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests that serve as regression tests for the bugs described in SPR-6888
@@ -100,35 +98,35 @@ public class ClassPathResourceTests {
 
 	@Test
 	public void dropLeadingSlashForClassLoaderAccess() {
-		assertEquals("test.html", new ClassPathResource("/test.html").getPath());
-		assertEquals("test.html", ((ClassPathResource) new ClassPathResource("").createRelative("/test.html")).getPath());
+		assertThat(new ClassPathResource("/test.html").getPath()).isEqualTo("test.html");
+		assertThat(((ClassPathResource) new ClassPathResource("").createRelative("/test.html")).getPath()).isEqualTo("test.html");
 	}
 
 	@Test
 	public void preserveLeadingSlashForClassRelativeAccess() {
-		assertEquals("/test.html", new ClassPathResource("/test.html", getClass()).getPath());
-		assertEquals("/test.html", ((ClassPathResource) new ClassPathResource("", getClass()).createRelative("/test.html")).getPath());
+		assertThat(new ClassPathResource("/test.html", getClass()).getPath()).isEqualTo("/test.html");
+		assertThat(((ClassPathResource) new ClassPathResource("", getClass()).createRelative("/test.html")).getPath()).isEqualTo("/test.html");
 	}
 
 	@Test
 	public void directoryNotReadable() {
 		Resource fileDir = new ClassPathResource("org/springframework/core");
-		assertTrue(fileDir.exists());
-		assertFalse(fileDir.isReadable());
+		assertThat(fileDir.exists()).isTrue();
+		assertThat(fileDir.isReadable()).isFalse();
 
 		Resource jarDir = new ClassPathResource("reactor/core");
-		assertTrue(jarDir.exists());
-		assertFalse(jarDir.isReadable());
+		assertThat(jarDir.exists()).isTrue();
+		assertThat(jarDir.isReadable()).isFalse();
 	}
 
 
 	private void assertDescriptionContainsExpectedPath(ClassPathResource resource, String expectedPath) {
 		Matcher matcher = DESCRIPTION_PATTERN.matcher(resource.getDescription());
-		assertTrue(matcher.matches());
-		assertEquals(1, matcher.groupCount());
+		assertThat(matcher.matches()).isTrue();
+		assertThat(matcher.groupCount()).isEqualTo(1);
 		String match = matcher.group(1);
 
-		assertEquals(expectedPath, match);
+		assertThat(match).isEqualTo(expectedPath);
 	}
 
 	private void assertExceptionContainsFullyQualifiedPath(ClassPathResource resource) {

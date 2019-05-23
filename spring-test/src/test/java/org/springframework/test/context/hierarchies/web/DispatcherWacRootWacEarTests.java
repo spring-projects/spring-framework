@@ -27,11 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -70,27 +66,27 @@ public class DispatcherWacRootWacEarTests extends RootWacEarTests {
 	@Test
 	public void verifyDispatcherWacConfig() {
 		ApplicationContext parent = wac.getParent();
-		assertNotNull(parent);
-		assertTrue(parent instanceof WebApplicationContext);
+		assertThat(parent).isNotNull();
+		boolean condition = parent instanceof WebApplicationContext;
+		assertThat(condition).isTrue();
 
 		ApplicationContext grandParent = parent.getParent();
-		assertNotNull(grandParent);
-		assertFalse(grandParent instanceof WebApplicationContext);
+		assertThat(grandParent).isNotNull();
+		boolean condition1 = grandParent instanceof WebApplicationContext;
+		assertThat(condition1).isFalse();
 
 		ServletContext dispatcherServletContext = wac.getServletContext();
-		assertNotNull(dispatcherServletContext);
+		assertThat(dispatcherServletContext).isNotNull();
 		ServletContext rootServletContext = ((WebApplicationContext) parent).getServletContext();
-		assertNotNull(rootServletContext);
-		assertSame(dispatcherServletContext, rootServletContext);
+		assertThat(rootServletContext).isNotNull();
+		assertThat(rootServletContext).isSameAs(dispatcherServletContext);
 
-		assertSame(parent,
-			rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
-		assertSame(parent,
-			dispatcherServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertThat(rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE)).isSameAs(parent);
+		assertThat(dispatcherServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE)).isSameAs(parent);
 
-		assertEquals("ear", ear);
-		assertEquals("root", root);
-		assertEquals("dispatcher", dispatcher);
+		assertThat(ear).isEqualTo("ear");
+		assertThat(root).isEqualTo("root");
+		assertThat(dispatcher).isEqualTo("dispatcher");
 	}
 
 }

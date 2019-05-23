@@ -18,9 +18,8 @@ package org.springframework.beans.factory.wiring;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for the ClassNameBeanWiringInfoResolver class.
@@ -40,9 +39,8 @@ public class ClassNameBeanWiringInfoResolverTests {
 		ClassNameBeanWiringInfoResolver resolver = new ClassNameBeanWiringInfoResolver();
 		Long beanInstance = new Long(1);
 		BeanWiringInfo info = resolver.resolveWiringInfo(beanInstance);
-		assertNotNull(info);
-		assertEquals("Not resolving bean name to the class name of the supplied bean instance as per class contract.",
-				beanInstance.getClass().getName(), info.getBeanName());
+		assertThat(info).isNotNull();
+		assertThat(info.getBeanName()).as("Not resolving bean name to the class name of the supplied bean instance as per class contract.").isEqualTo(beanInstance.getClass().getName());
 	}
 
 }

@@ -41,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -248,7 +247,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		@Override
 		public int getInvocationCount() {
 			if (this.myAspect != null) {
-				assertEquals(this.count.get(), this.myAspect.count.get());
+				assertThat(this.myAspect.count.get()).isEqualTo(this.count.get());
 			}
 			return this.count.get();
 		}

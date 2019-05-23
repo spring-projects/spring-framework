@@ -30,9 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link UrlBasedViewResolver}.
@@ -60,10 +58,10 @@ public class UrlBasedViewResolverTests {
 		this.resolver.setViewNames("my*");
 
 		Mono<View> mono = this.resolver.resolveViewName("my-view", Locale.US);
-		assertNotNull(mono.block());
+		assertThat(mono.block()).isNotNull();
 
 		mono = this.resolver.resolveViewName("not-my-view", Locale.US);
-		assertNull(mono.block());
+		assertThat(mono.block()).isNull();
 	}
 
 	@Test
@@ -72,10 +70,10 @@ public class UrlBasedViewResolverTests {
 
 		StepVerifier.create(mono)
 				.consumeNextWith(view -> {
-					assertEquals(RedirectView.class, view.getClass());
+					assertThat(view.getClass()).isEqualTo(RedirectView.class);
 					RedirectView redirectView = (RedirectView) view;
-					assertEquals("foo", redirectView.getUrl());
-					assertEquals(HttpStatus.SEE_OTHER, redirectView.getStatusCode());
+					assertThat(redirectView.getUrl()).isEqualTo("foo");
+					assertThat(redirectView.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 				})
 				.expectComplete()
 				.verify(Duration.ZERO);
@@ -88,10 +86,10 @@ public class UrlBasedViewResolverTests {
 
 		StepVerifier.create(mono)
 				.consumeNextWith(view -> {
-					assertEquals(RedirectView.class, view.getClass());
+					assertThat(view.getClass()).isEqualTo(RedirectView.class);
 					RedirectView redirectView = (RedirectView) view;
-					assertEquals("foo", redirectView.getUrl());
-					assertEquals(HttpStatus.FOUND, redirectView.getStatusCode());
+					assertThat(redirectView.getUrl()).isEqualTo("foo");
+					assertThat(redirectView.getStatusCode()).isEqualTo(HttpStatus.FOUND);
 				})
 				.expectComplete()
 				.verify(Duration.ZERO);

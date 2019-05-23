@@ -32,8 +32,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -84,14 +83,14 @@ public class RowMapperTests {
 
 	@After
 	public void verifyResults() {
-		assertNotNull(result);
-		assertEquals(2, result.size());
+		assertThat(result).isNotNull();
+		assertThat(result.size()).isEqualTo(2);
 		TestBean testBean1 = result.get(0);
 		TestBean testBean2 = result.get(1);
-		assertEquals("tb1", testBean1.getName());
-		assertEquals("tb2", testBean2.getName());
-		assertEquals(1, testBean1.getAge());
-		assertEquals(2, testBean2.getAge());
+		assertThat(testBean1.getName()).isEqualTo("tb1");
+		assertThat(testBean2.getName()).isEqualTo("tb2");
+		assertThat(testBean1.getAge()).isEqualTo(1);
+		assertThat(testBean2.getAge()).isEqualTo(2);
 	}
 
 	@Test

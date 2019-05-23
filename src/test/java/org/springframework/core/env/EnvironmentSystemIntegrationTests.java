@@ -166,7 +166,7 @@ public class EnvironmentSystemIntegrationTests {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(ctx);
 		scanner.scan("org.springframework.core.env.scan2");
 		ctx.refresh();
-		assertThat(scanner.getEnvironment()).isEqualTo((Environment)ctx.getEnvironment());
+		assertThat(scanner.getEnvironment()).isEqualTo(ctx.getEnvironment());
 		assertThat(ctx.containsBean(DEV_BEAN_NAME)).isFalse();
 		assertThat(ctx.containsBean(PROD_BEAN_NAME)).isTrue();
 	}

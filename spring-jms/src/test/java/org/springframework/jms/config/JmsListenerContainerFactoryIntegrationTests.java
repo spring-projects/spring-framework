@@ -41,8 +41,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -136,7 +135,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 	}
 
 	private void assertListenerMethodInvocation(String methodName) {
-		assertTrue("Method " + methodName + " should have been invoked", sample.invocations.get(methodName));
+		assertThat((boolean) sample.invocations.get(methodName)).as("Method " + methodName + " should have been invoked").isTrue();
 	}
 
 	private MethodJmsListenerEndpoint createMethodJmsEndpoint(DefaultMessageHandlerMethodFactory factory, Method method) {
@@ -169,8 +168,8 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 		public void handleIt(@Payload String msg, @Header("my-header") String myHeader) {
 			invocations.put("handleIt", true);
-			assertEquals("Unexpected payload message", "FOO-BAR", msg);
-			assertEquals("Unexpected header value", "my-value", myHeader);
+			assertThat(msg).as("Unexpected payload message").isEqualTo("FOO-BAR");
+			assertThat(myHeader).as("Unexpected header value").isEqualTo("my-value");
 		}
 	}
 
