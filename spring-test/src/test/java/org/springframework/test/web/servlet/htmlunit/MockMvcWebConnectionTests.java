@@ -29,8 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+
 
 /**
  * Integration tests for {@link MockMvcWebConnection}.
@@ -50,14 +49,14 @@ public class MockMvcWebConnectionTests {
 	public void contextPathNull() throws IOException {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, null));
 		Page page = this.webClient.getPage("http://localhost/context/a");
-		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
+		assertThat(page.getWebResponse().getStatusCode()).isEqualTo(200);
 	}
 
 	@Test
 	public void contextPathExplicit() throws IOException {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, "/context"));
 		Page page = this.webClient.getPage("http://localhost/context/a");
-		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
+		assertThat(page.getWebResponse().getStatusCode()).isEqualTo(200);
 	}
 
 	@Test
@@ -78,7 +77,7 @@ public class MockMvcWebConnectionTests {
 	public void forward() throws IOException {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 		Page page = this.webClient.getPage("http://localhost/forward");
-		assertThat(page.getWebResponse().getContentAsString(), equalTo("hello"));
+		assertThat(page.getWebResponse().getContentAsString()).isEqualTo("hello");
 	}
 
 	@Test

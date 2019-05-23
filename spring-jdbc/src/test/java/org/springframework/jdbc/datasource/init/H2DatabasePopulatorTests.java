@@ -20,8 +20,9 @@ import org.junit.Test;
 
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
 
 /**
  * @author Sam Brannen
@@ -48,7 +49,7 @@ public class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 		databasePopulator.setSeparator("\n\n");
 		DatabasePopulatorUtils.execute(databasePopulator, db);
 		String sql = "select REVERSE(first_name) from users where last_name='Brannen'";
-		assertThat(jdbcTemplate.queryForObject(sql, String.class), equalTo("maS"));
+		assertThat(jdbcTemplate.queryForObject(sql, String.class)).isEqualTo("maS");
 	}
 
 }

@@ -27,8 +27,9 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import org.springframework.tests.XmlContent;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link DomContentHandler}.
@@ -77,7 +78,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_1)));
-		assertThat("Invalid result", result, isSimilarTo(expected));
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 
 	@Test
@@ -86,7 +87,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_1)));
-		assertThat("Invalid result", result, isSimilarTo(expected));
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 
 	@Test
@@ -97,7 +98,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_2_EXPECTED)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_2_SNIPPET)));
-		assertThat("Invalid result", result, isSimilarTo(expected));
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 
 }

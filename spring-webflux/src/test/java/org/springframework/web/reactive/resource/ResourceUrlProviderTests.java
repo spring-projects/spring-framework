@@ -23,9 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matchers;
+import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +37,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.util.pattern.PathPattern;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 
@@ -138,10 +136,16 @@ public class ResourceUrlProviderTests {
 		context.register(HandlerMappingConfiguration.class);
 		context.refresh();
 
-		assertThat(context.getBean(ResourceUrlProvider.class).getHandlerMap(),
-				Matchers.hasKey(pattern("/resources/**")));
+		assertThat(context.getBean(ResourceUrlProvider.class).getHandlerMap())
+				.hasKeySatisfying(pathPatternStringOf("/resources/**"));
 	}
 
+
+	private Condition<PathPattern> pathPatternStringOf(String expected) {
+		return new Condition<PathPattern>(
+				actual -> actual != null && actual.getPatternString().equals(expected),
+				"Pattern %s", expected);
+	}
 
 	@Configuration
 	@SuppressWarnings({"unused", "WeakerAccess"})
@@ -160,32 +164,6 @@ public class ResourceUrlProviderTests {
 		@Bean
 		public ResourceUrlProvider resourceUrlProvider() {
 			return new ResourceUrlProvider();
-		}
-	}
-
-	private static PathPatternMatcher pattern(String pattern) {
-		return new PathPatternMatcher(pattern);
-	}
-
-	private static class PathPatternMatcher extends BaseMatcher<PathPattern> {
-
-		private final String pattern;
-
-		public PathPatternMatcher(String pattern) {
-			this.pattern = pattern;
-		}
-
-		@Override
-		public boolean matches(Object item) {
-			if (item != null && item instanceof PathPattern) {
-				return ((PathPattern) item).getPatternString().equals(pattern);
-			}
-			return false;
-		}
-
-		@Override
-		public void describeTo(Description description) {
-
 		}
 	}
 

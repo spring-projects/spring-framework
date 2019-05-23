@@ -21,8 +21,7 @@ import org.junit.Test;
 import org.springframework.stereotype.Component;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -52,7 +51,7 @@ public class NestedConfigurationClassTests {
 		ctx.getBean("l2Bean");
 
 		// ensure that override order is correct
-		assertThat(ctx.getBean("overrideBean", TestBean.class).getName(), is("override-l1"));
+		assertThat(ctx.getBean("overrideBean", TestBean.class).getName()).isEqualTo("override-l1");
 	}
 
 	@Test
@@ -74,7 +73,7 @@ public class NestedConfigurationClassTests {
 		ctx.getBean("l2Bean");
 
 		// ensure that override order is correct
-		assertThat(ctx.getBean("overrideBean", TestBean.class).getName(), is("override-l0"));
+		assertThat(ctx.getBean("overrideBean", TestBean.class).getName()).isEqualTo("override-l0");
 	}
 
 	@Test
@@ -96,7 +95,7 @@ public class NestedConfigurationClassTests {
 		ctx.getBean("l2Bean");
 
 		// ensure that override order is correct
-		assertThat(ctx.getBean("overrideBean", TestBean.class).getName(), is("override-l0"));
+		assertThat(ctx.getBean("overrideBean", TestBean.class).getName()).isEqualTo("override-l0");
 	}
 
 	@Test
@@ -118,7 +117,7 @@ public class NestedConfigurationClassTests {
 
 		// ensure that override order is correct and that it is a singleton
 		TestBean ob = ctx.getBean("overrideBean", TestBean.class);
-		assertThat(ob.getName(), is("override-s1"));
+		assertThat(ob.getName()).isEqualTo("override-s1");
 		assertTrue(ob == ctx.getBean("overrideBean", TestBean.class));
 
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);
@@ -146,7 +145,7 @@ public class NestedConfigurationClassTests {
 
 		// ensure that override order is correct and that it is a singleton
 		TestBean ob = ctx.getBean("overrideBean", TestBean.class);
-		assertThat(ob.getName(), is("override-s1"));
+		assertThat(ob.getName()).isEqualTo("override-s1");
 		assertTrue(ob == ctx.getBean("overrideBean", TestBean.class));
 
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);
@@ -174,7 +173,7 @@ public class NestedConfigurationClassTests {
 
 		// ensure that override order is correct and that it is a singleton
 		TestBean ob = ctx.getBean("overrideBean", TestBean.class);
-		assertThat(ob.getName(), is("override-s1"));
+		assertThat(ob.getName()).isEqualTo("override-s1");
 		assertTrue(ob == ctx.getBean("overrideBean", TestBean.class));
 
 		TestBean pb1 = ctx.getBean("prototypeBean", TestBean.class);

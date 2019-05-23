@@ -33,8 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Repository;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -53,7 +52,7 @@ public class EnableCachingIntegrationTests {
 		ctx.refresh();
 
 		assertCacheProxying(ctx);
-		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooRepository.class)), is(true));
+		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooRepository.class))).isTrue();
 	}
 
 	@Test

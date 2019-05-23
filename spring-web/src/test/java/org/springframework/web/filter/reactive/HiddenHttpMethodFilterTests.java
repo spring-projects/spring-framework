@@ -18,7 +18,6 @@ package org.springframework.web.filter.reactive;
 
 import java.time.Duration;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -31,7 +30,7 @@ import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -81,7 +80,7 @@ public class HiddenHttpMethodFilterTests {
 	public void filterWithInvalidMethodValue() {
 		StepVerifier.create(postForm("_method=INVALID"))
 				.consumeErrorWith(error -> {
-					assertThat(error, Matchers.instanceOf(IllegalArgumentException.class));
+					assertThat(error).isInstanceOf(IllegalArgumentException.class);
 					assertEquals("HttpMethod 'INVALID' not supported", error.getMessage());
 				})
 				.verify();

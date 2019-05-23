@@ -18,21 +18,19 @@ package org.springframework.web.servlet.view.groovy;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.Locale;
 
 import groovy.text.TemplateEngine;
 import groovy.text.markup.MarkupTemplateEngine;
 import groovy.text.markup.TemplateConfiguration;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -112,19 +110,19 @@ public class GroovyMarkupConfigurerTests {
 		ClassLoader classLoader = this.configurer.createTemplateClassLoader();
 		assertNotNull(classLoader);
 		URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
-		assertThat(Arrays.asList(urlClassLoader.getURLs()), Matchers.hasSize(1));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(),
-				Matchers.endsWith("org/springframework/web/servlet/view/groovy/"));
+		assertThat(urlClassLoader.getURLs()).hasSize(1);
+		assertThat(urlClassLoader.getURLs()[0].toString())
+				.endsWith("org/springframework/web/servlet/view/groovy/");
 
 		this.configurer.setResourceLoaderPath(RESOURCE_LOADER_PATH + ",classpath:org/springframework/web/servlet/view/");
 		classLoader = this.configurer.createTemplateClassLoader();
 		assertNotNull(classLoader);
 		urlClassLoader = (URLClassLoader) classLoader;
-		assertThat(Arrays.asList(urlClassLoader.getURLs()), Matchers.hasSize(2));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(),
-				Matchers.endsWith("org/springframework/web/servlet/view/groovy/"));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(1).toString(),
-				Matchers.endsWith("org/springframework/web/servlet/view/"));
+		assertThat(urlClassLoader.getURLs()).hasSize(2);
+		assertThat(urlClassLoader.getURLs()[0].toString())
+				.endsWith("org/springframework/web/servlet/view/groovy/");
+		assertThat(urlClassLoader.getURLs()[1].toString())
+				.endsWith("org/springframework/web/servlet/view/");
 	}
 
 	private class TestTemplateEngine extends MarkupTemplateEngine {
@@ -145,7 +143,7 @@ public class GroovyMarkupConfigurerTests {
 		LocaleContextHolder.setLocale(Locale.GERMANY);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
 		assertNotNull(url);
-		assertThat(url.getPath(), Matchers.containsString("i18n_de_DE.tpl"));
+		assertThat(url.getPath()).contains("i18n_de_DE.tpl");
 	}
 
 	@Test
@@ -153,7 +151,7 @@ public class GroovyMarkupConfigurerTests {
 		LocaleContextHolder.setLocale(Locale.FRANCE);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
 		assertNotNull(url);
-		assertThat(url.getPath(), Matchers.containsString("i18n_fr.tpl"));
+		assertThat(url.getPath()).contains("i18n_fr.tpl");
 	}
 
 	@Test
@@ -161,7 +159,7 @@ public class GroovyMarkupConfigurerTests {
 		LocaleContextHolder.setLocale(Locale.US);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
 		assertNotNull(url);
-		assertThat(url.getPath(), Matchers.containsString("i18n.tpl"));
+		assertThat(url.getPath()).contains("i18n.tpl");
 	}
 
 	@Test

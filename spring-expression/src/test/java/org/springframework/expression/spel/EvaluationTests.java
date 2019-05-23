@@ -45,8 +45,6 @@ import org.springframework.expression.spel.testresources.TestPerson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -671,14 +669,14 @@ public class EvaluationTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser( new SpelParserConfiguration(true, true, 3));
 		Expression e = parser.parseExpression("foo[2]");
 		e.setValue(ctx, "2");
-		assertThat(instance.getFoo().size(), equalTo(3));
+		assertThat(instance.getFoo().size()).isEqualTo(3);
 		e = parser.parseExpression("foo[3]");
 		try {
 			e.setValue(ctx, "3");
 		}
 		catch (SpelEvaluationException see) {
 			assertEquals(SpelMessage.UNABLE_TO_GROW_COLLECTION, see.getMessageCode());
-			assertThat(instance.getFoo().size(), equalTo(3));
+			assertThat(instance.getFoo().size()).isEqualTo(3);
 		}
 	}
 

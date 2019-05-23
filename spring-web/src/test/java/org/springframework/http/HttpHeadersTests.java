@@ -36,13 +36,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyCollectionOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -67,22 +62,22 @@ public class HttpHeadersTests {
 	public void getOrEmpty() {
 		String key = "FOO";
 
-		assertThat(headers.get(key), is(nullValue()));
-		assertThat(headers.getOrEmpty(key), is(empty()));
+		assertThat(headers.get(key)).isNull();
+		assertThat(headers.getOrEmpty(key)).isEmpty();
 
 		headers.add(key, "bar");
-		assertThat(headers.getOrEmpty(key), is(Arrays.asList("bar")));
+		assertThat(headers.getOrEmpty(key)).containsExactly("bar");
 
 		headers.remove(key);
-		assertThat(headers.get(key), is(nullValue()));
-		assertThat(headers.getOrEmpty(key), is(empty()));
+		assertThat(headers.get(key)).isNull();
+		assertThat(headers.getOrEmpty(key)).isEmpty();
 	}
 
 	@Test
 	public void getFirst() {
 		headers.add(HttpHeaders.CACHE_CONTROL, "max-age=1000, public");
 		headers.add(HttpHeaders.CACHE_CONTROL, "s-maxage=1000");
-		assertThat(headers.getFirst(HttpHeaders.CACHE_CONTROL), is("max-age=1000, public"));
+		assertThat(headers.getFirst(HttpHeaders.CACHE_CONTROL)).isEqualTo("max-age=1000, public");
 	}
 
 	@Test
@@ -223,7 +218,7 @@ public class HttpHeadersTests {
 		headers.add(HttpHeaders.IF_MATCH, "W/\"v2,1\", \"v2,2\"");
 		assertEquals("Invalid If-Match header", "\"v2,0\"", headers.get(HttpHeaders.IF_MATCH).get(0));
 		assertEquals("Invalid If-Match header", "W/\"v2,1\", \"v2,2\"", headers.get(HttpHeaders.IF_MATCH).get(1));
-		assertThat(headers.getIfMatch(), contains("\"v2,0\"", "W/\"v2,1\"", "\"v2,2\""));
+		assertThat(headers.getIfMatch()).contains("\"v2,0\"", "W/\"v2,1\"", "\"v2,2\"");
 	}
 
 	@Test
@@ -250,7 +245,7 @@ public class HttpHeadersTests {
 		ifNoneMatchList.add(ifNoneMatch1);
 		ifNoneMatchList.add(ifNoneMatch2);
 		headers.setIfNoneMatch(ifNoneMatchList);
-		assertThat(headers.getIfNoneMatch(), contains("\"v2.6\"", "\"v2.7\"", "\"v2.8\""));
+		assertThat(headers.getIfNoneMatch()).contains("\"v2.6\"", "\"v2.7\"", "\"v2.8\"");
 		assertEquals("Invalid If-None-Match header", "\"v2.6\", \"v2.7\", \"v2.8\"", headers.getFirst("If-None-Match"));
 	}
 
@@ -399,7 +394,7 @@ public class HttpHeadersTests {
 	@Test  // SPR-11917
 	public void getAllowEmptySet() {
 		headers.setAllow(Collections.emptySet());
-		assertThat(headers.getAllow(), is(emptyCollectionOf(HttpMethod.class)));
+		assertThat(headers.getAllow()).isEmpty();
 	}
 
 	@Test
@@ -414,7 +409,7 @@ public class HttpHeadersTests {
 	@Test
 	public void accessControlAllowHeaders() {
 		List<String> allowedHeaders = headers.getAccessControlAllowHeaders();
-		assertThat(allowedHeaders, is(emptyCollectionOf(String.class)));
+		assertThat(allowedHeaders).isEmpty();
 		headers.setAccessControlAllowHeaders(Arrays.asList("header1", "header2"));
 		allowedHeaders = headers.getAccessControlAllowHeaders();
 		assertEquals(allowedHeaders, Arrays.asList("header1", "header2"));
@@ -423,7 +418,7 @@ public class HttpHeadersTests {
 	@Test
 	public void accessControlAllowHeadersMultipleValues() {
 		List<String> allowedHeaders = headers.getAccessControlAllowHeaders();
-		assertThat(allowedHeaders, is(emptyCollectionOf(String.class)));
+		assertThat(allowedHeaders).isEmpty();
 		headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "header1, header2");
 		headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "header3");
 		allowedHeaders = headers.getAccessControlAllowHeaders();
@@ -433,7 +428,7 @@ public class HttpHeadersTests {
 	@Test
 	public void accessControlAllowMethods() {
 		List<HttpMethod> allowedMethods = headers.getAccessControlAllowMethods();
-		assertThat(allowedMethods, is(emptyCollectionOf(HttpMethod.class)));
+		assertThat(allowedMethods).isEmpty();
 		headers.setAccessControlAllowMethods(Arrays.asList(HttpMethod.GET, HttpMethod.POST));
 		allowedMethods = headers.getAccessControlAllowMethods();
 		assertEquals(allowedMethods, Arrays.asList(HttpMethod.GET, HttpMethod.POST));
@@ -449,7 +444,7 @@ public class HttpHeadersTests {
 	@Test
 	public void accessControlExposeHeaders() {
 		List<String> exposedHeaders = headers.getAccessControlExposeHeaders();
-		assertThat(exposedHeaders, is(emptyCollectionOf(String.class)));
+		assertThat(exposedHeaders).isEmpty();
 		headers.setAccessControlExposeHeaders(Arrays.asList("header1", "header2"));
 		exposedHeaders = headers.getAccessControlExposeHeaders();
 		assertEquals(exposedHeaders, Arrays.asList("header1", "header2"));
@@ -465,7 +460,7 @@ public class HttpHeadersTests {
 	@Test
 	public void accessControlRequestHeaders() {
 		List<String> requestHeaders = headers.getAccessControlRequestHeaders();
-		assertThat(requestHeaders, is(emptyCollectionOf(String.class)));
+		assertThat(requestHeaders).isEmpty();
 		headers.setAccessControlRequestHeaders(Arrays.asList("header1", "header2"));
 		requestHeaders = headers.getAccessControlRequestHeaders();
 		assertEquals(requestHeaders, Arrays.asList("header1", "header2"));
@@ -520,20 +515,20 @@ public class HttpHeadersTests {
 	@Test
 	public void firstDate() {
 		headers.setDate(HttpHeaders.DATE, 1496370120000L);
-		assertThat(headers.getFirstDate(HttpHeaders.DATE), is(1496370120000L));
+		assertThat(headers.getFirstDate(HttpHeaders.DATE)).isEqualTo(1496370120000L);
 
 		headers.clear();
 
 		headers.add(HttpHeaders.DATE, "Fri, 02 Jun 2017 02:22:00 GMT");
 		headers.add(HttpHeaders.DATE, "Sat, 18 Dec 2010 10:20:00 GMT");
-		assertThat(headers.getFirstDate(HttpHeaders.DATE), is(1496370120000L));
+		assertThat(headers.getFirstDate(HttpHeaders.DATE)).isEqualTo(1496370120000L);
 	}
 
 	@Test
 	public void firstZonedDateTime() {
 		ZonedDateTime date = ZonedDateTime.of(2017, 6, 2, 2, 22, 0, 0, ZoneId.of("GMT"));
 		headers.setZonedDateTime(HttpHeaders.DATE, date);
-		assertThat(headers.getFirst(HttpHeaders.DATE), is("Fri, 02 Jun 2017 02:22:00 GMT"));
+		assertThat(headers.getFirst(HttpHeaders.DATE)).isEqualTo("Fri, 02 Jun 2017 02:22:00 GMT");
 		assertTrue(headers.getFirstZonedDateTime(HttpHeaders.DATE).isEqual(date));
 
 		headers.clear();

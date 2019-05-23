@@ -60,10 +60,10 @@ import org.springframework.context.index.test.TestCompiler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.springframework.context.index.processor.Metadata.hasComponent;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+
 
 /**
  * Tests for {@link CandidateComponentsIndexer}.
@@ -87,13 +87,13 @@ public class CandidateComponentsIndexerTests {
 	@Test
 	public void noCandidate() {
 		CandidateComponentsMetadata metadata = compile(SampleNone.class);
-		assertThat(metadata.getItems(), hasSize(0));
+		assertThat(metadata.getItems()).hasSize(0);
 	}
 
 	@Test
 	public void noAnnotation() {
 		CandidateComponentsMetadata metadata = compile(CandidateComponentsIndexerTests.class);
-		assertThat(metadata.getItems(), hasSize(0));
+		assertThat(metadata.getItems()).hasSize(0);
 	}
 
 	@Test
@@ -171,7 +171,7 @@ public class CandidateComponentsIndexerTests {
 	public void packageInfo() {
 		CandidateComponentsMetadata metadata = compile(
 				"org/springframework/context/index/sample/jpa/package-info");
-		assertThat(metadata, hasComponent(
+		assertThat(metadata).has(Metadata.of(
 				"org.springframework.context.index.sample.jpa", "package-info"));
 	}
 
@@ -211,33 +211,33 @@ public class CandidateComponentsIndexerTests {
 		// Validate nested type structure
 		String nestedType = "org.springframework.context.index.sample.SampleEmbedded.Another$AnotherPublicCandidate";
 		Class<?> type = ClassUtils.forName(nestedType, getClass().getClassLoader());
-		assertThat(type, sameInstance(SampleEmbedded.Another.AnotherPublicCandidate.class));
+		assertThat(type).isSameAs(SampleEmbedded.Another.AnotherPublicCandidate.class);
 
 		CandidateComponentsMetadata metadata = compile(SampleEmbedded.class);
-		assertThat(metadata, hasComponent(
+		assertThat(metadata).has(Metadata.of(
 				SampleEmbedded.PublicCandidate.class, Component.class));
-		assertThat(metadata, hasComponent(nestedType, Component.class.getName()));
-		assertThat(metadata.getItems(), hasSize(2));
+		assertThat(metadata).has(Metadata.of(nestedType, Component.class.getName()));
+		assertThat(metadata.getItems()).hasSize(2);
 	}
 
 	@Test
 	public void embeddedNonStaticCandidateAreIgnored() {
 		CandidateComponentsMetadata metadata = compile(SampleNonStaticEmbedded.class);
-		assertThat(metadata.getItems(), hasSize(0));
+		assertThat(metadata.getItems()).hasSize(0);
 	}
 
 	private void testComponent(Class<?>... classes) {
 		CandidateComponentsMetadata metadata = compile(classes);
 		for (Class<?> c : classes) {
-			assertThat(metadata, hasComponent(c, Component.class));
+			assertThat(metadata).has(Metadata.of(c, Component.class));
 		}
-		assertThat(metadata.getItems(), hasSize(classes.length));
+		assertThat(metadata.getItems()).hasSize(classes.length);
 	}
 
 	private void testSingleComponent(Class<?> target, Class<?>... stereotypes) {
 		CandidateComponentsMetadata metadata = compile(target);
-		assertThat(metadata, hasComponent(target, stereotypes));
-		assertThat(metadata.getItems(), hasSize(1));
+		assertThat(metadata).has(Metadata.of(target, stereotypes));
+		assertThat(metadata.getItems()).hasSize(1);
 	}
 
 	private CandidateComponentsMetadata compile(Class<?>... types) {

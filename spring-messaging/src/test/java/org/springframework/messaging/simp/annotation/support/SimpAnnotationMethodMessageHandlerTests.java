@@ -67,8 +67,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -539,7 +538,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		@MessageMapping("/scope")
 		public void scope() {
 			SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
-			assertThat(simpAttributes.getAttribute("name"), is("value"));
+			assertThat(simpAttributes.getAttribute("name")).isEqualTo("value");
 			this.method = "scope";
 		}
 

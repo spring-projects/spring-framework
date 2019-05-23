@@ -40,11 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -124,19 +121,19 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc)
 				.withDelegate(otherDriver).build();
 
-		assertThat(get("http://localhost/"), equalTo(""));
+		assertThat(get("http://localhost/")).isEqualTo("");
 		Cookie cookie = new Cookie("localhost", "cookie", "cookieManagerShared");
 		otherDriver.getWebClient().getCookieManager().addCookie(cookie);
-		assertThat(get("http://localhost/"), equalTo("cookieManagerShared"));
+		assertThat(get("http://localhost/")).isEqualTo("cookieManagerShared");
 	}
 
 
 	private void assertMockMvcUsed(String url) throws Exception {
-		assertThat(get(url), containsString(EXPECTED_BODY));
+		assertThat(get(url)).contains(EXPECTED_BODY);
 	}
 
 	private void assertMockMvcNotUsed(String url) throws Exception {
-		assertThat(get(url), not(containsString(EXPECTED_BODY)));
+		assertThat(get(url)).doesNotContain(EXPECTED_BODY);
 	}
 
 	private String get(String url) throws IOException {

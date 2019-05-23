@@ -43,9 +43,8 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -111,7 +110,7 @@ public class DefaultStompSessionTests {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		assertEquals(StompCommand.CONNECT, accessor.getCommand());
 		assertEquals("my-host", accessor.getHost());
-		assertThat(accessor.getAcceptVersion(), containsInAnyOrder("1.1", "1.2"));
+		assertThat(accessor.getAcceptVersion()).containsExactly("1.1", "1.2");
 		assertArrayEquals(new long[] {11, 12}, accessor.getHeartbeat());
 	}
 
@@ -125,7 +124,7 @@ public class DefaultStompSessionTests {
 		Message<byte[]> message = this.messageCaptor.getValue();
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		assertEquals(StompCommand.CONNECT, accessor.getCommand());
-		assertThat(accessor.getAcceptVersion(), containsInAnyOrder("1.1"));
+		assertThat(accessor.getAcceptVersion()).containsExactly("1.1");
 	}
 
 	@Test

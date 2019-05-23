@@ -29,11 +29,9 @@ import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+
 
 /**
  * Tests for {@link MockWebResponseBuilder}.
@@ -79,7 +77,7 @@ public class MockWebResponseBuilderTests {
 		this.response.getWriter().write("expected content");
 		WebResponse webResponse = this.responseBuilder.build();
 
-		assertThat(webResponse.getContentAsString(), equalTo("expected content"));
+		assertThat(webResponse.getContentAsString()).isEqualTo("expected content");
 	}
 
 	@Test
@@ -87,7 +85,7 @@ public class MockWebResponseBuilderTests {
 		this.response.addHeader("Content-Type", "text/html; charset=UTF-8");
 		WebResponse webResponse = this.responseBuilder.build();
 
-		assertThat(webResponse.getContentCharset(), equalTo(StandardCharsets.UTF_8));
+		assertThat(webResponse.getContentCharset()).isEqualTo(StandardCharsets.UTF_8);
 	}
 
 	@Test
@@ -95,7 +93,7 @@ public class MockWebResponseBuilderTests {
 		this.response.addHeader("Content-Type", "text/html; charset-UTF-8");
 		WebResponse webResponse = this.responseBuilder.build();
 
-		assertThat(webResponse.getContentType(), equalTo("text/html"));
+		assertThat(webResponse.getContentType()).isEqualTo("text/html");
 	}
 
 	@Test
@@ -112,17 +110,18 @@ public class MockWebResponseBuilderTests {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		List<NameValuePair> responseHeaders = webResponse.getResponseHeaders();
-		assertThat(responseHeaders.size(), equalTo(3));
+		assertThat(responseHeaders.size()).isEqualTo(3);
 		NameValuePair header = responseHeaders.get(0);
-		assertThat(header.getName(), equalTo("Content-Type"));
-		assertThat(header.getValue(), equalTo("text/html"));
+		assertThat(header.getName()).isEqualTo("Content-Type");
+		assertThat(header.getValue()).isEqualTo("text/html");
 		header = responseHeaders.get(1);
-		assertThat(header.getName(), equalTo("X-Test"));
-		assertThat(header.getValue(), equalTo("value"));
+		assertThat(header.getName()).isEqualTo("X-Test");
+		assertThat(header.getValue()).isEqualTo("value");
 		header = responseHeaders.get(2);
-		assertThat(header.getName(), equalTo("Set-Cookie"));
-		assertThat(header.getValue(), startsWith("cookieA=valueA; Path=/path; Domain=domain; Max-Age=1800; Expires="));
-		assertThat(header.getValue(), endsWith("; Secure; HttpOnly"));
+		assertThat(header.getName()).isEqualTo("Set-Cookie");
+		assertThat(header.getValue())
+				.startsWith("cookieA=valueA; Path=/path; Domain=domain; Max-Age=1800; Expires=")
+				.endsWith("; Secure; HttpOnly");
 	}
 
 	// SPR-14169
@@ -133,18 +132,18 @@ public class MockWebResponseBuilderTests {
 		WebResponse webResponse = this.responseBuilder.build();
 
 		List<NameValuePair> responseHeaders = webResponse.getResponseHeaders();
-		assertThat(responseHeaders.size(), equalTo(1));
+		assertThat(responseHeaders.size()).isEqualTo(1);
 		NameValuePair header = responseHeaders.get(0);
-		assertThat(header.getName(), equalTo("Set-Cookie"));
-		assertThat(header.getValue(), equalTo("cookieA=valueA"));
+		assertThat(header.getName()).isEqualTo("Set-Cookie");
+		assertThat(header.getValue()).isEqualTo("cookieA=valueA");
 	}
 
 	@Test
 	public void buildStatus() throws Exception {
 		WebResponse webResponse = this.responseBuilder.build();
 
-		assertThat(webResponse.getStatusCode(), equalTo(200));
-		assertThat(webResponse.getStatusMessage(), equalTo("OK"));
+		assertThat(webResponse.getStatusCode()).isEqualTo(200);
+		assertThat(webResponse.getStatusMessage()).isEqualTo("OK");
 	}
 
 	@Test
@@ -152,8 +151,8 @@ public class MockWebResponseBuilderTests {
 		this.response.setStatus(401);
 		WebResponse webResponse = this.responseBuilder.build();
 
-		assertThat(webResponse.getStatusCode(), equalTo(401));
-		assertThat(webResponse.getStatusMessage(), equalTo("Unauthorized"));
+		assertThat(webResponse.getStatusCode()).isEqualTo(401);
+		assertThat(webResponse.getStatusMessage()).isEqualTo("Unauthorized");
 	}
 
 	@Test
@@ -161,15 +160,15 @@ public class MockWebResponseBuilderTests {
 		this.response.sendError(401, "Custom");
 		WebResponse webResponse = this.responseBuilder.build();
 
-		assertThat(webResponse.getStatusCode(), equalTo(401));
-		assertThat(webResponse.getStatusMessage(), equalTo("Custom"));
+		assertThat(webResponse.getStatusCode()).isEqualTo(401);
+		assertThat(webResponse.getStatusMessage()).isEqualTo("Custom");
 	}
 
 	@Test
 	public void buildWebRequest() throws Exception {
 		WebResponse webResponse = this.responseBuilder.build();
 
-		assertThat(webResponse.getWebRequest(), equalTo(this.webRequest));
+		assertThat(webResponse.getWebRequest()).isEqualTo(this.webRequest);
 	}
 
 }

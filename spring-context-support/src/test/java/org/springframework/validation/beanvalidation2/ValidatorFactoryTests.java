@@ -53,8 +53,6 @@ import org.springframework.validation.ObjectError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -140,8 +138,7 @@ public class ValidatorFactoryTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(person, "person");
 		validator.validate(person, errors);
 		assertEquals(1, errors.getErrorCount());
-		assertThat("Field/Value type mismatch", errors.getFieldError("address").getRejectedValue(),
-				instanceOf(ValidAddress.class));
+		assertThat(errors.getFieldError("address").getRejectedValue()).isInstanceOf(ValidAddress.class);
 	}
 
 	@Test

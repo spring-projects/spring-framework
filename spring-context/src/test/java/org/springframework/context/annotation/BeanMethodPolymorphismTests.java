@@ -25,8 +25,7 @@ import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -98,7 +97,7 @@ public class BeanMethodPolymorphismTests {
 		ctx.register(ConfigWithOverloading.class);
 		ctx.setAllowBeanDefinitionOverriding(false);
 		ctx.refresh();
-		assertThat(ctx.getBean(String.class), equalTo("regular"));
+		assertThat(ctx.getBean(String.class)).isEqualTo("regular");
 	}
 
 	@Test
@@ -108,7 +107,7 @@ public class BeanMethodPolymorphismTests {
 		ctx.getDefaultListableBeanFactory().registerSingleton("anInt", 5);
 		ctx.setAllowBeanDefinitionOverriding(false);
 		ctx.refresh();
-		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+		assertThat(ctx.getBean(String.class)).isEqualTo("overloaded5");
 	}
 
 	@Test
@@ -118,7 +117,7 @@ public class BeanMethodPolymorphismTests {
 		ctx.setAllowBeanDefinitionOverriding(false);
 		ctx.refresh();
 		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
-		assertThat(ctx.getBean(String.class), equalTo("regular"));
+		assertThat(ctx.getBean(String.class)).isEqualTo("regular");
 		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 	}
 
@@ -130,7 +129,7 @@ public class BeanMethodPolymorphismTests {
 		ctx.setAllowBeanDefinitionOverriding(false);
 		ctx.refresh();
 		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
-		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+		assertThat(ctx.getBean(String.class)).isEqualTo("overloaded5");
 		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 	}
 
@@ -141,7 +140,7 @@ public class BeanMethodPolymorphismTests {
 		ctx.setAllowBeanDefinitionOverriding(false);
 		ctx.refresh();
 		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
-		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+		assertThat(ctx.getBean(String.class)).isEqualTo("overloaded5");
 		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 	}
 
@@ -153,7 +152,7 @@ public class BeanMethodPolymorphismTests {
 		ctx.setAllowBeanDefinitionOverriding(false);
 		ctx.refresh();
 		assertFalse(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
-		assertThat(ctx.getBean(String.class), equalTo("overloaded5"));
+		assertThat(ctx.getBean(String.class)).isEqualTo("overloaded5");
 		assertTrue(ctx.getDefaultListableBeanFactory().containsSingleton("aString"));
 	}
 
@@ -165,7 +164,7 @@ public class BeanMethodPolymorphismTests {
 	@Test
 	public void beanMethodShadowing() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ShadowConfig.class);
-		assertThat(ctx.getBean(String.class), equalTo("shadow"));
+		assertThat(ctx.getBean(String.class)).isEqualTo("shadow");
 	}
 
 	@Test

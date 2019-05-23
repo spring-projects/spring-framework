@@ -58,13 +58,9 @@ import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -779,10 +775,10 @@ public class DispatcherServletTests {
 	public void environmentOperations() {
 		DispatcherServlet servlet = new DispatcherServlet();
 		ConfigurableEnvironment defaultEnv = servlet.getEnvironment();
-		assertThat(defaultEnv, notNullValue());
+		assertThat(defaultEnv).isNotNull();
 		ConfigurableEnvironment env1 = new StandardServletEnvironment();
 		servlet.setEnvironment(env1); // should succeed
-		assertThat(servlet.getEnvironment(), sameInstance(env1));
+		assertThat(servlet.getEnvironment()).isSameAs(env1);
 		assertThatIllegalArgumentException().as("non-configurable Environment").isThrownBy(() ->
 				servlet.setEnvironment(new DummyEnvironment()));
 		class CustomServletEnvironment extends StandardServletEnvironment { }
@@ -793,7 +789,7 @@ public class DispatcherServletTests {
 				return new CustomServletEnvironment();
 			}
 		};
-		assertThat(custom.getEnvironment(), instanceOf(CustomServletEnvironment.class));
+		assertThat(custom.getEnvironment()).isInstanceOf(CustomServletEnvironment.class);
 	}
 
 	@Test
@@ -804,7 +800,7 @@ public class DispatcherServletTests {
 		servlet.setDispatchOptionsRequest(false);
 		servlet.service(request, response);
 		verify(response, never()).getHeader(anyString()); // SPR-10341
-		assertThat(response.getHeader("Allow"), equalTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH"));
+		assertThat(response.getHeader("Allow")).isEqualTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH");
 	}
 
 	@Test

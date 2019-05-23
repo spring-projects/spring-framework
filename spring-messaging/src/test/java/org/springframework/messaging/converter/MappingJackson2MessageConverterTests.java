@@ -33,11 +33,8 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeType;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,8 +54,8 @@ public class MappingJackson2MessageConverterTests {
 	@Test
 	public void defaultConstructor() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		assertThat(converter.getSupportedMimeTypes(),
-				contains(new MimeType("application", "json")));
+		assertThat(converter.getSupportedMimeTypes())
+				.contains(new MimeType("application", "json"));
 		assertFalse(converter.getObjectMapper().getDeserializationConfig()
 				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
@@ -67,7 +64,7 @@ public class MappingJackson2MessageConverterTests {
 	public void mimetypeParametrizedConstructor() {
 		MimeType mimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(mimetype);
-		assertThat(converter.getSupportedMimeTypes(), contains(mimetype));
+		assertThat(converter.getSupportedMimeTypes()).contains(mimetype);
 		assertFalse(converter.getObjectMapper().getDeserializationConfig()
 				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
@@ -77,7 +74,7 @@ public class MappingJackson2MessageConverterTests {
 		MimeType jsonMimetype = new MimeType("application", "json", StandardCharsets.UTF_8);
 		MimeType xmlMimetype = new MimeType("application", "xml", StandardCharsets.UTF_8);
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(jsonMimetype, xmlMimetype);
-		assertThat(converter.getSupportedMimeTypes(), contains(jsonMimetype, xmlMimetype));
+		assertThat(converter.getSupportedMimeTypes()).contains(jsonMimetype, xmlMimetype);
 		assertFalse(converter.getObjectMapper().getDeserializationConfig()
 				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
 	}
@@ -238,9 +235,9 @@ public class MappingJackson2MessageConverterTests {
 		Message<?> message = converter.toMessage(jsonViewResponse(), new MessageHeaders(map), returnType);
 		String actual = new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
 
-		assertThat(actual, containsString("\"withView1\":\"with\""));
-		assertThat(actual, containsString("\"withView2\":\"with\""));
-		assertThat(actual, not(containsString("\"withoutView\":\"with\"")));
+		assertThat(actual).contains("\"withView1\":\"with\"");
+		assertThat(actual).contains("\"withView2\":\"with\"");
+		assertThat(actual).doesNotContain("\"withoutView\":\"with\"");
 
 		method = getClass().getDeclaredMethod("jsonViewPayload", JacksonViewBean.class);
 		MethodParameter param = new MethodParameter(method, 0);

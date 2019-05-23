@@ -24,8 +24,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Sam Brannen
@@ -40,8 +40,8 @@ public class TestPropertySourceInterfaceTests implements TestPropertySourceTestI
 
 	@Test
 	public void propertiesAreAvailableInEnvironment() {
-		assertThat(property("foo"), is("bar"));
-		assertThat(property("enigma"), is("42"));
+		assertThat(property("foo")).isEqualTo("bar");
+		assertThat(property("enigma")).isEqualTo("42");
 	}
 
 	private String property(String key) {

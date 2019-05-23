@@ -27,11 +27,7 @@ import org.junit.Test;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -55,27 +51,27 @@ public class DateTimeFormatterFactoryTests {
 
 	@Test
 	public void createDateTimeFormatter() {
-		assertThat(factory.createDateTimeFormatter(), is(equalTo(DateTimeFormat.mediumDateTime())));
+		assertThat(factory.createDateTimeFormatter()).isEqualTo(DateTimeFormat.mediumDateTime());
 	}
 
 	@Test
 	public void createDateTimeFormatterWithPattern() {
 		factory = new DateTimeFormatterFactory("yyyyMMddHHmmss");
 		DateTimeFormatter formatter = factory.createDateTimeFormatter();
-		assertThat(formatter.print(dateTime), is("20091021121000"));
+		assertThat(formatter.print(dateTime)).isEqualTo("20091021121000");
 	}
 
 	@Test
 	public void createDateTimeFormatterWithNullFallback() {
 		DateTimeFormatter formatter = factory.createDateTimeFormatter(null);
-		assertThat(formatter, is(nullValue()));
+		assertThat(formatter).isNull();
 	}
 
 	@Test
 	public void createDateTimeFormatterWithFallback() {
 		DateTimeFormatter fallback = DateTimeFormat.forStyle("LL");
 		DateTimeFormatter formatter = factory.createDateTimeFormatter(fallback);
-		assertThat(formatter, is(sameInstance(fallback)));
+		assertThat(formatter).isSameAs(fallback);
 	}
 
 	@Test
@@ -86,10 +82,10 @@ public class DateTimeFormatterFactoryTests {
 		assertTrue(value.endsWith("12:10 PM"));
 
 		factory.setIso(ISO.DATE);
-		assertThat(applyLocale(factory.createDateTimeFormatter()).print(dateTime), is("2009-10-21"));
+		assertThat(applyLocale(factory.createDateTimeFormatter()).print(dateTime)).isEqualTo("2009-10-21");
 
 		factory.setPattern("yyyyMMddHHmmss");
-		assertThat(factory.createDateTimeFormatter().print(dateTime), is("20091021121000"));
+		assertThat(factory.createDateTimeFormatter().print(dateTime)).isEqualTo("20091021121000");
 	}
 
 	@Test
@@ -99,7 +95,7 @@ public class DateTimeFormatterFactoryTests {
 		DateTimeZone dateTimeZone = DateTimeZone.forTimeZone(TEST_TIMEZONE);
 		DateTime dateTime = new DateTime(2009, 10, 21, 12, 10, 00, 00, dateTimeZone);
 		String offset = (TEST_TIMEZONE.equals(NEW_YORK) ? "-0400" : "+0200");
-		assertThat(factory.createDateTimeFormatter().print(dateTime), is("20091021121000 " + offset));
+		assertThat(factory.createDateTimeFormatter().print(dateTime)).isEqualTo("20091021121000 " + offset);
 	}
 
 	private DateTimeFormatter applyLocale(DateTimeFormatter dateTimeFormatter) {

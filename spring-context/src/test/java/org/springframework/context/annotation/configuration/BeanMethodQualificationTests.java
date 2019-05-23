@@ -35,8 +35,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -56,8 +55,8 @@ public class BeanMethodQualificationTests {
 				new AnnotationConfigApplicationContext(StandardConfig.class, StandardPojo.class);
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean1"));
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
-		assertThat(pojo.testBean.getName(), equalTo("interesting"));
-		assertThat(pojo.testBean2.getName(), equalTo("boring"));
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
+		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
 	}
 
 	@Test
@@ -66,8 +65,8 @@ public class BeanMethodQualificationTests {
 				new AnnotationConfigApplicationContext(ScopedConfig.class, StandardPojo.class);
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean1"));
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
-		assertThat(pojo.testBean.getName(), equalTo("interesting"));
-		assertThat(pojo.testBean2.getName(), equalTo("boring"));
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
+		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
 	}
 
 	@Test
@@ -76,8 +75,8 @@ public class BeanMethodQualificationTests {
 				new AnnotationConfigApplicationContext(ScopedProxyConfig.class, StandardPojo.class);
 		assertTrue(ctx.getBeanFactory().containsSingleton("testBean1"));  // a shared scoped proxy
 		StandardPojo pojo = ctx.getBean(StandardPojo.class);
-		assertThat(pojo.testBean.getName(), equalTo("interesting"));
-		assertThat(pojo.testBean2.getName(), equalTo("boring"));
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
+		assertThat(pojo.testBean2.getName()).isEqualTo("boring");
 	}
 
 	@Test
@@ -89,10 +88,10 @@ public class BeanMethodQualificationTests {
 		assertTrue(BeanFactoryAnnotationUtils.isQualifierMatch(value -> value.equals("boring"),
 				"testBean2", ctx.getDefaultListableBeanFactory()));
 		CustomPojo pojo = ctx.getBean(CustomPojo.class);
-		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 		TestBean testBean2 = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
 				ctx.getDefaultListableBeanFactory(), TestBean.class, "boring");
-		assertThat(testBean2.getName(), equalTo("boring"));
+		assertThat(testBean2.getName()).isEqualTo("boring");
 	}
 
 	@Test
@@ -106,7 +105,7 @@ public class BeanMethodQualificationTests {
 		assertTrue(BeanFactoryAnnotationUtils.isQualifierMatch(value -> value.equals("boring"),
 				"testBean2", ctx.getDefaultListableBeanFactory()));
 		CustomPojo pojo = ctx.getBean(CustomPojo.class);
-		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 	}
 
 	@Test
@@ -120,7 +119,7 @@ public class BeanMethodQualificationTests {
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean1"));
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean2"));
 		CustomPojo pojo = ctx.getBean(CustomPojo.class);
-		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 	}
 
 	@Test
@@ -129,7 +128,7 @@ public class BeanMethodQualificationTests {
 				new AnnotationConfigApplicationContext(CustomConfigWithAttributeOverride.class, CustomPojo.class);
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBeanX"));
 		CustomPojo pojo = ctx.getBean(CustomPojo.class);
-		assertThat(pojo.testBean.getName(), equalTo("interesting"));
+		assertThat(pojo.testBean.getName()).isEqualTo("interesting");
 	}
 
 	@Test

@@ -28,8 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ClassUtils;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class Spr7167Tests {
@@ -38,9 +37,9 @@ public class Spr7167Tests {
 	public void test() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
 
-		assertThat("someDependency was not post processed",
-				ctx.getBeanFactory().getBeanDefinition("someDependency").getDescription(),
-				equalTo("post processed by MyPostProcessor"));
+		assertThat(ctx.getBeanFactory().getBeanDefinition("someDependency").getDescription())
+				.as("someDependency was not post processed")
+				.isEqualTo("post processed by MyPostProcessor");
 
 		MyConfig config = ctx.getBean(MyConfig.class);
 		assertTrue("Config class was not enhanced", ClassUtils.isCglibProxy(config));

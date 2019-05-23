@@ -42,10 +42,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -742,29 +740,29 @@ public class TypeDescriptorTests {
 		ObjectInputStream inputStream = new ObjectInputStream(new ByteArrayInputStream(
 				out.toByteArray()));
 		TypeDescriptor readObject = (TypeDescriptor) inputStream.readObject();
-		assertThat(readObject, equalTo(typeDescriptor));
+		assertThat(readObject).isEqualTo(typeDescriptor);
 	}
 
 	@Test
 	public void createCollectionWithNullElement() throws Exception {
 		TypeDescriptor typeDescriptor = TypeDescriptor.collection(List.class, null);
-		assertThat(typeDescriptor.getElementTypeDescriptor(), nullValue());
+		assertThat(typeDescriptor.getElementTypeDescriptor()).isNull();
 	}
 
 	@Test
 	public void createMapWithNullElements() throws Exception {
 		TypeDescriptor typeDescriptor = TypeDescriptor.map(LinkedHashMap.class, null, null);
-		assertThat(typeDescriptor.getMapKeyTypeDescriptor(), nullValue());
-		assertThat(typeDescriptor.getMapValueTypeDescriptor(), nullValue());
+		assertThat(typeDescriptor.getMapKeyTypeDescriptor()).isNull();
+		assertThat(typeDescriptor.getMapValueTypeDescriptor()).isNull();
 	}
 
 	@Test
 	public void getSource() throws Exception {
 		Field field = getClass().getField("fieldScalar");
 		MethodParameter methodParameter = new MethodParameter(getClass().getMethod("testParameterPrimitive", int.class), 0);
-		assertThat(new TypeDescriptor(field).getSource(), equalTo((Object) field));
-		assertThat(new TypeDescriptor(methodParameter).getSource(), equalTo((Object) methodParameter));
-		assertThat(TypeDescriptor.valueOf(Integer.class).getSource(), equalTo((Object) Integer.class));
+		assertThat(new TypeDescriptor(field).getSource()).isEqualTo(field);
+		assertThat(new TypeDescriptor(methodParameter).getSource()).isEqualTo(methodParameter);
+		assertThat(TypeDescriptor.valueOf(Integer.class).getSource()).isEqualTo(Integer.class);
 	}
 
 

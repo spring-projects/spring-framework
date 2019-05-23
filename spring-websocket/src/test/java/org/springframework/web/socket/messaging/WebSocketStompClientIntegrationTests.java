@@ -48,8 +48,7 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -121,7 +120,7 @@ public class WebSocketStompClientIntegrationTests {
 		this.stompClient.connect(url, testHandler);
 
 		assertTrue(testHandler.awaitForMessageCount(1, 5000));
-		assertThat(testHandler.getReceived(), containsInAnyOrder("payload"));
+		assertThat(testHandler.getReceived()).containsExactly("payload");
 	}
 
 

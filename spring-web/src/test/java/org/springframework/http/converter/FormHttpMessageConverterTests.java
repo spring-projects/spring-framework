@@ -30,7 +30,6 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -44,10 +43,7 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -150,7 +146,7 @@ public class FormHttpMessageConverterTests {
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
 		// SPR-17030
-		assertThat(contentType.getParameters().keySet(), Matchers.contains("charset", "boundary"));
+		assertThat(contentType.getParameters()).containsKeys("charset", "boundary");
 
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();
@@ -234,8 +230,9 @@ public class FormHttpMessageConverterTests {
 		// With developer builds we get: <MyBean><string>foo</string></MyBean>
 		// But on CI server we get: <MyBean xmlns=""><string>foo</string></MyBean>
 		// So... we make a compromise:
-		assertThat(item.getString(),
-				allOf(startsWith("<MyBean"), endsWith("><string>foo</string></MyBean>")));
+		assertThat(item.getString())
+				.startsWith("<MyBean")
+				.endsWith("><string>foo</string></MyBean>");
 	}
 
 

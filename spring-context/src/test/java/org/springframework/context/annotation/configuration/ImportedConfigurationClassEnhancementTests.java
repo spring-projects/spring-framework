@@ -27,8 +27,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ClassUtils;
 
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -73,8 +72,9 @@ public class ImportedConfigurationClassEnhancementTests {
 		Config config = ctx.getBean(Config.class);
 		TestBean testBean1 = config.autowiredConfig.testBean();
 		TestBean testBean2 = config.autowiredConfig.testBean();
-		assertThat("got two distinct instances of testBean when singleton scoping was expected",
-				testBean1, sameInstance(testBean2));
+		assertThat(testBean1)
+				.as("got two distinct instances of testBean when singleton scoping was expected")
+				.isSameAs(testBean2);
 	}
 
 

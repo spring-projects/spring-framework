@@ -39,12 +39,8 @@ import org.springframework.util.ConcurrentReferenceHashMap.Restructure;
 import org.springframework.util.comparator.ComparableComparator;
 import org.springframework.util.comparator.NullSafeComparator;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -63,43 +59,43 @@ public class ConcurrentReferenceHashMapTests {
 	@Test
 	public void shouldCreateWithDefaults() {
 		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>();
-		assertThat(map.getSegmentsSize(), is(16));
-		assertThat(map.getSegment(0).getSize(), is(1));
-		assertThat(map.getLoadFactor(), is(0.75f));
+		assertThat(map.getSegmentsSize()).isEqualTo(16);
+		assertThat(map.getSegment(0).getSize()).isEqualTo(1);
+		assertThat(map.getLoadFactor()).isEqualTo(0.75f);
 	}
 
 	@Test
 	public void shouldCreateWithInitialCapacity() {
 		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(32);
-		assertThat(map.getSegmentsSize(), is(16));
-		assertThat(map.getSegment(0).getSize(), is(2));
-		assertThat(map.getLoadFactor(), is(0.75f));
+		assertThat(map.getSegmentsSize()).isEqualTo(16);
+		assertThat(map.getSegment(0).getSize()).isEqualTo(2);
+		assertThat(map.getLoadFactor()).isEqualTo(0.75f);
 	}
 
 	@Test
 	public void shouldCreateWithInitialCapacityAndLoadFactor() {
 		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(32, 0.5f);
-		assertThat(map.getSegmentsSize(), is(16));
-		assertThat(map.getSegment(0).getSize(), is(2));
-		assertThat(map.getLoadFactor(), is(0.5f));
+		assertThat(map.getSegmentsSize()).isEqualTo(16);
+		assertThat(map.getSegment(0).getSize()).isEqualTo(2);
+		assertThat(map.getLoadFactor()).isEqualTo(0.5f);
 	}
 
 	@Test
 	public void shouldCreateWithInitialCapacityAndConcurrentLevel() {
 		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(16, 2);
-		assertThat(map.getSegmentsSize(), is(2));
-		assertThat(map.getSegment(0).getSize(), is(8));
-		assertThat(map.getLoadFactor(), is(0.75f));
+		assertThat(map.getSegmentsSize()).isEqualTo(2);
+		assertThat(map.getSegment(0).getSize()).isEqualTo(8);
+		assertThat(map.getLoadFactor()).isEqualTo(0.75f);
 	}
 
 	@Test
 	public void shouldCreateFullyCustom() {
 		ConcurrentReferenceHashMap<Integer, String> map = new ConcurrentReferenceHashMap<>(5, 0.5f, 3);
 		// concurrencyLevel of 3 ends up as 4 (nearest power of 2)
-		assertThat(map.getSegmentsSize(), is(4));
+		assertThat(map.getSegmentsSize()).isEqualTo(4);
 		// initialCapacity is 5/4 (rounded up, to nearest power of 2)
-		assertThat(map.getSegment(0).getSize(), is(2));
-		assertThat(map.getLoadFactor(), is(0.5f));
+		assertThat(map.getSegment(0).getSize()).isEqualTo(2);
+		assertThat(map.getLoadFactor()).isEqualTo(0.5f);
 	}
 
 	@Test
@@ -129,55 +125,55 @@ public class ConcurrentReferenceHashMapTests {
 	@Test
 	public void shouldPutAndGet() {
 		// NOTE we are using mock references so we don't need to worry about GC
-		assertThat(this.map.size(), is(0));
+		assertThat(this.map).hasSize(0);
 		this.map.put(123, "123");
-		assertThat(this.map.get(123), is("123"));
-		assertThat(this.map.size(), is(1));
+		assertThat(this.map.get(123)).isEqualTo("123");
+		assertThat(this.map).hasSize(1);
 		this.map.put(123, "123b");
-		assertThat(this.map.size(), is(1));
+		assertThat(this.map).hasSize(1);
 		this.map.put(123, null);
-		assertThat(this.map.size(), is(1));
+		assertThat(this.map).hasSize(1);
 	}
 
 	@Test
 	public void shouldReplaceOnDoublePut() {
 		this.map.put(123, "321");
 		this.map.put(123, "123");
-		assertThat(this.map.get(123), is("123"));
+		assertThat(this.map.get(123)).isEqualTo("123");
 	}
 
 	@Test
 	public void shouldPutNullKey() {
-		assertThat(this.map.get(null), is(nullValue()));
-		assertThat(this.map.getOrDefault(null, "456"), is("456"));
+		assertThat(this.map.get(null)).isNull();
+		assertThat(this.map.getOrDefault(null, "456")).isEqualTo("456");
 		this.map.put(null, "123");
-		assertThat(this.map.get(null), is("123"));
-		assertThat(this.map.getOrDefault(null, "456"), is("123"));
+		assertThat(this.map.get(null)).isEqualTo("123");
+		assertThat(this.map.getOrDefault(null, "456")).isEqualTo("123");
 	}
 
 	@Test
 	public void shouldPutNullValue() {
-		assertThat(this.map.get(123), is(nullValue()));
-		assertThat(this.map.getOrDefault(123, "456"), is("456"));
+		assertThat(this.map.get(123)).isNull();
+		assertThat(this.map.getOrDefault(123, "456")).isEqualTo("456");
 		this.map.put(123, "321");
-		assertThat(this.map.get(123), is("321"));
-		assertThat(this.map.getOrDefault(123, "456"), is("321"));
+		assertThat(this.map.get(123)).isEqualTo("321");
+		assertThat(this.map.getOrDefault(123, "456")).isEqualTo("321");
 		this.map.put(123, null);
-		assertThat(this.map.get(123), is(nullValue()));
-		assertThat(this.map.getOrDefault(123, "456"), is(nullValue()));
+		assertThat(this.map.get(123)).isNull();
+		assertThat(this.map.getOrDefault(123, "456")).isNull();
 	}
 
 	@Test
 	public void shouldGetWithNoItems() {
-		assertThat(this.map.get(123), is(nullValue()));
+		assertThat(this.map.get(123)).isNull();
 	}
 
 	@Test
 	public void shouldApplySupplementalHash() {
 		Integer key = 123;
 		this.map.put(key, "123");
-		assertThat(this.map.getSupplementalHash(), is(not(key.hashCode())));
-		assertThat(this.map.getSupplementalHash() >> 30 & 0xFF, is(not(0)));
+		assertThat(this.map.getSupplementalHash()).isNotEqualTo(key.hashCode());
+		assertThat(this.map.getSupplementalHash() >> 30 & 0xFF).isNotEqualTo(0);
 	}
 
 	@Test
@@ -187,41 +183,41 @@ public class ConcurrentReferenceHashMapTests {
 		this.map.put(1, "1");
 		this.map.put(2, "2");
 		this.map.put(3, "3");
-		assertThat(this.map.getSegment(0).getSize(), is(1));
-		assertThat(this.map.get(1), is("1"));
-		assertThat(this.map.get(2), is("2"));
-		assertThat(this.map.get(3), is("3"));
-		assertThat(this.map.get(4), is(nullValue()));
+		assertThat(this.map.getSegment(0).getSize()).isEqualTo(1);
+		assertThat(this.map.get(1)).isEqualTo("1");
+		assertThat(this.map.get(2)).isEqualTo("2");
+		assertThat(this.map.get(3)).isEqualTo("3");
+		assertThat(this.map.get(4)).isNull();
 	}
 
 	@Test
 	public void shouldResize() {
 		this.map = new TestWeakConcurrentCache<>(1, 0.75f, 1);
 		this.map.put(1, "1");
-		assertThat(this.map.getSegment(0).getSize(), is(1));
-		assertThat(this.map.get(1), is("1"));
+		assertThat(this.map.getSegment(0).getSize()).isEqualTo(1);
+		assertThat(this.map.get(1)).isEqualTo("1");
 
 		this.map.put(2, "2");
-		assertThat(this.map.getSegment(0).getSize(), is(2));
-		assertThat(this.map.get(1), is("1"));
-		assertThat(this.map.get(2), is("2"));
+		assertThat(this.map.getSegment(0).getSize()).isEqualTo(2);
+		assertThat(this.map.get(1)).isEqualTo("1");
+		assertThat(this.map.get(2)).isEqualTo("2");
 
 		this.map.put(3, "3");
-		assertThat(this.map.getSegment(0).getSize(), is(4));
-		assertThat(this.map.get(1), is("1"));
-		assertThat(this.map.get(2), is("2"));
-		assertThat(this.map.get(3), is("3"));
+		assertThat(this.map.getSegment(0).getSize()).isEqualTo(4);
+		assertThat(this.map.get(1)).isEqualTo("1");
+		assertThat(this.map.get(2)).isEqualTo("2");
+		assertThat(this.map.get(3)).isEqualTo("3");
 
 		this.map.put(4, "4");
-		assertThat(this.map.getSegment(0).getSize(), is(8));
-		assertThat(this.map.get(4), is("4"));
+		assertThat(this.map.getSegment(0).getSize()).isEqualTo(8);
+		assertThat(this.map.get(4)).isEqualTo("4");
 
 		// Putting again should not increase the count
 		for (int i = 1; i <= 5; i++) {
 			this.map.put(i, String.valueOf(i));
 		}
-		assertThat(this.map.getSegment(0).getSize(), is(8));
-		assertThat(this.map.get(5), is("5"));
+		assertThat(this.map.getSegment(0).getSize()).isEqualTo(8);
+		assertThat(this.map.get(5)).isEqualTo("5");
 	}
 
 	@Test
@@ -232,11 +228,11 @@ public class ConcurrentReferenceHashMapTests {
 		}
 		this.map.getMockReference(1, Restructure.NEVER).queueForPurge();
 		this.map.getMockReference(3, Restructure.NEVER).queueForPurge();
-		assertThat(this.map.getReference(1, Restructure.WHEN_NECESSARY), is(nullValue()));
-		assertThat(this.map.get(2), is("2"));
-		assertThat(this.map.getReference(3, Restructure.WHEN_NECESSARY), is(nullValue()));
-		assertThat(this.map.get(4), is("4"));
-		assertThat(this.map.get(5), is("5"));
+		assertThat(this.map.getReference(1, Restructure.WHEN_NECESSARY)).isNull();
+		assertThat(this.map.get(2)).isEqualTo("2");
+		assertThat(this.map.getReference(3, Restructure.WHEN_NECESSARY)).isNull();
+		assertThat(this.map.get(4)).isEqualTo("4");
+		assertThat(this.map.get(5)).isEqualTo("5");
 	}
 
 	@Test
@@ -248,122 +244,122 @@ public class ConcurrentReferenceHashMapTests {
 		this.map.getMockReference(1, Restructure.NEVER).queueForPurge();
 		this.map.getMockReference(3, Restructure.NEVER).queueForPurge();
 		this.map.put(1, "1");
-		assertThat(this.map.get(1), is("1"));
-		assertThat(this.map.get(2), is("2"));
-		assertThat(this.map.getReference(3, Restructure.WHEN_NECESSARY), is(nullValue()));
-		assertThat(this.map.get(4), is("4"));
-		assertThat(this.map.get(5), is("5"));
+		assertThat(this.map.get(1)).isEqualTo("1");
+		assertThat(this.map.get(2)).isEqualTo("2");
+		assertThat(this.map.getReference(3, Restructure.WHEN_NECESSARY)).isNull();
+		assertThat(this.map.get(4)).isEqualTo("4");
+		assertThat(this.map.get(5)).isEqualTo("5");
 	}
 
 	@Test
 	public void shouldPutIfAbsent() {
-		assertThat(this.map.putIfAbsent(123, "123"), is(nullValue()));
-		assertThat(this.map.putIfAbsent(123, "123b"), is("123"));
-		assertThat(this.map.get(123), is("123"));
+		assertThat(this.map.putIfAbsent(123, "123")).isNull();
+		assertThat(this.map.putIfAbsent(123, "123b")).isEqualTo("123");
+		assertThat(this.map.get(123)).isEqualTo("123");
 	}
 
 	@Test
 	public void shouldPutIfAbsentWithNullValue() {
-		assertThat(this.map.putIfAbsent(123, null), is(nullValue()));
-		assertThat(this.map.putIfAbsent(123, "123"), is(nullValue()));
-		assertThat(this.map.get(123), is(nullValue()));
+		assertThat(this.map.putIfAbsent(123, null)).isNull();
+		assertThat(this.map.putIfAbsent(123, "123")).isNull();
+		assertThat(this.map.get(123)).isNull();
 	}
 
 	@Test
 	public void shouldPutIfAbsentWithNullKey() {
-		assertThat(this.map.putIfAbsent(null, "123"), is(nullValue()));
-		assertThat(this.map.putIfAbsent(null, "123b"), is("123"));
-		assertThat(this.map.get(null), is("123"));
+		assertThat(this.map.putIfAbsent(null, "123")).isNull();
+		assertThat(this.map.putIfAbsent(null, "123b")).isEqualTo("123");
+		assertThat(this.map.get(null)).isEqualTo("123");
 	}
 
 	@Test
 	public void shouldRemoveKeyAndValue() {
 		this.map.put(123, "123");
-		assertThat(this.map.remove(123, "456"), is(false));
-		assertThat(this.map.get(123), is("123"));
-		assertThat(this.map.remove(123, "123"), is(true));
+		assertThat(this.map.remove(123, "456")).isFalse();
+		assertThat(this.map.get(123)).isEqualTo("123");
+		assertThat(this.map.remove(123, "123")).isTrue();
 		assertFalse(this.map.containsKey(123));
-		assertThat(this.map.isEmpty(), is(true));
+		assertThat(this.map.isEmpty()).isTrue();
 	}
 
 	@Test
 	public void shouldRemoveKeyAndValueWithExistingNull() {
 		this.map.put(123, null);
-		assertThat(this.map.remove(123, "456"), is(false));
-		assertThat(this.map.get(123), is(nullValue()));
-		assertThat(this.map.remove(123, null), is(true));
+		assertThat(this.map.remove(123, "456")).isFalse();
+		assertThat(this.map.get(123)).isNull();
+		assertThat(this.map.remove(123, null)).isTrue();
 		assertFalse(this.map.containsKey(123));
-		assertThat(this.map.isEmpty(), is(true));
+		assertThat(this.map.isEmpty()).isTrue();
 	}
 
 	@Test
 	public void shouldReplaceOldValueWithNewValue() {
 		this.map.put(123, "123");
-		assertThat(this.map.replace(123, "456", "789"), is(false));
-		assertThat(this.map.get(123), is("123"));
-		assertThat(this.map.replace(123, "123", "789"), is(true));
-		assertThat(this.map.get(123), is("789"));
+		assertThat(this.map.replace(123, "456", "789")).isFalse();
+		assertThat(this.map.get(123)).isEqualTo("123");
+		assertThat(this.map.replace(123, "123", "789")).isTrue();
+		assertThat(this.map.get(123)).isEqualTo("789");
 	}
 
 	@Test
 	public void shouldReplaceOldNullValueWithNewValue() {
 		this.map.put(123, null);
-		assertThat(this.map.replace(123, "456", "789"), is(false));
-		assertThat(this.map.get(123), is(nullValue()));
-		assertThat(this.map.replace(123, null, "789"), is(true));
-		assertThat(this.map.get(123), is("789"));
+		assertThat(this.map.replace(123, "456", "789")).isFalse();
+		assertThat(this.map.get(123)).isNull();
+		assertThat(this.map.replace(123, null, "789")).isTrue();
+		assertThat(this.map.get(123)).isEqualTo("789");
 	}
 
 	@Test
 	public void shouldReplaceValue() {
 		this.map.put(123, "123");
-		assertThat(this.map.replace(123, "456"), is("123"));
-		assertThat(this.map.get(123), is("456"));
+		assertThat(this.map.replace(123, "456")).isEqualTo("123");
+		assertThat(this.map.get(123)).isEqualTo("456");
 	}
 
 	@Test
 	public void shouldReplaceNullValue() {
 		this.map.put(123, null);
-		assertThat(this.map.replace(123, "456"), is(nullValue()));
-		assertThat(this.map.get(123), is("456"));
+		assertThat(this.map.replace(123, "456")).isNull();
+		assertThat(this.map.get(123)).isEqualTo("456");
 	}
 
 	@Test
 	public void shouldGetSize() {
-		assertThat(this.map.size(), is(0));
+		assertThat(this.map).hasSize(0);
 		this.map.put(123, "123");
 		this.map.put(123, null);
 		this.map.put(456, "456");
-		assertThat(this.map.size(), is(2));
+		assertThat(this.map).hasSize(2);
 	}
 
 	@Test
 	public void shouldSupportIsEmpty() {
-		assertThat(this.map.isEmpty(), is(true));
+		assertThat(this.map.isEmpty()).isTrue();
 		this.map.put(123, "123");
 		this.map.put(123, null);
 		this.map.put(456, "456");
-		assertThat(this.map.isEmpty(), is(false));
+		assertThat(this.map.isEmpty()).isFalse();
 	}
 
 	@Test
 	public void shouldContainKey() {
-		assertThat(this.map.containsKey(123), is(false));
-		assertThat(this.map.containsKey(456), is(false));
+		assertThat(this.map.containsKey(123)).isFalse();
+		assertThat(this.map.containsKey(456)).isFalse();
 		this.map.put(123, "123");
 		this.map.put(456, null);
-		assertThat(this.map.containsKey(123), is(true));
-		assertThat(this.map.containsKey(456), is(true));
+		assertThat(this.map.containsKey(123)).isTrue();
+		assertThat(this.map.containsKey(456)).isTrue();
 	}
 
 	@Test
 	public void shouldContainValue() {
-		assertThat(this.map.containsValue("123"), is(false));
-		assertThat(this.map.containsValue(null), is(false));
+		assertThat(this.map.containsValue("123")).isFalse();
+		assertThat(this.map.containsValue(null)).isFalse();
 		this.map.put(123, "123");
 		this.map.put(456, null);
-		assertThat(this.map.containsValue("123"), is(true));
-		assertThat(this.map.containsValue(null), is(true));
+		assertThat(this.map.containsValue("123")).isTrue();
+		assertThat(this.map.containsValue(null)).isTrue();
 	}
 
 	@Test
@@ -371,17 +367,17 @@ public class ConcurrentReferenceHashMapTests {
 		this.map.put(123, null);
 		this.map.put(456, "456");
 		this.map.put(null, "789");
-		assertThat(this.map.remove(123), is(nullValue()));
-		assertThat(this.map.remove(456), is("456"));
-		assertThat(this.map.remove(null), is("789"));
-		assertThat(this.map.isEmpty(), is(true));
+		assertThat(this.map.remove(123)).isNull();
+		assertThat(this.map.remove(456)).isEqualTo("456");
+		assertThat(this.map.remove(null)).isEqualTo("789");
+		assertThat(this.map.isEmpty()).isTrue();
 	}
 
 	@Test
 	public void shouldRemoveWhenKeyIsNotInMap() {
-		assertThat(this.map.remove(123), is(nullValue()));
-		assertThat(this.map.remove(null), is(nullValue()));
-		assertThat(this.map.isEmpty(), is(true));
+		assertThat(this.map.remove(123)).isNull();
+		assertThat(this.map.remove(null)).isNull();
+		assertThat(this.map.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -391,10 +387,10 @@ public class ConcurrentReferenceHashMapTests {
 		m.put(456, null);
 		m.put(null, "789");
 		this.map.putAll(m);
-		assertThat(this.map.size(), is(3));
-		assertThat(this.map.get(123), is("123"));
-		assertThat(this.map.get(456), is(nullValue()));
-		assertThat(this.map.get(null), is("789"));
+		assertThat(this.map).hasSize(3);
+		assertThat(this.map.get(123)).isEqualTo("123");
+		assertThat(this.map.get(456)).isNull();
+		assertThat(this.map.get(null)).isEqualTo("789");
 	}
 
 	@Test
@@ -403,10 +399,10 @@ public class ConcurrentReferenceHashMapTests {
 		this.map.put(456, null);
 		this.map.put(null, "789");
 		this.map.clear();
-		assertThat(this.map.size(), is(0));
-		assertThat(this.map.containsKey(123), is(false));
-		assertThat(this.map.containsKey(456), is(false));
-		assertThat(this.map.containsKey(null), is(false));
+		assertThat(this.map).hasSize(0);
+		assertThat(this.map.containsKey(123)).isFalse();
+		assertThat(this.map.containsKey(456)).isFalse();
+		assertThat(this.map.containsKey(null)).isFalse();
 	}
 
 	@Test
@@ -418,7 +414,7 @@ public class ConcurrentReferenceHashMapTests {
 		expected.add(123);
 		expected.add(456);
 		expected.add(null);
-		assertThat(this.map.keySet(), is(expected));
+		assertThat(this.map.keySet()).isEqualTo(expected);
 	}
 
 	@Test
@@ -433,7 +429,7 @@ public class ConcurrentReferenceHashMapTests {
 		expected.add("789");
 		actual.sort(NULL_SAFE_STRING_SORT);
 		expected.sort(NULL_SAFE_STRING_SORT);
-		assertThat(actual, is(expected));
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -445,7 +441,7 @@ public class ConcurrentReferenceHashMapTests {
 		expected.put(123, "123");
 		expected.put(456, null);
 		expected.put(null, "789");
-		assertThat(this.map.entrySet(), is(expected.entrySet()));
+		assertThat(this.map.entrySet()).isEqualTo(expected.entrySet());
 	}
 
 	@Test
@@ -459,7 +455,7 @@ public class ConcurrentReferenceHashMapTests {
 		expected.put(1, "1");
 		expected.put(2, "2");
 		expected.put(3, "3");
-		assertThat(this.map.entrySet(), is(expected.entrySet()));
+		assertThat(this.map.entrySet()).isEqualTo(expected.entrySet());
 	}
 
 	@Test
@@ -472,9 +468,9 @@ public class ConcurrentReferenceHashMapTests {
 		iterator.next();
 		iterator.remove();
 		iterator.next();
-		assertThat(iterator.hasNext(), is(false));
-		assertThat(this.map.size(), is(2));
-		assertThat(this.map.containsKey(2), is(false));
+		assertThat(iterator.hasNext()).isFalse();
+		assertThat(this.map).hasSize(2);
+		assertThat(this.map.containsKey(2)).isFalse();
 	}
 
 	@Test
@@ -486,9 +482,9 @@ public class ConcurrentReferenceHashMapTests {
 		iterator.next();
 		iterator.next().setValue("2b");
 		iterator.next();
-		assertThat(iterator.hasNext(), is(false));
-		assertThat(this.map.size(), is(3));
-		assertThat(this.map.get(2), is("2b"));
+		assertThat(iterator.hasNext()).isFalse();
+		assertThat(this.map).hasSize(3);
+		assertThat(this.map.get(2)).isEqualTo("2b");
 	}
 
 	@Test
@@ -503,7 +499,7 @@ public class ConcurrentReferenceHashMapTests {
 		System.out.println(cacheTime.prettyPrint());
 
 		// We should be at least 4 time faster
-		assertThat(cacheTime.getTotalTimeSeconds(), is(lessThan(mapTime.getTotalTimeSeconds() / 4.0)));
+		assertThat(cacheTime.getTotalTimeSeconds()).isLessThan(mapTime.getTotalTimeSeconds() / 4.0);
 	}
 
 	@Test

@@ -21,9 +21,8 @@ import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -131,7 +130,7 @@ public class AopTestUtilsTests {
 		pf.addInterface(Foo.class);
 		Foo proxy = (Foo) pf.getProxy();
 		assertTrue("Proxy is a JDK dynamic proxy", AopUtils.isJdkDynamicProxy(proxy));
-		assertThat(proxy, instanceOf(Foo.class));
+		assertThat(proxy).isInstanceOf(Foo.class);
 		return proxy;
 	}
 
@@ -141,7 +140,7 @@ public class AopTestUtilsTests {
 		pf.setProxyTargetClass(true);
 		Foo proxy = (Foo) pf.getProxy();
 		assertTrue("Proxy is a CGLIB proxy", AopUtils.isCglibProxy(proxy));
-		assertThat(proxy, instanceOf(FooImpl.class));
+		assertThat(proxy).isInstanceOf(FooImpl.class);
 		return proxy;
 	}
 

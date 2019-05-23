@@ -67,8 +67,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.codec.json.Jackson2CodecSupport.JSON_VIEW_HINT;
@@ -341,16 +340,16 @@ public class BodyInsertersTests {
 					dataBuffer.read(resultBytes);
 					DataBufferUtils.release(dataBuffer);
 					String content = new String(resultBytes, StandardCharsets.UTF_8);
-					assertThat(content, containsString("Content-Disposition: form-data; name=\"name\"\r\n" +
+					assertThat(content).contains("Content-Disposition: form-data; name=\"name\"\r\n" +
 							"Content-Type: text/plain;charset=UTF-8\r\n" +
 							"Content-Length: 6\r\n" +
 							"\r\n" +
-							"value1"));
-					assertThat(content, containsString("Content-Disposition: form-data; name=\"name\"\r\n" +
+							"value1");
+					assertThat(content).contains("Content-Disposition: form-data; name=\"name\"\r\n" +
 							"Content-Type: text/plain;charset=UTF-8\r\n" +
 							"Content-Length: 6\r\n" +
 							"\r\n" +
-							"value2"));
+							"value2");
 				})
 				.expectComplete()
 				.verify();

@@ -22,9 +22,7 @@ import org.junit.Test;
 
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -62,7 +60,7 @@ public class SockJsUrlInfoTests {
 
 	private void testInfoUrl(String scheme, String expectedScheme) throws Exception {
 		SockJsUrlInfo info = new SockJsUrlInfo(new URI(scheme + "://example.com"));
-		assertThat(info.getInfoUrl(), is(equalTo(new URI(expectedScheme + "://example.com/info"))));
+		assertThat(info.getInfoUrl()).isEqualTo(new URI(expectedScheme + "://example.com/info"));
 	}
 
 	@Test
@@ -83,7 +81,7 @@ public class SockJsUrlInfoTests {
 		String sessionId = info.getSessionId();
 		String transport = transportType.toString().toLowerCase();
 		URI expected = new URI(expectedScheme + "://example.com/" + serverId + "/" + sessionId + "/" + transport);
-		assertThat(info.getTransportUrl(transportType), equalTo(expected));
+		assertThat(info.getTransportUrl(transportType)).isEqualTo(expected);
 	}
 
 }

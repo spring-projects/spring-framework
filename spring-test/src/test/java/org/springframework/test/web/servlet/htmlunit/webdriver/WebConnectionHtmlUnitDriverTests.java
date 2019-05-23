@@ -27,11 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openqa.selenium.WebDriverException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -58,7 +56,7 @@ public class WebConnectionHtmlUnitDriverTests {
 
 	@Test
 	public void getWebConnectionDefaultNotNull() {
-		assertThat(this.driver.getWebConnection(), notNullValue());
+		assertThat(this.driver.getWebConnection()).isNotNull();
 	}
 
 	@Test
@@ -70,7 +68,7 @@ public class WebConnectionHtmlUnitDriverTests {
 	@Test
 	public void setWebConnection() {
 		this.driver.setWebConnection(this.connection);
-		assertThat(this.driver.getWebConnection(), equalTo(this.connection));
+		assertThat(this.driver.getWebConnection()).isEqualTo(this.connection);
 		assertThatExceptionOfType(WebDriverException.class).isThrownBy(() ->
 				this.driver.get("https://example.com"));
 	}

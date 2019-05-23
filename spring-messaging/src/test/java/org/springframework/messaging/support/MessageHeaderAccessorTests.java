@@ -29,9 +29,8 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -344,7 +343,7 @@ public class MessageHeaderAccessorTests {
 				return payload;
 			}
 		});
-		assertThat(actual, startsWith("headers={contentType=text/plain} payload=" + getClass().getName() + "$"));
+		assertThat(actual).startsWith("headers={contentType=text/plain} payload=" + getClass().getName() + "$");
 	}
 
 	@Test

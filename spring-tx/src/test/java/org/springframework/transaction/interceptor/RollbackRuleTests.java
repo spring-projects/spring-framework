@@ -22,9 +22,8 @@ import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -61,7 +60,7 @@ public class RollbackRuleTests {
 	public void ancestry() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
 		// Exception -> Runtime -> NestedRuntime -> MyRuntimeException
-		assertThat(rr.getDepth(new MyRuntimeException("")), equalTo(3));
+		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(3);
 	}
 
 	@Test

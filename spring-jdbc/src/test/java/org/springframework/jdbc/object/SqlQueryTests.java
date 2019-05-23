@@ -39,10 +39,8 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -124,7 +122,7 @@ public class SqlQueryTests  {
 		query.compile();
 		List<Integer> list = query.execute();
 
-		assertThat(list, is(equalTo(Arrays.asList(1))));
+		assertThat(list).isEqualTo(Arrays.asList(1));
 		verify(connection).prepareStatement(SELECT_ID);
 		verify(resultSet).close();
 		verify(preparedStatement).close();
@@ -174,7 +172,7 @@ public class SqlQueryTests  {
 		StringQuery query = new StringQuery(dataSource, SELECT_FORENAME);
 		query.setRowsExpected(3);
 		String[] results = query.run();
-		assertThat(results, is(equalTo(dbResults)));
+		assertThat(results).isEqualTo(dbResults);
 		verify(connection).prepareStatement(SELECT_FORENAME);
 		verify(resultSet).close();
 		verify(preparedStatement).close();
@@ -186,7 +184,7 @@ public class SqlQueryTests  {
 		given(resultSet.next()).willReturn(false);
 		StringQuery query = new StringQuery(dataSource, SELECT_FORENAME_EMPTY);
 		String[] results = query.run();
-		assertThat(results, is(equalTo(new String[0])));
+		assertThat(results).isEqualTo(new String[0]);
 		verify(connection).prepareStatement(SELECT_FORENAME_EMPTY);
 		verify(resultSet).close();
 		verify(preparedStatement).close();
@@ -392,8 +390,8 @@ public class SqlQueryTests  {
 		CustomerQuery query = new CustomerQuery(dataSource);
 		List<Customer> list = query.execute(1, 1);
 		assertTrue("2 results in list", list.size() == 2);
-		assertThat(list.get(0).getForename(), is("rod"));
-		assertThat(list.get(1).getForename(), is("dave"));
+		assertThat(list.get(0).getForename()).isEqualTo("rod");
+		assertThat(list.get(1).getForename()).isEqualTo("dave");
 		verify(preparedStatement).setObject(1, 1, Types.NUMERIC);
 		verify(preparedStatement).setObject(2, 1, Types.NUMERIC);
 		verify(connection).prepareStatement(SELECT_ID_WHERE);
@@ -428,8 +426,8 @@ public class SqlQueryTests  {
 		CustomerQuery query = new CustomerQuery(dataSource);
 		List<Customer> list = query.execute("one");
 		assertTrue("2 results in list", list.size() == 2);
-		assertThat(list.get(0).getForename(), is("rod"));
-		assertThat(list.get(1).getForename(), is("dave"));
+		assertThat(list.get(0).getForename()).isEqualTo("rod");
+		assertThat(list.get(1).getForename()).isEqualTo("dave");
 		verify(preparedStatement).setString(1, "one");
 		verify(connection).prepareStatement(SELECT_ID_FORENAME_WHERE);
 		verify(resultSet).close();

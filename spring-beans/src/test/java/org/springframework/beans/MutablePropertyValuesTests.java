@@ -20,10 +20,8 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -138,17 +136,17 @@ public class MutablePropertyValuesTests extends AbstractPropertyValuesTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("foo", "bar");
 
-		assertThat(pvs.stream(), notNullValue());
-		assertThat(pvs.stream().count(), is(1L));
-		assertThat(pvs.stream().anyMatch(pv -> "foo".equals(pv.getName()) && "bar".equals(pv.getValue())), is(true));
-		assertThat(pvs.stream().anyMatch(pv -> "bar".equals(pv.getName()) && "foo".equals(pv.getValue())), is(false));
+		assertThat(pvs.stream()).isNotNull();
+		assertThat(pvs.stream().count()).isEqualTo(1L);
+		assertThat(pvs.stream().anyMatch(pv -> "foo".equals(pv.getName()) && "bar".equals(pv.getValue()))).isTrue();
+		assertThat(pvs.stream().anyMatch(pv -> "bar".equals(pv.getName()) && "foo".equals(pv.getValue()))).isFalse();
 	}
 
 	@Test
 	public void streamIsEmptyForEmptyValues() {
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		assertThat(pvs.stream(), notNullValue());
-		assertThat(pvs.stream().count(), is(0L));
+		assertThat(pvs.stream()).isNotNull();
+		assertThat(pvs.stream().count()).isEqualTo(0L);
 	}
 
 }

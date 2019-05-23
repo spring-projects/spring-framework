@@ -39,7 +39,6 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory;
-import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
@@ -141,10 +140,8 @@ import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -379,8 +376,8 @@ public class MvcNamespaceTests {
 		List<Class<?>> interceptors = beans.values().stream()
 				.map(mappedInterceptor -> mappedInterceptor.getInterceptor().getClass())
 				.collect(Collectors.toList());
-		assertThat(interceptors, containsInAnyOrder(ConversionServiceExposingInterceptor.class,
-				ResourceUrlProviderExposingInterceptor.class));
+		assertThat(interceptors).contains(ConversionServiceExposingInterceptor.class,
+				ResourceUrlProviderExposingInterceptor.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setRequestURI("/resources/foo.css");
@@ -427,21 +424,21 @@ public class MvcNamespaceTests {
 		assertNotNull(handler.getUrlPathHelper());
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(4));
-		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
-		assertThat(resolvers.get(1), Matchers.instanceOf(VersionResourceResolver.class));
-		assertThat(resolvers.get(2), Matchers.instanceOf(WebJarsResourceResolver.class));
-		assertThat(resolvers.get(3), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers).hasSize(4);
+		assertThat(resolvers.get(0)).isInstanceOf(CachingResourceResolver.class);
+		assertThat(resolvers.get(1)).isInstanceOf(VersionResourceResolver.class);
+		assertThat(resolvers.get(2)).isInstanceOf(WebJarsResourceResolver.class);
+		assertThat(resolvers.get(3)).isInstanceOf(PathResourceResolver.class);
 
 		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);
-		assertThat(cachingResolver.getCache(), Matchers.instanceOf(ConcurrentMapCache.class));
+		assertThat(cachingResolver.getCache()).isInstanceOf(ConcurrentMapCache.class);
 		assertEquals("test-resource-cache", cachingResolver.getCache().getName());
 
 		VersionResourceResolver versionResolver = (VersionResourceResolver) resolvers.get(1);
-		assertThat(versionResolver.getStrategyMap().get("/**/*.js"),
-				Matchers.instanceOf(FixedVersionStrategy.class));
-		assertThat(versionResolver.getStrategyMap().get("/**"),
-				Matchers.instanceOf(ContentVersionStrategy.class));
+		assertThat(versionResolver.getStrategyMap().get("/**/*.js"))
+				.isInstanceOf(FixedVersionStrategy.class);
+		assertThat(versionResolver.getStrategyMap().get("/**"))
+				.isInstanceOf(ContentVersionStrategy.class);
 
 		PathResourceResolver pathResolver = (PathResourceResolver) resolvers.get(3);
 		Map<Resource, Charset> locationCharsets = pathResolver.getLocationCharsets();
@@ -449,13 +446,13 @@ public class MvcNamespaceTests {
 		assertEquals(StandardCharsets.ISO_8859_1, locationCharsets.values().iterator().next());
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
-		assertThat(transformers, Matchers.hasSize(3));
-		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
-		assertThat(transformers.get(1), Matchers.instanceOf(CssLinkResourceTransformer.class));
-		assertThat(transformers.get(2), Matchers.instanceOf(AppCacheManifestTransformer.class));
+		assertThat(transformers).hasSize(3);
+		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
+		assertThat(transformers.get(1)).isInstanceOf(CssLinkResourceTransformer.class);
+		assertThat(transformers.get(2)).isInstanceOf(AppCacheManifestTransformer.class);
 
 		CachingResourceTransformer cachingTransformer = (CachingResourceTransformer) transformers.get(0);
-		assertThat(cachingTransformer.getCache(), Matchers.instanceOf(ConcurrentMapCache.class));
+		assertThat(cachingTransformer.getCache()).isInstanceOf(ConcurrentMapCache.class);
 		assertEquals("test-resource-cache", cachingTransformer.getCache().getName());
 	}
 
@@ -470,26 +467,26 @@ public class MvcNamespaceTests {
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
 
-		assertThat(handler.getCacheControl().getHeaderValue(),
-				Matchers.equalTo(CacheControl.maxAge(1, TimeUnit.HOURS)
-						.sMaxAge(30, TimeUnit.MINUTES).cachePublic().getHeaderValue()));
+		assertThat(handler.getCacheControl().getHeaderValue())
+				.isEqualTo(CacheControl.maxAge(1, TimeUnit.HOURS)
+						.sMaxAge(30, TimeUnit.MINUTES).cachePublic().getHeaderValue());
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(3));
-		assertThat(resolvers.get(0), Matchers.instanceOf(VersionResourceResolver.class));
-		assertThat(resolvers.get(1), Matchers.instanceOf(EncodedResourceResolver.class));
-		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers).hasSize(3);
+		assertThat(resolvers.get(0)).isInstanceOf(VersionResourceResolver.class);
+		assertThat(resolvers.get(1)).isInstanceOf(EncodedResourceResolver.class);
+		assertThat(resolvers.get(2)).isInstanceOf(PathResourceResolver.class);
 
 		VersionResourceResolver versionResolver = (VersionResourceResolver) resolvers.get(0);
-		assertThat(versionResolver.getStrategyMap().get("/**/*.js"),
-				Matchers.instanceOf(FixedVersionStrategy.class));
-		assertThat(versionResolver.getStrategyMap().get("/**"),
-				Matchers.instanceOf(ContentVersionStrategy.class));
+		assertThat(versionResolver.getStrategyMap().get("/**/*.js"))
+				.isInstanceOf(FixedVersionStrategy.class);
+		assertThat(versionResolver.getStrategyMap().get("/**"))
+				.isInstanceOf(ContentVersionStrategy.class);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
-		assertThat(transformers, Matchers.hasSize(2));
-		assertThat(transformers.get(0), Matchers.instanceOf(CachingResourceTransformer.class));
-		assertThat(transformers.get(1), Matchers.instanceOf(AppCacheManifestTransformer.class));
+		assertThat(transformers).hasSize(2);
+		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
+		assertThat(transformers.get(1)).isInstanceOf(AppCacheManifestTransformer.class);
 	}
 
 	@Test
@@ -702,7 +699,7 @@ public class MvcNamespaceTests {
 
 		ParameterizableViewController redirectViewController = (ParameterizableViewController) hm.getUrlMap().get("/old");
 		assertNotNull(redirectViewController);
-		assertThat(redirectViewController.getView(), Matchers.instanceOf(RedirectView.class));
+		assertThat(redirectViewController.getView()).isInstanceOf(RedirectView.class);
 
 		ParameterizableViewController statusViewController = (ParameterizableViewController) hm.getUrlMap().get("/bad");
 		assertNotNull(statusViewController);
@@ -775,7 +772,7 @@ public class MvcNamespaceTests {
 		assertEquals(TilesViewResolver.class, resolvers.get(2).getClass());
 
 		resolver = resolvers.get(3);
-		assertThat(resolver, instanceOf(FreeMarkerViewResolver.class));
+		assertThat(resolver).isInstanceOf(FreeMarkerViewResolver.class);
 		accessor = new DirectFieldAccessor(resolver);
 		assertEquals("freemarker-", accessor.getPropertyValue("prefix"));
 		assertEquals(".freemarker", accessor.getPropertyValue("suffix"));
@@ -783,14 +780,14 @@ public class MvcNamespaceTests {
 		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
 		resolver = resolvers.get(4);
-		assertThat(resolver, instanceOf(GroovyMarkupViewResolver.class));
+		assertThat(resolver).isInstanceOf(GroovyMarkupViewResolver.class);
 		accessor = new DirectFieldAccessor(resolver);
 		assertEquals("", accessor.getPropertyValue("prefix"));
 		assertEquals(".tpl", accessor.getPropertyValue("suffix"));
 		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
 		resolver = resolvers.get(5);
-		assertThat(resolver, instanceOf(ScriptTemplateViewResolver.class));
+		assertThat(resolver).isInstanceOf(ScriptTemplateViewResolver.class);
 		accessor = new DirectFieldAccessor(resolver);
 		assertEquals("", accessor.getPropertyValue("prefix"));
 		assertEquals("", accessor.getPropertyValue("suffix"));

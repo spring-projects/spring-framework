@@ -28,8 +28,8 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Unit tests for checking the behaviour of {@link CachingMetadataReaderFactory} under
@@ -51,7 +51,7 @@ public class CachingMetadataReaderLeakTests {
 
 		// the biggest public class in the JDK (>60k)
 		URL url = getClass().getResource("/java/awt/Component.class");
-		assertThat(url, notNullValue());
+		assertThat(url).isNotNull();
 
 		// look at a LOT of items
 		for (int i = 0; i < ITEMS_TO_LOAD; i++) {
@@ -69,7 +69,7 @@ public class CachingMetadataReaderLeakTests {
 			};
 
 			MetadataReader reader = mrf.getMetadataReader(resource);
-			assertThat(reader, notNullValue());
+			assertThat(reader).isNotNull();
 		}
 
 		// useful for profiling to take snapshots

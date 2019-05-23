@@ -50,10 +50,7 @@ import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -89,8 +86,8 @@ public class DispatcherHandlerErrorTests {
 
 		StepVerifier.create(mono)
 				.consumeErrorWith(ex -> {
-					assertThat(ex, instanceOf(ResponseStatusException.class));
-					assertThat(ex.getMessage(), is("404 NOT_FOUND \"No matching handler\""));
+					assertThat(ex).isInstanceOf(ResponseStatusException.class);
+					assertThat(ex.getMessage()).isEqualTo("404 NOT_FOUND \"No matching handler\"");
 				})
 				.verify();
 
@@ -126,10 +123,10 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> {
-					assertThat(error, instanceOf(IllegalStateException.class));
-					assertThat(error.getMessage(), startsWith("No HandlerResultHandler"));
-				})
+				.consumeErrorWith(error ->
+					assertThat(error)
+							.isInstanceOf(IllegalStateException.class)
+							.hasMessageStartingWith("No HandlerResultHandler"))
 				.verify();
 	}
 
@@ -141,7 +138,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(exchange);
 
 		StepVerifier.create(publisher)
-				.consumeErrorWith(error -> assertThat(error, instanceOf(NotAcceptableStatusException.class)))
+				.consumeErrorWith(error -> assertThat(error).isInstanceOf(NotAcceptableStatusException.class))
 				.verify();
 	}
 

@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import org.springframework.messaging.Message;
@@ -37,7 +36,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -113,7 +112,7 @@ public class StompHeaderAccessorTests {
 		assertNotNull(headerAccessor.getHeader("stompCredentials"));
 		assertEquals("joe", headerAccessor.getLogin());
 		assertEquals("joe123", headerAccessor.getPasscode());
-		assertThat(headerAccessor.toString(), CoreMatchers.containsString("passcode=[PROTECTED]"));
+		assertThat(headerAccessor.toString()).contains("passcode=[PROTECTED]");
 
 		Map<String, List<String>> output = headerAccessor.toNativeHeaderMap();
 		assertEquals("joe", output.get(StompHeaderAccessor.STOMP_LOGIN_HEADER).get(0));

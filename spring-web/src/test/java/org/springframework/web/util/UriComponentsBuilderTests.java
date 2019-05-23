@@ -33,11 +33,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -715,73 +712,73 @@ public class UriComponentsBuilderTests {
 	@Test
 	public void queryParamWithValueWithEquals() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=baz").build();
-		assertThat(uriComponents.toUriString(), equalTo("https://example.com/foo?bar=baz"));
-		assertThat(uriComponents.getQueryParams().get("bar").get(0), equalTo("baz"));
+		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=baz");
+		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isEqualTo("baz");
 	}
 
 	@Test
 	public void queryParamWithoutValueWithEquals()  {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=").build();
-		assertThat(uriComponents.toUriString(), equalTo("https://example.com/foo?bar="));
-		assertThat(uriComponents.getQueryParams().get("bar").get(0), equalTo(""));
+		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=");
+		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isEqualTo("");
 	}
 
 	@Test
 	public void queryParamWithoutValueWithoutEquals() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar").build();
-		assertThat(uriComponents.toUriString(), equalTo("https://example.com/foo?bar"));
+		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar");
 
 		// TODO [SPR-13537] Change equalTo(null) to equalTo("").
-		assertThat(uriComponents.getQueryParams().get("bar").get(0), equalTo(null));
+		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isNull();
 	}
 
 	@Test
 	public void relativeUrls() {
 		String baseUrl = "https://example.com";
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toString(),
-				equalTo(baseUrl + "/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toUriString(),
-				equalTo(baseUrl + "/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toUri().getPath(),
-				equalTo("/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString("../../").build().toString(),
-				equalTo("../../"));
-		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUriString(),
-				equalTo("../../"));
-		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUri().getPath(),
-				equalTo("../../"));
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toString(),
-				equalTo(baseUrl + "/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUriString(),
-				equalTo(baseUrl + "/foo/../bar"));
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUri().getPath(),
-				equalTo("/foo/../bar"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toString())
+				.isEqualTo(baseUrl + "/foo/../bar");
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toUriString())
+				.isEqualTo(baseUrl + "/foo/../bar");
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl + "/foo/../bar").build().toUri().getPath())
+				.isEqualTo("/foo/../bar");
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toString())
+				.isEqualTo("../../");
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUriString())
+				.isEqualTo("../../");
+		assertThat(UriComponentsBuilder.fromUriString("../../").build().toUri().getPath())
+				.isEqualTo("../../");
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toString())
+				.isEqualTo(baseUrl + "/foo/../bar");
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUriString())
+				.isEqualTo(baseUrl + "/foo/../bar");
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("foo/../bar").build().toUri().getPath())
+				.isEqualTo("/foo/../bar");
 	}
 
 	@Test
 	public void emptySegments() {
 		String baseUrl = "https://example.com/abc/";
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/y/z").build().toString(),
-				equalTo("https://example.com/abc/x/y/z"));
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x", "y", "z").build().toString(),
-				equalTo("https://example.com/abc/x/y/z"));
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/").path("/y/z").build().toString(),
-				equalTo("https://example.com/abc/x/y/z"));
-		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x").path("y").build().toString(),
-				equalTo("https://example.com/abc/x/y"));
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/y/z").build().toString())
+				.isEqualTo("https://example.com/abc/x/y/z");
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x", "y", "z").build().toString())
+				.isEqualTo("https://example.com/abc/x/y/z");
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).path("/x/").path("/y/z").build().toString())
+				.isEqualTo("https://example.com/abc/x/y/z");
+		assertThat(UriComponentsBuilder.fromUriString(baseUrl).pathSegment("x").path("y").build().toString())
+				.isEqualTo("https://example.com/abc/x/y");
 	}
 
 	@Test
 	public void parsesEmptyFragment() {
 		UriComponents components = UriComponentsBuilder.fromUriString("/example#").build();
-		assertThat(components.getFragment(), is(nullValue()));
-		assertThat(components.toString(), equalTo("/example"));
+		assertThat(components.getFragment()).isNull();
+		assertThat(components.toString()).isEqualTo("/example");
 	}
 
 	@Test  // SPR-13257
 	public void parsesEmptyUri() {
 		UriComponents components = UriComponentsBuilder.fromUriString("").build();
-		assertThat(components.toString(), equalTo(""));
+		assertThat(components.toString()).isEqualTo("");
 	}
 
 	@Test

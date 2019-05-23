@@ -22,8 +22,7 @@ import org.junit.Test;
 
 import org.springframework.util.ReflectionUtils;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -46,7 +45,7 @@ public class ReflectionUtilsIntegrationTests {
 				m1MethodCount++;
 			}
 		}
-		assertThat(m1MethodCount, is(1));
+		assertThat(m1MethodCount).isEqualTo(1);
 		for (Method method : methods) {
 			if (method.getName().contains("m1")) {
 				assertEquals(method.getReturnType(), Integer.class);

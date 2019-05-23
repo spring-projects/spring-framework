@@ -38,9 +38,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -139,14 +138,14 @@ public class EnableTransactionManagementTests {
 		CallCountingTransactionManager txManager = ctx.getBean("qualifiedTransactionManager", CallCountingTransactionManager.class);
 
 		bean.saveQualifiedFoo();
-		assertThat(txManager.begun, equalTo(1));
-		assertThat(txManager.commits, equalTo(1));
-		assertThat(txManager.rollbacks, equalTo(0));
+		assertThat(txManager.begun).isEqualTo(1);
+		assertThat(txManager.commits).isEqualTo(1);
+		assertThat(txManager.rollbacks).isEqualTo(0);
 
 		bean.saveQualifiedFooWithAttributeAlias();
-		assertThat(txManager.begun, equalTo(2));
-		assertThat(txManager.commits, equalTo(2));
-		assertThat(txManager.rollbacks, equalTo(0));
+		assertThat(txManager.begun).isEqualTo(2);
+		assertThat(txManager.commits).isEqualTo(2);
+		assertThat(txManager.rollbacks).isEqualTo(0);
 
 		ctx.close();
 	}
@@ -159,9 +158,9 @@ public class EnableTransactionManagementTests {
 
 		bean.saveFoo();
 		bean.saveBar();
-		assertThat(txManager.begun, equalTo(2));
-		assertThat(txManager.commits, equalTo(2));
-		assertThat(txManager.rollbacks, equalTo(0));
+		assertThat(txManager.begun).isEqualTo(2);
+		assertThat(txManager.commits).isEqualTo(2);
+		assertThat(txManager.rollbacks).isEqualTo(0);
 
 		ctx.close();
 	}
@@ -174,9 +173,9 @@ public class EnableTransactionManagementTests {
 
 		bean.saveFoo();
 		bean.saveBar();
-		assertThat(txManager.begun, equalTo(2));
-		assertThat(txManager.commits, equalTo(2));
-		assertThat(txManager.rollbacks, equalTo(0));
+		assertThat(txManager.begun).isEqualTo(2);
+		assertThat(txManager.commits).isEqualTo(2);
+		assertThat(txManager.rollbacks).isEqualTo(0);
 
 		ctx.close();
 	}

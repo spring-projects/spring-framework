@@ -32,9 +32,8 @@ import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -88,7 +87,7 @@ public class ResourceBundleViewResolverTests {
 	@Test
 	public void debugViewEnglish() throws Exception {
 		View v = rb.resolveViewName("debugView", Locale.ENGLISH);
-		assertThat(v, instanceOf(InternalResourceView.class));
+		assertThat(v).isInstanceOf(InternalResourceView.class);
 		InternalResourceView jv = (InternalResourceView) v;
 		assertEquals("debugView must have correct URL", "jsp/debug/debug.jsp", jv.getUrl());
 
@@ -103,7 +102,7 @@ public class ResourceBundleViewResolverTests {
 	@Test
 	public void debugViewFrench() throws Exception {
 		View v = rb.resolveViewName("debugView", Locale.FRENCH);
-		assertThat(v, instanceOf(InternalResourceView.class));
+		assertThat(v).isInstanceOf(InternalResourceView.class);
 		InternalResourceView jv = (InternalResourceView) v;
 		assertEquals("French debugView must have correct URL", "jsp/debug/deboug.jsp", jv.getUrl());
 		assertEquals("Correct overridden (XML) content type", "text/xml;charset=ISO-8859-1", jv.getContentType());
@@ -119,7 +118,7 @@ public class ResourceBundleViewResolverTests {
 		rb.setApplicationContext(wac);
 
 		View v = rb.resolveViewName("debugView", Locale.FRENCH);
-		assertThat(v, instanceOf(InternalResourceView.class));
+		assertThat(v).isInstanceOf(InternalResourceView.class);
 		InternalResourceView jv = (InternalResourceView) v;
 		assertEquals("French debugView must have correct URL", "jsp/debug/deboug.jsp", jv.getUrl());
 		assertEquals("Correct overridden (XML) content type", "text/xml;charset=ISO-8859-1", jv.getContentType());

@@ -64,6 +64,12 @@
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]support[\\/]ContextLoaderUtilsContextHierarchyTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]testng[\\/]transaction[\\/]programmatic/ProgrammaticTxMgmtTestNGTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]transaction[\\/]programmatic[\\/]ProgrammaticTxMgmtTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="JsonPathExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="XpathExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="DefaultWebTestClient" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="HeaderAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="StatusAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="JsonPathResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
 
 	<!-- spring-web -->
 	<suppress files="SpringHandlerInstantiator" checks="JavadocStyle" />

@@ -24,8 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -207,7 +206,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		latch.await();
 
 		assertEquals(10, results.size());
-		results.forEach(r -> assertThat(r, is(1))); // Only one method got invoked
+		results.forEach(r -> assertThat(r).isEqualTo(1)); // Only one method got invoked
 	}
 
 	protected String createRandomKey() {

@@ -28,10 +28,9 @@ import javax.servlet.ServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -84,8 +83,8 @@ public class MockFilterChainTests {
 		MockFilterChain chain = new MockFilterChain();
 		chain.doFilter(this.request, this.response);
 
-		assertThat(chain.getRequest(), is(request));
-		assertThat(chain.getResponse(), is(response));
+		assertThat(chain.getRequest()).isEqualTo(request);
+		assertThat(chain.getResponse()).isEqualTo(response);
 
 		assertThatIllegalStateException().isThrownBy(() ->
 				chain.doFilter(this.request, this.response))

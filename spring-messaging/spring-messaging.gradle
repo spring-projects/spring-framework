@@ -35,6 +35,7 @@ dependencies {
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	testCompile("org.xmlunit:xmlunit-assertj:2.6.2")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
 	testCompile(project(":spring-core-coroutines"))
 	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")

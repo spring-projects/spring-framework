@@ -32,9 +32,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -113,7 +112,7 @@ public class SqlLobValueTests  {
 		verify(creator).setClobAsAsciiStream(eq(preparedStatement), eq(1), inputStreamCaptor.capture(), eq(3));
 		byte[] bytes = new byte[3];
 		inputStreamCaptor.getValue().read(bytes);
-		assertThat(bytes, equalTo(testContent));
+		assertThat(bytes).isEqualTo(testContent);
 	}
 
 	@Test

@@ -26,8 +26,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.beans.CollectingReaderEventListener;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Torsten Juergeleit
@@ -50,7 +50,7 @@ public class TxNamespaceHandlerEventTests {
 	@Test
 	public void componentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("txAdvice");
-		assertThat(component, instanceOf(BeanComponentDefinition.class));
+		assertThat(component).isInstanceOf(BeanComponentDefinition.class);
 	}
 
 }

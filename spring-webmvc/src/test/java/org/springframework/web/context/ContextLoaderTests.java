@@ -47,10 +47,6 @@ import org.springframework.web.servlet.SimpleWebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -131,8 +127,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -146,8 +142,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -161,8 +157,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -175,8 +171,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -190,8 +186,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -205,8 +201,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -381,7 +377,7 @@ public class ContextLoaderTests {
 			// test that ApplicationContextInitializers can access ServletContext properties
 			// via the environment (SPR-8991)
 			String value = applicationContext.getEnvironment().getRequiredProperty("someProperty");
-			assertThat(value, is("someValue"));
+			assertThat(value).isEqualTo("someValue");
 		}
 	}
 

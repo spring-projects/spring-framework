@@ -34,9 +34,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -95,21 +93,21 @@ public class ContextHierarchyDirtiesContextTests {
 		Result result = jUnitCore.run(testClass);
 		assertTrue("all tests passed", result.wasSuccessful());
 
-		assertThat(ContextHierarchyDirtiesContextTests.context, notNullValue());
+		assertThat(ContextHierarchyDirtiesContextTests.context).isNotNull();
 
 		ConfigurableApplicationContext bazContext = (ConfigurableApplicationContext) ContextHierarchyDirtiesContextTests.context;
 		assertEquals("baz", ContextHierarchyDirtiesContextTests.baz);
-		assertThat("bazContext#isActive()", bazContext.isActive(), is(isBazContextActive));
+		assertThat(bazContext.isActive()).isEqualTo(isBazContextActive);
 
 		ConfigurableApplicationContext barContext = (ConfigurableApplicationContext) bazContext.getParent();
-		assertThat(barContext, notNullValue());
+		assertThat(barContext).isNotNull();
 		assertEquals("bar", ContextHierarchyDirtiesContextTests.bar);
-		assertThat("barContext#isActive()", barContext.isActive(), is(isBarContextActive));
+		assertThat(barContext.isActive()).isEqualTo(isBarContextActive);
 
 		ConfigurableApplicationContext fooContext = (ConfigurableApplicationContext) barContext.getParent();
-		assertThat(fooContext, notNullValue());
+		assertThat(fooContext).isNotNull();
 		assertEquals("foo", ContextHierarchyDirtiesContextTests.foo);
-		assertThat("fooContext#isActive()", fooContext.isActive(), is(isFooContextActive));
+		assertThat(fooContext.isActive()).isEqualTo(isFooContextActive);
 	}
 
 

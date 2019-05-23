@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -34,9 +33,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
@@ -179,7 +176,7 @@ public class VersionResourceResolverTests {
 
 		assertEquals(expected.getFilename(), actual.getFilename());
 		verify(this.versionStrategy, times(1)).getResourceVersion(expected);
-		assertThat(actual, instanceOf(HttpResource.class));
+		assertThat(actual).isInstanceOf(HttpResource.class);
 		assertEquals("\"" + version + "\"", ((HttpResource)actual).getResponseHeaders().getETag());
 	}
 
@@ -203,19 +200,19 @@ public class VersionResourceResolverTests {
 
 		this.resolver.addFixedVersionStrategy("fixedversion", "/js/**", "/css/**", "/fixedversion/css/**");
 
-		assertThat(this.resolver.getStrategyMap().size(), is(4));
+		assertThat(this.resolver.getStrategyMap()).hasSize(4);
 
-		assertThat(this.resolver.getStrategyForPath("js/something.js"),
-				Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(this.resolver.getStrategyForPath("js/something.js"))
+				.isInstanceOf(FixedVersionStrategy.class);
 
-		assertThat(this.resolver.getStrategyForPath("fixedversion/js/something.js"),
-				Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(this.resolver.getStrategyForPath("fixedversion/js/something.js"))
+				.isInstanceOf(FixedVersionStrategy.class);
 
-		assertThat(this.resolver.getStrategyForPath("css/something.css"),
-				Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(this.resolver.getStrategyForPath("css/something.css"))
+				.isInstanceOf(FixedVersionStrategy.class);
 
-		assertThat(this.resolver.getStrategyForPath("fixedversion/css/something.css"),
-				Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(this.resolver.getStrategyForPath("fixedversion/css/something.css"))
+				.isInstanceOf(FixedVersionStrategy.class);
 	}
 
 	@Test // SPR-15372
@@ -223,7 +220,7 @@ public class VersionResourceResolverTests {
 		given(this.chain.resolveUrlPath("/foo.css", this.locations)).willReturn(Mono.just("/foo.css"));
 		String resolved = this.resolver.resolveUrlPathInternal("/foo.css", this.locations, this.chain)
 				.block(Duration.ofMillis(1000));
-		assertThat(resolved, is("/foo.css"));
+		assertThat(resolved).isEqualTo("/foo.css");
 	}
 
 

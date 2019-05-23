@@ -38,10 +38,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -105,21 +101,21 @@ public class ExpressionEvaluatorTests {
 	public void withReturnValue() {
 		EvaluationContext context = createEvaluationContext("theResult");
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
-		assertThat(value, equalTo("theResult"));
+		assertThat(value).isEqualTo("theResult");
 	}
 
 	@Test
 	public void withNullReturn() {
 		EvaluationContext context = createEvaluationContext(null);
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
-		assertThat(value, nullValue());
+		assertThat(value).isNull();
 	}
 
 	@Test
 	public void withoutReturnValue() {
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT);
 		Object value = new SpelExpressionParser().parseExpression("#result").getValue(context);
-		assertThat(value, nullValue());
+		assertThat(value).isNull();
 	}
 
 	@Test
@@ -139,7 +135,7 @@ public class ExpressionEvaluatorTests {
 
 		EvaluationContext context = createEvaluationContext(CacheOperationExpressionEvaluator.NO_RESULT, applicationContext);
 		Object value = new SpelExpressionParser().parseExpression("@myBean.class.getName()").getValue(context);
-		assertThat(value, is(String.class.getName()));
+		assertThat(value).isEqualTo(String.class.getName());
 	}
 
 	private EvaluationContext createEvaluationContext(Object result) {

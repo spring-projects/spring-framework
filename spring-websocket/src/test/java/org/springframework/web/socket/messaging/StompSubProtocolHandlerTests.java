@@ -59,8 +59,7 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -492,7 +491,7 @@ public class StompSubProtocolHandlerTests {
 			@Override
 			public boolean send(Message<?> message) {
 				SimpAttributes simpAttributes = SimpAttributesContextHolder.currentAttributes();
-				assertThat(simpAttributes.getAttribute("name"), is("value"));
+				assertThat(simpAttributes.getAttribute("name")).isEqualTo("value");
 				return true;
 			}
 			@Override

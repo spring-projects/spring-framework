@@ -34,11 +34,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
 
 import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -97,7 +94,7 @@ public class AnnotationConfigApplicationContextTests {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		TestBean testBean = context.getBean(TestBean.class);
 		assertNotNull(testBean);
-		assertThat(testBean.name, equalTo("foo"));
+		assertThat(testBean.name).isEqualTo("foo");
 	}
 
 	@Test
@@ -114,19 +111,11 @@ public class AnnotationConfigApplicationContextTests {
 	@Test
 	public void getBeanByTypeAmbiguityRaisesException() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);
-
-		try {
-			context.getBean(TestBean.class);
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			assertThat(ex.getMessage(),
-					allOf(
-							containsString("No qualifying bean of type '" + TestBean.class.getName() + "'"),
-							containsString("tb1"),
-							containsString("tb2")
-					)
-			);
-		}
+		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
+				context.getBean(TestBean.class))
+			.withMessageContaining("No qualifying bean of type '" + TestBean.class.getName() + "'")
+			.withMessageContaining("tb1")
+			.withMessageContaining("tb2");
 	}
 
 	/**
@@ -158,7 +147,7 @@ public class AnnotationConfigApplicationContextTests {
 	@Test
 	public void autowiringIsEnabledByDefault() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(AutowiredConfig.class);
-		assertThat(context.getBean(TestBean.class).name, equalTo("foo"));
+		assertThat(context.getBean(TestBean.class).name).isEqualTo("foo");
 	}
 
 	@Test

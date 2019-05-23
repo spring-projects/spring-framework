@@ -52,9 +52,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -322,8 +320,8 @@ public class MappingJackson2JsonViewTests {
 		String content = response.getContentAsString();
 		assertTrue(content.length() > 0);
 		assertEquals(content.length(), response.getContentLength());
-		assertThat(content, containsString("\"property1\":\"value\""));
-		assertThat(content, not(containsString("\"property2\":\"value\"")));
+		assertThat(content).contains("\"property1\":\"value\"");
+		assertThat(content).doesNotContain("\"property2\":\"value\"");
 		assertFalse(content.contains(FilterProvider.class.getName()));
 	}
 

@@ -28,19 +28,15 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import org.springframework.util.FileCopyUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -101,75 +97,75 @@ public class PathResourceTests {
 	public void createFromPath() {
 		Path path = Paths.get(TEST_FILE);
 		PathResource resource = new PathResource(path);
-		assertThat(resource.getPath(), equalTo(TEST_FILE));
+		assertThat(resource.getPath()).isEqualTo(TEST_FILE);
 	}
 
 	@Test
 	public void createFromString() {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertThat(resource.getPath(), equalTo(TEST_FILE));
+		assertThat(resource.getPath()).isEqualTo(TEST_FILE);
 	}
 
 	@Test
 	public void createFromUri() {
 		File file = new File(TEST_FILE);
 		PathResource resource = new PathResource(file.toURI());
-		assertThat(resource.getPath(), equalTo(file.getAbsoluteFile().toString()));
+		assertThat(resource.getPath()).isEqualTo(file.getAbsoluteFile().toString());
 	}
 
 	@Test
 	public void getPathForFile() {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertThat(resource.getPath(), equalTo(TEST_FILE));
+		assertThat(resource.getPath()).isEqualTo(TEST_FILE);
 	}
 
 	@Test
 	public void getPathForDir() {
 		PathResource resource = new PathResource(TEST_DIR);
-		assertThat(resource.getPath(), equalTo(TEST_DIR));
+		assertThat(resource.getPath()).isEqualTo(TEST_DIR);
 	}
 
 	@Test
 	public void fileExists() {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertThat(resource.exists(), equalTo(true));
+		assertThat(resource.exists()).isEqualTo(true);
 	}
 
 	@Test
 	public void dirExists() {
 		PathResource resource = new PathResource(TEST_DIR);
-		assertThat(resource.exists(), equalTo(true));
+		assertThat(resource.exists()).isEqualTo(true);
 	}
 
 	@Test
 	public void fileDoesNotExist() {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
-		assertThat(resource.exists(), equalTo(false));
+		assertThat(resource.exists()).isEqualTo(false);
 	}
 
 	@Test
 	public void fileIsReadable() {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertThat(resource.isReadable(), equalTo(true));
+		assertThat(resource.isReadable()).isEqualTo(true);
 	}
 
 	@Test
 	public void doesNotExistIsNotReadable() {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
-		assertThat(resource.isReadable(), equalTo(false));
+		assertThat(resource.isReadable()).isEqualTo(false);
 	}
 
 	@Test
 	public void directoryIsNotReadable() {
 		PathResource resource = new PathResource(TEST_DIR);
-		assertThat(resource.isReadable(), equalTo(false));
+		assertThat(resource.isReadable()).isEqualTo(false);
 	}
 
 	@Test
 	public void getInputStream() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-		assertThat(bytes.length, greaterThan(0));
+		assertThat(bytes.length).isGreaterThan(0);
 	}
 
 	@Test
@@ -189,20 +185,20 @@ public class PathResourceTests {
 	@Test
 	public void getUrl() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertThat(resource.getURL().toString(), Matchers.endsWith("core/io/example.properties"));
+		assertThat(resource.getURL().toString()).endsWith("core/io/example.properties");
 	}
 
 	@Test
 	public void getUri() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertThat(resource.getURI().toString(), Matchers.endsWith("core/io/example.properties"));
+		assertThat(resource.getURI().toString()).endsWith("core/io/example.properties");
 	}
 
 	@Test
 	public void getFile() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		File file = new File(TEST_FILE);
-		assertThat(resource.getFile().getAbsoluteFile(), equalTo(file.getAbsoluteFile()));
+		assertThat(resource.getFile().getAbsoluteFile()).isEqualTo(file.getAbsoluteFile());
 	}
 
 	@Test
@@ -219,65 +215,65 @@ public class PathResourceTests {
 	public void contentLength() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		File file = new File(TEST_FILE);
-		assertThat(resource.contentLength(), equalTo(file.length()));
+		assertThat(resource.contentLength()).isEqualTo(file.length());
 	}
 
 	@Test
 	public void contentLengthForDirectory() throws IOException {
 		PathResource resource = new PathResource(TEST_DIR);
 		File file = new File(TEST_DIR);
-		assertThat(resource.contentLength(), equalTo(file.length()));
+		assertThat(resource.contentLength()).isEqualTo(file.length());
 	}
 
 	@Test
 	public void lastModified() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		File file = new File(TEST_FILE);
-		assertThat(resource.lastModified() / 1000, equalTo(file.lastModified() / 1000));
+		assertThat(resource.lastModified() / 1000).isEqualTo(file.lastModified() / 1000);
 	}
 
 	@Test
 	public void createRelativeFromDir() throws IOException {
 		Resource resource = new PathResource(TEST_DIR).createRelative("example.properties");
-		assertThat(resource, equalTo((Resource) new PathResource(TEST_FILE)));
+		assertThat(resource).isEqualTo(new PathResource(TEST_FILE));
 	}
 
 	@Test
 	public void createRelativeFromFile() throws IOException {
 		Resource resource = new PathResource(TEST_FILE).createRelative("../example.properties");
-		assertThat(resource, equalTo((Resource) new PathResource(TEST_FILE)));
+		assertThat(resource).isEqualTo(new PathResource(TEST_FILE));
 	}
 
 	@Test
 	public void filename() {
 		Resource resource = new PathResource(TEST_FILE);
-		assertThat(resource.getFilename(), equalTo("example.properties"));
+		assertThat(resource.getFilename()).isEqualTo("example.properties");
 	}
 
 	@Test
 	public void description() {
 		Resource resource = new PathResource(TEST_FILE);
-		assertThat(resource.getDescription(), containsString("path ["));
-		assertThat(resource.getDescription(), containsString(TEST_FILE));
+		assertThat(resource.getDescription()).contains("path [");
+		assertThat(resource.getDescription()).contains(TEST_FILE);
 	}
 
 	@Test
 	public void fileIsWritable() {
 		PathResource resource = new PathResource(TEST_FILE);
-		assertThat(resource.isWritable(), equalTo(true));
+		assertThat(resource.isWritable()).isEqualTo(true);
 	}
 
 	@Test
 	public void directoryIsNotWritable() {
 		PathResource resource = new PathResource(TEST_DIR);
-		assertThat(resource.isWritable(), equalTo(false));
+		assertThat(resource.isWritable()).isEqualTo(false);
 	}
 
 	@Test
 	public void outputStream() throws IOException {
 		PathResource resource = new PathResource(temporaryFolder.newFile("test").toPath());
 		FileCopyUtils.copy("test".getBytes(StandardCharsets.UTF_8), resource.getOutputStream());
-		assertThat(resource.contentLength(), equalTo(4L));
+		assertThat(resource.contentLength()).isEqualTo(4L);
 	}
 
 	@Test
@@ -286,7 +282,7 @@ public class PathResourceTests {
 		file.delete();
 		PathResource resource = new PathResource(file.toPath());
 		FileCopyUtils.copy("test".getBytes(), resource.getOutputStream());
-		assertThat(resource.contentLength(), equalTo(4L));
+		assertThat(resource.contentLength()).isEqualTo(4L);
 	}
 
 	@Test
@@ -305,7 +301,7 @@ public class PathResourceTests {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
-			assertThat(buffer.limit(), greaterThan(0));
+			assertThat(buffer.limit()).isGreaterThan(0);
 		}
 		finally {
 			if (channel != null) {
@@ -346,7 +342,7 @@ public class PathResourceTests {
 				channel.close();
 			}
 		}
-		assertThat(resource.contentLength(), equalTo(4L));
+		assertThat(resource.contentLength()).isEqualTo(4L);
 	}
 
 }

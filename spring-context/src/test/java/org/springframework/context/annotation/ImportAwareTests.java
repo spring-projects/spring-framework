@@ -36,9 +36,7 @@ import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.util.Assert;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -61,11 +59,11 @@ public class ImportAwareTests {
 
 		ImportedConfig importAwareConfig = ctx.getBean(ImportedConfig.class);
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
-		assertThat("import metadata was not injected", importMetadata, notNullValue());
-		assertThat(importMetadata.getClassName(), is(ImportingConfig.class.getName()));
+		assertThat(importMetadata).isNotNull();
+		assertThat(importMetadata.getClassName()).isEqualTo(ImportingConfig.class.getName());
 		AnnotationAttributes importAttribs = AnnotationConfigUtils.attributesFor(importMetadata, Import.class);
 		Class<?>[] importedClasses = importAttribs.getClassArray("value");
-		assertThat(importedClasses[0].getName(), is(ImportedConfig.class.getName()));
+		assertThat(importedClasses[0].getName()).isEqualTo(ImportedConfig.class.getName());
 	}
 
 	@Test
@@ -77,11 +75,11 @@ public class ImportAwareTests {
 
 		ImportedConfig importAwareConfig = ctx.getBean(ImportedConfig.class);
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
-		assertThat("import metadata was not injected", importMetadata, notNullValue());
-		assertThat(importMetadata.getClassName(), is(IndirectlyImportingConfig.class.getName()));
+		assertThat(importMetadata).isNotNull();
+		assertThat(importMetadata.getClassName()).isEqualTo(IndirectlyImportingConfig.class.getName());
 		AnnotationAttributes enableAttribs = AnnotationConfigUtils.attributesFor(importMetadata, EnableImportedConfig.class);
 		String foo = enableAttribs.getString("foo");
-		assertThat(foo, is("xyz"));
+		assertThat(foo).isEqualTo("xyz");
 	}
 
 	@Test
@@ -93,11 +91,11 @@ public class ImportAwareTests {
 
 		ImportedConfigLite importAwareConfig = ctx.getBean(ImportedConfigLite.class);
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
-		assertThat("import metadata was not injected", importMetadata, notNullValue());
-		assertThat(importMetadata.getClassName(), is(ImportingConfigLite.class.getName()));
+		assertThat(importMetadata).isNotNull();
+		assertThat(importMetadata.getClassName()).isEqualTo(ImportingConfigLite.class.getName());
 		AnnotationAttributes importAttribs = AnnotationConfigUtils.attributesFor(importMetadata, Import.class);
 		Class<?>[] importedClasses = importAttribs.getClassArray("value");
-		assertThat(importedClasses[0].getName(), is(ImportedConfigLite.class.getName()));
+		assertThat(importedClasses[0].getName()).isEqualTo(ImportedConfigLite.class.getName());
 	}
 
 	@Test

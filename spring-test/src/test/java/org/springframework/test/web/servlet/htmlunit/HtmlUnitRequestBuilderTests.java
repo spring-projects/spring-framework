@@ -19,9 +19,9 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletContext;
@@ -45,16 +45,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
@@ -119,8 +111,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getAuthType(), equalTo("Basic"));
-		assertThat(actualRequest.getHeader("Authorization"), equalTo(authzHeaderValue));
+		assertThat(actualRequest.getAuthType()).isEqualTo("Basic");
+		assertThat(actualRequest.getHeader("Authorization")).isEqualTo(authzHeaderValue);
 	}
 
 	@Test
@@ -129,14 +121,14 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getCharacterEncoding(), equalTo("UTF-8"));
+		assertThat(actualRequest.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
 	@Test
 	public void buildRequestDefaultCharacterEncoding() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getCharacterEncoding(), equalTo("ISO-8859-1"));
+		assertThat(actualRequest.getCharacterEncoding()).isEqualTo("ISO-8859-1");
 	}
 
 	@Test
@@ -147,7 +139,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getContentLength(), equalTo(content.length()));
+		assertThat(actualRequest.getContentLength()).isEqualTo(content.length());
 	}
 
 	@Test
@@ -157,8 +149,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getContentType(), equalTo(contentType));
-		assertThat(actualRequest.getHeader("Content-Type"), equalTo(contentType));
+		assertThat(actualRequest.getContentType()).isEqualTo(contentType);
+		assertThat(actualRequest.getHeader("Content-Type")).isEqualTo(contentType);
 	}
 
 	@Test  // SPR-14916
@@ -167,9 +159,9 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getContentType(), equalTo("application/x-www-form-urlencoded"));
-		assertThat(actualRequest.getHeader("Content-Type"),
-				equalTo("application/x-www-form-urlencoded;charset=ISO-8859-1"));
+		assertThat(actualRequest.getContentType()).isEqualTo("application/x-www-form-urlencoded");
+		assertThat(actualRequest.getHeader("Content-Type"))
+				.isEqualTo("application/x-www-form-urlencoded;charset=ISO-8859-1");
 	}
 
 
@@ -177,7 +169,7 @@ public class HtmlUnitRequestBuilderTests {
 	public void buildRequestContextPathUsesFirstSegmentByDefault() {
 		String contextPath = requestBuilder.buildRequest(servletContext).getContextPath();
 
-		assertThat(contextPath, equalTo("/test"));
+		assertThat(contextPath).isEqualTo("/test");
 	}
 
 	@Test
@@ -185,7 +177,7 @@ public class HtmlUnitRequestBuilderTests {
 		webRequest.setUrl(new URL("http://example.com/"));
 		String contextPath = requestBuilder.buildRequest(servletContext).getContextPath();
 
-		assertThat(contextPath, equalTo(""));
+		assertThat(contextPath).isEqualTo("");
 	}
 
 	@Test
@@ -203,7 +195,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		String contextPath = requestBuilder.buildRequest(servletContext).getContextPath();
 
-		assertThat(contextPath, equalTo(expected));
+		assertThat(contextPath).isEqualTo(expected);
 	}
 
 	@Test
@@ -213,7 +205,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		String contextPath = requestBuilder.buildRequest(servletContext).getContextPath();
 
-		assertThat(contextPath, equalTo(expected));
+		assertThat(contextPath).isEqualTo(expected);
 	}
 
 	@Test
@@ -223,14 +215,14 @@ public class HtmlUnitRequestBuilderTests {
 
 		String contextPath = requestBuilder.buildRequest(servletContext).getContextPath();
 
-		assertThat(contextPath, equalTo(expected));
+		assertThat(contextPath).isEqualTo(expected);
 	}
 
 	@Test
 	public void buildRequestCookiesNull() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getCookies(), nullValue());
+		assertThat(actualRequest.getCookies()).isNull();
 	}
 
 	@Test
@@ -240,9 +232,9 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		Cookie[] cookies = actualRequest.getCookies();
-		assertThat(cookies.length, equalTo(1));
-		assertThat(cookies[0].getName(), equalTo("name"));
-		assertThat(cookies[0].getValue(), equalTo("value"));
+		assertThat(cookies.length).isEqualTo(1);
+		assertThat(cookies[0].getName()).isEqualTo("name");
+		assertThat(cookies[0].getValue()).isEqualTo("value");
 	}
 
 	@Test
@@ -252,13 +244,13 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		Cookie[] cookies = actualRequest.getCookies();
-		assertThat(cookies.length, equalTo(2));
+		assertThat(cookies.length).isEqualTo(2);
 		Cookie cookie = cookies[0];
-		assertThat(cookie.getName(), equalTo("name"));
-		assertThat(cookie.getValue(), equalTo("value"));
+		assertThat(cookie.getName()).isEqualTo("name");
+		assertThat(cookie.getValue()).isEqualTo("value");
 		cookie = cookies[1];
-		assertThat(cookie.getName(), equalTo("name2"));
-		assertThat(cookie.getValue(), equalTo("value2"));
+		assertThat(cookie.getName()).isEqualTo("name2");
+		assertThat(cookie.getValue()).isEqualTo("value2");
 	}
 
 	@Test
@@ -270,21 +262,21 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(IOUtils.toString(actualRequest.getInputStream()), equalTo(content));
+		assertThat(IOUtils.toString(actualRequest.getInputStream())).isEqualTo(content);
 	}
 
 	@Test
 	public void buildRequestLocalAddr() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocalAddr(), equalTo("127.0.0.1"));
+		assertThat(actualRequest.getLocalAddr()).isEqualTo("127.0.0.1");
 	}
 
 	@Test
 	public void buildRequestLocaleDefault() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocale(), equalTo(Locale.getDefault()));
+		assertThat(actualRequest.getLocale()).isEqualTo(Locale.getDefault());
 	}
 
 	@Test
@@ -293,7 +285,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocale(), equalTo(new Locale("da")));
+		assertThat(actualRequest.getLocale()).isEqualTo(new Locale("da"));
 	}
 
 	@Test
@@ -302,7 +294,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocale(), equalTo(new Locale("en", "gb")));
+		assertThat(actualRequest.getLocale()).isEqualTo(new Locale("en", "gb"));
 	}
 
 	@Test
@@ -311,7 +303,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocale(), equalTo(new Locale("en", "")));
+		assertThat(actualRequest.getLocale()).isEqualTo(new Locale("en", ""));
 	}
 
 	@Test
@@ -320,7 +312,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocale(), equalTo(Locale.US));
+		assertThat(actualRequest.getLocale()).isEqualTo(Locale.US);
 	}
 
 	@Test
@@ -329,7 +321,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocale(), equalTo(Locale.FRENCH));
+		assertThat(actualRequest.getLocale()).isEqualTo(Locale.FRENCH);
 	}
 
 	@Test
@@ -338,22 +330,22 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		List<Locale> expected = asList(new Locale("da"), new Locale("en", "gb"), new Locale("en", ""));
-		assertThat(Collections.list(actualRequest.getLocales()), equalTo(expected));
+		assertThat(Collections.list(actualRequest.getLocales()))
+				.containsExactly(new Locale("da"), new Locale("en", "gb"), new Locale("en", ""));
 	}
 
 	@Test
 	public void buildRequestLocalName() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocalName(), equalTo("localhost"));
+		assertThat(actualRequest.getLocalName()).isEqualTo("localhost");
 	}
 
 	@Test
 	public void buildRequestLocalPort() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocalPort(), equalTo(80));
+		assertThat(actualRequest.getLocalPort()).isEqualTo(80);
 	}
 
 	@Test
@@ -361,7 +353,7 @@ public class HtmlUnitRequestBuilderTests {
 		webRequest.setUrl(new URL("http://localhost/test/this"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getLocalPort(), equalTo(-1));
+		assertThat(actualRequest.getLocalPort()).isEqualTo(-1);
 	}
 
 	@Test
@@ -369,59 +361,59 @@ public class HtmlUnitRequestBuilderTests {
 		for (HttpMethod expectedMethod : HttpMethod.values()) {
 			webRequest.setHttpMethod(expectedMethod);
 			String actualMethod = requestBuilder.buildRequest(servletContext).getMethod();
-			assertThat(actualMethod, equalTo(expectedMethod.name()));
+			assertThat(actualMethod).isEqualTo(expectedMethod.name());
 		}
 	}
 
 	@Test
 	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithSingleRequestParam() {
-		webRequest.setRequestParameters(asList(new NameValuePair("name", "value")));
+		webRequest.setRequestParameters(Arrays.asList(new NameValuePair("name", "value")));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), equalTo("value"));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isEqualTo("value");
 	}
 
 	@Test
 	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithSingleRequestParamWithNullValue() {
-		webRequest.setRequestParameters(asList(new NameValuePair("name", null)));
+		webRequest.setRequestParameters(Arrays.asList(new NameValuePair("name", null)));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), nullValue());
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isNull();
 	}
 
 	@Test
 	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithSingleRequestParamWithEmptyValue() {
-		webRequest.setRequestParameters(asList(new NameValuePair("name", "")));
+		webRequest.setRequestParameters(Arrays.asList(new NameValuePair("name", "")));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), equalTo(""));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isEqualTo("");
 	}
 
 	@Test
 	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithSingleRequestParamWithValueSetToSpace() {
-		webRequest.setRequestParameters(asList(new NameValuePair("name", " ")));
+		webRequest.setRequestParameters(Arrays.asList(new NameValuePair("name", " ")));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), equalTo(" "));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isEqualTo(" ");
 	}
 
 	@Test
 	public void buildRequestParameterMapViaWebRequestDotSetRequestParametersWithMultipleRequestParams() {
-		webRequest.setRequestParameters(asList(new NameValuePair("name1", "value1"), new NameValuePair("name2", "value2")));
+		webRequest.setRequestParameters(Arrays.asList(new NameValuePair("name1", "value1"), new NameValuePair("name2", "value2")));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(2));
-		assertThat(actualRequest.getParameter("name1"), equalTo("value1"));
-		assertThat(actualRequest.getParameter("name2"), equalTo("value2"));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(2);
+		assertThat(actualRequest.getParameter("name1")).isEqualTo("value1");
+		assertThat(actualRequest.getParameter("name2")).isEqualTo("value2");
 	}
 
 	@Test
@@ -430,8 +422,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), equalTo("value"));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isEqualTo("value");
 	}
 
 	// SPR-14177
@@ -441,8 +433,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("row[0]"), equalTo("value"));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("row[0]")).isEqualTo("value");
 	}
 
 	@Test
@@ -451,8 +443,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), equalTo("row[0]"));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isEqualTo("row[0]");
 	}
 
 	@Test
@@ -461,8 +453,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), equalTo(""));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isEqualTo("");
 	}
 
 	@Test
@@ -471,8 +463,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), equalTo(""));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isEqualTo("");
 	}
 
 	@Test
@@ -481,8 +473,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), equalTo(" "));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameter("name")).isEqualTo(" ");
 	}
 
 	@Test
@@ -491,16 +483,16 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size(), equalTo(2));
-		assertThat(actualRequest.getParameter("name"), equalTo("value"));
-		assertThat(actualRequest.getParameter("param2"), equalTo("value 2"));
+		assertThat(actualRequest.getParameterMap().size()).isEqualTo(2);
+		assertThat(actualRequest.getParameter("name")).isEqualTo("value");
+		assertThat(actualRequest.getParameter("param2")).isEqualTo("value 2");
 	}
 
 	@Test
 	public void buildRequestPathInfo() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getPathInfo(), nullValue());
+		assertThat(actualRequest.getPathInfo()).isNull();
 	}
 
 	@Test
@@ -509,7 +501,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getPathInfo(), nullValue());
+		assertThat(actualRequest.getPathInfo()).isNull();
 	}
 
 	@Test
@@ -519,15 +511,15 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		// verify it is going to work with Spring Security's AntPathRequestMatcher
-		assertThat(actualRequest.getPathInfo(), nullValue());
-		assertThat(actualRequest.getServletPath(), equalTo("/login/authenticate"));
+		assertThat(actualRequest.getPathInfo()).isNull();
+		assertThat(actualRequest.getServletPath()).isEqualTo("/login/authenticate");
 	}
 
 	@Test
 	public void buildRequestProtocol() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getProtocol(), equalTo("HTTP/1.1"));
+		assertThat(actualRequest.getProtocol()).isEqualTo("HTTP/1.1");
 	}
 
 	@Test
@@ -537,7 +529,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getQueryString(), equalTo(expectedQuery));
+		assertThat(actualRequest.getQueryString()).isEqualTo(expectedQuery);
 	}
 
 	@Test
@@ -547,7 +539,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getQueryString(), equalTo(expectedQuery));
+		assertThat(actualRequest.getQueryString()).isEqualTo(expectedQuery);
 	}
 
 	@Test
@@ -557,7 +549,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getQueryString(), equalTo(expectedQuery));
+		assertThat(actualRequest.getQueryString()).isEqualTo(expectedQuery);
 	}
 
 	@Test
@@ -567,7 +559,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getQueryString(), equalTo(expectedQuery));
+		assertThat(actualRequest.getQueryString()).isEqualTo(expectedQuery);
 	}
 
 	@Test
@@ -577,7 +569,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getQueryString(), equalTo(expectedQuery));
+		assertThat(actualRequest.getQueryString()).isEqualTo(expectedQuery);
 	}
 
 	@Test
@@ -588,28 +580,28 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(IOUtils.toString(actualRequest.getReader()), equalTo(expectedBody));
+		assertThat(IOUtils.toString(actualRequest.getReader())).isEqualTo(expectedBody);
 	}
 
 	@Test
 	public void buildRequestRemoteAddr() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getRemoteAddr(), equalTo("127.0.0.1"));
+		assertThat(actualRequest.getRemoteAddr()).isEqualTo("127.0.0.1");
 	}
 
 	@Test
 	public void buildRequestRemoteHost() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getRemoteAddr(), equalTo("127.0.0.1"));
+		assertThat(actualRequest.getRemoteAddr()).isEqualTo("127.0.0.1");
 	}
 
 	@Test
 	public void buildRequestRemotePort() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getRemotePort(), equalTo(80));
+		assertThat(actualRequest.getRemotePort()).isEqualTo(80);
 	}
 
 	@Test
@@ -618,7 +610,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getRemotePort(), equalTo(8080));
+		assertThat(actualRequest.getRemotePort()).isEqualTo(8080);
 	}
 
 	@Test
@@ -627,7 +619,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getRemotePort(), equalTo(80));
+		assertThat(actualRequest.getRemotePort()).isEqualTo(80);
 	}
 
 	@Test
@@ -636,33 +628,33 @@ public class HtmlUnitRequestBuilderTests {
 		webRequest.setAdditionalHeader("Cookie", "JSESSIONID=" + sessionId);
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getRequestedSessionId(), equalTo(sessionId));
+		assertThat(actualRequest.getRequestedSessionId()).isEqualTo(sessionId);
 	}
 
 	@Test
 	public void buildRequestRequestedSessionIdNull() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getRequestedSessionId(), nullValue());
+		assertThat(actualRequest.getRequestedSessionId()).isNull();
 	}
 
 	@Test
 	public void buildRequestUri() {
 		String uri = requestBuilder.buildRequest(servletContext).getRequestURI();
-		assertThat(uri, equalTo("/test/this/here"));
+		assertThat(uri).isEqualTo("/test/this/here");
 	}
 
 	@Test
 	public void buildRequestUrl() {
 		String uri = requestBuilder.buildRequest(servletContext).getRequestURL().toString();
-		assertThat(uri, equalTo("http://example.com/test/this/here"));
+		assertThat(uri).isEqualTo("http://example.com/test/this/here");
 	}
 
 	@Test
 	public void buildRequestSchemeHttp() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getScheme(), equalTo("http"));
+		assertThat(actualRequest.getScheme()).isEqualTo("http");
 	}
 
 	@Test
@@ -670,21 +662,21 @@ public class HtmlUnitRequestBuilderTests {
 		webRequest.setUrl(new URL("https://example.com/"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getScheme(), equalTo("https"));
+		assertThat(actualRequest.getScheme()).isEqualTo("https");
 	}
 
 	@Test
 	public void buildRequestServerName() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getServerName(), equalTo("example.com"));
+		assertThat(actualRequest.getServerName()).isEqualTo("example.com");
 	}
 
 	@Test
 	public void buildRequestServerPort() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getServerPort(), equalTo(80));
+		assertThat(actualRequest.getServerPort()).isEqualTo(80);
 	}
 
 	@Test
@@ -692,21 +684,21 @@ public class HtmlUnitRequestBuilderTests {
 		webRequest.setUrl(new URL("https://example.com/"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getServerPort(), equalTo(-1));
+		assertThat(actualRequest.getServerPort()).isEqualTo(-1);
 	}
 
 	@Test
 	public void buildRequestServletContext() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getServletContext(), equalTo(servletContext));
+		assertThat(actualRequest.getServletContext()).isEqualTo(servletContext);
 	}
 
 	@Test
 	public void buildRequestServletPath() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getServletPath(), equalTo("/this/here"));
+		assertThat(actualRequest.getServletPath()).isEqualTo("/this/here");
 	}
 
 	@Test
@@ -714,7 +706,7 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		HttpSession newSession = actualRequest.getSession();
-		assertThat(newSession, notNullValue());
+		assertThat(newSession).isNotNull();
 		assertSingleSessionCookie(
 				"JSESSIONID=" + newSession.getId() + "; Path=/test; Domain=example.com");
 
@@ -723,7 +715,7 @@ public class HtmlUnitRequestBuilderTests {
 		requestBuilder = new HtmlUnitRequestBuilder(sessions, webClient, webRequest);
 		actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getSession(), sameInstance(newSession));
+		assertThat(actualRequest.getSession()).isSameAs(newSession);
 	}
 
 	@Test
@@ -733,16 +725,16 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		HttpSession session = actualRequest.getSession();
-		assertThat(session.getId(), equalTo(sessionId));
+		assertThat(session.getId()).isEqualTo(sessionId);
 		assertSingleSessionCookie("JSESSIONID=" + session.getId() + "; Path=/test; Domain=example.com");
 
 		requestBuilder = new HtmlUnitRequestBuilder(sessions, webClient, webRequest);
 		actualRequest = requestBuilder.buildRequest(servletContext);
-		assertThat(actualRequest.getSession(), equalTo(session));
+		assertThat(actualRequest.getSession()).isEqualTo(session);
 
 		webRequest.setAdditionalHeader("Cookie", "JSESSIONID=" + sessionId + "NEW");
 		actualRequest = requestBuilder.buildRequest(servletContext);
-		assertThat(actualRequest.getSession(), not(equalTo(session)));
+		assertThat(actualRequest.getSession()).isNotEqualTo(session);
 		assertSingleSessionCookie("JSESSIONID=" + actualRequest.getSession().getId()
 				+ "; Path=/test; Domain=example.com");
 	}
@@ -752,7 +744,7 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		HttpSession session = actualRequest.getSession(true);
-		assertThat(session, notNullValue());
+		assertThat(session).isNotNull();
 	}
 
 	@Test
@@ -760,7 +752,7 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		HttpSession session = actualRequest.getSession(false);
-		assertThat(session, nullValue());
+		assertThat(session).isNull();
 	}
 
 	@Test
@@ -770,14 +762,14 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		HttpSession session = actualRequest.getSession(false);
-		assertThat(session, notNullValue());
+		assertThat(session).isNotNull();
 	}
 
 	@Test
 	public void buildRequestSessionIsNew() throws Exception {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getSession().isNew(), equalTo(true));
+		assertThat(actualRequest.getSession().isNew()).isEqualTo(true);
 	}
 
 	@Test
@@ -787,7 +779,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getSession().isNew(), equalTo(false));
+		assertThat(actualRequest.getSession().isNew()).isEqualTo(false);
 	}
 
 	@Test
@@ -799,7 +791,7 @@ public class HtmlUnitRequestBuilderTests {
 		HttpSession sessionToRemove = actualRequest.getSession();
 		sessionToRemove.invalidate();
 
-		assertThat(sessions.containsKey(sessionToRemove.getId()), equalTo(false));
+		assertThat(sessions.containsKey(sessionToRemove.getId())).isEqualTo(false);
 		assertSingleSessionCookie("JSESSIONID=" + sessionToRemove.getId()
 				+ "; Expires=Thu, 01-Jan-1970 00:00:01 GMT; Path=/test; Domain=example.com");
 
@@ -808,8 +800,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getSession().isNew(), equalTo(true));
-		assertThat(sessions.containsKey(sessionToRemove.getId()), equalTo(false));
+		assertThat(actualRequest.getSession().isNew()).isEqualTo(true);
+		assertThat(sessions.containsKey(sessionToRemove.getId())).isEqualTo(false);
 	}
 
 	// --- setContextPath
@@ -818,14 +810,14 @@ public class HtmlUnitRequestBuilderTests {
 	public void setContextPathNull() {
 		requestBuilder.setContextPath(null);
 
-		assertThat(getContextPath(), nullValue());
+		assertThat(getContextPath()).isNull();
 	}
 
 	@Test
 	public void setContextPathEmptyString() {
 		requestBuilder.setContextPath("");
 
-		assertThat(getContextPath(), isEmptyString());
+		assertThat(getContextPath()).isEmpty();
 	}
 
 	@Test
@@ -845,7 +837,7 @@ public class HtmlUnitRequestBuilderTests {
 		String expectedContextPath = "/abc/def";
 		requestBuilder.setContextPath(expectedContextPath);
 
-		assertThat(getContextPath(), equalTo(expectedContextPath));
+		assertThat(getContextPath()).isEqualTo(expectedContextPath);
 	}
 
 	@Test
@@ -856,7 +848,7 @@ public class HtmlUnitRequestBuilderTests {
 					.defaultRequest(get("/").header(headerName, headerValue))
 					.build();
 
-		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getHeader(headerName), equalTo(headerValue));
+		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getHeader(headerName)).isEqualTo(headerValue);
 	}
 
 	@Test
@@ -867,7 +859,7 @@ public class HtmlUnitRequestBuilderTests {
 				.defaultRequest(get("/").sessionAttr(attrName, attrValue))
 				.build();
 
-		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getSession().getAttribute(attrName), equalTo(attrValue));
+		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getSession().getAttribute(attrName)).isEqualTo(attrValue);
 	}
 
 	@Test
@@ -876,7 +868,7 @@ public class HtmlUnitRequestBuilderTests {
 				.defaultRequest(get("/"))
 				.build();
 
-		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getSession(false), nullValue());
+		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getSession(false)).isNull();
 	}
 
 	@Test
@@ -889,7 +881,7 @@ public class HtmlUnitRequestBuilderTests {
 				.build();
 
 		MockHttpServletRequest performedRequest = mockMvc.perform(requestBuilder).andReturn().getRequest();
-		assertThat(asList(performedRequest.getParameterValues(paramName)), contains(paramValue, paramValue2));
+		assertThat(performedRequest.getParameterValues(paramName)).containsExactly(paramValue, paramValue2);
 	}
 
 	@Test
@@ -901,11 +893,11 @@ public class HtmlUnitRequestBuilderTests {
 				.build();
 
 		Cookie[] cookies = mockMvc.perform(requestBuilder).andReturn().getRequest().getCookies();
-		assertThat(cookies, notNullValue());
-		assertThat(cookies.length, equalTo(1));
+		assertThat(cookies).isNotNull();
+		assertThat(cookies.length).isEqualTo(1);
 		Cookie cookie = cookies[0];
-		assertThat(cookie.getName(), equalTo(cookieName));
-		assertThat(cookie.getValue(), equalTo(cookieValue));
+		assertThat(cookie.getName()).isEqualTo(cookieName);
+		assertThat(cookie.getValue()).isEqualTo(cookieValue);
 	}
 
 	@Test
@@ -916,7 +908,7 @@ public class HtmlUnitRequestBuilderTests {
 				.defaultRequest(get("/").requestAttr(attrName, attrValue))
 				.build();
 
-		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getAttribute(attrName), equalTo(attrValue));
+		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getAttribute(attrName)).isEqualTo(attrValue);
 	}
 
 	@Test // SPR-14584
@@ -926,22 +918,22 @@ public class HtmlUnitRequestBuilderTests {
 				.defaultRequest(get("/"))
 				.build();
 
-		assertThat(mockMvc.perform(get(pathInfo)).andReturn().getRequest().getPathInfo(), equalTo(pathInfo));
+		assertThat(mockMvc.perform(get(pathInfo)).andReturn().getRequest().getPathInfo()).isEqualTo(pathInfo);
 
 		mockMvc.perform(requestBuilder);
 
-		assertThat(mockMvc.perform(get(pathInfo)).andReturn().getRequest().getPathInfo(), equalTo(pathInfo));
+		assertThat(mockMvc.perform(get(pathInfo)).andReturn().getRequest().getPathInfo()).isEqualTo(pathInfo);
 	}
 
 
 	private void assertSingleSessionCookie(String expected) {
 		com.gargoylesoftware.htmlunit.util.Cookie jsessionidCookie = webClient.getCookieManager().getCookie("JSESSIONID");
 		if (expected == null || expected.contains("Expires=Thu, 01-Jan-1970 00:00:01 GMT")) {
-			assertThat(jsessionidCookie, nullValue());
+			assertThat(jsessionidCookie).isNull();
 			return;
 		}
 		String actual = jsessionidCookie.getValue();
-		assertThat("JSESSIONID=" + actual + "; Path=/test; Domain=example.com", equalTo(expected));
+		assertThat("JSESSIONID=" + actual + "; Path=/test; Domain=example.com").isEqualTo(expected);
 	}
 
 	private String getContextPath() {

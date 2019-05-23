@@ -44,9 +44,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -97,7 +94,7 @@ public class EnableTransactionManagementIntegrationTests {
 		ctx.refresh();
 
 		assertTxProxying(ctx);
-		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooRepository.class)), is(true));
+		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooRepository.class))).isTrue();
 	}
 
 	@Test
@@ -125,9 +122,9 @@ public class EnableTransactionManagementIntegrationTests {
 		fooRepository.findAll();
 
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat(txManager.begun, equalTo(1));
-		assertThat(txManager.commits, equalTo(1));
-		assertThat(txManager.rollbacks, equalTo(0));
+		assertThat(txManager.begun).isEqualTo(1);
+		assertThat(txManager.commits).isEqualTo(1);
+		assertThat(txManager.rollbacks).isEqualTo(0);
 	}
 
 	@Test
@@ -140,14 +137,14 @@ public class EnableTransactionManagementIntegrationTests {
 		fooRepository.findAll();
 
 		CallCountingTransactionManager txManager1 = ctx.getBean("txManager1", CallCountingTransactionManager.class);
-		assertThat(txManager1.begun, equalTo(1));
-		assertThat(txManager1.commits, equalTo(1));
-		assertThat(txManager1.rollbacks, equalTo(0));
+		assertThat(txManager1.begun).isEqualTo(1);
+		assertThat(txManager1.commits).isEqualTo(1);
+		assertThat(txManager1.rollbacks).isEqualTo(0);
 
 		CallCountingTransactionManager txManager2 = ctx.getBean("txManager2", CallCountingTransactionManager.class);
-		assertThat(txManager2.begun, equalTo(0));
-		assertThat(txManager2.commits, equalTo(0));
-		assertThat(txManager2.rollbacks, equalTo(0));
+		assertThat(txManager2.begun).isEqualTo(0);
+		assertThat(txManager2.commits).isEqualTo(0);
+		assertThat(txManager2.rollbacks).isEqualTo(0);
 	}
 
 	@Test

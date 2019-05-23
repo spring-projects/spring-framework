@@ -18,10 +18,9 @@ package org.springframework.web.socket;
 
 import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -33,7 +32,7 @@ public class WebSocketExtensionTests {
 	@Test
 	public void parseHeaderSingle() {
 		List<WebSocketExtension> extensions = WebSocketExtension.parseExtensions("x-test-extension ; foo=bar ; bar=baz");
-		assertThat(extensions, Matchers.hasSize(1));
+		assertThat(extensions).hasSize(1);
 		WebSocketExtension extension = extensions.get(0);
 
 		assertEquals("x-test-extension", extension.getName());
@@ -45,9 +44,8 @@ public class WebSocketExtensionTests {
 	@Test
 	public void parseHeaderMultiple() {
 		List<WebSocketExtension> extensions = WebSocketExtension.parseExtensions("x-foo-extension, x-bar-extension");
-		assertThat(extensions, Matchers.hasSize(2));
-		assertEquals("x-foo-extension", extensions.get(0).getName());
-		assertEquals("x-bar-extension", extensions.get(1).getName());
+		assertThat(extensions.stream().map(WebSocketExtension::getName))
+				.containsExactly("x-foo-extension", "x-bar-extension");
 	}
 
 }

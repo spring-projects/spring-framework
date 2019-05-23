@@ -52,10 +52,8 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -440,7 +438,7 @@ public class JdbcTemplateTests {
 			template.batchUpdate(sql);
 		}
 		catch (UncategorizedSQLException ex) {
-			assertThat(ex.getSql(), equalTo("B; D"));
+			assertThat(ex.getSql()).isEqualTo("B; D");
 		}
 	}
 
@@ -1069,7 +1067,7 @@ public class JdbcTemplateTests {
 		Map<String, Object> out = this.template.call(
 				conn -> conn.prepareCall("my query"), Collections.singletonList(new SqlOutParameter("a", 12)));
 
-		assertThat(out, instanceOf(LinkedCaseInsensitiveMap.class));
+		assertThat(out).isInstanceOf(LinkedCaseInsensitiveMap.class);
 		assertNotNull("we should have gotten the result with upper case", out.get("A"));
 		assertNotNull("we should have gotten the result with lower case", out.get("a"));
 		verify(this.callableStatement).close();

@@ -36,9 +36,7 @@ import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isA;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -149,14 +147,9 @@ public class WebRequestDataBinderTests {
 		request.addParameter("_someMap", "visible");
 
 		binder.bind(new ServletWebRequest(request));
-		assertThat(target.getSomeSet(), notNullValue());
-		assertThat(target.getSomeSet(), isA(Set.class));
-
-		assertThat(target.getSomeList(), notNullValue());
-		assertThat(target.getSomeList(), isA(List.class));
-
-		assertThat(target.getSomeMap(), notNullValue());
-		assertThat(target.getSomeMap(), isA(Map.class));
+		assertThat(target.getSomeSet()).isNotNull().isInstanceOf(Set.class);
+		assertThat(target.getSomeList()).isNotNull().isInstanceOf(List.class);
+		assertThat(target.getSomeMap()).isNotNull().isInstanceOf(Map.class);
 	}
 
 	@Test

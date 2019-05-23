@@ -32,8 +32,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -49,7 +48,7 @@ public class EnableAspectJAutoProxyTests {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithJdkProxy.class);
 
 		aspectIsApplied(ctx);
-		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean(FooService.class)), is(true));
+		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean(FooService.class))).isTrue();
 	}
 
 	@Test
@@ -57,7 +56,7 @@ public class EnableAspectJAutoProxyTests {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithCglibProxy.class);
 
 		aspectIsApplied(ctx);
-		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooService.class)), is(true));
+		assertThat(AopUtils.isCglibProxy(ctx.getBean(FooService.class))).isTrue();
 	}
 
 	@Test
@@ -65,7 +64,7 @@ public class EnableAspectJAutoProxyTests {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithExposedProxy.class);
 
 		aspectIsApplied(ctx);
-		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean(FooService.class)), is(true));
+		assertThat(AopUtils.isJdkDynamicProxy(ctx.getBean(FooService.class))).isTrue();
 	}
 
 	private void aspectIsApplied(ApplicationContext ctx) {

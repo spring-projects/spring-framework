@@ -54,12 +54,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -79,7 +75,7 @@ public class EnableAsyncTests {
 		ctx.refresh();
 
 		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
-		assertThat(AopUtils.isAopProxy(asyncBean), is(true));
+		assertThat(AopUtils.isAopProxy(asyncBean)).isTrue();
 		asyncBean.work();
 		ctx.close();
 	}
@@ -92,7 +88,7 @@ public class EnableAsyncTests {
 
 		AsyncBeanUser asyncBeanUser = ctx.getBean(AsyncBeanUser.class);
 		AsyncBean asyncBean = asyncBeanUser.getAsyncBean();
-		assertThat(AopUtils.isAopProxy(asyncBean), is(true));
+		assertThat(AopUtils.isAopProxy(asyncBean)).isTrue();
 		asyncBean.work();
 		ctx.close();
 	}
@@ -125,13 +121,13 @@ public class EnableAsyncTests {
 
 		AsyncBeanWithExecutorQualifiedByName asyncBean = ctx.getBean(AsyncBeanWithExecutorQualifiedByName.class);
 		Future<Thread> workerThread0 = asyncBean.work0();
-		assertThat(workerThread0.get().getName(), not(anyOf(startsWith("e1-"), startsWith("otherExecutor-"))));
+		assertThat(workerThread0.get().getName()).doesNotStartWith("e1-").doesNotStartWith("otherExecutor-");
 		Future<Thread> workerThread = asyncBean.work();
-		assertThat(workerThread.get().getName(), startsWith("e1-"));
+		assertThat(workerThread.get().getName()).startsWith("e1-");
 		Future<Thread> workerThread2 = asyncBean.work2();
-		assertThat(workerThread2.get().getName(), startsWith("otherExecutor-"));
+		assertThat(workerThread2.get().getName()).startsWith("otherExecutor-");
 		Future<Thread> workerThread3 = asyncBean.work3();
-		assertThat(workerThread3.get().getName(), startsWith("otherExecutor-"));
+		assertThat(workerThread3.get().getName()).startsWith("otherExecutor-");
 
 		ctx.close();
 	}
@@ -143,7 +139,7 @@ public class EnableAsyncTests {
 		ctx.refresh();
 
 		AsyncAnnotationBeanPostProcessor bpp = ctx.getBean(AsyncAnnotationBeanPostProcessor.class);
-		assertThat(bpp.getOrder(), is(Ordered.LOWEST_PRECEDENCE));
+		assertThat(bpp.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 
 		ctx.close();
 	}
@@ -155,7 +151,7 @@ public class EnableAsyncTests {
 		ctx.refresh();
 
 		AsyncAnnotationBeanPostProcessor bpp = ctx.getBean(AsyncAnnotationBeanPostProcessor.class);
-		assertThat(bpp.getOrder(), is(Ordered.HIGHEST_PRECEDENCE));
+		assertThat(bpp.getOrder()).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 
 		ctx.close();
 	}
@@ -206,7 +202,7 @@ public class EnableAsyncTests {
 					.atMost(500, TimeUnit.MILLISECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> asyncBean.getThreadOfExecution() != null);
-		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+		assertThat(asyncBean.getThreadOfExecution().getName()).startsWith("Custom-");
 		ctx.close();
 	}
 
@@ -224,7 +220,7 @@ public class EnableAsyncTests {
 					.atMost(500, TimeUnit.MILLISECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> asyncBean.getThreadOfExecution() != null);
-		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+		assertThat(asyncBean.getThreadOfExecution().getName()).startsWith("Custom-");
 		ctx.close();
 	}
 
@@ -263,7 +259,7 @@ public class EnableAsyncTests {
 					.atMost(500, TimeUnit.MILLISECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> asyncBean.getThreadOfExecution() != null);
-		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Post-"));
+		assertThat(asyncBean.getThreadOfExecution().getName()).startsWith("Post-");
 		ctx.close();
 	}
 
@@ -300,7 +296,7 @@ public class EnableAsyncTests {
 					.atMost(500, TimeUnit.MILLISECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> asyncBean.getThreadOfExecution() != null);
-		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+		assertThat(asyncBean.getThreadOfExecution().getName()).startsWith("Custom-");
 		ctx.close();
 	}
 
@@ -316,7 +312,7 @@ public class EnableAsyncTests {
 					.atMost(500, TimeUnit.MILLISECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> asyncBean.getThreadOfExecution() != null);
-		assertThat(asyncBean.getThreadOfExecution().getName(), startsWith("Custom-"));
+		assertThat(asyncBean.getThreadOfExecution().getName()).startsWith("Custom-");
 		ctx.close();
 	}
 

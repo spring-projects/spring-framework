@@ -20,9 +20,9 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+
 
 /**
  * Tests for {@link InvertibleComparator}.
@@ -52,30 +52,30 @@ public class InvertibleComparatorTests {
 	@Test
 	public void shouldDefaultToAscending() throws Exception {
 		InvertibleComparator<Integer> invertibleComparator = new InvertibleComparator<>(comparator);
-		assertThat(invertibleComparator.isAscending(), is(true));
-		assertThat(invertibleComparator.compare(1, 2), is(-1));
+		assertThat(invertibleComparator.isAscending()).isTrue();
+		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(-1);
 	}
 
 	@Test
 	public void shouldInvert() throws Exception {
 		InvertibleComparator<Integer> invertibleComparator = new InvertibleComparator<>(comparator);
-		assertThat(invertibleComparator.isAscending(), is(true));
-		assertThat(invertibleComparator.compare(1, 2), is(-1));
+		assertThat(invertibleComparator.isAscending()).isTrue();
+		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(-1);
 		invertibleComparator.invertOrder();
-		assertThat(invertibleComparator.isAscending(), is(false));
-		assertThat(invertibleComparator.compare(1, 2), is(1));
+		assertThat(invertibleComparator.isAscending()).isFalse();
+		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(1);
 	}
 
 	@Test
 	public void shouldCompareAscending() throws Exception {
 		InvertibleComparator<Integer> invertibleComparator = new InvertibleComparator<>(comparator, true);
-		assertThat(invertibleComparator.compare(1, 2), is(-1));
+		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(-1);
 	}
 
 	@Test
 	public void shouldCompareDescending() throws Exception {
 		InvertibleComparator<Integer> invertibleComparator = new InvertibleComparator<>(comparator, false);
-		assertThat(invertibleComparator.compare(1, 2), is(1));
+		assertThat(invertibleComparator.compare(1, 2)).isEqualTo(1);
 	}
 
 }

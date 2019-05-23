@@ -30,8 +30,9 @@ import org.junit.Test;
 import org.w3c.dom.Node;
 import org.xmlunit.util.Predicate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import org.springframework.tests.XmlContent;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class XMLEventStreamReaderTests {
 
@@ -63,7 +64,7 @@ public class XMLEventStreamReaderTests {
 		transformer.transform(source, new StreamResult(writer));
 		Predicate<Node> nodeFilter = n ->
 				n.getNodeType() != Node.DOCUMENT_TYPE_NODE && n.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE;
-		assertThat(writer.toString(), isSimilarTo(XML).withNodeFilter(nodeFilter));
+		assertThat(XmlContent.from(writer)).isSimilarTo(XML, nodeFilter);
 	}
 
 }

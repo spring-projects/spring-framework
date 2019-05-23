@@ -28,13 +28,13 @@ import com.rometools.rome.feed.rss.Item;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-import org.xmlunit.matchers.CompareMatcher;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.tests.XmlContent;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -112,7 +112,8 @@ public class RssChannelHttpMessageConverterTests {
 				"<item><title>title1</title></item>" +
 				"<item><title>title2</title></item>" +
 				"</channel></rss>";
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8), isSimilarTo(expected));
+		assertThat(XmlContent.of(outputMessage.getBodyAsString(StandardCharsets.UTF_8)))
+				.isSimilarToIgnoringWhitespace(expected);
 	}
 
 	@Test
@@ -135,8 +136,4 @@ public class RssChannelHttpMessageConverterTests {
 				outputMessage.getHeaders().getContentType());
 	}
 
-	private static CompareMatcher isSimilarTo(final String content) {
-		return CompareMatcher.isSimilarTo(content)
-				.ignoreWhitespace();
-	}
 }

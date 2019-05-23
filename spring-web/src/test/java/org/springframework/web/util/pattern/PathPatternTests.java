@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.http.server.PathContainer;
@@ -33,7 +32,6 @@ import org.springframework.web.util.pattern.PathPattern.PathRemainingMatchInfo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -981,7 +979,7 @@ public class PathPatternTests {
 		// Comparator<String> patternComparator = new AntPathMatcher().getPatternComparator("");
 		// System.out.println(patternComparator.compare("/{foo}","/{foo}.*"));
 
-		assertThat(p1.compareTo(p2), Matchers.greaterThan(0));
+		assertThat(p1.compareTo(p2)).isGreaterThan(0);
 	}
 
 	@Test

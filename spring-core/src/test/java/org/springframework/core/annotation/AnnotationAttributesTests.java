@@ -25,10 +25,8 @@ import org.junit.Test;
 
 import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -64,16 +62,16 @@ public class AnnotationAttributesTests {
 		attributes.put("anno", nestedAttributes);
 		attributes.put("annoArray", new AnnotationAttributes[] {nestedAttributes});
 
-		assertThat(attributes.getString("name"), equalTo("dave"));
-		assertThat(attributes.getStringArray("names"), equalTo(new String[] {"dave", "frank", "hal"}));
-		assertThat(attributes.getBoolean("bool1"), equalTo(true));
-		assertThat(attributes.getBoolean("bool2"), equalTo(false));
-		assertThat(attributes.<Color>getEnum("color"), equalTo(Color.RED));
+		assertThat(attributes.getString("name")).isEqualTo("dave");
+		assertThat(attributes.getStringArray("names")).isEqualTo(new String[] {"dave", "frank", "hal"});
+		assertThat(attributes.getBoolean("bool1")).isEqualTo(true);
+		assertThat(attributes.getBoolean("bool2")).isEqualTo(false);
+		assertThat(attributes.<Color>getEnum("color")).isEqualTo(Color.RED);
 		assertTrue(attributes.getClass("class").equals(Integer.class));
-		assertThat(attributes.getClassArray("classes"), equalTo(new Class<?>[] {Number.class, Short.class, Integer.class}));
-		assertThat(attributes.<Integer>getNumber("number"), equalTo(42));
-		assertThat(attributes.getAnnotation("anno").<Integer>getNumber("value"), equalTo(10));
-		assertThat(attributes.getAnnotationArray("annoArray")[0].getString("name"), equalTo("algernon"));
+		assertThat(attributes.getClassArray("classes")).isEqualTo(new Class<?>[] {Number.class, Short.class, Integer.class});
+		assertThat(attributes.<Integer>getNumber("number")).isEqualTo(42);
+		assertThat(attributes.getAnnotation("anno").<Integer>getNumber("value")).isEqualTo(10);
+		assertThat(attributes.getAnnotationArray("annoArray")[0].getString("name")).isEqualTo("algernon");
 
 	}
 
@@ -99,18 +97,18 @@ public class AnnotationAttributesTests {
 		attributes.put("filters", filter);
 
 		// Get back arrays of single elements
-		assertThat(attributes.getStringArray("names"), equalTo(new String[] {"Dogbert"}));
-		assertThat(attributes.getClassArray("classes"), equalTo(new Class<?>[] {Number.class}));
+		assertThat(attributes.getStringArray("names")).isEqualTo(new String[] {"Dogbert"});
+		assertThat(attributes.getClassArray("classes")).isEqualTo(new Class<?>[] {Number.class});
 
 		AnnotationAttributes[] array = attributes.getAnnotationArray("nestedAttributes");
 		assertNotNull(array);
-		assertThat(array.length, is(1));
-		assertThat(array[0].getString("name"), equalTo("Dilbert"));
+		assertThat(array.length).isEqualTo(1);
+		assertThat(array[0].getString("name")).isEqualTo("Dilbert");
 
 		Filter[] filters = attributes.getAnnotationArray("filters", Filter.class);
 		assertNotNull(filters);
-		assertThat(filters.length, is(1));
-		assertThat(filters[0].pattern(), equalTo("foo"));
+		assertThat(filters.length).isEqualTo(1);
+		assertThat(filters[0].pattern()).isEqualTo("foo");
 	}
 
 	@Test
@@ -121,13 +119,13 @@ public class AnnotationAttributesTests {
 		attributes.put("filters", new Filter[] {filter, filter});
 
 		Filter retrievedFilter = attributes.getAnnotation("filter", Filter.class);
-		assertThat(retrievedFilter, equalTo(filter));
-		assertThat(retrievedFilter.pattern(), equalTo("foo"));
+		assertThat(retrievedFilter).isEqualTo(filter);
+		assertThat(retrievedFilter.pattern()).isEqualTo("foo");
 
 		Filter[] retrievedFilters = attributes.getAnnotationArray("filters", Filter.class);
 		assertNotNull(retrievedFilters);
 		assertEquals(2, retrievedFilters.length);
-		assertThat(retrievedFilters[1].pattern(), equalTo("foo"));
+		assertThat(retrievedFilters[1].pattern()).isEqualTo("foo");
 	}
 
 	@Test

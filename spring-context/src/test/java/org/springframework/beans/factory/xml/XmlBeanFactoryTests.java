@@ -69,8 +69,6 @@ import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -626,7 +624,7 @@ public class XmlBeanFactoryTests {
 	public void testFactoryReferenceWithDoublePrefix() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(FACTORY_CIRCLE_CONTEXT);
-		assertThat(xbf.getBean("&&singletonFactory"), instanceOf(DummyFactory.class));
+		assertThat(xbf.getBean("&&singletonFactory")).isInstanceOf(DummyFactory.class);
 	}
 
 	@Test

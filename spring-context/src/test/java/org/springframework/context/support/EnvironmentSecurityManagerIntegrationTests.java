@@ -32,8 +32,8 @@ import org.springframework.core.env.StandardEnvironmentTests;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests integration between Environment and SecurityManagers. See SPR-9970.
@@ -78,7 +78,7 @@ public class EnvironmentSecurityManagerIntegrationTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(bf);
 		reader.register(C1.class);
-		assertThat(bf.containsBean("c1"), is(true));
+		assertThat(bf.containsBean("c1")).isTrue();
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class EnvironmentSecurityManagerIntegrationTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(bf);
 		reader.register(C1.class);
-		assertThat(bf.containsBean("c1"), is(false));
+		assertThat(bf.containsBean("c1")).isFalse();
 	}
 
 

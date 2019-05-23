@@ -33,9 +33,8 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -245,9 +244,9 @@ public class MapToMapConverterTests {
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("multiValueMapTarget"));
 
 		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
-		assertThat(converted.size(), equalTo(2));
-		assertThat(converted.get("a"), equalTo(Arrays.asList("1", "2", "3")));
-		assertThat(converted.get("b"), equalTo(Arrays.asList("4", "5", "6")));
+		assertThat(converted.size()).isEqualTo(2);
+		assertThat(converted.get("a")).isEqualTo(Arrays.asList("1", "2", "3"));
+		assertThat(converted.get("b")).isEqualTo(Arrays.asList("4", "5", "6"));
 	}
 
 	@Test
@@ -260,9 +259,9 @@ public class MapToMapConverterTests {
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("multiValueMapTarget"));
 
 		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
-		assertThat(converted.size(), equalTo(2));
-		assertThat(converted.get("a"), equalTo(Arrays.asList("1")));
-		assertThat(converted.get("b"), equalTo(Arrays.asList("2")));
+		assertThat(converted.size()).isEqualTo(2);
+		assertThat(converted.get("a")).isEqualTo(Arrays.asList("1"));
+		assertThat(converted.get("b")).isEqualTo(Arrays.asList("2"));
 	}
 
 	@Test

@@ -30,8 +30,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -162,13 +161,13 @@ public class MultiServerUserRegistryTests {
 		SimpUser user = this.registry.getUsers().iterator().next();
 		assertTrue(user.hasSessions());
 		assertEquals(2, user.getSessions().size());
-		assertThat(user.getSessions(), containsInAnyOrder(localSession, remoteSession));
+		assertThat(user.getSessions()).containsExactlyInAnyOrder(localSession, remoteSession);
 		assertSame(localSession, user.getSession("sess123"));
 		assertEquals(remoteSession, user.getSession("sess456"));
 
 		user = this.registry.getUser("joe");
 		assertEquals(2, user.getSessions().size());
-		assertThat(user.getSessions(), containsInAnyOrder(localSession, remoteSession));
+		assertThat(user.getSessions()).containsExactlyInAnyOrder(localSession, remoteSession);
 		assertSame(localSession, user.getSession("sess123"));
 		assertEquals(remoteSession, user.getSession("sess456"));
 	}

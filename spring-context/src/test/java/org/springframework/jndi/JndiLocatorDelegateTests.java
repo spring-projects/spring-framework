@@ -21,8 +21,9 @@ import javax.naming.spi.NamingManager;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
 
 /**
  * Tests for {@link JndiLocatorDelegate}.
@@ -40,7 +41,7 @@ public class JndiLocatorDelegateTests {
 		builderField.set(null, null);
 
 		try {
-			assertThat(JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable(), equalTo(false));
+			assertThat(JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()).isEqualTo(false);
 		}
 		finally {
 			builderField.set(null, oldBuilder);

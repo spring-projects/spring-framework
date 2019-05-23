@@ -63,9 +63,6 @@ import org.springframework.util.SerializationTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -347,8 +344,8 @@ public class ProxyFactoryBeanTests {
 	 */
 	@Test
 	public void testCanAddAndRemoveAspectInterfacesOnPrototype() {
-		assertThat("Shouldn't implement TimeStamped before manipulation",
-				factory.getBean("test2"), not(instanceOf(TimeStamped.class)));
+		assertThat(factory.getBean("test2")).as("Shouldn't implement TimeStamped before manipulation")
+				.isNotInstanceOf(TimeStamped.class);
 
 		ProxyFactoryBean config = (ProxyFactoryBean) factory.getBean("&test2");
 		long time = 666L;
@@ -369,8 +366,8 @@ public class ProxyFactoryBeanTests {
 		// Check no change on existing object reference
 		assertTrue(ts.getTimeStamp() == time);
 
-		assertThat("Should no longer implement TimeStamped",
-				factory.getBean("test2"), not(instanceOf(TimeStamped.class)));
+		assertThat(factory.getBean("test2")).as("Should no longer implement TimeStamped")
+				.isNotInstanceOf(TimeStamped.class);
 
 		// Now check non-effect of removing interceptor that isn't there
 		config.removeAdvice(new DebugInterceptor());

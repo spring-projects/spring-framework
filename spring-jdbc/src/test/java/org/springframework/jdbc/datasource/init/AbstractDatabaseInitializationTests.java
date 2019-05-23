@@ -27,8 +27,9 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
 
 /**
  * Abstract base class for integration tests involving database initialization.
@@ -76,9 +77,9 @@ public abstract class AbstractDatabaseInitializationTests {
 
 	void assertUsersDatabaseCreated(String... lastNames) {
 		for (String lastName : lastNames) {
-			assertThat("Did not find user with last name [" + lastName + "].",
-				jdbcTemplate.queryForObject("select count(0) from users where last_name = ?", Integer.class, lastName),
-				equalTo(1));
+			String sql = "select count(0) from users where last_name = ?";
+			Integer result = jdbcTemplate.queryForObject(sql, Integer.class, lastName);
+			assertThat(result).as("user with last name [" + lastName + "]").isEqualTo(1);
 		}
 	}
 

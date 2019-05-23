@@ -21,47 +21,45 @@ import java.util.List;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+
 
 public class SimpleCommandLineParserTests {
 
 	@Test
 	public void withNoOptions() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
-		assertThat(parser.parse().getOptionValues("foo"), nullValue());
+		assertThat(parser.parse().getOptionValues("foo")).isNull();
 	}
 
 	@Test
 	public void withSingleOptionAndNoValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1");
-		assertThat(args.containsOption("o1"), is(true));
-		assertThat(args.getOptionValues("o1"), equalTo(Collections.EMPTY_LIST));
+		assertThat(args.containsOption("o1")).isTrue();
+		assertThat(args.getOptionValues("o1")).isEqualTo(Collections.EMPTY_LIST);
 	}
 
 	@Test
 	public void withSingleOptionAndValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1");
-		assertThat(args.containsOption("o1"), is(true));
-		assertThat(args.getOptionValues("o1").get(0), equalTo("v1"));
+		assertThat(args.containsOption("o1")).isTrue();
+		assertThat(args.getOptionValues("o1").get(0)).isEqualTo("v1");
 	}
 
 	@Test
 	public void withMixOfOptionsHavingValueAndOptionsHavingNoValue() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1", "--o2");
-		assertThat(args.containsOption("o1"), is(true));
-		assertThat(args.containsOption("o2"), is(true));
-		assertThat(args.containsOption("o3"), is(false));
-		assertThat(args.getOptionValues("o1").get(0), equalTo("v1"));
-		assertThat(args.getOptionValues("o2"), equalTo(Collections.EMPTY_LIST));
-		assertThat(args.getOptionValues("o3"), nullValue());
+		assertThat(args.containsOption("o1")).isTrue();
+		assertThat(args.containsOption("o2")).isTrue();
+		assertThat(args.containsOption("o3")).isFalse();
+		assertThat(args.getOptionValues("o1").get(0)).isEqualTo("v1");
+		assertThat(args.getOptionValues("o2")).isEqualTo(Collections.EMPTY_LIST);
+		assertThat(args.getOptionValues("o3")).isNull();
 	}
 
 	@Test
@@ -96,13 +94,13 @@ public class SimpleCommandLineParserTests {
 	public void withNonOptionArguments() {
 		SimpleCommandLineArgsParser parser = new SimpleCommandLineArgsParser();
 		CommandLineArgs args = parser.parse("--o1=v1", "noa1", "--o2=v2", "noa2");
-		assertThat(args.getOptionValues("o1").get(0), equalTo("v1"));
-		assertThat(args.getOptionValues("o2").get(0), equalTo("v2"));
+		assertThat(args.getOptionValues("o1").get(0)).isEqualTo("v1");
+		assertThat(args.getOptionValues("o2").get(0)).isEqualTo("v2");
 
 		List<String> nonOptions = args.getNonOptionArgs();
-		assertThat(nonOptions.get(0), equalTo("noa1"));
-		assertThat(nonOptions.get(1), equalTo("noa2"));
-		assertThat(nonOptions.size(), equalTo(2));
+		assertThat(nonOptions.get(0)).isEqualTo("noa1");
+		assertThat(nonOptions.get(1)).isEqualTo("noa2");
+		assertThat(nonOptions.size()).isEqualTo(2);
 	}
 
 	@Test

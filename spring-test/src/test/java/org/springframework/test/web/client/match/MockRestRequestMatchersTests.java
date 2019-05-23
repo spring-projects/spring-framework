@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -83,7 +83,7 @@ public class MockRestRequestMatchersTests {
 
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.method(HttpMethod.GET).match(this.request));
-		assertThat(error.getMessage(), containsString("expected:<GET> but was:<POST>"));
+		assertThat(error.getMessage()).contains("expected:<GET> but was:<POST>");
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class MockRestRequestMatchersTests {
 	public void headerMissing() throws Exception {
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.header("foo", "bar").match(this.request));
-		assertThat(error.getMessage(), containsString("was null"));
+		assertThat(error.getMessage()).contains("was null");
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class MockRestRequestMatchersTests {
 
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.header("foo", "bad").match(this.request));
-		assertThat(error.getMessage(), containsString("expected:<bad> but was:<bar>"));
+		assertThat(error.getMessage()).contains("expected:<bad> but was:<bar>");
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class MockRestRequestMatchersTests {
 	public void headerContainsWithMissingHeader() throws Exception {
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.header("foo", containsString("baz")).match(this.request));
-		assertThat(error.getMessage(), containsString("but was null"));
+		assertThat(error.getMessage()).contains("but was null");
 	}
 
 	@Test
@@ -129,7 +129,7 @@ public class MockRestRequestMatchersTests {
 
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.header("foo", containsString("bx")).match(this.request));
-		assertThat(error.getMessage(), containsString("was \"bar\""));
+		assertThat(error.getMessage()).contains("was \"bar\"");
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class MockRestRequestMatchersTests {
 	public void headersWithMissingHeader() throws Exception {
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.header("foo", "bar").match(this.request));
-		assertThat(error.getMessage(), containsString("but was null"));
+		assertThat(error.getMessage()).contains("but was null");
 	}
 
 	@Test
@@ -152,7 +152,7 @@ public class MockRestRequestMatchersTests {
 
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request));
-		assertThat(error.getMessage(), containsString("to have at least <2> values"));
+		assertThat(error.getMessage()).contains("to have at least <2> values");
 	}
 
 	@Test
@@ -168,7 +168,7 @@ public class MockRestRequestMatchersTests {
 
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.queryParam("foo", "bar").match(this.request));
-		assertThat(error.getMessage(), containsString("but was null"));
+		assertThat(error.getMessage()).contains("but was null");
 	}
 
 	@Test
@@ -177,7 +177,7 @@ public class MockRestRequestMatchersTests {
 
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.queryParam("foo", "bad").match(this.request));
-		assertThat(error.getMessage(), containsString("expected:<bad> but was:<bar>"));
+		assertThat(error.getMessage()).contains("expected:<bad> but was:<bar>");
 	}
 
 	@Test
@@ -193,7 +193,7 @@ public class MockRestRequestMatchersTests {
 
 		AssertionError error = assertThrows(AssertionError.class,
 				() -> MockRestRequestMatchers.queryParam("foo", containsString("bx")).match(this.request));
-		assertThat(error.getMessage(), containsString("was \"bar\""));
+		assertThat(error.getMessage()).contains("was \"bar\"");
 	}
 
 }

@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,7 +37,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -99,7 +98,7 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 				.block(TIMEOUT);
 
 		HandshakeInfo info = infoRef.get();
-		assertThat(info.getHeaders().getFirst("Upgrade"), Matchers.equalToIgnoringCase("websocket"));
+		assertThat(info.getHeaders().getFirst("Upgrade")).isEqualToIgnoringCase("websocket");
 		assertEquals(protocol, info.getHeaders().getFirst("Sec-WebSocket-Protocol"));
 		assertEquals("Wrong protocol accepted", protocol, info.getSubProtocol());
 		assertEquals("Wrong protocol detected on the server side", protocol, output.block(TIMEOUT));

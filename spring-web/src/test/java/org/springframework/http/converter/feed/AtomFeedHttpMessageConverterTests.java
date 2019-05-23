@@ -35,11 +35,11 @@ import org.xmlunit.diff.NodeMatcher;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.tests.XmlContent;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Arjen Poutsma
@@ -114,8 +114,8 @@ public class AtomFeedHttpMessageConverterTests {
 				"<entry><id>id1</id><title>title1</title></entry>" +
 				"<entry><id>id2</id><title>title2</title></entry></feed>";
 		NodeMatcher nm = new DefaultNodeMatcher(ElementSelectors.byName);
-		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8),
-				isSimilarTo(expected).ignoreWhitespace().withNodeMatcher(nm));
+		assertThat(XmlContent.of(outputMessage.getBodyAsString(StandardCharsets.UTF_8)))
+				.isSimilarToIgnoringWhitespace(expected, nm);
 	}
 
 	@Test

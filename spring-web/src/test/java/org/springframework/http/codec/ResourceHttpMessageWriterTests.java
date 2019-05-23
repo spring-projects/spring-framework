@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -34,10 +35,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
@@ -62,9 +60,10 @@ public class ResourceHttpMessageWriterTests {
 
 
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void getWritableMediaTypes() throws Exception {
-		assertThat(this.writer.getWritableMediaTypes(),
-				containsInAnyOrder(MimeTypeUtils.APPLICATION_OCTET_STREAM, MimeTypeUtils.ALL));
+		assertThat((List) this.writer.getWritableMediaTypes())
+				.containsExactlyInAnyOrder(MimeTypeUtils.APPLICATION_OCTET_STREAM, MimeTypeUtils.ALL);
 	}
 
 	@Test
@@ -72,9 +71,9 @@ public class ResourceHttpMessageWriterTests {
 
 		testWrite(get("/").build());
 
-		assertThat(this.response.getHeaders().getContentType(), is(TEXT_PLAIN));
-		assertThat(this.response.getHeaders().getContentLength(), is(39L));
-		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
+		assertThat(this.response.getHeaders().getContentType()).isEqualTo(TEXT_PLAIN);
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(39L);
+		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES)).isEqualTo("bytes");
 
 		String content = "Spring Framework test resource content.";
 		StepVerifier.create(this.response.getBodyAsString()).expectNext(content).expectComplete().verify();
@@ -85,9 +84,9 @@ public class ResourceHttpMessageWriterTests {
 
 		testWrite(get("/").range(of(0, 5)).build());
 
-		assertThat(this.response.getHeaders().getContentType(), is(TEXT_PLAIN));
-		assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE), is("bytes 0-5/39"));
-		assertThat(this.response.getHeaders().getContentLength(), is(6L));
+		assertThat(this.response.getHeaders().getContentType()).isEqualTo(TEXT_PLAIN);
+		assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE)).isEqualTo("bytes 0-5/39");
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(6L);
 
 		StepVerifier.create(this.response.getBodyAsString()).expectNext("Spring").expectComplete().verify();
 	}
@@ -101,7 +100,7 @@ public class ResourceHttpMessageWriterTests {
 		String contentType = headers.getContentType().toString();
 		String boundary = contentType.substring(30);
 
-		assertThat(contentType, startsWith("multipart/byteranges;boundary="));
+		assertThat(contentType).startsWith("multipart/byteranges;boundary=");
 
 		StepVerifier.create(this.response.getBodyAsString())
 				.consumeNextWith(content -> {
@@ -136,8 +135,8 @@ public class ResourceHttpMessageWriterTests {
 
 		testWrite(get("/").header(HttpHeaders.RANGE, "invalid").build());
 
-		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
-		assertThat(this.response.getStatusCode(), is(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE));
+		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES)).isEqualTo("bytes");
+		assertThat(this.response.getStatusCode()).isEqualTo(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
 	}
 
 

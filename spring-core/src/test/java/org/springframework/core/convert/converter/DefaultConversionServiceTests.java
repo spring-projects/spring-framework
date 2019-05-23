@@ -56,9 +56,8 @@ import org.springframework.tests.TestGroup;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StopWatch;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -657,7 +656,7 @@ public class DefaultConversionServiceTests {
 	public void convertByteArrayToWrapperArray() {
 		byte[] byteArray = new byte[] {1, 2, 3};
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
-		assertThat(converted, equalTo(new Byte[]{1, 2, 3}));
+		assertThat(converted).isEqualTo(new Byte[]{1, 2, 3});
 	}
 
 	@Test
@@ -914,20 +913,20 @@ public class DefaultConversionServiceTests {
 	@Test
 	public void convertCharArrayToString() {
 		String converted = conversionService.convert(new char[] {'a', 'b', 'c'}, String.class);
-		assertThat(converted, equalTo("a,b,c"));
+		assertThat(converted).isEqualTo("a,b,c");
 	}
 
 	@Test
 	public void convertStringToCharArray() {
 		char[] converted = conversionService.convert("a,b,c", char[].class);
-		assertThat(converted, equalTo(new char[]{'a', 'b', 'c'}));
+		assertThat(converted).isEqualTo(new char[]{'a', 'b', 'c'});
 	}
 
 	@Test
 	public void convertStringToCustomCharArray() {
 		conversionService.addConverter(String.class, char[].class, String::toCharArray);
 		char[] converted = conversionService.convert("abc", char[].class);
-		assertThat(converted, equalTo(new char[] {'a', 'b', 'c'}));
+		assertThat(converted).isEqualTo(new char[] {'a', 'b', 'c'});
 	}
 
 	@Test

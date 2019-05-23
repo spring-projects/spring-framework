@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -77,7 +76,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -288,10 +287,10 @@ public class MessageBrokerConfigurationTests {
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
 		List<MessageConverter> converters = compositeConverter.getConverters();
-		assertThat(converters.size(), Matchers.is(3));
-		assertThat(converters.get(0), Matchers.instanceOf(StringMessageConverter.class));
-		assertThat(converters.get(1), Matchers.instanceOf(ByteArrayMessageConverter.class));
-		assertThat(converters.get(2), Matchers.instanceOf(MappingJackson2MessageConverter.class));
+		assertThat(converters).hasSize(3);
+		assertThat(converters.get(0)).isInstanceOf(StringMessageConverter.class);
+		assertThat(converters.get(1)).isInstanceOf(ByteArrayMessageConverter.class);
+		assertThat(converters.get(2)).isInstanceOf(MappingJackson2MessageConverter.class);
 
 		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
@@ -328,9 +327,9 @@ public class MessageBrokerConfigurationTests {
 		};
 
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
-		assertThat(compositeConverter.getConverters().size(), Matchers.is(1));
+		assertThat(compositeConverter.getConverters()).hasSize(1);
 		Iterator<MessageConverter> iterator = compositeConverter.getConverters().iterator();
-		assertThat(iterator.next(), Matchers.is(testConverter));
+		assertThat(iterator.next()).isEqualTo(testConverter);
 	}
 
 	@Test
@@ -346,12 +345,12 @@ public class MessageBrokerConfigurationTests {
 		};
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
-		assertThat(compositeConverter.getConverters().size(), Matchers.is(4));
+		assertThat(compositeConverter.getConverters()).hasSize(4);
 		Iterator<MessageConverter> iterator = compositeConverter.getConverters().iterator();
-		assertThat(iterator.next(), Matchers.is(testConverter));
-		assertThat(iterator.next(), Matchers.instanceOf(StringMessageConverter.class));
-		assertThat(iterator.next(), Matchers.instanceOf(ByteArrayMessageConverter.class));
-		assertThat(iterator.next(), Matchers.instanceOf(MappingJackson2MessageConverter.class));
+		assertThat(iterator.next()).isEqualTo(testConverter);
+		assertThat(iterator.next()).isInstanceOf(StringMessageConverter.class);
+		assertThat(iterator.next()).isInstanceOf(ByteArrayMessageConverter.class);
+		assertThat(iterator.next()).isInstanceOf(MappingJackson2MessageConverter.class);
 	}
 
 	@Test
@@ -375,8 +374,8 @@ public class MessageBrokerConfigurationTests {
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {};
 		config.setApplicationContext(new StaticApplicationContext());
 
-		assertThat(config.simpValidator(), Matchers.notNullValue());
-		assertThat(config.simpValidator(), Matchers.instanceOf(OptionalValidatorFactoryBean.class));
+		assertThat(config.simpValidator()).isNotNull();
+		assertThat(config.simpValidator()).isInstanceOf(OptionalValidatorFactoryBean.class);
 	}
 
 	@Test
@@ -399,8 +398,8 @@ public class MessageBrokerConfigurationTests {
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {};
 		config.setApplicationContext(appCxt);
 
-		assertThat(config.simpValidator(), Matchers.notNullValue());
-		assertThat(config.simpValidator(), Matchers.instanceOf(TestValidator.class));
+		assertThat(config.simpValidator()).isNotNull();
+		assertThat(config.simpValidator()).isInstanceOf(TestValidator.class);
 	}
 
 	@Test
@@ -410,7 +409,7 @@ public class MessageBrokerConfigurationTests {
 		SimpAnnotationMethodMessageHandler messageHandler =
 				context.getBean(SimpAnnotationMethodMessageHandler.class);
 
-		assertThat(messageHandler.getValidator(), Matchers.notNullValue(Validator.class));
+		assertThat(messageHandler.getValidator()).isNotNull();
 	}
 
 	@Test

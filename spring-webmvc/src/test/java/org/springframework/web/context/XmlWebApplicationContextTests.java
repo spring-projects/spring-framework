@@ -38,8 +38,6 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -91,10 +89,10 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 	@Test
 	@SuppressWarnings("deprecation")
 	public void environmentMerge() {
-		assertThat(this.root.getEnvironment().acceptsProfiles("rootProfile1"), is(true));
-		assertThat(this.root.getEnvironment().acceptsProfiles("wacProfile1"), is(false));
-		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("rootProfile1"), is(true));
-		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("wacProfile1"), is(true));
+		assertThat(this.root.getEnvironment().acceptsProfiles("rootProfile1")).isTrue();
+		assertThat(this.root.getEnvironment().acceptsProfiles("wacProfile1")).isFalse();
+		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("rootProfile1")).isTrue();
+		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("wacProfile1")).isTrue();
 	}
 
 	/**

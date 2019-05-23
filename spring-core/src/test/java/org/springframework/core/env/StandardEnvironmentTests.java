@@ -28,17 +28,8 @@ import org.junit.Test;
 import org.springframework.core.SpringProperties;
 import org.springframework.mock.env.MockPropertySource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContaining;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
@@ -84,64 +75,64 @@ public class StandardEnvironmentTests {
 						.withProperty("parentKey", "parentVal")
 						.withProperty("bothKey", "parentBothVal"));
 
-		assertThat(child.getProperty("childKey"), is("childVal"));
-		assertThat(child.getProperty("parentKey"), nullValue());
-		assertThat(child.getProperty("bothKey"), is("childBothVal"));
+		assertThat(child.getProperty("childKey")).isEqualTo("childVal");
+		assertThat(child.getProperty("parentKey")).isNull();
+		assertThat(child.getProperty("bothKey")).isEqualTo("childBothVal");
 
-		assertThat(parent.getProperty("childKey"), nullValue());
-		assertThat(parent.getProperty("parentKey"), is("parentVal"));
-		assertThat(parent.getProperty("bothKey"), is("parentBothVal"));
+		assertThat(parent.getProperty("childKey")).isNull();
+		assertThat(parent.getProperty("parentKey")).isEqualTo("parentVal");
+		assertThat(parent.getProperty("bothKey")).isEqualTo("parentBothVal");
 
-		assertThat(child.getActiveProfiles(), equalTo(new String[]{"c1","c2"}));
-		assertThat(parent.getActiveProfiles(), equalTo(new String[]{"p1","p2"}));
+		assertThat(child.getActiveProfiles()).isEqualTo(new String[]{"c1","c2"});
+		assertThat(parent.getActiveProfiles()).isEqualTo(new String[]{"p1","p2"});
 
 		child.merge(parent);
 
-		assertThat(child.getProperty("childKey"), is("childVal"));
-		assertThat(child.getProperty("parentKey"), is("parentVal"));
-		assertThat(child.getProperty("bothKey"), is("childBothVal"));
+		assertThat(child.getProperty("childKey")).isEqualTo("childVal");
+		assertThat(child.getProperty("parentKey")).isEqualTo("parentVal");
+		assertThat(child.getProperty("bothKey")).isEqualTo("childBothVal");
 
-		assertThat(parent.getProperty("childKey"), nullValue());
-		assertThat(parent.getProperty("parentKey"), is("parentVal"));
-		assertThat(parent.getProperty("bothKey"), is("parentBothVal"));
+		assertThat(parent.getProperty("childKey")).isNull();
+		assertThat(parent.getProperty("parentKey")).isEqualTo("parentVal");
+		assertThat(parent.getProperty("bothKey")).isEqualTo("parentBothVal");
 
-		assertThat(child.getActiveProfiles(), equalTo(new String[]{"c1","c2","p1","p2"}));
-		assertThat(parent.getActiveProfiles(), equalTo(new String[]{"p1","p2"}));
+		assertThat(child.getActiveProfiles()).isEqualTo(new String[]{"c1","c2","p1","p2"});
+		assertThat(parent.getActiveProfiles()).isEqualTo(new String[]{"p1","p2"});
 	}
 
 	@Test
 	public void propertySourceOrder() {
 		ConfigurableEnvironment env = new StandardEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
-		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(0));
-		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(1));
-		assertThat(sources.size(), is(2));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))).isEqualTo(0);
+		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME))).isEqualTo(1);
+		assertThat(sources).hasSize(2);
 	}
 
 	@Test
 	public void propertySourceTypes() {
 		ConfigurableEnvironment env = new StandardEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
-		assertThat(sources.get(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME), instanceOf(SystemEnvironmentPropertySource.class));
+		assertThat(sources.get(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)).isInstanceOf(SystemEnvironmentPropertySource.class);
 	}
 
 	@Test
 	public void activeProfilesIsEmptyByDefault() {
-		assertThat(environment.getActiveProfiles().length, is(0));
+		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
 	}
 
 	@Test
 	public void defaultProfilesContainsDefaultProfileByDefault() {
-		assertThat(environment.getDefaultProfiles().length, is(1));
-		assertThat(environment.getDefaultProfiles()[0], equalTo("default"));
+		assertThat(environment.getDefaultProfiles().length).isEqualTo(1);
+		assertThat(environment.getDefaultProfiles()[0]).isEqualTo("default");
 	}
 
 	@Test
 	public void setActiveProfiles() {
 		environment.setActiveProfiles("local", "embedded");
 		String[] activeProfiles = environment.getActiveProfiles();
-		assertThat(Arrays.asList(activeProfiles), hasItems("local", "embedded"));
-		assertThat(activeProfiles.length, is(2));
+		assertThat(activeProfiles).contains("local", "embedded");
+		assertThat(activeProfiles.length).isEqualTo(2);
 	}
 
 	@Test
@@ -194,36 +185,36 @@ public class StandardEnvironmentTests {
 
 	@Test
 	public void addActiveProfile() {
-		assertThat(environment.getActiveProfiles().length, is(0));
+		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
 		environment.setActiveProfiles("local", "embedded");
-		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItems("local", "embedded"));
-		assertThat(environment.getActiveProfiles().length, is(2));
+		assertThat(environment.getActiveProfiles()).contains("local", "embedded");
+		assertThat(environment.getActiveProfiles().length).isEqualTo(2);
 		environment.addActiveProfile("p1");
-		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItems("p1"));
-		assertThat(environment.getActiveProfiles().length, is(3));
+		assertThat(environment.getActiveProfiles()).contains("p1");
+		assertThat(environment.getActiveProfiles().length).isEqualTo(3);
 		environment.addActiveProfile("p2");
 		environment.addActiveProfile("p3");
-		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItems("p2", "p3"));
-		assertThat(environment.getActiveProfiles().length, is(5));
+		assertThat(environment.getActiveProfiles()).contains("p2", "p3");
+		assertThat(environment.getActiveProfiles().length).isEqualTo(5);
 	}
 
 	@Test
 	public void addActiveProfile_whenActiveProfilesPropertyIsAlreadySet() {
 		ConfigurableEnvironment env = new StandardEnvironment();
-		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME), nullValue());
+		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME)).isNull();
 		env.getPropertySources().addFirst(new MockPropertySource().withProperty(ACTIVE_PROFILES_PROPERTY_NAME, "p1"));
-		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME), equalTo("p1"));
+		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME)).isEqualTo("p1");
 		env.addActiveProfile("p2");
-		assertThat(env.getActiveProfiles(), arrayContaining("p1", "p2"));
+		assertThat(env.getActiveProfiles()).contains("p1", "p2");
 	}
 
 	@Test
 	public void reservedDefaultProfile() {
-		assertThat(environment.getDefaultProfiles(), equalTo(new String[]{RESERVED_DEFAULT_PROFILE_NAME}));
+		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[]{RESERVED_DEFAULT_PROFILE_NAME});
 		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "d0");
-		assertThat(environment.getDefaultProfiles(), equalTo(new String[]{"d0"}));
+		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[]{"d0"});
 		environment.setDefaultProfiles("d1", "d2");
-		assertThat(environment.getDefaultProfiles(), equalTo(new String[]{"d1","d2"}));
+		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[]{"d1","d2"});
 		System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
 	}
 
@@ -241,50 +232,50 @@ public class StandardEnvironmentTests {
 
 	@Test
 	public void getActiveProfiles_systemPropertiesEmpty() {
-		assertThat(environment.getActiveProfiles().length, is(0));
+		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "");
-		assertThat(environment.getActiveProfiles().length, is(0));
+		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
 		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
 	public void getActiveProfiles_fromSystemProperties() {
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo");
-		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItem("foo"));
+		assertThat(Arrays.asList(environment.getActiveProfiles())).contains("foo");
 		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
 	public void getActiveProfiles_fromSystemProperties_withMultipleProfiles() {
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo,bar");
-		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItems("foo", "bar"));
+		assertThat(environment.getActiveProfiles()).contains("foo", "bar");
 		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
 	public void getActiveProfiles_fromSystemProperties_withMulitpleProfiles_withWhitespace() {
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, " bar , baz "); // notice whitespace
-		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItems("bar", "baz"));
+		assertThat(environment.getActiveProfiles()).contains("bar", "baz");
 		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
 	public void getDefaultProfiles() {
-		assertThat(environment.getDefaultProfiles(), equalTo(new String[] {RESERVED_DEFAULT_PROFILE_NAME}));
+		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[] {RESERVED_DEFAULT_PROFILE_NAME});
 		environment.getPropertySources().addFirst(new MockPropertySource().withProperty(DEFAULT_PROFILES_PROPERTY_NAME, "pd1"));
-		assertThat(environment.getDefaultProfiles().length, is(1));
-		assertThat(Arrays.asList(environment.getDefaultProfiles()), hasItem("pd1"));
+		assertThat(environment.getDefaultProfiles().length).isEqualTo(1);
+		assertThat(Arrays.asList(environment.getDefaultProfiles())).contains("pd1");
 	}
 
 	@Test
 	public void setDefaultProfiles() {
 		environment.setDefaultProfiles();
-		assertThat(environment.getDefaultProfiles().length, is(0));
+		assertThat(environment.getDefaultProfiles().length).isEqualTo(0);
 		environment.setDefaultProfiles("pd1");
-		assertThat(Arrays.asList(environment.getDefaultProfiles()), hasItem("pd1"));
+		assertThat(Arrays.asList(environment.getDefaultProfiles())).contains("pd1");
 		environment.setDefaultProfiles("pd2", "pd3");
-		assertThat(Arrays.asList(environment.getDefaultProfiles()), not(hasItem("pd1")));
-		assertThat(Arrays.asList(environment.getDefaultProfiles()), hasItems("pd2", "pd3"));
+		assertThat(environment.getDefaultProfiles()).doesNotContain("pd1");
+		assertThat(environment.getDefaultProfiles()).contains("pd2", "pd3");
 	}
 
 	@Test
@@ -313,39 +304,39 @@ public class StandardEnvironmentTests {
 
 	@Test
 	public void acceptsProfiles_activeProfileSetProgrammatically() {
-		assertThat(environment.acceptsProfiles("p1", "p2"), is(false));
+		assertThat(environment.acceptsProfiles("p1", "p2")).isFalse();
 		environment.setActiveProfiles("p1");
-		assertThat(environment.acceptsProfiles("p1", "p2"), is(true));
+		assertThat(environment.acceptsProfiles("p1", "p2")).isTrue();
 		environment.setActiveProfiles("p2");
-		assertThat(environment.acceptsProfiles("p1", "p2"), is(true));
+		assertThat(environment.acceptsProfiles("p1", "p2")).isTrue();
 		environment.setActiveProfiles("p1", "p2");
-		assertThat(environment.acceptsProfiles("p1", "p2"), is(true));
+		assertThat(environment.acceptsProfiles("p1", "p2")).isTrue();
 	}
 
 	@Test
 	public void acceptsProfiles_activeProfileSetViaProperty() {
-		assertThat(environment.acceptsProfiles("p1"), is(false));
+		assertThat(environment.acceptsProfiles("p1")).isFalse();
 		environment.getPropertySources().addFirst(new MockPropertySource().withProperty(ACTIVE_PROFILES_PROPERTY_NAME, "p1"));
-		assertThat(environment.acceptsProfiles("p1"), is(true));
+		assertThat(environment.acceptsProfiles("p1")).isTrue();
 	}
 
 	@Test
 	public void acceptsProfiles_defaultProfile() {
-		assertThat(environment.acceptsProfiles("pd"), is(false));
+		assertThat(environment.acceptsProfiles("pd")).isFalse();
 		environment.setDefaultProfiles("pd");
-		assertThat(environment.acceptsProfiles("pd"), is(true));
+		assertThat(environment.acceptsProfiles("pd")).isTrue();
 		environment.setActiveProfiles("p1");
-		assertThat(environment.acceptsProfiles("pd"), is(false));
-		assertThat(environment.acceptsProfiles("p1"), is(true));
+		assertThat(environment.acceptsProfiles("pd")).isFalse();
+		assertThat(environment.acceptsProfiles("p1")).isTrue();
 	}
 
 	@Test
 	public void acceptsProfiles_withNotOperator() {
-		assertThat(environment.acceptsProfiles("p1"), is(false));
-		assertThat(environment.acceptsProfiles("!p1"), is(true));
+		assertThat(environment.acceptsProfiles("p1")).isFalse();
+		assertThat(environment.acceptsProfiles("!p1")).isTrue();
 		environment.addActiveProfile("p1");
-		assertThat(environment.acceptsProfiles("p1"), is(true));
-		assertThat(environment.acceptsProfiles("!p1"), is(false));
+		assertThat(environment.acceptsProfiles("p1")).isTrue();
+		assertThat(environment.acceptsProfiles("!p1")).isFalse();
 	}
 
 	@Test
@@ -356,11 +347,11 @@ public class StandardEnvironmentTests {
 
 	@Test
 	public void acceptsProfiles_withProfileExpression() {
-		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2"))).isFalse();
 		environment.addActiveProfile("p1");
-		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(false));
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2"))).isFalse();
 		environment.addActiveProfile("p2");
-		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2")), is(true));
+		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2"))).isTrue();
 	}
 
 	@Test
@@ -413,14 +404,14 @@ public class StandardEnvironmentTests {
 
 		{
 			Map<?, ?> systemProperties = environment.getSystemProperties();
-			assertThat(systemProperties, notNullValue());
+			assertThat(systemProperties).isNotNull();
 			assertSame(systemProperties, System.getProperties());
-			assertThat(systemProperties.get(ALLOWED_PROPERTY_NAME), equalTo((Object)ALLOWED_PROPERTY_VALUE));
-			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME), equalTo((Object)DISALLOWED_PROPERTY_VALUE));
+			assertThat(systemProperties.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
+			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isEqualTo(DISALLOWED_PROPERTY_VALUE);
 
 			// non-string keys and values work fine... until the security manager is introduced below
-			assertThat(systemProperties.get(STRING_PROPERTY_NAME), equalTo(NON_STRING_PROPERTY_VALUE));
-			assertThat(systemProperties.get(NON_STRING_PROPERTY_NAME), equalTo((Object)STRING_PROPERTY_VALUE));
+			assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isEqualTo(NON_STRING_PROPERTY_VALUE);
+			assertThat(systemProperties.get(NON_STRING_PROPERTY_NAME)).isEqualTo(STRING_PROPERTY_VALUE);
 		}
 
 		SecurityManager oldSecurityManager = System.getSecurityManager();
@@ -447,17 +438,17 @@ public class StandardEnvironmentTests {
 
 		{
 			Map<?, ?> systemProperties = environment.getSystemProperties();
-			assertThat(systemProperties, notNullValue());
-			assertThat(systemProperties, instanceOf(ReadOnlySystemAttributesMap.class));
-			assertThat((String)systemProperties.get(ALLOWED_PROPERTY_NAME), equalTo(ALLOWED_PROPERTY_VALUE));
-			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME), equalTo(null));
+			assertThat(systemProperties).isNotNull();
+			assertThat(systemProperties).isInstanceOf(ReadOnlySystemAttributesMap.class);
+			assertThat((String)systemProperties.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
+			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isNull();
 
 			// nothing we can do here in terms of warning the user that there was
 			// actually a (non-string) value available. By this point, we only
 			// have access to calling System.getProperty(), which itself returns null
 			// if the value is non-string.  So we're stuck with returning a potentially
 			// misleading null.
-			assertThat(systemProperties.get(STRING_PROPERTY_NAME), nullValue());
+			assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isNull();
 
 			// in the case of a non-string *key*, however, we can do better.  Alert
 			// the user that under these very special conditions (non-object key +
@@ -481,7 +472,7 @@ public class StandardEnvironmentTests {
 
 		{
 			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
-			assertThat(systemEnvironment, notNullValue());
+			assertThat(systemEnvironment).isNotNull();
 			assertSame(systemEnvironment, System.getenv());
 		}
 
@@ -504,10 +495,10 @@ public class StandardEnvironmentTests {
 
 		{
 			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
-			assertThat(systemEnvironment, notNullValue());
-			assertThat(systemEnvironment, instanceOf(ReadOnlySystemAttributesMap.class));
-			assertThat(systemEnvironment.get(ALLOWED_PROPERTY_NAME), equalTo((Object)ALLOWED_PROPERTY_VALUE));
-			assertThat(systemEnvironment.get(DISALLOWED_PROPERTY_NAME), nullValue());
+			assertThat(systemEnvironment).isNotNull();
+			assertThat(systemEnvironment).isInstanceOf(ReadOnlySystemAttributesMap.class);
+			assertThat(systemEnvironment.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
+			assertThat(systemEnvironment.get(DISALLOWED_PROPERTY_NAME)).isNull();
 		}
 
 		System.setSecurityManager(oldSecurityManager);

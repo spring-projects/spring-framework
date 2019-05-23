@@ -63,9 +63,6 @@ import org.springframework.util.ObjectUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -1261,10 +1258,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		String fromInterface = parser.parseExpression("T(" + StaticFinalImpl1.class.getName() + ").VALUE").getValue(
 				context, String.class);
-		assertThat(fromInterface, is("interfaceValue"));
+		assertThat(fromInterface).isEqualTo("interfaceValue");
 		String fromClass = parser.parseExpression("T(" + StaticFinalImpl2.class.getName() + ").VALUE").getValue(
 				context, String.class);
-		assertThat(fromClass, is("interfaceValue"));
+		assertThat(fromClass).isEqualTo("interfaceValue");
 	}
 
 	@Test
@@ -1359,8 +1356,8 @@ public class SpelReproTests extends AbstractExpressionTests {
 		Spr10486 rootObject = new Spr10486();
 		Expression classNameExpression = parser.parseExpression("class.name");
 		Expression nameExpression = parser.parseExpression("name");
-		assertThat(classNameExpression.getValue(context, rootObject), equalTo((Object) Spr10486.class.getName()));
-		assertThat(nameExpression.getValue(context, rootObject), equalTo((Object) "name"));
+		assertThat(classNameExpression.getValue(context, rootObject)).isEqualTo(Spr10486.class.getName());
+		assertThat(nameExpression.getValue(context, rootObject)).isEqualTo("name");
 	}
 
 	@Test
@@ -1424,7 +1421,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void SPR11494() {
 		Expression exp = new SpelExpressionParser().parseExpression("T(java.util.Arrays).asList('a','b')");
 		List<String> list = (List<String>) exp.getValue();
-		assertThat(list.size(), is(2));
+		assertThat(list).hasSize(2);
 	}
 
 	@Test

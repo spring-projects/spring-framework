@@ -18,15 +18,15 @@ package org.springframework.web.servlet.mvc;
 
 import java.util.Properties;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+
+
 
 /**
  * @author Rick Evans
@@ -47,7 +47,7 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.hasItem("max-age=10"));
+		assertThat(cacheControlHeaders).contains("max-age=10");
 	}
 
 	@Test
@@ -64,14 +64,14 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.emptyIterable());
+		assertThat(cacheControlHeaders).isEmpty();
 
 		// request.setRequestURI("http://localhost:7070/example/bingo.html");
 		request.setRequestURI("example/bingo.html");
 		interceptor.preHandle(request, response, null);
 
 		cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.hasItem("max-age=10"));
+		assertThat(cacheControlHeaders).contains("max-age=10");
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("no-store"));
+		assertThat(cacheControlHeaders).contains("no-store");
 	}
 
 	@Test
@@ -93,9 +93,9 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.emptyIterable());
+		assertThat(expiresHeaders).isEmpty();
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.emptyIterable());
+		assertThat(cacheControlHeaders).isEmpty();
 	}
 
 	// SPR-13252, SPR-14053
@@ -108,8 +108,8 @@ public class WebContentInterceptorTests {
 
 		interceptor.preHandle(request, response, null);
 
-		assertThat(response.getHeader("Pragma"), is(""));
-		assertThat(response.getHeader("Expires"), is(""));
+		assertThat(response.getHeader("Pragma")).isEqualTo("");
+		assertThat(response.getHeader("Expires")).isEqualTo("");
 	}
 
 	// SPR-13252, SPR-14053
@@ -124,8 +124,8 @@ public class WebContentInterceptorTests {
 
 		interceptor.preHandle(request, response, null);
 
-		assertThat(response.getHeader("Pragma"), is(""));
-		assertThat(response.getHeader("Expires"), is(""));
+		assertThat(response.getHeader("Pragma")).isEqualTo("");
+		assertThat(response.getHeader("Expires")).isEqualTo("");
 	}
 
 	@SuppressWarnings("deprecation")
@@ -144,11 +144,11 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		Iterable<String> expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.iterableWithSize(1));
+		assertThat(expiresHeaders).hasSize(1);
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("no-cache", "no-store"));
+		assertThat(cacheControlHeaders).containsExactly("no-cache", "no-store");
 		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
-		assertThat(pragmaHeaders, Matchers.contains("no-cache"));
+		assertThat(pragmaHeaders).containsExactly("no-cache");
 
 		// request.setRequestURI("https://example.org/page.cache.html");
 		request = new MockHttpServletRequest("GET", "foo/page.cache.html");
@@ -156,9 +156,9 @@ public class WebContentInterceptorTests {
 		interceptor.preHandle(request, response, null);
 
 		expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.iterableWithSize(1));
+		assertThat(expiresHeaders).hasSize(1);
 		cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("max-age=10, must-revalidate"));
+		assertThat(cacheControlHeaders).containsExactly("max-age=10, must-revalidate");
 	}
 
 	@Test

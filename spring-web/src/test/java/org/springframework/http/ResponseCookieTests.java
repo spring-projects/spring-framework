@@ -20,10 +20,7 @@ import java.time.Duration;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -51,13 +48,13 @@ public class ResponseCookieTests {
 		String expires = HttpHeaders.formatDate(System.currentTimeMillis() + maxAge.toMillis());
 		expires = expires.substring(0, expires.indexOf(":") + 1);
 
-		assertThat(ResponseCookie.from("id", "1fWa").maxAge(maxAge).build().toString(), allOf(
-				startsWith("id=1fWa; Max-Age=31536000; Expires=" + expires),
-				endsWith(" GMT")));
+		assertThat(ResponseCookie.from("id", "1fWa").maxAge(maxAge).build().toString())
+				.startsWith("id=1fWa; Max-Age=31536000; Expires=" + expires)
+				.endsWith(" GMT");
 
-		assertThat(ResponseCookie.from("id", "1fWa").maxAge(maxAge.getSeconds()).build().toString(), allOf(
-				startsWith("id=1fWa; Max-Age=31536000; Expires=" + expires),
-				endsWith(" GMT")));
+		assertThat(ResponseCookie.from("id", "1fWa").maxAge(maxAge.getSeconds()).build().toString())
+				.startsWith("id=1fWa; Max-Age=31536000; Expires=" + expires)
+				.endsWith(" GMT");
 	}
 
 	@Test

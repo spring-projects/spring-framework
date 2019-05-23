@@ -33,8 +33,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -127,7 +126,7 @@ public class ComponentScanParserTests {
 			GenericXmlApplicationContext context = new GenericXmlApplicationContext();
 			context.load(xmlLocation);
 			context.refresh();
-			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(false));
+			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME)).isFalse();
 			context.close();
 		}
 		{ // should include the profile-annotated bean with active profiles set
@@ -135,7 +134,7 @@ public class ComponentScanParserTests {
 			context.getEnvironment().setActiveProfiles(ProfileAnnotatedComponent.PROFILE_NAME);
 			context.load(xmlLocation);
 			context.refresh();
-			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(true));
+			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME)).isTrue();
 			context.close();
 		}
 		{ // ensure the same works for AbstractRefreshableApplicationContext impls too
@@ -143,7 +142,7 @@ public class ComponentScanParserTests {
 				false);
 			context.getEnvironment().setActiveProfiles(ProfileAnnotatedComponent.PROFILE_NAME);
 			context.refresh();
-			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME), is(true));
+			assertThat(context.containsBean(ProfileAnnotatedComponent.BEAN_NAME)).isTrue();
 			context.close();
 		}
 	}

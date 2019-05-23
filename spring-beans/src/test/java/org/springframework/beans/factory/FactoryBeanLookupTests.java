@@ -25,8 +25,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -47,7 +46,7 @@ public class FactoryBeanLookupTests {
 	@Test
 	public void factoryBeanLookupByNameDereferencing() {
 		Object fooFactory = beanFactory.getBean("&fooFactory");
-		assertThat(fooFactory, instanceOf(FooFactoryBean.class));
+		assertThat(fooFactory).isInstanceOf(FooFactoryBean.class);
 	}
 
 	@Test
@@ -65,7 +64,7 @@ public class FactoryBeanLookupTests {
 	@Test
 	public void factoryBeanObjectLookupByName() {
 		Object fooFactory = beanFactory.getBean("fooFactory");
-		assertThat(fooFactory, instanceOf(Foo.class));
+		assertThat(fooFactory).isInstanceOf(Foo.class);
 	}
 
 	@Test

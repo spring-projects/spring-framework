@@ -42,10 +42,8 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.Nullable;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -359,9 +357,9 @@ public class MappingJackson2HttpMessageConverterTests {
 		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(result, containsString("\"withView1\":\"with\""));
-		assertThat(result, not(containsString("\"withView2\":\"with\"")));
-		assertThat(result, not(containsString("\"withoutView\":\"without\"")));
+		assertThat(result).contains("\"withView1\":\"with\"");
+		assertThat(result).doesNotContain("\"withView2\":\"with\"");
+		assertThat(result).doesNotContain("\"withoutView\":\"without\"");
 	}
 
 	@Test
@@ -377,9 +375,9 @@ public class MappingJackson2HttpMessageConverterTests {
 		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(result, not(containsString("\"withView1\":\"with\"")));
-		assertThat(result, not(containsString("\"withView2\":\"with\"")));
-		assertThat(result, containsString("\"withoutView\":\"without\""));
+		assertThat(result).doesNotContain("\"withView1\":\"with\"");
+		assertThat(result).doesNotContain("\"withView2\":\"with\"");
+		assertThat(result).contains("\"withoutView\":\"without\"");
 	}
 
 	@Test
@@ -396,8 +394,8 @@ public class MappingJackson2HttpMessageConverterTests {
 		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(result, containsString("\"property1\":\"value\""));
-		assertThat(result, not(containsString("\"property2\":\"value\"")));
+		assertThat(result).contains("\"property1\":\"value\"");
+		assertThat(result).doesNotContain("\"property2\":\"value\"");
 	}
 
 	@Test  // SPR-13318

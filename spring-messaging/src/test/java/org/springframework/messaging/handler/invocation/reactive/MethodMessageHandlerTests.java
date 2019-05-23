@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -47,8 +46,8 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.RouteMatcher;
 import org.springframework.util.SimpleRouteMatcher;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -70,9 +69,9 @@ public class MethodMessageHandlerTests {
 		Map<String, HandlerMethod> mappings = messageHandler.getHandlerMethods();
 
 		assertEquals(5, mappings.keySet().size());
-		assertThat(mappings.keySet(), Matchers.containsInAnyOrder(
+		assertThat(mappings).containsOnlyKeys(
 				"/handleMessage", "/handleMessageWithArgument", "/handleMessageWithError",
-				"/handleMessageMatch1", "/handleMessageMatch2"));
+				"/handleMessageMatch1", "/handleMessageMatch2");
 	}
 
 	@Test

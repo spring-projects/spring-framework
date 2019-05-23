@@ -55,10 +55,9 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -287,7 +286,7 @@ public class ResourceWebHandlerTests {
 
 		StepVerifier.create(handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
-					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertThat(err).isInstanceOf(ResponseStatusException.class);
 					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
 				}).verify(TIMEOUT);
 	}
@@ -333,7 +332,7 @@ public class ResourceWebHandlerTests {
 		setPathWithinHandlerMapping(exchange, requestPath);
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
-					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertThat(err).isInstanceOf(ResponseStatusException.class);
 					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
 				})
 				.verify(TIMEOUT);
@@ -428,7 +427,7 @@ public class ResourceWebHandlerTests {
 		setPathWithinHandlerMapping(exchange, "js/");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
-					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertThat(err).isInstanceOf(ResponseStatusException.class);
 					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
 				}).verify(TIMEOUT);
 	}
@@ -439,7 +438,7 @@ public class ResourceWebHandlerTests {
 		setPathWithinHandlerMapping(exchange, "underscorejs/");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
-					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertThat(err).isInstanceOf(ResponseStatusException.class);
 					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
 				}).verify(TIMEOUT);
 	}
@@ -450,7 +449,7 @@ public class ResourceWebHandlerTests {
 		setPathWithinHandlerMapping(exchange, "");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
-					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertThat(err).isInstanceOf(ResponseStatusException.class);
 					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
 				}).verify(TIMEOUT);
 	}
@@ -485,7 +484,7 @@ public class ResourceWebHandlerTests {
 
 		StepVerifier.create(mono)
 				.expectErrorSatisfies(err -> {
-					assertThat(err, instanceOf(ResponseStatusException.class));
+					assertThat(err).isInstanceOf(ResponseStatusException.class);
 					assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) err).getStatus());
 				}).verify(TIMEOUT);
 

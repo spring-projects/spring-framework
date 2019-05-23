@@ -27,12 +27,12 @@ import com.rometools.rome.feed.atom.Content;
 import com.rometools.rome.feed.atom.Entry;
 import com.rometools.rome.feed.atom.Feed;
 import org.junit.Test;
-import org.xmlunit.matchers.CompareMatcher;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.tests.XmlContent;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -56,12 +56,9 @@ public class AtomFeedViewTests {
 		String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>Test Feed</title>" +
 				"<entry><title>2</title><summary>This is entry 2</summary></entry>" +
 				"<entry><title>1</title><summary>This is entry 1</summary></entry>" + "</feed>";
-		assertThat(response.getContentAsString(), isSimilarTo(expected));
+		assertThat(XmlContent.of(response.getContentAsString())).isSimilarToIgnoringWhitespace(expected);
 	}
 
-	private static CompareMatcher isSimilarTo(String content) {
-		return CompareMatcher.isSimilarTo(content).ignoreWhitespace();
-	}
 
 	private static class MyAtomFeedView extends AbstractAtomFeedView {
 

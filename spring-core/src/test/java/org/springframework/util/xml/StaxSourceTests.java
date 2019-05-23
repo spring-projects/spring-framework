@@ -33,10 +33,11 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.springframework.tests.XmlContent;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Arjen Poutsma
@@ -69,7 +70,7 @@ public class StaxSourceTests {
 		assertNull("EventReader returned", source.getXMLEventReader());
 		StringWriter writer = new StringWriter();
 		transformer.transform(source, new StreamResult(writer));
-		assertThat("Invalid result", writer.toString(), isSimilarTo(XML));
+		assertThat(XmlContent.from(writer)).as("Invalid result").isSimilarTo(XML);
 	}
 
 	@Test
@@ -82,7 +83,7 @@ public class StaxSourceTests {
 		Document expected = documentBuilder.parse(new InputSource(new StringReader(XML)));
 		Document result = documentBuilder.newDocument();
 		transformer.transform(source, new DOMResult(result));
-		assertThat("Invalid result", result, isSimilarTo(expected));
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 
 	@Test
@@ -93,7 +94,7 @@ public class StaxSourceTests {
 		assertNull("StreamReader returned", source.getXMLStreamReader());
 		StringWriter writer = new StringWriter();
 		transformer.transform(source, new StreamResult(writer));
-		assertThat("Invalid result", writer.toString(), isSimilarTo(XML));
+		assertThat(XmlContent.from(writer)).as("Invalid result").isSimilarTo(XML);
 	}
 
 	@Test
@@ -106,6 +107,6 @@ public class StaxSourceTests {
 		Document expected = documentBuilder.parse(new InputSource(new StringReader(XML)));
 		Document result = documentBuilder.newDocument();
 		transformer.transform(source, new DOMResult(result));
-		assertThat("Invalid result", result, isSimilarTo(expected));
+		assertThat(XmlContent.of(result)).as("Invalid result").isSimilarTo(expected);
 	}
 }

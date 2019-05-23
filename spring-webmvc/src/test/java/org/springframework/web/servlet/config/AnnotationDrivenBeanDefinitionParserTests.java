@@ -18,7 +18,6 @@ package org.springframework.web.servlet.config;
 
 import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -50,7 +49,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -90,11 +89,10 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(hm.useSuffixPatternMatch());
 		assertFalse(hm.useTrailingSlashMatch());
 		assertTrue(hm.useRegisteredSuffixPatternMatch());
-		assertThat(hm.getUrlPathHelper(), Matchers.instanceOf(TestPathHelper.class));
-		assertThat(hm.getPathMatcher(), Matchers.instanceOf(TestPathMatcher.class));
+		assertThat(hm.getUrlPathHelper()).isInstanceOf(TestPathHelper.class);
+		assertThat(hm.getPathMatcher()).isInstanceOf(TestPathMatcher.class);
 		List<String> fileExtensions = hm.getContentNegotiationManager().getAllFileExtensions();
-		assertThat(fileExtensions, Matchers.contains("xml"));
-		assertThat(fileExtensions, Matchers.hasSize(1));
+		assertThat(fileExtensions).containsExactly("xml");
 	}
 
 	@Test

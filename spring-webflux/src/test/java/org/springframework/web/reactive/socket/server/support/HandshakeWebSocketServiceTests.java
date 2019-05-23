@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -33,8 +32,7 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
@@ -67,10 +65,11 @@ public class HandshakeWebSocketServiceTests {
 		assertNotNull(info);
 
 		Map<String, Object> attributes = info.getAttributes();
-		assertEquals(3, attributes.size());
-		assertThat(attributes, Matchers.hasEntry("a1", "v1"));
-		assertThat(attributes, Matchers.hasEntry("a3", "v3"));
-		assertThat(attributes, Matchers.hasEntry("a5", "v5"));
+		assertThat(attributes)
+				.hasSize(3)
+				.containsEntry("a1", "v1")
+				.containsEntry("a3", "v3")
+				.containsEntry("a5", "v5");
 	}
 
 	private MockServerHttpRequest initHandshakeRequest() {

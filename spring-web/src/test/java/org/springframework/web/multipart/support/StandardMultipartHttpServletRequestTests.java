@@ -29,8 +29,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -86,12 +85,12 @@ public class StandardMultipartHttpServletRequestTests {
 		MockHttpOutputMessage output = new MockHttpOutputMessage();
 		new FormHttpMessageConverter().write(map, null, output);
 
-		assertThat(output.getBodyAsString(StandardCharsets.UTF_8), containsString(
+		assertThat(output.getBodyAsString(StandardCharsets.UTF_8)).contains(
 				"Content-Disposition: form-data; name=\"file\"; filename=\"myFile.txt\"\r\n" +
 						"Content-Type: text/plain\r\n" +
 						"Content-Length: 6\r\n" +
 						"\r\n" +
-						"myBody\r\n"));
+						"myBody\r\n");
 	}
 
 

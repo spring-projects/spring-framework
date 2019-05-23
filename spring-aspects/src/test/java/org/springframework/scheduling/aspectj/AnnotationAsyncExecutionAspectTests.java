@@ -38,9 +38,7 @@ import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -140,14 +138,14 @@ public class AnnotationAsyncExecutionAspectTests {
 		ClassWithQualifiedAsyncMethods obj = new ClassWithQualifiedAsyncMethods();
 
 		Future<Thread> defaultThread = obj.defaultWork();
-		assertThat(defaultThread.get(), not(Thread.currentThread()));
-		assertThat(defaultThread.get().getName(), not(startsWith("e1-")));
+		assertThat(defaultThread.get()).isNotEqualTo(Thread.currentThread());
+		assertThat(defaultThread.get().getName()).doesNotStartWith("e1-");
 
 		ListenableFuture<Thread> e1Thread = obj.e1Work();
-		assertThat(e1Thread.get().getName(), startsWith("e1-"));
+		assertThat(e1Thread.get().getName()).startsWith("e1-");
 
 		CompletableFuture<Thread> e1OtherThread = obj.e1OtherWork();
-		assertThat(e1OtherThread.get().getName(), startsWith("e1-"));
+		assertThat(e1OtherThread.get().getName()).startsWith("e1-");
 	}
 
 	@Test

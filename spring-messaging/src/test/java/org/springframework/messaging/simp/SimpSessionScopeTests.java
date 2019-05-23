@@ -25,9 +25,7 @@ import org.mockito.Mockito;
 
 import org.springframework.beans.factory.ObjectFactory;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -66,7 +64,7 @@ public class SimpSessionScopeTests {
 		this.simpAttributes.setAttribute("name", "value");
 		Object actual = this.scope.get("name", this.objectFactory);
 
-		assertThat(actual, is("value"));
+		assertThat(actual).isEqualTo("value");
 	}
 
 	@Test
@@ -74,8 +72,8 @@ public class SimpSessionScopeTests {
 		given(this.objectFactory.getObject()).willReturn("value");
 		Object actual = this.scope.get("name", this.objectFactory);
 
-		assertThat(actual, is("value"));
-		assertThat(this.simpAttributes.getAttribute("name"), is("value"));
+		assertThat(actual).isEqualTo("value");
+		assertThat(this.simpAttributes.getAttribute("name")).isEqualTo("value");
 	}
 
 	@Test
@@ -83,11 +81,11 @@ public class SimpSessionScopeTests {
 		this.simpAttributes.setAttribute("name", "value");
 
 		Object removed = this.scope.remove("name");
-		assertThat(removed, is("value"));
-		assertThat(this.simpAttributes.getAttribute("name"), nullValue());
+		assertThat(removed).isEqualTo("value");
+		assertThat(this.simpAttributes.getAttribute("name")).isNull();
 
 		removed = this.scope.remove("name");
-		assertThat(removed, nullValue());
+		assertThat(removed).isNull();
 	}
 
 	@Test
@@ -101,7 +99,7 @@ public class SimpSessionScopeTests {
 
 	@Test
 	public void getSessionId() {
-		assertThat(this.scope.getConversationId(), is("session1"));
+		assertThat(this.scope.getConversationId()).isEqualTo("session1");
 	}
 
 

@@ -32,10 +32,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -75,11 +72,14 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 		List<String> headerValues = response.getHeaders().get("Set-Cookie");
 		assertEquals(2, headerValues.size());
 
-		assertThat(splitCookie(headerValues.get(0)), containsInAnyOrder(equalTo("SID=31d4d96e407aad42"),
-				equalToIgnoringCase("Path=/"), equalToIgnoringCase("Secure"), equalToIgnoringCase("HttpOnly")));
-
-		assertThat(splitCookie(headerValues.get(1)), containsInAnyOrder(equalTo("lang=en-US"),
-				equalToIgnoringCase("Path=/"), equalToIgnoringCase("Domain=example.com")));
+		List<String> cookie0 = splitCookie(headerValues.get(0));
+		assertThat(cookie0.remove("SID=31d4d96e407aad42")).as("SID").isTrue();
+		assertThat(cookie0.stream().map(String::toLowerCase))
+				.containsExactlyInAnyOrder("path=/", "secure", "httponly");
+		List<String> cookie1 = splitCookie(headerValues.get(1));
+		assertThat(cookie1.remove("lang=en-US")).as("lang").isTrue();
+		assertThat(cookie1.stream().map(String::toLowerCase))
+				.containsExactlyInAnyOrder("path=/", "domain=example.com");
 	}
 
 	// No client side HttpCookie support yet

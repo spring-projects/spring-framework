@@ -24,8 +24,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
 /**
@@ -49,7 +48,7 @@ public class EnvironmentAccessorIntegrationTests {
 		ctx.getEnvironment().getPropertySources().addFirst(new MockPropertySource().withProperty("my.name", "myBean"));
 		ctx.refresh();
 
-		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("myBean"));
+		assertThat(ctx.getBean(TestBean.class).getName()).isEqualTo("myBean");
 		ctx.close();
 	}
 

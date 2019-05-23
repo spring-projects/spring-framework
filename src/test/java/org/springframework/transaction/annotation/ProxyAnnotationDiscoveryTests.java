@@ -22,9 +22,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -47,7 +45,7 @@ public class ProxyAnnotationDiscoveryTests {
 		ctx.refresh();
 		AnnotatedServiceWithoutInterface s = ctx.getBean(AnnotatedServiceWithoutInterface.class);
 		assertTrue("expected a subclass proxy", AopUtils.isCglibProxy(s));
-		assertThat(s, instanceOf(AnnotatedServiceWithoutInterface.class));
+		assertThat(s).isInstanceOf(AnnotatedServiceWithoutInterface.class);
 	}
 
 	@Test
@@ -57,7 +55,7 @@ public class ProxyAnnotationDiscoveryTests {
 		ctx.refresh();
 		AnnotatedServiceWithoutInterface s = ctx.getBean(AnnotatedServiceWithoutInterface.class);
 		assertTrue("expected a subclass proxy", AopUtils.isCglibProxy(s));
-		assertThat(s, instanceOf(AnnotatedServiceWithoutInterface.class));
+		assertThat(s).isInstanceOf(AnnotatedServiceWithoutInterface.class);
 	}
 
 	@Test
@@ -67,7 +65,7 @@ public class ProxyAnnotationDiscoveryTests {
 		ctx.refresh();
 		NonAnnotatedService s = ctx.getBean(NonAnnotatedService.class);
 		assertTrue("expected a subclass proxy", AopUtils.isCglibProxy(s));
-		assertThat(s, instanceOf(AnnotatedServiceImpl.class));
+		assertThat(s).isInstanceOf(AnnotatedServiceImpl.class);
 	}
 
 	@Test
@@ -77,7 +75,7 @@ public class ProxyAnnotationDiscoveryTests {
 		ctx.refresh();
 		NonAnnotatedService s = ctx.getBean(NonAnnotatedService.class);
 		assertTrue("expected a jdk proxy", AopUtils.isJdkDynamicProxy(s));
-		assertThat(s, not(instanceOf(AnnotatedServiceImpl.class)));
+		assertThat(s).isNotInstanceOf(AnnotatedServiceImpl.class);
 	}
 
 	@Test
@@ -87,7 +85,7 @@ public class ProxyAnnotationDiscoveryTests {
 		ctx.refresh();
 		AnnotatedService s = ctx.getBean(AnnotatedService.class);
 		assertTrue("expected a subclass proxy", AopUtils.isCglibProxy(s));
-		assertThat(s, instanceOf(NonAnnotatedServiceImpl.class));
+		assertThat(s).isInstanceOf(NonAnnotatedServiceImpl.class);
 	}
 
 	@Test
@@ -97,7 +95,7 @@ public class ProxyAnnotationDiscoveryTests {
 		ctx.refresh();
 		AnnotatedService s = ctx.getBean(AnnotatedService.class);
 		assertTrue("expected a jdk proxy", AopUtils.isJdkDynamicProxy(s));
-		assertThat(s, not(instanceOf(NonAnnotatedServiceImpl.class)));
+		assertThat(s).isNotInstanceOf(NonAnnotatedServiceImpl.class);
 	}
 }
 

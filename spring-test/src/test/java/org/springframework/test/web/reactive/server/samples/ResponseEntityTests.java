@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -40,10 +39,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static java.time.Duration.ofMillis;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
@@ -110,7 +107,7 @@ public class ResponseEntityTests {
 				.expectStatus().isOk()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON)
 				.expectBodyList(Person.class).value(people ->
-					MatcherAssert.assertThat(people, hasItem(new Person("Jason")))
+					assertThat(people).contains(new Person("Jason"))
 				);
 	}
 
@@ -141,7 +138,7 @@ public class ResponseEntityTests {
 		StepVerifier.create(result.getResponseBody())
 				.expectNext(new Person("N0"), new Person("N1"), new Person("N2"))
 				.expectNextCount(4)
-				.consumeNextWith(person -> assertThat(person.getName(), endsWith("7")))
+				.consumeNextWith(person -> assertThat(person.getName()).endsWith("7"))
 				.thenCancel()
 				.verify();
 	}

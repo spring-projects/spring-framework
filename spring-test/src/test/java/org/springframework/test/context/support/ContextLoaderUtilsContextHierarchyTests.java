@@ -31,11 +31,8 @@ import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -127,7 +124,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		List<ContextConfigurationAttributes> configAttributesListClassLevel1 = hierarchyAttributes.get(0);
 		debugConfigAttributes(configAttributesListClassLevel1);
 		assertEquals(1, configAttributesListClassLevel1.size());
-		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0], equalTo("one.xml"));
+		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0]).isEqualTo("one.xml");
 
 		List<ContextConfigurationAttributes> configAttributesListClassLevel2 = hierarchyAttributes.get(1);
 		debugConfigAttributes(configAttributesListClassLevel2);
@@ -138,7 +135,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		List<ContextConfigurationAttributes> configAttributesListClassLevel3 = hierarchyAttributes.get(2);
 		debugConfigAttributes(configAttributesListClassLevel3);
 		assertEquals(1, configAttributesListClassLevel3.size());
-		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0], equalTo("three.xml"));
+		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0]).isEqualTo("three.xml");
 	}
 
 	@Test
@@ -149,7 +146,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		List<ContextConfigurationAttributes> configAttributesListClassLevel1 = hierarchyAttributes.get(0);
 		debugConfigAttributes(configAttributesListClassLevel1);
 		assertEquals(1, configAttributesListClassLevel1.size());
-		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0], equalTo("A.xml"));
+		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0]).isEqualTo("A.xml");
 		assertAttributes(configAttributesListClassLevel1.get(0),
 			TestClass1WithSingleLevelContextHierarchyFromMetaAnnotation.class, new String[] { "A.xml" },
 			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
@@ -167,7 +164,7 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		List<ContextConfigurationAttributes> configAttributesListClassLevel3 = hierarchyAttributes.get(2);
 		debugConfigAttributes(configAttributesListClassLevel3);
 		assertEquals(1, configAttributesListClassLevel3.size());
-		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0], equalTo("C.xml"));
+		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0]).isEqualTo("C.xml");
 		assertAttributes(configAttributesListClassLevel3.get(0),
 			TestClass3WithSingleLevelContextHierarchyFromMetaAnnotation.class, new String[] { "C.xml" },
 			EMPTY_CLASS_ARRAY, ContextLoader.class, true);
@@ -182,10 +179,10 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		debugConfigAttributes(configAttributesListClassLevel2);
 
 		assertEquals(1, configAttributesListClassLevel1.size());
-		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0], equalTo("one.xml"));
+		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0]).isEqualTo("one.xml");
 
 		assertEquals(1, configAttributesListClassLevel2.size());
-		assertThat(configAttributesListClassLevel2.get(0).getLocations()[0], equalTo("two.xml"));
+		assertThat(configAttributesListClassLevel2.get(0).getLocations()[0]).isEqualTo("two.xml");
 	}
 
 	@Test
@@ -216,45 +213,44 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		List<ContextConfigurationAttributes> configAttributesListClassLevel1 = hierarchyAttributes.get(0);
 		debugConfigAttributes(configAttributesListClassLevel1);
 		assertEquals(2, configAttributesListClassLevel1.size());
-		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0], equalTo("1-A.xml"));
-		assertThat(configAttributesListClassLevel1.get(1).getLocations()[0], equalTo("1-B.xml"));
+		assertThat(configAttributesListClassLevel1.get(0).getLocations()[0]).isEqualTo("1-A.xml");
+		assertThat(configAttributesListClassLevel1.get(1).getLocations()[0]).isEqualTo("1-B.xml");
 
 		List<ContextConfigurationAttributes> configAttributesListClassLevel2 = hierarchyAttributes.get(1);
 		debugConfigAttributes(configAttributesListClassLevel2);
 		assertEquals(2, configAttributesListClassLevel2.size());
-		assertThat(configAttributesListClassLevel2.get(0).getLocations()[0], equalTo("2-A.xml"));
-		assertThat(configAttributesListClassLevel2.get(1).getLocations()[0], equalTo("2-B.xml"));
+		assertThat(configAttributesListClassLevel2.get(0).getLocations()[0]).isEqualTo("2-A.xml");
+		assertThat(configAttributesListClassLevel2.get(1).getLocations()[0]).isEqualTo("2-B.xml");
 
 		List<ContextConfigurationAttributes> configAttributesListClassLevel3 = hierarchyAttributes.get(2);
 		debugConfigAttributes(configAttributesListClassLevel3);
 		assertEquals(3, configAttributesListClassLevel3.size());
-		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0], equalTo("3-A.xml"));
-		assertThat(configAttributesListClassLevel3.get(1).getLocations()[0], equalTo("3-B.xml"));
-		assertThat(configAttributesListClassLevel3.get(2).getLocations()[0], equalTo("3-C.xml"));
+		assertThat(configAttributesListClassLevel3.get(0).getLocations()[0]).isEqualTo("3-A.xml");
+		assertThat(configAttributesListClassLevel3.get(1).getLocations()[0]).isEqualTo("3-B.xml");
+		assertThat(configAttributesListClassLevel3.get(2).getLocations()[0]).isEqualTo("3-C.xml");
 	}
 
 	@Test
 	public void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchies() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass3WithMultiLevelContextHierarchy.class);
 
-		assertThat(map.size(), is(3));
-		assertThat(map.keySet(), hasItems("alpha", "beta", "gamma"));
+		assertThat(map).hasSize(3).containsKeys("alpha", "beta", "gamma");
 
 		List<ContextConfigurationAttributes> alphaConfig = map.get("alpha");
-		assertThat(alphaConfig.size(), is(3));
-		assertThat(alphaConfig.get(0).getLocations()[0], is("1-A.xml"));
-		assertThat(alphaConfig.get(1).getLocations()[0], is("2-A.xml"));
-		assertThat(alphaConfig.get(2).getLocations()[0], is("3-A.xml"));
+		assertThat(alphaConfig).hasSize(3);
+		assertThat(alphaConfig.get(0).getLocations()[0]).isEqualTo("1-A.xml");
+		assertThat(alphaConfig.get(1).getLocations()[0]).isEqualTo("2-A.xml");
+		assertThat(alphaConfig.get(2).getLocations()[0]).isEqualTo("3-A.xml");
 
 		List<ContextConfigurationAttributes> betaConfig = map.get("beta");
-		assertThat(betaConfig.size(), is(3));
-		assertThat(betaConfig.get(0).getLocations()[0], is("1-B.xml"));
-		assertThat(betaConfig.get(1).getLocations()[0], is("2-B.xml"));
-		assertThat(betaConfig.get(2).getLocations()[0], is("3-B.xml"));
+		assertThat(betaConfig).hasSize(3);
+		assertThat(betaConfig.get(0).getLocations()[0]).isEqualTo("1-B.xml");
+		assertThat(betaConfig.get(1).getLocations()[0]).isEqualTo("2-B.xml");
+		assertThat(betaConfig.get(2).getLocations()[0]).isEqualTo("3-B.xml");
 
 		List<ContextConfigurationAttributes> gammaConfig = map.get("gamma");
-		assertThat(gammaConfig.size(), is(1));
-		assertThat(gammaConfig.get(0).getLocations()[0], is("3-C.xml"));
+		assertThat(gammaConfig).hasSize(1);
+		assertThat(gammaConfig.get(0).getLocations()[0]).isEqualTo("3-C.xml");
 	}
 
 	@Test
@@ -269,26 +265,25 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		String level6 = GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX + 6;
 		String level7 = GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX + 7;
 
-		assertThat(map.size(), is(7));
-		assertThat(map.keySet(), hasItems(level1, level2, level3, level4, level5, level6, level7));
+		assertThat(map).hasSize(7).containsKeys(level1, level2, level3, level4, level5, level6, level7);
 
 		List<ContextConfigurationAttributes> level1Config = map.get(level1);
-		assertThat(level1Config.size(), is(1));
-		assertThat(level1Config.get(0).getLocations()[0], is("1-A.xml"));
+		assertThat(level1Config).hasSize(1);
+		assertThat(level1Config.get(0).getLocations()[0]).isEqualTo("1-A.xml");
 
 		List<ContextConfigurationAttributes> level2Config = map.get(level2);
-		assertThat(level2Config.size(), is(1));
-		assertThat(level2Config.get(0).getLocations()[0], is("1-B.xml"));
+		assertThat(level2Config).hasSize(1);
+		assertThat(level2Config.get(0).getLocations()[0]).isEqualTo("1-B.xml");
 
 		List<ContextConfigurationAttributes> level3Config = map.get(level3);
-		assertThat(level3Config.size(), is(1));
-		assertThat(level3Config.get(0).getLocations()[0], is("2-A.xml"));
+		assertThat(level3Config).hasSize(1);
+		assertThat(level3Config.get(0).getLocations()[0]).isEqualTo("2-A.xml");
 
 		// ...
 
 		List<ContextConfigurationAttributes> level7Config = map.get(level7);
-		assertThat(level7Config.size(), is(1));
-		assertThat(level7Config.get(0).getLocations()[0], is("3-C.xml"));
+		assertThat(level7Config).hasSize(1);
+		assertThat(level7Config.get(0).getLocations()[0]).isEqualTo("3-C.xml");
 	}
 
 	@Test
@@ -299,25 +294,24 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 		String level2 = GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX + 2;
 		String level3 = GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX + 3;
 
-		assertThat(map.size(), is(3));
-		assertThat(map.keySet(), hasItems(level1, level2, level3));
+		assertThat(map).hasSize(3).containsKeys(level1, level2, level3);
 		Iterator<String> levels = map.keySet().iterator();
-		assertThat(levels.next(), is(level1));
-		assertThat(levels.next(), is(level2));
-		assertThat(levels.next(), is(level3));
+		assertThat(levels.next()).isEqualTo(level1);
+		assertThat(levels.next()).isEqualTo(level2);
+		assertThat(levels.next()).isEqualTo(level3);
 
 		List<ContextConfigurationAttributes> level1Config = map.get(level1);
-		assertThat(level1Config.size(), is(2));
-		assertThat(level1Config.get(0).getLocations()[0], is("1-A.xml"));
-		assertThat(level1Config.get(1).getLocations()[0], is("2-A.xml"));
+		assertThat(level1Config).hasSize(2);
+		assertThat(level1Config.get(0).getLocations()[0]).isEqualTo("1-A.xml");
+		assertThat(level1Config.get(1).getLocations()[0]).isEqualTo("2-A.xml");
 
 		List<ContextConfigurationAttributes> level2Config = map.get(level2);
-		assertThat(level2Config.size(), is(1));
-		assertThat(level2Config.get(0).getLocations()[0], is("1-B.xml"));
+		assertThat(level2Config).hasSize(1);
+		assertThat(level2Config.get(0).getLocations()[0]).isEqualTo("1-B.xml");
 
 		List<ContextConfigurationAttributes> level3Config = map.get(level3);
-		assertThat(level3Config.size(), is(1));
-		assertThat(level3Config.get(0).getLocations()[0], is("2-C.xml"));
+		assertThat(level3Config).hasSize(1);
+		assertThat(level3Config.get(0).getLocations()[0]).isEqualTo("2-C.xml");
 	}
 
 	private void assertContextConfigEntriesAreNotUnique(Class<?> testClass) {
@@ -344,25 +338,24 @@ public class ContextLoaderUtilsContextHierarchyTests extends AbstractContextConf
 	public void buildContextHierarchyMapForTestClassHierarchyWithMultiLevelContextHierarchiesAndOverriddenInitializers() {
 		Map<String, List<ContextConfigurationAttributes>> map = buildContextHierarchyMap(TestClass2WithMultiLevelContextHierarchyWithOverriddenInitializers.class);
 
-		assertThat(map.size(), is(2));
-		assertThat(map.keySet(), hasItems("alpha", "beta"));
+		assertThat(map).hasSize(2).containsKeys("alpha", "beta");
 
 		List<ContextConfigurationAttributes> alphaConfig = map.get("alpha");
-		assertThat(alphaConfig.size(), is(2));
-		assertThat(alphaConfig.get(0).getLocations().length, is(1));
-		assertThat(alphaConfig.get(0).getLocations()[0], is("1-A.xml"));
-		assertThat(alphaConfig.get(0).getInitializers().length, is(0));
-		assertThat(alphaConfig.get(1).getLocations().length, is(0));
-		assertThat(alphaConfig.get(1).getInitializers().length, is(1));
+		assertThat(alphaConfig).hasSize(2);
+		assertThat(alphaConfig.get(0).getLocations().length).isEqualTo(1);
+		assertThat(alphaConfig.get(0).getLocations()[0]).isEqualTo("1-A.xml");
+		assertThat(alphaConfig.get(0).getInitializers().length).isEqualTo(0);
+		assertThat(alphaConfig.get(1).getLocations().length).isEqualTo(0);
+		assertThat(alphaConfig.get(1).getInitializers().length).isEqualTo(1);
 		assertEquals(DummyApplicationContextInitializer.class, alphaConfig.get(1).getInitializers()[0]);
 
 		List<ContextConfigurationAttributes> betaConfig = map.get("beta");
-		assertThat(betaConfig.size(), is(2));
-		assertThat(betaConfig.get(0).getLocations().length, is(1));
-		assertThat(betaConfig.get(0).getLocations()[0], is("1-B.xml"));
-		assertThat(betaConfig.get(0).getInitializers().length, is(0));
-		assertThat(betaConfig.get(1).getLocations().length, is(0));
-		assertThat(betaConfig.get(1).getInitializers().length, is(1));
+		assertThat(betaConfig).hasSize(2);
+		assertThat(betaConfig.get(0).getLocations().length).isEqualTo(1);
+		assertThat(betaConfig.get(0).getLocations()[0]).isEqualTo("1-B.xml");
+		assertThat(betaConfig.get(0).getInitializers().length).isEqualTo(0);
+		assertThat(betaConfig.get(1).getLocations().length).isEqualTo(0);
+		assertThat(betaConfig.get(1).getInitializers().length).isEqualTo(1);
 		assertEquals(DummyApplicationContextInitializer.class, betaConfig.get(1).getInitializers()[0]);
 	}
 

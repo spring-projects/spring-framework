@@ -22,8 +22,8 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Unit tests covering the extensibility of {@link AbstractEnvironment}.
@@ -38,7 +38,7 @@ public class CustomEnvironmentTests {
 	@Test
 	public void control() {
 		Environment env = new AbstractEnvironment() { };
-		assertThat(env.acceptsProfiles(defaultProfile()), is(true));
+		assertThat(env.acceptsProfiles(defaultProfile())).isTrue();
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class CustomEnvironmentTests {
 		}
 
 		Environment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(defaultProfile()), is(false));
+		assertThat(env.acceptsProfiles(defaultProfile())).isFalse();
 	}
 
 	@Test
@@ -64,8 +64,8 @@ public class CustomEnvironmentTests {
 		}
 
 		Environment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(defaultProfile()), is(false));
-		assertThat(env.acceptsProfiles(Profiles.of("rd1")), is(true));
+		assertThat(env.acceptsProfiles(defaultProfile())).isFalse();
+		assertThat(env.acceptsProfiles(Profiles.of("rd1"))).isTrue();
 	}
 
 	@Test
@@ -82,28 +82,28 @@ public class CustomEnvironmentTests {
 		}
 
 		ConfigurableEnvironment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(defaultProfile()), is(false));
-		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2")), is(true));
+		assertThat(env.acceptsProfiles(defaultProfile())).isFalse();
+		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2"))).isTrue();
 
 		// finally, issue additional assertions to cover all combinations of calling these
 		// methods, however unlikely.
 		env.setDefaultProfiles("d1");
-		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2")), is(false));
-		assertThat(env.acceptsProfiles(Profiles.of("d1")), is(true));
+		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2"))).isFalse();
+		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isTrue();
 
 		env.setActiveProfiles("a1", "a2");
-		assertThat(env.acceptsProfiles(Profiles.of("d1")), is(false));
-		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2")), is(true));
+		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isFalse();
+		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2"))).isTrue();
 
 		env.setActiveProfiles();
-		assertThat(env.acceptsProfiles(Profiles.of("d1")), is(true));
-		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2")), is(false));
+		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isTrue();
+		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2"))).isFalse();
 
 		env.setDefaultProfiles();
-		assertThat(env.acceptsProfiles(defaultProfile()), is(false));
-		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2")), is(false));
-		assertThat(env.acceptsProfiles(Profiles.of("d1")), is(false));
-		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2")), is(false));
+		assertThat(env.acceptsProfiles(defaultProfile())).isFalse();
+		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2"))).isFalse();
+		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isFalse();
+		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2"))).isFalse();
 	}
 
 	private Profiles defaultProfile() {

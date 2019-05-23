@@ -43,10 +43,9 @@ import org.springframework.stereotype.Component;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -581,7 +580,7 @@ public class AnnotationUtilsTests {
 		Set<MyRepeatable> annotations = getRepeatableAnnotations(method, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(annotations);
 		List<String> values = annotations.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(asList("A", "B", "C", "meta1")));
+		assertThat(values).isEqualTo(asList("A", "B", "C", "meta1"));
 	}
 
 	@Test
@@ -606,10 +605,10 @@ public class AnnotationUtilsTests {
 		assertNotNull(annotations);
 
 		List<String> locations = annotations.stream().map(ContextConfig::location).collect(toList());
-		assertThat(locations, is(expectedLocations));
+		assertThat(locations).isEqualTo(expectedLocations);
 
 		List<String> values = annotations.stream().map(ContextConfig::value).collect(toList());
-		assertThat(values, is(expectedLocations));
+		assertThat(values).isEqualTo(expectedLocations);
 	}
 
 	@Test
@@ -621,19 +620,19 @@ public class AnnotationUtilsTests {
 		MyRepeatable[] array = MyRepeatableClass.class.getAnnotationsByType(MyRepeatable.class);
 		assertNotNull(array);
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesJava));
+		assertThat(values).isEqualTo(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 	}
 
 	@Test
@@ -646,19 +645,19 @@ public class AnnotationUtilsTests {
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertNotNull(array);
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesJava));
+		assertThat(values).isEqualTo(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 	}
 
 	@Test
@@ -671,19 +670,19 @@ public class AnnotationUtilsTests {
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertNotNull(array);
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesJava));
+		assertThat(values).isEqualTo(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 	}
 
 	@Test
@@ -696,19 +695,19 @@ public class AnnotationUtilsTests {
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertNotNull(array);
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesJava));
+		assertThat(values).isEqualTo(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 	}
 
 	@Test
@@ -720,19 +719,19 @@ public class AnnotationUtilsTests {
 		MyRepeatable[] array = MyRepeatableClass.class.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertNotNull(array);
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesJava));
+		assertThat(values).isEqualTo(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getDeclaredRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, is(expectedValuesSpring));
+		assertThat(values).isEqualTo(expectedValuesSpring);
 	}
 
 	@Test
@@ -742,17 +741,17 @@ public class AnnotationUtilsTests {
 		// Java 8
 		MyRepeatable[] array = clazz.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertNotNull(array);
-		assertThat(array.length, is(0));
+		assertThat(array.length).isEqualTo(0);
 
 		// Spring
 		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
-		assertThat(set.size(), is(0));
+		assertThat(set).hasSize(0);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertNotNull(set);
-		assertThat(set.size(), is(0));
+		assertThat(set).hasSize(0);
 	}
 
 	@Test

@@ -27,12 +27,9 @@ import java.util.Collections;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
@@ -193,7 +190,7 @@ public class UriComponentsTests {
 		oos.writeObject(uriComponents);
 		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
 		UriComponents readObject = (UriComponents) ois.readObject();
-		assertThat(uriComponents.toString(), equalTo(readObject.toString()));
+		assertThat(uriComponents.toString()).isEqualTo(readObject.toString());
 	}
 
 	@Test
@@ -212,10 +209,10 @@ public class UriComponentsTests {
 		UriComponents uric1 = UriComponentsBuilder.fromUriString(url).path("/{foo}").query("bar={baz}").build();
 		UriComponents uric2 = UriComponentsBuilder.fromUriString(url).path("/{foo}").query("bar={baz}").build();
 		UriComponents uric3 = UriComponentsBuilder.fromUriString(url).path("/{foo}").query("bin={baz}").build();
-		assertThat(uric1, instanceOf(HierarchicalUriComponents.class));
-		assertThat(uric1, equalTo(uric1));
-		assertThat(uric1, equalTo(uric2));
-		assertThat(uric1, not(equalTo(uric3)));
+		assertThat(uric1).isInstanceOf(HierarchicalUriComponents.class);
+		assertThat(uric1).isEqualTo(uric1);
+		assertThat(uric1).isEqualTo(uric2);
+		assertThat(uric1).isNotEqualTo(uric3);
 	}
 
 	@Test
@@ -224,10 +221,10 @@ public class UriComponentsTests {
 		UriComponents uric1 = UriComponentsBuilder.fromUriString(baseUrl + "/foo/bar").build();
 		UriComponents uric2 = UriComponentsBuilder.fromUriString(baseUrl + "/foo/bar").build();
 		UriComponents uric3 = UriComponentsBuilder.fromUriString(baseUrl + "/foo/bin").build();
-		assertThat(uric1, instanceOf(OpaqueUriComponents.class));
-		assertThat(uric1, equalTo(uric1));
-		assertThat(uric1, equalTo(uric2));
-		assertThat(uric1, not(equalTo(uric3)));
+		assertThat(uric1).isInstanceOf(OpaqueUriComponents.class);
+		assertThat(uric1).isEqualTo(uric1);
+		assertThat(uric1).isEqualTo(uric2);
+		assertThat(uric1).isNotEqualTo(uric3);
 	}
 
 }

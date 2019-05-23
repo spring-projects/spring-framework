@@ -22,10 +22,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -265,8 +264,8 @@ public class ResponseEntityTests {
 		assertTrue(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL));
 		assertEquals(entity, responseEntity.getBody());
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
-		assertThat(cacheControlHeader,
-				Matchers.equalTo("max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800"));
+		assertThat(cacheControlHeader).isEqualTo(
+				"max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800");
 	}
 
 	@Test
@@ -284,7 +283,7 @@ public class ResponseEntityTests {
 		assertEquals(entity, responseEntity.getBody());
 
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
-		assertThat(cacheControlHeader, Matchers.equalTo("no-store"));
+		assertThat(cacheControlHeader).isEqualTo("no-store");
 	}
 
 	@Test

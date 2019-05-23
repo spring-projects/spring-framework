@@ -30,10 +30,8 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJacksonValue;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -137,9 +135,9 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		this.converter.write(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(result, containsString("<withView1>with</withView1>"));
-		assertThat(result, not(containsString("<withView2>with</withView2>")));
-		assertThat(result, not(containsString("<withoutView>without</withoutView>")));
+		assertThat(result).contains("<withView1>with</withView1>");
+		assertThat(result).doesNotContain("<withView2>with</withView2>");
+		assertThat(result).doesNotContain("<withoutView>without</withoutView>");
 	}
 
 	@Test

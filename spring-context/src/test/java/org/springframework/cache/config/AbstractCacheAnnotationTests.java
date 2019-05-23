@@ -29,11 +29,9 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -276,8 +274,8 @@ public abstract class AbstractCacheAnnotationTests {
 		cache.clear();
 		service.unless(10);
 		service.unless(11);
-		assertThat(cache.get(10).get(), equalTo(10L));
-		assertThat(cache.get(11), nullValue());
+		assertThat(cache.get(10).get()).isEqualTo(10L);
+		assertThat(cache.get(11)).isNull();
 	}
 
 	public void testKeyExpression(CacheableService<?> service) throws Exception {

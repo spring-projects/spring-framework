@@ -34,9 +34,8 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.ResourceTestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -142,8 +141,8 @@ public class ConversionServiceFactoryBeanTests {
 
 		public ComplexConstructorArgument(Map<String, Class<?>> map) {
 			assertTrue(!map.isEmpty());
-			assertThat(map.keySet().iterator().next(), instanceOf(String.class));
-			assertThat(map.values().iterator().next(), instanceOf(Class.class));
+			assertThat(map.keySet().iterator().next()).isInstanceOf(String.class);
+			assertThat(map.values().iterator().next()).isInstanceOf(Class.class);
 		}
 	}
 

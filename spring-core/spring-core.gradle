@@ -87,6 +87,7 @@ dependencies {
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("com.google.code.findbugs:jsr305:3.0.2")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
+	testCompile("org.xmlunit:xmlunit-assertj:2.6.2")
 	testCompile("javax.xml.bind:jaxb-api:2.3.1")
 	testCompile("com.fasterxml.woodstox:woodstox-core:5.2.0") {
 		exclude group: "stax", module: "stax-api"

@@ -26,13 +26,12 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 
 import org.springframework.http.MediaType;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -170,9 +169,9 @@ public class AbstractMockWebServerTestCase {
 	private MockResponse formRequest(RecordedRequest request) {
 		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", request.getHeader("Content-Type"));
 		String body = request.getBody().readUtf8();
-		assertThat(body, Matchers.containsString("name+1=value+1"));
-		assertThat(body, Matchers.containsString("name+2=value+2%2B1"));
-		assertThat(body, Matchers.containsString("name+2=value+2%2B2"));
+		assertThat(body).contains("name+1=value+1");
+		assertThat(body).contains("name+2=value+2%2B1");
+		assertThat(body).contains("name+2=value+2%2B2");
 		return new MockResponse().setResponseCode(200);
 	}
 

@@ -24,10 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static java.util.stream.Collectors.joining;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.springframework.tests.Assume.TEST_GROUPS_SYSTEM_PROPERTY;
 import static org.springframework.tests.TestGroup.CI;
@@ -108,13 +105,13 @@ public class AssumeTests {
 			fail("assumption should have failed");
 		}
 		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(),
-				startsWith("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY + "' system property: "));
+			assertThat(ex.getMessage()).
+				startsWith("Failed to parse '" + TEST_GROUPS_SYSTEM_PROPERTY + "' system property: ");
 
-			assertThat(ex.getCause(), instanceOf(IllegalArgumentException.class));
-			assertThat(ex.getCause().getMessage(),
-				equalTo("Unable to find test group 'bogus' when parsing testGroups value: '" + testGroups
-						+ "'. Available groups include: [LONG_RUNNING,PERFORMANCE,CI]"));
+			assertThat(ex.getCause()).isInstanceOf(IllegalArgumentException.class);
+			assertThat(ex.getCause().getMessage()).
+				isEqualTo("Unable to find test group 'bogus' when parsing testGroups value: '" + testGroups
+						+ "'. Available groups include: [LONG_RUNNING,PERFORMANCE,CI]");
 		}
 	}
 

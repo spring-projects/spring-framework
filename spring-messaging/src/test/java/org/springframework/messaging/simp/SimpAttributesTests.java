@@ -23,12 +23,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -57,8 +53,8 @@ public class SimpAttributesTests {
 	public void getAttribute() {
 		this.simpAttributes.setAttribute("name1", "value1");
 
-		assertThat(this.simpAttributes.getAttribute("name1"), is("value1"));
-		assertThat(this.simpAttributes.getAttribute("name2"), nullValue());
+		assertThat(this.simpAttributes.getAttribute("name1")).isEqualTo("value1");
+		assertThat(this.simpAttributes.getAttribute("name2")).isNull();
 	}
 
 	@Test
@@ -67,7 +63,8 @@ public class SimpAttributesTests {
 		this.simpAttributes.setAttribute("name2", "value1");
 		this.simpAttributes.setAttribute("name3", "value1");
 
-		assertThat(this.simpAttributes.getAttributeNames(), arrayContainingInAnyOrder("name1", "name2", "name3"));
+		assertThat(this.simpAttributes.getAttributeNames())
+				.containsExactlyInAnyOrder("name1", "name2", "name3");
 	}
 
 	@Test
@@ -76,7 +73,7 @@ public class SimpAttributesTests {
 		this.simpAttributes.registerDestructionCallback("name1", callback);
 
 		assertThat(this.simpAttributes.getAttribute(
-				SimpAttributes.DESTRUCTION_CALLBACK_NAME_PREFIX + "name1"), sameInstance(callback));
+				SimpAttributes.DESTRUCTION_CALLBACK_NAME_PREFIX + "name1")).isSameAs(callback);
 	}
 
 	@Test
@@ -94,12 +91,12 @@ public class SimpAttributesTests {
 		this.simpAttributes.registerDestructionCallback("name1", callback1);
 		this.simpAttributes.registerDestructionCallback("name2", callback2);
 
-		assertThat(this.simpAttributes.getAttributeNames().length, is(2));
+		assertThat(this.simpAttributes.getAttributeNames().length).isEqualTo(2);
 	}
 
 	@Test
 	public void getSessionMutex() {
-		assertThat(this.simpAttributes.getSessionMutex(), sameInstance(this.map));
+		assertThat(this.simpAttributes.getSessionMutex()).isSameAs(this.map);
 	}
 
 	@Test
@@ -107,7 +104,7 @@ public class SimpAttributesTests {
 		Object mutex = new Object();
 		this.simpAttributes.setAttribute(SimpAttributes.SESSION_MUTEX_NAME, mutex);
 
-		assertThat(this.simpAttributes.getSessionMutex(), sameInstance(mutex));
+		assertThat(this.simpAttributes.getSessionMutex()).isSameAs(mutex);
 	}
 
 	@Test

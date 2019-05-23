@@ -22,14 +22,14 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Brian Clozel
@@ -64,8 +64,8 @@ public class AbstractMockWebServerTestCase {
 		public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
 			try {
 				if (request.getPath().equals("/echo")) {
-					assertThat(request.getHeader("Host"),
-							Matchers.containsString("localhost:" + port));
+					assertThat(request.getHeader("Host"))
+							.contains("localhost:" + port);
 					MockResponse response = new MockResponse()
 							.setHeaders(request.getHeaders())
 							.setHeader("Content-Length", request.getBody().size())
@@ -81,26 +81,25 @@ public class AbstractMockWebServerTestCase {
 					return new MockResponse().setResponseCode(404);
 				}
 				else if(request.getPath().startsWith("/params")) {
-					assertThat(request.getPath(), Matchers.containsString("param1=value"));
-					assertThat(request.getPath(), Matchers.containsString("param2=value1&param2=value2"));
+					assertThat(request.getPath()).contains("param1=value");
+					assertThat(request.getPath()).contains("param2=value1&param2=value2");
 					return new MockResponse();
 				}
 				else if(request.getPath().equals("/methods/post")) {
-					assertThat(request.getMethod(), Matchers.is("POST"));
+					assertThat(request.getMethod()).isEqualTo("POST");
 					String transferEncoding = request.getHeader("Transfer-Encoding");
 					if(StringUtils.hasLength(transferEncoding)) {
-						assertThat(transferEncoding, Matchers.is("chunked"));
+						assertThat(transferEncoding).isEqualTo("chunked");
 					}
 					else {
 						long contentLength = Long.parseLong(request.getHeader("Content-Length"));
-						assertThat("Invalid content-length",
-								request.getBody().size(), Matchers.is(contentLength));
+						assertThat(request.getBody().size()).isEqualTo(contentLength);
 					}
 					return new MockResponse().setResponseCode(200);
 				}
 				else if(request.getPath().startsWith("/methods/")) {
 					String expectedMethod = request.getPath().replace("/methods/","").toUpperCase();
-					assertThat(request.getMethod(), Matchers.is(expectedMethod));
+					assertThat(request.getMethod()).isEqualTo(expectedMethod);
 					return new MockResponse();
 				}
 				return new MockResponse().setResponseCode(404);

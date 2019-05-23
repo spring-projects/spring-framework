@@ -27,8 +27,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -52,7 +51,7 @@ public class HttpStatusCodeExceptionTests {
 		ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 		HttpStatusCodeException ex2 =
 				(HttpStatusCodeException) new ObjectInputStream(in).readObject();
-		assertThat(ex2.getResponseBodyAsString(), equalTo(ex1.getResponseBodyAsString()));
+		assertThat(ex2.getResponseBodyAsString()).isEqualTo(ex1.getResponseBodyAsString());
 	}
 
 	@Test

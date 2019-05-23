@@ -64,10 +64,9 @@ import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -548,7 +547,7 @@ public class AnnotationDrivenEventListenerTests {
 
 		assertTrue(listener.order.isEmpty());
 		this.context.publishEvent("whatever");
-		assertThat(listener.order, contains("first", "second", "third"));
+		assertThat(listener.order).contains("first", "second", "third");
 	}
 
 	@Test @Ignore  // SPR-15122
@@ -556,7 +555,7 @@ public class AnnotationDrivenEventListenerTests {
 		load(EventOnPostConstruct.class, OrderedTestListener.class);
 		OrderedTestListener listener = this.context.getBean(OrderedTestListener.class);
 
-		assertThat(listener.order, contains("first", "second", "third"));
+		assertThat(listener.order).contains("first", "second", "third");
 	}
 
 

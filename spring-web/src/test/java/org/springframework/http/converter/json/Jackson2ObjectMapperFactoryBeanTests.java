@@ -64,9 +64,8 @@ import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -228,7 +227,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
 		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
-		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
+		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8")).contains("customid");
 	}
 
 	@Test // SPR-12634
@@ -242,7 +241,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
 		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
-		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
+		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8")).contains("customid");
 	}
 
 	@Test
@@ -301,8 +300,8 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		JacksonFilteredBean bean = new JacksonFilteredBean("value1", "value2");
 		String output = objectMapper.writeValueAsString(bean);
-		assertThat(output, containsString("value1"));
-		assertThat(output, containsString("value2"));
+		assertThat(output).contains("value1");
+		assertThat(output).contains("value2");
 	}
 
 	@Test

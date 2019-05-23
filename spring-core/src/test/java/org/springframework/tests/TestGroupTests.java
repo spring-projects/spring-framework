@@ -22,9 +22,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+
 
 /**
  * Tests for {@link TestGroup}.
@@ -36,29 +36,29 @@ public class TestGroupTests {
 
 	@Test
 	public void parseNull() {
-		assertThat(TestGroup.parse(null), equalTo(Collections.emptySet()));
+		assertThat(TestGroup.parse(null)).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
 	public void parseEmptyString() {
-		assertThat(TestGroup.parse(""), equalTo(Collections.emptySet()));
+		assertThat(TestGroup.parse("")).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
 	public void parseBlankString() {
-		assertThat(TestGroup.parse("     "), equalTo(Collections.emptySet()));
+		assertThat(TestGroup.parse("     ")).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
 	public void parseWithSpaces() {
-		assertThat(TestGroup.parse(" PERFORMANCE,  PERFORMANCE "),
-				equalTo(EnumSet.of(TestGroup.PERFORMANCE)));
+		assertThat(TestGroup.parse(" PERFORMANCE,  PERFORMANCE ")).containsOnly(
+				TestGroup.PERFORMANCE);
 	}
 
 	@Test
 	public void parseInMixedCase() {
-		assertThat(TestGroup.parse("performance,  PERFormaNCE"),
-				equalTo(EnumSet.of(TestGroup.PERFORMANCE)));
+		assertThat(TestGroup.parse("performance,  PERFormaNCE")).containsOnly(
+				TestGroup.PERFORMANCE);
 	}
 
 	@Test
@@ -72,14 +72,14 @@ public class TestGroupTests {
 
 	@Test
 	public void parseAll() {
-		assertThat(TestGroup.parse("all"), equalTo(EnumSet.allOf(TestGroup.class)));
+		assertThat(TestGroup.parse("all")).isEqualTo(EnumSet.allOf(TestGroup.class));
 	}
 
 	@Test
 	public void parseAllExceptPerformance() {
 		Set<TestGroup> expected = EnumSet.allOf(TestGroup.class);
 		expected.remove(TestGroup.PERFORMANCE);
-		assertThat(TestGroup.parse("all-performance"), equalTo(expected));
+		assertThat(TestGroup.parse("all-performance")).isEqualTo(expected);
 	}
 
 	@Test

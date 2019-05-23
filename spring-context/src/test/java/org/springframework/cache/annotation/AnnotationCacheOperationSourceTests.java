@@ -33,10 +33,8 @@ import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AliasFor;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -104,14 +102,14 @@ public class AnnotationCacheOperationSourceTests {
 		Iterator<CacheOperation> it = ops.iterator();
 
 		CacheOperation cacheOperation = it.next();
-		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
-		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("directly declared")));
-		assertThat(cacheOperation.getKey(), equalTo(""));
+		assertThat(cacheOperation).isInstanceOf(CacheableOperation.class);
+		assertThat(cacheOperation.getCacheNames()).isEqualTo(Collections.singleton("directly declared"));
+		assertThat(cacheOperation.getKey()).isEqualTo("");
 
 		cacheOperation = it.next();
-		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
-		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composedCache")));
-		assertThat(cacheOperation.getKey(), equalTo("composedKey"));
+		assertThat(cacheOperation).isInstanceOf(CacheableOperation.class);
+		assertThat(cacheOperation.getCacheNames()).isEqualTo(Collections.singleton("composedCache"));
+		assertThat(cacheOperation.getKey()).isEqualTo("composedKey");
 	}
 
 	@Test
@@ -120,24 +118,24 @@ public class AnnotationCacheOperationSourceTests {
 		Iterator<CacheOperation> it = ops.iterator();
 
 		CacheOperation cacheOperation = it.next();
-		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
-		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("directly declared")));
-		assertThat(cacheOperation.getKey(), equalTo(""));
+		assertThat(cacheOperation).isInstanceOf(CacheableOperation.class);
+		assertThat(cacheOperation.getCacheNames()).isEqualTo(Collections.singleton("directly declared"));
+		assertThat(cacheOperation.getKey()).isEqualTo("");
 
 		cacheOperation = it.next();
-		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
-		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composedCache")));
-		assertThat(cacheOperation.getKey(), equalTo("composedKey"));
+		assertThat(cacheOperation).isInstanceOf(CacheableOperation.class);
+		assertThat(cacheOperation.getCacheNames()).isEqualTo(Collections.singleton("composedCache"));
+		assertThat(cacheOperation.getKey()).isEqualTo("composedKey");
 
 		cacheOperation = it.next();
-		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
-		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("foo")));
-		assertThat(cacheOperation.getKey(), equalTo(""));
+		assertThat(cacheOperation).isInstanceOf(CacheableOperation.class);
+		assertThat(cacheOperation.getCacheNames()).isEqualTo(Collections.singleton("foo"));
+		assertThat(cacheOperation.getKey()).isEqualTo("");
 
 		cacheOperation = it.next();
-		assertThat(cacheOperation, instanceOf(CacheEvictOperation.class));
-		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composedCacheEvict")));
-		assertThat(cacheOperation.getKey(), equalTo("composedEvictionKey"));
+		assertThat(cacheOperation).isInstanceOf(CacheEvictOperation.class);
+		assertThat(cacheOperation.getCacheNames()).isEqualTo(Collections.singleton("composedCacheEvict"));
+		assertThat(cacheOperation.getKey()).isEqualTo("composedEvictionKey");
 	}
 
 	@Test

@@ -26,8 +26,7 @@ import org.junit.Test;
 
 import org.springframework.util.StreamUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -54,7 +53,7 @@ public class SimpleClientHttpResponseTests {
 		given(this.connection.getInputStream()).willReturn(is);
 
 		InputStream responseStream = this.response.getBody();
-		assertThat(StreamUtils.copyToString(responseStream, StandardCharsets.UTF_8), is("Spring"));
+		assertThat(StreamUtils.copyToString(responseStream, StandardCharsets.UTF_8)).isEqualTo("Spring");
 
 		this.response.close();
 		assertTrue(is.isClosed());
@@ -70,11 +69,11 @@ public class SimpleClientHttpResponseTests {
 
 		InputStream responseStream = this.response.getBody();
 		responseStream.read(buf);
-		assertThat(new String(buf, StandardCharsets.UTF_8), is("Spring"));
-		assertThat(is.available(), is(6));
+		assertThat(new String(buf, StandardCharsets.UTF_8)).isEqualTo("Spring");
+		assertThat(is.available()).isEqualTo(6);
 
 		this.response.close();
-		assertThat(is.available(), is(0));
+		assertThat(is.available()).isEqualTo(0);
 		assertTrue(is.isClosed());
 		verify(this.connection, never()).disconnect();
 	}
@@ -87,11 +86,11 @@ public class SimpleClientHttpResponseTests {
 
 		InputStream responseStream = this.response.getBody();
 		responseStream.read(buf);
-		assertThat(new String(buf, StandardCharsets.UTF_8), is("Spring"));
-		assertThat(is.available(), is(6));
+		assertThat(new String(buf, StandardCharsets.UTF_8)).isEqualTo("Spring");
+		assertThat(is.available()).isEqualTo(6);
 
 		this.response.close();
-		assertThat(is.available(), is(0));
+		assertThat(is.available()).isEqualTo(0);
 		assertTrue(is.isClosed());
 		verify(this.connection, never()).disconnect();
 	}
@@ -117,7 +116,7 @@ public class SimpleClientHttpResponseTests {
 		given(this.connection.getInputStream()).willReturn(is);
 
 		this.response.close();
-		assertThat(is.available(), is(0));
+		assertThat(is.available()).isEqualTo(0);
 		assertTrue(is.isClosed());
 		verify(this.connection, never()).disconnect();
 	}

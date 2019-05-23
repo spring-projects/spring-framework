@@ -41,10 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -85,9 +81,9 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		MyRepository repository = ctx.getBean(MyRepository.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat("repository is not a proxy", AopUtils.isCglibProxy(repository), equalTo(true));
-		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
-		assertThat("no transactions were committed", txManager.commits, greaterThan(0));
+		assertThat(AopUtils.isCglibProxy(repository)).isEqualTo(true);
+		assertThat(repository.getInvocationCount()).isGreaterThan(0);
+		assertThat(txManager.commits).isGreaterThan(0);
 	}
 
 	@Test
@@ -100,9 +96,9 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		MyRepositoryWithScheduledMethod repository = ctx.getBean(MyRepositoryWithScheduledMethod.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat("repository is not a proxy", AopUtils.isJdkDynamicProxy(repository), is(true));
-		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
-		assertThat("no transactions were committed", txManager.commits, greaterThan(0));
+		assertThat(AopUtils.isJdkDynamicProxy(repository)).isTrue();
+		assertThat(repository.getInvocationCount()).isGreaterThan(0);
+		assertThat(txManager.commits).isGreaterThan(0);
 	}
 
 	@Test
@@ -114,8 +110,8 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		Thread.sleep(100);  // allow @Scheduled method to be called several times
 
 		MyRepositoryWithScheduledMethod repository = ctx.getBean(MyRepositoryWithScheduledMethod.class);
-		assertThat("repository is not a proxy", AopUtils.isCglibProxy(repository), is(true));
-		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
+		assertThat(AopUtils.isCglibProxy(repository)).isTrue();
+		assertThat(repository.getInvocationCount()).isGreaterThan(0);
 	}
 
 
