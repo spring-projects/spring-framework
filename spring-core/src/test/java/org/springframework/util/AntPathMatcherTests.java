@@ -679,4 +679,14 @@ public class AntPathMatcherTests {
 				"/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));
 	}
 
+	@Test // gh-22959
+	public void isPattern() {
+		assertTrue(pathMatcher.isPattern("/test/*"));
+		assertTrue(pathMatcher.isPattern("/test/**/name"));
+		assertTrue(pathMatcher.isPattern("/test?"));
+		assertTrue(pathMatcher.isPattern("/test/{name}"));
+		assertFalse(pathMatcher.isPattern("/test/name"));
+		assertFalse(pathMatcher.isPattern("/test/foo{bar"));
+	}
+
 }
