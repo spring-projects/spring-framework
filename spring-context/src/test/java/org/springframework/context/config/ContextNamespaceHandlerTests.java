@@ -16,7 +16,6 @@
 
 package org.springframework.context.config;
 
-import java.io.FileNotFoundException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -30,7 +29,9 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Arjen Poutsma
@@ -128,14 +129,14 @@ public class ContextNamespaceHandlerTests {
 	@Test
 	public void propertyPlaceholderLocationWithSystemPropertyMissing() {
 		try {
-			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+			new ClassPathXmlApplicationContext(
 					"contextNamespaceHandlerTests-location-placeholder.xml", getClass());
-			assertEquals("bar", applicationContext.getBean("foo"));
-			assertEquals("foo", applicationContext.getBean("bar"));
-			assertEquals("maps", applicationContext.getBean("spam"));
+			fail("Should have thrown FatalBeanException");
 		}
 		catch (FatalBeanException ex) {
-			assertTrue(ex.getRootCause() instanceof FileNotFoundException);
+			Throwable cause = ex.getRootCause();
+			assertTrue(cause instanceof IllegalArgumentException);
+			assertEquals("Could not resolve placeholder 'foo' in value \"${foo}\"", cause.getMessage());
 		}
 	}
 
