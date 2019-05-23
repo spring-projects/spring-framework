@@ -53,6 +53,7 @@ import org.springframework.messaging.simp.user.UserRegistryMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
@@ -360,7 +361,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	// Expose alias for 4.1 compatibility
 	@Bean(name = {"messageBrokerTaskScheduler", "messageBrokerSockJsTaskScheduler"})
-	public ThreadPoolTaskScheduler messageBrokerTaskScheduler() {
+	public TaskScheduler messageBrokerTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 		scheduler.setThreadNamePrefix("MessageBroker-");
 		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
