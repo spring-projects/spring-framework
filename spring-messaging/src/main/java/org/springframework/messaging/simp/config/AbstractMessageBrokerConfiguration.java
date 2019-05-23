@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.SmartApplicationListener;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -139,7 +140,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public ThreadPoolTaskExecutor clientInboundChannelExecutor() {
+	public TaskExecutor clientInboundChannelExecutor() {
 		TaskExecutorRegistration reg = getClientInboundChannelRegistration().taskExecutor();
 		ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
 		executor.setThreadNamePrefix("clientInboundChannel-");
@@ -175,7 +176,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
+	public TaskExecutor clientOutboundChannelExecutor() {
 		TaskExecutorRegistration reg = getClientOutboundChannelRegistration().taskExecutor();
 		ThreadPoolTaskExecutor executor = reg.getTaskExecutor();
 		executor.setThreadNamePrefix("clientOutboundChannel-");
@@ -211,7 +212,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public ThreadPoolTaskExecutor brokerChannelExecutor() {
+	public TaskExecutor brokerChannelExecutor() {
 		ChannelRegistration reg = getBrokerRegistry().getBrokerChannelRegistration();
 		ThreadPoolTaskExecutor executor;
 		if (reg.hasTaskExecutor()) {
