@@ -135,6 +135,14 @@ public class ImportAwareTests {
 	}
 
 	@Test
+	public void metadataFromImportsOneThenThree() {
+		AnnotationMetadata importMetadata = new AnnotationConfigApplicationContext(
+				ConfigurationOne.class, ConfigurationThree.class)
+				.getBean(MetadataHolder.class).importMetadata;
+		assertThat(((StandardAnnotationMetadata) importMetadata).getIntrospectedClass()).isEqualTo(ConfigurationOne.class);
+	}
+
+	@Test
 	public void importAwareWithAnnotationAttributes() {
 		new AnnotationConfigApplicationContext(ApplicationConfiguration.class);
 	}
@@ -285,6 +293,13 @@ public class ImportAwareTests {
 	@EnableSomeConfiguration("foo")
 	@Configuration
 	public static class ConfigurationTwo {
+	}
+
+
+	@Conditional(OnMissingBeanCondition.class)
+	@EnableLiteConfiguration("foo")
+	@Configuration
+	public static class ConfigurationThree {
 	}
 
 
