@@ -30,11 +30,10 @@ import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Tests for {@link DisabledIfCondition} that verify actual condition evaluation
@@ -62,34 +61,30 @@ class DisabledIfConditionTests {
 
 	@Test
 	void disabledByEmptyExpression() {
-		// @formatter:off
-		assertAll(
-			() -> assertExpressionIsBlank("emptyExpression"),
-			() -> assertExpressionIsBlank("blankExpression")
-		);
-		// @formatter:on
+		assertExpressionIsBlank("emptyExpression");
+		assertExpressionIsBlank("blankExpression");
 	}
 
 	@Test
 	void invalidExpressionEvaluationType() {
 		String methodName = "nonBooleanOrStringExpression";
-		IllegalStateException exception = assertThrows(IllegalStateException.class,
-			() -> condition.evaluateExecutionCondition(buildExtensionContext(methodName)));
-
 		Method method = ReflectionUtils.findMethod(getClass(), methodName);
 
-		assertThat(exception).hasMessage("@DisabledIf(\"#{6 * 7}\") on " + method + " must evaluate to a String or a Boolean, not java.lang.Integer");
+		assertThatIllegalStateException()
+			.isThrownBy(() -> condition.evaluateExecutionCondition(buildExtensionContext(methodName)))
+			.withMessageContaining(
+				"@DisabledIf(\"#{6 * 7}\") on " + method + " must evaluate to a String or a Boolean, not java.lang.Integer");
 	}
 
 	@Test
 	void unsupportedStringEvaluationValue() {
 		String methodName = "stringExpressionThatIsNeitherTrueNorFalse";
-		IllegalStateException exception = assertThrows(IllegalStateException.class,
-			() -> condition.evaluateExecutionCondition(buildExtensionContext(methodName)));
-
 		Method method = ReflectionUtils.findMethod(getClass(), methodName);
 
-		assertThat(exception).hasMessage("@DisabledIf(\"#{'enigma'}\") on " + method + " must evaluate to \"true\" or \"false\", not \"enigma\"");
+		assertThatIllegalStateException()
+			.isThrownBy(() -> condition.evaluateExecutionCondition(buildExtensionContext(methodName)))
+			.withMessageContaining(
+				"@DisabledIf(\"#{'enigma'}\") on " + method + " must evaluate to \"true\" or \"false\", not \"enigma\"");
 	}
 
 	@Test
@@ -103,14 +98,16 @@ class DisabledIfConditionTests {
 	void disabledWithDefaultReason() {
 		ConditionEvaluationResult result = condition.evaluateExecutionCondition(buildExtensionContext("defaultReason"));
 		assertThat(result.isDisabled()).isTrue();
-		assertThat(result.getReason().get()).endsWith("defaultReason() is disabled because @DisabledIf(\"#{1 + 1 eq 2}\") evaluated to true");
+		assertThat(result.getReason().get())
+			.endsWith("defaultReason() is disabled because @DisabledIf(\"#{1 + 1 eq 2}\") evaluated to true");
 	}
 
 	@Test
 	void notDisabledWithDefaultReason() {
 		ConditionEvaluationResult result = condition.evaluateExecutionCondition(buildExtensionContext("neverDisabledWithDefaultReason"));
 		assertThat(result.isDisabled()).isFalse();
-		assertThat(result.getReason().get()).endsWith("neverDisabledWithDefaultReason() is enabled because @DisabledIf(\"false\") did not evaluate to true");
+		assertThat(result.getReason().get())
+			.endsWith("neverDisabledWithDefaultReason() is enabled because @DisabledIf(\"false\") did not evaluate to true");
 	}
 
 	// -------------------------------------------------------------------------
@@ -129,10 +126,9 @@ class DisabledIfConditionTests {
 	}
 
 	private void assertExpressionIsBlank(String methodName) {
-		IllegalStateException exception = assertThrows(IllegalStateException.class,
-			() -> condition.evaluateExecutionCondition(buildExtensionContext(methodName)));
-
-		assertThat(exception.getMessage()).contains("must not be blank");
+		assertThatIllegalStateException()
+			.isThrownBy(() -> condition.evaluateExecutionCondition(buildExtensionContext(methodName)))
+			.withMessageContaining("must not be blank");
 	}
 
 	// -------------------------------------------------------------------------

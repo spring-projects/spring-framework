@@ -28,8 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.comics.Person;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests which demonstrate the composability of annotations from
@@ -61,16 +60,16 @@ class ComposedSpringExtensionTests {
 	@Test
 	@DisplayName("ApplicationContext injected into method")
 	void applicationContextInjected(ApplicationContext applicationContext) {
-		assertNotNull(applicationContext, "ApplicationContext should have been injected into method by Spring");
-		assertEquals(dilbert, applicationContext.getBean("dilbert", Person.class));
+		assertThat(applicationContext).as("ApplicationContext should have been injected into method by Spring").isNotNull();
+		assertThat(applicationContext.getBean("dilbert", Person.class)).isEqualTo(dilbert);
 	}
 
 	@Test
 	@DisplayName("Spring @Beans injected into fields")
 	void springBeansInjected() {
-		assertNotNull(dilbert, "Person should have been @Autowired by Spring");
-		assertEquals("Dilbert", dilbert.getName(), "Person's name");
-		assertEquals(2, people.size(), "Number of Person objects in context");
+		assertThat(dilbert).as("Person should have been @Autowired by Spring").isNotNull();
+		assertThat(dilbert.getName()).as("Person's name").isEqualTo("Dilbert");
+		assertThat(people).as("Number of Person objects in context").hasSize(2);
 	}
 
 }

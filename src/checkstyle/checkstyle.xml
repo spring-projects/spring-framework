@@ -98,7 +98,7 @@
 			<property name="id" value="bannedImports"/>
 			<property name="regexp" value="true" />
 			<property name="illegalClasses"
-				value="^reactor\.core\.support\.Assert,^junit\.framework\..+,^org\.junit\.Assert$,^org\.junit\.Assume$,^org\.junit\.Assert\.assertThat,^org\.junit\.Assume\.assumeThat,^org\.junit\.rules\.ExpectedException,^org\.slf4j\.LoggerFactory" />
+				value="^reactor\.core\.support\.Assert,^junit\.framework\..+,^org\.junit\.Assert$,^org\.junit\.Assume$,^org\.junit\.jupiter\.api\.Assertions$,^org\.junit\.Assert\.assertThat,^org\.junit\.Assume\.assumeThat,^org\.junit\.rules\.ExpectedException,^org\.slf4j\.LoggerFactory" />
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
 			<property name="id" value="bannedHamcrestImports"/>
@@ -177,15 +177,21 @@
 			<property name="id" value="expectedExceptionAnnotation"/>
 			<property name="maximum" value="0"/>
 			<property name="format" value="\@Test\(expected" />
-			<property name="message"
-				value="Please use AssertJ asserThat." />
+			<property name="message" value="Please use AssertJ assertions." />
 			<property name="ignoreComments" value="true" />
 		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="junit4Assertions"/>
 			<property name="maximum" value="0"/>
 			<property name="format" value="org\.junit\.Assert\.assert" />
-			<property name="message"
-				value="Please use AssertJ imports." />
+			<property name="message" value="Please use AssertJ assertions." />
+			<property name="ignoreComments" value="true" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="id" value="junitJupiterAssertions"/>
+			<property name="maximum" value="0"/>
+			<property name="format" value="org\.junit\.jupiter\.api\.Assertions\.assert" />
+			<property name="message" value="Please use AssertJ assertions." />
 			<property name="ignoreComments" value="true" />
 		</module>
 

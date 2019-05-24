@@ -25,9 +25,8 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit tests for {@link MockRestRequestMatchers}.
@@ -59,8 +58,9 @@ public class MockRestRequestMatchersTests {
 	public void requestToNoMatch() throws Exception {
 		this.request.setURI(new URI("http://www.foo.com/bar"));
 
-		assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.requestTo("http://www.foo.com/wrong").match(this.request));
+		assertThatThrownBy(
+			() -> MockRestRequestMatchers.requestTo("http://www.foo.com/wrong").match(this.request))
+				.isInstanceOf(AssertionError.class);
 	}
 
 	@Test
@@ -81,9 +81,9 @@ public class MockRestRequestMatchersTests {
 	public void methodNoMatch() throws Exception {
 		this.request.setMethod(HttpMethod.POST);
 
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.method(HttpMethod.GET).match(this.request));
-		assertThat(error.getMessage()).contains("expected:<GET> but was:<POST>");
+		assertThatThrownBy(() -> MockRestRequestMatchers.method(HttpMethod.GET).match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("expected:<GET> but was:<POST>");
 	}
 
 	@Test
@@ -95,18 +95,18 @@ public class MockRestRequestMatchersTests {
 
 	@Test
 	public void headerMissing() throws Exception {
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.header("foo", "bar").match(this.request));
-		assertThat(error.getMessage()).contains("was null");
+		assertThatThrownBy(() -> MockRestRequestMatchers.header("foo", "bar").match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("was null");
 	}
 
 	@Test
 	public void headerMissingValue() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.header("foo", "bad").match(this.request));
-		assertThat(error.getMessage()).contains("expected:<bad> but was:<bar>");
+		assertThatThrownBy(() -> MockRestRequestMatchers.header("foo", "bad").match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("expected:<bad> but was:<bar>");
 	}
 
 	@Test
@@ -118,18 +118,18 @@ public class MockRestRequestMatchersTests {
 
 	@Test
 	public void headerContainsWithMissingHeader() throws Exception {
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.header("foo", containsString("baz")).match(this.request));
-		assertThat(error.getMessage()).contains("but was null");
+		assertThatThrownBy(() -> MockRestRequestMatchers.header("foo", containsString("baz")).match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("but was null");
 	}
 
 	@Test
 	public void headerContainsWithMissingValue() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.header("foo", containsString("bx")).match(this.request));
-		assertThat(error.getMessage()).contains("was \"bar\"");
+		assertThatThrownBy(() -> MockRestRequestMatchers.header("foo", containsString("bx")).match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("was \"bar\"");
 	}
 
 	@Test
@@ -141,18 +141,18 @@ public class MockRestRequestMatchersTests {
 
 	@Test
 	public void headersWithMissingHeader() throws Exception {
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.header("foo", "bar").match(this.request));
-		assertThat(error.getMessage()).contains("but was null");
+		assertThatThrownBy(() -> MockRestRequestMatchers.header("foo", "bar").match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("but was null");
 	}
 
 	@Test
 	public void headersWithMissingValue() throws Exception {
 		this.request.getHeaders().put("foo", Collections.singletonList("bar"));
 
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request));
-		assertThat(error.getMessage()).contains("to have at least <2> values");
+		assertThatThrownBy(() -> MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("to have at least <2> values");
 	}
 
 	@Test
@@ -166,18 +166,18 @@ public class MockRestRequestMatchersTests {
 	public void queryParamMissing() throws Exception {
 		this.request.setURI(new URI("http://www.foo.com/a"));
 
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.queryParam("foo", "bar").match(this.request));
-		assertThat(error.getMessage()).contains("but was null");
+		assertThatThrownBy(() -> MockRestRequestMatchers.queryParam("foo", "bar").match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("but was null");
 	}
 
 	@Test
 	public void queryParamMissingValue() throws Exception {
 		this.request.setURI(new URI("http://www.foo.com/a?foo=bar&foo=baz"));
 
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.queryParam("foo", "bad").match(this.request));
-		assertThat(error.getMessage()).contains("expected:<bad> but was:<bar>");
+		assertThatThrownBy(() -> MockRestRequestMatchers.queryParam("foo", "bad").match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("expected:<bad> but was:<bar>");
 	}
 
 	@Test
@@ -191,9 +191,9 @@ public class MockRestRequestMatchersTests {
 	public void queryParamContainsWithMissingValue() throws Exception {
 		this.request.setURI(new URI("http://www.foo.com/a?foo=bar&foo=baz"));
 
-		AssertionError error = assertThrows(AssertionError.class,
-				() -> MockRestRequestMatchers.queryParam("foo", containsString("bx")).match(this.request));
-		assertThat(error.getMessage()).contains("was \"bar\"");
+		assertThatThrownBy(() -> MockRestRequestMatchers.queryParam("foo", containsString("bx")).match(this.request))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("was \"bar\"");
 	}
 
 }

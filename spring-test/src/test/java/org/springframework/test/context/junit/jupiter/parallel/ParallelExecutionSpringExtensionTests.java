@@ -31,7 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
@@ -61,8 +61,8 @@ class ParallelExecutionSpringExtensionTests {
 
 		launcher.execute(request);
 
-		assertEquals(NUM_TESTS, listener.getSummary().getTestsSucceededCount(),
-				"number of tests executed successfully");
+		assertThat(listener.getSummary().getTestsSucceededCount()).as(
+			"number of tests executed successfully").isEqualTo(NUM_TESTS);
 	}
 
 	@SpringJUnitConfig

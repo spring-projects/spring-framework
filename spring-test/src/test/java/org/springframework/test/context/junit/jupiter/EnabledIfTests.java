@@ -24,9 +24,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration tests which verify support for {@link EnabledIf @EnabledIf}
@@ -113,8 +112,8 @@ class EnabledIfTests {
 		@EnabledOnMac
 		void enabledIfWithSpelOsCheckInCustomComposedAnnotation() {
 			String os = System.getProperty("os.name").toLowerCase();
-			assertTrue(os.contains("mac"), "This test must be enabled on Mac OS");
-			assertFalse(os.contains("win"), "This test must be disabled on Windows");
+			assertThat(os).as("This test must be enabled on Mac OS").contains("mac");
+			assertThat(os).as("This test must be disabled on Windows").doesNotContain("win");
 		}
 
 		@Test

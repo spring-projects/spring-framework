@@ -31,7 +31,6 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
-import org.opentest4j.AssertionFailedError;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,9 +45,9 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
@@ -106,27 +105,20 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 		int expectedSucceededCount = getExpectedSucceededCount(testClass);
 		int expectedFailedCount = getExpectedFailedCount(testClass);
 
-		// @formatter:off
-		assertAll(
-			() -> assertEquals(1, summary.getTestsFoundCount(), () -> name + ": tests found"),
-			() -> assertEquals(0, summary.getTestsSkippedCount(), () -> name + ": tests skipped"),
-			() -> assertEquals(0, summary.getTestsAbortedCount(), () -> name + ": tests aborted"),
-			() -> assertEquals(expectedStartedCount, summary.getTestsStartedCount(), () -> name + ": tests started"),
-			() -> assertEquals(expectedSucceededCount, summary.getTestsSucceededCount(), () -> name + ": tests succeeded"),
-			() -> assertEquals(expectedFailedCount, summary.getTestsFailedCount(), () -> name + ": tests failed")
-		);
-		// @formatter:on
+		assertSoftly(softly -> {
+			softly.assertThat(summary.getTestsFoundCount()).as("%s: tests found", name).isEqualTo(1);
+			softly.assertThat(summary.getTestsSkippedCount()).as("%s: tests skipped", name).isEqualTo(0);
+			softly.assertThat(summary.getTestsAbortedCount()).as("%s: tests aborted", name).isEqualTo(0);
+			softly.assertThat(summary.getTestsStartedCount()).as("%s: tests started", name).isEqualTo(expectedStartedCount);
+			softly.assertThat(summary.getTestsSucceededCount()).as("%s: tests succeeded", name).isEqualTo(expectedSucceededCount);
+			softly.assertThat(summary.getTestsFailedCount()).as("%s: tests failed", name).isEqualTo(expectedFailedCount);
+		});
 
-		// Ensure it was an AssertionFailedError that failed the test and not
+		// Ensure it was an AssertionError that failed the test and not
 		// something else like an error in the @Configuration class, etc.
 		if (expectedFailedCount > 0) {
-			assertEquals(1, listener.exceptions.size(), "exceptions expected");
-			Throwable exception = listener.exceptions.get(0);
-			if (!(exception instanceof AssertionFailedError)) {
-				throw new AssertionFailedError(
-					exception.getClass().getName() + " is not an instance of " + AssertionFailedError.class.getName(),
-					exception);
-			}
+			assertThat(listener.exceptions).as("exceptions expected").hasSize(1);
+			assertThat(listener.exceptions.get(0)).isInstanceOf(AssertionError.class);
 		}
 	}
 
