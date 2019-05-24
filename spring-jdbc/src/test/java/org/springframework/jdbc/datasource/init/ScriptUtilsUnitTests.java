@@ -125,7 +125,7 @@ public class ScriptUtilsUnitTests {
 		String script = readScript("test-data-with-comments.sql").replaceAll("\n", "\r\n");
 		splitScriptContainingComments(script);
 	}
-	
+
 	private void splitScriptContainingComments(String script) throws Exception {
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
