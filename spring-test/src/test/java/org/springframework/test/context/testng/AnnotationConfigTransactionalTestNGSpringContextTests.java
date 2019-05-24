@@ -37,9 +37,9 @@ import org.springframework.tests.sample.beans.Pet;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -129,15 +129,15 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	@BeforeMethod
 	void setUp() throws Exception {
 		numSetUpCalls++;
-		if (TransactionSynchronizationManager.isActualTransactionActive()) {
+		if (isActualTransactionActive()) {
 			numSetUpCallsInTransaction++;
 		}
-		assertNumRowsInPersonTable((TransactionSynchronizationManager.isActualTransactionActive() ? 2 : 1), "before a test method");
+		assertNumRowsInPersonTable((isActualTransactionActive() ? 2 : 1), "before a test method");
 	}
 
 	@Test
 	void modifyTestDataWithinTransaction() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
 		assertNumRowsInPersonTable(4, "in modifyTestDataWithinTransaction()");
@@ -146,10 +146,10 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	@AfterMethod
 	void tearDown() throws Exception {
 		numTearDownCalls++;
-		if (TransactionSynchronizationManager.isActualTransactionActive()) {
+		if (isActualTransactionActive()) {
 			numTearDownCallsInTransaction++;
 		}
-		assertNumRowsInPersonTable((TransactionSynchronizationManager.isActualTransactionActive() ? 4 : 1), "after a test method");
+		assertNumRowsInPersonTable((isActualTransactionActive() ? 4 : 1), "after a test method");
 	}
 
 	@AfterTransaction

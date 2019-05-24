@@ -33,9 +33,10 @@ import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive;
 
 /**
  * This set of tests (i.e., all concrete subclasses) investigates the claims made in
@@ -108,13 +109,13 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 
 	@Before
 	public void setUp() throws Exception {
-		assertNumRowsInPersonTable((TransactionSynchronizationManager.isActualTransactionActive() ? 1 : 0), "before a test method");
+		assertNumRowsInPersonTable((isActualTransactionActive() ? 1 : 0), "before a test method");
 	}
 
 	@Test
 	@Transactional
 	public void modifyTestDataWithinTransaction() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
 		assertNumRowsInPersonTable(3, "in modifyTestDataWithinTransaction()");
@@ -122,7 +123,7 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 
 	@After
 	public void tearDown() throws Exception {
-		assertNumRowsInPersonTable((TransactionSynchronizationManager.isActualTransactionActive() ? 3 : 0), "after a test method");
+		assertNumRowsInPersonTable((isActualTransactionActive() ? 3 : 0), "after a test method");
 	}
 
 	@AfterTransaction

@@ -31,10 +31,10 @@ import org.springframework.test.context.junit4.orm.domain.DriversLicense;
 import org.springframework.test.context.junit4.orm.domain.Person;
 import org.springframework.test.context.junit4.orm.service.PersonService;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Transactional integration tests regarding <i>manual</i> session flushing with
@@ -60,7 +60,7 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 
 	@Before
 	public void setup() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 		assertThat(personService).as("PersonService should have been autowired.").isNotNull();
 		assertThat(sessionFactory).as("SessionFactory should have been autowired.").isNotNull();
 	}

@@ -32,9 +32,9 @@ import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * JUnit 4 based integration test which verifies
@@ -79,7 +79,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	@BeforeTransaction
 	void beforeTransaction() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		this.inTransaction = true;
 		BeforeAndAfterTransactionAnnotationTests.numBeforeTransactionCalls++;
 		clearPersonTable(jdbcTemplate);
@@ -88,7 +88,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	@AfterTransaction
 	void afterTransaction() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		this.inTransaction = false;
 		BeforeAndAfterTransactionAnnotationTests.numAfterTransactionCalls++;
 		assertThat(deletePerson(jdbcTemplate, YODA)).as("Deleting yoda").isEqualTo(1);
@@ -105,7 +105,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	private void assertShouldBeInTransaction() {
 		boolean shouldBeInTransaction = !testName.getMethodName().equals("nonTransactionalMethod");
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isEqualTo(shouldBeInTransaction);
+		assertThatTransaction().isInTransaction(shouldBeInTransaction);
 	}
 
 	@After
@@ -115,14 +115,14 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	@Test
 	public void transactionalMethod1() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 		assertThat(addPerson(jdbcTemplate, JANE)).as("Adding jane").isEqualTo(1);
 		assertThat(countRowsInPersonTable(jdbcTemplate)).as("Verifying the number of rows in the person table within transactionalMethod1().").isEqualTo(2);
 	}
 
 	@Test
 	public void transactionalMethod2() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 		assertThat(addPerson(jdbcTemplate, JANE)).as("Adding jane").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, SUE)).as("Adding sue").isEqualTo(1);
 		assertThat(countRowsInPersonTable(jdbcTemplate)).as("Verifying the number of rows in the person table within transactionalMethod2().").isEqualTo(3);
@@ -131,7 +131,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void nonTransactionalMethod() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		assertThat(addPerson(jdbcTemplate, LUKE)).as("Adding luke").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, LEIA)).as("Adding leia").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, YODA)).as("Adding yoda").isEqualTo(1);

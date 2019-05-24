@@ -27,9 +27,8 @@ import org.junit.runners.JUnit4;
 
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.TimedTransactionalSpringRunnerTests;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * This class is an extension of {@link TimedTransactionalSpringRunnerTests}
@@ -60,7 +59,7 @@ public class TimedTransactionalSpringRuleTests extends TimedTransactionalSpringR
 	@Repeat(5)
 	@Override
 	public void transactionalWithJUnitTimeout() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 	}
 
 	/**
@@ -68,7 +67,7 @@ public class TimedTransactionalSpringRuleTests extends TimedTransactionalSpringR
 	 */
 	@Test
 	public void transactionalWithJUnitRuleBasedTimeout() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 	}
 
 	// All other tests are in superclass.

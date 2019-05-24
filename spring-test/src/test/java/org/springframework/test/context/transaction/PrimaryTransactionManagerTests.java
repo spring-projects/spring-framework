@@ -37,9 +37,9 @@ import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Integration tests that ensure that <em>primary</em> transaction managers
@@ -76,7 +76,7 @@ public final class PrimaryTransactionManagerTests {
 	@Test
 	@Transactional
 	public void transactionalTest() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 
 		ClassPathResource resource = new ClassPathResource("/org/springframework/test/context/jdbc/data.sql");
 		new ResourceDatabasePopulator(resource).execute(jdbcTemplate.getDataSource());

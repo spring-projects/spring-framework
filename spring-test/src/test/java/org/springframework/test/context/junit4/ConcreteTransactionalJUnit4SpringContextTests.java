@@ -32,9 +32,10 @@ import org.springframework.tests.sample.beans.Employee;
 import org.springframework.tests.sample.beans.Pet;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive;
 
 /**
  * Combined integration test for {@link AbstractJUnit4SpringContextTests} and
@@ -92,13 +93,13 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	@Before
 	public void setUp() {
-		long expected = (TransactionSynchronizationManager.isActualTransactionActive() ? 2 : 1);
+		long expected = (isActualTransactionActive() ? 2 : 1);
 		assertThat(countRowsInPersonTable()).as("Verifying the number of rows in the person table before a test method.").isEqualTo(expected);
 	}
 
 	@After
 	public void tearDown() {
-		long expected = (TransactionSynchronizationManager.isActualTransactionActive() ? 4 : 1);
+		long expected = (isActualTransactionActive() ? 4 : 1);
 		assertThat(countRowsInPersonTable()).as("Verifying the number of rows in the person table after a test method.").isEqualTo(expected);
 	}
 
@@ -118,7 +119,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyBeanNameSet() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		assertThat(this.beanName.startsWith(getClass().getName())).as("The bean name of this test instance should have been set to the fully qualified class name " +
 				"due to BeanNameAware semantics.").isTrue();
 	}
@@ -126,21 +127,21 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyApplicationContext() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		assertThat(super.applicationContext).as("The application context should have been set due to ApplicationContextAware semantics.").isNotNull();
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyBeanInitialized() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		assertThat(this.beanInitialized).as("This test bean should have been initialized due to InitializingBean semantics.").isTrue();
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyAnnotationAutowiredFields() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		assertThat(this.nonrequiredLong).as("The nonrequiredLong property should NOT have been autowired.").isNull();
 		assertThat(this.pet).as("The pet field should have been autowired.").isNotNull();
 		assertThat(this.pet.getName()).isEqualTo("Fido");
@@ -149,7 +150,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyAnnotationAutowiredMethods() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		assertThat(this.employee).as("The employee setter method should have been autowired.").isNotNull();
 		assertThat(this.employee.getName()).isEqualTo("John Smith");
 	}
@@ -157,20 +158,20 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyResourceAnnotationWiredFields() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		assertThat(this.foo).as("The foo field should have been wired via @Resource.").isEqualTo("Foo");
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void verifyResourceAnnotationWiredMethods() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+		assertThatTransaction().isNotActive();
 		assertThat(this.bar).as("The bar method should have been wired via @Resource.").isEqualTo("Bar");
 	}
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 		assertThat(addPerson(JANE)).as("Adding jane").isEqualTo(1);
 		assertThat(addPerson(SUE)).as("Adding sue").isEqualTo(1);
 		assertThat(countRowsInPersonTable()).as("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().").isEqualTo(4);

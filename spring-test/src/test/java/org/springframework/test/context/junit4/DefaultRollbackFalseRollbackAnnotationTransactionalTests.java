@@ -28,9 +28,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Integration test which verifies proper transactional behavior when the
@@ -69,7 +69,7 @@ public class DefaultRollbackFalseRollbackAnnotationTransactionalTests extends Ab
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
-		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+		assertThatTransaction().isActive();
 		assertThat(deletePerson(jdbcTemplate, BOB)).as("Deleting bob").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, JANE)).as("Adding jane").isEqualTo(1);
 		assertThat(addPerson(jdbcTemplate, SUE)).as("Adding sue").isEqualTo(1);
