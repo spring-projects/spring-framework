@@ -39,7 +39,7 @@ ext {
 	kotlinVersion        = "1.3.31"
 	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.36.Final"
-	reactorVersion       = "Dysprosium-M1"
+	reactorVersion       = "Dysprosium-BUILD-SNAPSHOT"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
 	rxjava2Version       = "2.2.8"
