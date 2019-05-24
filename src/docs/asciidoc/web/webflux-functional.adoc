@@ -253,8 +253,8 @@ public class PersonHandler {
 	}
 
 	private void validate(Person person) {
-		Errors errors = new BeanPropertyBindingResult(body, "person");
-		validator.validate(body, errors);
+		Errors errors = new BeanPropertyBindingResult(person, "person");
+		validator.validate(person, errors);
 		if (errors.hasErrors) {
 			throw new ServerWebInputException(errors.toString()); <3>
 		}
