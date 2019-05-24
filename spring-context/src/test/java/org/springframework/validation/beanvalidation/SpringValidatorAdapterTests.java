@@ -72,7 +72,7 @@ public class SpringValidatorAdapterTests {
 
 	@Before
 	public void setupSpringValidatorAdapter() {
-		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} is must be between {2} and {1}");
+		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} must be between {2} and {1}");
 		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value as {1}");
 		messageSource.addMessage("password", Locale.ENGLISH, "Password");
 		messageSource.addMessage("confirmPassword", Locale.ENGLISH, "Password(Confirm)");
@@ -98,7 +98,7 @@ public class SpringValidatorAdapterTests {
 		assertThat(errors.getFieldValue("password"), is("pass"));
 		FieldError error = errors.getFieldError("password");
 		assertNotNull(error);
-		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Size of Password is must be between 8 and 128"));
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Size of Password must be between 8 and 128"));
 		assertTrue(error.contains(ConstraintViolation.class));
 		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("password"));
 	}
