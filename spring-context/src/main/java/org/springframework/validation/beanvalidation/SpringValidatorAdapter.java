@@ -169,7 +169,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage()) {
 								@Override
 								public boolean shouldRenderDefaultMessage() {
-									return false;
+									return requiresMessageFormat(violation);
 								}
 							};
 							error.wrap(violation);
@@ -182,7 +182,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 									rejectedValue, false, errorCodes, errorArgs, violation.getMessage()) {
 								@Override
 								public boolean shouldRenderDefaultMessage() {
-									return false;
+									return requiresMessageFormat(violation);
 								}
 							};
 							error.wrap(violation);
@@ -300,10 +300,34 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * @param field the field that caused the binding error
 	 * @return a corresponding {@code MessageSourceResolvable} for the specified field
 	 * @since 4.3
+	 * @see #getArgumentsForConstraint
 	 */
 	protected MessageSourceResolvable getResolvableField(String objectName, String field) {
 		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
 		return new DefaultMessageSourceResolvable(codes, field);
+	}
+
+	/**
+	 * Indicate whether this violation's interpolated message has remaining
+	 * placeholders and therefore requires {@link java.text.MessageFormat}
+	 * to be applied to it. Called for a Bean Validation defined message
+	 * (coming out {@code ValidationMessages.properties}) when rendered
+	 * as the default message in Spring's MessageSource.
+	 * <p>The default implementation considers a Spring-style "{0}" placeholder
+	 * for the field name as an indication for {@link java.text.MessageFormat}.
+	 * Any other placeholder or escape syntax occurrences are typically a
+	 * mismatch, coming out of regex pattern values or the like. Note that
+	 * standard Bean Validation does not support "{0}" style placeholders at all;
+	 * this is a feature typically used in Spring MessageSource resource bundles.
+	 * @param violation the Bean Validation constraint violation, including
+	 * BV-defined interpolation of named attribute references in its message
+	 * @return {@code true} if {@code java.text.MessageFormat} is to be applied,
+	 * or {@code false} if the violation's message should be used as-is
+	 * @since 5.1.8
+	 * @see #getArgumentsForConstraint
+	 */
+	protected boolean requiresMessageFormat(ConstraintViolation<?> violation) {
+		return violation.getMessage().contains("{0}");
 	}
 
 	/**
