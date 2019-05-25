@@ -18,11 +18,12 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.http.MediaType;
 
@@ -30,11 +31,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link ResponseBodyEmitter}.
@@ -44,17 +45,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 public class ResponseBodyEmitterTests {
 
-	private ResponseBodyEmitter emitter;
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private ResponseBodyEmitter.Handler handler;
 
-
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		this.emitter = new ResponseBodyEmitter();
-	}
+	private final ResponseBodyEmitter emitter = new ResponseBodyEmitter();
 
 
 	@Test

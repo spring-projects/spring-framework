@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.junit.Test;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,6 +30,8 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.inOrder;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link RelativeRedirectFilter}.
@@ -42,7 +43,7 @@ public class RelativeRedirectFilterTests {
 
 	private RelativeRedirectFilter filter = new RelativeRedirectFilter();
 
-	private HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+	private HttpServletResponse response = mock(HttpServletResponse.class);
 
 
 	@Test
@@ -62,7 +63,7 @@ public class RelativeRedirectFilterTests {
 		String location = "/foo";
 		sendRedirect(location);
 
-		InOrder inOrder = Mockito.inOrder(this.response);
+		InOrder inOrder = inOrder(this.response);
 		inOrder.verify(this.response).setStatus(HttpStatus.SEE_OTHER.value());
 		inOrder.verify(this.response).setHeader(HttpHeaders.LOCATION, location);
 	}
@@ -74,7 +75,7 @@ public class RelativeRedirectFilterTests {
 		this.filter.setRedirectStatus(status);
 		sendRedirect(location);
 
-		InOrder inOrder = Mockito.inOrder(this.response);
+		InOrder inOrder = inOrder(this.response);
 		inOrder.verify(this.response).setStatus(status.value());
 		inOrder.verify(this.response).setHeader(HttpHeaders.LOCATION, location);
 	}

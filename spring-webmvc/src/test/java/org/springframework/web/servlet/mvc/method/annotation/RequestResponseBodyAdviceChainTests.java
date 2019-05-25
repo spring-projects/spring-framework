@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -46,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link RequestResponseBodyAdviceChain}.
@@ -83,8 +83,8 @@ public class RequestResponseBodyAdviceChainTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void requestBodyAdvice() throws IOException {
-		RequestBodyAdvice requestAdvice = Mockito.mock(RequestBodyAdvice.class);
-		ResponseBodyAdvice<String> responseAdvice = Mockito.mock(ResponseBodyAdvice.class);
+		RequestBodyAdvice requestAdvice = mock(RequestBodyAdvice.class);
+		ResponseBodyAdvice<String> responseAdvice = mock(ResponseBodyAdvice.class);
 		List<Object> advice = Arrays.asList(requestAdvice, responseAdvice);
 		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(advice);
 
@@ -106,8 +106,8 @@ public class RequestResponseBodyAdviceChainTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void responseBodyAdvice() {
-		RequestBodyAdvice requestAdvice = Mockito.mock(RequestBodyAdvice.class);
-		ResponseBodyAdvice<String> responseAdvice = Mockito.mock(ResponseBodyAdvice.class);
+		RequestBodyAdvice requestAdvice = mock(RequestBodyAdvice.class);
+		ResponseBodyAdvice<String> responseAdvice = mock(ResponseBodyAdvice.class);
 		List<Object> advice = Arrays.asList(requestAdvice, responseAdvice);
 		RequestResponseBodyAdviceChain chain = new RequestResponseBodyAdviceChain(advice);
 

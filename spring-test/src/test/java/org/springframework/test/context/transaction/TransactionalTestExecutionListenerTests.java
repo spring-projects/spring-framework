@@ -37,7 +37,7 @@ import org.springframework.transaction.support.SimpleTransactionStatus;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 

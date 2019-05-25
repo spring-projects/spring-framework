@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Rick Evans

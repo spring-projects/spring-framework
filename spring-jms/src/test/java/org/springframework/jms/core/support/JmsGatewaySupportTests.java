@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.springframework.jms.core.JmsTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Mark Pollack

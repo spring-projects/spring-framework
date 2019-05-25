@@ -37,7 +37,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Arjen Poutsma

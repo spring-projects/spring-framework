@@ -25,9 +25,9 @@ import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link SpringFailOnTimeout}.

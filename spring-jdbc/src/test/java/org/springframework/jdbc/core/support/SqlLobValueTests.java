@@ -24,10 +24,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
@@ -36,8 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Test cases for the sql lob value:
@@ -57,8 +59,16 @@ import static org.mockito.Mockito.verify;
  */
 public class SqlLobValueTests  {
 
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
+
+	@Mock
 	private PreparedStatement preparedStatement;
+
+	@Mock
 	private LobHandler handler;
+
+	@Mock
 	private LobCreator creator;
 
 	@Captor
@@ -66,10 +76,6 @@ public class SqlLobValueTests  {
 
 	@Before
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-		preparedStatement = mock(PreparedStatement.class);
-		handler = mock(LobHandler.class);
-		creator = mock(LobCreator.class);
 		given(handler.getLobCreator()).willReturn(creator);
 	}
 

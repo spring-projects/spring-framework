@@ -44,8 +44,8 @@ import org.springframework.transaction.TransactionStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verifyZeroInteractions;
 
 /**
  * Test cases for AOP transaction management.

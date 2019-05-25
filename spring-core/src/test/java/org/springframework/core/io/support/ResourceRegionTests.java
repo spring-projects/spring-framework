@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.springframework.core.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for the {@link ResourceRegion} class.

@@ -36,8 +36,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Mock object based tests for CallMetaDataContext.

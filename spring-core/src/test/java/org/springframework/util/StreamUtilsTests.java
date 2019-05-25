@@ -30,11 +30,11 @@ import org.junit.Test;
 import org.mockito.InOrder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.inOrder;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.spy;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Tests for {@link StreamUtils}.

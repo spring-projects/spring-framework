@@ -21,10 +21,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
@@ -53,10 +55,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link WebSocketStompClient}.
@@ -64,6 +66,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rossen Stoyanchev
  */
 public class WebSocketStompClientTests {
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private TaskScheduler taskScheduler;
@@ -84,8 +89,6 @@ public class WebSocketStompClientTests {
 
 	@Before
 	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-
 		WebSocketClient webSocketClient = mock(WebSocketClient.class);
 		this.stompClient = new TestWebSocketStompClient(webSocketClient);
 		this.stompClient.setTaskScheduler(this.taskScheduler);

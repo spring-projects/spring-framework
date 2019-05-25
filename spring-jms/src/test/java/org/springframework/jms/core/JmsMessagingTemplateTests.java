@@ -27,12 +27,13 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.BDDMockito;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -54,11 +55,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link JmsMessagingTemplate}.
@@ -66,6 +67,9 @@ import static org.mockito.Mockito.verify;
  * @author Stephane Nicoll
  */
 public class JmsMessagingTemplateTests {
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Captor
 	private ArgumentCaptor<MessageCreator> messageCreator;
@@ -78,7 +82,6 @@ public class JmsMessagingTemplateTests {
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		this.messagingTemplate = new JmsMessagingTemplate(this.jmsTemplate);
 	}
 
@@ -648,11 +651,11 @@ public class JmsMessagingTemplateTests {
 
 	protected TextMessage createTextMessage(MessageCreator creator) throws JMSException {
 		Session mock = mock(Session.class);
-		given(mock.createTextMessage(BDDMockito.any())).willAnswer(
+		given(mock.createTextMessage(any())).willAnswer(
 				(Answer<TextMessage>) invocation ->
 						new StubTextMessage((String) invocation.getArguments()[0]));
 		javax.jms.Message message = creator.createMessage(mock);
-		verify(mock).createTextMessage(BDDMockito.any());
+		verify(mock).createTextMessage(any());
 		return TextMessage.class.cast(message);
 	}
 

@@ -23,11 +23,13 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
@@ -50,10 +52,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.reset;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link DefaultStompSession}.
@@ -64,10 +66,14 @@ public class DefaultStompSessionTests {
 
 	private DefaultStompSession session;
 
+	private StompHeaders connectHeaders;
+
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
+
 	@Mock
 	private StompSessionHandler sessionHandler;
-
-	private StompHeaders connectHeaders;
 
 	@Mock
 	private TcpConnection<byte[]> connection;
@@ -78,9 +84,6 @@ public class DefaultStompSessionTests {
 
 	@Before
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-
-		this.sessionHandler = mock(StompSessionHandler.class);
 		this.connectHeaders = new StompHeaders();
 		this.session = new DefaultStompSession(this.sessionHandler, this.connectHeaders);
 		this.session.setMessageConverter(new StringMessageConverter());

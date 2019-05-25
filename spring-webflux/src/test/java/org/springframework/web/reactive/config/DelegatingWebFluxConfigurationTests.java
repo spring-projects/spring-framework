@@ -20,11 +20,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -40,8 +42,8 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link DelegatingWebFluxConfiguration} tests.
@@ -50,7 +52,8 @@ import static org.mockito.Mockito.verify;
  */
 public class DelegatingWebFluxConfigurationTests {
 
-	private DelegatingWebFluxConfiguration delegatingConfig;
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private WebFluxConfigurer webFluxConfigurer;
@@ -64,10 +67,11 @@ public class DelegatingWebFluxConfigurationTests {
 	@Captor
 	private ArgumentCaptor<FormatterRegistry> formatterRegistry;
 
+	private DelegatingWebFluxConfiguration delegatingConfig;
+
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		delegatingConfig = new DelegatingWebFluxConfiguration();
 		delegatingConfig.setApplicationContext(new StaticApplicationContext());
 		given(webFluxConfigurer.getValidator()).willReturn(null);

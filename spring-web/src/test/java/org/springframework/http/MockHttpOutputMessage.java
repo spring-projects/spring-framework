@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import static org.mockito.Mockito.spy;
+import static org.mockito.BDDMockito.spy;
 
 /**
  * @author Arjen Poutsma

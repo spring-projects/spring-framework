@@ -24,8 +24,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture for {@link ExceptionWebSocketHandlerDecorator}.

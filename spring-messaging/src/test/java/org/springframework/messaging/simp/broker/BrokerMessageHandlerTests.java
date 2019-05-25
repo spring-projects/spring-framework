@@ -21,9 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,7 +31,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler}.
@@ -42,14 +40,7 @@ import static org.mockito.Mockito.mock;
  */
 public class BrokerMessageHandlerTests {
 
-	private TestBrokerMessageHandler handler;
-
-
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		this.handler = new TestBrokerMessageHandler();
-	}
+	private final TestBrokerMessageHandler handler = new TestBrokerMessageHandler();
 
 
 	@Test

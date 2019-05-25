@@ -24,7 +24,6 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -32,7 +31,7 @@ import org.springframework.messaging.converter.MessageConverter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link MultiServerUserRegistry}.
@@ -50,7 +49,7 @@ public class MultiServerUserRegistryTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.localRegistry = Mockito.mock(SimpUserRegistry.class);
+		this.localRegistry = mock(SimpUserRegistry.class);
 		this.registry = new MultiServerUserRegistry(this.localRegistry);
 		this.converter = new MappingJackson2MessageConverter();
 	}
@@ -58,7 +57,7 @@ public class MultiServerUserRegistryTests {
 
 	@Test
 	public void getUserFromLocalRegistry() throws Exception {
-		SimpUser user = Mockito.mock(SimpUser.class);
+		SimpUser user = mock(SimpUser.class);
 		Set<SimpUser> users = Collections.singleton(user);
 		given(this.localRegistry.getUsers()).willReturn(users);
 		given(this.localRegistry.getUserCount()).willReturn(1);

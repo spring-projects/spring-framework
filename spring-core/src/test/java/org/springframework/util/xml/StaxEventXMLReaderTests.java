@@ -29,8 +29,8 @@ import org.xml.sax.InputSource;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 public class StaxEventXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 

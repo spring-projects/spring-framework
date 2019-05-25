@@ -21,15 +21,15 @@ import java.util.Map;
 import javax.websocket.Session;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.handler.TestPrincipal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.reset;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link org.springframework.web.socket.adapter.standard.StandardWebSocketSession}.
@@ -57,7 +57,7 @@ public class StandardWebSocketSessionTests {
 	public void getPrincipalWithNativeSession() {
 		TestPrincipal user = new TestPrincipal("joe");
 
-		Session nativeSession = Mockito.mock(Session.class);
+		Session nativeSession = mock(Session.class);
 		given(nativeSession.getUserPrincipal()).willReturn(user);
 
 		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null);
@@ -69,7 +69,7 @@ public class StandardWebSocketSessionTests {
 	@Test
 	@SuppressWarnings("resource")
 	public void getPrincipalNone() {
-		Session nativeSession = Mockito.mock(Session.class);
+		Session nativeSession = mock(Session.class);
 		given(nativeSession.getUserPrincipal()).willReturn(null);
 
 		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null);
@@ -86,7 +86,7 @@ public class StandardWebSocketSessionTests {
 	public void getAcceptedProtocol() {
 		String protocol = "foo";
 
-		Session nativeSession = Mockito.mock(Session.class);
+		Session nativeSession = mock(Session.class);
 		given(nativeSession.getNegotiatedSubprotocol()).willReturn(protocol);
 
 		StandardWebSocketSession session = new StandardWebSocketSession(this.headers, this.attributes, null, null);

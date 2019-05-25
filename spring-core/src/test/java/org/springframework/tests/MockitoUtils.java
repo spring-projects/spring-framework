@@ -18,18 +18,14 @@ package org.springframework.tests;
 
 import java.util.List;
 
-import org.mockito.Mockito;
 import org.mockito.internal.stubbing.InvocationContainerImpl;
 import org.mockito.internal.util.MockUtil;
 import org.mockito.invocation.Invocation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
-
 /**
- * General test utilities for use with {@link Mockito}.
+ * General test utilities for use with {@link org.mockito.Mockito Mockito}.
  *
  * @author Phillip Webb
  */

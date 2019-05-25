@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import reactor.test.StepVerifier;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -49,6 +48,8 @@ import org.springframework.web.reactive.resource.VersionResourceResolver;
 import org.springframework.web.reactive.resource.WebJarsResourceResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Unit tests for {@link ResourceHandlerRegistry}.
@@ -116,10 +117,10 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void resourceChain() throws Exception {
-		ResourceUrlProvider resourceUrlProvider = Mockito.mock(ResourceUrlProvider.class);
+		ResourceUrlProvider resourceUrlProvider = mock(ResourceUrlProvider.class);
 		this.registry.setResourceUrlProvider(resourceUrlProvider);
-		ResourceResolver mockResolver = Mockito.mock(ResourceResolver.class);
-		ResourceTransformerSupport mockTransformer = Mockito.mock(ResourceTransformerSupport.class);
+		ResourceResolver mockResolver = mock(ResourceResolver.class);
+		ResourceTransformerSupport mockTransformer = mock(ResourceTransformerSupport.class);
 
 		this.registration.resourceChain(true).addResolver(mockResolver).addTransformer(mockTransformer);
 
@@ -137,7 +138,7 @@ public class ResourceHandlerRegistryTests {
 		assertThat(transformers).hasSize(2);
 		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
 		assertThat(transformers.get(1)).isEqualTo(mockTransformer);
-		Mockito.verify(mockTransformer).setResourceUrlProvider(resourceUrlProvider);
+		verify(mockTransformer).setResourceUrlProvider(resourceUrlProvider);
 	}
 
 	@Test
@@ -180,12 +181,12 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void resourceChainWithOverrides() throws Exception {
-		CachingResourceResolver cachingResolver = Mockito.mock(CachingResourceResolver.class);
-		VersionResourceResolver versionResolver = Mockito.mock(VersionResourceResolver.class);
-		WebJarsResourceResolver webjarsResolver = Mockito.mock(WebJarsResourceResolver.class);
+		CachingResourceResolver cachingResolver = mock(CachingResourceResolver.class);
+		VersionResourceResolver versionResolver = mock(VersionResourceResolver.class);
+		WebJarsResourceResolver webjarsResolver = mock(WebJarsResourceResolver.class);
 		PathResourceResolver pathResourceResolver = new PathResourceResolver();
-		CachingResourceTransformer cachingTransformer = Mockito.mock(CachingResourceTransformer.class);
-		AppCacheManifestTransformer appCacheTransformer = Mockito.mock(AppCacheManifestTransformer.class);
+		CachingResourceTransformer cachingTransformer = mock(CachingResourceTransformer.class);
+		AppCacheManifestTransformer appCacheTransformer = mock(AppCacheManifestTransformer.class);
 		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
 
 		this.registration.setCacheControl(CacheControl.maxAge(3600, TimeUnit.MILLISECONDS))

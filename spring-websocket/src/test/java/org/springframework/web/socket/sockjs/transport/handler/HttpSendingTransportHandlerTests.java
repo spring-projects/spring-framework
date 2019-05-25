@@ -32,8 +32,8 @@ import org.springframework.web.socket.sockjs.transport.session.StubSockJsService
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Test fixture for {@link AbstractHttpSendingTransportHandler} and sub-classes.

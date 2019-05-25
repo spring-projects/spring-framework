@@ -44,7 +44,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Base class for {@code @RequestAttribute} and {@code @SessionAttribute} method

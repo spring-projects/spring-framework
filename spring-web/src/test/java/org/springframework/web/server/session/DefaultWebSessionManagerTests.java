@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.session;
+
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -38,20 +41,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Unit tests for {@link DefaultWebSessionManager}.
  * @author Rossen Stoyanchev
  * @author Rob Winch
  */
-@RunWith(MockitoJUnitRunner.class)
 public class DefaultWebSessionManagerTests {
 
-	private DefaultWebSessionManager sessionManager;
-
-	private ServerWebExchange exchange;
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private WebSessionIdResolver sessionIdResolver;
@@ -65,10 +66,13 @@ public class DefaultWebSessionManagerTests {
 	@Mock
 	private WebSession updateSession;
 
+	private DefaultWebSessionManager sessionManager;
+
+	private ServerWebExchange exchange;
+
 
 	@Before
 	public void setUp() throws Exception {
-
 		given(this.createSession.save()).willReturn(Mono.empty());
 		given(this.createSession.getId()).willReturn("create-session-id");
 		given(this.updateSession.getId()).willReturn("update-session-id");

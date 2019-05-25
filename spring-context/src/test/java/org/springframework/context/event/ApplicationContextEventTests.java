@@ -52,10 +52,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit and integration tests for the ApplicationContext event support.
@@ -633,6 +633,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		private ApplicationContext applicationContext;
 
+		@Override
 		public void setApplicationContext(ApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
 		}

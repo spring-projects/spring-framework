@@ -22,11 +22,12 @@ import java.util.HashSet;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -42,9 +43,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 
 /**
  * User tests for {@link UserRegistryMessageHandler}.
@@ -60,6 +61,10 @@ public class UserRegistryMessageHandlerTests {
 
 	private MessageConverter converter;
 
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
+
 	@Mock
 	private MessageChannel brokerChannel;
 
@@ -69,9 +74,6 @@ public class UserRegistryMessageHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-
-		MockitoAnnotations.initMocks(this);
-
 		given(this.brokerChannel.send(any())).willReturn(true);
 		this.converter = new MappingJackson2MessageConverter();
 
@@ -95,7 +97,7 @@ public class UserRegistryMessageHandlerTests {
 	@Test
 	public void brokerUnavailableEvent() throws Exception {
 
-		ScheduledFuture future = Mockito.mock(ScheduledFuture.class);
+		ScheduledFuture future = mock(ScheduledFuture.class);
 		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), any(Long.class))).willReturn(future);
 
 		BrokerAvailabilityEvent event = new BrokerAvailabilityEvent(true, this);

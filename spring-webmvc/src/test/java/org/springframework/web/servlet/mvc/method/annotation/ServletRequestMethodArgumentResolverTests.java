@@ -29,7 +29,6 @@ import javax.servlet.http.PushBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
@@ -44,6 +43,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Arjen Poutsma
@@ -228,7 +228,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	@Test
 	public void pushBuilder() throws Exception {
-		final PushBuilder pushBuilder = Mockito.mock(PushBuilder.class);
+		final PushBuilder pushBuilder = mock(PushBuilder.class);
 		servletRequest = new MockHttpServletRequest("GET", "") {
 			@Override
 			public PushBuilder newPushBuilder() {

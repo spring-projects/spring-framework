@@ -26,11 +26,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
@@ -70,8 +72,8 @@ import org.springframework.validation.annotation.Validated;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Test fixture for
@@ -86,9 +88,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	private static final String TEST_INVALID_VALUE = "invalidValue";
 
 
-	private TestSimpAnnotationMethodMessageHandler messageHandler;
-
-	private TestController testController;
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private SubscribableChannel channel;
@@ -99,11 +100,13 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	@Captor
 	private ArgumentCaptor<Object> payloadCaptor;
 
+	private TestSimpAnnotationMethodMessageHandler messageHandler;
+
+	private TestController testController;
+
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
-
 		SimpMessagingTemplate brokerTemplate = new SimpMessagingTemplate(this.channel);
 		brokerTemplate.setMessageConverter(this.converter);
 

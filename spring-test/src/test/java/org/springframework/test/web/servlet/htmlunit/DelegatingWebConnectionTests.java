@@ -27,10 +27,11 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,8 +42,8 @@ import org.springframework.tests.TestGroup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 
 /**
  * Unit and integration tests for {@link DelegatingWebConnection}.
@@ -50,7 +51,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rob Winch
  * @since 4.2
  */
-@RunWith(MockitoJUnitRunner.class)
 public class DelegatingWebConnectionTests {
 
 	private DelegatingWebConnection webConnection;
@@ -59,6 +59,9 @@ public class DelegatingWebConnectionTests {
 
 	private WebResponse expectedResponse;
 
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private WebRequestMatcher matcher1;

@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -31,6 +30,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for
@@ -49,7 +49,6 @@ public class CachingResourceResolverTests {
 
 	@Before
 	public void setup() {
-
 		this.cache = new ConcurrentMapCache("resourceCache");
 
 		List<ResourceResolver> resolvers = new ArrayList<>();
@@ -73,7 +72,7 @@ public class CachingResourceResolverTests {
 
 	@Test
 	public void resolveResourceInternalFromCache() {
-		Resource expected = Mockito.mock(Resource.class);
+		Resource expected = mock(Resource.class);
 		this.cache.put(resourceKey("bar.css"), expected);
 		Resource actual = this.chain.resolveResource(null, "bar.css", this.locations);
 
@@ -154,8 +153,8 @@ public class CachingResourceResolverTests {
 
 	@Test
 	public void resolveResourceMatchingEncoding() {
-		Resource resource = Mockito.mock(Resource.class);
-		Resource gzipped = Mockito.mock(Resource.class);
+		Resource resource = mock(Resource.class);
+		Resource gzipped = mock(Resource.class);
 		this.cache.put(resourceKey("bar.css"), resource);
 		this.cache.put(resourceKey("bar.css+encoding=gzip"), gzipped);
 

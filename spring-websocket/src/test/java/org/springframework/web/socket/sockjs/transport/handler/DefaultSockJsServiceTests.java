@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
@@ -45,10 +47,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.reset;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 
 /**
  * Test fixture for {@link DefaultSockJsService}.
@@ -66,6 +68,9 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	private static final String sessionUrlPrefix = "/server1/" + sessionId + "/";
 
 
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
+
 	@Mock private SessionCreatingTransportHandler xhrHandler;
 
 	@Mock private TransportHandler xhrSendHandler;
@@ -81,10 +86,10 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	private TransportHandlingSockJsService service;
 
 
+	@Override
 	@Before
 	public void setup() {
 		super.setup();
-		MockitoAnnotations.initMocks(this);
 
 		Map<String, Object> attributes = Collections.emptyMap();
 		this.session = new TestSockJsSession(sessionId, new StubSockJsServiceConfig(), this.wsHandler, attributes);

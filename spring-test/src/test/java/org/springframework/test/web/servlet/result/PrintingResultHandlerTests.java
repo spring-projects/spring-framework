@@ -25,7 +25,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,6 +42,7 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link PrintingResultHandler}.
@@ -126,7 +126,7 @@ public class PrintingResultHandlerTests {
 		String palindrome = "ablE was I ere I saw Elba";
 		byte[] bytes = palindrome.getBytes("UTF-16");
 		this.request.setContent(bytes);
-		this.request.setSession(Mockito.mock(HttpSession.class));
+		this.request.setSession(mock(HttpSession.class));
 
 		this.handler.handle(this.mvcResult);
 

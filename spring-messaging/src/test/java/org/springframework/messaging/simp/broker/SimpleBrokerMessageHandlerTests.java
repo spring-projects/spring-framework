@@ -22,11 +22,13 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -42,13 +44,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.atLeast;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.reset;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link SimpleBrokerMessageHandler}.
@@ -60,6 +62,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class SimpleBrokerMessageHandlerTests {
 
 	private SimpleBrokerMessageHandler messageHandler;
+
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private SubscribableChannel clientInChannel;
@@ -79,7 +85,6 @@ public class SimpleBrokerMessageHandlerTests {
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		this.messageHandler = new SimpleBrokerMessageHandler(
 				this.clientInChannel, this.clientOutChannel, this.brokerChannel, Collections.emptyList());
 	}

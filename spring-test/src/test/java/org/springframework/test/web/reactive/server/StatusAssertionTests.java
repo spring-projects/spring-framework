@@ -30,7 +30,7 @@ import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link StatusAssertions}.

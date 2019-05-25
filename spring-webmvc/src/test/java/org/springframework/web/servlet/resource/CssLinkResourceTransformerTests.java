@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -32,6 +31,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.resource.EncodedResourceResolver.EncodedResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Unit tests for {@link CssLinkResourceTransformer}.
@@ -108,7 +110,7 @@ public class CssLinkResourceTransformerTests {
 		this.request = new MockHttpServletRequest("GET", "/static/external.css");
 
 		List<ResourceTransformer> transformers = Collections.singletonList(new CssLinkResourceTransformer());
-		ResourceResolverChain mockChain = Mockito.mock(DefaultResourceResolverChain.class);
+		ResourceResolverChain mockChain = mock(DefaultResourceResolverChain.class);
 		ResourceTransformerChain chain = new DefaultResourceTransformerChain(mockChain, transformers);
 
 		Resource resource = getResource("external.css");
@@ -122,9 +124,9 @@ public class CssLinkResourceTransformerTests {
 		assertThat(result).isEqualTo(expected);
 
 		List<Resource> locations = Collections.singletonList(resource);
-		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("https://example.org/fonts/css", locations);
-		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("file:///home/spring/image.png", locations);
-		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("//example.org/style.css", locations);
+		verify(mockChain, never()).resolveUrlPath("https://example.org/fonts/css", locations);
+		verify(mockChain, never()).resolveUrlPath("file:///home/spring/image.png", locations);
+		verify(mockChain, never()).resolveUrlPath("//example.org/style.css", locations);
 	}
 
 	@Test

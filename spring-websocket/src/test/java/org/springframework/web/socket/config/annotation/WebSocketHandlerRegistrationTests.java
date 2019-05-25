@@ -19,9 +19,7 @@ package org.springframework.web.socket.config.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketHandler;
@@ -37,6 +35,7 @@ import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsServ
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Test fixture for
@@ -46,16 +45,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class WebSocketHandlerRegistrationTests {
 
-	private TestWebSocketHandlerRegistration registration;
+	private TestWebSocketHandlerRegistration registration = new TestWebSocketHandlerRegistration();
 
-	private TaskScheduler taskScheduler;
+	private TaskScheduler taskScheduler = mock(TaskScheduler.class);
 
-
-	@Before
-	public void setup() {
-		this.taskScheduler = Mockito.mock(TaskScheduler.class);
-		this.registration = new TestWebSocketHandlerRegistration();
-	}
 
 	@Test
 	public void minimal() {

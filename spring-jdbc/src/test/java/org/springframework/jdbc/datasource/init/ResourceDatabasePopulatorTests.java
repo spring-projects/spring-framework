@@ -17,12 +17,12 @@
 package org.springframework.jdbc.datasource.init;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.core.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link ResourceDatabasePopulator}.
@@ -33,9 +33,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 public class ResourceDatabasePopulatorTests {
 
-	private static final Resource script1 = Mockito.mock(Resource.class);
-	private static final Resource script2 = Mockito.mock(Resource.class);
-	private static final Resource script3 = Mockito.mock(Resource.class);
+	private static final Resource script1 = mock(Resource.class);
+	private static final Resource script2 = mock(Resource.class);
+	private static final Resource script3 = mock(Resource.class);
 
 
 	@Test

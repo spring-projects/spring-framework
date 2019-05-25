@@ -21,7 +21,6 @@ import javax.servlet.ServletContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -48,6 +47,7 @@ import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -138,7 +138,7 @@ public class JavaConfigTests {
 
 		@Bean
 		public PersonDao personDao() {
-			return Mockito.mock(PersonDao.class);
+			return mock(PersonDao.class);
 		}
 	}
 

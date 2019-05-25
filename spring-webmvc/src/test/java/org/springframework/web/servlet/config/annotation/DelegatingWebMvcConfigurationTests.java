@@ -20,12 +20,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -47,8 +48,8 @@ import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * A test fixture for {@link DelegatingWebMvcConfiguration} tests.
@@ -57,7 +58,8 @@ import static org.mockito.Mockito.verify;
  */
 public class DelegatingWebMvcConfigurationTests {
 
-	private DelegatingWebMvcConfiguration delegatingConfig;
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private WebMvcConfigurer webMvcConfigurer;
@@ -83,12 +85,7 @@ public class DelegatingWebMvcConfigurationTests {
 	@Captor
 	private ArgumentCaptor<List<HandlerExceptionResolver>> exceptionResolvers;
 
-
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-		delegatingConfig = new DelegatingWebMvcConfiguration();
-	}
+	private final DelegatingWebMvcConfiguration delegatingConfig = new DelegatingWebMvcConfiguration();
 
 
 	@Test
@@ -134,7 +131,6 @@ public class DelegatingWebMvcConfigurationTests {
 				converters.add(0, customConverter);
 			}
 		});
-		delegatingConfig = new DelegatingWebMvcConfiguration();
 		delegatingConfig.setConfigurers(configurers);
 
 		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter(

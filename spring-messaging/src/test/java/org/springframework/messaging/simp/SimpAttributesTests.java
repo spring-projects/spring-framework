@@ -21,12 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Unit tests for
@@ -69,7 +69,7 @@ public class SimpAttributesTests {
 
 	@Test
 	public void registerDestructionCallback() {
-		Runnable callback = Mockito.mock(Runnable.class);
+		Runnable callback = mock(Runnable.class);
 		this.simpAttributes.registerDestructionCallback("name1", callback);
 
 		assertThat(this.simpAttributes.getAttribute(
@@ -80,14 +80,14 @@ public class SimpAttributesTests {
 	public void registerDestructionCallbackAfterSessionCompleted() {
 		this.simpAttributes.sessionCompleted();
 		assertThatIllegalStateException().isThrownBy(() ->
-				this.simpAttributes.registerDestructionCallback("name1", Mockito.mock(Runnable.class)))
+				this.simpAttributes.registerDestructionCallback("name1", mock(Runnable.class)))
 			.withMessageContaining("already completed");
 	}
 
 	@Test
 	public void removeDestructionCallback() {
-		Runnable callback1 = Mockito.mock(Runnable.class);
-		Runnable callback2 = Mockito.mock(Runnable.class);
+		Runnable callback1 = mock(Runnable.class);
+		Runnable callback2 = mock(Runnable.class);
 		this.simpAttributes.registerDestructionCallback("name1", callback1);
 		this.simpAttributes.registerDestructionCallback("name2", callback2);
 
@@ -109,8 +109,8 @@ public class SimpAttributesTests {
 
 	@Test
 	public void sessionCompleted() {
-		Runnable callback1 = Mockito.mock(Runnable.class);
-		Runnable callback2 = Mockito.mock(Runnable.class);
+		Runnable callback1 = mock(Runnable.class);
+		Runnable callback2 = mock(Runnable.class);
 		this.simpAttributes.registerDestructionCallback("name1", callback1);
 		this.simpAttributes.registerDestructionCallback("name2", callback2);
 
@@ -122,7 +122,7 @@ public class SimpAttributesTests {
 
 	@Test
 	public void sessionCompletedIsIdempotent() {
-		Runnable callback1 = Mockito.mock(Runnable.class);
+		Runnable callback1 = mock(Runnable.class);
 		this.simpAttributes.registerDestructionCallback("name1", callback1);
 
 		this.simpAttributes.sessionCompleted();

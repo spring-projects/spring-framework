@@ -25,9 +25,9 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyZeroInteractions;
 
 /**
  * Unit tests for @EnableLoadTimeWeaving

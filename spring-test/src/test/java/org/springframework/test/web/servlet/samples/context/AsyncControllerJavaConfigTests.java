@@ -23,7 +23,6 @@ import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +44,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -86,17 +88,17 @@ public class AsyncControllerJavaConfigTests {
 				.andExpect(request().asyncResult(Collections.singletonMap("key", "value")))
 				.andReturn();
 
-		Mockito.verify(this.callableInterceptor).beforeConcurrentHandling(any(), any());
-		Mockito.verify(this.callableInterceptor).preProcess(any(), any());
-		Mockito.verify(this.callableInterceptor).postProcess(any(), any(), any());
-		Mockito.verifyNoMoreInteractions(this.callableInterceptor);
+		verify(this.callableInterceptor).beforeConcurrentHandling(any(), any());
+		verify(this.callableInterceptor).preProcess(any(), any());
+		verify(this.callableInterceptor).postProcess(any(), any(), any());
+		verifyNoMoreInteractions(this.callableInterceptor);
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
 				.andExpect(status().isOk())
 				.andExpect(content().string("{\"key\":\"value\"}"));
 
-		Mockito.verify(this.callableInterceptor).afterCompletion(any(), any());
-		Mockito.verifyNoMoreInteractions(this.callableInterceptor);
+		verify(this.callableInterceptor).afterCompletion(any(), any());
+		verifyNoMoreInteractions(this.callableInterceptor);
 	}
 
 
@@ -111,7 +113,7 @@ public class AsyncControllerJavaConfigTests {
 
 		@Bean
 		public CallableProcessingInterceptor callableInterceptor() {
-			return Mockito.mock(CallableProcessingInterceptor.class);
+			return mock(CallableProcessingInterceptor.class);
 		}
 
 		@Bean

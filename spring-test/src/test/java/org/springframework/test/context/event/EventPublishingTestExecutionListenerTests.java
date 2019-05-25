@@ -23,11 +23,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -36,10 +36,10 @@ import org.springframework.test.context.TestContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 import static org.mockito.BDDMockito.willCallRealMethod;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link EventPublishingTestExecutionListener}.
@@ -48,13 +48,15 @@ import static org.mockito.Mockito.verify;
  * @author Sam Brannen
  * @since 5.2
  */
-@RunWith(MockitoJUnitRunner.class)
 public class EventPublishingTestExecutionListenerTests {
 
 	private final EventPublishingTestExecutionListener listener = new EventPublishingTestExecutionListener();
 
 	@Rule
 	public final TestName testName = new TestName();
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private TestContext testContext;

@@ -16,10 +16,11 @@
 
 package org.springframework.test.jdbc;
 
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -33,8 +34,10 @@ import static org.mockito.BDDMockito.given;
  * @since 2.5.4
  * @see JdbcTestUtilsIntegrationTests
  */
-@RunWith(MockitoJUnitRunner.class)
 public class JdbcTestUtilsTests {
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private JdbcTemplate jdbcTemplate;

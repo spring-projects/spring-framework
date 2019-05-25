@@ -21,10 +21,11 @@ import java.io.IOException;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.openqa.selenium.WebDriverException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,13 +41,16 @@ import static org.mockito.BDDMockito.given;
  * @author Sam Brannen
  * @since 4.2
  */
-@RunWith(MockitoJUnitRunner.class)
 public class WebConnectionHtmlUnitDriverTests {
 
-	private final WebConnectionHtmlUnitDriver driver = new WebConnectionHtmlUnitDriver();
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private WebConnection connection;
+
+	private final WebConnectionHtmlUnitDriver driver = new WebConnectionHtmlUnitDriver();
+
 
 	@Before
 	public void setup() throws Exception {

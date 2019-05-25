@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -62,12 +61,12 @@ import org.springframework.web.socket.sockjs.transport.SockJsSession;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.reset;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.verifyZeroInteractions;
 
 /**
  * Test fixture for {@link StompSubProtocolHandler} tests.
@@ -90,7 +89,7 @@ public class StompSubProtocolHandlerTests {
 	@Before
 	public void setup() {
 		this.protocolHandler = new StompSubProtocolHandler();
-		this.channel = Mockito.mock(MessageChannel.class);
+		this.channel = mock(MessageChannel.class);
 		this.messageCaptor = ArgumentCaptor.forClass(Message.class);
 
 		given(this.channel.send(any())).willReturn(true);
@@ -216,7 +215,7 @@ public class StompSubProtocolHandlerTests {
 	@Test
 	public void handleMessageToClientWithHeartbeatSuppressingSockJsHeartbeat() throws IOException {
 
-		SockJsSession sockJsSession = Mockito.mock(SockJsSession.class);
+		SockJsSession sockJsSession = mock(SockJsSession.class);
 		given(sockJsSession.getId()).willReturn("s1");
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		accessor.setHeartbeat(0, 10);
@@ -229,7 +228,7 @@ public class StompSubProtocolHandlerTests {
 		verify(sockJsSession).sendMessage(any(WebSocketMessage.class));
 		verifyNoMoreInteractions(sockJsSession);
 
-		sockJsSession = Mockito.mock(SockJsSession.class);
+		sockJsSession = mock(SockJsSession.class);
 		given(sockJsSession.getId()).willReturn("s1");
 		accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		accessor.setHeartbeat(0, 0);
@@ -477,7 +476,7 @@ public class StompSubProtocolHandlerTests {
 	@Test
 	public void webSocketScope() {
 
-		Runnable runnable = Mockito.mock(Runnable.class);
+		Runnable runnable = mock(Runnable.class);
 		SimpAttributes simpAttributes = new SimpAttributes(this.session.getId(), this.session.getAttributes());
 		simpAttributes.setAttribute("name", "value");
 		simpAttributes.registerDestructionCallback("name", runnable);

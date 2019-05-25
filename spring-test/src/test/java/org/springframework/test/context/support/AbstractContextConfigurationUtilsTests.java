@@ -23,8 +23,6 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.Set;
 
-import org.mockito.Mockito;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
@@ -39,6 +37,7 @@ import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Abstract base class for tests involving {@link ContextLoaderUtils},
@@ -58,7 +57,7 @@ abstract class AbstractContextConfigurationUtilsTests {
 
 
 	MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = Mockito.mock(CacheAwareContextLoaderDelegate.class);
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = mock(CacheAwareContextLoaderDelegate.class);
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		TestContextBootstrapper bootstrapper = BootstrapTestUtils.resolveTestContextBootstrapper(bootstrapContext);
 		return bootstrapper.buildMergedContextConfiguration();

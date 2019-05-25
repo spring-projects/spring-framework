@@ -50,7 +50,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
 import static org.springframework.web.method.MvcAnnotationPredicates.requestPart;
 

@@ -18,12 +18,13 @@ package org.springframework.messaging.support;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
@@ -33,13 +34,13 @@ import org.springframework.messaging.MessageHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.verifyZeroInteractions;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Unit tests for {@link ExecutorSubscribableChannel}.
@@ -49,6 +50,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public class ExecutorSubscribableChannelTests {
 
 	private ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock
 	private MessageHandler handler;
@@ -60,11 +64,6 @@ public class ExecutorSubscribableChannelTests {
 	@Captor
 	private ArgumentCaptor<Runnable> runnableCaptor;
 
-
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
-	}
 
 
 	@Test

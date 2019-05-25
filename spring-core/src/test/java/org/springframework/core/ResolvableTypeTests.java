@@ -43,11 +43,12 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 import org.assertj.core.api.AbstractAssert;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.core.ResolvableType.VariableResolver;
 import org.springframework.util.MultiValueMap;
@@ -55,10 +56,10 @@ import org.springframework.util.MultiValueMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.atLeastOnce;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Tests for {@link ResolvableType}.
@@ -68,8 +69,10 @@ import static org.mockito.Mockito.verify;
  * @author Sebastien Deleuze
  */
 @SuppressWarnings("rawtypes")
-@RunWith(MockitoJUnitRunner.class)
 public class ResolvableTypeTests {
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Captor
 	private ArgumentCaptor<TypeVariable<?>> typeVariableCaptor;

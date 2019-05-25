@@ -44,7 +44,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.BDDMockito;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
@@ -1759,7 +1759,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("annotatedBean", bd);
 
 		RootBeanDefinition rbd = new RootBeanDefinition();
-		rbd.setBeanClassName(Mockito.class.getName());
+		rbd.setBeanClassName(BDDMockito.class.getName());
 		rbd.setFactoryMethodName("mock");
 		// TypedStringValue used to be equivalent to an XML-defined argument String
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Repository.class.getName()));

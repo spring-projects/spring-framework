@@ -26,7 +26,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * @author Rod Johnson

@@ -23,19 +23,21 @@ import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 import javax.persistence.TransactionRequiredException;
 
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.withSettings;
+import static org.mockito.BDDMockito.withSettings;
+import static org.mockito.quality.Strictness.STRICT_STUBS;
 
 /**
  * Unit tests for {@link SharedEntityManagerCreator}.
@@ -43,8 +45,10 @@ import static org.mockito.Mockito.withSettings;
  * @author Oliver Gierke
  * @author Juergen Hoeller
  */
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SharedEntityManagerCreatorTests {
+
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(STRICT_STUBS);
 
 	@Test
 	public void proxyingWorksIfInfoReturnsNullEntityManagerInterface() {

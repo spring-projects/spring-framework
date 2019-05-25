@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Superclass for unit tests for EntityManagerFactory-creating beans.

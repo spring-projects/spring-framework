@@ -54,8 +54,8 @@ import org.springframework.util.MultiValueMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.spy;
+import static org.mockito.BDDMockito.inOrder;
+import static org.mockito.BDDMockito.spy;
 
 /**
  * Tests for {@link ImportSelector} and {@link DeferredImportSelector}.

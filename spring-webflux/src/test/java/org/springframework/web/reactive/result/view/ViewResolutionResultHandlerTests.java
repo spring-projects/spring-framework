@@ -57,7 +57,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 import static org.springframework.web.method.ResolvableMethod.on;

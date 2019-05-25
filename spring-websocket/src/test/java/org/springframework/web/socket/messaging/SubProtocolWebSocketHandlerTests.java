@@ -20,9 +20,11 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.messaging.MessageChannel;
@@ -37,8 +39,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Test fixture for {@link SubProtocolWebSocketHandler}.
@@ -48,9 +50,8 @@ import static org.mockito.Mockito.verify;
  */
 public class SubProtocolWebSocketHandlerTests {
 
-	private SubProtocolWebSocketHandler webSocketHandler;
-
-	private TestWebSocketSession session;
+	@Rule
+	public MockitoRule mockitoRule = MockitoJUnit.rule();
 
 	@Mock SubProtocolHandler stompHandler;
 
@@ -63,10 +64,13 @@ public class SubProtocolWebSocketHandlerTests {
 	@Mock
 	SubscribableChannel outClientChannel;
 
+	private SubProtocolWebSocketHandler webSocketHandler;
+
+	private TestWebSocketSession session;
+
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		this.webSocketHandler = new SubProtocolWebSocketHandler(this.inClientChannel, this.outClientChannel);
 		given(stompHandler.getSupportedProtocols()).willReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
 		given(mqttHandler.getSupportedProtocols()).willReturn(Arrays.asList("MQTT"));

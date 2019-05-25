@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -43,8 +42,9 @@ import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.spy;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Tests to reproduce raised caching issues.
@@ -280,7 +280,7 @@ public class CacheReproTests {
 		@Bean
 		public Cache cache() {
 			Cache cache = new ConcurrentMapCache("cache");
-			return Mockito.spy(cache);
+			return spy(cache);
 		}
 
 		@Bean

@@ -21,14 +21,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.beans.factory.ObjectFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.SimpSessionScope}.
@@ -49,7 +49,7 @@ public class SimpSessionScopeTests {
 	@Before
 	public void setUp() {
 		this.scope = new SimpSessionScope();
-		this.objectFactory = Mockito.mock(ObjectFactory.class);
+		this.objectFactory = mock(ObjectFactory.class);
 		this.simpAttributes = new SimpAttributes("session1", new ConcurrentHashMap<>());
 		SimpAttributesContextHolder.setAttributes(this.simpAttributes);
 	}
@@ -90,7 +90,7 @@ public class SimpSessionScopeTests {
 
 	@Test
 	public void registerDestructionCallback() {
-		Runnable runnable = Mockito.mock(Runnable.class);
+		Runnable runnable = mock(Runnable.class);
 		this.scope.registerDestructionCallback("name", runnable);
 
 		this.simpAttributes.sessionCompleted();

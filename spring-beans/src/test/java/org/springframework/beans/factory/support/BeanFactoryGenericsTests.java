@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.BDDMockito;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
@@ -674,7 +674,7 @@ public class BeanFactoryGenericsTests {
 	 */
 	@Test
 	public void parameterizedStaticFactoryMethod() {
-		RootBeanDefinition rbd = new RootBeanDefinition(Mockito.class);
+		RootBeanDefinition rbd = new RootBeanDefinition(BDDMockito.class);
 		rbd.setFactoryMethodName("mock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
 
@@ -745,7 +745,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
 		RootBeanDefinition rbd = new RootBeanDefinition();
-		rbd.setBeanClassName(Mockito.class.getName());
+		rbd.setBeanClassName(BDDMockito.class.getName());
 		rbd.setFactoryMethodName("mock");
 		// TypedStringValue used to be equivalent to an XML-defined argument String
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Runnable.class.getName()));
