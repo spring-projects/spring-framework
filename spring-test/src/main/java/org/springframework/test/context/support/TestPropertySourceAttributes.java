@@ -156,10 +156,10 @@ class TestPropertySourceAttributes {
 	 */
 	private static String detectDefaultPropertiesFile(Class<?> testClass) {
 		String resourcePath = ClassUtils.convertClassNameToResourcePath(testClass.getName()) + ".properties";
-		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
 		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 
 		if (classPathResource.exists()) {
+			String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
 			if (logger.isInfoEnabled()) {
 				logger.info(String.format("Detected default properties file \"%s\" for test class [%s]",
 					prefixedResourcePath, testClass.getName()));
