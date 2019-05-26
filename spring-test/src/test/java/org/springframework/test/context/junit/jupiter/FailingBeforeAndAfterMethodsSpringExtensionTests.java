@@ -16,21 +16,14 @@
 
 package org.springframework.test.context.junit.jupiter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.TestIdentifier;
-import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
-import org.junit.platform.launcher.listeners.TestExecutionSummary;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.testkit.engine.EngineTestKit;
+import org.junit.platform.testkit.engine.Events;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,12 +38,13 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
+import static org.junit.platform.testkit.engine.EventConditions.event;
+import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
+import static org.junit.platform.testkit.engine.EventConditions.test;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
 /**
  * Integration tests which verify that '<i>before</i>' and '<i>after</i>'
@@ -72,53 +66,38 @@ import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.r
  */
 class FailingBeforeAndAfterMethodsSpringExtensionTests {
 
-	private static Stream<Class<?>> testClasses() {
-		// @formatter:off
-		return Stream.of(
-				AlwaysFailingBeforeTestClassTestCase.class,
-				AlwaysFailingAfterTestClassTestCase.class,
-				AlwaysFailingPrepareTestInstanceTestCase.class,
-				AlwaysFailingBeforeTestMethodTestCase.class,
-				AlwaysFailingBeforeTestExecutionTestCase.class,
-				AlwaysFailingAfterTestExecutionTestCase.class,
-				AlwaysFailingAfterTestMethodTestCase.class,
-				FailingBeforeTransactionTestCase.class,
-				FailingAfterTransactionTestCase.class);
-		// @formatter:on
-	}
-
-	@TestFactory
-	Stream<DynamicTest> generateTests() throws Exception {
-		return testClasses().map(clazz -> dynamicTest(clazz.getSimpleName(), () -> runTestAndAssertCounters(clazz)));
-	}
-
-	private void runTestAndAssertCounters(Class<?> testClass) {
-		Launcher launcher = LauncherFactory.create();
-		ExceptionTrackingListener listener = new ExceptionTrackingListener();
-		launcher.registerTestExecutionListeners(listener);
-
-		launcher.execute(request().selectors(selectClass(testClass)).build());
-		TestExecutionSummary summary = listener.getSummary();
-
-		String name = testClass.getSimpleName();
-		int expectedStartedCount = getExpectedStartedCount(testClass);
-		int expectedSucceededCount = getExpectedSucceededCount(testClass);
-		int expectedFailedCount = getExpectedFailedCount(testClass);
-
-		assertSoftly(softly -> {
-			softly.assertThat(summary.getTestsFoundCount()).as("%s: tests found", name).isEqualTo(1);
-			softly.assertThat(summary.getTestsSkippedCount()).as("%s: tests skipped", name).isEqualTo(0);
-			softly.assertThat(summary.getTestsAbortedCount()).as("%s: tests aborted", name).isEqualTo(0);
-			softly.assertThat(summary.getTestsStartedCount()).as("%s: tests started", name).isEqualTo(expectedStartedCount);
-			softly.assertThat(summary.getTestsSucceededCount()).as("%s: tests succeeded", name).isEqualTo(expectedSucceededCount);
-			softly.assertThat(summary.getTestsFailedCount()).as("%s: tests failed", name).isEqualTo(expectedFailedCount);
-		});
+	@ParameterizedTest
+	@ValueSource(classes = {
+		AlwaysFailingBeforeTestClassTestCase.class,
+		AlwaysFailingAfterTestClassTestCase.class,
+		AlwaysFailingPrepareTestInstanceTestCase.class,
+		AlwaysFailingBeforeTestMethodTestCase.class,
+		AlwaysFailingBeforeTestExecutionTestCase.class,
+		AlwaysFailingAfterTestExecutionTestCase.class,
+		AlwaysFailingAfterTestMethodTestCase.class,
+		FailingBeforeTransactionTestCase.class,
+		FailingAfterTransactionTestCase.class
+	})
+	void failingBeforeAndAfterCallbacks(Class<?> testClass) {
+		Events events = EngineTestKit.engine("junit-jupiter")
+			.selectors(selectClass(testClass))
+			.execute()
+			.tests()
+			.assertStatistics(stats -> stats
+				.skipped(0)
+				.aborted(0)
+				.started(getExpectedStartedCount(testClass))
+				.succeeded(getExpectedSucceededCount(testClass))
+				.failed(getExpectedFailedCount(testClass)));
 
 		// Ensure it was an AssertionError that failed the test and not
 		// something else like an error in the @Configuration class, etc.
-		if (expectedFailedCount > 0) {
-			assertThat(listener.exceptions).as("exceptions expected").hasSize(1);
-			assertThat(listener.exceptions.get(0)).isInstanceOf(AssertionError.class);
+		if (getExpectedFailedCount(testClass) > 0) {
+			events.assertThatEvents().haveExactly(1,
+				event(test("testNothing"),
+					finishedWithFailure(
+						instanceOf(AssertionError.class),
+						message(msg -> msg.contains("always failing")))));
 		}
 	}
 
@@ -276,18 +255,6 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 		@Bean
 		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder().generateUniqueName(true).build();
-		}
-	}
-
-	private static class ExceptionTrackingListener extends SummaryGeneratingListener {
-
-		List<Throwable> exceptions = new ArrayList<>();
-
-
-		@Override
-		public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-			super.executionFinished(testIdentifier, testExecutionResult);
-			testExecutionResult.getThrowable().ifPresent(exceptions::add);
 		}
 	}
 

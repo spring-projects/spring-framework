@@ -62,8 +62,8 @@ dependencies {
 	testCompile("javax.mail:javax.mail-api:1.6.2")
 	testCompile("org.hibernate:hibernate-core:5.4.2.Final")
 	testCompile("org.hibernate:hibernate-validator:6.0.16.Final")
-	// Enable use of the JUnit Platform Runner
 	testCompile("org.junit.platform:junit-platform-runner")
+	testCompile("org.junit.platform:junit-platform-testkit")
 	testCompile("org.junit.jupiter:junit-jupiter-params")
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
