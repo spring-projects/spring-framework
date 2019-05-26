@@ -38,10 +38,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 import static org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * Integration tests that verify support for
@@ -86,12 +85,13 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
-		assertEquals(countRowsInTable("person"), expectedNumRows, "the number of rows in the person table ("
-				+ testState + ").");
+		assertThat(countRowsInTable("person"))
+			.as("the number of rows in the person table (" + testState + ").")
+			.isEqualTo(expectedNumRows);
 	}
 
-	private void assertAddPerson(final String name) {
-		assertEquals(createPerson(name), 1, "Adding '" + name + "'");
+	private void assertAddPerson(String name) {
+		assertThat(createPerson(name)).as("Adding '%s'", name).isEqualTo(1);
 	}
 
 	@BeforeClass
@@ -104,20 +104,20 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 
 	@AfterClass
 	void afterClass() {
-		assertEquals(numSetUpCalls, NUM_TESTS, "number of calls to setUp().");
-		assertEquals(numSetUpCallsInTransaction, NUM_TX_TESTS, "number of calls to setUp() within a transaction.");
-		assertEquals(numTearDownCalls, NUM_TESTS, "number of calls to tearDown().");
-		assertEquals(numTearDownCallsInTransaction, NUM_TX_TESTS, "number of calls to tearDown() within a transaction.");
+		assertThat(numSetUpCalls).as("number of calls to setUp().").isEqualTo(NUM_TESTS);
+		assertThat(numSetUpCallsInTransaction).as("number of calls to setUp() within a transaction.").isEqualTo(NUM_TX_TESTS);
+		assertThat(numTearDownCalls).as("number of calls to tearDown().").isEqualTo(NUM_TESTS);
+		assertThat(numTearDownCallsInTransaction).as("number of calls to tearDown() within a transaction.").isEqualTo(NUM_TX_TESTS);
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	void autowiringFromConfigClass() {
-		assertNotNull(employee, "The employee should have been autowired.");
-		assertEquals(employee.getName(), "John Smith");
+		assertThat(employee).as("The employee should have been autowired.").isNotNull();
+		assertThat(employee.getName()).isEqualTo("John Smith");
 
-		assertNotNull(pet, "The pet should have been autowired.");
-		assertEquals(pet.getName(), "Fido");
+		assertThat(pet).as("The pet should have been autowired.").isNotNull();
+		assertThat(pet.getName()).isEqualTo("Fido");
 	}
 
 	@BeforeTransaction
@@ -154,7 +154,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 
 	@AfterTransaction
 	void afterTransaction() {
-		assertEquals(deletePerson(YODA), 1, "Deleting yoda");
+		assertThat(deletePerson(YODA)).as("Deleting yoda").isEqualTo(1);
 		assertNumRowsInPersonTable(1, "after a transactional test method");
 	}
 

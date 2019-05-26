@@ -182,8 +182,7 @@ public class ClassLevelDirtiesContextTestNGTests {
 
 
 		protected void assertApplicationContextWasAutowired() {
-			org.testng.Assert.assertNotNull(this.applicationContext,
-				"The application context should have been autowired.");
+			assertThat(this.applicationContext).as("The application context should have been autowired.").isNotNull();
 		}
 	}
 
