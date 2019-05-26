@@ -81,8 +81,8 @@ public abstract class MergedAnnotationPredicates {
 	/**
 	 * Create a new stateful, single use {@link Predicate} that matches only
 	 * the first run of an extracted value. For example,
-	 * {@code MergedAnnotationPredicates.firstRunOf(MergedAnnotation::depth)}
-	 * will return the first annotation and a subsequent run of the same depth.
+	 * {@code MergedAnnotationPredicates.firstRunOf(MergedAnnotation::distance)}
+	 * will return the first annotation and a subsequent run of the same distance.
 	 * <p>NOTE: This predicate only matches the first first run. Once the extracted
 	 * value changes, the predicate always returns {@code false}.
 	 * @param valueExtractor function used to extract the value to check

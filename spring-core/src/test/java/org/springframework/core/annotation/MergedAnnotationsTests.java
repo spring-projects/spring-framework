@@ -153,7 +153,7 @@ public class MergedAnnotationsTests {
 	@Test
 	public void getParent() {
 		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
-		assertThat(annotations.get(TransactionalComponent.class).getParent().getType())
+		assertThat(annotations.get(TransactionalComponent.class).getMetaSource().getType())
 				.isEqualTo(ComposedTransactionalComponent.class);
 	}
 
@@ -161,7 +161,7 @@ public class MergedAnnotationsTests {
 	public void getRootWhenNotDirect() {
 		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
 		MergedAnnotation<?> annotation = annotations.get(TransactionalComponent.class);
-		assertThat(annotation.getDepth()).isGreaterThan(0);
+		assertThat(annotation.getDistance()).isGreaterThan(0);
 		assertThat(annotation.getRoot().getType()).isEqualTo(ComposedTransactionalComponent.class);
 	}
 
@@ -169,16 +169,16 @@ public class MergedAnnotationsTests {
 	public void getRootWhenDirect() {
 		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
 		MergedAnnotation<?> annotation = annotations.get(ComposedTransactionalComponent.class);
-		assertThat(annotation.getDepth()).isEqualTo(0);
+		assertThat(annotation.getDistance()).isEqualTo(0);
 		assertThat(annotation.getRoot()).isSameAs(annotation);
 	}
 
 	@Test
-	public void getTypeHierarchy() {
+	public void getMetaTypes() {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				ComposedTransactionalComponentClass.class).get(
 						TransactionalComponent.class);
-		assertThat(annotation.getTypeHierarchy()).containsExactly(
+		assertThat(annotation.getMetaTypes()).containsExactly(
 				ComposedTransactionalComponent.class, TransactionalComponent.class);
 	}
 
@@ -696,30 +696,30 @@ public class MergedAnnotationsTests {
 	public void getFromMethodWithMethodAnnotationOnLeaf() throws Exception {
 		Method method = Leaf.class.getMethod("annotatedOnLeaf");
 		assertThat(method.getAnnotation(Order.class)).isNotNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				0);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test
 	public void getFromMethodWithAnnotationOnMethodInInterface() throws Exception {
 		Method method = Leaf.class.getMethod("fromInterfaceImplementedByRoot");
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test
 	public void getFromMethodWithMetaAnnotationOnLeaf() throws Exception {
 		Method method = Leaf.class.getMethod("metaAnnotatedOnLeaf");
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(1);
+				Order.class).getDistance()).isEqualTo(1);
 	}
 
 	@Test
@@ -727,50 +727,50 @@ public class MergedAnnotationsTests {
 		Method method = Leaf.class.getMethod("metaMetaAnnotatedOnLeaf");
 		assertThat(method.getAnnotation(Component.class)).isNull();
 		assertThat(
-				MergedAnnotations.from(method).get(Component.class).getDepth()).isEqualTo(
+				MergedAnnotations.from(method).get(Component.class).getDistance()).isEqualTo(
 						2);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Component.class).getDepth()).isEqualTo(2);
+				Component.class).getDistance()).isEqualTo(2);
 	}
 
 	@Test
 	public void getWithAnnotationOnRoot() throws Exception {
 		Method method = Leaf.class.getMethod("annotatedOnRoot");
 		assertThat(method.getAnnotation(Order.class)).isNotNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				0);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test
 	public void getFromMethodWithMetaAnnotationOnRoot() throws Exception {
 		Method method = Leaf.class.getMethod("metaAnnotatedOnRoot");
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(1);
+				Order.class).getDistance()).isEqualTo(1);
 	}
 
 	@Test
 	public void getFromMethodWithOnRootButOverridden() throws Exception {
 		Method method = Leaf.class.getMethod("overrideWithoutNewAnnotation");
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test
 	public void getFromMethodWithNotAnnotated() throws Exception {
 		Method method = Leaf.class.getMethod("notAnnotated");
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(-1);
+				Order.class).getDistance()).isEqualTo(-1);
 	}
 
 	@Test
@@ -779,10 +779,10 @@ public class MergedAnnotationsTests {
 				Object.class);
 		assertThat(method.isBridge()).isTrue();
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 		boolean runningInEclipse = Arrays.stream(
 				new Exception().getStackTrace()).anyMatch(
 						element -> element.getClassName().startsWith("org.eclipse.jdt"));
@@ -799,9 +799,9 @@ public class MergedAnnotationsTests {
 			assertThat(method.getAnnotation(Transactional.class)).isNotNull();
 		}
 		assertThat(MergedAnnotations.from(method).get(
-				Transactional.class).getDepth()).isEqualTo(0);
+				Transactional.class).getDistance()).isEqualTo(0);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Transactional.class).getDepth()).isEqualTo(0);
+				Transactional.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test
@@ -810,22 +810,22 @@ public class MergedAnnotationsTests {
 				String.class);
 		assertThat(method.isBridge()).isFalse();
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDepth()).isEqualTo(
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(
 				-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 		assertThat(method.getAnnotation(Transactional.class)).isNotNull();
 		assertThat(MergedAnnotations.from(method).get(
-				Transactional.class).getDepth()).isEqualTo(0);
+				Transactional.class).getDistance()).isEqualTo(0);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Transactional.class).getDepth()).isEqualTo(0);
+				Transactional.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test
 	public void getFromMethodWithInterface() throws Exception {
 		Method method = ImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test // SPR-16060
@@ -833,7 +833,7 @@ public class MergedAnnotationsTests {
 		Method method = ImplementsInterfaceWithGenericAnnotatedMethod.class.getMethod(
 				"foo", String.class);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test // SPR-17146
@@ -841,7 +841,7 @@ public class MergedAnnotationsTests {
 		Method method = ExtendsBaseClassWithGenericAnnotatedMethod.class.getMethod("foo",
 				String.class);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test
@@ -849,7 +849,7 @@ public class MergedAnnotationsTests {
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod(
 				"foo");
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test
@@ -858,7 +858,7 @@ public class MergedAnnotationsTests {
 		Method method = SubOfAbstractImplementsInterfaceWithAnnotatedMethod.class.getMethod(
 				"foo");
 		assertThat(MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE).get(
-				Order.class).getDepth()).isEqualTo(0);
+				Order.class).getDistance()).isEqualTo(0);
 	}
 
 	@Test

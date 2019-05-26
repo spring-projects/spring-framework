@@ -163,7 +163,7 @@ public class MergedAnnotationsCollectionTests {
 	public void getWithPredicateReturnsOnlyMatching() {
 		MergedAnnotations annotations = getMutiRoute1();
 		assertThat(annotations.get(MutiRouteTarget.class,
-				annotation -> annotation.getDepth() >= 3).getString(
+				annotation -> annotation.getDistance() >= 3).getString(
 						MergedAnnotation.VALUE)).isEqualTo("111");
 	}
 
@@ -171,7 +171,7 @@ public class MergedAnnotationsCollectionTests {
 	public void getWithSelectorReturnsSelected() {
 		MergedAnnotations annotations = getMutiRoute1();
 		MergedAnnotationSelector<MutiRouteTarget> deepest = (existing,
-				candidate) -> candidate.getDepth() > existing.getDepth() ? candidate
+				candidate) -> candidate.getDistance() > existing.getDistance() ? candidate
 						: existing;
 		assertThat(annotations.get(MutiRouteTarget.class, null, deepest).getString(
 				MergedAnnotation.VALUE)).isEqualTo("111");

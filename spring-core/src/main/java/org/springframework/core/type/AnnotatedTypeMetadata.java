@@ -139,7 +139,7 @@ public interface AnnotatedTypeMetadata {
 
 		Adapt[] adaptations = Adapt.values(classValuesAsString, true);
 		return getAnnotations().stream(annotationName)
-				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getTypeHierarchy))
+				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
 				.map(MergedAnnotation::withNonMergedAttributes)
 				.collect(MergedAnnotationCollectors.toMultiValueMap(map ->
 						map.isEmpty() ? null : map, adaptations));

@@ -229,8 +229,8 @@ public abstract class AnnotationUtils {
 	}
 
 	private static <A extends Annotation> boolean isSingleLevelPresent(MergedAnnotation<A> mergedAnnotation) {
-		int depth = mergedAnnotation.getDepth();
-		return (depth == 0 || depth == 1);
+		int distance = mergedAnnotation.getDistance();
+		return (distance == 0 || distance == 1);
 	}
 
 	/**

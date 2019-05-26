@@ -41,12 +41,12 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 
 	@Override
 	public boolean isDirectlyPresent() {
-		return isPresent() && getDepth() == 0;
+		return isPresent() && getDistance() == 0;
 	}
 
 	@Override
 	public boolean isMetaPresent() {
-		return isPresent() && getDepth() > 0;
+		return isPresent() && getDistance() > 0;
 	}
 
 	@Override

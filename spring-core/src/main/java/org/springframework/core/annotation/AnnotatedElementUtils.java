@@ -502,7 +502,7 @@ public abstract class AnnotatedElementUtils {
 
 		Adapt[] adaptations = Adapt.values(classValuesAsString, nestedAnnotationsAsMap);
 		return getAnnotations(element).stream(annotationName)
-				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getTypeHierarchy))
+				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
 				.map(MergedAnnotation::withNonMergedAttributes)
 				.collect(MergedAnnotationCollectors.toMultiValueMap(AnnotatedElementUtils::nullIfEmpty, adaptations));
 	}

@@ -51,11 +51,6 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
-	public List<Class<? extends Annotation>> getTypeHierarchy() {
-		return Collections.emptyList();
-	}
-
-	@Override
 	public boolean isPresent() {
 		return false;
 	}
@@ -68,7 +63,7 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 
 	@Override
 	@Nullable
-	public MergedAnnotation<?> getParent() {
+	public MergedAnnotation<?> getMetaSource() {
 		return null;
 	}
 
@@ -78,7 +73,12 @@ final class MissingMergedAnnotation<A extends Annotation> extends AbstractMerged
 	}
 
 	@Override
-	public int getDepth() {
+	public List<Class<? extends Annotation>> getMetaTypes() {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public int getDistance() {
 		return -1;
 	}
 

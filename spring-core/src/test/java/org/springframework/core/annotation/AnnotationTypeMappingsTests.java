@@ -220,11 +220,11 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getDepthReturnsDepth() {
+	public void getDistanceReturnsDistance() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				Mapped.class);
-		assertThat(mappings.get(0).getDepth()).isEqualTo(0);
-		assertThat(mappings.get(1).getDepth()).isEqualTo(1);
+		assertThat(mappings.get(0).getDistance()).isEqualTo(0);
+		assertThat(mappings.get(1).getDistance()).isEqualTo(1);
 	}
 
 	@Test
@@ -236,11 +236,11 @@ public class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	public void getAnnotationTypeHierarchyReturnsTypeHierarchy() {
+	public void getMetaTypeReturnsTypes() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
 				ThreeDeepA.class);
 		AnnotationTypeMapping mappingC = mappings.get(2);
-		assertThat(mappingC.getAnnotationTypeHierarchy()).containsExactly(
+		assertThat(mappingC.getMetaTypes()).containsExactly(
 				ThreeDeepA.class, ThreeDeepB.class, ThreeDeepC.class);
 	}
 

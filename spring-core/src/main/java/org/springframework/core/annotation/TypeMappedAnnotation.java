@@ -135,7 +135,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		this.attributeFilter = null;
 		this.resolvedRootMirrors = (resolvedRootMirrors != null ? resolvedRootMirrors :
 				mapping.getRoot().getMirrorSets().resolve(source, rootAttributes, this.valueExtractor));
-		this.resolvedMirrors = (getDepth() == 0 ? this.resolvedRootMirrors :
+		this.resolvedMirrors = (getDistance() == 0 ? this.resolvedRootMirrors :
 				mapping.getMirrorSets().resolve(source, this, this::getValueForMirrorResolution));
 	}
 
@@ -165,8 +165,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
-	public List<Class<? extends Annotation>> getTypeHierarchy() {
-		return this.mapping.getAnnotationTypeHierarchy();
+	public List<Class<? extends Annotation>> getMetaTypes() {
+		return this.mapping.getMetaTypes();
 	}
 
 	@Override
@@ -175,8 +175,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
-	public int getDepth() {
-		return this.mapping.getDepth();
+	public int getDistance() {
+		return this.mapping.getDistance();
 	}
 
 	@Override
@@ -192,23 +192,23 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@Override
 	@Nullable
-	public MergedAnnotation<?> getParent() {
-		AnnotationTypeMapping parentMapping = this.mapping.getParent();
-		if (parentMapping == null) {
+	public MergedAnnotation<?> getMetaSource() {
+		AnnotationTypeMapping metaSourceMapping = this.mapping.getSource();
+		if (metaSourceMapping == null) {
 			return null;
 		}
-		return new TypeMappedAnnotation<>(parentMapping, this.classLoader, this.source, this.rootAttributes,
-				this.valueExtractor, this.aggregateIndex, this.resolvedRootMirrors);
+		return new TypeMappedAnnotation<>(metaSourceMapping, this.classLoader, this.source,
+				this.rootAttributes, this.valueExtractor, this.aggregateIndex, this.resolvedRootMirrors);
 	}
 
 	@Override
 	public MergedAnnotation<?> getRoot() {
-		if (getDepth() == 0) {
+		if (getDistance() == 0) {
 			return this;
 		}
 		AnnotationTypeMapping rootMapping = this.mapping.getRoot();
-		return new TypeMappedAnnotation<>(rootMapping, this.classLoader, this.source, this.rootAttributes,
-				this.valueExtractor, this.aggregateIndex, this.resolvedRootMirrors);
+		return new TypeMappedAnnotation<>(rootMapping, this.classLoader, this.source,
+				this.rootAttributes, this.valueExtractor, this.aggregateIndex, this.resolvedRootMirrors);
 	}
 
 	@Override
@@ -416,14 +416,14 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			}
 		}
 		if (!forMirrorResolution) {
-			attributeIndex = (mapping.getDepth() != 0 ?
+			attributeIndex = (mapping.getDistance() != 0 ?
 					this.resolvedMirrors :
 					this.resolvedRootMirrors)[attributeIndex];
 		}
 		if (attributeIndex == -1) {
 			return null;
 		}
-		if (mapping.getDepth() == 0) {
+		if (mapping.getDistance() == 0) {
 			Method attribute = mapping.getAttributes().get(attributeIndex);
 			Object result = this.valueExtractor.apply(attribute, this.rootAttributes);
 			return (result != null) ? result : attribute.getDefaultValue();
@@ -672,7 +672,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			}
 			if (logger.isEnabled()) {
 				String type = mapping.getAnnotationType().getName();
-				String item = (mapping.getDepth() == 0 ? "annotation " + type :
+				String item = (mapping.getDistance() == 0 ? "annotation " + type :
 						"meta-annotation " + type + " from " + mapping.getRoot().getAnnotationType().getName());
 				logger.log("Failed to introspect " + item, source, ex);
 			}

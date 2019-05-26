@@ -269,7 +269,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * Stream all annotations and meta-annotations contained in this collection.
 	 * The resulting stream is ordered first by the
 	 * {@linkplain MergedAnnotation#getAggregateIndex() aggregate index} and then
-	 * by the annotation depth (with the closest annotations first). This ordering
+	 * by the annotation distance (with the closest annotations first). This ordering
 	 * means that, for most use-cases, the most suitable annotations appear
 	 * earliest in the stream.
 	 * @return a stream of annotations

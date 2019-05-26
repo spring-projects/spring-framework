@@ -46,8 +46,8 @@ public class MissingMergedAnnotationTests {
 	}
 
 	@Test
-	public void getTypeHierarchyReturnsEmptyList() {
-		assertThat(this.missing.getTypeHierarchy()).isEmpty();
+	public void MetaTypesReturnsEmptyList() {
+		assertThat(this.missing.getMetaTypes()).isEmpty();
 	}
 
 	@Test
@@ -66,8 +66,8 @@ public class MissingMergedAnnotationTests {
 	}
 
 	@Test
-	public void getDepthReturnsMinusOne() {
-		assertThat(this.missing.getDepth()).isEqualTo(-1);
+	public void getDistanceReturnsMinusOne() {
+		assertThat(this.missing.getDistance()).isEqualTo(-1);
 	}
 
 	@Test
@@ -81,8 +81,8 @@ public class MissingMergedAnnotationTests {
 	}
 
 	@Test
-	public void getParentReturnsNull() {
-		assertThat(this.missing.getParent()).isNull();
+	public void getMetaSourceReturnsNull() {
+		assertThat(this.missing.getMetaSource()).isNull();
 	}
 
 	@Test

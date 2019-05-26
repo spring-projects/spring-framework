@@ -73,38 +73,40 @@ final class AnnotationTypeMappings {
 		}
 	}
 
-	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping parent) {
+	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source) {
 		Annotation[] metaAnnotations =
-				AnnotationsScanner.getDeclaredAnnotations(parent.getAnnotationType(), false);
+				AnnotationsScanner.getDeclaredAnnotations(source.getAnnotationType(), false);
 		for (Annotation metaAnnotation : metaAnnotations) {
-			if (!isMappable(parent, metaAnnotation)) {
+			if (!isMappable(source, metaAnnotation)) {
 				continue;
 			}
 			Annotation[] repeatedAnnotations = RepeatableContainers.standardRepeatables()
 					.findRepeatedAnnotations(metaAnnotation);
 			if (repeatedAnnotations != null) {
 				for (Annotation repeatedAnnotation : repeatedAnnotations) {
-					if (!isMappable(parent, metaAnnotation)) {
+					if (!isMappable(source, metaAnnotation)) {
 						continue;
 					}
-					addIfPossible(queue, parent, repeatedAnnotation);
+					addIfPossible(queue, source, repeatedAnnotation);
 				}
 			}
 			else {
-				addIfPossible(queue, parent, metaAnnotation);
+				addIfPossible(queue, source, metaAnnotation);
 			}
 		}
 	}
 
-	private void addIfPossible(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping parent, Annotation ann) {
-		addIfPossible(queue, parent, ann.annotationType(), ann);
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue,
+			AnnotationTypeMapping source, Annotation ann) {
+
+		addIfPossible(queue, source, ann.annotationType(), ann);
 	}
 
-	private void addIfPossible(Deque<AnnotationTypeMapping> queue, @Nullable AnnotationTypeMapping parent,
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue, @Nullable AnnotationTypeMapping source,
 			Class<? extends Annotation> annotationType, @Nullable Annotation ann) {
 
 		try {
-			queue.addLast(new AnnotationTypeMapping(parent, annotationType, ann));
+			queue.addLast(new AnnotationTypeMapping(source, annotationType, ann));
 		}
 		catch (Exception ex) {
 			if (ex instanceof AnnotationConfigurationException) {
@@ -112,25 +114,25 @@ final class AnnotationTypeMappings {
 			}
 			if (failureLogger.isEnabled()) {
 				failureLogger.log("Failed to introspect meta-annotation " + annotationType.getName(),
-						(parent != null ? parent.getAnnotationType() : null), ex);
+						(source != null ? source.getAnnotationType() : null), ex);
 			}
 		}
 	}
 
-	private boolean isMappable(AnnotationTypeMapping parent, @Nullable Annotation metaAnnotation) {
+	private boolean isMappable(AnnotationTypeMapping source, @Nullable Annotation metaAnnotation) {
 		return (metaAnnotation != null && !this.filter.matches(metaAnnotation) &&
-				!AnnotationFilter.PLAIN.matches(parent.getAnnotationType()) &&
-				!isAlreadyMapped(parent, metaAnnotation));
+				!AnnotationFilter.PLAIN.matches(source.getAnnotationType()) &&
+				!isAlreadyMapped(source, metaAnnotation));
 	}
 
-	private boolean isAlreadyMapped(AnnotationTypeMapping parent, Annotation metaAnnotation) {
+	private boolean isAlreadyMapped(AnnotationTypeMapping source, Annotation metaAnnotation) {
 		Class<? extends Annotation> annotationType = metaAnnotation.annotationType();
-		AnnotationTypeMapping mapping = parent;
+		AnnotationTypeMapping mapping = source;
 		while (mapping != null) {
 			if (mapping.getAnnotationType() == annotationType) {
 				return true;
 			}
-			mapping = mapping.getParent();
+			mapping = mapping.getSource();
 		}
 		return false;
 	}

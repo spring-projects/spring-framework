@@ -74,15 +74,6 @@ public interface MergedAnnotation<A extends Annotation> {
 	Class<A> getType();
 
 	/**
-	 * Return a complete type hierarchy from this annotation to the
-	 * {@link #getRoot() root}. Provides a useful way to uniquely identify a
-	 * merged annotation instance.
-	 * @return the type hierarchy for the annotation
-	 * @see MergedAnnotationPredicates#unique(Function)
-	 */
-	List<Class<? extends Annotation>> getTypeHierarchy();
-
-	/**
 	 * Determine if the annotation is present on the source. Considers
 	 * {@linkplain #isDirectlyPresent() directly present} and
 	 * {@linkplain #isMetaPresent() meta-present} annotations within the context
@@ -109,14 +100,14 @@ public interface MergedAnnotation<A extends Annotation> {
 	boolean isMetaPresent();
 
 	/**
-	 * Get the depth of this annotation related to its use as a
-	 * meta-annotation. A directly declared annotation has a depth of {@code 0},
-	 * a meta-annotation has a depth of {@code 1}, a meta-annotation on a
-	 * meta-annotation has a depth of {@code 2}, etc. A {@linkplain #missing()
-	 * missing} annotation will always return a depth of {@code -1}.
-	 * @return the annotation depth or {@code -1} if the annotation is missing
+	 * Get the distance of this annotation related to its use as a
+	 * meta-annotation. A directly declared annotation has a distance of {@code 0},
+	 * a meta-annotation has a distance of {@code 1}, a meta-annotation on a
+	 * meta-annotation has a distance of {@code 2}, etc. A {@linkplain #missing()
+	 * missing} annotation will always return a distance of {@code -1}.
+	 * @return the annotation distance or {@code -1} if the annotation is missing
 	 */
-	int getDepth();
+	int getDistance();
 
 	/**
 	 * Get the index of the aggregate collection containing this annotation.
@@ -130,32 +121,49 @@ public interface MergedAnnotation<A extends Annotation> {
 	int getAggregateIndex();
 
 	/**
-	 * Get the source that ultimately declared the annotation, or
+	 * Get the source that ultimately declared the root annotation, or
 	 * {@code null} if the source is not known. If this merged annotation was
 	 * created {@link MergedAnnotations#from(java.lang.reflect.AnnotatedElement)
 	 * from} an {@link AnnotatedElement} then this source will be an element of
 	 * the same type. If the annotation was loaded without using reflection, the
 	 * source can be of any type, but should have a sensible {@code toString()}.
-	 * Meta-annotations will return the same source as the {@link #getParent()}.
+	 * Meta-annotations will always return the same source as the
+	 * {@link #getRoot() root}.
 	 * @return the source, or {@code null}
 	 */
 	@Nullable
 	Object getSource();
 
 	/**
-	 * Get the parent of the meta-annotation, or {@code null} if the
-	 * annotation is not {@linkplain #isMetaPresent() meta-present}.
-	 * @return the parent annotation or {@code null}
+	 * Get the source of the meta-annotation, or {@code null} if the
+	 * annotation is not {@linkplain #isMetaPresent() meta-present}. The
+	 * meta-source is the annotation that was meta-annotated with this
+	 * annotation.
+	 * @return the meta-annotation source or {@code null}
+	 * @see #getRoot()
 	 */
 	@Nullable
-	MergedAnnotation<?> getParent();
+	MergedAnnotation<?> getMetaSource();
 
 	/**
-	 * Get the root annotation, i.e. the {@link #getDepth() depth} {@code 0}
+	 * Get the root annotation, i.e. the {@link #getDistance() distance} {@code 0}
 	 * annotation as directly declared on the source.
 	 * @return the root annotation
+	 * @see #getMetaSource()
 	 */
 	MergedAnnotation<?> getRoot();
+
+	/**
+	 * Return the complete list of annotation types from this annotation to the
+	 * {@link #getRoot() root}. Provides a useful way to uniquely identify a
+	 * merged annotation instance.
+	 * @return the meta types for the annotation
+	 * @see MergedAnnotationPredicates#unique(Function)
+	 * @see #getRoot()
+	 * @see #getMetaSource()
+	 */
+	List<Class<? extends Annotation>> getMetaTypes();
+
 
 	/**
 	 * Determine if the specified attribute name has a non-default value when
@@ -433,7 +441,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new view of the annotation that exposes non-merged attribute values.
 	 * <p>Methods from this view will return attribute values with only alias mirroring
-	 * rules applied. Aliases to parent attributes will not be applied.
+	 * rules applied. Aliases to {@link #getMetaSource() meta-source} attributes will
+	 * not be applied.
 	 * @return a non-merged view of the annotation
 	 */
 	MergedAnnotation<A> withNonMergedAttributes();
