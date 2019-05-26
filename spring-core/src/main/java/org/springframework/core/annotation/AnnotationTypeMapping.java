@@ -161,7 +161,7 @@ final class AnnotationTypeMapping {
 					StringUtils.capitalize(AttributeMethods.describe(attribute)),
 					AttributeMethods.describe(targetAnnotation, targetAttributeName)));
 		}
-		if (target == attribute) {
+		if (target.equals(attribute)) {
 			throw new AnnotationConfigurationException(String.format(
 					"@AliasFor declaration on %s points to itself. " +
 					"Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
@@ -182,7 +182,7 @@ final class AnnotationTypeMapping {
 						attribute.getName()));
 			}
 			Method mirror = resolveAliasTarget(target, targetAliasFor, false);
-			if (mirror != attribute) {
+			if (!mirror.equals(attribute)) {
 				throw new AnnotationConfigurationException(String.format(
 						"%s must be declared as an @AliasFor '%s', not '%s'.",
 						StringUtils.capitalize(AttributeMethods.describe(target)),
