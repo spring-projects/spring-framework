@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,7 +289,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	@Override
 	protected void handleMessageInternal(Message<?> message) {
 		MessageHeaders headers = message.getHeaders();
-		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 
@@ -299,6 +298,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			return;
 		}
 
+		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
 		if (SimpMessageType.MESSAGE.equals(messageType)) {
 			logMessage(message);
 			sendMessageToSubscribers(destination, message);
