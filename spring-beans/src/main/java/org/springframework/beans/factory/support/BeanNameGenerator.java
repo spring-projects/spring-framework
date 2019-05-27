@@ -19,6 +19,8 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
+ * spring bean name生成器
+ * 实现此接口可自定义bean name生成器
  * Strategy interface for generating bean names for bean definitions.
  *
  * @author Juergen Hoeller
