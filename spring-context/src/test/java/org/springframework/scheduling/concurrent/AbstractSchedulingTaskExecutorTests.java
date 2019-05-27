@@ -155,8 +155,7 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 			.pollInterval(10, TimeUnit.MILLISECONDS)
 			.untilAsserted(() ->
 				assertThatExceptionOfType(CancellationException.class).isThrownBy(() ->
-					future2.get(1000, TimeUnit.MILLISECONDS)
-				));
+					future2.get(1000, TimeUnit.MILLISECONDS)));
 	}
 
 	@Test
@@ -181,10 +180,19 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 		Future<?> future1 = executor.submit(new TestCallable(-1));
 		Future<?> future2 = executor.submit(new TestCallable(-1));
 		shutdownExecutor();
-		assertThatExceptionOfType(CancellationException.class).isThrownBy(() -> {
+
+		try {
 			future1.get(1000, TimeUnit.MILLISECONDS);
-			future2.get(1000, TimeUnit.MILLISECONDS);
-		});
+		}
+		catch (Exception ex) {
+			/* ignore */
+		}
+		Awaitility.await()
+			.atMost(4, TimeUnit.SECONDS)
+			.pollInterval(10, TimeUnit.MILLISECONDS)
+			.untilAsserted(() ->
+				assertThatExceptionOfType(CancellationException.class).isThrownBy(() ->
+					future2.get(1000, TimeUnit.MILLISECONDS)));
 	}
 
 	@Test
