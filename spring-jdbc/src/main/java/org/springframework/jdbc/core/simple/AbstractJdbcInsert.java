@@ -484,12 +484,12 @@ public abstract class AbstractJdbcInsert {
 					//Get the key
 					Statement keyStmt = null;
 					ResultSet rs = null;
-					Map<String, Object> keys = new HashMap<>(2);
 					try {
 						keyStmt = con.createStatement();
 						rs = keyStmt.executeQuery(keyQuery);
 						if (rs.next()) {
 							long key = rs.getLong(1);
+							Map<String, Object> keys = new HashMap<>(2);
 							keys.put(getGeneratedKeyNames()[0], key);
 							keyHolder.getKeyList().add(keys);
 						}
