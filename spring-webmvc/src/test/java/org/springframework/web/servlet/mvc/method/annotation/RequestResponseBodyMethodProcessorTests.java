@@ -293,7 +293,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		processor.writeWithMessageConverters("Foo", returnTypeString, request);
 
-		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("application/json;charset=UTF-8");
+		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	@Test
@@ -674,22 +674,6 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertThat(content.contains("\"name\":\"foo\"")).isTrue();
 		assertThat(content.contains("\"id\":456")).isTrue();
 		assertThat(content.contains("\"name\":\"bar\"")).isTrue();
-	}
-
-	@Test  // SPR-13631
-	public void defaultCharset() throws Exception {
-		Method method = JacksonController.class.getMethod("defaultCharset");
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
-		MethodParameter methodReturnType = handlerMethod.getReturnType();
-
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new MappingJackson2HttpMessageConverter());
-		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
-
-		Object returnValue = new JacksonController().defaultCharset();
-		processor.handleReturnValue(returnValue, methodReturnType, this.container, this.request);
-
-		assertThat(this.servletResponse.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
 	@Test  // SPR-14520
