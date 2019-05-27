@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IndexingTests {
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void indexIntoGenericPropertyContainingMap() {
 		Map<String, String> property = new HashMap<>();
 		property.put("foo", "bar");
@@ -60,6 +61,7 @@ public class IndexingTests {
 	public Object property;
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void indexIntoGenericPropertyContainingMapObject() {
 		Map<String, Map<String, String>> property = new HashMap<>();
 		Map<String, String> map = new HashMap<>();

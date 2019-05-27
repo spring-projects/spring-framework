@@ -83,6 +83,7 @@ public class AspectProxyFactoryTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testSerializable() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
@@ -119,6 +120,7 @@ public class AspectProxyFactoryTests {
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	public void testProxiedVarargsWithEnumArray() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
@@ -127,6 +129,7 @@ public class AspectProxyFactoryTests {
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	public void testUnproxiedVarargsWithEnumArray() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnSetter.class);
