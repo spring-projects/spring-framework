@@ -15,6 +15,8 @@
  * RequestContext under the name "springMacroRequestContext", as needed by
  * the macros in this library.
  *
+ * @author Darren Davison
+ * @author Juergen Hoeller
  * @author Issam El-atif
  * @since 5.2
  -->
