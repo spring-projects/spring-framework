@@ -26,7 +26,7 @@ The lower-level AOP support is discussed in <<aop-api, the following chapter>>.
 AOP is used in the Spring Framework to:
 
 * Provide declarative enterprise services. The most important such service is
-  <<transaction-declarative, declarative transaction management>>.
+  <<data-access.adoc#transaction-declarative, declarative transaction management>>.
 * Let users implement custom aspects, complementing their use of OOP with AOP.
 
 NOTE: If you are interested only in generic declarative services or other pre-packaged
