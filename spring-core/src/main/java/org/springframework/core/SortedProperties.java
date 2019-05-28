@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 class SortedProperties extends Properties {
 
-	static final String EOL = System.getProperty("line.separator");
+	static final String EOL = System.lineSeparator();
 
 	private static final Comparator<Object> keyComparator = //
 		(key1, key2) -> String.valueOf(key1).compareTo(String.valueOf(key2));
