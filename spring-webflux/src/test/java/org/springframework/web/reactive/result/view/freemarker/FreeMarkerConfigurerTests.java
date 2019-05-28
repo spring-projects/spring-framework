@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -35,11 +37,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.ui.freemarker.SpringTemplateLoader;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -52,7 +51,7 @@ public class FreeMarkerConfigurerTests {
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.afterPropertiesSet();
 		Configuration cfg = configurer.getConfiguration();
-		assertEquals("UTF-8", cfg.getDefaultEncoding());
+		assertThat(cfg.getDefaultEncoding()).isEqualTo("UTF-8");
 	}
 
 	@Test
@@ -72,7 +71,10 @@ public class FreeMarkerConfigurerTests {
 		configurer.setTemplateLoaderPath("file:/mydir");
 		configurer.afterPropertiesSet();
 		Configuration cfg = configurer.getConfiguration();
-		assertTrue(cfg.getTemplateLoader() instanceof SpringTemplateLoader);
+		assertThat(cfg.getTemplateLoader()).isInstanceOf(MultiTemplateLoader.class);
+		MultiTemplateLoader multiTemplateLoader = (MultiTemplateLoader)cfg.getTemplateLoader();
+		assertThat(multiTemplateLoader.getTemplateLoader(0)).isInstanceOf(SpringTemplateLoader.class);
+		assertThat(multiTemplateLoader.getTemplateLoader(1)).isInstanceOf(ClassTemplateLoader.class);
 	}
 
 	@Test
@@ -97,10 +99,10 @@ public class FreeMarkerConfigurerTests {
 			}
 		});
 		configurer.afterPropertiesSet();
-		assertThat(configurer.getConfiguration(), instanceOf(Configuration.class));
+		assertThat(configurer.getConfiguration()).isInstanceOf(Configuration.class);
 		Configuration fc = configurer.getConfiguration();
 		Template ft = fc.getTemplate("test");
-		assertEquals("test", FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap()));
+		assertThat(FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap())).isEqualTo("test");
 	}
 
 	@Test  // SPR-12448
