@@ -450,7 +450,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			defaultMediaTypes.put("smile", "application/x-jackson-smile");
 		}
 		if (jackson2CborPresent) {
-			defaultMediaTypes.put("cbor", "application/cbor");
+			defaultMediaTypes.put("cbor", MediaType.APPLICATION_CBOR_VALUE);
 		}
 		return defaultMediaTypes;
 	}

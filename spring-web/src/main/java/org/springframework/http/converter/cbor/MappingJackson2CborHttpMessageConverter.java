@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * <a href="https://github.com/FasterXML/jackson-dataformats-binary/tree/master/cbor">
  * the dedicated Jackson 2.x extension</a>.
  *
- * <p>By default, this converter supports {@code "application/cbor"} media type. This can be
+ * <p>By default, this converter supports {@value MediaType#APPLICATION_CBOR_VALUE} media type. This can be
  * overridden by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
@@ -57,7 +57,7 @@ public class MappingJackson2CborHttpMessageConverter extends AbstractJackson2Htt
 	 * @see Jackson2ObjectMapperBuilder#cbor()
 	 */
 	public MappingJackson2CborHttpMessageConverter(ObjectMapper objectMapper) {
-		super(objectMapper, new MediaType("application", "cbor"));
+		super(objectMapper, MediaType.APPLICATION_CBOR);
 		Assert.isInstanceOf(CBORFactory.class, objectMapper.getFactory(), "CBORFactory required");
 	}
 
