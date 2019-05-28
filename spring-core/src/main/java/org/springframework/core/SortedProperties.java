@@ -30,8 +30,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.springframework.util.StringUtils;
-
 /**
  * Specialization of {@link Properties} that sorts properties alphanumerically
  * based on their keys.
@@ -94,7 +92,7 @@ class SortedProperties extends Properties {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		super.store(baos, (this.omitComments ? null : comments));
 		String contents = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
-		for (String line : StringUtils.tokenizeToStringArray(contents, EOL)) {
+		for (String line : contents.split(EOL)) {
 			if (!this.omitComments || !line.startsWith("#")) {
 				out.write((line + EOL).getBytes(StandardCharsets.ISO_8859_1));
 			}
@@ -106,7 +104,7 @@ class SortedProperties extends Properties {
 		StringWriter stringWriter = new StringWriter();
 		super.store(stringWriter, (this.omitComments ? null : comments));
 		String contents = stringWriter.toString();
-		for (String line : StringUtils.tokenizeToStringArray(contents, EOL)) {
+		for (String line : contents.split(EOL)) {
 			if (!this.omitComments || !line.startsWith("#")) {
 				writer.write(line + EOL);
 			}
