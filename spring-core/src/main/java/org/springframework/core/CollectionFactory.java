@@ -347,6 +347,50 @@ public final class CollectionFactory {
 	}
 
 	/**
+	 * Create a variant of {@link java.util.Properties} that sorts properties
+	 * alphanumerically based on their keys.
+	 *
+	 * <p>This can be useful when storing the {@link Properties} instance in a
+	 * properties file, since it allows such files to be generated in a repeatable
+	 * manner with consistent ordering of properties. Comments in generated
+	 * properties files can also be optionally omitted.
+	 *
+	 * @param omitComments {@code true} if comments should be omitted when
+	 * storing properties in a file
+	 * @return a new {@code Properties} instance
+	 * @since 5.2
+	 * @see #createSortedProperties(Properties, boolean)
+	 */
+	public static Properties createSortedProperties(boolean omitComments) {
+		return new SortedProperties(omitComments);
+	}
+
+	/**
+	 * Create a variant of {@link java.util.Properties} that sorts properties
+	 * alphanumerically based on their keys.
+	 *
+	 * <p>This can be useful when storing the {@code Properties} instance in a
+	 * properties file, since it allows such files to be generated in a repeatable
+	 * manner with consistent ordering of properties. Comments in generated
+	 * properties files can also be optionally omitted.
+	 *
+	 * <p>The returned {@code Properties} instance will be populated with
+	 * properties from the supplied {@code properties} object, but default
+	 * properties from the supplied {@code properties} object will not be copied.
+	 *
+	 * @param properties the {@code Properties} object from which to copy the
+	 * initial properties
+	 * @param omitComments {@code true} if comments should be omitted when
+	 * storing properties in a file
+	 * @return a new {@code Properties} instance
+	 * @since 5.2
+	 * @see #createSortedProperties(boolean)
+	 */
+	public static Properties createSortedProperties(Properties properties, boolean omitComments) {
+		return new SortedProperties(properties, omitComments);
+	}
+
+	/**
 	 * Cast the given type to a subtype of {@link Enum}.
 	 * @param enumType the enum type, never {@code null}
 	 * @return the given type as subtype of {@link Enum}
