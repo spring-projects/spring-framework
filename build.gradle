@@ -4,7 +4,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
-		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.17")
+		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
 	}
 }
 
