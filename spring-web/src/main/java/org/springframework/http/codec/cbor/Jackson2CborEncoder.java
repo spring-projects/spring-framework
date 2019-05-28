@@ -44,7 +44,7 @@ import org.springframework.util.MimeType;
 public class Jackson2CborEncoder extends AbstractJackson2Encoder {
 
 	public Jackson2CborEncoder() {
-		this(Jackson2ObjectMapperBuilder.cbor().build(), new MediaType("application", "cbor"));
+		this(Jackson2ObjectMapperBuilder.cbor().build(), MediaType.APPLICATION_CBOR);
 	}
 
 	public Jackson2CborEncoder(ObjectMapper mapper, MimeType... mimeTypes) {

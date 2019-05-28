@@ -427,7 +427,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			map.put("smile", MediaType.valueOf("application/x-jackson-smile"));
 		}
 		if (jackson2CborPresent) {
-			map.put("cbor", MediaType.valueOf("application/cbor"));
+			map.put("cbor", MediaType.APPLICATION_CBOR);
 		}
 		return map;
 	}

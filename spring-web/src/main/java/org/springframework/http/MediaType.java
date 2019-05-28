@@ -74,6 +74,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_ATOM_XML_VALUE = "application/atom+xml";
 
 	/**
+	 * Public constant media type for {@code application/cbor}.
+	 * @since 5.2
+	 */
+	public static final MediaType APPLICATION_CBOR;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_CBOR}.
+	 * @since 5.2
+	 */
+	public static final String APPLICATION_CBOR_VALUE = "application/cbor";
+
+	/**
 	 * Public constant media type for {@code application/x-www-form-urlencoded}.
 	 */
 	public static final MediaType APPLICATION_FORM_URLENCODED;
@@ -338,6 +350,7 @@ public class MediaType extends MimeType implements Serializable {
 		// Not using "valueOf' to avoid static init cost
 		ALL = new MediaType("*", "*");
 		APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
+		APPLICATION_CBOR = new MediaType("application", "cbor");
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
