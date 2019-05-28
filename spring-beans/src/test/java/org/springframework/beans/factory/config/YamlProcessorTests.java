@@ -56,24 +56,24 @@ public class YamlProcessorTests {
 	}
 
 	@Test
-	public void testStringResource() {
+	public void stringResource() {
 		this.processor.setResources(new ByteArrayResource("foo # a document that is a literal".getBytes()));
 		this.processor.process((properties, map) -> assertThat(map.get("document")).isEqualTo("foo"));
 	}
 
 	@Test
-	public void testBadDocumentStart() {
+	public void badDocumentStart() {
 		this.processor.setResources(new ByteArrayResource("foo # a document\nbar: baz".getBytes()));
-		assertThatExceptionOfType(ParserException.class).isThrownBy(() ->
-				this.processor.process((properties, map) -> {}))
+		assertThatExceptionOfType(ParserException.class)
+			.isThrownBy(() -> this.processor.process((properties, map) -> {}))
 			.withMessageContaining("line 2, column 1");
 	}
 
 	@Test
-	public void testBadResource() {
+	public void badResource() {
 		this.processor.setResources(new ByteArrayResource("foo: bar\ncd\nspam:\n  foo: baz".getBytes()));
-		assertThatExceptionOfType(ScannerException.class).isThrownBy(() ->
-				this.processor.process((properties, map) -> {}))
+		assertThatExceptionOfType(ScannerException.class)
+			.isThrownBy(() -> this.processor.process((properties, map) -> {}))
 			.withMessageContaining("line 3, column 1");
 	}
 
@@ -82,7 +82,7 @@ public class YamlProcessorTests {
 		this.processor.setResources(new ByteArrayResource("foo: bar\nbar:\n spam: bucket".getBytes()));
 		this.processor.process((properties, map) -> {
 			assertThat(properties.get("bar.spam")).isEqualTo("bucket");
-			assertThat(properties.size()).isEqualTo(2);
+			assertThat(properties).hasSize(2);
 		});
 	}
 
@@ -91,7 +91,7 @@ public class YamlProcessorTests {
 		this.processor.setResources(new ByteArrayResource("foo: bar\n1: bar".getBytes()));
 		this.processor.process((properties, map) -> {
 			assertThat(properties.get("[1]")).isEqualTo("bar");
-			assertThat(properties.size()).isEqualTo(2);
+			assertThat(properties).hasSize(2);
 		});
 	}
 
@@ -100,7 +100,7 @@ public class YamlProcessorTests {
 		this.processor.setResources(new ByteArrayResource("foo:\n  1: bar".getBytes()));
 		this.processor.process((properties, map) -> {
 			assertThat(properties.get("foo[1]")).isEqualTo("bar");
-			assertThat(properties.size()).isEqualTo(1);
+			assertThat(properties).hasSize(1);
 		});
 	}
 
@@ -110,7 +110,7 @@ public class YamlProcessorTests {
 		this.processor.setResources(new ByteArrayResource("foo: bar\nbar:\n spam: bucket".getBytes()));
 		this.processor.process((properties, map) -> {
 			assertThat(properties.get("bar.spam")).isEqualTo("bucket");
-			assertThat(properties.size()).isEqualTo(2);
+			assertThat(properties).hasSize(2);
 			Map<String, Object> flattenedMap = processor.getFlattenedMap(map);
 			assertThat(flattenedMap.get("bar.spam")).isEqualTo("bucket");
 			assertThat(flattenedMap.size()).isEqualTo(2);
