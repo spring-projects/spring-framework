@@ -300,7 +300,7 @@ locations -- for example, through "${...}" placeholders that are resolved agains
 system properties at runtime.
 ====
 
-The namespace itself provices the import directive feature. Further
+The namespace itself provides the import directive feature. Further
 configuration features beyond plain bean definitions are available in a selection
 of XML namespaces provided by Spring -- for example, the `context` and `util` namespaces.
 
