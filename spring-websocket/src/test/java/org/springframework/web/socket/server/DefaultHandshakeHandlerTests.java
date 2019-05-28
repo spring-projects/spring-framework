@@ -21,10 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.SubProtocolCapable;
@@ -35,6 +32,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -44,19 +42,9 @@ import static org.mockito.Mockito.verify;
  */
 public class DefaultHandshakeHandlerTests extends AbstractHttpRequestTests {
 
-	private DefaultHandshakeHandler handshakeHandler;
+	private RequestUpgradeStrategy upgradeStrategy = mock(RequestUpgradeStrategy.class);
 
-	@Mock
-	private RequestUpgradeStrategy upgradeStrategy;
-
-
-	@Before
-	public void setup() {
-		super.setup();
-
-		MockitoAnnotations.initMocks(this);
-		this.handshakeHandler = new DefaultHandshakeHandler(this.upgradeStrategy);
-	}
+	private DefaultHandshakeHandler handshakeHandler = new DefaultHandshakeHandler(this.upgradeStrategy);
 
 
 	@Test

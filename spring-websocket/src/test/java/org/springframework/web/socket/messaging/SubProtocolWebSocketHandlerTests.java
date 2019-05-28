@@ -21,8 +21,9 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.messaging.MessageChannel;
@@ -46,11 +47,8 @@ import static org.mockito.Mockito.verify;
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
  */
+@RunWith(MockitoJUnitRunner.class)
 public class SubProtocolWebSocketHandlerTests {
-
-	private SubProtocolWebSocketHandler webSocketHandler;
-
-	private TestWebSocketSession session;
 
 	@Mock SubProtocolHandler stompHandler;
 
@@ -63,10 +61,13 @@ public class SubProtocolWebSocketHandlerTests {
 	@Mock
 	SubscribableChannel outClientChannel;
 
+	private SubProtocolWebSocketHandler webSocketHandler;
+
+	private TestWebSocketSession session;
+
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		this.webSocketHandler = new SubProtocolWebSocketHandler(this.inClientChannel, this.outClientChannel);
 		given(stompHandler.getSupportedProtocols()).willReturn(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"));
 		given(mqttHandler.getSupportedProtocols()).willReturn(Arrays.asList("MQTT"));

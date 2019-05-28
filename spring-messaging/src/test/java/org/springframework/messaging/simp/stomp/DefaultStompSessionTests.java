@@ -24,10 +24,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
@@ -60,14 +61,16 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
+@RunWith(MockitoJUnitRunner.class)
 public class DefaultStompSessionTests {
 
 	private DefaultStompSession session;
 
+	private StompHeaders connectHeaders;
+
+
 	@Mock
 	private StompSessionHandler sessionHandler;
-
-	private StompHeaders connectHeaders;
 
 	@Mock
 	private TcpConnection<byte[]> connection;
@@ -78,9 +81,6 @@ public class DefaultStompSessionTests {
 
 	@Before
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-
-		this.sessionHandler = mock(StompSessionHandler.class);
 		this.connectHeaders = new StompHeaders();
 		this.session = new DefaultStompSession(this.sessionHandler, this.connectHeaders);
 		this.session.setMessageConverter(new StringMessageConverter());

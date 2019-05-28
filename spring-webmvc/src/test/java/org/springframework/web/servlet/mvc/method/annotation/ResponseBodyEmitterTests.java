@@ -18,11 +18,11 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.http.MediaType;
 
@@ -42,19 +42,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rossen Stoyanchev
  * @author Tomasz Nurkiewicz
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ResponseBodyEmitterTests {
-
-	private ResponseBodyEmitter emitter;
 
 	@Mock
 	private ResponseBodyEmitter.Handler handler;
 
-
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		this.emitter = new ResponseBodyEmitter();
-	}
+	private final ResponseBodyEmitter emitter = new ResponseBodyEmitter();
 
 
 	@Test

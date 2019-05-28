@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.session;
 
 import java.util.Arrays;
@@ -49,10 +50,6 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultWebSessionManagerTests {
 
-	private DefaultWebSessionManager sessionManager;
-
-	private ServerWebExchange exchange;
-
 	@Mock
 	private WebSessionIdResolver sessionIdResolver;
 
@@ -65,10 +62,13 @@ public class DefaultWebSessionManagerTests {
 	@Mock
 	private WebSession updateSession;
 
+	private DefaultWebSessionManager sessionManager;
+
+	private ServerWebExchange exchange;
+
 
 	@Before
 	public void setUp() throws Exception {
-
 		given(this.createSession.save()).willReturn(Mono.empty());
 		given(this.createSession.getId()).willReturn("create-session-id");
 		given(this.updateSession.getId()).willReturn("update-session-id");

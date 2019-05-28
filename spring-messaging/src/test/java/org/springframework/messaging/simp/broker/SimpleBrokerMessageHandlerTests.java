@@ -23,10 +23,11 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -56,10 +57,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
+@RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("unchecked")
 public class SimpleBrokerMessageHandlerTests {
 
 	private SimpleBrokerMessageHandler messageHandler;
+
 
 	@Mock
 	private SubscribableChannel clientInChannel;
@@ -79,7 +82,6 @@ public class SimpleBrokerMessageHandlerTests {
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		this.messageHandler = new SimpleBrokerMessageHandler(
 				this.clientInChannel, this.clientOutChannel, this.brokerChannel, Collections.emptyList());
 	}

@@ -22,13 +22,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.mock.web.test.MockHttpSession;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture for {@link HttpSessionHandshakeInterceptor}.
@@ -37,12 +37,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
+	private final Map<String, Object> attributes = new HashMap<>();
+	private final WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+
 
 	@Test
 	public void defaultConstructor() throws Exception {
-		Map<String, Object> attributes = new HashMap<>();
-		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
-
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
 		this.servletRequest.getSession().setAttribute("foo", "bar");
 		this.servletRequest.getSession().setAttribute("bar", "baz");
@@ -58,9 +58,6 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void constructorWithAttributeNames() throws Exception {
-		Map<String, Object> attributes = new HashMap<>();
-		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
-
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
 		this.servletRequest.getSession().setAttribute("foo", "bar");
 		this.servletRequest.getSession().setAttribute("bar", "baz");
@@ -76,9 +73,6 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void doNotCopyHttpSessionId() throws Exception {
-		Map<String, Object> attributes = new HashMap<>();
-		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
-
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
 		this.servletRequest.getSession().setAttribute("foo", "bar");
 
@@ -93,9 +87,6 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void doNotCopyAttributes() throws Exception {
-		Map<String, Object> attributes = new HashMap<>();
-		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
-
 		this.servletRequest.setSession(new MockHttpSession(null, "123"));
 		this.servletRequest.getSession().setAttribute("foo", "bar");
 
@@ -109,9 +100,6 @@ public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTes
 
 	@Test
 	public void doNotCauseSessionCreation() throws Exception {
-		Map<String, Object> attributes = new HashMap<>();
-		WebSocketHandler wsHandler = Mockito.mock(WebSocketHandler.class);
-
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 		interceptor.beforeHandshake(this.request, this.response, wsHandler, attributes);
 

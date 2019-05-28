@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -55,9 +55,8 @@ import static org.mockito.Mockito.verify;
  *
  * @author Rossen Stoyanchev
  */
+@RunWith(MockitoJUnitRunner.class)
 public class DelegatingWebMvcConfigurationTests {
-
-	private DelegatingWebMvcConfiguration delegatingConfig;
 
 	@Mock
 	private WebMvcConfigurer webMvcConfigurer;
@@ -83,12 +82,7 @@ public class DelegatingWebMvcConfigurationTests {
 	@Captor
 	private ArgumentCaptor<List<HandlerExceptionResolver>> exceptionResolvers;
 
-
-	@Before
-	public void setUp() {
-		MockitoAnnotations.initMocks(this);
-		delegatingConfig = new DelegatingWebMvcConfiguration();
-	}
+	private final DelegatingWebMvcConfiguration delegatingConfig = new DelegatingWebMvcConfiguration();
 
 
 	@Test
@@ -134,7 +128,6 @@ public class DelegatingWebMvcConfigurationTests {
 				converters.add(0, customConverter);
 			}
 		});
-		delegatingConfig = new DelegatingWebMvcConfiguration();
 		delegatingConfig.setConfigurers(configurers);
 
 		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter(

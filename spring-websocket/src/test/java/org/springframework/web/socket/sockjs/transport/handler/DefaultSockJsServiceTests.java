@@ -23,8 +23,9 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
@@ -57,6 +58,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Sebastien Deleuze
  * @author Ben Kiefer
  */
+@RunWith(MockitoJUnitRunner.class)
 public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
 	private static final String sockJsPrefix = "/mysockjs";
@@ -66,25 +68,30 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 	private static final String sessionUrlPrefix = "/server1/" + sessionId + "/";
 
 
-	@Mock private SessionCreatingTransportHandler xhrHandler;
+	@Mock
+	private SessionCreatingTransportHandler xhrHandler;
 
-	@Mock private TransportHandler xhrSendHandler;
+	@Mock
+	private TransportHandler xhrSendHandler;
 
-	@Mock private HandshakeTransportHandler wsTransportHandler;
+	@Mock
+	private HandshakeTransportHandler wsTransportHandler;
 
-	@Mock private WebSocketHandler wsHandler;
+	@Mock
+	private WebSocketHandler wsHandler;
 
-	@Mock private TaskScheduler taskScheduler;
+	@Mock
+	private TaskScheduler taskScheduler;
 
 	private TestSockJsSession session;
 
 	private TransportHandlingSockJsService service;
 
 
+	@Override
 	@Before
 	public void setup() {
 		super.setup();
-		MockitoAnnotations.initMocks(this);
 
 		Map<String, Object> attributes = Collections.emptyMap();
 		this.session = new TestSockJsSession(sessionId, new StubSockJsServiceConfig(), this.wsHandler, attributes);

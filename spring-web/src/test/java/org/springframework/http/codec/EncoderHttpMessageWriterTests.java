@@ -24,11 +24,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -57,6 +57,7 @@ import static org.springframework.http.MediaType.TEXT_XML;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
+@RunWith(MockitoJUnitRunner.class)
 public class EncoderHttpMessageWriterTests {
 
 	private static final Map<String, Object> NO_HINTS = Collections.emptyMap();
@@ -67,17 +68,9 @@ public class EncoderHttpMessageWriterTests {
 	@Mock
 	private HttpMessageEncoder<String> encoder;
 
-	private ArgumentCaptor<MediaType> mediaTypeCaptor;
+	private final ArgumentCaptor<MediaType> mediaTypeCaptor = ArgumentCaptor.forClass(MediaType.class);
 
-	private MockServerHttpResponse response;
-
-
-	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-		this.mediaTypeCaptor = ArgumentCaptor.forClass(MediaType.class);
-		this.response = new MockServerHttpResponse();
-	}
+	private final MockServerHttpResponse response = new MockServerHttpResponse();
 
 
 	@Test
@@ -116,9 +109,6 @@ public class EncoderHttpMessageWriterTests {
 	}
 
 	private void testDefaultMediaType(MediaType negotiatedMediaType) {
-
-		this.mediaTypeCaptor = ArgumentCaptor.forClass(MediaType.class);
-
 		MimeType defaultContentType = MimeTypeUtils.TEXT_XML;
 		configureEncoder(defaultContentType);
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);

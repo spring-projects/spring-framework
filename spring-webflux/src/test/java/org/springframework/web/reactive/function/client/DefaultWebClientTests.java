@@ -23,10 +23,11 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
@@ -48,20 +50,20 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
+@RunWith(MockitoJUnitRunner.class)
 public class DefaultWebClientTests {
 
-	private WebClient.Builder builder;
-
+	@Mock
 	private ExchangeFunction exchangeFunction;
 
 	@Captor
 	private ArgumentCaptor<ClientRequest> captor;
 
+	private WebClient.Builder builder;
+
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		this.exchangeFunction = mock(ExchangeFunction.class);
 		ClientResponse mockResponse = mock(ClientResponse.class);
 		given(this.exchangeFunction.exchange(this.captor.capture())).willReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction);
@@ -309,7 +311,7 @@ public class DefaultWebClientTests {
 
 	private ClientRequest verifyAndGetRequest() {
 		ClientRequest request = this.captor.getValue();
-		Mockito.verify(this.exchangeFunction).exchange(request);
+		verify(this.exchangeFunction).exchange(request);
 		verifyNoMoreInteractions(this.exchangeFunction);
 		return request;
 	}

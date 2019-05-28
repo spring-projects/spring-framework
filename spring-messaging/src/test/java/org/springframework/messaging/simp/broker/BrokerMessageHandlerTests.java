@@ -21,9 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -42,14 +40,7 @@ import static org.mockito.Mockito.mock;
  */
 public class BrokerMessageHandlerTests {
 
-	private TestBrokerMessageHandler handler;
-
-
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		this.handler = new TestBrokerMessageHandler();
-	}
+	private final TestBrokerMessageHandler handler = new TestBrokerMessageHandler();
 
 
 	@Test
@@ -61,7 +52,6 @@ public class BrokerMessageHandlerTests {
 
 	@Test
 	public void stopShouldUpdateIsRunning() {
-
 		this.handler.start();
 		assertThat(this.handler.isRunning()).isTrue();
 

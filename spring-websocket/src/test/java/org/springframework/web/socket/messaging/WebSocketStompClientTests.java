@@ -22,9 +22,10 @@ import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
@@ -63,6 +64,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
+@RunWith(MockitoJUnitRunner.class)
 public class WebSocketStompClientTests {
 
 	@Mock
@@ -74,7 +76,6 @@ public class WebSocketStompClientTests {
 	@Mock
 	private WebSocketSession webSocketSession;
 
-
 	private TestWebSocketStompClient stompClient;
 
 	private ArgumentCaptor<WebSocketHandler> webSocketHandlerCaptor;
@@ -84,8 +85,6 @@ public class WebSocketStompClientTests {
 
 	@Before
 	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-
 		WebSocketClient webSocketClient = mock(WebSocketClient.class);
 		this.stompClient = new TestWebSocketStompClient(webSocketClient);
 		this.stompClient.setTaskScheduler(this.taskScheduler);

@@ -18,12 +18,12 @@ package org.springframework.messaging.support;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
@@ -46,6 +46,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  *
  * @author Phillip Webb
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ExecutorSubscribableChannelTests {
 
 	private ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
@@ -53,18 +54,12 @@ public class ExecutorSubscribableChannelTests {
 	@Mock
 	private MessageHandler handler;
 
-	private final Object payload = new Object();
-
-	private final Message<Object> message = MessageBuilder.withPayload(this.payload).build();
-
 	@Captor
 	private ArgumentCaptor<Runnable> runnableCaptor;
 
+	private final Object payload = new Object();
 
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
-	}
+	private final Message<Object> message = MessageBuilder.withPayload(this.payload).build();
 
 
 	@Test

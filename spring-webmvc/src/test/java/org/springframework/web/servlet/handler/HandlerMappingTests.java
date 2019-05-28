@@ -21,9 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -34,34 +32,27 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for
- * {@link org.springframework.web.servlet.handler.HandlerMappingTests}.
+ * Unit tests for {@link org.springframework.web.servlet.HandlerMapping}.
  * @author Brian Clozel
  */
 public class HandlerMappingTests {
 
-	private MockHttpServletRequest request;
-	private AbstractHandlerMapping handlerMapping;
-	private StaticWebApplicationContext context;
+	private AbstractHandlerMapping handlerMapping = new TestHandlerMapping();
+	private StaticWebApplicationContext context = new StaticWebApplicationContext();
+	private MockHttpServletRequest request = new MockHttpServletRequest();
 
-	@Before
-	public void setup() {
-		this.context = new StaticWebApplicationContext();
-		this.handlerMapping = new TestHandlerMapping();
-		this.request = new MockHttpServletRequest();
-	}
 
 	@Test
 	public void orderedInterceptors() throws Exception {
-		HandlerInterceptor i1 = Mockito.mock(HandlerInterceptor.class);
+		HandlerInterceptor i1 = mock(HandlerInterceptor.class);
 		MappedInterceptor mappedInterceptor1 = new MappedInterceptor(new String[]{"/**"}, i1);
-		HandlerInterceptor i2 = Mockito.mock(HandlerInterceptor.class);
-		HandlerInterceptor i3 = Mockito.mock(HandlerInterceptor.class);
+		HandlerInterceptor i2 = mock(HandlerInterceptor.class);
+		HandlerInterceptor i3 = mock(HandlerInterceptor.class);
 		MappedInterceptor mappedInterceptor3 = new MappedInterceptor(new String[]{"/**"}, i3);
-		HandlerInterceptor i4 = Mockito.mock(HandlerInterceptor.class);
+		HandlerInterceptor i4 = mock(HandlerInterceptor.class);
 
 		this.handlerMapping.setInterceptors(mappedInterceptor1, i2, mappedInterceptor3, i4);
 		this.handlerMapping.setApplicationContext(this.context);

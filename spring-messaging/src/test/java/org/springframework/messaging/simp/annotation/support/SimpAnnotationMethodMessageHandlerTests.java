@@ -27,10 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
@@ -74,21 +75,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
- * Test fixture for
- * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler}.
+ * Test fixture for {@link SimpAnnotationMethodMessageHandler}.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Sebastien Deleuze
  */
+@RunWith(MockitoJUnitRunner.class)
 public class SimpAnnotationMethodMessageHandlerTests {
 
 	private static final String TEST_INVALID_VALUE = "invalidValue";
 
-
-	private TestSimpAnnotationMethodMessageHandler messageHandler;
-
-	private TestController testController;
 
 	@Mock
 	private SubscribableChannel channel;
@@ -99,11 +96,13 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	@Captor
 	private ArgumentCaptor<Object> payloadCaptor;
 
+	private TestSimpAnnotationMethodMessageHandler messageHandler;
+
+	private TestController testController = new TestController();
+
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
-
 		SimpMessagingTemplate brokerTemplate = new SimpMessagingTemplate(this.channel);
 		brokerTemplate.setMessageConverter(this.converter);
 
@@ -111,8 +110,6 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		this.messageHandler.setApplicationContext(new StaticApplicationContext());
 		this.messageHandler.setValidator(new StringTestValidator(TEST_INVALID_VALUE));
 		this.messageHandler.afterPropertiesSet();
-
-		this.testController = new TestController();
 	}
 
 
@@ -287,12 +284,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void listenableFutureFailure() {
-		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
-		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
-
 		ListenableFutureController controller = new ListenableFutureController();
 		this.messageHandler.registerHandler(controller);
 		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
@@ -325,12 +317,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void completableFutureFailure() {
-		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
-		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
-
 		CompletableFutureController controller = new CompletableFutureController();
 		this.messageHandler.registerHandler(controller);
 		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
@@ -363,12 +350,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void monoFailure() {
-		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
-		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
-
 		ReactiveController controller = new ReactiveController();
 		this.messageHandler.registerHandler(controller);
 		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
@@ -381,12 +363,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void fluxNotHandled() {
-		Message emptyMessage = MessageBuilder.withPayload(new byte[0]).build();
-		given(this.channel.send(any(Message.class))).willReturn(true);
-		given(this.converter.toMessage(any(), any(MessageHeaders.class))).willReturn(emptyMessage);
-
 		ReactiveController controller = new ReactiveController();
 		this.messageHandler.registerHandler(controller);
 		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));

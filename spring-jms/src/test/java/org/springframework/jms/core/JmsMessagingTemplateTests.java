@@ -28,11 +28,11 @@ import javax.jms.TextMessage;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.BDDMockito;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -65,6 +65,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Stephane Nicoll
  */
+@RunWith(MockitoJUnitRunner.class)
 public class JmsMessagingTemplateTests {
 
 	@Captor
@@ -78,7 +79,6 @@ public class JmsMessagingTemplateTests {
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		this.messagingTemplate = new JmsMessagingTemplate(this.jmsTemplate);
 	}
 
@@ -108,8 +108,6 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void customConverterAlwaysTakesPrecedence() {
-		MessageConverter messageConverter = mock(MessageConverter.class);
-		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
 		MessageConverter customMessageConverter = mock(MessageConverter.class);
 		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate();
 		messagingTemplate.setJmsMessageConverter(
@@ -648,11 +646,11 @@ public class JmsMessagingTemplateTests {
 
 	protected TextMessage createTextMessage(MessageCreator creator) throws JMSException {
 		Session mock = mock(Session.class);
-		given(mock.createTextMessage(BDDMockito.any())).willAnswer(
+		given(mock.createTextMessage(any())).willAnswer(
 				(Answer<TextMessage>) invocation ->
 						new StubTextMessage((String) invocation.getArguments()[0]));
 		javax.jms.Message message = creator.createMessage(mock);
-		verify(mock).createTextMessage(BDDMockito.any());
+		verify(mock).createTextMessage(any());
 		return TextMessage.class.cast(message);
 	}
 

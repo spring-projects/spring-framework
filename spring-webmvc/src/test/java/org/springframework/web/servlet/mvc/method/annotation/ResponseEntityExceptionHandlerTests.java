@@ -22,9 +22,7 @@ import java.util.EnumSet;
 import java.util.List;
 import javax.servlet.ServletException;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -62,6 +60,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture for {@link ResponseEntityExceptionHandler}.
@@ -70,26 +69,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ResponseEntityExceptionHandlerTests {
 
-	private ResponseEntityExceptionHandler exceptionHandlerSupport;
+	private ResponseEntityExceptionHandler exceptionHandlerSupport = new ApplicationExceptionHandler();
 
-	private DefaultHandlerExceptionResolver defaultExceptionResolver;
+	private DefaultHandlerExceptionResolver defaultExceptionResolver = new DefaultHandlerExceptionResolver();
 
-	private WebRequest request;
+	private MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
 
-	private MockHttpServletRequest servletRequest;
+	private MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 
-	private MockHttpServletResponse servletResponse;
-
-
-	@Before
-	public void setup() {
-		this.servletRequest = new MockHttpServletRequest("GET", "/");
-		this.servletResponse = new MockHttpServletResponse();
-		this.request = new ServletWebRequest(this.servletRequest, this.servletResponse);
-
-		this.exceptionHandlerSupport = new ApplicationExceptionHandler();
-		this.defaultExceptionResolver = new DefaultHandlerExceptionResolver();
-	}
+	private WebRequest request = new ServletWebRequest(this.servletRequest, this.servletResponse);
 
 
 	@Test
@@ -179,7 +167,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	public void methodArgumentNotValid() {
-		Exception ex = Mockito.mock(MethodArgumentNotValidException.class);
+		Exception ex = mock(MethodArgumentNotValidException.class);
 		testException(ex);
 	}
 

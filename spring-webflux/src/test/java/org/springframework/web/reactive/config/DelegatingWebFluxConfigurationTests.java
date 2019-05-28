@@ -21,10 +21,11 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -48,9 +49,8 @@ import static org.mockito.Mockito.verify;
  *
  * @author Brian Clozel
  */
+@RunWith(MockitoJUnitRunner.class)
 public class DelegatingWebFluxConfigurationTests {
-
-	private DelegatingWebFluxConfiguration delegatingConfig;
 
 	@Mock
 	private WebFluxConfigurer webFluxConfigurer;
@@ -64,10 +64,11 @@ public class DelegatingWebFluxConfigurationTests {
 	@Captor
 	private ArgumentCaptor<FormatterRegistry> formatterRegistry;
 
+	private DelegatingWebFluxConfiguration delegatingConfig;
+
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
 		delegatingConfig = new DelegatingWebFluxConfiguration();
 		delegatingConfig.setApplicationContext(new StaticApplicationContext());
 		given(webFluxConfigurer.getValidator()).willReturn(null);
