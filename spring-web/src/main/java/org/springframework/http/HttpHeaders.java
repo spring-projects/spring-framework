@@ -886,7 +886,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the {@link Locale} of the content language,
 	 * as specified by the {@literal Content-Language} header.
-	 * <p>Use {@code set(CONTENT_LANGUAGE, list)} if you need
+	 * <p>Use {@code put(CONTENT_LANGUAGE, list)} if you need
 	 * to set multiple content languages.</p>
 	 * @since 5.0
 	 */
