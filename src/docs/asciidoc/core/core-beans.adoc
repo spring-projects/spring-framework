@@ -5243,6 +5243,199 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 `ApplicationContext`.
 
 
+[[beans-value-annotations]]
+=== Using `@Value`
+
+You can use `@Value` annotation to inject a default value to a constructor parameter, as the following example shows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    public class MovieRecommender {
+
+        private final String algorithm;
+
+        public MovieRecommender(@Value("myRecommendationAlgorithm") String algorithm){
+            this.algorithm = algorithm;
+        }
+    }
+----
+
+You can also apply the `@Value` annotation to fields, as the following example shows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    public class MovieRecommender {
+
+        @Value("myAlgorithm")
+        private String algorithm;
+    }
+----
+
+
+Built-in converter support provided by Spring allows simple type conversion to be automatically handled, as the following example shows:
+
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    public class MovieRecommender {
+
+        private final Integer depth;
+
+        public MovieRecommender(@Value("2") Integer depth){
+            this.depth = depth;
+        }
+    }
+----
+
+As the annotation java type does not allow non constant value such as null, you can also safely use primitive type parameter:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class MovieRecommender {
+
+    private final int depth;
+
+    public MovieRecommender(@Value("2") int depth){
+        this.depth = depth;
+    }
+}
+----
+
+Multiple comma separated values parameter can be automatically converted to String array without extra effort:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class MovieRecommender {
+
+    private final String[] catalogs;
+
+    public MovieRecommender(@Value("catalogA,catalogB") String[] catalogs){
+        this.catalogs = catalogs;
+    }
+}
+----
+
+Spring BeanPostProcessor uses ConversionService instance behind the scene to handle the process from converting
+`@Value` value to the target type.
+If you want to provide conversion support for your own custom type, you can provide your own ConversionService bean instance as the following example shows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class MyConfig {
+
+    @Bean
+    public static ConversionService conversionService() {
+        DefaultFormattingConversionService defaultFormattingConversionService = new DefaultFormattingConversionService();
+        defaultFormattingConversionService.addConverter(new MyCustomConverter());
+        return defaultFormattingConversionService;
+    }
+}
+----
+
+SpEL built-in support allows dynamically computed `@Value` at runtime as in the following example shows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public class MovieRecommender {
+
+    private final String catalog;
+
+    public MovieRecommender(@Value("#{systemProperties['user.region'] + 'Catalog' }") String catalog){
+        this.catalog = catalog;
+    }
+----
+
+SpEL also enables to use more complex data structure:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+
+public class MovieRecommender {
+
+    private final Map<String, Integer> countOfMoviesPerCatalog;
+
+    public MovieRecommender(
+            @Value("#{{'Thriller': 100, 'Comedy': 300}}") Map<String, Integer> countOfMoviesPerCatalog) {
+        this.countOfMoviesPerCatalog = countOfMoviesPerCatalog;
+    }
+}
+----
+
+A widely spread use of `@Value` is placeholder substitution from `@PropertySource`.
+
+A default lenient embedded value resolver is provided by Spring. It will try to resolve the property value and if it
+cannot be resolved, the property name will be injected as the value. For instance, according to the following application.properties content:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    catalogName=MovieCatalog
+----
+
+The following configuration :
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    @Configuration
+    @PropertySource("classpath:application.properties")
+    public class MyConfig {
+    }
+----
+
+And the class:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    public class MovieRecommender {
+
+        private final String catalog;
+
+        private final String region;
+
+        public MovieRecommender(
+                @Value("${catalogName}") String catalog, @Value("${region}") String region) {
+            this.catalog = catalog;
+            this.region = region;
+        }
+    }
+----
+
+The `catalog` attribute will be equal to the `"MovieCatalog"`  value.
+The region attribute will be equal the `"${region}"` value.
+
+If you want to maintain strict control over non existent values, you should declare a `PropertySourcesPlaceholderConfigurer` bean,
+as the following example shows:
+
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+    @Configuration
+    @PropertySource("classpath:application.properties")
+    public class MyConfig {
+
+         @Bean
+         public PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+               return new PropertySourcesPlaceholderConfigurer();
+         }
+    }
+----
+
+Using the above configuration ensures Spring initialization failure if any of "${}" placeholder could not be resolved.
+
+NOTE: Spring Boot configures by default a `PropertySourcesPlaceholderConfigurer` bean that will get properties from `application.properties` and `application.yml` files.
+
 
 [[beans-postconstruct-and-predestroy-annotations]]
 === Using `@PostConstruct` and `@PreDestroy`
