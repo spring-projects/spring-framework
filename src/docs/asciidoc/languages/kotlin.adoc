@@ -734,12 +734,7 @@ that uses the `${...}` syntax, with configuration beans, as the following exampl
 
 NOTE: If you use Spring Boot, you can use
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-typesafe-configuration-properties[`@ConfigurationProperties`]
-instead of `@Value` annotations. However, currently, this only works with `lateinit` or
-nullable `var` properties (we recommended the former), since immutable classes initialized
-by constructors are not yet supported. See these issues about
-https://github.com/spring-projects/spring-boot/issues/8762[`@ConfigurationProperties` binding for immutable POJOs]
-and https://github.com/spring-projects/spring-boot/issues/1254[`@ConfigurationProperties` binding on interfaces]
-for more details.
+instead of `@Value` annotations. We only have one remaining https://github.com/spring-projects/spring-boot/issues/1254[`@ConfigurationProperties` issue with binding on interfaces.]
 
 
 
