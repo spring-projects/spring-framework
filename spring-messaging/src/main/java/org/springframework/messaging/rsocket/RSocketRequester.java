@@ -107,10 +107,19 @@ public interface RSocketRequester {
 	interface Builder {
 
 		/**
+		 * Configure the MimeType to use for payload data. This is set on the
+		 * {@code SETUP} frame for the whole connection.
+		 * <p>By default this is set to the first concrete MimeType supported
+		 * by the configured encoders and decoders.
+		 * @param mimeType the data MimeType to use
+		 */
+		RSocketRequester.Builder dataMimeType(MimeType mimeType);
+
+		/**
 		 * Configure the {@code ClientRSocketFactory}.
-		 * <p>Note there is typically no need to set a data MimeType explicitly.
-		 * By default a data MimeType is picked by taking the first concrete
-		 * MimeType supported by the configured encoders and decoders.
+		 * <p><strong>Note:</strong> Please, do not set the {@code dataMimeType}
+		 * directly on the underlying {@code RSocketFactory.ClientRSocketFactory},
+		 * and use {@link #dataMimeType(MimeType)} instead.
 		 * @param configurer the configurer to apply
 		 */
 		RSocketRequester.Builder rsocketFactory(Consumer<RSocketFactory.ClientRSocketFactory> configurer);

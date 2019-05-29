@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.rsocket;
 
+import java.lang.reflect.Field;
 import java.util.function.Consumer;
 
 import io.netty.buffer.ByteBuf;
@@ -28,6 +29,13 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.codec.StringDecoder;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.ReflectionUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
@@ -67,9 +75,14 @@ public class DefaultRSocketRequesterBuilderTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void shouldApplyCustomizations() {
+		RSocketStrategies strategies = RSocketStrategies.builder()
+				.encoder(CharSequenceEncoder.allMimeTypes())
+				.decoder(StringDecoder.allMimeTypes())
+				.build();
 		Consumer<RSocketFactory.ClientRSocketFactory> factoryConfigurer = mock(Consumer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
+				.rsocketStrategies(strategies)
 				.rsocketFactory(factoryConfigurer)
 				.rsocketStrategies(strategiesConfigurer)
 				.connect(this.transport)
@@ -77,6 +90,25 @@ public class DefaultRSocketRequesterBuilderTests {
 		verify(this.transport).connect(anyInt());
 		verify(factoryConfigurer).accept(any(RSocketFactory.ClientRSocketFactory.class));
 		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
+	}
+
+	@Test
+	public void dataMimeType() throws NoSuchFieldException {
+		RSocketStrategies strategies = RSocketStrategies.builder()
+				.encoder(CharSequenceEncoder.allMimeTypes())
+				.decoder(StringDecoder.allMimeTypes())
+				.build();
+
+		RSocketRequester requester = RSocketRequester.builder()
+				.rsocketStrategies(strategies)
+				.dataMimeType(MimeTypeUtils.APPLICATION_JSON)
+				.connect(this.transport)
+				.block();
+
+		Field field = DefaultRSocketRequester.class.getDeclaredField("dataMimeType");
+		ReflectionUtils.makeAccessible(field);
+		MimeType dataMimeType = (MimeType) ReflectionUtils.getField(field, requester);
+		assertThat(dataMimeType).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
 
@@ -99,7 +131,6 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		@Override
 		public void dispose() {
-
 		}
 	}
 
