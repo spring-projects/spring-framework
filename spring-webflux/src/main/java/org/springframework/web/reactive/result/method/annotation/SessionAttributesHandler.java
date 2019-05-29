@@ -113,8 +113,7 @@ class SessionAttributesHandler {
 	 * @param attributes candidate attributes for session storage
 	 */
 	public void storeAttributes(WebSession session, Map<String, ?> attributes) {
-		attributes.keySet().forEach(name -> {
-			Object value = attributes.get(name);
+		attributes.forEach((name, value) -> {
 			if (value != null && isHandlerSessionAttribute(name, value.getClass())) {
 				session.getAttributes().put(name, value);
 			}
