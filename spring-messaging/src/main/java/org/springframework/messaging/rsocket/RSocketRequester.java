@@ -116,8 +116,8 @@ public interface RSocketRequester {
 		RSocketRequester.Builder rsocketFactory(Consumer<RSocketFactory.ClientRSocketFactory> configurer);
 
 		/**
-		 * Set the {@link RSocketStrategies} instance.
-		 * @param strategies the strategies to use
+		 * Set the {@link RSocketStrategies} to use for access to encoders,
+		 * decoders, and a factory for {@code DataBuffer's}.
 		 */
 		RSocketRequester.Builder rsocketStrategies(@Nullable RSocketStrategies strategies);
 

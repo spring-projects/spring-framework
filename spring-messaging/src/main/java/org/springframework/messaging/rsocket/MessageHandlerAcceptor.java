@@ -24,6 +24,7 @@ import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.util.MimeType;
@@ -78,11 +79,9 @@ public final class MessageHandlerAcceptor extends RSocketMessageHandler
 		MimeType dataMimeType = StringUtils.hasText(setupPayload.dataMimeType()) ?
 				MimeTypeUtils.parseMimeType(setupPayload.dataMimeType()) :
 				this.defaultDataMimeType;
-		return new MessagingRSocket(this::handleMessage,
-				route -> getRouteMatcher().parseRoute(route),
-				RSocketRequester.wrap(rsocket, dataMimeType, getRSocketStrategies()),
-				dataMimeType,
-				getRSocketStrategies().dataBufferFactory());
+		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, getRSocketStrategies());
+		DataBufferFactory bufferFactory = getRSocketStrategies().dataBufferFactory();
+		return new MessagingRSocket(this, getRouteMatcher(), requester, dataMimeType, bufferFactory);
 	}
 
 }

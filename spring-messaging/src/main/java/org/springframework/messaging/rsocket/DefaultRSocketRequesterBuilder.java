@@ -34,6 +34,7 @@ import org.springframework.util.MimeType;
  * Default implementation of {@link RSocketRequester.Builder}.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 5.2
  */
 final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
@@ -76,29 +77,36 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	@Override
 	public Mono<RSocketRequester> connect(ClientTransport transport) {
-		return Mono.defer(() -> {
-			RSocketStrategies strategies = getRSocketStrategies();
-			MimeType dataMimeType = getDefaultDataMimeType(strategies);
+		return Mono.defer(() -> doConnect(transport));
+	}
 
-			RSocketFactory.ClientRSocketFactory factory = RSocketFactory.connect();
-			if (dataMimeType != null) {
-				factory.dataMimeType(dataMimeType.toString());
-			}
-			this.factoryConfigurers.forEach(configurer -> configurer.accept(factory));
+	private Mono<RSocketRequester> doConnect(ClientTransport transport) {
+		RSocketStrategies rsocketStrategies = getRSocketStrategies();
+		RSocketFactory.ClientRSocketFactory rsocketFactory = RSocketFactory.connect();
 
-			return factory.transport(transport).start()
-					.map(rsocket -> new DefaultRSocketRequester(rsocket, dataMimeType, strategies));
-		});
+		// 1. Apply default settings
+		MimeType dataMimeType = getDefaultDataMimeType(rsocketStrategies);
+		if (dataMimeType != null) {
+			rsocketFactory.dataMimeType(dataMimeType.toString());
+		}
+
+		// 2. Application customizations
+		this.factoryConfigurers.forEach(c -> c.accept(rsocketFactory));
+
+		return rsocketFactory.transport(transport).start()
+				.map(rsocket -> new DefaultRSocketRequester(rsocket, dataMimeType, rsocketStrategies));
 	}
 
 	private RSocketStrategies getRSocketStrategies() {
-		if (this.strategiesConfigurers.isEmpty()) {
+		if (!this.strategiesConfigurers.isEmpty()) {
+			RSocketStrategies.Builder builder =
+					this.strategies != null ? this.strategies.mutate() : RSocketStrategies.builder();
+			this.strategiesConfigurers.forEach(c -> c.accept(builder));
+			return builder.build();
+		}
+		else {
 			return this.strategies != null ? this.strategies : RSocketStrategies.builder().build();
 		}
-		RSocketStrategies.Builder strategiesBuilder = this.strategies != null ?
-				this.strategies.mutate() : RSocketStrategies.builder();
-		this.strategiesConfigurers.forEach(configurer -> configurer.accept(strategiesBuilder));
-		return strategiesBuilder.build();
 	}
 
 	@Nullable

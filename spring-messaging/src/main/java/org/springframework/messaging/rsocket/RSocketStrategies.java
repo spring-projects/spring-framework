@@ -172,7 +172,7 @@ public interface RSocketStrategies {
 		Builder dataBufferFactory(DataBufferFactory bufferFactory);
 
 		/**
-		 * Builder the {@code RSocketStrategies} instance.
+		 * Build the {@code RSocketStrategies} instance.
 		 */
 		RSocketStrategies build();
 	}
