@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.KeyHolder;
@@ -66,6 +67,14 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcInsert(JdbcTemplate jdbcTemplate) {
+		super(jdbcTemplate);
+	}
+
+	/**
+	 * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
+	 * @param jdbcTemplate the {@code JdbcOperations} to use
+	 */
+	public SimpleJdbcInsert(JdbcOperations jdbcTemplate) {
 		super(jdbcTemplate);
 	}
 

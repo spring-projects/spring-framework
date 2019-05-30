@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterMapper;
 import org.springframework.jdbc.core.SqlParameter;
@@ -64,6 +65,16 @@ public abstract class StoredProcedure extends SqlCall {
 	 */
 	protected StoredProcedure(JdbcTemplate jdbcTemplate, String name) {
 		setJdbcTemplate(jdbcTemplate);
+		setSql(name);
+	}
+
+	/**
+	 * Create a new object wrapper for a stored procedure.
+	 * @param jdbcTemplate the JdbcTemplate which wraps DataSource
+	 * @param name name of the stored procedure in the database
+	 */
+	protected StoredProcedure(JdbcOperations jdbcTemplate, String name) {
+		setJdbcOperations(jdbcTemplate);
 		setSql(name);
 	}
 

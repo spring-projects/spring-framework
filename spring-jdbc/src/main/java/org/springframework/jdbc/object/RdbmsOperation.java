@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.lang.Nullable;
@@ -65,7 +66,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Lower-level class used to execute SQL. */
-	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
+	private JdbcOperations jdbcTemplate = new JdbcTemplate();
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
@@ -100,10 +101,21 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
+	 * An alternative to the more commonly used {@link #setDataSource} when you want to
+	 * use the same {@link JdbcOperations} in multiple {@code RdbmsOperations}. This is
+	 * appropriate if the {@code JdbcOperations} has special configuration such as a
+	 * {@link org.springframework.jdbc.support.SQLExceptionTranslator} to be reused.
+	 */
+	public void setJdbcOperations(JdbcOperations jdbcOperations) {
+		this.jdbcTemplate = jdbcOperations;
+	}
+
+	/**
 	 * Return the {@link JdbcTemplate} used by this operation object.
 	 */
 	public JdbcTemplate getJdbcTemplate() {
-		return this.jdbcTemplate;
+		Assert.state(this.jdbcTemplate instanceof JdbcTemplate, "No JdbcTemplate available");
+		return (JdbcTemplate) this.jdbcTemplate;
 	}
 
 	/**
@@ -111,7 +123,9 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate.setDataSource(dataSource);
+		if (this.jdbcTemplate instanceof JdbcTemplate) {
+			((JdbcTemplate) this.jdbcTemplate).setDataSource(dataSource);
+		}
 	}
 
 	/**
@@ -123,7 +137,13 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setFetchSize
 	 */
 	public void setFetchSize(int fetchSize) {
-		this.jdbcTemplate.setFetchSize(fetchSize);
+		if (this.jdbcTemplate instanceof JdbcTemplate) {
+			((JdbcTemplate) this.jdbcTemplate).setFetchSize(fetchSize);
+		}
+		else {
+			throw new InvalidDataAccessApiUsageException(
+					"setFetchSize only supported on JdbcTemplate");
+		}
 	}
 
 	/**
@@ -134,7 +154,13 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setMaxRows
 	 */
 	public void setMaxRows(int maxRows) {
-		this.jdbcTemplate.setMaxRows(maxRows);
+		if (this.jdbcTemplate instanceof JdbcTemplate) {
+			((JdbcTemplate) this.jdbcTemplate).setMaxRows(maxRows);
+		}
+		else {
+			throw new InvalidDataAccessApiUsageException(
+					"setMaxRows only supported on JdbcTemplate");
+		}
 	}
 
 	/**
@@ -145,7 +171,13 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * timeout specified at the transaction level.
 	 */
 	public void setQueryTimeout(int queryTimeout) {
-		this.jdbcTemplate.setQueryTimeout(queryTimeout);
+		if (this.jdbcTemplate instanceof JdbcTemplate) {
+			((JdbcTemplate) this.jdbcTemplate).setQueryTimeout(queryTimeout);
+		}
+		else {
+			throw new InvalidDataAccessApiUsageException(
+					"setQueryTimeout only supported on JdbcTemplate");
+		}
 	}
 
 	/**
@@ -344,11 +376,13 @@ public abstract class RdbmsOperation implements InitializingBean {
 				throw new InvalidDataAccessApiUsageException("Property 'sql' is required");
 			}
 
-			try {
-				this.jdbcTemplate.afterPropertiesSet();
-			}
-			catch (IllegalArgumentException ex) {
-				throw new InvalidDataAccessApiUsageException(ex.getMessage());
+			if (this.jdbcTemplate instanceof JdbcTemplate) {
+				try {
+					((JdbcTemplate) this.jdbcTemplate).afterPropertiesSet();
+				}
+				catch (IllegalArgumentException ex) {
+					throw new InvalidDataAccessApiUsageException(ex.getMessage());
+				}
 			}
 
 			compileInternal();

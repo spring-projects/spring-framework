@@ -38,6 +38,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
@@ -65,7 +66,7 @@ public abstract class AbstractJdbcInsert {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Lower-level class used to execute SQL. */
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcOperations jdbcTemplate;
 
 	/** Context used to retrieve and manage database meta-data. */
 	private final TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
@@ -106,6 +107,15 @@ public abstract class AbstractJdbcInsert {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
+	/**
+	 * Constructor to be used when initializing using a {@link JdbcOperations}.
+	 * @param jdbcTemplate the JdbcTemplate to use
+	 */
+	protected AbstractJdbcInsert(JdbcOperations jdbcTemplate) {
+		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with configuration properties
@@ -115,7 +125,8 @@ public abstract class AbstractJdbcInsert {
 	 * Get the configured {@link JdbcTemplate}.
 	 */
 	public JdbcTemplate getJdbcTemplate() {
-		return this.jdbcTemplate;
+		Assert.state(this.jdbcTemplate instanceof JdbcTemplate, "No JdbcTemplate available");
+		return (JdbcTemplate) this.jdbcTemplate;
 	}
 
 	/**
@@ -252,11 +263,13 @@ public abstract class AbstractJdbcInsert {
 			if (getTableName() == null) {
 				throw new InvalidDataAccessApiUsageException("Table name is required");
 			}
-			try {
-				this.jdbcTemplate.afterPropertiesSet();
-			}
-			catch (IllegalArgumentException ex) {
-				throw new InvalidDataAccessApiUsageException(ex.getMessage());
+			if (this.jdbcTemplate instanceof JdbcTemplate) {
+				try {
+					((JdbcTemplate) this.jdbcTemplate).afterPropertiesSet();
+				}
+				catch (IllegalArgumentException ex) {
+					throw new InvalidDataAccessApiUsageException(ex.getMessage());
+				}
 			}
 			compileInternal();
 			this.compiled = true;

@@ -21,6 +21,7 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -50,7 +51,7 @@ public class JdbcBeanDefinitionReader {
 	private final org.springframework.beans.factory.support.PropertiesBeanDefinitionReader propReader;
 
 	@Nullable
-	private JdbcTemplate jdbcTemplate;
+	private JdbcOperations jdbcTemplate;
 
 
 	/**
@@ -92,6 +93,15 @@ public class JdbcBeanDefinitionReader {
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
 		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	/**
+	 * Set the JdbcTemplate to be used by this bean factory.
+	 * Contains settings for DataSource, SQLExceptionTranslator, etc.
+	 */
+	public void setJdbcOperations(JdbcOperations jdbcOperations) {
+		Assert.notNull(jdbcOperations, "JdbcOperations must not be null");
+		this.jdbcTemplate = jdbcOperations;
 	}
 
 

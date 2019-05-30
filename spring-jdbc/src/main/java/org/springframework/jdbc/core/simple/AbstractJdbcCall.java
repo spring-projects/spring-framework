@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
@@ -55,7 +56,7 @@ public abstract class AbstractJdbcCall {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Lower-level class used to execute SQL. */
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcOperations jdbcTemplate;
 
 	/** Context used to retrieve and manage database meta-data. */
 	private final CallMetaDataContext callMetaDataContext = new CallMetaDataContext();
@@ -101,12 +102,22 @@ public abstract class AbstractJdbcCall {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
+	/**
+	 * Constructor to be used when initializing using a {@link JdbcOperations}.
+	 * @param jdbcTemplate the JdbcOperations to use
+	 */
+	protected AbstractJdbcCall(JdbcOperations jdbcTemplate) {
+		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
 
 	/**
 	 * Get the configured {@link JdbcTemplate}.
 	 */
 	public JdbcTemplate getJdbcTemplate() {
-		return this.jdbcTemplate;
+		Assert.state(this.jdbcTemplate instanceof JdbcTemplate, "No JdbcTemplate available");
+		return (JdbcTemplate) this.jdbcTemplate;
 	}
 
 	/**
@@ -289,11 +300,13 @@ public abstract class AbstractJdbcCall {
 			if (getProcedureName() == null) {
 				throw new InvalidDataAccessApiUsageException("Procedure or Function name is required");
 			}
-			try {
-				this.jdbcTemplate.afterPropertiesSet();
-			}
-			catch (IllegalArgumentException ex) {
-				throw new InvalidDataAccessApiUsageException(ex.getMessage());
+			if (this.jdbcTemplate instanceof JdbcTemplate) {
+				try {
+					((JdbcTemplate) this.jdbcTemplate).afterPropertiesSet();
+				}
+				catch (IllegalArgumentException ex) {
+					throw new InvalidDataAccessApiUsageException(ex.getMessage());
+				}
 			}
 			compileInternal();
 			this.compiled = true;

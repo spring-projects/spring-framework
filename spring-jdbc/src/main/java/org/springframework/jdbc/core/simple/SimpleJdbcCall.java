@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
@@ -77,6 +78,14 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcCall(JdbcTemplate jdbcTemplate) {
+		super(jdbcTemplate);
+	}
+
+	/**
+	 * Alternative Constructor that takes one parameter with the JdbcOperations to be used.
+	 * @param jdbcTemplate the {@code JdbcOperations} to use
+	 */
+	public SimpleJdbcCall(JdbcOperations jdbcTemplate) {
 		super(jdbcTemplate);
 	}
 
