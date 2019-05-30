@@ -519,6 +519,22 @@ public class StringUtilsTests {
 	}
 
 	@Test
+	public void testDelimitedListToStringArrayWithCommaWithEscapedCommas() {
+		String[] sa = StringUtils.delimitedListToStringArray("a\\,a,b\\,b", ",");
+		assertThat(sa.length).isEqualTo(2);
+		assertThat(sa[0]).isEqualTo("a,a");
+		assertThat(sa[1]).isEqualTo("b,b");
+	}
+
+	@Test
+	public void testDelimitedListToStringArrayWithCommaWithEscapedDelimiter() {
+		String[] sa = StringUtils.delimitedListToStringArray("a\\::a::b\\::b", "::");
+		assertThat(sa.length).isEqualTo(2);
+		assertThat(sa[0]).isEqualTo("a::a");
+		assertThat(sa[1]).isEqualTo("b::b");
+	}
+
+	@Test
 	public void testDelimitedListToStringArrayWithSemicolon() {
 		String[] sa = StringUtils.delimitedListToStringArray("a;b", ";");
 		assertThat(sa.length).isEqualTo(2);

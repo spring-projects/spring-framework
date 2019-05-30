@@ -1219,16 +1219,59 @@ public abstract class StringUtils {
 		else {
 			int pos = 0;
 			int delPos;
-			while ((delPos = str.indexOf(delimiter, pos)) != -1) {
-				result.add(deleteAny(str.substring(pos, delPos), charsToDelete));
+			while ((delPos =  nextDelimiterPosition(str, delimiter, pos)) != -1) {
+				result.add(extractEffectiveValue(str.substring(pos, delPos), delimiter, charsToDelete));
 				pos = delPos + delimiter.length();
 			}
 			if (str.length() > 0 && pos <= str.length()) {
 				// Add rest of String, but not in case of empty input.
-				result.add(deleteAny(str.substring(pos), charsToDelete));
+				result.add(extractEffectiveValue(str.substring(pos), delimiter, charsToDelete));
 			}
 		}
 		return toStringArray(result);
+	}
+
+	/**
+	 * It finds the next delimiter position not escaped
+	 * i.e: a\,a,b,c -> the returned int will be 2
+	 * @param str
+	 * @param delimiter
+	 * @param pos
+	 * @return
+	 */
+	private static int nextDelimiterPosition(final String str, final String delimiter, final int pos) {
+		int indexOfDelimiterEscaped = str.indexOf("\\".concat(delimiter), pos);
+
+		if (indexOfDelimiterEscaped == -1 || indexOfDelimiterEscaped + 1 != str.indexOf(delimiter, pos)) {
+			return str.indexOf(delimiter, pos);
+		}
+		int newDelimiterPos = indexOfDelimiterEscaped + delimiter.length() + 1;
+		return str.indexOf(delimiter, newDelimiterPos);
+	}
+
+	/**
+	 * Given that string might contain escaped delimiters and chars which want to be deleted, the method
+	 * work the result out returning a new string without the backward slashes either chars to be removed
+	 * @param chunkString
+	 * @param delimiter
+	 * @param charsToDelete
+	 * @return
+	 */
+	private static String extractEffectiveValue(final String chunkString,
+												final String delimiter,
+												@Nullable final String charsToDelete) {
+		String auxString = removeEscapedDelimiter(chunkString, delimiter);
+		return deleteAny(auxString, charsToDelete);
+	}
+
+	/**
+	 * remove the backward slashed leaving just the delimiter in the string which want to be used.
+	 * @param chunkString
+	 * @param delimiter
+	 * @return
+	 */
+	private static String removeEscapedDelimiter(final String chunkString, final String delimiter) {
+		return chunkString.replace("\\".concat(delimiter), delimiter);
 	}
 
 	/**
