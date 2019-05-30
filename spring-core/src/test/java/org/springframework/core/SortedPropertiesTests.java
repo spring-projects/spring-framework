@@ -132,8 +132,11 @@ public class SortedPropertiesTests {
 
 		String[] lines = lines(baos);
 
-		assertThat(lines).containsExactly( //
-			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>", //
+		assertThat(lines).isNotEmpty();
+		// Leniently match first line due to differences between JDK 8 and JDK 9+.
+		String regex = "<\\?xml .*\\?>";
+		assertThat(lines[0]).matches(regex);
+		assertThat(lines).filteredOn(line -> !line.matches(regex)).containsExactly( //
 			"<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">", //
 			"<properties>", //
 			"<entry key=\"color\">blue</entry>", //
