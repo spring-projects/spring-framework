@@ -1648,7 +1648,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return beanInstance;
 			}
 			if (!(beanInstance instanceof FactoryBean)) {
-				throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
+                throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
 			}
 		}
 
