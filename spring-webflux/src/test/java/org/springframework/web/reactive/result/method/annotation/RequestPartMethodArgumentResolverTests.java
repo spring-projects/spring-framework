@@ -60,6 +60,7 @@ import static org.springframework.web.method.MvcAnnotationPredicates.requestPart
 /**
  * Unit tests for {@link RequestPartMethodArgumentResolver}.
  * @author Rossen Stoyanchev
+ * @author Ilya Lukyanovich
  */
 public class RequestPartMethodArgumentResolverTests {
 
@@ -132,6 +133,15 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void listPersonNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(List.class, Person.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		List<Person> actual = resolveArgument(param, bodyBuilder);
+
+		assertThat(actual).isEmpty();
+	}
+
+	@Test
 	public void monoPerson() {
 		MethodParameter param = this.testMethod.annot(requestPart()).arg(Mono.class, Person.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -139,6 +149,15 @@ public class RequestPartMethodArgumentResolverTests {
 		Mono<Person> actual = resolveArgument(param, bodyBuilder);
 
 		assertThat(actual.block().getName()).isEqualTo("Jones");
+	}
+
+	@Test
+	public void monoPersonNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Mono.class, Person.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		Mono<Person> actual = resolveArgument(param, bodyBuilder);
+
+		assertThat(actual.block()).isNull();
 	}
 
 	@Test
@@ -152,6 +171,15 @@ public class RequestPartMethodArgumentResolverTests {
 		List<Person> persons = actual.collectList().block();
 		assertThat(persons.get(0).getName()).isEqualTo("Jones");
 		assertThat(persons.get(1).getName()).isEqualTo("James");
+	}
+
+	@Test
+	public void fluxPersonNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Flux.class, Person.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		Flux<Person> actual = resolveArgument(param, bodyBuilder);
+
+		assertThat(actual.collectList().block()).isEmpty();
 	}
 
 	@Test
@@ -178,6 +206,15 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void listPartNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(List.class, Part.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		List<Part> actual = resolveArgument(param, bodyBuilder);
+
+		assertThat(actual).isEmpty();
+	}
+
+	@Test
 	public void monoPart() {
 		MethodParameter param = this.testMethod.annot(requestPart()).arg(Mono.class, Part.class);
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
@@ -186,6 +223,15 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Part part = actual.block();
 		assertThat(partToUtf8String(part)).isEqualTo("{\"name\":\"Jones\"}");
+	}
+
+	@Test
+	public void monoPartNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Mono.class, Part.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		Mono<Part> actual = resolveArgument(param, bodyBuilder);
+
+		assertThat(actual.block()).isNull();
 	}
 
 	@Test
@@ -199,6 +245,15 @@ public class RequestPartMethodArgumentResolverTests {
 		List<Part> parts = actual.collectList().block();
 		assertThat(partToUtf8String(parts.get(0))).isEqualTo("{\"name\":\"Jones\"}");
 		assertThat(partToUtf8String(parts.get(1))).isEqualTo("{\"name\":\"James\"}");
+	}
+
+	@Test
+	public void fluxPartNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Flux.class, Part.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		Flux<Part> actual = resolveArgument(param, bodyBuilder);
+
+		assertThat(actual.collectList().block()).isEmpty();
 	}
 
 	@Test
@@ -278,7 +333,13 @@ public class RequestPartMethodArgumentResolverTests {
 			@RequestPart("name") Flux<Part> partFlux,
 			@RequestPart("name") List<Part> partList,
 			@RequestPart(name = "anotherPart", required = false) Person anotherPerson,
+			@RequestPart(name = "name", required = false) Mono<Person> anotherPersonMono,
+			@RequestPart(name = "name", required = false) Flux<Person> anotherPersonFlux,
+			@RequestPart(name = "name", required = false) List<Person> anotherPersonList,
 			@RequestPart(name = "anotherPart", required = false) Part anotherPart,
+			@RequestPart(name = "name", required = false) Mono<Part> anotherPartMono,
+			@RequestPart(name = "name", required = false) Flux<Part> anotherPartFlux,
+			@RequestPart(name = "name", required = false) List<Part> anotherPartList,
 			Person notAnnotated) {}
 
 
