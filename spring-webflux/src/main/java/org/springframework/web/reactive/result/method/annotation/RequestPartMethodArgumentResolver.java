@@ -99,13 +99,9 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 			// Mono<Part> or Flux<Part>
 			MethodParameter elementType = parameter.nested();
 			if (Part.class.isAssignableFrom(elementType.getNestedParameterType())) {
-				parts = (adapter.isMultiValue() ? parts : parts.take(1));
 				return Mono.just(adapter.fromPublisher(parts));
 			}
-			// We have to decode the content for each part, one at a time
-			if (adapter.isMultiValue()) {
-				return Mono.just(decodePartValues(parts, elementType, bindingContext, exchange, isRequired));
-			}
+			return Mono.just(adapter.fromPublisher(decodePartValues(parts, elementType, bindingContext, exchange, isRequired)));
 		}
 
 		// <T> or Mono<T>
