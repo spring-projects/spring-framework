@@ -56,7 +56,7 @@ public class InstanceComparator<T> implements Comparator<T> {
 	public int compare(T o1, T o2) {
 		int i1 = getOrder(o1);
 		int i2 = getOrder(o2);
-		return (i1 < i2 ? -1 : (i1 == i2 ? 0 : 1));
+		return (Integer.compare(i1, i2));
 	}
 
 	private int getOrder(@Nullable T object) {
