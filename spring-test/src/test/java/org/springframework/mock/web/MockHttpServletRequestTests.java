@@ -292,7 +292,9 @@ public class MockHttpServletRequestTests {
 		assertEquals("bar", cookies[0].getValue());
 		assertEquals("baz", cookies[1].getName());
 		assertEquals("qux", cookies[1].getValue());
-		assertEquals(Arrays.asList("foo=bar", "baz=qux"), cookieHeaders);
+
+		assertEquals(1, cookieHeaders.size());
+		assertEquals("foo=bar; baz=qux", cookieHeaders.get(0));
 	}
 
 	@Test
