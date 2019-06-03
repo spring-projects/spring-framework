@@ -329,12 +329,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			sendErrorMessage(session, ex);
 			return;
 		}
-
 		Message<byte[]> message = getErrorHandler().handleClientMessageProcessingError(clientMessage, ex);
 		if (message == null) {
 			return;
 		}
-
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		Assert.state(accessor != null, "No StompHeaderAccessor");
 		sendToClient(session, accessor, message.getPayload());
@@ -356,6 +354,14 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		catch (Throwable ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
 			logger.debug("Failed to send STOMP ERROR to client", ex);
+		}
+		finally {
+			try {
+				session.close(CloseStatus.PROTOCOL_ERROR);
+			}
+			catch (IOException ex) {
+				// Ignore
+			}
 		}
 	}
 
