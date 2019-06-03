@@ -81,6 +81,14 @@ public class ContentDispositionTests {
 				.filename("中文.txt", StandardCharsets.UTF_8).build());
 	}
 
+	@Test // gh-23077
+	public void parseWithEscapedQuote() {
+		ContentDisposition disposition = ContentDisposition.parse(
+				"form-data; name=\"file\"; filename=\"\\\"The Twilight Zone\\\".txt\"; size=123");
+		assertThat(ContentDisposition.builder("form-data").name("file")
+				.filename("\\\"The Twilight Zone\\\".txt").size(123L).build()).isEqualTo(disposition);
+	}
+
 	@Test
 	public void parseEmpty() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
