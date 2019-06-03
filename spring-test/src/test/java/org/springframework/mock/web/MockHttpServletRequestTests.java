@@ -279,15 +279,20 @@ public class MockHttpServletRequestTests {
 		Cookie cookie2 = new Cookie("baz", "qux");
 		request.setCookies(cookie1, cookie2);
 
-		Cookie[] cookies = request.getCookies();
-		List<String> cookieHeaders = Collections.list(request.getHeaders("Cookie"));
+		assertThat(request.getCookies())
+				.describedAs("Raw cookies stored as is")
+				.hasSize(2)
+				.satisfies(subject -> {
+					assertThat(subject[0].getName()).isEqualTo("foo");
+					assertThat(subject[0].getValue()).isEqualTo("bar");
+					assertThat(subject[1].getName()).isEqualTo("baz");
+					assertThat(subject[1].getValue()).isEqualTo("qux");
+				});
 
-		assertThat(cookies.length).isEqualTo(2);
-		assertThat(cookies[0].getName()).isEqualTo("foo");
-		assertThat(cookies[0].getValue()).isEqualTo("bar");
-		assertThat(cookies[1].getName()).isEqualTo("baz");
-		assertThat(cookies[1].getValue()).isEqualTo("qux");
-		assertThat(cookieHeaders).isEqualTo(Arrays.asList("foo=bar", "baz=qux"));
+		assertThat(Collections.list(request.getHeaders(HttpHeaders.COOKIE)))
+				.describedAs("Cookies -> Header conversion works as expected per RFC6265")
+				.hasSize(1)
+				.hasOnlyOneElementSatisfying(header -> assertThat(header).isEqualTo("foo=bar; baz=qux"));
 	}
 
 	@Test
