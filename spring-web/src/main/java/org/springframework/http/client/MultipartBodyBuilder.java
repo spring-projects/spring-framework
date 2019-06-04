@@ -225,8 +225,8 @@ public final class MultipartBodyBuilder {
 		/**
 		 * Set the {@linkplain MediaType media type} of the part.
 		 * @param contentType the content type
-		 * @see HttpHeaders#setContentType(MediaType)
 		 * @since 5.2
+		 * @see HttpHeaders#setContentType(MediaType)
 		 */
 		PartBuilder contentType(MediaType contentType);
 
