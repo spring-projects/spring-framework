@@ -76,7 +76,7 @@ public interface ServerResponse {
 	 * @param request the current request
 	 * @param response the response to write to
 	 * @param context the context to use when writing
-	 * @return {@code Mono<Void>} to indicate when writing is complete
+	 * @return a ModelAndView to render, or {@code null} if handled directly
 	 */
 	@Nullable
 	ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
