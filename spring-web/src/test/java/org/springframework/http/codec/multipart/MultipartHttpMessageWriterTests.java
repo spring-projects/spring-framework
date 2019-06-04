@@ -93,8 +93,9 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 				this.bufferFactory.wrap("Bb".getBytes(StandardCharsets.UTF_8)),
 				this.bufferFactory.wrap("Cc".getBytes(StandardCharsets.UTF_8))
 		);
-		Part mockPart = mock(Part.class);
+		FilePart mockPart = mock(FilePart.class);
 		given(mockPart.content()).willReturn(bufferPublisher);
+		given(mockPart.filename()).willReturn("file.txt");
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("name 1", "value 1");
@@ -104,7 +105,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 		bodyBuilder.part("utf8", utf8);
 		bodyBuilder.part("json", new Foo("bar"), MediaType.APPLICATION_JSON);
 		bodyBuilder.asyncPart("publisher", Flux.just("foo", "bar", "baz"), String.class);
-		bodyBuilder.asyncPart("partPublisher", Mono.just(mockPart), Part.class);
+		bodyBuilder.part("filePublisher", mockPart);
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
 		Map<String, Object> hints = Collections.emptyMap();
@@ -159,8 +160,9 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTestCas
 		value = decodeToString(part);
 		assertThat(value).isEqualTo("foobarbaz");
 
-		part = requestParts.getFirst("partPublisher");
-		assertThat(part.name()).isEqualTo("partPublisher");
+		part = requestParts.getFirst("filePublisher");
+		assertThat(part.name()).isEqualTo("filePublisher");
+		assertThat(((FilePart) part).filename()).isEqualTo("file.txt");
 		value = decodeToString(part);
 		assertThat(value).isEqualTo("AaBbCc");
 	}

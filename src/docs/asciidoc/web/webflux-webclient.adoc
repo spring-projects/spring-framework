@@ -414,8 +414,9 @@ multipart request. The following example shows how to create a `MultiValueMap<St
 ----
 	MultipartBodyBuilder builder = new MultipartBodyBuilder();
 	builder.part("fieldPart", "fieldValue");
-	builder.part("filePart", new FileSystemResource("...logo.png"));
+	builder.part("filePart1", new FileSystemResource("...logo.png"));
 	builder.part("jsonPart", new Person("Jason"));
+	builder.part("myPart", part); // Part from a server request
 
 	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
 ----
