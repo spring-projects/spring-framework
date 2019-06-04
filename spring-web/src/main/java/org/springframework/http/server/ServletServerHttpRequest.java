@@ -249,7 +249,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext();) {
 				String value = valueIterator.next();
 				writer.write(URLEncoder.encode(name, FORM_CHARSET.name()));
-				if (value != null) {
+				if (value != null && value.length() > 0) {
 					writer.write('=');
 					writer.write(URLEncoder.encode(value, FORM_CHARSET.name()));
 					if (valueIterator.hasNext()) {
