@@ -71,12 +71,11 @@ public interface ServerResponse {
 	MultiValueMap<String, Cookie> cookies();
 
 	/**
-	 * Write this response to the servlet response (and return {@code null}, or return a model and
-	 * view.
+	 * Write this response to the given servlet response.
 	 * @param request the current request
 	 * @param response the response to write to
 	 * @param context the context to use when writing
-	 * @return a ModelAndView to render, or {@code null} if handled directly
+	 * @return a {@code ModelAndView} to render, or {@code null} if handled directly
 	 */
 	@Nullable
 	ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
@@ -121,7 +120,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a new builder with a {@linkplain HttpStatus#CREATED 201 Created} status
+	 * Create a builder with a {@linkplain HttpStatus#CREATED 201 Created} status
 	 * and a location header set to the given URI.
 	 * @param location the location URI
 	 * @return the created builder
@@ -132,7 +131,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with an {@linkplain HttpStatus#ACCEPTED 202 Accepted} status.
+	 * Create a builder with a {@linkplain HttpStatus#ACCEPTED 202 Accepted} status.
 	 * @return the created builder
 	 */
 	static BodyBuilder accepted() {
@@ -197,7 +196,7 @@ public interface ServerResponse {
 	}
 
 	/**
-	 * Create a builder with an
+	 * Create a builder with a
 	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY 422 Unprocessable Entity} status.
 	 * @return the created builder
 	 */
