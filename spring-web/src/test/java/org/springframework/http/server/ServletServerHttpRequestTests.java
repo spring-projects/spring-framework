@@ -169,5 +169,15 @@ public class ServletServerHttpRequestTests {
 		byte[] content = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3".getBytes("UTF-8");
 		assertThat(result).as("Invalid content returned").isEqualTo(content);
 	}
+	
+    @Test
+	public void getFormBodyWhenEmptyValue() throws IOException {
+		mockRequest.setContentType("application/x-www-form-urlencoded; charset=UTF-8");
+		mockRequest.setMethod("POST");
+		byte[] content = "Hello World".getBytes("UTF-8");
+		mockRequest.setContent(content);
 
+ 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertArrayEquals("Invalid content returned", content, result);
+	}
 }
