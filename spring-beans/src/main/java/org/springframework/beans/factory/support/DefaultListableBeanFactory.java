@@ -342,6 +342,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getBean(Class<T> requiredType, @Nullable Object... args) throws BeansException {
+		Assert.notNull(requiredType, "Required type must not be null");
 		Object resolved = resolveBean(ResolvableType.forRawClass(requiredType), args, false);
 		if (resolved == null) {
 			throw new NoSuchBeanDefinitionException(requiredType);
@@ -351,6 +352,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) throws BeansException {
+		Assert.notNull(requiredType, "Required type must not be null");
 		return getBeanProvider(ResolvableType.forRawClass(requiredType));
 	}
 
@@ -1105,6 +1107,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType) throws BeansException {
+		Assert.notNull(requiredType, "Required type must not be null");
 		NamedBeanHolder<T> namedBean = resolveNamedBean(ResolvableType.forRawClass(requiredType), null, false);
 		if (namedBean != null) {
 			return namedBean;
