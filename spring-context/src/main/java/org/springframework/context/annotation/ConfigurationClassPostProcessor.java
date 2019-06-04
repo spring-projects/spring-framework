@@ -76,7 +76,11 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.CONFI
  * <p>This post processor is priority-ordered as it is important that any
  * {@link Bean} methods declared in {@code @Configuration} classes have
  * their corresponding bean definitions registered before any other
- * {@link BeanFactoryPostProcessor} executes.
+ * {@link BeanFactoryPostProcessor} executes.ss
+ *
+ * @see <a href="https://blog.csdn.net/andy_zhang2007/article/details/78579464">外部链接</a>
+ * 确认相关功能
+ *
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -324,6 +328,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
+			/**
+			 * 关键
+			 * 将配置类及其定义的资源对象转化成spring的BeanDefinition放入内存
+			 */
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 

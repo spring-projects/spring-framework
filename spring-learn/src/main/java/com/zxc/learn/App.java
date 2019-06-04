@@ -5,7 +5,6 @@ import com.zxc.learn.custom.MyBeanNameGenerator;
 import com.zxc.learn.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author simon

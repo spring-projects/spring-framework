@@ -61,6 +61,15 @@ public abstract class AnnotationConfigUtils {
 
 	/**
 	 * The bean name of the internally managed Configuration annotation processor.
+	 *
+	 * 配置处理器注册名称
+	 *
+	 * 此处理器用于解析处理 @Configuration注解的类。
+	 * 具体实现类{@link ConfigurationClassPostProcessor}
+	 * 核心方法：
+	 * 	{@linkplain ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry 方法}
+	 * 	{@linkplain ConfigurationClassPostProcessor#postProcessBeanFactory 方法}
+	 *
 	 */
 	public static final String CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalConfigurationAnnotationProcessor";
@@ -160,6 +169,18 @@ public abstract class AnnotationConfigUtils {
 
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 
+		/**
+		 * 注入spring自带的处理器
+		 *
+		 * 1.ConfigurationClassPostProcessor
+		 * {@link ConfigurationClassPostProcessor}用于处理@Configuration注解的类的处理器
+		 * 通过{@link ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry}方法将配置类及其定义的资源和类转化成BeanDefinition放入内存
+		 * 通过{@link ConfigurationClassPostProcessor#postProcessBeanFactory}方法增强所有配置类，另外往容器中增加一个BeanPostProcessor:ImportAwareBeanPostProcessor(如果所增加的BeanPostProcessor已经存在会先将其删除然后重新添加)
+		 *
+		 * 2.AutowiredAnnotationBeanPostProcessor
+		 * {@link ConfigurationClassPostProcessor}
+		 *
+		 */
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);

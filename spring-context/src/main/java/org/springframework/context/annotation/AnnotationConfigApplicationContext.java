@@ -63,7 +63,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	public AnnotationConfigApplicationContext() {
 		/**
-		 * 初始化注解类定义加载器
+		 * 初始化注解类加载器
+		 *
+		 * 此处会加载spring的默认后置处理器
+		 * 通过{@link AnnotatedBeanDefinitionReader}类中的构造器的{@link AnnotationConfigUtils}.registerAnnotationConfigProcessors方法实现
 		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 		/**
