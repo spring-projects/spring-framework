@@ -329,14 +329,18 @@ public final class CollectionFactory {
 	}
 
 	/**
-	 * Create a variant of {@code java.util.Properties} that automatically adapts
-	 * non-String values to String representations on {@link Properties#getProperty}.
+	 * Create a variant of {@link java.util.Properties} that automatically adapts
+	 * non-String values to String representations in {@link Properties#getProperty}.
+	 * <p>In addition, the returned {@code Properties} instance sorts properties
+	 * alphanumerically based on their keys.
 	 * @return a new {@code Properties} instance
 	 * @since 4.3.4
+	 * @see #createSortedProperties(boolean)
+	 * @see #createSortedProperties(Properties, boolean)
 	 */
 	@SuppressWarnings("serial")
 	public static Properties createStringAdaptingProperties() {
-		return new Properties() {
+		return new SortedProperties(false) {
 			@Override
 			@Nullable
 			public String getProperty(String key) {
@@ -359,6 +363,7 @@ public final class CollectionFactory {
 	 * storing properties in a file
 	 * @return a new {@code Properties} instance
 	 * @since 5.2
+	 * @see #createStringAdaptingProperties()
 	 * @see #createSortedProperties(Properties, boolean)
 	 */
 	public static Properties createSortedProperties(boolean omitComments) {
@@ -384,6 +389,7 @@ public final class CollectionFactory {
 	 * storing properties in a file
 	 * @return a new {@code Properties} instance
 	 * @since 5.2
+	 * @see #createStringAdaptingProperties()
 	 * @see #createSortedProperties(boolean)
 	 */
 	public static Properties createSortedProperties(Properties properties, boolean omitComments) {
