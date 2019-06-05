@@ -97,11 +97,11 @@ public class ReactiveAdapterRegistry {
 		// We can fall back on "reactive-streams-flow-bridge" (once released)
 
 		// Coroutines
-		if (ClassUtils.isPresent("kotlinx.coroutines.Deferred", classLoader)) {
+		if (reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.Deferred", classLoader)) {
 			new CoroutinesRegistrar().registerAdapters(this);
 		}
 		// TODO Use a single CoroutinesRegistrar when Flow will be not experimental anymore
-		if (ClassUtils.isPresent("kotlinx.coroutines.flow.Flow", classLoader)) {
+		if (reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.flow.Flow", classLoader)) {
 			new CoroutinesFlowRegistrar().registerAdapters(this);
 		}
 	}
