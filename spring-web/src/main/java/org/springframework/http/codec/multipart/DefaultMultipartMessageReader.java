@@ -21,6 +21,7 @@ import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.Channel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
@@ -367,6 +368,10 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 
 	private static class DefaultFilePart extends DefaultPart implements FilePart {
 
+		private static final OpenOption[] FILE_CHANNEL_OPTIONS =
+				{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
+
+
 		public DefaultFilePart(HttpHeaders headers, DataBuffer body) {
 			super(headers, body);
 		}
@@ -380,7 +385,7 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 
 		@Override
 		public Mono<Void> transferTo(Path dest) {
-			return Mono.using(() -> AsynchronousFileChannel.open(dest, StandardOpenOption.WRITE),
+			return Mono.using(() -> AsynchronousFileChannel.open(dest, FILE_CHANNEL_OPTIONS),
 					this::writeBody, this::close);
 		}
 
