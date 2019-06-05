@@ -82,13 +82,13 @@ public class TransactionSynchronizationManager {
 
 
 	/**
-	 * Return the TransactionSynchronizationManager of the current transaction.
-	 * Mainly intended for code that wants to bind resources or synchronizations.
-	 * rollback-only but not throw an application exception.
-	 * @throws NoTransactionException if the transaction info cannot be found,
-	 * because the method was invoked outside a managed transaction.
+	 * Get the {@link TransactionSynchronizationManager} that is associated with
+	 * the current transaction context.
+	 * <p>Mainly intended for code that wants to bind resources or synchronizations.
+	 * @throws NoTransactionException if the transaction info cannot be found &mdash;
+	 * for example, because the method was invoked outside a managed transaction
 	 */
-	public static Mono<TransactionSynchronizationManager> currentTransaction() {
+	public static Mono<TransactionSynchronizationManager> forCurrentTransaction() {
 		return TransactionContextManager.currentContext().map(TransactionSynchronizationManager::new);
 	}
 
