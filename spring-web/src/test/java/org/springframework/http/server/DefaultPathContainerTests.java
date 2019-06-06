@@ -27,6 +27,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link DefaultPathContainer}.
@@ -111,13 +112,16 @@ public class DefaultPathContainerTests {
 		testPath("//%20/%20", "//%20/%20", Arrays.asList("/", "/", "%20", "/", "%20"));
 	}
 
-	private void testPath(String input, String value, List<String> expectedElements) {
-
-		PathContainer path = PathContainer.parsePath(input);
+	private void testPath(String input, String separator, String value, List<String> expectedElements) {
+		PathContainer path = PathContainer.parsePath(input, separator);
 
 		assertThat(path.value()).as("value: '" + input + "'").isEqualTo(value);
 		assertThat(path.elements().stream()
 				.map(PathContainer.Element::value).collect(Collectors.toList())).as("elements: " + input).isEqualTo(expectedElements);
+	}
+
+	private void testPath(String input, String value, List<String> expectedElements) {
+		testPath(input, "/", value, expectedElements);
 	}
 
 	@Test
@@ -135,6 +139,16 @@ public class DefaultPathContainerTests {
 		// trailing slash
 		path = PathContainer.parsePath("/a/b/");
 		assertThat(path.subPath(2).value()).isEqualTo("/b/");
+	}
+
+	@Test
+	public void pathWithCustomSeparator() throws Exception {
+		testPath("a.b.c", ".", "a.b.c", Arrays.asList("a", ".", "b", ".", "c"));
+	}
+
+	@Test
+	public void emptySeparator() {
+		assertThatIllegalArgumentException().isThrownBy(() -> PathContainer.parsePath("path", ""));
 	}
 
 }

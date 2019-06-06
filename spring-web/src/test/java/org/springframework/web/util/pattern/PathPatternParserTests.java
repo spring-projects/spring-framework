@@ -408,6 +408,15 @@ public class PathPatternParserTests {
 		assertThat(patterns.get(1)).isEqualTo(p2);
 	}
 
+	@Test
+	public void separatorTests() {
+		PathPatternParser parser = new PathPatternParser();
+		parser.setSeparator('.');
+		String rawPattern = "first.second.{last}";
+		PathPattern pattern = parser.parse(rawPattern);
+		assertThat(pattern.computePatternString()).isEqualTo(rawPattern);
+	}
+
 	private PathPattern parse(String pattern) {
 		PathPatternParser patternParser = new PathPatternParser();
 		return patternParser.parse(pattern);

@@ -66,13 +66,25 @@ public interface PathContainer {
 
 
 	/**
-	 * Parse the path value into a sequence of {@link Separator Separator} and
-	 * {@link PathSegment PathSegment} elements.
-	 * @param path the encoded, raw URL path value to parse
+	 * Parse the path value into a sequence of {@code "/"} {@link Separator Separator}
+	 * and {@link PathSegment PathSegment} elements.
+	 * @param path the encoded, raw path value to parse
 	 * @return the parsed path
 	 */
 	static PathContainer parsePath(String path) {
-		return DefaultPathContainer.createFromUrlPath(path);
+		return DefaultPathContainer.createFromUrlPath(path, "/");
+	}
+
+	/**
+	 * Parse the path value into a sequence of {@link Separator Separator} and
+	 * {@link PathSegment PathSegment} elements.
+	 * @param path the encoded, raw path value to parse
+	 * @param separator the decoded separator for parsing patterns
+	 * @return the parsed path
+	 * @since 5.2
+	 */
+	static PathContainer parsePath(String path, String separator) {
+		return DefaultPathContainer.createFromUrlPath(path, separator);
 	}
 
 
