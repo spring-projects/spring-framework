@@ -41,6 +41,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -58,6 +59,7 @@ import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -973,12 +975,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public void setCookies(@Nullable Cookie... cookies) {
 		this.cookies = (ObjectUtils.isEmpty(cookies) ? null : cookies);
-		this.headers.remove(HttpHeaders.COOKIE);
-		if (this.cookies != null) {
-			Arrays.stream(this.cookies)
-					.map(c -> c.getName() + '=' + (c.getValue() == null ? "" : c.getValue()))
-					.forEach(value -> doAddHeaderValue(HttpHeaders.COOKIE, value, false));
+		if (this.cookies == null) {
+			removeHeader(HttpHeaders.COOKIE);
 		}
+		else {
+			doAddHeaderValue(HttpHeaders.COOKIE, encodeCookies(this.cookies), true);
+		}
+	}
+
+	private static String encodeCookies(@NonNull Cookie... cookies) {
+		return Arrays.stream(cookies)
+				.map(c -> c.getName() + '=' + (c.getValue() == null ? "" : c.getValue()))
+				.collect(Collectors.joining("; "));
 	}
 
 	@Override
@@ -1297,6 +1305,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * Otherwise it simply returns the current session id.
 	 * @since 4.0.3
 	 */
+	@Override
 	public String changeSessionId() {
 		Assert.isTrue(this.session != null, "The request does not have a session");
 		if (this.session instanceof MockHttpSession) {
