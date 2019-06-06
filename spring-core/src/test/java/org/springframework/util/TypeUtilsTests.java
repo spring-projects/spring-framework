@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link TypeUtils}.
@@ -58,13 +58,13 @@ public class TypeUtilsTests {
 
 	@Test
 	public void withClasses() {
-		assertTrue(TypeUtils.isAssignable(Object.class, Object.class));
-		assertTrue(TypeUtils.isAssignable(Object.class, String.class));
-		assertFalse(TypeUtils.isAssignable(String.class, Object.class));
-		assertTrue(TypeUtils.isAssignable(List.class, List.class));
-		assertTrue(TypeUtils.isAssignable(List.class, LinkedList.class));
-		assertFalse(TypeUtils.isAssignable(List.class, Collection.class));
-		assertFalse(TypeUtils.isAssignable(List.class, HashSet.class));
+		assertThat(TypeUtils.isAssignable(Object.class, Object.class)).isTrue();
+		assertThat(TypeUtils.isAssignable(Object.class, String.class)).isTrue();
+		assertThat(TypeUtils.isAssignable(String.class, Object.class)).isFalse();
+		assertThat(TypeUtils.isAssignable(List.class, List.class)).isTrue();
+		assertThat(TypeUtils.isAssignable(List.class, LinkedList.class)).isTrue();
+		assertThat(TypeUtils.isAssignable(List.class, Collection.class)).isFalse();
+		assertThat(TypeUtils.isAssignable(List.class, HashSet.class)).isFalse();
 	}
 
 	@Test
@@ -72,22 +72,22 @@ public class TypeUtilsTests {
 		Type objectsType = getClass().getField("objects").getGenericType();
 		Type openObjectsType = getClass().getField("openObjects").getGenericType();
 		Type stringsType = getClass().getField("strings").getGenericType();
-		assertTrue(TypeUtils.isAssignable(Object.class, objectsType));
-		assertTrue(TypeUtils.isAssignable(Object.class, openObjectsType));
-		assertTrue(TypeUtils.isAssignable(Object.class, stringsType));
-		assertTrue(TypeUtils.isAssignable(List.class, objectsType));
-		assertTrue(TypeUtils.isAssignable(List.class, openObjectsType));
-		assertTrue(TypeUtils.isAssignable(List.class, stringsType));
-		assertTrue(TypeUtils.isAssignable(objectsType, List.class));
-		assertTrue(TypeUtils.isAssignable(openObjectsType, List.class));
-		assertTrue(TypeUtils.isAssignable(stringsType, List.class));
-		assertTrue(TypeUtils.isAssignable(objectsType, objectsType));
-		assertTrue(TypeUtils.isAssignable(openObjectsType, openObjectsType));
-		assertTrue(TypeUtils.isAssignable(stringsType, stringsType));
-		assertTrue(TypeUtils.isAssignable(openObjectsType, objectsType));
-		assertTrue(TypeUtils.isAssignable(openObjectsType, stringsType));
-		assertFalse(TypeUtils.isAssignable(stringsType, objectsType));
-		assertFalse(TypeUtils.isAssignable(objectsType, stringsType));
+		assertThat(TypeUtils.isAssignable(Object.class, objectsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(Object.class, openObjectsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(Object.class, stringsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(List.class, objectsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(List.class, openObjectsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(List.class, stringsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(objectsType, List.class)).isTrue();
+		assertThat(TypeUtils.isAssignable(openObjectsType, List.class)).isTrue();
+		assertThat(TypeUtils.isAssignable(stringsType, List.class)).isTrue();
+		assertThat(TypeUtils.isAssignable(objectsType, objectsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(openObjectsType, openObjectsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(stringsType, stringsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(openObjectsType, objectsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(openObjectsType, stringsType)).isTrue();
+		assertThat(TypeUtils.isAssignable(stringsType, objectsType)).isFalse();
+		assertThat(TypeUtils.isAssignable(objectsType, stringsType)).isFalse();
 	}
 
 	@Test
@@ -103,25 +103,25 @@ public class TypeUtilsTests {
 		Type openWildcard = openObjectsType.getActualTypeArguments()[0]; // '?'
 		Type openNumbersWildcard = openNumbersType.getActualTypeArguments()[0]; // '? extends number'
 
-		assertTrue(TypeUtils.isAssignable(openWildcard, objectType));
-		assertTrue(TypeUtils.isAssignable(openNumbersWildcard, numberType));
-		assertFalse(TypeUtils.isAssignable(openNumbersWildcard, stringType));
-		assertFalse(TypeUtils.isAssignable(storableObjectListType, openObjectsType));
+		assertThat(TypeUtils.isAssignable(openWildcard, objectType)).isTrue();
+		assertThat(TypeUtils.isAssignable(openNumbersWildcard, numberType)).isTrue();
+		assertThat(TypeUtils.isAssignable(openNumbersWildcard, stringType)).isFalse();
+		assertThat(TypeUtils.isAssignable(storableObjectListType, openObjectsType)).isFalse();
 	}
 
 	@Test
 	public void withGenericArrayTypes() throws Exception {
 		Type arrayType = getClass().getField("array").getGenericType();
 		Type openArrayType = getClass().getField("openArray").getGenericType();
-		assertTrue(TypeUtils.isAssignable(Object.class, arrayType));
-		assertTrue(TypeUtils.isAssignable(Object.class, openArrayType));
-		assertTrue(TypeUtils.isAssignable(List[].class, arrayType));
-		assertTrue(TypeUtils.isAssignable(List[].class, openArrayType));
-		assertTrue(TypeUtils.isAssignable(arrayType, List[].class));
-		assertTrue(TypeUtils.isAssignable(openArrayType, List[].class));
-		assertTrue(TypeUtils.isAssignable(arrayType, arrayType));
-		assertTrue(TypeUtils.isAssignable(openArrayType, openArrayType));
-		assertTrue(TypeUtils.isAssignable(openArrayType, arrayType));
+		assertThat(TypeUtils.isAssignable(Object.class, arrayType)).isTrue();
+		assertThat(TypeUtils.isAssignable(Object.class, openArrayType)).isTrue();
+		assertThat(TypeUtils.isAssignable(List[].class, arrayType)).isTrue();
+		assertThat(TypeUtils.isAssignable(List[].class, openArrayType)).isTrue();
+		assertThat(TypeUtils.isAssignable(arrayType, List[].class)).isTrue();
+		assertThat(TypeUtils.isAssignable(openArrayType, List[].class)).isTrue();
+		assertThat(TypeUtils.isAssignable(arrayType, arrayType)).isTrue();
+		assertThat(TypeUtils.isAssignable(openArrayType, openArrayType)).isTrue();
+		assertThat(TypeUtils.isAssignable(openArrayType, arrayType)).isTrue();
 	}
 
 }

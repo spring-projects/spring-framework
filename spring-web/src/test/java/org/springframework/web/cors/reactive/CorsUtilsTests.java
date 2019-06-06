@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,13 +16,17 @@
 
 package org.springframework.web.cors.reactive;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.web.test.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
 import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.options;
 
@@ -35,35 +39,117 @@ public class CorsUtilsTests {
 
 	@Test
 	public void isCorsRequest() {
-		MockServerHttpRequest request = get("/").header(HttpHeaders.ORIGIN, "http://domain.com").build();
-		assertTrue(CorsUtils.isCorsRequest(request));
+		ServerHttpRequest request = get("http://domain.com/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
+		assertThat(CorsUtils.isCorsRequest(request)).isTrue();
 	}
 
 	@Test
 	public void isNotCorsRequest() {
-		MockServerHttpRequest request = get("/").build();
-		assertFalse(CorsUtils.isCorsRequest(request));
+		ServerHttpRequest request = get("/").build();
+		assertThat(CorsUtils.isCorsRequest(request)).isFalse();
 	}
 
 	@Test
 	public void isPreFlightRequest() {
-		MockServerHttpRequest request = options("/")
-				.header(HttpHeaders.ORIGIN, "http://domain.com")
+		ServerHttpRequest request = options("/")
+				.header(HttpHeaders.ORIGIN, "https://domain.com")
 				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
 				.build();
-		assertTrue(CorsUtils.isPreFlightRequest(request));
+		assertThat(CorsUtils.isPreFlightRequest(request)).isTrue();
 	}
 
 	@Test
 	public void isNotPreFlightRequest() {
-		MockServerHttpRequest request = get("/").build();
-		assertFalse(CorsUtils.isPreFlightRequest(request));
+		ServerHttpRequest request = get("/").build();
+		assertThat(CorsUtils.isPreFlightRequest(request)).isFalse();
 
-		request = options("/").header(HttpHeaders.ORIGIN, "http://domain.com").build();
-		assertFalse(CorsUtils.isPreFlightRequest(request));
+		request = options("/").header(HttpHeaders.ORIGIN, "https://domain.com").build();
+		assertThat(CorsUtils.isPreFlightRequest(request)).isFalse();
+	}
 
-		request = options("/").header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET").build();
-		assertFalse(CorsUtils.isPreFlightRequest(request));
+	@Test  // SPR-16262
+	public void isSameOriginWithXForwardedHeaders() {
+		String server = "mydomain1.com";
+		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.com");
+		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.com");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", -1, "https://mydomain2.com");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", -1, "https://mydomain2.com");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
+	}
+
+	@Test  // SPR-16262
+	public void isSameOriginWithForwardedHeader() {
+		String server = "mydomain1.com";
+		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.com");
+		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.com");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com", "https://mydomain2.com");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com", "https://mydomain2.com");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
+	}
+
+	@Test  // SPR-16362
+	@SuppressWarnings("deprecation")
+	public void isSameOriginWithDifferentSchemes() {
+		MockServerHttpRequest request = MockServerHttpRequest
+				.get("http://mydomain1.com")
+				.header(HttpHeaders.ORIGIN, "https://mydomain1.com")
+				.build();
+		assertThat(CorsUtils.isSameOrigin(request)).isFalse();
+	}
+
+	@SuppressWarnings("deprecation")
+	private void testWithXForwardedHeaders(String serverName, int port,
+			String forwardedProto, String forwardedHost, int forwardedPort, String originHeader) {
+
+		String url = "http://" + serverName;
+		if (port != -1) {
+			url = url + ":" + port;
+		}
+
+		MockServerHttpRequest.BaseBuilder<?> builder = get(url).header(HttpHeaders.ORIGIN, originHeader);
+		if (forwardedProto != null) {
+			builder.header("X-Forwarded-Proto", forwardedProto);
+		}
+		if (forwardedHost != null) {
+			builder.header("X-Forwarded-Host", forwardedHost);
+		}
+		if (forwardedPort != -1) {
+			builder.header("X-Forwarded-Port", String.valueOf(forwardedPort));
+		}
+
+		ServerHttpRequest request = adaptFromForwardedHeaders(builder);
+		assertThat(CorsUtils.isSameOrigin(request)).isTrue();
+	}
+
+	@SuppressWarnings("deprecation")
+	private void testWithForwardedHeader(String serverName, int port,
+			String forwardedHeader, String originHeader) {
+
+		String url = "http://" + serverName;
+		if (port != -1) {
+			url = url + ":" + port;
+		}
+
+		MockServerHttpRequest.BaseBuilder<?> builder = get(url)
+				.header("Forwarded", forwardedHeader)
+				.header(HttpHeaders.ORIGIN, originHeader);
+
+		ServerHttpRequest request = adaptFromForwardedHeaders(builder);
+		assertThat(CorsUtils.isSameOrigin(request)).isTrue();
+	}
+
+	// SPR-16668
+	@SuppressWarnings("deprecation")
+	private ServerHttpRequest adaptFromForwardedHeaders(MockServerHttpRequest.BaseBuilder<?> builder) {
+		AtomicReference<ServerHttpRequest> requestRef = new AtomicReference<>();
+		MockServerWebExchange exchange = MockServerWebExchange.from(builder);
+		new org.springframework.web.filter.reactive.ForwardedHeaderFilter().filter(exchange, exchange2 -> {
+			requestRef.set(exchange2.getRequest());
+			return Mono.empty();
+		}).block();
+		return requestRef.get();
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,16 +29,19 @@ import javax.jms.TextMessage;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.core.MethodParameter;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -47,16 +50,13 @@ import static org.mockito.BDDMockito.*;
  */
 public class MappingJackson2MessageConverterTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private MappingJackson2MessageConverter converter;
 
 	private Session sessionMock;
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() {
 		sessionMock = mock(Session.class);
 		converter = new MappingJackson2MessageConverter();
 		converter.setEncodingPropertyName("__encoding__");
@@ -98,7 +98,7 @@ public class MappingJackson2MessageConverterTests {
 				});
 
 		Object result = converter.fromMessage(bytesMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class MappingJackson2MessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		MyBean result = (MyBean)converter.fromMessage(textMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -149,7 +149,7 @@ public class MappingJackson2MessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		MyBean result = (MyBean)converter.fromMessage(textMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -162,7 +162,7 @@ public class MappingJackson2MessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		Object result = converter.fromMessage(textMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class MappingJackson2MessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		Object result = converter.fromMessage(textMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -206,8 +206,8 @@ public class MappingJackson2MessageConverterTests {
 		Method method = this.getClass().getDeclaredMethod("invalid");
 		MethodParameter returnType = new MethodParameter(method, -1);
 
-		thrown.expect(IllegalArgumentException.class);
-		testToTextMessageWithReturnType(returnType);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				testToTextMessageWithReturnType(returnType));
 	}
 
 	private void testToTextMessageWithReturnType(MethodParameter returnType) throws JMSException, NoSuchMethodException {
@@ -263,7 +263,10 @@ public class MappingJackson2MessageConverterTests {
 		return new MyAnotherBean();
 	}
 
+
 	public static class MyBean {
+
+		private String foo;
 
 		public MyBean() {
 		}
@@ -271,8 +274,6 @@ public class MappingJackson2MessageConverterTests {
 		public MyBean(String foo) {
 			this.foo = foo;
 		}
-
-		private String foo;
 
 		public String getFoo() {
 			return foo;
@@ -290,13 +291,10 @@ public class MappingJackson2MessageConverterTests {
 			if (o == null || getClass() != o.getClass()) {
 				return false;
 			}
-
 			MyBean bean = (MyBean) o;
-
 			if (foo != null ? !foo.equals(bean.foo) : bean.foo != null) {
 				return false;
 			}
-
 			return true;
 		}
 
@@ -306,8 +304,11 @@ public class MappingJackson2MessageConverterTests {
 		}
 	}
 
+
 	private interface Summary {};
+
 	private interface Full extends Summary {};
+
 
 	private static class MyAnotherBean {
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,6 +75,8 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	}
 
 	/**
+	 * Indicate whether to use the Java Activation Framework as a fallback option
+	 * to map from file extensions to media types.
 	 * @deprecated as of 5.0, in favor of {@link #setUseRegisteredExtensionsOnly(boolean)}.
 	 */
 	@Deprecated
@@ -87,9 +89,9 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	protected String getMediaTypeKey(NativeWebRequest webRequest) {
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 		if (request == null) {
-			logger.warn("An HttpServletRequest is required to determine the media type key");
 			return null;
 		}
+		// Ignore LOOKUP_PATH attribute, use our own "fixed" UrlPathHelper with decoding off
 		String path = this.urlPathHelper.getLookupPathForRequest(request);
 		String extension = UriUtils.extractFileExtension(path);
 		return (StringUtils.hasText(extension) ? extension.toLowerCase(Locale.ENGLISH) : null);

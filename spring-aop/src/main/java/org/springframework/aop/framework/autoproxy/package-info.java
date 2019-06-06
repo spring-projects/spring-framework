@@ -10,6 +10,8 @@
  * Post-processors can be explicitly registered on a ConfigurableBeanFactory instead.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.aop.framework.autoproxy;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

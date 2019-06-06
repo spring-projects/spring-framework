@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.freemarker;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -35,8 +34,8 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.ui.freemarker.SpringTemplateLoader;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
  * @author Juergen Hoeller
@@ -44,14 +43,15 @@ import static org.junit.Assert.*;
  */
 public class FreeMarkerConfigurerTests {
 
-	@Test(expected = IOException.class)
+	@Test
 	public void freeMarkerConfigurationFactoryBeanWithConfigLocation() throws Exception {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
 		fcfb.setFreemarkerSettings(props);
-		fcfb.afterPropertiesSet();
+		assertThatIOException().isThrownBy(
+				fcfb::afterPropertiesSet);
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class FreeMarkerConfigurerTests {
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		fcfb.afterPropertiesSet();
 		Configuration cfg = fcfb.getObject();
-		assertTrue(cfg.getTemplateLoader() instanceof SpringTemplateLoader);
+		assertThat(cfg.getTemplateLoader() instanceof SpringTemplateLoader).isTrue();
 	}
 
 	@Test
@@ -85,10 +85,10 @@ public class FreeMarkerConfigurerTests {
 			}
 		});
 		fcfb.afterPropertiesSet();
-		assertThat(fcfb.getObject(), instanceOf(Configuration.class));
+		assertThat(fcfb.getObject()).isInstanceOf(Configuration.class);
 		Configuration fc = fcfb.getObject();
 		Template ft = fc.getTemplate("test");
-		assertEquals("test", FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap()));
+		assertThat(FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap())).isEqualTo("test");
 	}
 
 	@Test  // SPR-12448

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,13 +24,11 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -39,26 +37,29 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
+/**
+ * @author Sebastien Deleuze
+ */
 public class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final WebClient webClient = WebClient.create();
+
 
 	@Test
 	public void multipartData() {
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/multipartData")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.exchange();
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
+				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 
@@ -67,26 +68,20 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/parts")
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(BodyInserters.fromMultipartData(generateBody()))
+				.syncBody(generateBody())
 				.exchange();
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
+				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 
-	private MultiValueMap<String, Object> generateBody() {
-		HttpHeaders fooHeaders = new HttpHeaders();
-		fooHeaders.setContentType(MediaType.TEXT_PLAIN);
-		ClassPathResource fooResource = new ClassPathResource("org/springframework/http/codec/multipart/foo.txt");
-		HttpEntity<ClassPathResource> fooPart = new HttpEntity<>(fooResource, fooHeaders);
-		HttpEntity<String> barPart = new HttpEntity<>("bar");
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-		parts.add("fooPart", fooPart);
-		parts.add("barPart", barPart);
-		return parts;
+	private MultiValueMap<String, HttpEntity<?>> generateBody() {
+		MultipartBodyBuilder builder = new MultipartBodyBuilder();
+		builder.part("fooPart", new ClassPathResource("org/springframework/http/codec/multipart/foo.txt"));
+		builder.part("barPart", "bar");
+		return builder.build();
 	}
 
 	@Override
@@ -96,6 +91,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 				.andRoute(POST("/parts"), multipartHandler::parts);
 	}
 
+
 	private static class MultipartHandler {
 
 		public Mono<ServerResponse> multipartData(ServerRequest request) {
@@ -104,9 +100,9 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 					.flatMap(map -> {
 						Map<String, Part> parts = map.toSingleValueMap();
 						try {
-							assertEquals(2, parts.size());
-							assertEquals("foo.txt", ((FilePart) parts.get("fooPart")).filename());
-							assertEquals("bar", ((FormFieldPart) parts.get("barPart")).value());
+							assertThat(parts.size()).isEqualTo(2);
+							assertThat(((FilePart) parts.get("fooPart")).filename()).isEqualTo("foo.txt");
+							assertThat(((FormFieldPart) parts.get("barPart")).value()).isEqualTo("bar");
 						}
 						catch(Exception e) {
 							return Mono.error(e);
@@ -119,9 +115,9 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 			return request.body(BodyExtractors.toParts()).collectList()
 					.flatMap(parts -> {
 						try {
-							assertEquals(2, parts.size());
-							assertEquals("foo.txt", ((FilePart) parts.get(0)).filename());
-							assertEquals("bar", ((FormFieldPart) parts.get(1)).value());
+							assertThat(parts.size()).isEqualTo(2);
+							assertThat(((FilePart) parts.get(0)).filename()).isEqualTo("foo.txt");
+							assertThat(((FormFieldPart) parts.get(1)).value()).isEqualTo("bar");
 						}
 						catch(Exception e) {
 							return Mono.error(e);

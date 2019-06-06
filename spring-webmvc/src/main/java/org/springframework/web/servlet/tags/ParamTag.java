@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,10 +22,36 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
 import org.springframework.lang.Nullable;
 
 /**
- * JSP tag for collecting name-value parameters and passing them to a
+ * The {@code <param>} tag collects name-value parameters and passes them to a
  * {@link ParamAware} ancestor in the tag hierarchy.
  *
  * <p>This tag must be nested under a param aware tag.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr>
+ * <td>name</td>
+ * <td>true</td>
+ * <td>true</td>
+ * <td>The name of the parameter.</td>
+ * </tr>
+ * <tr>
+ * <td>value</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The value of the parameter.</td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Scott Andrews
  * @author Nicholas Williams

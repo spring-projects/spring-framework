@@ -6,6 +6,8 @@
  * meaning that code using this package does not need to worry about error handling.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.jca.cci.object;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

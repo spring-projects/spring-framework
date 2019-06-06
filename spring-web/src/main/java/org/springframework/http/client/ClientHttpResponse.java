@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,13 +38,19 @@ public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an HttpStatus enum value
 	 * @throws IOException in case of I/O errors
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus getStatusCode() throws IOException;
 
 	/**
-	 * Return the HTTP status code of the response as integer
+	 * Return the HTTP status code (potentially non-standard and not
+	 * resolvable through the {@link HttpStatus} enum) as an integer.
 	 * @return the HTTP status as an integer
 	 * @throws IOException in case of I/O errors
+	 * @since 3.1.1
+	 * @see #getStatusCode()
+	 * @see HttpStatus#resolve(int)
 	 */
 	int getRawStatusCode() throws IOException;
 

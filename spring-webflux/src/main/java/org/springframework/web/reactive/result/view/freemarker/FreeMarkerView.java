@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,7 +32,6 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.Version;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeansException;
@@ -41,6 +40,8 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -166,9 +167,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			return true;
 		}
 		catch (FileNotFoundException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No FreeMarker view found for URL: " + getUrl());
-			}
+			// Allow for ViewResolver chaining...
 			return false;
 		}
 		catch (ParseException ex) {
@@ -185,27 +184,34 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	protected Mono<Void> renderInternal(Map<String, Object> renderAttributes,
 			@Nullable MediaType contentType, ServerWebExchange exchange) {
 
-		// Expose all standard FreeMarker hash models.
-		SimpleHash freeMarkerModel = getTemplateModel(renderAttributes, exchange);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Rendering FreeMarker template [" + getUrl() + "].");
-		}
+		return exchange.getResponse().writeWith(Mono
+				.fromCallable(() -> {
+					// Expose all standard FreeMarker hash models.
+					SimpleHash freeMarkerModel = getTemplateModel(renderAttributes, exchange);
 
-		Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
-		DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
-		try {
-			Charset charset = getCharset(contentType);
-			Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream(), charset);
-			getTemplate(locale).process(freeMarkerModel, writer);
-		}
-		catch (IOException ex) {
-			String message = "Could not load FreeMarker template for URL [" + getUrl() + "]";
-			return Mono.error(new IllegalStateException(message, ex));
-		}
-		catch (Throwable ex) {
-			return Mono.error(ex);
-		}
-		return exchange.getResponse().writeWith(Flux.just(dataBuffer));
+					if (logger.isDebugEnabled()) {
+						logger.debug(exchange.getLogPrefix() + "Rendering [" + getUrl() + "]");
+					}
+
+					Locale locale = LocaleContextHolder.getLocale(exchange.getLocaleContext());
+					DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
+					try {
+						Charset charset = getCharset(contentType);
+						Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream(), charset);
+						getTemplate(locale).process(freeMarkerModel, writer);
+						return dataBuffer;
+					}
+					catch (IOException ex) {
+						DataBufferUtils.release(dataBuffer);
+						String message = "Could not load FreeMarker template for URL [" + getUrl() + "]";
+						throw new IllegalStateException(message, ex);
+					}
+					catch (Throwable ex) {
+						DataBufferUtils.release(dataBuffer);
+						throw ex;
+					}
+				})
+				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
 	}
 
 	private Charset getCharset(@Nullable MediaType mediaType) {

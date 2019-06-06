@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.session;
 
 import java.util.List;
@@ -24,11 +25,10 @@ import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
-
 /**
  * Default implementation of {@link WebSessionManager} delegating to a
  * {@link WebSessionIdResolver} for session id resolution and to a
- * {@link WebSessionStore}
+ * {@link WebSessionStore}.
  *
  * @author Rossen Stoyanchev
  * @author Rob Winch
@@ -47,7 +47,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	 * @param sessionIdResolver the resolver to use
 	 */
 	public void setSessionIdResolver(WebSessionIdResolver sessionIdResolver) {
-		Assert.notNull(sessionIdResolver, "WebSessionIdResolver is required.");
+		Assert.notNull(sessionIdResolver, "WebSessionIdResolver is required");
 		this.sessionIdResolver = sessionIdResolver;
 	}
 
@@ -64,7 +64,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	 * @param sessionStore the persistence strategy to use
 	 */
 	public void setSessionStore(WebSessionStore sessionStore) {
-		Assert.notNull(sessionStore, "WebSessionStore is required.");
+		Assert.notNull(sessionStore, "WebSessionStore is required");
 		this.sessionStore = sessionStore;
 	}
 
@@ -78,12 +78,9 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
-		return Mono.defer(() ->
-				retrieveSession(exchange)
-						.flatMap(session -> removeSessionIfExpired(exchange, session))
-						.flatMap(this.getSessionStore()::updateLastAccessTime)
-						.switchIfEmpty(this.sessionStore.createWebSession())
-						.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
+		return Mono.defer(() -> retrieveSession(exchange)
+				.switchIfEmpty(this.sessionStore.createWebSession())
+				.doOnNext(session -> exchange.getResponse().beforeCommit(() -> save(exchange, session))));
 	}
 
 	private Mono<WebSession> retrieveSession(ServerWebExchange exchange) {
@@ -92,36 +89,22 @@ public class DefaultWebSessionManager implements WebSessionManager {
 				.next();
 	}
 
-	private Mono<WebSession> removeSessionIfExpired(ServerWebExchange exchange, WebSession session) {
-		if (session.isExpired()) {
-			this.sessionIdResolver.expireSession(exchange);
-			return this.sessionStore.removeSession(session.getId()).then(Mono.empty());
-		}
-		return Mono.just(session);
-	}
-
 	private Mono<Void> save(ServerWebExchange exchange, WebSession session) {
-		if (session.isExpired()) {
-			return Mono.error(new IllegalStateException(
-					"Sessions are checked for expiration and have their " +
-							"lastAccessTime updated when first accessed during request processing. " +
-							"However this session is expired meaning that maxIdleTime elapsed " +
-							"before the call to session.save()."));
-		}
+		List<String> ids = getSessionIdResolver().resolveSessionIds(exchange);
 
-		if (!session.isStarted()) {
+		if (!session.isStarted() || session.isExpired()) {
+			if (!ids.isEmpty()) {
+				// Expired on retrieve or while processing request, or invalidated..
+				this.sessionIdResolver.expireSession(exchange);
+			}
 			return Mono.empty();
 		}
 
-		if (hasNewSessionId(exchange, session)) {
-			DefaultWebSessionManager.this.sessionIdResolver.setSessionId(exchange, session.getId());
+		if (ids.isEmpty() || !session.getId().equals(ids.get(0))) {
+			this.sessionIdResolver.setSessionId(exchange, session.getId());
 		}
 
 		return session.save();
 	}
 
-	private boolean hasNewSessionId(ServerWebExchange exchange, WebSession session) {
-		List<String> ids = getSessionIdResolver().resolveSessionIds(exchange);
-		return ids.isEmpty() || !session.getId().equals(ids.get(0));
-	}
 }

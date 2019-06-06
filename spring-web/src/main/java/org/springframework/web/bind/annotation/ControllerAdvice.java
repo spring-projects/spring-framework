@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,6 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Specialization of {@link Component @Component} for classes that declare
  * {@link ExceptionHandler @ExceptionHandler}, {@link InitBinder @InitBinder}, or
@@ -39,17 +38,24 @@ import org.springframework.stereotype.Component;
  * AnnotationAwareOrderComparator}, i.e. based on
  * {@link org.springframework.core.annotation.Order @Order} and
  * {@link org.springframework.core.Ordered Ordered}, and applied in that order
- * at runtime. For handling exceptions the first {@code @ExceptionHandler} to
- * match the exception is used. For model attributes and {@code InitBinder}
- * initialization, {@code @ModelAttribute} and {@code @InitBinder} methods will
- * also follow {@code @ControllerAdvice} order.
+ * at runtime. For handling exceptions, an {@code @ExceptionHandler} will be
+ * picked on the first advice with a matching exception handler method. For
+ * model attributes and {@code InitBinder} initialization, {@code @ModelAttribute}
+ * and {@code @InitBinder} methods will also follow {@code @ControllerAdvice} order.
  *
- * <p>By default the methods in an {@code @ControllerAdvice} apply globally to
- * all Controllers. Use selectors {@link #annotations()},
- * {@link #basePackageClasses()}, and {@link #basePackages()} (or its alias
- * {@link #value()}) to define a more narrow subset of targeted Controllers.
- * If multiple selectors are declared, OR logic is applied, meaning selected
- * Controllers should match at least one selector. Note that selector checks
+ * <p>Note: For {@code @ExceptionHandler} methods, a root exception match will be
+ * preferred to just matching a cause of the current exception, among the handler
+ * methods of a particular advice bean. However, a cause match on a higher-priority
+ * advice will still be preferred over any match (whether root or cause level)
+ * on a lower-priority advice bean. As a consequence, please declare your primary
+ * root exception mappings on a prioritized advice bean with a corresponding order.
+ *
+ * <p>By default, the methods in an {@code @ControllerAdvice} apply globally to
+ * all controllers. Use selectors {@link #annotations},
+ * {@link #basePackageClasses}, and {@link #basePackages} (or its alias
+ * {@link #value}) to define a more narrow subset of targeted controllers.
+ * If multiple selectors are declared, boolean {@code OR} logic is applied, meaning
+ * selected controllers should match at least one selector. Note that selector checks
  * are performed at runtime and so adding many selectors may negatively impact
  * performance and add complexity.
  *
@@ -57,6 +63,8 @@ import org.springframework.stereotype.Component;
  * @author Brian Clozel
  * @author Sam Brannen
  * @since 3.2
+ * @see org.springframework.stereotype.Controller
+ * @see RestControllerAdvice
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -90,8 +98,8 @@ public @interface ControllerAdvice {
 	String[] basePackages() default {};
 
 	/**
-	 * Type-safe alternative to {@link #value()} for specifying the packages
-	 * to select Controllers to be assisted by the {@code @ControllerAdvice}
+	 * Type-safe alternative to {@link #basePackages} for specifying the packages
+	 * in which to select controllers to be advised by the {@code @ControllerAdvice}
 	 * annotated class.
 	 * <p>Consider creating a special no-op marker class or interface in each package
 	 * that serves no purpose other than being referenced by this attribute.
@@ -102,16 +110,16 @@ public @interface ControllerAdvice {
 	/**
 	 * Array of classes.
 	 * <p>Controllers that are assignable to at least one of the given types
-	 * will be assisted by the {@code @ControllerAdvice} annotated class.
+	 * will be advised by the {@code @ControllerAdvice} annotated class.
 	 * @since 4.0
 	 */
 	Class<?>[] assignableTypes() default {};
 
 	/**
 	 * Array of annotations.
-	 * <p>Controllers that are annotated with this/one of those annotation(s)
-	 * will be assisted by the {@code @ControllerAdvice} annotated class.
-	 * <p>Consider creating a special annotation or use a predefined one,
+	 * <p>Controllers that are annotated with at least one of the supplied annotations
+	 * will be advised by the {@code @ControllerAdvice} annotated class.
+	 * <p>Consider creating a custom composed annotation or use a predefined one,
 	 * like {@link RestController @RestController}.
 	 * @since 4.0
 	 */

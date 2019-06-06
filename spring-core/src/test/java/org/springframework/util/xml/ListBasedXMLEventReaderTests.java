@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.util.xml;
-
-import static org.junit.Assert.assertThat;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -32,14 +29,25 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.junit.Test;
 
+import org.springframework.tests.XmlContent;
+
+import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
+import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
+import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 /**
  * @author Arjen Poutsma
+ * @author Andrzej Hołowko
  */
 public class ListBasedXMLEventReaderTests {
 
-	private final XMLInputFactory inputFactory = XMLInputFactory.newFactory();
+	private final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 
 	private final XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
+
 
 	@Test
 	public void standard() throws Exception {
@@ -52,12 +60,40 @@ public class ListBasedXMLEventReaderTests {
 		XMLEventWriter writer = this.outputFactory.createXMLEventWriter(resultWriter);
 		writer.add(reader);
 
-		assertThat(resultWriter.toString(), isSimilarTo(xml));
+		assertThat(XmlContent.from(resultWriter)).isSimilarTo(xml);
+	}
+
+	@Test
+	public void testGetElementText() throws Exception {
+		String xml = "<foo><bar>baz</bar></foo>";
+		List<XMLEvent> events = readEvents(xml);
+
+		ListBasedXMLEventReader reader = new ListBasedXMLEventReader(events);
+
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_DOCUMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_ELEMENT);
+		assertThat(reader.getElementText()).isEqualTo("baz");
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(END_ELEMENT);
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(END_DOCUMENT);
+	}
+
+	@Test
+	public void testGetElementTextThrowsExceptionAtWrongPosition() throws Exception {
+		String xml = "<foo><bar>baz</bar></foo>";
+		List<XMLEvent> events = readEvents(xml);
+
+		ListBasedXMLEventReader reader = new ListBasedXMLEventReader(events);
+
+		assertThat(reader.nextEvent().getEventType()).isEqualTo(START_DOCUMENT);
+
+		assertThatExceptionOfType(XMLStreamException.class).isThrownBy(
+				reader::getElementText)
+			.withMessageStartingWith("Not at START_ELEMENT");
 	}
 
 	private List<XMLEvent> readEvents(String xml) throws XMLStreamException {
-		XMLEventReader reader =
-				this.inputFactory.createXMLEventReader(new StringReader(xml));
+		XMLEventReader reader = this.inputFactory.createXMLEventReader(new StringReader(xml));
 		List<XMLEvent> events = new ArrayList<>();
 		while (reader.hasNext()) {
 			events.add(reader.nextEvent());

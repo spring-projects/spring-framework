@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,7 +64,7 @@ import org.springframework.util.Assert;
 public class EmbeddedDatabaseFactory {
 
 	/**
-	 * Default name for an embedded database: {@value}
+	 * Default name for an embedded database: {@value}.
 	 */
 	public static final String DEFAULT_DATABASE_NAME = "testdb";
 
@@ -91,8 +91,8 @@ public class EmbeddedDatabaseFactory {
 	 * generation of a pseudo-random unique ID to be used as the database name.
 	 * <p>Setting this flag to {@code true} overrides any explicit name set
 	 * via {@link #setDatabaseName}.
-	 * @see #setDatabaseName
 	 * @since 4.2
+	 * @see #setDatabaseName
 	 */
 	public void setGenerateUniqueDatabaseName(boolean generateUniqueDatabaseName) {
 		this.generateUniqueDatabaseName = generateUniqueDatabaseName;
@@ -187,7 +187,7 @@ public class EmbeddedDatabaseFactory {
 			if (this.dataSource instanceof SimpleDriverDataSource) {
 				SimpleDriverDataSource simpleDriverDataSource = (SimpleDriverDataSource) this.dataSource;
 				logger.info(String.format("Starting embedded database: url='%s', username='%s'",
-					simpleDriverDataSource.getUrl(), simpleDriverDataSource.getUsername()));
+						simpleDriverDataSource.getUrl(), simpleDriverDataSource.getUsername()));
 			}
 			else {
 				logger.info(String.format("Starting embedded database '%s'", this.databaseName));

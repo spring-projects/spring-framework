@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,9 +32,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Static factory methods for {@link RequestMatcher} classes. Typically used to
@@ -46,6 +45,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
  *
  * @author Craig Walls
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class MockRestRequestMatchers {
@@ -68,8 +68,8 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Assert the request URI string with the given matcher.
-	 * @param matcher String matcher for the expected URI
+	 * Assert the request URI string with the given Hamcrest matcher.
+	 * @param matcher the String matcher for the expected URI
 	 * @return the request matcher
 	 */
 	public static RequestMatcher requestTo(final Matcher<String> matcher) {
@@ -112,7 +112,7 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Assert request query parameter values with the given Hamcrest matcher.
+	 * Assert request query parameter values with the given Hamcrest matcher(s).
 	 */
 	@SafeVarargs
 	public static RequestMatcher queryParam(final String name, final Matcher<? super String>... matchers) {
@@ -133,7 +133,7 @@ public abstract class MockRestRequestMatchers {
 			MultiValueMap<String, String> params = getQueryParams(request);
 			assertValueCount("query param", name, params, expectedValues.length);
 			for (int i = 0 ; i < expectedValues.length; i++) {
-				assertEquals("Query param + [" + name + "]", expectedValues[i], params.get(name).get(i));
+				assertEquals("Query param [" + name + "]", expectedValues[i], params.get(name).get(i));
 			}
 		};
 	}
@@ -142,20 +142,21 @@ public abstract class MockRestRequestMatchers {
 		return UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
 	}
 
-	private static void assertValueCount(String valueType, final String name,
-			MultiValueMap<String, String> map, int count) {
+	private static void assertValueCount(
+			String valueType, final String name, MultiValueMap<String, String> map, int count) {
 
 		List<String> values = map.get(name);
-
 		String message = "Expected " + valueType + " <" + name + ">";
-		assertNotNull(message, values);
-
-		assertTrue(message + " to have at least <" + count + "> values but found " + values,
-				count <= values.size());
+		if (values == null) {
+			fail(message + " to exist but was null");
+		}
+		if (count > values.size()) {
+			fail(message + " to have at least <" + count + "> values but found " + values);
+		}
 	}
 
 	/**
-	 * Assert request header values with the given Hamcrest matcher.
+	 * Assert request header values with the given Hamcrest matcher(s).
 	 */
 	@SafeVarargs
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
@@ -164,8 +165,7 @@ public abstract class MockRestRequestMatchers {
 			List<String> headerValues = request.getHeaders().get(name);
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < matchers.length; i++) {
-				assertThat("Request header[" + name + "]", headerValues.get(i), matchers[i]);
-
+				assertThat("Request header [" + name + "]", headerValues.get(i), matchers[i]);
 			}
 		};
 	}
@@ -179,9 +179,7 @@ public abstract class MockRestRequestMatchers {
 			List<String> headerValues = request.getHeaders().get(name);
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < expectedValues.length; i++) {
-				assertEquals("Request header  [" + name + "]",
-						expectedValues[i], headerValues.get(i));
-
+				assertEquals("Request header [" + name + "]", expectedValues[i], headerValues.get(i));
 			}
 		};
 	}
@@ -202,7 +200,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param expression the JSON path optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
 	 */
-	public static JsonPathRequestMatchers jsonPath(String expression, Object ... args) {
+	public static JsonPathRequestMatchers jsonPath(String expression, Object... args) {
 		return new JsonPathRequestMatchers(expression, args);
 	}
 

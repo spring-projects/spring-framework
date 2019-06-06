@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
 public class StringArrayPropertyEditor extends PropertyEditorSupport {
 
 	/**
-	 * Default separator for splitting a String: a comma (",")
+	 * Default separator for splitting a String: a comma (",").
 	 */
 	public static final String DEFAULT_SEPARATOR = ",";
 
@@ -128,7 +128,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		String[] array = StringUtils.delimitedListToStringArray(text, this.separator, this.charsToDelete);
-		if (trimValues) {
+		if (this.trimValues) {
 			array = StringUtils.trimArrayElements(array);
 		}
 		if (this.emptyArrayAsNull && array.length == 0) {

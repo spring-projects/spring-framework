@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -347,8 +347,11 @@ public interface AsyncRestOperations {
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
 	 * <pre class="code">
-	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
-	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean =
+	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 *
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
+	 *     template.exchange(&quot;https://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -368,8 +371,11 @@ public interface AsyncRestOperations {
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
 	 * <pre class="code">
-	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
-	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean =
+	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 *
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
+	 *     template.exchange(&quot;https://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
@@ -389,8 +395,11 @@ public interface AsyncRestOperations {
 	 * The given {@link ParameterizedTypeReference} is used to pass generic type
 	 * information:
 	 * <pre class="code">
-	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
-	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean =
+	 *     new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 *
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response =
+	 *     template.exchange(&quot;https://example.com&quot;,HttpMethod.GET, null, myBean);
 	 * </pre>
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)

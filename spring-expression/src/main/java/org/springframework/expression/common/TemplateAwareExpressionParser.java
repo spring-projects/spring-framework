@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,10 @@
 
 package org.springframework.expression.common;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -86,10 +87,11 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * @throws ParseException when the expressions cannot be parsed
 	 */
 	private Expression[] parseExpressions(String expressionString, ParserContext context) throws ParseException {
-		List<Expression> expressions = new LinkedList<>();
+		List<Expression> expressions = new ArrayList<>();
 		String prefix = context.getExpressionPrefix();
 		String suffix = context.getExpressionSuffix();
 		int startIdx = 0;
+
 		while (startIdx < expressionString.length()) {
 			int prefixIndex = expressionString.indexOf(prefix, startIdx);
 			if (prefixIndex >= startIdx) {
@@ -104,22 +106,18 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 							"No ending suffix '" + suffix + "' for expression starting at character " +
 							prefixIndex + ": " + expressionString.substring(prefixIndex));
 				}
-
 				if (suffixIndex == afterPrefixIndex) {
 					throw new ParseException(expressionString, prefixIndex,
 							"No expression defined within delimiter '" + prefix + suffix +
 							"' at character " + prefixIndex);
 				}
-
 				String expr = expressionString.substring(prefixIndex + prefix.length(), suffixIndex);
 				expr = expr.trim();
-
 				if (expr.isEmpty()) {
 					throw new ParseException(expressionString, prefixIndex,
 							"No expression defined within delimiter '" + prefix + suffix +
 							"' at character " + prefixIndex);
 				}
-
 				expressions.add(doParseExpression(expr, context));
 				startIdx = suffixIndex + suffix.length();
 			}
@@ -129,7 +127,8 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 				startIdx = expressionString.length();
 			}
 		}
-		return expressions.toArray(new Expression[expressions.size()]);
+
+		return expressions.toArray(new Expression[0]);
 	}
 
 	/**
@@ -174,7 +173,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 		if (nextSuffix == -1) {
 			return -1; // the suffix is missing
 		}
-		Stack<Bracket> stack = new Stack<>();
+		Deque<Bracket> stack = new ArrayDeque<>();
 		while (pos < maxlen) {
 			if (isSuffixHere(expressionString, pos, suffix) && stack.isEmpty()) {
 				break;

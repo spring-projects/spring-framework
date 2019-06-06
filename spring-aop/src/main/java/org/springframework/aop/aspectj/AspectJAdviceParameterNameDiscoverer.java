@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -156,17 +156,17 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 
-	/** The pointcut expression associated with the advice, as a simple String */
+	/** The pointcut expression associated with the advice, as a simple String. */
 	@Nullable
 	private String pointcutExpression;
 
 	private boolean raiseExceptions;
 
-	/** If the advice is afterReturning, and binds the return value, this is the parameter name used */
+	/** If the advice is afterReturning, and binds the return value, this is the parameter name used. */
 	@Nullable
 	private String returningName;
 
-	/** If the advice is afterThrowing, and binds the thrown value, this is the parameter name used */
+	/** If the advice is afterThrowing, and binds the thrown value, this is the parameter name used. */
 	@Nullable
 	private String throwingName;
 
@@ -178,7 +178,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 
 	/**
-	 * Create a new discoverer that attempts to discover parameter names
+	 * Create a new discoverer that attempts to discover parameter names.
 	 * from the given pointcut expression.
 	 */
 	public AspectJAdviceParameterNameDiscoverer(@Nullable String pointcutExpression) {
@@ -272,15 +272,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 				}
 			}
 		}
-		catch (AmbiguousBindingException ambigEx) {
-			if (this.raiseExceptions) {
-				throw ambigEx;
-			}
-			else {
-				return null;
-			}
-		}
-		catch (IllegalArgumentException ex) {
+		catch (AmbiguousBindingException | IllegalArgumentException ex) {
 			if (this.raiseExceptions) {
 				throw ex;
 			}
@@ -421,7 +413,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		String[] tokens = StringUtils.tokenizeToStringArray(this.pointcutExpression, " ");
 		for (int i = 0; i < tokens.length; i++) {
 			String toMatch = tokens[i];
-			int firstParenIndex = toMatch.indexOf("(");
+			int firstParenIndex = toMatch.indexOf('(');
 			if (firstParenIndex != -1) {
 				toMatch = toMatch.substring(0, firstParenIndex);
 			}
@@ -582,7 +574,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			if (toMatch.startsWith("!")) {
 				toMatch = toMatch.substring(1);
 			}
-			int firstParenIndex = toMatch.indexOf("(");
+			int firstParenIndex = toMatch.indexOf('(');
 			if (firstParenIndex != -1) {
 				toMatch = toMatch.substring(0, firstParenIndex);
 			}
@@ -677,7 +669,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 	/**
-	 * Match up args against unbound arguments of primitive types
+	 * Match up args against unbound arguments of primitive types.
 	 */
 	private void maybeBindPrimitiveArgsFromPointcutExpression() {
 		int numUnboundPrimitives = countNumberOfUnboundPrimitiveArguments();

@@ -1,16 +1,11 @@
 description = "Spring WebSocket"
 
-apply plugin: "io.spring.dependency-management"
-
 dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
+		mavenBom "org.eclipse.jetty:jetty-bom:${jettyVersion}"
 	}
-	resolutionStrategy {
-		cacheChangingModulesFor 0, 'seconds'
-	}
-	applyMavenExclusions = false
 }
 
 dependencies {
@@ -19,21 +14,21 @@ dependencies {
 	compile(project(":spring-web"))
 	optional(project(":spring-messaging"))
 	optional(project(":spring-webmvc"))
-	optional("javax.servlet:javax.servlet-api:3.1.0")
+	optional("javax.servlet:javax.servlet-api:4.0.1")
 	optional("javax.websocket:javax.websocket-api:1.1")
 	optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
 		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
 	}
 	optional("org.glassfish.tyrus:tyrus-container-servlet:1.13.1")
-	optional("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
+	optional("org.eclipse.jetty:jetty-webapp") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
+	optional("org.eclipse.jetty.websocket:websocket-server") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
-	optional("org.eclipse.jetty:jetty-client:${jettyVersion}")
+	optional("org.eclipse.jetty.websocket:websocket-client")
+	optional("org.eclipse.jetty:jetty-client")
 	optional("io.undertow:undertow-servlet:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.servlet", module: "jboss-servlet-api_3.1_spec"
 		exclude group: "org.jboss.spec.javax.annotation", module: "jboss-annotations-api_1.2_spec"
@@ -44,5 +39,5 @@ dependencies {
 	optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-	testCompile("io.projectreactor.ipc:reactor-netty")
+	testCompile("io.projectreactor.netty:reactor-netty")
 }

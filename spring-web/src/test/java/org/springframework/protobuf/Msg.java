@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -526,7 +526,8 @@ public  final class Msg extends
     // optional .SecondMsg blah = 2;
     private org.springframework.protobuf.SecondMsg blah_ = org.springframework.protobuf.SecondMsg.getDefaultInstance();
     private com.google.protobuf.SingleFieldBuilder<
-        org.springframework.protobuf.SecondMsg, org.springframework.protobuf.SecondMsg.Builder, org.springframework.protobuf.SecondMsgOrBuilder> blahBuilder_;
+        org.springframework.protobuf.SecondMsg, org.springframework.protobuf.SecondMsg.Builder,
+			org.springframework.protobuf.SecondMsgOrBuilder> blahBuilder_;
     /**
      * <code>optional .SecondMsg blah = 2;</code>
      */
@@ -627,7 +628,8 @@ public  final class Msg extends
      * <code>optional .SecondMsg blah = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilder<
-        org.springframework.protobuf.SecondMsg, org.springframework.protobuf.SecondMsg.Builder, org.springframework.protobuf.SecondMsgOrBuilder>
+        org.springframework.protobuf.SecondMsg, org.springframework.protobuf.SecondMsg.Builder,
+			org.springframework.protobuf.SecondMsgOrBuilder>
         getBlahFieldBuilder() {
       if (blahBuilder_ == null) {
         blahBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(

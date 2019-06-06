@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.format.support.DefaultFormattingConversionService
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest
+import org.springframework.mock.web.test.server.MockServerWebExchange
 import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
@@ -48,7 +49,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Before
 	fun setup() {
-		this.resolver = RequestParamMethodArgumentResolver(null, ReactiveAdapterRegistry(), true)
+		this.resolver = RequestParamMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance(), true)
 		val initializer = ConfigurableWebBindingInitializer()
 		initializer.conversionService = DefaultFormattingConversionService()
 		bindingContext = BindingContext(initializer)
@@ -64,56 +65,56 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNullableRequiredWithParameter() {
-		var exchange = MockServerHttpRequest.get("/path?name=123").toExchange()
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name=123"))
 		var result = resolver.resolveArgument(nullableParamRequired, bindingContext, exchange)
 		StepVerifier.create(result).expectNext("123").expectComplete().verify()
 	}
 
 	@Test
 	fun resolveNullableRequiredWithoutParameter() {
-		var exchange = MockServerHttpRequest.get("/").toExchange()
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 		var result = resolver.resolveArgument(nullableParamRequired, bindingContext, exchange)
 		StepVerifier.create(result).expectComplete().verify()
 	}
 
 	@Test
 	fun resolveNullableNotRequiredWithParameter() {
-		var exchange = MockServerHttpRequest.get("/path?name=123").toExchange()
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name=123"))
 		var result = resolver.resolveArgument(nullableParamNotRequired, bindingContext, exchange)
 		StepVerifier.create(result).expectNext("123").expectComplete().verify()
 	}
 
 	@Test
 	fun resolveNullableNotRequiredWithoutParameter() {
-		var exchange = MockServerHttpRequest.get("/").toExchange()
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 		var result = resolver.resolveArgument(nullableParamNotRequired, bindingContext, exchange)
 		StepVerifier.create(result).expectComplete().verify()
 	}
 
 	@Test
 	fun resolveNonNullableRequiredWithParameter() {
-		var exchange = MockServerHttpRequest.get("/path?name=123").toExchange()
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name=123"))
 		var result = resolver.resolveArgument(nonNullableParamRequired, bindingContext, exchange)
 		StepVerifier.create(result).expectNext("123").expectComplete().verify()
 	}
 
 	@Test
 	fun resolveNonNullableRequiredWithoutParameter() {
-		var exchange = MockServerHttpRequest.get("/").toExchange()
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 		var result = resolver.resolveArgument(nonNullableParamRequired, bindingContext, exchange)
 		StepVerifier.create(result).expectError(ServerWebInputException::class.java).verify()
 	}
 
 	@Test
 	fun resolveNonNullableNotRequiredWithParameter() {
-		var exchange = MockServerHttpRequest.get("/path?name=123").toExchange()
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path?name=123"))
 		var result = resolver.resolveArgument(nonNullableParamNotRequired, bindingContext, exchange)
 		StepVerifier.create(result).expectNext("123").expectComplete().verify()
 	}
 
 	@Test
 	fun resolveNonNullableNotRequiredWithoutParameter() {
-		var exchange = MockServerHttpRequest.get("/").toExchange()
+		var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 		var result = resolver.resolveArgument(nonNullableParamNotRequired, bindingContext, exchange)
 		StepVerifier.create(result).expectComplete().verify()
 	}

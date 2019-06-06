@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,19 +41,12 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 	public Mono<Resource> resolveResource(@Nullable ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolving resource for request path \"" + requestPath + "\"");
-		}
 		return resolveResourceInternal(exchange, requestPath, locations, chain);
 	}
 
 	@Override
 	public Mono<String> resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Resolving public URL for resource path \"" + resourceUrlPath + "\"");
-		}
 
 		return resolveUrlPathInternal(resourceUrlPath, locations, chain);
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,7 +45,7 @@ public class CommonsLogWriter extends Writer {
 
 	public void write(char ch) {
 		if (ch == '\n' && this.buffer.length() > 0) {
-			this.logger.debug(this.buffer.toString());
+			logger.debug(this.buffer.toString());
 			this.buffer.setLength(0);
 		}
 		else {
@@ -58,7 +58,7 @@ public class CommonsLogWriter extends Writer {
 		for (int i = 0; i < length; i++) {
 			char ch = buffer[offset + i];
 			if (ch == '\n' && this.buffer.length() > 0) {
-				this.logger.debug(this.buffer.toString());
+				logger.debug(this.buffer.toString());
 				this.buffer.setLength(0);
 			}
 			else {

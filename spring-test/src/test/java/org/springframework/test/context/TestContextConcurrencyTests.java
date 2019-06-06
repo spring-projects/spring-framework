@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,9 +26,7 @@ import org.junit.Test;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toCollection;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify proper concurrency support between a
@@ -76,9 +74,9 @@ public class TestContextConcurrencyTests {
 					throw new RuntimeException(ex);
 				}
 			});
-			assertThat(actualMethods, equalTo(expectedMethods));
+			assertThat(actualMethods).isEqualTo(expectedMethods);
 		});
-		assertEquals(0, tcm.getTestContext().attributeNames().length);
+		assertThat(tcm.getTestContext().attributeNames().length).isEqualTo(0);
 	}
 
 
@@ -132,7 +130,7 @@ public class TestContextConcurrencyTests {
 
 		@Override
 		public void afterTestMethod(TestContext testContext) throws Exception {
-			assertEquals(this.methodName.get(), testContext.getAttribute("method"));
+			assertThat(testContext.getAttribute("method")).isEqualTo(this.methodName.get());
 		}
 
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import org.springframework.cache.AbstractCacheTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Costin Leau
@@ -39,11 +39,14 @@ import static org.junit.Assert.*;
 public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 
 	private CacheManager cacheManager;
+
 	private Ehcache nativeCache;
+
 	private EhCacheCache cache;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		cacheManager = new CacheManager(new Configuration().name("EhCacheCacheTests")
 				.defaultCache(new CacheConfiguration("default", 100)));
 		nativeCache = new net.sf.ehcache.Cache(new CacheConfiguration(CACHE_NAME, 100));
@@ -53,9 +56,10 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 	}
 
 	@After
-	public void tearDown() {
+	public void shutdown() {
 		cacheManager.shutdown();
 	}
+
 
 	@Override
 	protected EhCacheCache getCache() {
@@ -67,9 +71,11 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 		return nativeCache;
 	}
 
+
 	@Test
 	public void testExpiredElements() throws Exception {
 		Assume.group(TestGroup.LONG_RUNNING);
+
 		String key = "brancusi";
 		String value = "constantin";
 		Element brancusi = new Element(key, value);
@@ -77,10 +83,10 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 		brancusi.setTimeToLive(3);
 		nativeCache.put(brancusi);
 
-		assertEquals(value, cache.get(key).get());
+		assertThat(cache.get(key).get()).isEqualTo(value);
 		// wait for the entry to expire
 		Thread.sleep(5 * 1000);
-		assertNull(cache.get(key));
+		assertThat(cache.get(key)).isNull();
 	}
 
 }

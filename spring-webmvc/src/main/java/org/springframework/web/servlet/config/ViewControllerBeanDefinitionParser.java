@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,9 +37,9 @@ import org.springframework.web.servlet.view.RedirectView;
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that
  * parses the following MVC namespace elements:
  * <ul>
- *	<li>{@code <view-controller>}
- *	<li>{@code <redirect-view-controller>}
- *	<li>{@code <status-controller>}
+ * <li>{@code <view-controller>}
+ * <li>{@code <redirect-view-controller>}
+ * <li>{@code <status-controller>}
  * </ul>
  *
  * <p>All elements result in the registration of a
@@ -56,7 +56,7 @@ import org.springframework.web.servlet.view.RedirectView;
 class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String HANDLER_MAPPING_BEAN_NAME =
-		"org.springframework.web.servlet.config.viewControllerHandlerMapping";
+			"org.springframework.web.servlet.config.viewControllerHandlerMapping";
 
 
 	@Override
@@ -76,7 +76,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 
 		HttpStatus statusCode = null;
 		if (element.hasAttribute("status-code")) {
-			int statusValue = Integer.valueOf(element.getAttribute("status-code"));
+			int statusValue = Integer.parseInt(element.getAttribute("status-code"));
 			statusCode = HttpStatus.valueOf(statusValue);
 		}
 

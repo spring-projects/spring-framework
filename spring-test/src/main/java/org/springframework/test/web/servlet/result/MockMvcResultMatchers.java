@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,11 +21,13 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Static factory methods for {@link ResultMatcher}-based result actions.
@@ -84,7 +86,7 @@ public abstract class MockMvcResultMatchers {
 	 * <p>This method accepts only exact matches.
 	 * @param expectedUrl the exact URL expected
 	 */
-	public static ResultMatcher forwardedUrl(String expectedUrl) {
+	public static ResultMatcher forwardedUrl(@Nullable String expectedUrl) {
 		return result -> assertEquals("Forwarded URL", expectedUrl, result.getResponse().getForwardedUrl());
 	}
 
@@ -186,7 +188,7 @@ public abstract class MockMvcResultMatchers {
 	 * @param expression the JSON path expression, optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
 	 */
-	public static JsonPathResultMatchers jsonPath(String expression, Object ... args) {
+	public static JsonPathResultMatchers jsonPath(String expression, Object... args) {
 		return new JsonPathResultMatchers(expression, args);
 	}
 

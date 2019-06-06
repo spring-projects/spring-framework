@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <T> the callback result type
  */
 public class ListenableFutureCallbackRegistry<T> {
 
@@ -136,8 +137,9 @@ public class ListenableFutureCallbackRegistry<T> {
 		synchronized (this.mutex) {
 			this.state = State.SUCCESS;
 			this.result = result;
-			while (!this.successCallbacks.isEmpty()) {
-				notifySuccess(this.successCallbacks.poll());
+			SuccessCallback<? super T> callback;
+			while ((callback = this.successCallbacks.poll()) != null) {
+				notifySuccess(callback);
 			}
 		}
 	}
@@ -151,8 +153,9 @@ public class ListenableFutureCallbackRegistry<T> {
 		synchronized (this.mutex) {
 			this.state = State.FAILURE;
 			this.result = ex;
-			while (!this.failureCallbacks.isEmpty()) {
-				notifyFailure(this.failureCallbacks.poll());
+			FailureCallback callback;
+			while ((callback = this.failureCallbacks.poll()) != null) {
+				notifyFailure(callback);
 			}
 		}
 	}

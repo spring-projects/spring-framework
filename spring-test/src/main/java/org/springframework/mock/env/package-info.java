@@ -8,6 +8,8 @@
  * unit tests for code that depends on environment-specific properties.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.mock.env;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

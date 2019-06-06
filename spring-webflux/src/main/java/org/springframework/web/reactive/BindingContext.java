@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,12 @@ import org.springframework.ui.Model;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
+import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Context to assist with processing a request and binding it onto Objects.
+ * Context to assist with binding request data onto Objects and provide access
+ * to a shared {@link Model} with controller-specific attributes.
  *
  * <p>Provides  methods to create a {@link WebExchangeDataBinder} for a specific
  * target, command Object to apply data binding and validation to, or without a
@@ -74,6 +76,7 @@ public class BindingContext {
 	 * @param target the object to create a data binder for
 	 * @param name the name of the target object
 	 * @return the created data binder
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, @Nullable Object target, String name) {
 		WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(target, name);
@@ -85,6 +88,7 @@ public class BindingContext {
 
 	/**
 	 * Initialize the data binder instance for the given exchange.
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	protected WebExchangeDataBinder initDataBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
 		return binder;
@@ -96,6 +100,7 @@ public class BindingContext {
 	 * @param exchange the current exchange
 	 * @param name the name of the target object
 	 * @return the created data binder
+	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
 		return createDataBinder(exchange, null, name);

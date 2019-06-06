@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,8 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.SimpleWebApplicationContext;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link ContextLoader} and {@link ContextLoaderListener}.
@@ -68,25 +68,28 @@ public class ContextLoaderTests {
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertTrue("Correct WebApplicationContext exposed in ServletContext", context instanceof XmlWebApplicationContext);
-		assertTrue(WebApplicationContextUtils.getRequiredWebApplicationContext(sc) instanceof XmlWebApplicationContext);
+		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
+		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(contextAttr);
+		boolean condition1 = context instanceof XmlWebApplicationContext;
+		assertThat(condition1).as("Correct WebApplicationContext exposed in ServletContext").isTrue();
+		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(sc) instanceof XmlWebApplicationContext).isTrue();
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
-		assertTrue("Has father", context.containsBean("father"));
-		assertTrue("Has rod", context.containsBean("rod"));
-		assertTrue("Has kerry", context.containsBean("kerry"));
-		assertTrue("Not destroyed", !lb.isDestroyed());
-		assertFalse(context.containsBean("beans1.bean1"));
-		assertFalse(context.containsBean("beans1.bean2"));
+		assertThat(context.containsBean("father")).as("Has father").isTrue();
+		assertThat(context.containsBean("rod")).as("Has rod").isTrue();
+		assertThat(context.containsBean("kerry")).as("Has kerry").isTrue();
+		boolean condition = !lb.isDestroyed();
+		assertThat(condition).as("Not destroyed").isTrue();
+		assertThat(context.containsBean("beans1.bean1")).isFalse();
+		assertThat(context.containsBean("beans1.bean2")).isFalse();
 		listener.contextDestroyed(event);
-		assertTrue("Destroyed", lb.isDestroyed());
-		assertNull(sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
-		assertNull(WebApplicationContextUtils.getWebApplicationContext(sc));
+		assertThat(lb.isDestroyed()).as("Destroyed").isTrue();
+		assertThat(sc.getAttribute(contextAttr)).isNull();
+		assertThat(WebApplicationContextUtils.getWebApplicationContext(sc)).isNull();
 	}
 
 	/**
 	 * Addresses the issues raised in <a
-	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4008"
+	 * href="https://opensource.atlassian.com/projects/spring/browse/SPR-4008"
 	 * target="_blank">SPR-4008</a>: <em>Supply an opportunity to customize
 	 * context before calling refresh in ContextLoaders</em>.
 	 */
@@ -100,14 +103,14 @@ public class ContextLoaderTests {
 		ServletContextListener listener = new ContextLoaderListener() {
 			@Override
 			protected void customizeContext(ServletContext sc, ConfigurableWebApplicationContext wac) {
-				assertNotNull("The ServletContext should not be null.", sc);
-				assertEquals("Verifying that we received the expected ServletContext.", sc, sc);
-				assertFalse("The ApplicationContext should not yet have been refreshed.", wac.isActive());
+				assertThat(sc).as("The ServletContext should not be null.").isNotNull();
+				assertThat(sc).as("Verifying that we received the expected ServletContext.").isEqualTo(sc);
+				assertThat(wac.isActive()).as("The ApplicationContext should not yet have been refreshed.").isFalse();
 				buffer.append(expectedContents);
 			}
 		};
 		listener.contextInitialized(new ServletContextEvent(sc));
-		assertEquals("customizeContext() should have been called.", expectedContents, buffer.toString());
+		assertThat(buffer.toString()).as("customizeContext() should have been called.").isEqualTo(expectedContents);
 	}
 
 	@Test
@@ -121,8 +124,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -136,8 +139,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -151,8 +154,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -165,8 +168,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -180,8 +183,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -195,8 +198,8 @@ public class ContextLoaderTests {
 		listener.contextInitialized(new ServletContextEvent(sc));
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
 		TestBean testBean = wac.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("testName"));
-		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+		assertThat(testBean.getName()).isEqualTo("testName");
+		assertThat(wac.getServletContext().getAttribute("initialized")).isNotNull();
 	}
 
 	@Test
@@ -207,7 +210,8 @@ public class ContextLoaderTests {
 				"/org/springframework/web/context/WEB-INF/empty-context.xml");
 
 		sc.addInitParameter("someProperty", "someValue");
-		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM, EnvApplicationContextInitializer.class.getName());
+		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM,
+				EnvApplicationContextInitializer.class.getName());
 		ContextLoaderListener listener = new ContextLoaderListener();
 		listener.contextInitialized(new ServletContextEvent(sc));
 	}
@@ -221,13 +225,9 @@ public class ContextLoaderTests {
 		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM,
 				StringUtils.arrayToCommaDelimitedString(new Object[] {UnknownContextInitializer.class.getName()}));
 		ContextLoaderListener listener = new ContextLoaderListener();
-		try {
-			listener.contextInitialized(new ServletContextEvent(sc));
-			fail("expected exception");
-		}
-		catch (ApplicationContextException ex) {
-			assertTrue(ex.getMessage().contains("not assignable"));
-		}
+		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(() ->
+				listener.contextInitialized(new ServletContextEvent(sc)))
+			.withMessageContaining("not assignable");
 	}
 
 	@Test
@@ -238,8 +238,10 @@ public class ContextLoaderTests {
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof SimpleWebApplicationContext);
+		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
+		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(contextAttr);
+		boolean condition = wc instanceof SimpleWebApplicationContext;
+		assertThat(condition).as("Correct WebApplicationContext exposed in ServletContext").isTrue();
 	}
 
 	@Test
@@ -248,14 +250,9 @@ public class ContextLoaderTests {
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "/WEB-INF/myContext.xml");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
-		try {
-			listener.contextInitialized(event);
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof FileNotFoundException);
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				listener.contextInitialized(event))
+			.withCauseInstanceOf(FileNotFoundException.class);
 	}
 
 	@Test
@@ -265,14 +262,9 @@ public class ContextLoaderTests {
 				"org.springframework.web.context.support.InvalidWebApplicationContext");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
-		try {
-			listener.contextInitialized(event);
-			fail("Should have thrown ApplicationContextException");
-		}
-		catch (ApplicationContextException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof ClassNotFoundException);
-		}
+		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(() ->
+				listener.contextInitialized(event))
+			.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test
@@ -280,30 +272,20 @@ public class ContextLoaderTests {
 		MockServletContext sc = new MockServletContext("");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
-		try {
-			listener.contextInitialized(event);
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IOException);
-			assertTrue(ex.getCause().getMessage().contains("/WEB-INF/applicationContext.xml"));
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				listener.contextInitialized(event))
+			.withCauseInstanceOf(IOException.class)
+			.satisfies(ex -> assertThat(ex.getCause()).hasMessageContaining("/WEB-INF/applicationContext.xml"));
 	}
 
 	@Test
 	public void testFrameworkServletWithDefaultLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextClass(XmlWebApplicationContext.class);
-		try {
-			servlet.init(new MockServletConfig(new MockServletContext(""), "test"));
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// expected
-			assertTrue(ex.getCause() instanceof IOException);
-			assertTrue(ex.getCause().getMessage().contains("/WEB-INF/test-servlet.xml"));
-		}
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
+				servlet.init(new MockServletConfig(new MockServletContext(""), "test")))
+			.withCauseInstanceOf(IOException.class)
+			.satisfies(ex -> assertThat(ex.getCause()).hasMessageContaining("/WEB-INF/test-servlet.xml"));
 	}
 
 	@Test
@@ -312,52 +294,49 @@ public class ContextLoaderTests {
 		servlet.setContextConfigLocation("/org/springframework/web/context/WEB-INF/testNamespace.xml "
 				+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
 		servlet.init(new MockServletConfig(new MockServletContext(""), "test"));
-		assertTrue(servlet.getWebApplicationContext().containsBean("kerry"));
-		assertTrue(servlet.getWebApplicationContext().containsBean("kerryX"));
+		assertThat(servlet.getWebApplicationContext().containsBean("kerry")).isTrue();
+		assertThat(servlet.getWebApplicationContext().containsBean("kerryX")).isTrue();
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testClassPathXmlApplicationContext() throws IOException {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml");
-		assertTrue("Has father", context.containsBean("father"));
-		assertTrue("Has rod", context.containsBean("rod"));
-		assertFalse("Hasn't kerry", context.containsBean("kerry"));
-		assertTrue("Doesn't have spouse", ((TestBean) context.getBean("rod")).getSpouse() == null);
-		assertTrue("myinit not evaluated", "Roderick".equals(((TestBean) context.getBean("rod")).getName()));
+		assertThat(context.containsBean("father")).as("Has father").isTrue();
+		assertThat(context.containsBean("rod")).as("Has rod").isTrue();
+		assertThat(context.containsBean("kerry")).as("Hasn't kerry").isFalse();
+		assertThat(((TestBean) context.getBean("rod")).getSpouse() == null).as("Doesn't have spouse").isTrue();
+		assertThat("Roderick".equals(((TestBean) context.getBean("rod")).getName())).as("myinit not evaluated").isTrue();
 
 		context = new ClassPathXmlApplicationContext(new String[] {
 			"/org/springframework/web/context/WEB-INF/applicationContext.xml",
 			"/org/springframework/web/context/WEB-INF/context-addition.xml" });
-		assertTrue("Has father", context.containsBean("father"));
-		assertTrue("Has rod", context.containsBean("rod"));
-		assertTrue("Has kerry", context.containsBean("kerry"));
+		assertThat(context.containsBean("father")).as("Has father").isTrue();
+		assertThat(context.containsBean("rod")).as("Has rod").isTrue();
+		assertThat(context.containsBean("kerry")).as("Has kerry").isTrue();
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testSingletonDestructionOnStartupFailure() throws IOException {
-		try {
-			new ClassPathXmlApplicationContext(new String[] {
-				"/org/springframework/web/context/WEB-INF/applicationContext.xml",
-				"/org/springframework/web/context/WEB-INF/fail.xml" }) {
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext(new String[] {
+					"/org/springframework/web/context/WEB-INF/applicationContext.xml",
+					"/org/springframework/web/context/WEB-INF/fail.xml" }) {
 
-				@Override
-				public void refresh() throws BeansException {
-					try {
-						super.refresh();
+					@Override
+					public void refresh() throws BeansException {
+						try {
+							super.refresh();
+						}
+						catch (BeanCreationException ex) {
+							DefaultListableBeanFactory factory = (DefaultListableBeanFactory) getBeanFactory();
+							assertThat(factory.getSingletonCount()).isEqualTo(0);
+							throw ex;
+						}
 					}
-					catch (BeanCreationException ex) {
-						DefaultListableBeanFactory factory = (DefaultListableBeanFactory) getBeanFactory();
-						assertEquals(0, factory.getSingletonCount());
-						throw ex;
-					}
-				}
-			};
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-		}
+				});
 	}
 
 
@@ -376,7 +355,8 @@ public class ContextLoaderTests {
 	}
 
 
-	private static class TestWebContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+	private static class TestWebContextInitializer implements
+			ApplicationContextInitializer<ConfigurableWebApplicationContext> {
 
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
@@ -386,14 +366,15 @@ public class ContextLoaderTests {
 	}
 
 
-	private static class EnvApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+	private static class EnvApplicationContextInitializer
+			implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
 
 		@Override
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
 			// test that ApplicationContextInitializers can access ServletContext properties
 			// via the environment (SPR-8991)
 			String value = applicationContext.getEnvironment().getRequiredProperty("someProperty");
-			assertThat(value, is("someValue"));
+			assertThat(value).isEqualTo("someValue");
 		}
 	}
 

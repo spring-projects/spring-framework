@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,9 @@ import org.springframework.util.Assert;
  *
  * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)}
  * for example usages.
+ *
+ * <p>This class is designed to be thread-safe and reusable, allowing for any number
+ * of expand or match calls.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -81,13 +84,13 @@ public class UriTemplate implements Serializable {
 	 * the Map values variable values. The order of variables is not significant.
 	 * <p>Example:
 	 * <pre class="code">
-	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
 	 * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
 	 * uriVariables.put("booking", "42");
 	 * uriVariables.put("hotel", "Rest & Relax");
 	 * System.out.println(template.expand(uriVariables));
 	 * </pre>
-	 * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
+	 * will print: <blockquote>{@code https://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded URI
 	 * @throws IllegalArgumentException if {@code uriVariables} is {@code null};
@@ -99,20 +102,20 @@ public class UriTemplate implements Serializable {
 		return encodedComponents.toUri();
 	}
 
-    /**
-     * Given an array of variables, expand this template into a full URI. The array represent variable values.
-     * The order of variables is significant.
-     * <p>Example:
-     * <pre class="code">
-     * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-     * System.out.println(template.expand("Rest & Relax", 42));
-     * </pre>
-     * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
-     * @param uriVariableValues the array of URI variables
-     * @return the expanded URI
-     * @throws IllegalArgumentException if {@code uriVariables} is {@code null}
-     * or if it does not contain sufficient variables
-     */
+	/**
+	 * Given an array of variables, expand this template into a full URI. The array represent variable values.
+	 * The order of variables is significant.
+	 * <p>Example:
+	 * <pre class="code">
+	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
+	 * System.out.println(template.expand("Rest & Relax", 42));
+	 * </pre>
+	 * will print: <blockquote>{@code https://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
+	 * @param uriVariableValues the array of URI variables
+	 * @return the expanded URI
+	 * @throws IllegalArgumentException if {@code uriVariables} is {@code null}
+	 * or if it does not contain sufficient variables
+	 */
 	public URI expand(Object... uriVariableValues) {
 		UriComponents expandedComponents = this.uriComponents.expand(uriVariableValues);
 		UriComponents encodedComponents = expandedComponents.encode();
@@ -137,8 +140,8 @@ public class UriTemplate implements Serializable {
 	 * values are variable values, as occurred in the given URI.
 	 * <p>Example:
 	 * <pre class="code">
-	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-	 * System.out.println(template.match("http://example.com/hotels/1/bookings/42"));
+	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
+	 * System.out.println(template.match("https://example.com/hotels/1/bookings/42"));
 	 * </pre>
 	 * will print: <blockquote>{@code {hotel=1, booking=42}}</blockquote>
 	 * @param uri the URI to match to
@@ -167,7 +170,7 @@ public class UriTemplate implements Serializable {
 	/**
 	 * Helper to extract variable names and regex for matching to actual URLs.
 	 */
-	private static class TemplateInfo {
+	private static final class TemplateInfo {
 
 		private final List<String> variableNames;
 
@@ -209,7 +212,7 @@ public class UriTemplate implements Serializable {
 						String variable = builder.toString();
 						int idx = variable.indexOf(':');
 						if (idx == -1) {
-							pattern.append("(.*)");
+							pattern.append("([^/]*)");
 							variableNames.add(variable);
 						}
 						else {

@@ -1,0 +1,44 @@
+[[webmvc-client]]
+= REST Clients
+
+This section describes options for client-side access to REST endpoints.
+
+
+
+
+[[webmvc-resttemplate]]
+== `RestTemplate`
+
+`RestTemplate` is a synchronous client to perform HTTP requests. It is the original
+Spring REST client and exposes a simple, template-method API over underlying HTTP client
+libraries.
+
+NOTE: As of 5.0, the non-blocking, reactive `WebClient` offers a modern alternative to the
+`RestTemplate`, with efficient support for both
+<<web-reactive.adoc#webflux-client-synchronous, synchronous and asynchronous>>, as well as
+streaming scenarios. The `RestTemplate` will be deprecated in a future version and will
+not have major new features added going forward.
+
+
+See <<integration.adoc#rest-client-access, REST Endpoints>> for details.
+
+
+
+
+[[webmvc-webclient]]
+== `WebClient`
+
+`WebClient` is a non-blocking, reactive client to perform HTTP requests. It was
+introduced in 5.0 and offers a modern alternative to the `RestTemplate`, with efficient
+support for both synchronous and asynchronous, as well as streaming scenarios.
+
+In contrast to `RestTemplate`, `WebClient` supports the following:
+
+* Non-blocking I/O.
+* Reactive Streams back pressure.
+* High concurrency with fewer hardware resources.
+* Functional-style, fluent API that takes advantage of Java 8 lambdas.
+* Synchronous and asynchronous interactions.
+* Streaming up to or streaming down from a server.
+
+See <<web-reactive.adoc#webflux-client, WebClient>> for more details.

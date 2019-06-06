@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -104,9 +104,9 @@ public interface PathMatcher {
 	/**
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns
 	 * in order of explicitness for that path.
-	 * <p>The full algorithm used depends on the underlying implementation, but generally,
-	 * the returned {@code Comparator} will
-	 * {@linkplain java.util.Collections#sort(java.util.List, java.util.Comparator) sort}
+	 * <p>The full algorithm used depends on the underlying implementation,
+	 * but generally, the returned {@code Comparator} will
+	 * {@linkplain java.util.List#sort(java.util.Comparator) sort}
 	 * a list so that more specific patterns come before generic patterns.
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -85,7 +85,7 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
 
 	@Override
 	public URI getURI() {
-		return uri;
+		return this.uri;
 	}
 
 
@@ -106,12 +106,12 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
 				return interceptor.intercept(request, body, this);
 			}
 			else {
-				URI theUri = request.getURI();
+				URI uri = request.getURI();
 				HttpMethod method = request.getMethod();
 				HttpHeaders headers = request.getHeaders();
 
 				Assert.state(method != null, "No standard HTTP method");
-				AsyncClientHttpRequest delegate = requestFactory.createAsyncRequest(theUri, method);
+				AsyncClientHttpRequest delegate = requestFactory.createAsyncRequest(uri, method);
 				delegate.getHeaders().putAll(headers);
 				if (body.length > 0) {
 					StreamUtils.copy(body, delegate.getBody());

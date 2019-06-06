@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +40,7 @@ import org.springframework.util.PropertiesPersister;
  */
 public abstract class PropertiesLoaderSupport {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -174,8 +174,8 @@ public abstract class PropertiesLoaderSupport {
 	protected void loadProperties(Properties props) throws IOException {
 		if (this.locations != null) {
 			for (Resource location : this.locations) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Loading properties file from " + location);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Loading properties file from " + location);
 				}
 				try {
 					PropertiesLoaderUtils.fillProperties(
@@ -183,8 +183,8 @@ public abstract class PropertiesLoaderSupport {
 				}
 				catch (FileNotFoundException | UnknownHostException ex) {
 					if (this.ignoreResourceNotFound) {
-						if (logger.isInfoEnabled()) {
-							logger.info("Properties resource not found: " + ex.getMessage());
+						if (logger.isDebugEnabled()) {
+							logger.debug("Properties resource not found: " + ex.getMessage());
 						}
 					}
 					else {

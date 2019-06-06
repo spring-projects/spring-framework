@@ -18,6 +18,11 @@ def customizePom(pom, gradleProject) {
 			"$dep.scope:$dep.groupId:$dep.artifactId"
 		}
 
+		def managedVersions = dependencyManagement.managedVersions
+		generatedPom.dependencies.findAll{dep -> !dep.version }.each { dep ->
+			dep.version = managedVersions["${dep.groupId}:${dep.artifactId}"]
+		}
+
 		// add all items necessary for maven central publication
 		generatedPom.project {
 			name = gradleProject.description
@@ -25,12 +30,12 @@ def customizePom(pom, gradleProject) {
 			url = "https://github.com/spring-projects/spring-framework"
 			organization {
 				name = "Spring IO"
-				url = "http://projects.spring.io/spring-framework"
+				url = "https://projects.spring.io/spring-framework"
 			}
 			licenses {
 				license {
 					name "Apache License, Version 2.0"
-					url "http://www.apache.org/licenses/LICENSE-2.0"
+					url "https://www.apache.org/licenses/LICENSE-2.0"
 					distribution "repo"
 				}
 			}
@@ -47,8 +52,8 @@ def customizePom(pom, gradleProject) {
 				}
 			}
 			issueManagement {
-				system = "Jira"
-				url = "https://jira.springsource.org/browse/SPR"
+				system = "GitHub"
+				url = "https://github.com/spring-projects/spring-framework/issues"
 			}
 		}
 	}

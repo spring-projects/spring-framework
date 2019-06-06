@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,11 @@
 package org.springframework.http;
 
 import java.net.URI;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
@@ -34,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  * {@link org.springframework.web.client.RestTemplate#getForEntity getForEntity()} and
  * {@link org.springframework.web.client.RestTemplate#exchange exchange()}:
  * <pre class="code">
- * ResponseEntity&lt;String&gt; entity = template.getForEntity("http://example.com", String.class);
+ * ResponseEntity&lt;String&gt; entity = template.getForEntity("https://example.com", String.class);
  * String body = entity.getBody();
  * MediaType contentType = entity.getHeaders().getContentType();
  * HttpStatus statusCode = entity.getStatusCode();
@@ -51,6 +54,7 @@ import org.springframework.util.ObjectUtils;
  *   return new ResponseEntity&lt;String&gt;("Hello World", responseHeaders, HttpStatus.CREATED);
  * }
  * </pre>
+ *
  * Or, by using a builder accessible via static methods:
  * <pre class="code">
  * &#64;RequestMapping("/handle")
@@ -63,6 +67,7 @@ import org.springframework.util.ObjectUtils;
  * @author Arjen Poutsma
  * @author Brian Clozel
  * @since 3.0.2
+ * @param <T> the body type
  * @see #getStatusCode()
  */
 public class ResponseEntity<T> extends HttpEntity<T> {
@@ -212,6 +217,19 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body
+	 * and the {@linkplain HttpStatus#OK OK} status, or an empty body and a
+	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of a
+	 * {@linkplain Optional#empty()} parameter.
+	 * @return the created {@code ResponseEntity}
+	 * @since 5.1
+	 */
+	public static <T> ResponseEntity<T> of(Optional<T> body) {
+		Assert.notNull(body, "Body must not be null");
+		return body.map(ResponseEntity::ok).orElse(notFound().build());
+	}
+
+	/**
 	 * Create a builder with the status set to {@linkplain HttpStatus#OK OK}.
 	 * @return the created builder
 	 * @since 4.1
@@ -292,8 +310,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Defines a builder that adds headers to the response entity.
-	 * @param <B> the builder subclass
 	 * @since 4.1
+	 * @param <B> the builder subclass
 	 */
 	public interface HeadersBuilder<B extends HeadersBuilder<B>> {
 
@@ -331,6 +349,26 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @see HttpHeaders#setETag(String)
 		 */
 		B eTag(String etag);
+
+		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(ZonedDateTime)
+		 */
+		B lastModified(ZonedDateTime lastModified);
+
+		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(Instant)
+		 */
+		B lastModified(Instant lastModified);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
@@ -474,6 +512,18 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
+		public BodyBuilder lastModified(ZonedDateTime date) {
+			this.headers.setLastModified(date);
+			return this;
+		}
+
+		@Override
+		public BodyBuilder lastModified(Instant date) {
+			this.headers.setLastModified(date);
+			return this;
+		}
+
+		@Override
 		public BodyBuilder lastModified(long date) {
 			this.headers.setLastModified(date);
 			return this;
@@ -487,10 +537,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder cacheControl(CacheControl cacheControl) {
-			String ccValue = cacheControl.getHeaderValue();
-			if (ccValue != null) {
-				this.headers.setCacheControl(cacheControl.getHeaderValue());
-			}
+			this.headers.setCacheControl(cacheControl);
 			return this;
 		}
 

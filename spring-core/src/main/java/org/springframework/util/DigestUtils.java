@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import java.security.NoSuchAlgorithmException;
  * Miscellaneous methods for calculating digests.
  *
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/codec/">Apache Commons Codec</a>
+ * <a href="https://commons.apache.org/codec/">Apache Commons Codec</a>
  * for a more comprehensive suite of digest utilities.
  *
  * @author Arjen Poutsma
@@ -169,7 +169,7 @@ public abstract class DigestUtils {
 	}
 
 	private static char[] encodeHex(byte[] bytes) {
-		char chars[] = new char[32];
+		char[] chars = new char[32];
 		for (int i = 0; i < chars.length; i = i + 2) {
 			byte b = bytes[i / 2];
 			chars[i] = HEX_CHARS[(b >>> 0x4) & 0xf];

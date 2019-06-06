@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -111,11 +111,13 @@ public class JspAwareRequestContext extends RequestContext {
 	 */
 	private static class JstlPageLocaleResolver {
 
+		@Nullable
 		public static Locale getJstlLocale(PageContext pageContext) {
 			Object localeObject = Config.find(pageContext, Config.FMT_LOCALE);
 			return (localeObject instanceof Locale ? (Locale) localeObject : null);
 		}
 
+		@Nullable
 		public static TimeZone getJstlTimeZone(PageContext pageContext) {
 			Object timeZoneObject = Config.find(pageContext, Config.FMT_TIME_ZONE);
 			return (timeZoneObject instanceof TimeZone ? (TimeZone) timeZoneObject : null);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,48 +29,52 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
- * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
- * handlers for processing a web request, providing convenient mapping facilities.
+ * Central dispatcher for HTTP request handlers/controllers. Dispatches to
+ * registered handlers for processing a request, providing convenient mapping
+ * facilities.
  *
- * <p>It can use any {@link HandlerMapping} implementation to control the routing of
- * requests to handler objects. HandlerMapping objects can be defined as beans in
- * the application context.
+ * <p>{@code DispatcherHandler} discovers the delegate components it needs from
+ * Spring configuration. It detects the following in the application context:
+ * <ul>
+ * <li>{@link HandlerMapping} -- map requests to handler objects
+ * <li>{@link HandlerAdapter} -- for using any handler interface
+ * <li>{@link HandlerResultHandler} -- process handler return values
+ * </ul>
  *
- * <p>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
- * HandlerAdapter objects can be added as beans in the application context.
+ * <p>{@code DispatcherHandler} is also designed to be a Spring bean itself and
+ * implements {@link ApplicationContextAware} for access to the context it runs
+ * in. If {@code DispatcherHandler} is declared with the bean name "webHandler"
+ * it is discovered by {@link WebHttpHandlerBuilder#applicationContext} which
+ * creates a processing chain together with {@code WebFilter},
+ * {@code WebExceptionHandler} and others.
  *
- * <p>It can use any {@link HandlerResultHandler}; this allows to process the result of
- * the request handling. HandlerResultHandler objects can be added as beans in the
- * application context.
+ * <p>A {@code DispatcherHandler} bean declaration is included in
+ * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}
+ * configuration.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 5.0
+ * @see WebHttpHandlerBuilder#applicationContext(ApplicationContext)
  */
 public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
-	@SuppressWarnings("ThrowableInstanceNeverThrown")
-	private static final Exception HANDLER_NOT_FOUND_EXCEPTION =
-			new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
+	@Nullable
+	private List<HandlerMapping> handlerMappings;
 
+	@Nullable
+	private List<HandlerAdapter> handlerAdapters;
 
-	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
-
-	private List<HandlerMapping> handlerMappings = Collections.emptyList();
-
-	private List<HandlerAdapter> handlerAdapters = Collections.emptyList();
-
-	private List<HandlerResultHandler> resultHandlers = Collections.emptyList();
+	@Nullable
+	private List<HandlerResultHandler> resultHandlers;
 
 
 	/**
@@ -91,17 +93,32 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	}
 
 
+	/**
+	 * Return all {@link HandlerMapping} beans detected by type in the
+	 * {@link #setApplicationContext injected context} and also
+	 * {@link AnnotationAwareOrderComparator#sort(List) sorted}.
+	 * <p><strong>Note:</strong> This method may return {@code null} if invoked
+	 * prior to {@link #setApplicationContext(ApplicationContext)}.
+	 * @return immutable list with the configured mappings or {@code null}
+	 */
+	@Nullable
+	public final List<HandlerMapping> getHandlerMappings() {
+		return this.handlerMappings;
+	}
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		initStrategies(applicationContext);
 	}
 
+
 	protected void initStrategies(ApplicationContext context) {
 		Map<String, HandlerMapping> mappingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				context, HandlerMapping.class, true, false);
 
-		this.handlerMappings = new ArrayList<>(mappingBeans.values());
-		AnnotationAwareOrderComparator.sort(this.handlerMappings);
+		ArrayList<HandlerMapping> mappings = new ArrayList<>(mappingBeans.values());
+		AnnotationAwareOrderComparator.sort(mappings);
+		this.handlerMappings = Collections.unmodifiableList(mappings);
 
 		Map<String, HandlerAdapter> adapterBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				context, HandlerAdapter.class, true, false);
@@ -119,22 +136,30 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
-		if (logger.isDebugEnabled()) {
-			ServerHttpRequest request = exchange.getRequest();
-			logger.debug("Processing " + request.getMethodValue() + " request for [" + request.getURI() + "]");
+		if (this.handlerMappings == null) {
+			return createNotFoundError();
 		}
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
-				.switchIfEmpty(Mono.error(HANDLER_NOT_FOUND_EXCEPTION))
+				.switchIfEmpty(createNotFoundError())
 				.flatMap(handler -> invokeHandler(exchange, handler))
 				.flatMap(result -> handleResult(exchange, result));
 	}
 
+	private <R> Mono<R> createNotFoundError() {
+		return Mono.defer(() -> {
+			Exception ex = new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
+			return Mono.error(ex);
+		});
+	}
+
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
-		for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
-			if (handlerAdapter.supports(handler)) {
-				return handlerAdapter.handle(exchange, handler);
+		if (this.handlerAdapters != null) {
+			for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
+				if (handlerAdapter.supports(handler)) {
+					return handlerAdapter.handle(exchange, handler);
+				}
 			}
 		}
 		return Mono.error(new IllegalStateException("No HandlerAdapter: " + handler));
@@ -142,52 +167,24 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		return getResultHandler(result).handleResult(exchange, result)
-				.onErrorResume(ex -> result.applyExceptionHandler(ex).flatMap(exceptionResult ->
-						getResultHandler(exceptionResult).handleResult(exchange, exceptionResult)));
+				.checkpoint("Handler " + result.getHandler() + " [DispatcherHandler]")
+				.onErrorResume(ex ->
+						result.applyExceptionHandler(ex).flatMap(exResult -> {
+							String text = "Exception handler " + exResult.getHandler() +
+									", error=\"" + ex.getMessage() + "\" [DispatcherHandler]";
+							return getResultHandler(exResult).handleResult(exchange, exResult).checkpoint(text);
+						}));
 	}
 
 	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
-		for (HandlerResultHandler resultHandler : this.resultHandlers) {
-			if (resultHandler.supports(handlerResult)) {
-				return resultHandler;
+		if (this.resultHandlers != null) {
+			for (HandlerResultHandler resultHandler : this.resultHandlers) {
+				if (resultHandler.supports(handlerResult)) {
+					return resultHandler;
+				}
 			}
 		}
 		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
-	}
-
-
-	/**
-	 * Expose a dispatcher-based {@link WebHandler} for the given application context,
-	 * typically for further configuration with filters and exception handlers through
-	 * a {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder}.
-	 * @param applicationContext the application context to find the handler beans in
-	 * @see #DispatcherHandler(ApplicationContext)
-	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#webHandler
-	 */
-	public static WebHandler toWebHandler(ApplicationContext applicationContext) {
-		return new DispatcherHandler(applicationContext);
-	}
-
-	/**
-	 * Expose a dispatcher-based {@link HttpHandler} for the given application context,
-	 * typically for direct registration with an engine adapter such as
-	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}.
-	 *
-	 * <p>Delegates to {@link WebHttpHandlerBuilder#applicationContext} that
-	 * detects the target {@link DispatcherHandler} along with
-	 * {@link org.springframework.web.server.WebFilter}s, and
-	 * {@link org.springframework.web.server.WebExceptionHandler}s in the given
-	 * ApplicationContext.
-	 *
-	 * @param context the application context to find the handler beans in
-	 * @see #DispatcherHandler(ApplicationContext)
-	 * @see HttpWebHandlerAdapter
-	 * @see org.springframework.http.server.reactive.ServletHttpHandlerAdapter
-	 * @see org.springframework.http.server.reactive.ReactorHttpHandlerAdapter
-	 * @see org.springframework.http.server.reactive.UndertowHttpHandlerAdapter
-	 */
-	public static HttpHandler toHttpHandler(ApplicationContext context) {
-		return WebHttpHandlerBuilder.applicationContext(context).build();
 	}
 
 }

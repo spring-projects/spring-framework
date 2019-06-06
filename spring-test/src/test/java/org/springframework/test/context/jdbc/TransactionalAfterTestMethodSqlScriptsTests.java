@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,9 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 /**
  * Transactional integration tests for {@link Sql @Sql} that verify proper
@@ -51,13 +52,9 @@ public class TransactionalAfterTestMethodSqlScriptsTests extends AbstractTransac
 	@AfterTransaction
 	public void afterTransaction() {
 		if ("test01".equals(testName.getMethodName())) {
-			try {
-				assertNumUsers(99);
-				fail("Should throw a BadSqlGrammarException after test01, assuming 'drop-schema.sql' was executed");
-			}
-			catch (BadSqlGrammarException e) {
-				/* expected */
-			}
+			// Should throw a BadSqlGrammarException after test01, assuming 'drop-schema.sql' was executed
+			assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
+					assertNumUsers(99));
 		}
 	}
 
@@ -79,7 +76,7 @@ public class TransactionalAfterTestMethodSqlScriptsTests extends AbstractTransac
 	}
 
 	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 }

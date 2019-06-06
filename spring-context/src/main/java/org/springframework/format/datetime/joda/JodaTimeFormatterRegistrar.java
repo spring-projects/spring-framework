@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.format.datetime.joda;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.joda.time.DateTime;
@@ -64,7 +64,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	/**
 	 * User defined formatters.
 	 */
-	private final Map<Type, DateTimeFormatter> formatters = new HashMap<>();
+	private final Map<Type, DateTimeFormatter> formatters = new EnumMap<>(Type.class);
 
 	/**
 	 * Factories used when specific formatters have not been specified.
@@ -73,7 +73,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 
 	public JodaTimeFormatterRegistrar() {
-		this.factories = new HashMap<>();
+		this.factories = new EnumMap<>(Type.class);
 		for (Type type : Type.values()) {
 			this.factories.put(type, new DateTimeFormatterFactory());
 		}

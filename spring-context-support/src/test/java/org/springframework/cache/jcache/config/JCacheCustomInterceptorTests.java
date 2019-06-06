@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,10 +38,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JCacheCustomInterceptorTests {
@@ -52,6 +52,7 @@ public class JCacheCustomInterceptorTests {
 
 	protected Cache exceptionCache;
 
+
 	@Before
 	public void setup() {
 		ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
@@ -61,36 +62,32 @@ public class JCacheCustomInterceptorTests {
 
 	@After
 	public void tearDown() {
-		ctx.close();
+		if (ctx != null) {
+			ctx.close();
+		}
 	}
+
 
 	@Test
 	public void onlyOneInterceptorIsAvailable() {
 		Map<String, JCacheInterceptor> interceptors = ctx.getBeansOfType(JCacheInterceptor.class);
-		assertEquals("Only one interceptor should be defined", 1, interceptors.size());
+		assertThat(interceptors.size()).as("Only one interceptor should be defined").isEqualTo(1);
 		JCacheInterceptor interceptor = interceptors.values().iterator().next();
-		assertEquals("Custom interceptor not defined", TestCacheInterceptor.class, interceptor.getClass());
+		assertThat(interceptor.getClass()).as("Custom interceptor not defined").isEqualTo(TestCacheInterceptor.class);
 	}
 
 	@Test
 	public void customInterceptorAppliesWithRuntimeException() {
 		Object o = cs.cacheWithException("id", true);
-		assertEquals(55L, o); // See TestCacheInterceptor
+		// See TestCacheInterceptor
+		assertThat(o).isEqualTo(55L);
 	}
 
 	@Test
 	public void customInterceptorAppliesWithCheckedException() {
-		try {
-			cs.cacheWithCheckedException("id", true);
-			fail("Should have failed");
-		}
-		catch (RuntimeException e) {
-			assertNotNull("missing original exception", e.getCause());
-			assertEquals(IOException.class, e.getCause().getClass());
-		}
-		catch (Exception e) {
-			fail("Wrong exception type " + e);
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				cs.cacheWithCheckedException("id", true))
+			.withCauseExactlyInstanceOf(IOException.class);
 	}
 
 
@@ -129,6 +126,7 @@ public class JCacheCustomInterceptorTests {
 			return cacheInterceptor;
 		}
 	}
+
 
 	/**
 	 * A test {@link org.springframework.cache.interceptor.CacheInterceptor} that handles special exception

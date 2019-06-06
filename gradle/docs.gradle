@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ task api(type: Javadoc) {
 	options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
 	options.author = true
 	options.header = rootProject.description
+	options.use = true
 	options.overview = "src/docs/api/overview.html"
 	options.stylesheetFile = file("src/docs/api/stylesheet.css")
 	options.splitIndex = true
@@ -49,12 +50,9 @@ task api(type: Javadoc) {
 	}
 }
 
-// Need https://github.com/Kotlin/dokka/issues/184 to be fixed to avoid "Can't find node by signature" log spam
 dokka {
 	dependsOn {
-		subprojects.collect {
-			it.tasks.getByName("jar")
-		}
+		tasks.getByName("api")
 	}
 	doFirst {
 		classpath = subprojects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
@@ -66,22 +64,51 @@ dokka {
 	outputDirectory = "$buildDir/docs/kdoc"
 
 	sourceDirs = files(subprojects.collect { project ->
-		project.sourceSets.main.kotlin.srcDirs
+		def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
+		kotlinDirs -= project.sourceSets.main.java.srcDirs
 	})
 	externalDocumentationLink {
-		url = new URL("http://docs.spring.io/spring-framework/docs/${version}/javadoc-api/")
+		url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
+		packageListUrl = new File(buildDir, "api/package-list").toURI().toURL()
 	}
 	externalDocumentationLink {
-		url = new URL("http://projectreactor.io/docs/core/release/api/")
+		url = new URL("https://projectreactor.io/docs/core/release/api/")
 	}
 	externalDocumentationLink {
-		url = new URL("http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+		url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+	}
+	externalDocumentationLink {
+		url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
 	}
 }
 
+configurations {
+	docs
+}
+
+dependencies {
+	// for documentation resources
+	docs "io.spring.docresources:spring-doc-resources:0.1.0.RELEASE@zip"
+}
+
+task extractDocResources(type: Sync) {
+	dependsOn configurations.docs
+	from "src/docs/asciidoc/"
+	from {
+		configurations.docs.collect { zipTree(it) }
+	}
+	into "$buildDir/asciidoc/build"
+}
+
 asciidoctor {
+	sourceDir "$buildDir/asciidoc/build"
 	sources {
 		include '*.adoc'
+	}
+	resources {
+		from(sourceDir) {
+			include 'images/*', 'css/**', 'js/**'
+		}
 	}
 	logDocuments = true
 	backends = ["html5"]
@@ -93,23 +120,27 @@ asciidoctor {
 	attributes  'icons': 'font',
 			'idprefix': '',
 			'idseparator': '-',
-			docinfo: '',
+			docinfo: 'shared',
 			revnumber: project.version,
 			sectanchors: '',
 			sectnums: '',
-			'source-highlighter': 'coderay@', // TODO switch to 'rouge' once supported by the html5 backend
-			stylesdir: 'stylesheets/',
+			'source-highlighter=highlight.js',
+			'highlightjsdir=js/highlight',
+			'highlightjs-theme=atom-one-dark-reasonable',
+			stylesdir: "css/",
 			stylesheet: 'spring.css',
 			'spring-version': project.version
 
 }
+
+asciidoctor.dependsOn extractDocResources
 
 task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 	group = "Distribution"
 	baseName = "spring-framework"
 	classifier = "docs"
 	description = "Builds -${classifier} archive containing api and reference " +
-			"for deployment at http://docs.spring.io/spring-framework/docs."
+			"for deployment at https://docs.spring.io/spring-framework/docs."
 
 	from("src/dist") {
 		include "changelog.txt"
@@ -119,8 +150,12 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 		into "javadoc-api"
 	}
 
-	from (asciidoctor) {
+	from ("$asciidoctor.outputDir/html5") {
 		into "spring-framework-reference"
+	}
+
+	from ("$asciidoctor.outputDir/pdf") {
+		into "spring-framework-reference/pdf"
 	}
 
 	from (dokka) {
@@ -133,7 +168,7 @@ task schemaZip(type: Zip) {
 	baseName = "spring-framework"
 	classifier = "schema"
 	description = "Builds -${classifier} archive containing all " +
-			"XSDs for deployment at http://springframework.org/schema."
+			"XSDs for deployment at https://springframework.org/schema."
 	duplicatesStrategy 'exclude'
 	moduleProjects.each { subproject ->
 		def Properties schemas = new Properties();

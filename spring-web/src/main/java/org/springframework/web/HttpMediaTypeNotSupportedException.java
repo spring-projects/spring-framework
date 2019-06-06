@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,7 +50,8 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	 * @param supportedMediaTypes the list of supported media types
 	 */
 	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType, List<MediaType> supportedMediaTypes) {
-		this(contentType, supportedMediaTypes, "Content type '" + (contentType != null ? contentType : "") + "' not supported");
+		this(contentType, supportedMediaTypes, "Content type '" +
+				(contentType != null ? contentType : "") + "' not supported");
 	}
 
 	/**
@@ -59,7 +60,9 @@ public class HttpMediaTypeNotSupportedException extends HttpMediaTypeException {
 	 * @param supportedMediaTypes the list of supported media types
 	 * @param msg the detail message
 	 */
-	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType, List<MediaType> supportedMediaTypes, String msg) {
+	public HttpMediaTypeNotSupportedException(@Nullable MediaType contentType,
+			List<MediaType> supportedMediaTypes, String msg) {
+
 		super(msg, supportedMediaTypes);
 		this.contentType = contentType;
 	}

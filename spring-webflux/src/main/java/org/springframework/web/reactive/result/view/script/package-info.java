@@ -4,6 +4,8 @@
  * Contains a View implementation for scripted templates.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.web.reactive.result.view.script;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

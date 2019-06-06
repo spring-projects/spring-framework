@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"/>
+
+	<bean id="aspect" class="test.aspect.TwoAdviceAspect"/>
+
+	<bean id="adrian" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+		<property name="name" value="adrian"/>
+		<property name="age" value="34"/>
+	</bean>
+
+</beans>

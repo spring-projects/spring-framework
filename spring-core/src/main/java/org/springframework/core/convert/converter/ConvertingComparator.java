@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -88,7 +88,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	 * @return a new {@link ConvertingComparator} instance
 	 */
 	public static <K, V> ConvertingComparator<Map.Entry<K, V>, K> mapEntryKeys(Comparator<K> comparator) {
-		return new ConvertingComparator<>(comparator, source -> source.getKey());
+		return new ConvertingComparator<>(comparator, Map.Entry::getKey);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	 * @return a new {@link ConvertingComparator} instance
 	 */
 	public static <K, V> ConvertingComparator<Map.Entry<K, V>, V> mapEntryValues(Comparator<V> comparator) {
-		return new ConvertingComparator<>(comparator, source -> source.getValue());
+		return new ConvertingComparator<>(comparator, Map.Entry::getValue);
 	}
 
 

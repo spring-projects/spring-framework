@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -127,7 +127,7 @@ public class AspectMetadata implements Serializable {
 	 */
 	private String findPerClause(Class<?> aspectClass) {
 		String str = aspectClass.getAnnotation(Aspect.class).value();
-		str = str.substring(str.indexOf("(") + 1);
+		str = str.substring(str.indexOf('(') + 1);
 		str = str.substring(0, str.length() - 1);
 		return str;
 	}
@@ -148,7 +148,7 @@ public class AspectMetadata implements Serializable {
 	}
 
 	/**
-	 * Return the aspect class.
+	 * Return the aspect name.
 	 */
 	public String getAspectName() {
 		return this.aspectName;

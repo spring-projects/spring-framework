@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
@@ -33,6 +34,7 @@ import org.springframework.util.MimeType;
  *
  * @author Arjen Poutsma
  * @since 5.0
+ * @param <T> the element type
  */
 public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
@@ -46,9 +48,10 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 	public final Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
 			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux.from(inputStream).
-				take(1).
-				concatMap(t -> encode(t, bufferFactory, elementType, mimeType, hints));
+		return Flux.from(inputStream)
+				.take(1)
+				.concatMap(value -> encode(value, bufferFactory, elementType, mimeType, hints))
+				.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release);
 	}
 
 	/**
@@ -57,7 +60,7 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 	 * @param dataBufferFactory a buffer factory used to create the output
 	 * @param type the stream element type to process
 	 * @param mimeType the mime type to process
-	 * @param hints Additional information about how to do decode, optional
+	 * @param hints additional information about how to do decode, optional
 	 * @return the output stream
 	 */
 	protected abstract Flux<DataBuffer> encode(T t, DataBufferFactory dataBufferFactory,

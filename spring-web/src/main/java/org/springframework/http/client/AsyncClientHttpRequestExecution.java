@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,8 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @author Rossen Stoyanchev
  * @since 4.3
  * @see AsyncClientHttpRequestInterceptor
- * @deprecated as of Spring 5.0, in favor of {@link org.springframework.web.reactive.function.client.ExchangeFilterFunction}
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.web.reactive.function.client.ExchangeFilterFunction}
  */
 @Deprecated
 public interface AsyncClientHttpRequestExecution {

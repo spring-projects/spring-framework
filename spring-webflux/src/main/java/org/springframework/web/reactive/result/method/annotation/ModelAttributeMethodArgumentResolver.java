@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.Conventions;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -39,7 +38,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -115,7 +113,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 				() -> getClass().getSimpleName() + " does not support multi-value reactive type wrapper: " +
 						parameter.getGenericParameterType());
 
-		String name = getAttributeName(parameter);
+		String name = ModelInitializer.getNameForParameter(parameter);
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
 
 		Map<String, Object> model = context.getModel().asMap();
@@ -137,8 +135,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						BindingResult errors = binder.getBindingResult();
 						if (adapter != null) {
 							return adapter.fromPublisher(errors.hasErrors() ?
-									Mono.error(new WebExchangeBindException(parameter, errors)) :
-									valueMono);
+									Mono.error(new WebExchangeBindException(parameter, errors)) : valueMono);
 						}
 						else {
 							if (errors.hasErrors() && !hasErrorsArgument(parameter)) {
@@ -148,13 +145,6 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						}
 					}));
 		});
-	}
-
-	private String getAttributeName(MethodParameter parameter) {
-		return Optional.ofNullable(parameter.getParameterAnnotation(ModelAttribute.class))
-				.filter(ann -> StringUtils.hasText(ann.value()))
-				.map(ModelAttribute::value)
-				.orElse(Conventions.getVariableNameForParameter(parameter));
 	}
 
 	private Mono<?> prepareAttributeMono(String attributeName, ResolvableType attributeType,
@@ -167,15 +157,13 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		if (attribute == null) {
-			Class<?> attributeClass = attributeType.getRawClass();
-			Assert.state(attributeClass != null, "No attribute class");
-			return createAttribute(attributeName, attributeClass, context, exchange);
+			return createAttribute(attributeName, attributeType.toClass(), context, exchange);
 		}
 
-		ReactiveAdapter adapterFrom = getAdapterRegistry().getAdapter(null, attribute);
-		if (adapterFrom != null) {
-			Assert.isTrue(!adapterFrom.isMultiValue(), "Data binding only supports single-value async types");
-			return Mono.from(adapterFrom.toPublisher(attribute));
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, attribute);
+		if (adapter != null) {
+			Assert.isTrue(!adapter.isMultiValue(), "Data binding only supports single-value async types");
+			return Mono.from(adapter.toPublisher(attribute));
 		}
 		else {
 			return Mono.justOrEmpty(attribute);
@@ -206,15 +194,29 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	}
 
 	private Mono<?> createAttribute(
-			String attributeName, Class<?> attributeType, BindingContext context, ServerWebExchange exchange) {
+			String attributeName, Class<?> clazz, BindingContext context, ServerWebExchange exchange) {
 
-		Constructor<?>[] ctors = attributeType.getConstructors();
-		if (ctors.length != 1) {
-			// No standard data class or standard JavaBeans arrangement ->
-			// defensively go with default constructor, expecting regular bean property bindings.
-			return Mono.just(BeanUtils.instantiateClass(attributeType));
+		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(clazz);
+		if (ctor == null) {
+			Constructor<?>[] ctors = clazz.getConstructors();
+			if (ctors.length == 1) {
+				ctor = ctors[0];
+			}
+			else {
+				try {
+					ctor = clazz.getDeclaredConstructor();
+				}
+				catch (NoSuchMethodException ex) {
+					throw new IllegalStateException("No primary or default constructor found for " + clazz, ex);
+				}
+			}
 		}
-		Constructor<?> ctor = ctors[0];
+		return constructAttribute(ctor, attributeName, context, exchange);
+	}
+
+	private Mono<?> constructAttribute(Constructor<?> ctor, String attributeName,
+			BindingContext context, ServerWebExchange exchange) {
+
 		if (ctor.getParameterCount() == 0) {
 			// A single default constructor -> clearly a standard JavaBeans arrangement.
 			return Mono.just(BeanUtils.instantiateClass(ctor));
@@ -247,7 +249,13 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 					}
 				}
 				value = (value instanceof List ? ((List<?>) value).toArray() : value);
-				args[i] = binder.convertIfNecessary(value, paramTypes[i], new MethodParameter(ctor, i));
+				MethodParameter methodParam = new MethodParameter(ctor, i);
+				if (value == null && methodParam.isOptional()) {
+					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
+				}
+				else {
+					args[i] = binder.convertIfNecessary(value, paramTypes[i], methodParam);
+				}
 			}
 			return BeanUtils.instantiateClass(ctor, args);
 		});
@@ -260,13 +268,17 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	}
 
 	private void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter) {
-		Annotation[] annotations = parameter.getParameterAnnotations();
-		for (Annotation ann : annotations) {
-			Validated validAnnot = AnnotationUtils.getAnnotation(ann, Validated.class);
-			if (validAnnot != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
-				Object hints = (validAnnot != null ? validAnnot.value() : AnnotationUtils.getValue(ann));
-				Object hintArray = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-				binder.validate(hintArray);
+		for (Annotation ann : parameter.getParameterAnnotations()) {
+			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
+			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
+				if (hints != null) {
+					Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+					binder.validate(validationHints);
+				}
+				else {
+					binder.validate();
+				}
 			}
 		}
 	}

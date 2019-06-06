@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,6 +55,12 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 public class ViewResolverRegistry {
 
 	@Nullable
+	private ContentNegotiationManager contentNegotiationManager;
+
+	@Nullable
+	private ApplicationContext applicationContext;
+
+	@Nullable
 	private ContentNegotiatingViewResolver contentNegotiatingResolver;
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
@@ -62,20 +68,18 @@ public class ViewResolverRegistry {
 	@Nullable
 	private Integer order;
 
-	@Nullable
-	private ContentNegotiationManager contentNegotiationManager;
 
-	@Nullable
-	private ApplicationContext applicationContext;
+	/**
+	 * Class constructor with {@link ContentNegotiationManager} and {@link ApplicationContext}.
+	 * @since 4.3.12
+	 */
+	public ViewResolverRegistry(
+			ContentNegotiationManager contentNegotiationManager, @Nullable ApplicationContext context) {
 
-
-	protected void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
+		this.applicationContext = context;
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
 
 	/**
 	 * Whether any view resolvers have been registered.
@@ -83,7 +87,6 @@ public class ViewResolverRegistry {
 	public boolean hasRegistrations() {
 		return (this.contentNegotiatingResolver != null || !this.viewResolvers.isEmpty());
 	}
-
 
 	/**
 	 * Enable use of a {@link ContentNegotiatingViewResolver} to front all other
@@ -115,12 +118,11 @@ public class ViewResolverRegistry {
 		this.order = (this.order != null ? this.order : Ordered.HIGHEST_PRECEDENCE);
 
 		if (this.contentNegotiatingResolver != null) {
-			if (!ObjectUtils.isEmpty(defaultViews)) {
-				if (!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
-					List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
-					views.addAll(Arrays.asList(defaultViews));
-					this.contentNegotiatingResolver.setDefaultViews(views);
-				}
+			if (!ObjectUtils.isEmpty(defaultViews) &&
+					!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
+				List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
+				views.addAll(Arrays.asList(defaultViews));
+				this.contentNegotiatingResolver.setDefaultViews(views);
 			}
 		}
 		else {
@@ -305,6 +307,7 @@ public class ViewResolverRegistry {
 		}
 	}
 
+
 	private static class GroovyMarkupRegistration extends UrlBasedViewResolverRegistration {
 
 		public GroovyMarkupRegistration() {
@@ -312,6 +315,7 @@ public class ViewResolverRegistry {
 			getViewResolver().setSuffix(".tpl");
 		}
 	}
+
 
 	private static class ScriptRegistration extends UrlBasedViewResolverRegistration {
 

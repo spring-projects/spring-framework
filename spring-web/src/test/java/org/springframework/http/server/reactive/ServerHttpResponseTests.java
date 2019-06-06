@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,10 +29,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rossen Stoyanchev
@@ -40,20 +40,19 @@ import static org.junit.Assert.*;
  */
 public class ServerHttpResponseTests {
 
-
 	@Test
 	public void writeWith() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
-		assertTrue(response.statusCodeWritten);
-		assertTrue(response.headersWritten);
-		assertTrue(response.cookiesWritten);
+		assertThat(response.statusCodeWritten).isTrue();
+		assertThat(response.headersWritten).isTrue();
+		assertThat(response.cookiesWritten).isTrue();
 
-		assertEquals(3, response.body.size());
-		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
-		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8));
-		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertThat(response.body.size()).isEqualTo(3);
+		assertThat(new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("a");
+		assertThat(new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("b");
+		assertThat(new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("c");
 	}
 
 	@Test  // SPR-14952
@@ -62,24 +61,26 @@ public class ServerHttpResponseTests {
 		Flux<Flux<DefaultDataBuffer>> flux = Flux.just(Flux.just(wrap("foo")));
 		response.writeAndFlushWith(flux).block();
 
-		assertTrue(response.statusCodeWritten);
-		assertTrue(response.headersWritten);
-		assertTrue(response.cookiesWritten);
+		assertThat(response.statusCodeWritten).isTrue();
+		assertThat(response.headersWritten).isTrue();
+		assertThat(response.cookiesWritten).isTrue();
 
-		assertEquals(1, response.body.size());
-		assertEquals("foo", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertThat(response.body.size()).isEqualTo(1);
+		assertThat(new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("foo");
 	}
 
 	@Test
 	public void writeWithError() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
+		response.getHeaders().setContentLength(12);
 		IllegalStateException error = new IllegalStateException("boo");
 		response.writeWith(Flux.error(error)).onErrorResume(ex -> Mono.empty()).block();
 
-		assertFalse(response.statusCodeWritten);
-		assertFalse(response.headersWritten);
-		assertFalse(response.cookiesWritten);
-		assertTrue(response.body.isEmpty());
+		assertThat(response.statusCodeWritten).isFalse();
+		assertThat(response.headersWritten).isFalse();
+		assertThat(response.cookiesWritten).isFalse();
+		assertThat(response.getHeaders().containsKey(HttpHeaders.CONTENT_LENGTH)).isFalse();
+		assertThat(response.body.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -87,31 +88,28 @@ public class ServerHttpResponseTests {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.setComplete().block();
 
-		assertTrue(response.statusCodeWritten);
-		assertTrue(response.headersWritten);
-		assertTrue(response.cookiesWritten);
-		assertTrue(response.body.isEmpty());
+		assertThat(response.statusCodeWritten).isTrue();
+		assertThat(response.headersWritten).isTrue();
+		assertThat(response.cookiesWritten).isTrue();
+		assertThat(response.body.isEmpty()).isTrue();
 	}
 
 	@Test
 	public void beforeCommitWithComplete() throws Exception {
 		ResponseCookie cookie = ResponseCookie.from("ID", "123").build();
 		TestServerHttpResponse response = new TestServerHttpResponse();
-		response.beforeCommit(() -> {
-			response.getCookies().add(cookie.getName(), cookie);
-			return Mono.empty();
-		});
+		response.beforeCommit(() -> Mono.fromRunnable(() -> response.getCookies().add(cookie.getName(), cookie)));
 		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
-		assertTrue(response.statusCodeWritten);
-		assertTrue(response.headersWritten);
-		assertTrue(response.cookiesWritten);
-		assertSame(cookie, response.getCookies().getFirst("ID"));
+		assertThat(response.statusCodeWritten).isTrue();
+		assertThat(response.headersWritten).isTrue();
+		assertThat(response.cookiesWritten).isTrue();
+		assertThat(response.getCookies().getFirst("ID")).isSameAs(cookie);
 
-		assertEquals(3, response.body.size());
-		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
-		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8));
-		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertThat(response.body.size()).isEqualTo(3);
+		assertThat(new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("a");
+		assertThat(new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("b");
+		assertThat(new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("c");
 	}
 
 	@Test
@@ -124,11 +122,11 @@ public class ServerHttpResponseTests {
 		});
 		response.setComplete().block();
 
-		assertTrue(response.statusCodeWritten);
-		assertTrue(response.headersWritten);
-		assertTrue(response.cookiesWritten);
-		assertTrue(response.body.isEmpty());
-		assertSame(cookie, response.getCookies().getFirst("ID"));
+		assertThat(response.statusCodeWritten).isTrue();
+		assertThat(response.headersWritten).isTrue();
+		assertThat(response.cookiesWritten).isTrue();
+		assertThat(response.body.isEmpty()).isTrue();
+		assertThat(response.getCookies().getFirst("ID")).isSameAs(cookie);
 	}
 
 
@@ -153,20 +151,25 @@ public class ServerHttpResponseTests {
 		}
 
 		@Override
+		public <T> T getNativeResponse() {
+			throw new IllegalStateException("This is a mock. No running server, no native response.");
+		}
+
+		@Override
 		public void applyStatusCode() {
-			assertFalse(this.statusCodeWritten);
+			assertThat(this.statusCodeWritten).isFalse();
 			this.statusCodeWritten = true;
 		}
 
 		@Override
 		protected void applyHeaders() {
-			assertFalse(this.headersWritten);
+			assertThat(this.headersWritten).isFalse();
 			this.headersWritten = true;
 		}
 
 		@Override
 		protected void applyCookies() {
-			assertFalse(this.cookiesWritten);
+			assertThat(this.cookiesWritten).isFalse();
 			this.cookiesWritten = true;
 		}
 

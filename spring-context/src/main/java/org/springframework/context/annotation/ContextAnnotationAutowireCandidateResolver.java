@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -91,13 +91,13 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 				if (target == null) {
 					Class<?> type = getTargetClass();
 					if (Map.class == type) {
-						return Collections.EMPTY_MAP;
+						return Collections.emptyMap();
 					}
 					else if (List.class == type) {
-						return Collections.EMPTY_LIST;
+						return Collections.emptyList();
 					}
 					else if (Set.class == type || Collection.class == type) {
-						return Collections.EMPTY_SET;
+						return Collections.emptySet();
 					}
 					throw new NoSuchBeanDefinitionException(descriptor.getResolvableType(),
 							"Optional dependency not present for lazy injection point");

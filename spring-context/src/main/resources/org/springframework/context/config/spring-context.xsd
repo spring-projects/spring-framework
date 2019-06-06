@@ -8,8 +8,8 @@
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="https://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="https://www.springframework.org/schema/tool/spring-tool.xsd"/>
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
@@ -515,7 +515,7 @@
 				<xsd:documentation><![CDATA[
     Controls the type of filtering to apply to the expression.
 
-    "annotation" indicates an annotation to be present at the type level in target components;
+    "annotation" indicates an annotation to be present or meta-present at the type level in target components;
     "assignable" indicates a class (or interface) that the target components are assignable to (extend/implement);
     "aspectj" indicates an AspectJ type pattern expression to be matched by the target components;
     "regex" indicates a regex pattern to be matched by the target components' class names;

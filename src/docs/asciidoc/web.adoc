@@ -1,25 +1,23 @@
 [[spring-web]]
-= Web
+= Web on Servlet Stack
 :doc-root: https://docs.spring.io
 :api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 :toc: left
-:toclevels: 2
+:toclevels: 4
+:tabsize: 4
+:docinfo1:
 
-This part of the documentation covers support for web applications designed to run on a
-traditional Servlet stack (Servlet API + Servlet container).
-
-Chapters cover the Servlet-based <<mvc,Spring MVC>> web framework including <<mvc-view,Views>>,
-<<mvc-cors,CORS>>, and <<websocket,WebSocket>> support.
-
-Note that as of Spring Framework 5.0 web applications can also run on a
-<<reactive-web.adoc#spring-reactive-web, reactive web stack>> (Reactive Streams API + non-blocking runtime).
+This part of the documentation covers support for Servlet-stack web applications built on the
+Servlet API and deployed to Servlet containers. Individual chapters include <<mvc, Spring MVC>>,
+<<mvc-view,View Technologies>>, <<mvc-cors,CORS Support>>, and <<websocket, WebSocket Support>>.
+For reactive-stack web applications, see <<web-reactive.adoc#spring-web-reactive, Web on Reactive Stack>>.
 
 include::web/webmvc.adoc[leveloffset=+1]
 
-include::web/webmvc-view.adoc[leveloffset=+1]
+include::web/webmvc-client.adoc[leveloffset=+1]
 
-include::web/webmvc-cors.adoc[leveloffset=+1]
+include::web/webmvc-test.adoc[leveloffset=+1]
 
 include::web/websocket.adoc[leveloffset=+1]
 
-
+include::web/integration.adoc[leveloffset=+1]

@@ -11,7 +11,7 @@ eclipse.jdt {
 }
 
 // Replace classpath entries with project dependencies (GRADLE-1116)
-// http://issues.gradle.org/browse/GRADLE-1116
+// https://issues.gradle.org/browse/GRADLE-1116
 eclipse.classpath.file.whenMerged { classpath ->
 	def regexp = /.*?\/([^\/]+)\/build\/([^\/]+\/)+(?:main|test)/ // only match those that end in main or test (avoids removing necessary entries like build/classes/jaxb)
 	def projectOutputDependencies = classpath.entries.findAll { entry -> entry.path =~ regexp }
@@ -89,6 +89,14 @@ task cleanEclipseJdtUi(type: Delete) {
 	delete project.file(".settings/org.eclipse.jdt.ui.prefs")
 	delete project.file(".settings/org.eclipse.wst.common.component")
 	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml")
+}
+
+task eclipseBuildship(type: Copy) {
+	from rootProject.files(
+		"src/eclipse/org.eclipse.jdt.ui.prefs",
+		"src/eclipse/org.eclipse.jdt.core.prefs")
+	into project.file('.settings/')
+	outputs.upToDateWhen { false }
 }
 
 tasks["eclipseJdt"].dependsOn(eclipseJdtPrepare)

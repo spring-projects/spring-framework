@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,10 +68,8 @@ import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Abstract base class for integration tests using the
@@ -196,7 +194,7 @@ public abstract class AbstractSockJsIntegrationTests {
 
 		for (Map.Entry<String, HttpHeaders> entry : this.testFilter.requests.entrySet()) {
 			HttpHeaders httpHeaders = entry.getValue();
-			assertEquals("No auth header for: " + entry.getKey(), "123", httpHeaders.getFirst("auth"));
+			assertThat(httpHeaders.getFirst("auth")).as("No auth header for: " + entry.getKey()).isEqualTo("123");
 		}
 	}
 
@@ -235,7 +233,7 @@ public abstract class AbstractSockJsIntegrationTests {
 					}
 				}
 		);
-		assertTrue(latch.await(5000, TimeUnit.MILLISECONDS));
+		assertThat(latch.await(5000, TimeUnit.MILLISECONDS)).isTrue();
 	}
 
 	@Test
@@ -245,7 +243,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		TestClientHandler handler = new TestClientHandler();
 		initSockJsClient(createWebSocketTransport(), createXhrTransport());
 		WebSocketSession session = this.sockJsClient.doHandshake(handler, this.baseUrl + "/echo").get();
-		assertEquals("Fallback didn't occur", XhrClientSockJsSession.class, session.getClass());
+		assertThat(session.getClass()).as("Fallback didn't occur").isEqualTo(XhrClientSockJsSession.class);
 		TextMessage message = new TextMessage("message1");
 		session.sendMessage(message);
 		handler.awaitMessage(message, 5000);
@@ -259,7 +257,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		initSockJsClient(createXhrTransport());
 		this.sockJsClient.setConnectTimeoutScheduler(this.wac.getBean(ThreadPoolTaskScheduler.class));
 		WebSocketSession clientSession = sockJsClient.doHandshake(clientHandler, this.baseUrl + "/echo").get();
-		assertEquals("Fallback didn't occur", XhrClientSockJsSession.class, clientSession.getClass());
+		assertThat(clientSession.getClass()).as("Fallback didn't occur").isEqualTo(XhrClientSockJsSession.class);
 		TextMessage message = new TextMessage("message1");
 		clientSession.sendMessage(message);
 		clientHandler.awaitMessage(message, 5000);
@@ -281,9 +279,9 @@ public abstract class AbstractSockJsIntegrationTests {
 		}
 		handler.awaitMessageCount(messageCount, 5000);
 		for (TextMessage message : messages) {
-			assertTrue("Message not received: " + message, handler.receivedMessages.remove(message));
+			assertThat(handler.receivedMessages.remove(message)).as("Message not received: " + message).isTrue();
 		}
-		assertEquals("Remaining messages: " + handler.receivedMessages, 0, handler.receivedMessages.size());
+		assertThat(handler.receivedMessages.size()).as("Remaining messages: " + handler.receivedMessages).isEqualTo(0);
 		session.close();
 	}
 
@@ -295,7 +293,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.sockJsClient.doHandshake(clientHandler, headers, new URI(this.baseUrl + "/test")).get();
 		TestServerHandler serverHandler = this.wac.getBean(TestServerHandler.class);
 
-		assertNotNull("afterConnectionEstablished should have been called", clientHandler.session);
+		assertThat(clientHandler.session).as("afterConnectionEstablished should have been called").isNotNull();
 		serverHandler.awaitSession(5000);
 
 		TextMessage message = new TextMessage("message1");
@@ -372,7 +370,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		public void awaitMessage(TextMessage expected, long timeToWait) throws InterruptedException {
 			TextMessage actual = this.receivedMessages.poll(timeToWait, TimeUnit.MILLISECONDS);
 			if (actual != null) {
-				assertEquals(expected, actual);
+				assertThat(actual).isEqualTo(expected);
 			}
 			else if (this.transportError != null) {
 				throw new AssertionError("Transport error", this.transportError);

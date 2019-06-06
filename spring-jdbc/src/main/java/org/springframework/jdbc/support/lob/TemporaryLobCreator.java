@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,11 +60,15 @@ public class TemporaryLobCreator implements LobCreator {
 	public void setBlobAsBytes(PreparedStatement ps, int paramIndex, @Nullable byte[] content)
 			throws SQLException {
 
-		Blob blob = ps.getConnection().createBlob();
-		blob.setBytes(1, content);
-
-		this.temporaryBlobs.add(blob);
-		ps.setBlob(paramIndex, blob);
+		if (content != null) {
+			Blob blob = ps.getConnection().createBlob();
+			blob.setBytes(1, content);
+			this.temporaryBlobs.add(blob);
+			ps.setBlob(paramIndex, blob);
+		}
+		else {
+			ps.setBlob(paramIndex, (Blob) null);
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(content != null ? "Copied bytes into temporary BLOB with length " + content.length :
@@ -103,11 +107,15 @@ public class TemporaryLobCreator implements LobCreator {
 	public void setClobAsString(PreparedStatement ps, int paramIndex, @Nullable String content)
 			throws SQLException {
 
-		Clob clob = ps.getConnection().createClob();
-		clob.setString(1, content);
-
-		this.temporaryClobs.add(clob);
-		ps.setClob(paramIndex, clob);
+		if (content != null) {
+			Clob clob = ps.getConnection().createClob();
+			clob.setString(1, content);
+			this.temporaryClobs.add(clob);
+			ps.setClob(paramIndex, clob);
+		}
+		else {
+			ps.setClob(paramIndex, (Clob) null);
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(content != null ? "Copied string into temporary CLOB with length " + content.length() :
@@ -171,16 +179,22 @@ public class TemporaryLobCreator implements LobCreator {
 
 	@Override
 	public void close() {
-		try {
-			for (Blob blob : this.temporaryBlobs) {
+		for (Blob blob : this.temporaryBlobs) {
+			try {
 				blob.free();
 			}
-			for (Clob clob : this.temporaryClobs) {
-				clob.free();
+			catch (SQLException ex) {
+				logger.warn("Could not free BLOB", ex);
 			}
 		}
-		catch (SQLException ex) {
-			logger.error("Could not free LOB", ex);
+		for (Clob clob : this.temporaryClobs) {
+			try {
+				clob.free();
+			}
+			catch (SQLException ex) {
+				logger.warn("Could not free CLOB", ex);
+			}
 		}
 	}
+
 }

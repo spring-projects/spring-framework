@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,11 +42,22 @@ class KotlinReflectionParameterNameDiscovererTests {
 		assertThat(actualParams, `is`(arrayOf("message")))
 	}
 
+	@Test
+	fun getParameterNamesOnExtensionMethod() {
+		val method = ReflectionUtils.findMethod(UtilityClass::class.java, "identity", String::class.java)!!
+		val actualParams = parameterNameDiscoverer.getParameterNames(method)!!
+		assertThat(actualParams, `is`(arrayOf("\$receiver")))
+	}
+
 	interface MessageService {
 		fun sendMessage(message: String)
 	}
 
 	class MessageServiceImpl {
 		fun sendMessage(message: String) = message
+	}
+
+	class UtilityClass {
+		fun String.identity() = this
 	}
 }

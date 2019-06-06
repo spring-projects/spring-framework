@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,8 +60,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
@@ -87,184 +86,232 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		return wac;
 	}
 
-
 	@Test
 	public void byteBufferResponseBodyWithPublisher() throws Exception {
 		Person expected = new Person("Robert");
-		assertEquals(expected, performGet("/raw-response/publisher", JSON, Person.class).getBody());
+		assertThat(performGet("/raw-response/publisher", JSON, Person.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void byteBufferResponseBodyWithFlux() throws Exception {
 		String expected = "Hello!";
-		assertEquals(expected, performGet("/raw-response/flux", new HttpHeaders(), String.class).getBody());
+		assertThat(performGet("/raw-response/flux", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
+	}
+
+	@Test
+	public void byteBufferResponseBodyWithMono() throws Exception {
+		String expected = "Hello!";
+		ResponseEntity<String> responseEntity = performGet("/raw-response/mono", new HttpHeaders(), String.class);
+		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(6);
+		assertThat(responseEntity.getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void byteBufferResponseBodyWithObservable() throws Exception {
 		String expected = "Hello!";
-		assertEquals(expected, performGet("/raw-response/observable", new HttpHeaders(), String.class).getBody());
+		assertThat(performGet("/raw-response/observable", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void byteBufferResponseBodyWithRxJava2Observable() throws Exception {
 		String expected = "Hello!";
-		assertEquals(expected, performGet("/raw-response/rxjava2-observable",
-				new HttpHeaders(), String.class).getBody());
+		assertThat(performGet("/raw-response/rxjava2-observable",
+				new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void byteBufferResponseBodyWithFlowable() throws Exception {
 		String expected = "Hello!";
-		assertEquals(expected, performGet("/raw-response/flowable", new HttpHeaders(), String.class).getBody());
+		assertThat(performGet("/raw-response/flowable", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void personResponseBody() throws Exception {
 		Person expected = new Person("Robert");
-		assertEquals(expected, performGet("/person-response/person", JSON, Person.class).getBody());
+		ResponseEntity<Person> responseEntity = performGet("/person-response/person", JSON, Person.class);
+		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(17);
+		assertThat(responseEntity.getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void personResponseBodyWithCompletableFuture() throws Exception {
 		Person expected = new Person("Robert");
-		assertEquals(expected, performGet("/person-response/completable-future", JSON, Person.class).getBody());
+		ResponseEntity<Person> responseEntity = performGet("/person-response/completable-future", JSON, Person.class);
+		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(17);
+		assertThat(responseEntity.getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void personResponseBodyWithMono() throws Exception {
 		Person expected = new Person("Robert");
-		assertEquals(expected, performGet("/person-response/mono", JSON, Person.class).getBody());
+		ResponseEntity<Person> responseEntity = performGet("/person-response/mono", JSON, Person.class);
+		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(17);
+		assertThat(responseEntity.getBody()).isEqualTo(expected);
+	}
+
+	@Test // SPR-17506
+	public void personResponseBodyWithEmptyMono() throws Exception {
+		ResponseEntity<Person> responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
+		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(0);
+		assertThat(responseEntity.getBody()).isNull();
+
+		// As we're on the same connection, the 2nd request proves server response handling
+		// did complete after the 1st request..
+		responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
+		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(0);
+		assertThat(responseEntity.getBody()).isNull();
 	}
 
 	@Test
 	public void personResponseBodyWithMonoDeclaredAsObject() throws Exception {
 		Person expected = new Person("Robert");
-		assertEquals(expected, performGet("/person-response/mono-declared-as-object", JSON, Person.class).getBody());
+		ResponseEntity<Person> entity = performGet("/person-response/mono-declared-as-object", JSON, Person.class);
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(17);
+		assertThat(entity.getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void personResponseBodyWithSingle() throws Exception {
 		Person expected = new Person("Robert");
-		assertEquals(expected, performGet("/person-response/single", JSON, Person.class).getBody());
+		ResponseEntity<Person> entity = performGet("/person-response/single", JSON, Person.class);
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(17);
+		assertThat(entity.getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void personResponseBodyWithMonoResponseEntity() throws Exception {
 		Person expected = new Person("Robert");
-		assertEquals(expected, performGet("/person-response/mono-response-entity", JSON, Person.class).getBody());
+		ResponseEntity<Person> entity = performGet("/person-response/mono-response-entity", JSON, Person.class);
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(17);
+		assertThat(entity.getBody()).isEqualTo(expected);
+	}
+
+	@Test // SPR-16172
+	public void personResponseBodyWithMonoResponseEntityXml() throws Exception {
+
+		String url = "/person-response/mono-response-entity-xml";
+		ResponseEntity<String> entity = performGet(url, new HttpHeaders(), String.class);
+		String actual = entity.getBody();
+
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(91);
+		assertThat(actual).isEqualTo(("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+				"<person><name>Robert</name></person>"));
 	}
 
 	@Test
 	public void personResponseBodyWithList() throws Exception {
 		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
-		assertEquals(expected, performGet("/person-response/list", JSON, PERSON_LIST).getBody());
+		ResponseEntity<List<Person>> entity = performGet("/person-response/list", JSON, PERSON_LIST);
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(36);
+		assertThat(entity.getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void personResponseBodyWithPublisher() throws Exception {
 		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
-		assertEquals(expected, performGet("/person-response/publisher", JSON, PERSON_LIST).getBody());
+		ResponseEntity<List<Person>> entity = performGet("/person-response/publisher", JSON, PERSON_LIST);
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(-1);
+		assertThat(entity.getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void personResponseBodyWithFlux() throws Exception {
 		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
-		assertEquals(expected, performGet("/person-response/flux", JSON, PERSON_LIST).getBody());
+		assertThat(performGet("/person-response/flux", JSON, PERSON_LIST).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void personResponseBodyWithObservable() throws Exception {
 		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
-		assertEquals(expected, performGet("/person-response/observable", JSON, PERSON_LIST).getBody());
+		assertThat(performGet("/person-response/observable", JSON, PERSON_LIST).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void resource() throws Exception {
 		ResponseEntity<byte[]> response = performGet("/resource", new HttpHeaders(), byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertTrue(response.hasBody());
-		assertEquals(951, response.getHeaders().getContentLength());
-		assertEquals(951, response.getBody().length);
-		assertEquals(new MediaType("image", "png"), response.getHeaders().getContentType());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.hasBody()).isTrue();
+		assertThat(response.getHeaders().getContentLength()).isEqualTo(951);
+		assertThat(response.getBody().length).isEqualTo(951);
+		assertThat(response.getHeaders().getContentType()).isEqualTo(new MediaType("image", "png"));
 	}
 
 	@Test
 	public void personTransform() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/person-transform/person", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
+		assertThat(performPost("/person-transform/person", JSON, new Person("Robert"),
+				JSON, Person.class).getBody()).isEqualTo(new Person("ROBERT"));
 	}
 
 	@Test
 	public void personTransformWithCompletableFuture() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/person-transform/completable-future", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
+		assertThat(performPost("/person-transform/completable-future", JSON, new Person("Robert"),
+				JSON, Person.class).getBody()).isEqualTo(new Person("ROBERT"));
 	}
 
 	@Test
 	public void personTransformWithMono() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/person-transform/mono", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
+		assertThat(performPost("/person-transform/mono", JSON, new Person("Robert"),
+				JSON, Person.class).getBody()).isEqualTo(new Person("ROBERT"));
+	}
+
+	@Test  // SPR-16759
+	public void personTransformWithMonoAndXml() throws Exception {
+		assertThat(performPost("/person-transform/mono", MediaType.APPLICATION_XML, new Person("Robert"),
+				MediaType.APPLICATION_XML, Person.class).getBody()).isEqualTo(new Person("ROBERT"));
 	}
 
 	@Test
 	public void personTransformWithSingle() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/person-transform/single", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
+		assertThat(performPost("/person-transform/single", JSON, new Person("Robert"),
+				JSON, Person.class).getBody()).isEqualTo(new Person("ROBERT"));
 	}
 
 	@Test
 	public void personTransformWithRxJava2Single() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/person-transform/rxjava2-single", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
+		assertThat(performPost("/person-transform/rxjava2-single", JSON, new Person("Robert"),
+				JSON, Person.class).getBody()).isEqualTo(new Person("ROBERT"));
 	}
 
 	@Test
 	public void personTransformWithRxJava2Maybe() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/person-transform/rxjava2-maybe", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
+		assertThat(performPost("/person-transform/rxjava2-maybe", JSON, new Person("Robert"),
+				JSON, Person.class).getBody()).isEqualTo(new Person("ROBERT"));
 	}
 
 	@Test
 	public void personTransformWithPublisher() throws Exception {
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
 		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
-		assertEquals(res, performPost("/person-transform/publisher", JSON, req, JSON, PERSON_LIST).getBody());
+		assertThat(performPost("/person-transform/publisher", JSON, req, JSON, PERSON_LIST).getBody()).isEqualTo(res);
 	}
 
 	@Test
 	public void personTransformWithFlux() throws Exception {
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
 		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
-		assertEquals(res, performPost("/person-transform/flux", JSON, req, JSON, PERSON_LIST).getBody());
+		assertThat(performPost("/person-transform/flux", JSON, req, JSON, PERSON_LIST).getBody()).isEqualTo(res);
 	}
 
 	@Test
 	public void personTransformWithObservable() throws Exception {
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
 		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
-		assertEquals(res, performPost("/person-transform/observable", JSON, req, JSON, PERSON_LIST).getBody());
+		assertThat(performPost("/person-transform/observable", JSON, req, JSON, PERSON_LIST).getBody()).isEqualTo(res);
 	}
 
 	@Test
 	public void personTransformWithRxJava2Observable() throws Exception {
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
 		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
-		assertEquals(res, performPost("/person-transform/rxjava2-observable", JSON, req, JSON, PERSON_LIST).getBody());
+		assertThat(performPost("/person-transform/rxjava2-observable", JSON, req, JSON, PERSON_LIST).getBody()).isEqualTo(res);
 	}
 
 	@Test
 	public void personTransformWithFlowable() throws Exception {
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
 		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
-		assertEquals(res, performPost("/person-transform/flowable", JSON, req, JSON, PERSON_LIST).getBody());
+		assertThat(performPost("/person-transform/flowable", JSON, req, JSON, PERSON_LIST).getBody()).isEqualTo(res);
 	}
 
 	@Test
@@ -272,8 +319,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> entity = performPost("/person-create/publisher", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
-		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
@@ -281,8 +328,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/publisher", APPLICATION_XML, people, null, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
@@ -290,8 +337,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> entity = performPost(
 				"/person-create/mono", JSON, new Person("Robert"), null, Void.class);
 
-		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(1, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -299,8 +346,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> entity = performPost(
 				"/person-create/single", JSON, new Person("Robert"), null, Void.class);
 
-		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(1, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -308,8 +355,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> entity = performPost(
 				"/person-create/rxjava2-single", JSON, new Person("Robert"), null, Void.class);
 
-		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(1, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -317,8 +364,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> entity = performPost("/person-create/flux", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
-		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
@@ -326,8 +373,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/flux", APPLICATION_XML, people, null, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
@@ -335,8 +382,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> entity = performPost("/person-create/observable", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
-		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
@@ -344,8 +391,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> entity = performPost("/person-create/rxjava2-observable", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
-		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
@@ -353,17 +400,18 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/observable", APPLICATION_XML, people, null, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
 	public void personCreateWithRxJava2ObservableXml() throws Exception {
 		People people = new People(new Person("Robert"), new Person("Marie"));
-		ResponseEntity<Void> response = performPost("/person-create/rxjava2-observable", APPLICATION_XML, people, null, Void.class);
+		String url = "/person-create/rxjava2-observable";
+		ResponseEntity<Void> response = performPost(url, APPLICATION_XML, people, null, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
@@ -371,8 +419,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> entity = performPost("/person-create/flowable", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
-		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 	@Test
@@ -380,8 +428,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/flowable", APPLICATION_XML, people, null, Void.class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
 	}
 
 
@@ -409,6 +457,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		@GetMapping("/flux")
 		public Flux<ByteBuffer> getFlux() {
 			return Flux.just(ByteBuffer.wrap("Hello!".getBytes()));
+		}
+
+		@GetMapping("/mono")
+		public Mono<ByteBuffer> getMonoString() {
+			return Mono.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
 		@GetMapping("/observable")
@@ -448,6 +501,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			return Mono.just(new Person("Robert"));
 		}
 
+		@GetMapping("/mono-empty")
+		public Mono<Person> getMonoEmpty() {
+			return Mono.empty();
+		}
+
 		@GetMapping("/mono-declared-as-object")
 		public Object getMonoDeclaredAsObject() {
 			return Mono.just(new Person("Robert"));
@@ -462,6 +520,12 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		public ResponseEntity<Mono<Person>> getMonoResponseEntity() {
 			Mono<Person> body = Mono.just(new Person("Robert"));
 			return ResponseEntity.ok(body);
+		}
+
+		@GetMapping("/mono-response-entity-xml")
+		public ResponseEntity<Mono<Person>> getMonoResponseEntityXml() {
+			Mono<Person> body = Mono.just(new Person("Robert"));
+			return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(body);
 		}
 
 		@GetMapping("/list")
@@ -585,6 +649,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@PostMapping("/rxjava2-single")
+		@SuppressWarnings("deprecation")
 		public io.reactivex.Completable createWithRxJava2Single(@RequestBody io.reactivex.Single<Person> single) {
 			return single.map(persons::add).toCompletable();
 		}
@@ -600,11 +665,15 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@PostMapping("/rxjava2-observable")
-		public io.reactivex.Completable createWithRxJava2Observable(@RequestBody io.reactivex.Observable<Person> observable) {
+		@SuppressWarnings("deprecation")
+		public io.reactivex.Completable createWithRxJava2Observable(
+				@RequestBody io.reactivex.Observable<Person> observable) {
+
 			return observable.toList().doOnSuccess(persons::addAll).toCompletable();
 		}
 
 		@PostMapping("/flowable")
+		@SuppressWarnings("deprecation")
 		public io.reactivex.Completable createWithFlowable(@RequestBody Flowable<Person> flowable) {
 			return flowable.toList().doOnSuccess(persons::addAll).toCompletable();
 		}

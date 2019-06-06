@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,11 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Colin Sampaleanu
@@ -33,10 +32,6 @@ import static org.junit.Assert.*;
  * @since 21.11.2003
  */
 public class MethodInvokerTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
 	public void plainMethodInvoker() throws Exception {
@@ -47,31 +42,41 @@ public class MethodInvokerTests {
 		mi.setTargetMethod("method1");
 		mi.prepare();
 		Integer i = (Integer) mi.invoke();
-		assertEquals(1, i.intValue());
+		assertThat(i.intValue()).isEqualTo(1);
+
+		// defensive check: singleton, non-static should work with null array
+		tc1 = new TestClass1();
+		mi = new MethodInvoker();
+		mi.setTargetObject(tc1);
+		mi.setTargetMethod("method1");
+		mi.setArguments((Object[]) null);
+		mi.prepare();
+		i = (Integer) mi.invoke();
+		assertThat(i.intValue()).isEqualTo(1);
 
 		// sanity check: check that argument count matching works
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes");
-		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello"});
+		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello");
 		mi.prepare();
-		assertEquals("hello", mi.invoke());
+		assertThat(mi.invoke()).isEqualTo("hello");
 
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello", "bogus"});
+		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", "bogus");
 		mi.prepare();
-		assertEquals("hello", mi.invoke());
+		assertThat(mi.invoke()).isEqualTo("hello");
 
 		// Sanity check: check that argument conversion doesn't work with plain MethodInvoker
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello", Boolean.TRUE});
+		mi.setArguments(new ArrayList<>(), new ArrayList<>(), "hello", Boolean.TRUE);
 
-		exception.expect(NoSuchMethodException.class);
-		mi.prepare();
+		assertThatExceptionOfType(NoSuchMethodException.class).isThrownBy(
+				mi::prepare);
 	}
 
 	@Test
@@ -79,10 +84,10 @@ public class MethodInvokerTests {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {"no match"});
+		methodInvoker.setArguments("no match");
 
-		exception.expect(NoSuchMethodException.class);
-		methodInvoker.prepare();
+		assertThatExceptionOfType(NoSuchMethodException.class).isThrownBy(
+				methodInvoker::prepare);
 	}
 
 	@Test
@@ -90,10 +95,10 @@ public class MethodInvokerTests {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Purchaser()});
+		methodInvoker.setArguments(new Purchaser());
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
-		assertEquals("purchaser: hello", greeting);
+		assertThat(greeting).isEqualTo("purchaser: hello");
 	}
 
 	@Test
@@ -101,10 +106,10 @@ public class MethodInvokerTests {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Shopper()});
+		methodInvoker.setArguments(new Shopper());
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
-		assertEquals("purchaser: may I help you?", greeting);
+		assertThat(greeting).isEqualTo("purchaser: may I help you?");
 	}
 
 	@Test
@@ -112,10 +117,10 @@ public class MethodInvokerTests {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Salesman()});
+		methodInvoker.setArguments(new Salesman());
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
-		assertEquals("greetable: how are sales?", greeting);
+		assertThat(greeting).isEqualTo("greetable: how are sales?");
 	}
 
 	@Test
@@ -123,10 +128,10 @@ public class MethodInvokerTests {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Customer()});
+		methodInvoker.setArguments(new Customer());
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
-		assertEquals("customer: good day", greeting);
+		assertThat(greeting).isEqualTo("customer: good day");
 	}
 
 	@Test
@@ -134,10 +139,10 @@ public class MethodInvokerTests {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new Regular("Kotter")});
+		methodInvoker.setArguments(new Regular("Kotter"));
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
-		assertEquals("regular: welcome back Kotter", greeting);
+		assertThat(greeting).isEqualTo("regular: welcome back Kotter");
 	}
 
 	@Test
@@ -145,10 +150,10 @@ public class MethodInvokerTests {
 		MethodInvoker methodInvoker = new MethodInvoker();
 		methodInvoker.setTargetObject(new Greeter());
 		methodInvoker.setTargetMethod("greet");
-		methodInvoker.setArguments(new Object[] {new VIP("Fonzie")});
+		methodInvoker.setArguments(new VIP("Fonzie"));
 		methodInvoker.prepare();
 		String greeting = (String) methodInvoker.invoke();
-		assertEquals("regular: whassup dude?", greeting);
+		assertThat(greeting).isEqualTo("regular: whassup dude?");
 	}
 
 

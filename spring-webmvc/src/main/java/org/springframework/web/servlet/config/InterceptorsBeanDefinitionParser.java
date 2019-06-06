@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,9 +43,9 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 
 	@Override
 	@Nullable
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
-		parserContext.pushContainingComponent(compDefinition);
+	public BeanDefinition parse(Element element, ParserContext context) {
+		context.pushContainingComponent(
+				new CompositeComponentDefinition(element.getTagName(), context.extractSource(element)));
 
 		RuntimeBeanReference pathMatcherRef = null;
 		if (element.hasAttribute("path-matcher")) {
@@ -55,7 +55,7 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 		List<Element> interceptors = DomUtils.getChildElementsByTagName(element, "bean", "ref", "interceptor");
 		for (Element interceptor : interceptors) {
 			RootBeanDefinition mappedInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
-			mappedInterceptorDef.setSource(parserContext.extractSource(interceptor));
+			mappedInterceptorDef.setSource(context.extractSource(interceptor));
 			mappedInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 			ManagedList<String> includePatterns = null;
@@ -65,10 +65,10 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 				includePatterns = getIncludePatterns(interceptor, "mapping");
 				excludePatterns = getIncludePatterns(interceptor, "exclude-mapping");
 				Element beanElem = DomUtils.getChildElementsByTagName(interceptor, "bean", "ref").get(0);
-				interceptorBean = parserContext.getDelegate().parsePropertySubElement(beanElem, null);
+				interceptorBean = context.getDelegate().parsePropertySubElement(beanElem, null);
 			}
 			else {
-				interceptorBean = parserContext.getDelegate().parsePropertySubElement(interceptor, null);
+				interceptorBean = context.getDelegate().parsePropertySubElement(interceptor, null);
 			}
 			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, includePatterns);
 			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, excludePatterns);
@@ -78,11 +78,11 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 				mappedInterceptorDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
 			}
 
-			String beanName = parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
-			parserContext.registerComponent(new BeanComponentDefinition(mappedInterceptorDef, beanName));
+			String beanName = context.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
+			context.registerComponent(new BeanComponentDefinition(mappedInterceptorDef, beanName));
 		}
 
-		parserContext.popAndRegisterContainingComponent();
+		context.popAndRegisterContainingComponent();
 		return null;
 	}
 

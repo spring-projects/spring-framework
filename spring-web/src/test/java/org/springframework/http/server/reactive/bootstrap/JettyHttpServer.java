@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,6 +41,7 @@ public class JettyHttpServer extends AbstractHttpServer {
 
 		ServletHttpHandlerAdapter servlet = createServletAdapter();
 		ServletHolder servletHolder = new ServletHolder(servlet);
+		servletHolder.setAsyncSupported(true);
 
 		this.contextHandler = new ServletContextHandler(this.jettyServer, "", false, false);
 		this.contextHandler.addServlet(servletHolder, "/");

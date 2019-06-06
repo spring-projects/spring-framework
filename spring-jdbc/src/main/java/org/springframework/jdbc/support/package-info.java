@@ -7,6 +7,8 @@
  * or in JDBC-based O/R mapping layers.
  */
 @NonNullApi
+@NonNullFields
 package org.springframework.jdbc.support;
 
 import org.springframework.lang.NonNullApi;
+import org.springframework.lang.NonNullFields;

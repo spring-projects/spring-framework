@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,8 +47,7 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * @see #andOther(RouterFunction)
 	 */
 	default RouterFunction<T> and(RouterFunction<T> other) {
-		return request -> this.route(request)
-				.switchIfEmpty(Mono.defer(() -> other.route(request)));
+		return new RouterFunctions.SameComposedRouterFunction<>(this, other);
 	}
 
 	/**
@@ -61,10 +60,7 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * @see #and(RouterFunction)
 	 */
 	default RouterFunction<?> andOther(RouterFunction<?> other) {
-		return request -> this.route(request)
-				.map(RouterFunctions::cast)
-				.switchIfEmpty(
-						Mono.defer(() -> other.route(request).map(RouterFunctions::cast)));
+		return new RouterFunctions.DifferentComposedRouterFunction(this, other);
 	}
 
 	/**
@@ -105,7 +101,18 @@ public interface RouterFunction<T extends ServerResponse> {
 	 * @return the filtered routing function
 	 */
 	default <S extends ServerResponse> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
-		return request -> this.route(request).map(filterFunction::apply);
+		return new RouterFunctions.FilteredRouterFunction<>(this, filterFunction);
+	}
+
+	/**
+	 * Accept the given visitor. Default implementation calls
+	 * {@link RouterFunctions.Visitor#unknown(RouterFunction)}; composed {@code RouterFunction}
+	 * implementations are expected to call {@code accept} for all components that make up this
+	 * router function.
+	 * @param visitor the visitor to accept
+	 */
+	default void accept(RouterFunctions.Visitor visitor) {
+		visitor.unknown(this);
 	}
 
 }
