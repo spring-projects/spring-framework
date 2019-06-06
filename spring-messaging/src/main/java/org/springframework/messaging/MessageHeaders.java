@@ -320,7 +320,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	// equals, hashCode, toString
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other ||
 				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
 	}

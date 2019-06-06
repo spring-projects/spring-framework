@@ -322,9 +322,12 @@ public abstract class AbstractApplicationEventMulticaster
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
+			}
+			if (!(other instanceof ListenerCacheKey)) {
+				return false;
 			}
 			ListenerCacheKey otherKey = (ListenerCacheKey) other;
 			return (this.eventType.equals(otherKey.eventType) &&

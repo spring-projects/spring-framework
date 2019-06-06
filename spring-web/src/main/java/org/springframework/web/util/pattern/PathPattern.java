@@ -420,7 +420,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		return this.parser.parse(file2 + (firstExtensionWild ? secondExtension : firstExtension));
 	}
 
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (!(other instanceof PathPattern)) {
 			return false;
 		}

@@ -452,7 +452,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -778,7 +778,7 @@ public class TypeDescriptor implements Serializable {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof AnnotatedElementAdapter &&
 					Arrays.equals(this.annotations, ((AnnotatedElementAdapter) other).annotations)));
 		}

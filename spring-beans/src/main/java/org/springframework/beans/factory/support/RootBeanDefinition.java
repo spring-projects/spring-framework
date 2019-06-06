@@ -452,7 +452,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof RootBeanDefinition && super.equals(other)));
 	}
 

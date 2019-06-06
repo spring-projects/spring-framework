@@ -86,7 +86,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
 		}
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other);
 		}
 		@Override
@@ -543,7 +543,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -890,7 +890,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof FullPathComponent &&
 					getPath().equals(((FullPathComponent) other).getPath())));
 		}
@@ -964,7 +964,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof PathSegmentComponent &&
 					getPathSegments().equals(((PathSegmentComponent) other).getPathSegments())));
 		}

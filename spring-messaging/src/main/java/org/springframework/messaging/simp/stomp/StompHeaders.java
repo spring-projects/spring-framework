@@ -552,7 +552,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof StompHeaders &&
 				this.headers.equals(((StompHeaders) other).headers)));
 	}

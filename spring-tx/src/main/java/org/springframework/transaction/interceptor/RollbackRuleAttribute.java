@@ -18,6 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.io.Serializable;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -124,7 +125,7 @@ public class RollbackRuleAttribute implements Serializable{
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

@@ -416,7 +416,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

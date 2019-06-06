@@ -349,9 +349,12 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
+			}
+			if (!(other instanceof AnnotationConverterKey)) {
+				return false;
 			}
 			AnnotationConverterKey otherKey = (AnnotationConverterKey) other;
 			return (this.fieldType == otherKey.fieldType && this.annotation.equals(otherKey.annotation));

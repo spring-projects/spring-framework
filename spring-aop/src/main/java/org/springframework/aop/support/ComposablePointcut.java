@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -180,7 +181,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

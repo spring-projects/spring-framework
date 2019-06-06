@@ -223,7 +223,7 @@ final class ConfigurationClass {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof ConfigurationClass &&
 				getMetadata().getClassName().equals(((ConfigurationClass) other).getMetadata().getClassName())));
 	}

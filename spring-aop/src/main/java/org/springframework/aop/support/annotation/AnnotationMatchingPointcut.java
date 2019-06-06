@@ -120,7 +120,7 @@ public class AnnotationMatchingPointcut implements Pointcut {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

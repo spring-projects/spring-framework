@@ -349,7 +349,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof CglibAopProxy &&
 				AopProxyUtils.equalsInProxy(this.advised, ((CglibAopProxy) other).advised)));
 	}
@@ -703,7 +703,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other ||
 					(other instanceof DynamicAdvisedInterceptor &&
 							this.advised.equals(((DynamicAdvisedInterceptor) other).advised)));
@@ -899,7 +899,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

@@ -19,6 +19,7 @@ package org.springframework.scheduling.support;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 
@@ -89,7 +90,7 @@ public class CronTrigger implements Trigger {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof CronTrigger &&
 				this.sequenceGenerator.equals(((CronTrigger) other).sequenceGenerator)));
 	}

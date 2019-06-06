@@ -19,6 +19,7 @@ package org.springframework.messaging.support;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -85,7 +86,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	}
 
 
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

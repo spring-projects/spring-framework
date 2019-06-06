@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -98,7 +99,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof NameMatchMethodPointcut &&
 				this.mappedNames.equals(((NameMatchMethodPointcut) other).mappedNames)));
 	}

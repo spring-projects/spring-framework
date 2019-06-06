@@ -188,7 +188,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
