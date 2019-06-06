@@ -280,7 +280,7 @@ public class MockHttpServletRequestTests {
 		request.setCookies(cookie1, cookie2);
 
 		Cookie[] cookies = request.getCookies();
-		List<String> cookieHeaders = Collections.list(request.getHeaders("Cookie"));
+		List<String> cookieHeaders = Collections.list(request.getHeaders(HttpHeaders.COOKIE));
 
 		assertThat(cookies)
 				.describedAs("Raw cookies stored as is")
