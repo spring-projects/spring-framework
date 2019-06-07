@@ -215,11 +215,19 @@ public abstract class AbstractView implements View, BeanNameAware, ApplicationCo
 	protected Mono<Map<String, Object>> getModelAttributes(
 			@Nullable Map<String, ?> model, ServerWebExchange exchange) {
 
-		int size = (model != null ? model.size() : 0);
-		Map<String, Object> attributes = new ConcurrentHashMap<>(size);
+		Map<String, Object> attributes;
 		if (model != null) {
-			attributes.putAll(model);
+			attributes = new ConcurrentHashMap<>(model.size());
+			for (Map.Entry<String, ?> entry : model.entrySet()) {
+				if (entry.getValue() != null) {
+					attributes.put(entry.getKey(), entry.getValue());
+				}
+			}
 		}
+		else {
+			attributes = new ConcurrentHashMap<>(0);
+		}
+
 		//noinspection deprecation
 		return resolveAsyncAttributes(attributes)
 				.then(resolveAsyncAttributes(attributes, exchange))
