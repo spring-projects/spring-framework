@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -93,6 +94,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
+		alreadyFilteredAttributeName = updateForErrorDispatch(alreadyFilteredAttributeName, request);
 		boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
 
 		if (hasAlreadyFilteredAttribute || skipDispatch(httpRequest) || shouldNotFilter(httpRequest)) {
@@ -163,6 +165,21 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			name = getClass().getName();
 		}
 		return name + ALREADY_FILTERED_SUFFIX;
+	}
+
+	private String updateForErrorDispatch(String alreadyFilteredAttributeName, ServletRequest request) {
+
+		// Jetty does ERROR dispatch within sendError, so request attribute is still present
+		// Use a separate attribute for ERROR dispatches
+
+		if (DispatcherType.ERROR.equals(request.getDispatcherType()) && !shouldNotFilterErrorDispatch() &&
+				request.getAttribute(alreadyFilteredAttributeName) != null) {
+
+			return alreadyFilteredAttributeName + ".ERROR";
+		}
+
+
+		return alreadyFilteredAttributeName;
 	}
 
 	/**
