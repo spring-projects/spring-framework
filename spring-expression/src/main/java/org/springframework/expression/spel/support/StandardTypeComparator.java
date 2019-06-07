@@ -27,7 +27,7 @@ import org.springframework.util.NumberUtils;
 
 /**
  * A simple basic {@link TypeComparator} implementation.
- * It supports comparison of Numbers and types implementing Comparable.
+ * <p>It supports comparison of Numbers and types implementing Comparable.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -89,10 +89,10 @@ public class StandardTypeComparator implements TypeComparator {
 				return Integer.compare(leftNumber.intValue(), rightNumber.intValue());
 			}
 			else if (leftNumber instanceof Short || rightNumber instanceof Short) {
-				return leftNumber.shortValue() - rightNumber.shortValue();
+				return Short.compare(leftNumber.shortValue(), rightNumber.shortValue());
 			}
 			else if (leftNumber instanceof Byte || rightNumber instanceof Byte) {
-				return leftNumber.byteValue() - rightNumber.byteValue();
+				return Byte.compare(leftNumber.byteValue(), rightNumber.byteValue());
 			}
 			else {
 				// Unknown Number subtypes -> best guess is double multiplication
