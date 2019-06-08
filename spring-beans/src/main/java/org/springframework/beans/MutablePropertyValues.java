@@ -380,11 +380,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	@Override
 	public String toString() {
 		PropertyValue[] pvs = getPropertyValues();
-		StringBuilder sb = new StringBuilder("PropertyValues: length=").append(pvs.length);
 		if (pvs.length > 0) {
-			sb.append("; ").append(StringUtils.arrayToDelimitedString(pvs, "; "));
+			return "PropertyValues: length=" + pvs.length + "; " + StringUtils.arrayToDelimitedString(pvs, "; ");
 		}
-		return sb.toString();
+		return "PropertyValues: length=0";
 	}
 
 }
