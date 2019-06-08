@@ -25,10 +25,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.junit.Test;
 
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -41,23 +38,23 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
 /**
  * @author Juergen Hoeller
  * @author Issam El-atif
+ * @author Sam Brannen
  */
 public class FreeMarkerConfigurerTests {
 
+	private final FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
+
 	@Test
-	public void freeMarkerConfigurationFactoryBeanWithConfigLocation() throws Exception {
-		FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
+	public void freeMarkerConfigurerWithConfigLocation() throws Exception {
 		freeMarkerConfigurer.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
 		freeMarkerConfigurer.setFreemarkerSettings(props);
-		assertThatIOException().isThrownBy(
-				freeMarkerConfigurer::afterPropertiesSet);
+		assertThatIOException().isThrownBy(freeMarkerConfigurer::afterPropertiesSet);
 	}
 
 	@Test
-	public void freeMarkerConfigurationFactoryBeanWithResourceLoaderPath() throws Exception {
-		FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
+	public void freeMarkerConfigurerWithResourceLoaderPath() throws Exception {
 		freeMarkerConfigurer.setTemplateLoaderPath("file:/mydir");
 		freeMarkerConfigurer.afterPropertiesSet();
 		Configuration cfg = freeMarkerConfigurer.getConfiguration();
@@ -69,8 +66,7 @@ public class FreeMarkerConfigurerTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void freeMarkerConfigurationFactoryBeanWithNonFileResourceLoaderPath() throws Exception {
-		FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
+	public void freeMarkerConfigurerWithNonFileResourceLoaderPath() throws Exception {
 		freeMarkerConfigurer.setTemplateLoaderPath("file:/mydir");
 		Properties settings = new Properties();
 		settings.setProperty("localized_lookup", "false");
@@ -93,18 +89,6 @@ public class FreeMarkerConfigurerTests {
 		Configuration fc = freeMarkerConfigurer.getConfiguration();
 		Template ft = fc.getTemplate("test");
 		assertThat(FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap())).isEqualTo("test");
-	}
-
-	@Test  // SPR-12448
-	public void freeMarkerConfigurationAsBean() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		RootBeanDefinition loaderDef = new RootBeanDefinition(SpringTemplateLoader.class);
-		loaderDef.getConstructorArgumentValues().addGenericArgumentValue(new DefaultResourceLoader());
-		loaderDef.getConstructorArgumentValues().addGenericArgumentValue("/freemarker");
-		RootBeanDefinition configDef = new RootBeanDefinition(Configuration.class);
-		configDef.getPropertyValues().add("templateLoader", loaderDef);
-		beanFactory.registerBeanDefinition("freeMarkerConfig", configDef);
-		beanFactory.getBean(Configuration.class);
 	}
 
 }

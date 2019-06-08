@@ -16,9 +16,13 @@
 
 package org.springframework.ui.freemarker;
 
+import java.util.HashMap;
+import java.util.Properties;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ByteArrayResource;
@@ -27,42 +31,38 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-import java.util.HashMap;
-import java.util.Properties;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
  * @author Juergen Hoeller
  * @author Issam El-atif
+ * @author Sam Brannen
  */
 public class FreeMarkerConfigurationFactoryBeanTests {
 
+	private final FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
+
 	@Test
 	public void freeMarkerConfigurationFactoryBeanWithConfigLocation() throws Exception {
-		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
 		fcfb.setFreemarkerSettings(props);
-		assertThatIOException().isThrownBy(
-				fcfb::afterPropertiesSet);
+		assertThatIOException().isThrownBy(fcfb::afterPropertiesSet);
 	}
 
 	@Test
 	public void freeMarkerConfigurationFactoryBeanWithResourceLoaderPath() throws Exception {
-		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		fcfb.afterPropertiesSet();
 		Configuration cfg = fcfb.getObject();
-		assertThat(cfg.getTemplateLoader() instanceof SpringTemplateLoader).isTrue();
+		assertThat(cfg.getTemplateLoader()).isInstanceOf(SpringTemplateLoader.class);
 	}
 
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void freeMarkerConfigurationFactoryBeanWithNonFileResourceLoaderPath() throws Exception {
-		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		Properties settings = new Properties();
 		settings.setProperty("localized_lookup", "false");
@@ -96,7 +96,7 @@ public class FreeMarkerConfigurationFactoryBeanTests {
 		RootBeanDefinition configDef = new RootBeanDefinition(Configuration.class);
 		configDef.getPropertyValues().add("templateLoader", loaderDef);
 		beanFactory.registerBeanDefinition("freeMarkerConfig", configDef);
-		beanFactory.getBean(Configuration.class);
+		assertThat(beanFactory.getBean(Configuration.class)).isNotNull();
 	}
 
 }
