@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,9 +41,9 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
  * Common base class for accessing a Quartz Scheduler, i.e. for registering jobs,
@@ -207,7 +207,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	protected void registerJobsAndTriggers() throws SchedulerException {
 		TransactionStatus transactionStatus = null;
 		if (this.transactionManager != null) {
-			transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+			transactionStatus = this.transactionManager.getTransaction(TransactionDefinition.withDefaults());
 		}
 
 		try {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -762,7 +762,7 @@ public class Enhancer extends AbstractClassGenerator {
 
 	/**
 	 * This method should not be called in regular flow.
-	 * Technically speaking {@link #wrapCachedClass(Class)} uses {@link EnhancerFactoryData} as a cache value,
+	 * Technically speaking {@link #wrapCachedClass(Class)} uses {@link Enhancer.EnhancerFactoryData} as a cache value,
 	 * and the latter enables faster instantiation than plain old reflection lookup and invoke.
 	 * This method is left intact for backward compatibility reasons: just in case it was ever used.
 	 * @param type class to instantiate

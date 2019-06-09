@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,8 +33,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Integration tests for {@link Sql @Sql} support with only a {@link DataSource}
@@ -61,7 +61,7 @@ public class DataSourceOnlySqlScriptsTests {
 	@Test
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test01_classLevelScripts() {
-		assertInTransaction(false);
+		assertThatTransaction().isNotActive();
 		assertNumUsers(1);
 	}
 
@@ -69,13 +69,12 @@ public class DataSourceOnlySqlScriptsTests {
 	@Sql({ "drop-schema.sql", "schema.sql", "data.sql", "data-add-dogbert.sql" })
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
-		assertInTransaction(false);
+		assertThatTransaction().isNotActive();
 		assertNumUsers(2);
 	}
 
 	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected,
-			JdbcTestUtils.countRowsInTable(jdbcTemplate, "user"));
+		assertThat(JdbcTestUtils.countRowsInTable(jdbcTemplate, "user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +40,7 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Client and server-side WebSocket integration tests.
@@ -72,7 +72,7 @@ public class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 		headers.setSecWebSocketProtocol("foo");
 		URI url = new URI(getWsBaseUrl() + "/ws");
 		WebSocketSession session = this.webSocketClient.doHandshake(new TextWebSocketHandler(), headers, url).get();
-		assertEquals("foo", session.getAcceptedProtocol());
+		assertThat(session.getAcceptedProtocol()).isEqualTo("foo");
 		session.close();
 	}
 
@@ -87,9 +87,9 @@ public class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 		session.sendMessage(new PongMessage());
 
 		serverHandler.await();
-		assertNull(serverHandler.getTransportError());
-		assertEquals(1, serverHandler.getReceivedMessages().size());
-		assertEquals(PongMessage.class, serverHandler.getReceivedMessages().get(0).getClass());
+		assertThat(serverHandler.getTransportError()).isNull();
+		assertThat(serverHandler.getReceivedMessages().size()).isEqualTo(1);
+		assertThat(serverHandler.getReceivedMessages().get(0).getClass()).isEqualTo(PongMessage.class);
 	}
 
 

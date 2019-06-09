@@ -5,7 +5,7 @@
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *       https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -72,10 +72,13 @@ dokka {
 		packageListUrl = new File(buildDir, "api/package-list").toURI().toURL()
 	}
 	externalDocumentationLink {
-		url = new URL("http://projectreactor.io/docs/core/release/api/")
+		url = new URL("https://projectreactor.io/docs/core/release/api/")
 	}
 	externalDocumentationLink {
-		url = new URL("http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+		url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+	}
+	externalDocumentationLink {
+		url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
 	}
 }
 
@@ -137,7 +140,7 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 	baseName = "spring-framework"
 	classifier = "docs"
 	description = "Builds -${classifier} archive containing api and reference " +
-			"for deployment at http://docs.spring.io/spring-framework/docs."
+			"for deployment at https://docs.spring.io/spring-framework/docs."
 
 	from("src/dist") {
 		include "changelog.txt"
@@ -165,7 +168,7 @@ task schemaZip(type: Zip) {
 	baseName = "spring-framework"
 	classifier = "schema"
 	description = "Builds -${classifier} archive containing all " +
-			"XSDs for deployment at http://springframework.org/schema."
+			"XSDs for deployment at https://springframework.org/schema."
 	duplicatesStrategy 'exclude'
 	moduleProjects.each { subproject ->
 		def Properties schemas = new Properties();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Simple unit test to verify the expected functionality of standard JUnit 4.4+
@@ -66,7 +67,7 @@ public class StandardJUnit4FeaturesTests {
 
 	@Test
 	public void alwaysSucceeds() {
-		assertTrue(true);
+		assertThat(true).isTrue();
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
@@ -92,7 +93,7 @@ public class StandardJUnit4FeaturesTests {
 
 	@Test
 	public void verifyBeforeAnnotation() {
-		assertEquals(1, this.beforeCounter);
+		assertThat(this.beforeCounter).isEqualTo(1);
 	}
 
 	@Test
@@ -100,7 +101,7 @@ public class StandardJUnit4FeaturesTests {
 		// Instead of testing for equality to 1, we just assert that the value
 		// was incremented at least once, since this test class may serve as a
 		// parent class to other tests in a suite, etc.
-		assertTrue(StandardJUnit4FeaturesTests.staticBeforeCounter > 0);
+		assertThat(StandardJUnit4FeaturesTests.staticBeforeCounter > 0).isTrue();
 	}
 
 }

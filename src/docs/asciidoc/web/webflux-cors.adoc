@@ -1,6 +1,6 @@
 [[webflux-cors]]
 = CORS
-[.small]#<<web.adoc#mvc-cors,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors, Same as in Spring MVC>>#
 
 Spring WebFlux lets you handle CORS (Cross-Origin Resource Sharing). This section
 describes how to do so.
@@ -10,15 +10,15 @@ describes how to do so.
 
 [[webflux-cors-intro]]
 == Introduction
-[.small]#<<web.adoc#mvc-cors-intro,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-intro, Same as in Spring MVC>>#
 
 For security reasons, browsers prohibit AJAX calls to resources outside the current origin.
 For example, you could have your bank account in one tab and evil.com in another. Scripts
 from evil.com should not be able to make AJAX requests to your bank API with your
 credentials -- for example, withdrawing money from your account!
 
-Cross-Origin Resource Sharing (CORS) is a http://www.w3.org/TR/cors/[W3C specification]
-implemented by http://caniuse.com/#feat=cors[most browsers] that lets you specify
+Cross-Origin Resource Sharing (CORS) is a https://www.w3.org/TR/cors/[W3C specification]
+implemented by https://caniuse.com/#feat=cors[most browsers] that lets you specify
 what kind of cross-domain requests are authorized, rather than using less secure and less
 powerful workarounds based on IFRAME or JSONP.
 
@@ -27,7 +27,7 @@ powerful workarounds based on IFRAME or JSONP.
 
 [[webflux-cors-processing]]
 == Processing
-[.small]#<<web.adoc#mvc-cors-processing,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-processing, Same as in Spring MVC>>#
 
 The CORS specification distinguishes between preflight, simple, and actual requests.
 To learn how CORS works, you can read
@@ -77,7 +77,7 @@ To learn more from the source or to make advanced customizations, see:
 
 [[webflux-cors-controller]]
 == `@CrossOrigin`
-[.small]#<<web.adoc#mvc-cors-controller,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-controller, Same as in Spring MVC>>#
 
 The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods, as the
@@ -122,7 +122,7 @@ The following example specifies a certain domain and sets `maxAge` to an hour:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@CrossOrigin(origins = "http://domain2.com", maxAge = 3600)
+@CrossOrigin(origins = "https://domain2.com", maxAge = 3600)
 @RestController
 @RequestMapping("/account")
 public class AccountController {
@@ -150,7 +150,7 @@ as the following example shows:
 @RequestMapping("/account")
 public class AccountController {
 
-	@CrossOrigin("http://domain2.com") <2>
+	@CrossOrigin("https://domain2.com") <2>
 	@GetMapping("/{id}")
 	public Mono<Account> retrieve(@PathVariable Long id) {
 		// ...
@@ -169,7 +169,7 @@ public class AccountController {
 
 [[webflux-cors-global]]
 == Global Configuration
-[.small]#<<web.adoc#mvc-cors-global,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-global, Same as in Spring MVC>>#
 
 In addition to fine-grained, controller method-level configuration, you probably want to
 define some global CORS configuration, too. You can set URL-based `CorsConfiguration`
@@ -202,7 +202,7 @@ public class WebConfig implements WebFluxConfigurer {
 	public void addCorsMappings(CorsRegistry registry) {
 
 		registry.addMapping("/api/**")
-			.allowedOrigins("http://domain2.com")
+			.allowedOrigins("https://domain2.com")
 			.allowedMethods("PUT", "DELETE")
 			.allowedHeaders("header1", "header2", "header3")
 			.exposedHeaders("header1", "header2")
@@ -218,11 +218,11 @@ public class WebConfig implements WebFluxConfigurer {
 
 [[webflux-cors-webfilter]]
 == CORS `WebFilter`
-[.small]#<<web.adoc#mvc-cors-filter,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-cors-filter, Same as in Spring MVC>>#
 
 You can apply CORS support through the built-in
 {api-spring-framework}/web/cors/reactive/CorsWebFilter.html[`CorsWebFilter`], which is a
-good fit with <<webflux-fn,functional endpoints>>.
+good fit with <<webflux-fn, functional endpoints>>.
 
 NOTE: If you try to use the `CorsFilter` with Spring Security, keep in mind that Spring
 Security has
@@ -244,7 +244,7 @@ CorsWebFilter corsFilter() {
 	// config.applyPermitDefaultValues()
 
 	config.setAllowCredentials(true);
-	config.addAllowedOrigin("http://domain1.com");
+	config.addAllowedOrigin("https://domain1.com");
 	config.addAllowedHeader("*");
 	config.addAllowedMethod("*");
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,11 +29,11 @@ import org.springframework.util.ObjectUtils;
  * HttpHeaders headers = new HttpHeaders();
  * headers.setContentType(MediaType.TEXT_PLAIN);
  * HttpEntity&lt;String&gt; entity = new HttpEntity&lt;String&gt;(helloWorld, headers);
- * URI location = template.postForLocation("http://example.com", entity);
+ * URI location = template.postForLocation("https://example.com", entity);
  * </pre>
  * or
  * <pre class="code">
- * HttpEntity&lt;String&gt; entity = template.getForEntity("http://example.com", String.class);
+ * HttpEntity&lt;String&gt; entity = template.getForEntity("https://example.com", String.class);
  * String body = entity.getBody();
  * MediaType contentType = entity.getHeaders().getContentType();
  * </pre>

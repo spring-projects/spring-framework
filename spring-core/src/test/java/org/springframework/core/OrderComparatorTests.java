@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,7 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for the {@link OrderComparator} class.
@@ -36,65 +36,65 @@ public class OrderComparatorTests {
 
 	@Test
 	public void compareOrderedInstancesBefore() {
-		assertEquals(-1, this.comparator.compare(new StubOrdered(100), new StubOrdered(2000)));
+		assertThat(this.comparator.compare(new StubOrdered(100), new StubOrdered(2000))).isEqualTo(-1);
 	}
 
 	@Test
 	public void compareOrderedInstancesSame() {
-		assertEquals(0, this.comparator.compare(new StubOrdered(100), new StubOrdered(100)));
+		assertThat(this.comparator.compare(new StubOrdered(100), new StubOrdered(100))).isEqualTo(0);
 	}
 
 	@Test
 	public void compareOrderedInstancesAfter() {
-		assertEquals(1, this.comparator.compare(new StubOrdered(982300), new StubOrdered(100)));
+		assertThat(this.comparator.compare(new StubOrdered(982300), new StubOrdered(100))).isEqualTo(1);
 	}
 
 	@Test
 	public void compareOrderedInstancesNullFirst() {
-		assertEquals(1, this.comparator.compare(null, new StubOrdered(100)));
+		assertThat(this.comparator.compare(null, new StubOrdered(100))).isEqualTo(1);
 	}
 
 	@Test
 	public void compareOrderedInstancesNullLast() {
-		assertEquals(-1, this.comparator.compare(new StubOrdered(100), null));
+		assertThat(this.comparator.compare(new StubOrdered(100), null)).isEqualTo(-1);
 	}
 
 	@Test
 	public void compareOrderedInstancesDoubleNull() {
-		assertEquals(0, this.comparator.compare(null, null));
+		assertThat(this.comparator.compare(null, null)).isEqualTo(0);
 	}
 
 	@Test
 	public void compareTwoNonOrderedInstancesEndsUpAsSame() {
-		assertEquals(0, this.comparator.compare(new Object(), new Object()));
+		assertThat(this.comparator.compare(new Object(), new Object())).isEqualTo(0);
 	}
 
 	@Test
 	public void compareWithSimpleSourceProvider() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
 				new TestSourceProvider(5L, new StubOrdered(25)));
-		assertEquals(-1, customComparator.compare(new StubOrdered(10), 5L));
+		assertThat(customComparator.compare(new StubOrdered(10), 5L)).isEqualTo(-1);
 	}
 
 	@Test
 	public void compareWithSourceProviderArray() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
 				new TestSourceProvider(5L, new Object[] {new StubOrdered(10), new StubOrdered(-25)}));
-		assertEquals(-1, customComparator.compare(5L, new Object()));
+		assertThat(customComparator.compare(5L, new Object())).isEqualTo(-1);
 	}
 
 	@Test
 	public void compareWithSourceProviderArrayNoMatch() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
 				new TestSourceProvider(5L, new Object[]{new Object(), new Object()}));
-		assertEquals(0, customComparator.compare(new Object(), 5L));
+		assertThat(customComparator.compare(new Object(), 5L)).isEqualTo(0);
 	}
 
 	@Test
 	public void compareWithSourceProviderEmpty() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
 				new TestSourceProvider(50L, new Object()));
-		assertEquals(0, customComparator.compare(new Object(), 5L));
+		assertThat(customComparator.compare(new Object(), 5L)).isEqualTo(0);
 	}
 
 

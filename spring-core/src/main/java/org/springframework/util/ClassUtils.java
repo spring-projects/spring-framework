@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,11 +38,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 
 /**
- * Miscellaneous class utility methods.
+ * Miscellaneous {@code java.lang.Class} utility methods.
  * Mainly for internal use within the framework.
  *
  * @author Juergen Hoeller
@@ -656,16 +657,11 @@ public abstract class ClassUtils {
 		if (CollectionUtils.isEmpty(classes)) {
 			return "[]";
 		}
-		StringBuilder sb = new StringBuilder("[");
-		for (Iterator<Class<?>> it = classes.iterator(); it.hasNext(); ) {
-			Class<?> clazz = it.next();
-			sb.append(clazz.getName());
-			if (it.hasNext()) {
-				sb.append(", ");
-			}
+		StringJoiner sj = new StringJoiner(", ", "[", "]");
+		for (Class<?> clazz : classes) {
+			sj.add(clazz.getName());
 		}
-		sb.append("]");
-		return sb.toString();
+		return sj.toString();
 	}
 
 	/**
@@ -776,9 +772,9 @@ public abstract class ClassUtils {
 	 * conflicting method signatures (or a similar constraint is violated)
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")  // on JDK 9
 	public static Class<?> createCompositeInterface(Class<?>[] interfaces, @Nullable ClassLoader classLoader) {
-		Assert.notEmpty(interfaces, "Interfaces must not be empty");
+		Assert.notEmpty(interfaces, "Interface array must not be empty");
 		return Proxy.getProxyClass(classLoader, interfaces);
 	}
 
@@ -845,7 +841,9 @@ public abstract class ClassUtils {
 	 * @param object the object to check
 	 * @see #isCglibProxyClass(Class)
 	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 */
+	@Deprecated
 	public static boolean isCglibProxy(Object object) {
 		return isCglibProxyClass(object.getClass());
 	}
@@ -854,7 +852,9 @@ public abstract class ClassUtils {
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
 	 * @see #isCglibProxyClassName(String)
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 */
+	@Deprecated
 	public static boolean isCglibProxyClass(@Nullable Class<?> clazz) {
 		return (clazz != null && isCglibProxyClassName(clazz.getName()));
 	}
@@ -862,7 +862,9 @@ public abstract class ClassUtils {
 	/**
 	 * Check whether the specified class name is a CGLIB-generated class.
 	 * @param className the class name to check
+	 * @deprecated as of 5.2, in favor of custom (possibly narrower) checks
 	 */
+	@Deprecated
 	public static boolean isCglibProxyClassName(@Nullable String className) {
 		return (className != null && className.contains(CGLIB_CLASS_SEPARATOR));
 	}
@@ -1120,13 +1122,7 @@ public abstract class ClassUtils {
 			}
 		}
 		else {
-			Set<Method> candidates = new HashSet<>(1);
-			Method[] methods = clazz.getMethods();
-			for (Method method : methods) {
-				if (methodName.equals(method.getName())) {
-					candidates.add(method);
-				}
-			}
+			Set<Method> candidates = findMethodCandidatesByName(clazz, methodName);
 			if (candidates.size() == 1) {
 				return candidates.iterator().next();
 			}
@@ -1165,13 +1161,7 @@ public abstract class ClassUtils {
 			}
 		}
 		else {
-			Set<Method> candidates = new HashSet<>(1);
-			Method[] methods = clazz.getMethods();
-			for (Method method : methods) {
-				if (methodName.equals(method.getName())) {
-					candidates.add(method);
-				}
-			}
+			Set<Method> candidates = findMethodCandidatesByName(clazz, methodName);
 			if (candidates.size() == 1) {
 				return candidates.iterator().next();
 			}
@@ -1362,4 +1352,14 @@ public abstract class ClassUtils {
 		}
 	}
 
+	private static Set<Method> findMethodCandidatesByName(Class<?> clazz, String methodName) {
+		Set<Method> candidates = new HashSet<>(1);
+		Method[] methods = clazz.getMethods();
+		for (Method method : methods) {
+			if (methodName.equals(method.getName())) {
+				candidates.add(method);
+			}
+		}
+		return candidates;
+	}
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,7 @@ import org.springframework.http.codec.Pojo;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -58,12 +58,12 @@ public class Jackson2SmileDecoderTests extends AbstractDecoderTestCase<Jackson2S
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(decoder.canDecode(forClass(Pojo.class), SMILE_MIME_TYPE));
-		assertTrue(decoder.canDecode(forClass(Pojo.class), STREAM_SMILE_MIME_TYPE));
-		assertTrue(decoder.canDecode(forClass(Pojo.class), null));
+		assertThat(decoder.canDecode(forClass(Pojo.class), SMILE_MIME_TYPE)).isTrue();
+		assertThat(decoder.canDecode(forClass(Pojo.class), STREAM_SMILE_MIME_TYPE)).isTrue();
+		assertThat(decoder.canDecode(forClass(Pojo.class), null)).isTrue();
 
-		assertFalse(decoder.canDecode(forClass(String.class), null));
-		assertFalse(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON));
+		assertThat(decoder.canDecode(forClass(String.class), null)).isFalse();
+		assertThat(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON)).isFalse();
 	}
 
 	@Override

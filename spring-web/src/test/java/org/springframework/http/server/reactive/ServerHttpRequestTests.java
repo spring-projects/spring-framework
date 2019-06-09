@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,8 +34,9 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link AbstractServerHttpRequest}.
@@ -47,43 +48,43 @@ public class ServerHttpRequestTests {
 	@Test
 	public void queryParamsNone() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path").getQueryParams();
-		assertEquals(0, params.size());
+		assertThat(params.size()).isEqualTo(0);
 	}
 
 	@Test
 	public void queryParams() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a=A&b=B").getQueryParams();
-		assertEquals(2, params.size());
-		assertEquals(Collections.singletonList("A"), params.get("a"));
-		assertEquals(Collections.singletonList("B"), params.get("b"));
+		assertThat(params.size()).isEqualTo(2);
+		assertThat(params.get("a")).isEqualTo(Collections.singletonList("A"));
+		assertThat(params.get("b")).isEqualTo(Collections.singletonList("B"));
 	}
 
 	@Test
 	public void queryParamsWithMultipleValues() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a=1&a=2").getQueryParams();
-		assertEquals(1, params.size());
-		assertEquals(Arrays.asList("1", "2"), params.get("a"));
+		assertThat(params.size()).isEqualTo(1);
+		assertThat(params.get("a")).isEqualTo(Arrays.asList("1", "2"));
 	}
 
 	@Test  // SPR-15140
 	public void queryParamsWithEncodedValue() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a=%20%2B+%C3%A0").getQueryParams();
-		assertEquals(1, params.size());
-		assertEquals(Collections.singletonList(" + \u00e0"), params.get("a"));
+		assertThat(params.size()).isEqualTo(1);
+		assertThat(params.get("a")).isEqualTo(Collections.singletonList(" + \u00e0"));
 	}
 
 	@Test
 	public void queryParamsWithEmptyValue() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a=").getQueryParams();
-		assertEquals(1, params.size());
-		assertEquals(Collections.singletonList(""), params.get("a"));
+		assertThat(params.size()).isEqualTo(1);
+		assertThat(params.get("a")).isEqualTo(Collections.singletonList(""));
 	}
 
 	@Test
 	public void queryParamsWithNoValue() throws Exception {
 		MultiValueMap<String, String> params = createHttpRequest("/path?a").getQueryParams();
-		assertEquals(1, params.size());
-		assertEquals(Collections.singletonList(null), params.get("a"));
+		assertThat(params.size()).isEqualTo(1);
+		assertThat(params.get("a")).isEqualTo(Collections.singletonList(null));
 	}
 
 	@Test
@@ -91,27 +92,28 @@ public class ServerHttpRequestTests {
 
 		SslInfo sslInfo = mock(SslInfo.class);
 		ServerHttpRequest request = createHttpRequest("/").mutate().sslInfo(sslInfo).build();
-		assertSame(sslInfo, request.getSslInfo());
+		assertThat(request.getSslInfo()).isSameAs(sslInfo);
 
 		request = createHttpRequest("/").mutate().method(HttpMethod.DELETE).build();
-		assertEquals(HttpMethod.DELETE, request.getMethod());
+		assertThat(request.getMethod()).isEqualTo(HttpMethod.DELETE);
 
-		String baseUri = "http://aaa.org:8080/a";
+		String baseUri = "https://aaa.org:8080/a";
 
-		request = createHttpRequest(baseUri).mutate().uri(URI.create("http://bbb.org:9090/b")).build();
-		assertEquals("http://bbb.org:9090/b", request.getURI().toString());
+		request = createHttpRequest(baseUri).mutate().uri(URI.create("https://bbb.org:9090/b")).build();
+		assertThat(request.getURI().toString()).isEqualTo("https://bbb.org:9090/b");
 
 		request = createHttpRequest(baseUri).mutate().path("/b/c/d").build();
-		assertEquals("http://aaa.org:8080/b/c/d", request.getURI().toString());
+		assertThat(request.getURI().toString()).isEqualTo("https://aaa.org:8080/b/c/d");
 
 		request = createHttpRequest(baseUri).mutate().path("/app/b/c/d").contextPath("/app").build();
-		assertEquals("http://aaa.org:8080/app/b/c/d", request.getURI().toString());
-		assertEquals("/app", request.getPath().contextPath().value());
+		assertThat(request.getURI().toString()).isEqualTo("https://aaa.org:8080/app/b/c/d");
+		assertThat(request.getPath().contextPath().value()).isEqualTo("/app");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void mutateWithInvalidPath() throws Exception {
-		createHttpRequest("/").mutate().path("foo-bar");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				createHttpRequest("/").mutate().path("foo-bar"));
 	}
 
 	@Test  // SPR-16434
@@ -119,8 +121,8 @@ public class ServerHttpRequestTests {
 		ServerHttpRequest request = createHttpRequest("/path?name=%E6%89%8E%E6%A0%B9");
 		request = request.mutate().path("/mutatedPath").build();
 
-		assertEquals("/mutatedPath", request.getURI().getRawPath());
-		assertEquals("name=%E6%89%8E%E6%A0%B9", request.getURI().getRawQuery());
+		assertThat(request.getURI().getRawPath()).isEqualTo("/mutatedPath");
+		assertThat(request.getURI().getRawQuery()).isEqualTo("name=%E6%89%8E%E6%A0%B9");
 	}
 
 	private ServerHttpRequest createHttpRequest(String uriString) throws Exception {

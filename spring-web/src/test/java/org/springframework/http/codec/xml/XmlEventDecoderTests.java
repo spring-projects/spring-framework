@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.buffer.AbstractLeakCheckingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -50,7 +50,7 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTestCase {
 				this.decoder.decode(stringBuffer(XML), null, null, Collections.emptyMap());
 
 		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
+				.consumeNextWith(e -> assertThat(e.isStartDocument()).isTrue())
 				.consumeNextWith(e -> assertStartElement(e, "pojo"))
 				.consumeNextWith(e -> assertStartElement(e, "foo"))
 				.consumeNextWith(e -> assertCharacters(e, "foofoo"))
@@ -71,7 +71,7 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTestCase {
 				this.decoder.decode(stringBuffer(XML), null, null, Collections.emptyMap());
 
 		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
+				.consumeNextWith(e -> assertThat(e.isStartDocument()).isTrue())
 				.consumeNextWith(e -> assertStartElement(e, "pojo"))
 				.consumeNextWith(e -> assertStartElement(e, "foo"))
 				.consumeNextWith(e -> assertCharacters(e, "foofoo"))
@@ -80,7 +80,7 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTestCase {
 				.consumeNextWith(e -> assertCharacters(e, "barbar"))
 				.consumeNextWith(e -> assertEndElement(e, "bar"))
 				.consumeNextWith(e -> assertEndElement(e, "pojo"))
-				.consumeNextWith(e -> assertTrue(e.isEndDocument()))
+				.consumeNextWith(e -> assertThat(e.isEndDocument()).isTrue())
 				.expectComplete()
 				.verify();
 	}
@@ -95,7 +95,7 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTestCase {
 				this.decoder.decode(source, null, null, Collections.emptyMap());
 
 		StepVerifier.create(events)
-				.consumeNextWith(e -> assertTrue(e.isStartDocument()))
+				.consumeNextWith(e -> assertThat(e.isStartDocument()).isTrue())
 				.consumeNextWith(e -> assertStartElement(e, "pojo"))
 				.expectError(RuntimeException.class)
 				.verify();
@@ -118,18 +118,18 @@ public class XmlEventDecoderTests extends AbstractLeakCheckingTestCase {
 	}
 
 	private static void assertStartElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event.isStartElement());
-		assertEquals(expectedLocalName, event.asStartElement().getName().getLocalPart());
+		assertThat(event.isStartElement()).isTrue();
+		assertThat(event.asStartElement().getName().getLocalPart()).isEqualTo(expectedLocalName);
 	}
 
 	private static void assertEndElement(XMLEvent event, String expectedLocalName) {
-		assertTrue(event + " is no end element", event.isEndElement());
-		assertEquals(expectedLocalName, event.asEndElement().getName().getLocalPart());
+		assertThat(event.isEndElement()).as(event + " is no end element").isTrue();
+		assertThat(event.asEndElement().getName().getLocalPart()).isEqualTo(expectedLocalName);
 	}
 
 	private static void assertCharacters(XMLEvent event, String expectedData) {
-		assertTrue(event.isCharacters());
-		assertEquals(expectedData, event.asCharacters().getData());
+		assertThat(event.isCharacters()).isTrue();
+		assertThat(event.asCharacters().getData()).isEqualTo(expectedData);
 	}
 
 	private Mono<DataBuffer> stringBuffer(String value) {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,13 +26,12 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Brian Clozel
@@ -85,17 +84,16 @@ public class AbstractMockWebServerTestCase {
 	private MockResponse postRequest(RecordedRequest request, String expectedRequestContent,
 			String location, String contentType, byte[] responseBody) {
 
-		assertEquals(1, request.getHeaders().values("Content-Length").size());
-		assertTrue("Invalid request content-length",
-				Integer.parseInt(request.getHeader("Content-Length")) > 0);
+		assertThat(request.getHeaders().values("Content-Length").size()).isEqualTo(1);
+		assertThat(Integer.parseInt(request.getHeader("Content-Length")) > 0).as("Invalid request content-length").isTrue();
 		String requestContentType = request.getHeader("Content-Type");
-		assertNotNull("No content-type", requestContentType);
+		assertThat(requestContentType).as("No content-type").isNotNull();
 		Charset charset = StandardCharsets.ISO_8859_1;
 		if (requestContentType.contains("charset=")) {
 			String charsetName = requestContentType.split("charset=")[1];
 			charset = Charset.forName(charsetName);
 		}
-		assertEquals("Invalid request body", expectedRequestContent, request.getBody().readString(charset));
+		assertThat(request.getBody().readString(charset)).as("Invalid request body").isEqualTo(expectedRequestContent);
 		Buffer buf = new Buffer();
 		buf.write(responseBody);
 		return new MockResponse()
@@ -108,9 +106,8 @@ public class AbstractMockWebServerTestCase {
 
 	private MockResponse jsonPostRequest(RecordedRequest request, String location, String contentType) {
 		if (request.getBodySize() > 0) {
-			assertTrue("Invalid request content-length",
-					Integer.parseInt(request.getHeader("Content-Length")) > 0);
-			assertNotNull("No content-type", request.getHeader("Content-Type"));
+			assertThat(Integer.parseInt(request.getHeader("Content-Length")) > 0).as("Invalid request content-length").isTrue();
+			assertThat(request.getHeader("Content-Type")).as("No content-type").isNotNull();
 		}
 		return new MockResponse()
 				.setHeader("Location", baseUrl + location)
@@ -122,7 +119,7 @@ public class AbstractMockWebServerTestCase {
 
 	private MockResponse multipartRequest(RecordedRequest request) {
 		MediaType mediaType = MediaType.parseMediaType(request.getHeader("Content-Type"));
-		assertTrue(mediaType.isCompatibleWith(MediaType.MULTIPART_FORM_DATA));
+		assertThat(mediaType.isCompatibleWith(MediaType.MULTIPART_FORM_DATA)).isTrue();
 		String boundary = mediaType.getParameter("boundary");
 		Buffer body = request.getBody();
 		try {
@@ -140,53 +137,52 @@ public class AbstractMockWebServerTestCase {
 	private void assertPart(Buffer buffer, String disposition, String boundary, String name,
 			String contentType, String value) throws EOFException {
 
-		assertTrue(buffer.readUtf8Line().contains("--" + boundary));
+		assertThat(buffer.readUtf8Line().contains("--" + boundary)).isTrue();
 		String line = buffer.readUtf8Line();
-		assertTrue(line.contains("Content-Disposition: "+ disposition));
-		assertTrue(line.contains("name=\""+ name + "\""));
-		assertTrue(buffer.readUtf8Line().startsWith("Content-Type: "+contentType));
-		assertTrue(buffer.readUtf8Line().equals("Content-Length: " + value.length()));
-		assertTrue(buffer.readUtf8Line().equals(""));
-		assertTrue(buffer.readUtf8Line().equals(value));
+		assertThat(line.contains("Content-Disposition: "+ disposition)).isTrue();
+		assertThat(line.contains("name=\""+ name + "\"")).isTrue();
+		assertThat(buffer.readUtf8Line().startsWith("Content-Type: "+contentType)).isTrue();
+		assertThat(buffer.readUtf8Line().equals("Content-Length: " + value.length())).isTrue();
+		assertThat(buffer.readUtf8Line().equals("")).isTrue();
+		assertThat(buffer.readUtf8Line().equals(value)).isTrue();
 	}
 
 	private void assertFilePart(Buffer buffer, String disposition, String boundary, String name,
 			String filename, String contentType) throws EOFException {
 
-		assertTrue(buffer.readUtf8Line().contains("--" + boundary));
+		assertThat(buffer.readUtf8Line().contains("--" + boundary)).isTrue();
 		String line = buffer.readUtf8Line();
-		assertTrue(line.contains("Content-Disposition: "+ disposition));
-		assertTrue(line.contains("name=\""+ name + "\""));
-		assertTrue(line.contains("filename=\""+ filename + "\""));
-		assertTrue(buffer.readUtf8Line().startsWith("Content-Type: "+contentType));
-		assertTrue(buffer.readUtf8Line().startsWith("Content-Length: "));
-		assertTrue(buffer.readUtf8Line().equals(""));
-		assertNotNull(buffer.readUtf8Line());
+		assertThat(line.contains("Content-Disposition: "+ disposition)).isTrue();
+		assertThat(line.contains("name=\""+ name + "\"")).isTrue();
+		assertThat(line.contains("filename=\""+ filename + "\"")).isTrue();
+		assertThat(buffer.readUtf8Line().startsWith("Content-Type: "+contentType)).isTrue();
+		assertThat(buffer.readUtf8Line().startsWith("Content-Length: ")).isTrue();
+		assertThat(buffer.readUtf8Line().equals("")).isTrue();
+		assertThat(buffer.readUtf8Line()).isNotNull();
 	}
 
 	private MockResponse formRequest(RecordedRequest request) {
-		assertEquals("application/x-www-form-urlencoded;charset=UTF-8", request.getHeader("Content-Type"));
+		assertThat(request.getHeader("Content-Type")).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
 		String body = request.getBody().readUtf8();
-		assertThat(body, Matchers.containsString("name+1=value+1"));
-		assertThat(body, Matchers.containsString("name+2=value+2%2B1"));
-		assertThat(body, Matchers.containsString("name+2=value+2%2B2"));
+		assertThat(body).contains("name+1=value+1");
+		assertThat(body).contains("name+2=value+2%2B1");
+		assertThat(body).contains("name+2=value+2%2B2");
 		return new MockResponse().setResponseCode(200);
 	}
 
 	private MockResponse patchRequest(RecordedRequest request, String expectedRequestContent,
 			String contentType, byte[] responseBody) {
 
-		assertEquals("PATCH", request.getMethod());
-		assertTrue("Invalid request content-length",
-				Integer.parseInt(request.getHeader("Content-Length")) > 0);
+		assertThat(request.getMethod()).isEqualTo("PATCH");
+		assertThat(Integer.parseInt(request.getHeader("Content-Length")) > 0).as("Invalid request content-length").isTrue();
 		String requestContentType = request.getHeader("Content-Type");
-		assertNotNull("No content-type", requestContentType);
+		assertThat(requestContentType).as("No content-type").isNotNull();
 		Charset charset = StandardCharsets.ISO_8859_1;
 		if (requestContentType.contains("charset=")) {
 			String charsetName = requestContentType.split("charset=")[1];
 			charset = Charset.forName(charsetName);
 		}
-		assertEquals("Invalid request body", expectedRequestContent, request.getBody().readString(charset));
+		assertThat(request.getBody().readString(charset)).as("Invalid request body").isEqualTo(expectedRequestContent);
 		Buffer buf = new Buffer();
 		buf.write(responseBody);
 		return new MockResponse().setResponseCode(201)
@@ -196,16 +192,15 @@ public class AbstractMockWebServerTestCase {
 	}
 
 	private MockResponse putRequest(RecordedRequest request, String expectedRequestContent) {
-		assertTrue("Invalid request content-length",
-				Integer.parseInt(request.getHeader("Content-Length")) > 0);
+		assertThat(Integer.parseInt(request.getHeader("Content-Length")) > 0).as("Invalid request content-length").isTrue();
 		String requestContentType = request.getHeader("Content-Type");
-		assertNotNull("No content-type", requestContentType);
+		assertThat(requestContentType).as("No content-type").isNotNull();
 		Charset charset = StandardCharsets.ISO_8859_1;
 		if (requestContentType.contains("charset=")) {
 			String charsetName = requestContentType.split("charset=")[1];
 			charset = Charset.forName(charsetName);
 		}
-		assertEquals("Invalid request body", expectedRequestContent, request.getBody().readString(charset));
+		assertThat(request.getBody().readString(charset)).as("Invalid request body").isEqualTo(expectedRequestContent);
 		return new MockResponse().setResponseCode(202);
 	}
 

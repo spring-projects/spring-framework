@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -706,96 +706,100 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return cachedReturnType.resolve();
 		}
 
-		Class<?> factoryClass;
-		boolean isStatic = true;
-
-		String factoryBeanName = mbd.getFactoryBeanName();
-		if (factoryBeanName != null) {
-			if (factoryBeanName.equals(beanName)) {
-				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
-						"factory-bean reference points back to the same bean definition");
-			}
-			// Check declared factory method return type on factory class.
-			factoryClass = getType(factoryBeanName);
-			isStatic = false;
-		}
-		else {
-			// Check declared factory method return type on bean class.
-			factoryClass = resolveBeanClass(mbd, beanName, typesToMatch);
-		}
-
-		if (factoryClass == null) {
-			return null;
-		}
-		factoryClass = ClassUtils.getUserClass(factoryClass);
-
-		// If all factory methods have the same return type, return that type.
-		// Can't clearly figure out exact method due to type converting / autowiring!
 		Class<?> commonType = null;
-		Method uniqueCandidate = null;
-		int minNrOfArgs =
-				(mbd.hasConstructorArgumentValues() ? mbd.getConstructorArgumentValues().getArgumentCount() : 0);
-		Method[] candidates = this.factoryMethodCandidateCache.computeIfAbsent(
-				factoryClass, ReflectionUtils::getUniqueDeclaredMethods);
+		Method uniqueCandidate = mbd.factoryMethodToIntrospect;
 
-		for (Method candidate : candidates) {
-			if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate) &&
-					candidate.getParameterCount() >= minNrOfArgs) {
-				// Declared type variables to inspect?
-				if (candidate.getTypeParameters().length > 0) {
-					try {
-						// Fully resolve parameter names and argument values.
-						Class<?>[] paramTypes = candidate.getParameterTypes();
-						String[] paramNames = null;
-						ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
-						if (pnd != null) {
-							paramNames = pnd.getParameterNames(candidate);
-						}
-						ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
-						Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = new HashSet<>(paramTypes.length);
-						Object[] args = new Object[paramTypes.length];
-						for (int i = 0; i < args.length; i++) {
-							ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
-									i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
-							if (valueHolder == null) {
-								valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+		if (uniqueCandidate == null) {
+			Class<?> factoryClass;
+			boolean isStatic = true;
+
+			String factoryBeanName = mbd.getFactoryBeanName();
+			if (factoryBeanName != null) {
+				if (factoryBeanName.equals(beanName)) {
+					throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+							"factory-bean reference points back to the same bean definition");
+				}
+				// Check declared factory method return type on factory class.
+				factoryClass = getType(factoryBeanName);
+				isStatic = false;
+			}
+			else {
+				// Check declared factory method return type on bean class.
+				factoryClass = resolveBeanClass(mbd, beanName, typesToMatch);
+			}
+
+			if (factoryClass == null) {
+				return null;
+			}
+			factoryClass = ClassUtils.getUserClass(factoryClass);
+
+			// If all factory methods have the same return type, return that type.
+			// Can't clearly figure out exact method due to type converting / autowiring!
+			int minNrOfArgs =
+					(mbd.hasConstructorArgumentValues() ? mbd.getConstructorArgumentValues().getArgumentCount() : 0);
+			Method[] candidates = this.factoryMethodCandidateCache.computeIfAbsent(factoryClass,
+					clazz -> ReflectionUtils.getUniqueDeclaredMethods(clazz, ReflectionUtils.USER_DECLARED_METHODS));
+
+			for (Method candidate : candidates) {
+				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate) &&
+						candidate.getParameterCount() >= minNrOfArgs) {
+					// Declared type variables to inspect?
+					if (candidate.getTypeParameters().length > 0) {
+						try {
+							// Fully resolve parameter names and argument values.
+							Class<?>[] paramTypes = candidate.getParameterTypes();
+							String[] paramNames = null;
+							ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
+							if (pnd != null) {
+								paramNames = pnd.getParameterNames(candidate);
 							}
-							if (valueHolder != null) {
-								args[i] = valueHolder.getValue();
-								usedValueHolders.add(valueHolder);
+							ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
+							Set<ConstructorArgumentValues.ValueHolder> usedValueHolders = new HashSet<>(paramTypes.length);
+							Object[] args = new Object[paramTypes.length];
+							for (int i = 0; i < args.length; i++) {
+								ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
+										i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
+								if (valueHolder == null) {
+									valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+								}
+								if (valueHolder != null) {
+									args[i] = valueHolder.getValue();
+									usedValueHolders.add(valueHolder);
+								}
+							}
+							Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
+									candidate, args, getBeanClassLoader());
+							uniqueCandidate = (commonType == null && returnType == candidate.getReturnType() ?
+									candidate : null);
+							commonType = ClassUtils.determineCommonAncestor(returnType, commonType);
+							if (commonType == null) {
+								// Ambiguous return types found: return null to indicate "not determinable".
+								return null;
 							}
 						}
-						Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
-								candidate, args, getBeanClassLoader());
-						uniqueCandidate = (commonType == null && returnType == candidate.getReturnType() ?
-								candidate : null);
-						commonType = ClassUtils.determineCommonAncestor(returnType, commonType);
+						catch (Throwable ex) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Failed to resolve generic return type for factory method: " + ex);
+							}
+						}
+					}
+					else {
+						uniqueCandidate = (commonType == null ? candidate : null);
+						commonType = ClassUtils.determineCommonAncestor(candidate.getReturnType(), commonType);
 						if (commonType == null) {
 							// Ambiguous return types found: return null to indicate "not determinable".
 							return null;
 						}
 					}
-					catch (Throwable ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Failed to resolve generic return type for factory method: " + ex);
-						}
-					}
 				}
-				else {
-					uniqueCandidate = (commonType == null ? candidate : null);
-					commonType = ClassUtils.determineCommonAncestor(candidate.getReturnType(), commonType);
-					if (commonType == null) {
-						// Ambiguous return types found: return null to indicate "not determinable".
-						return null;
-					}
-				}
+			}
+
+			mbd.factoryMethodToIntrospect = uniqueCandidate;
+			if (commonType == null) {
+				return null;
 			}
 		}
 
-		mbd.factoryMethodToIntrospect = uniqueCandidate;
-		if (commonType == null) {
-			return null;
-		}
 		// Common return type found: all factory methods return same type. For a non-parameterized
 		// unique candidate, cache the full type declaration context of the target factory method.
 		cachedReturnType = (uniqueCandidate != null ?
@@ -926,7 +930,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					objectType.value = ClassUtils.determineCommonAncestor(currentType, objectType.value);
 				}
 			}
-		});
+		}, ReflectionUtils.USER_DECLARED_METHODS);
 
 		return (objectType.value != null && Object.class != objectType.value ? objectType.value : null);
 	}
@@ -992,6 +996,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					instance = bw.getWrappedInstance();
 				}
 			}
+			catch (UnsatisfiedDependencyException ex) {
+				// Don't swallow, probably misconfiguration...
+				throw ex;
+			}
+			catch (BeanCreationException ex) {
+				// Instantiation failure, maybe too early...
+				if (logger.isDebugEnabled()) {
+					logger.debug("Bean creation exception on singleton FactoryBean type check: " + ex);
+				}
+				onSuppressedException(ex);
+				return null;
+			}
 			finally {
 				// Finished partial creation of this bean.
 				afterSingletonCreation(beanName);
@@ -1019,7 +1035,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return null;
 		}
 
-		Object instance = null;
+		Object instance;
 		try {
 			// Mark this bean as currently in creation, even if just partially.
 			beforePrototypeCreation(beanName);
@@ -1030,8 +1046,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				instance = bw.getWrappedInstance();
 			}
 		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Don't swallow, probably misconfiguration...
+			throw ex;
+		}
 		catch (BeanCreationException ex) {
-			// Can only happen when getting a FactoryBean.
+			// Instantiation failure, maybe too early...
 			if (logger.isDebugEnabled()) {
 				logger.debug("Bean creation exception on non-singleton FactoryBean type check: " + ex);
 			}
@@ -1368,14 +1388,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);
 
-		if (mbd.getResolvedAutowireMode() == AUTOWIRE_BY_NAME || mbd.getResolvedAutowireMode() == AUTOWIRE_BY_TYPE) {
+		int resolvedAutowireMode = mbd.getResolvedAutowireMode();
+		if (resolvedAutowireMode == AUTOWIRE_BY_NAME || resolvedAutowireMode == AUTOWIRE_BY_TYPE) {
 			MutablePropertyValues newPvs = new MutablePropertyValues(pvs);
 			// Add property values based on autowire by name if applicable.
-			if (mbd.getResolvedAutowireMode() == AUTOWIRE_BY_NAME) {
+			if (resolvedAutowireMode == AUTOWIRE_BY_NAME) {
 				autowireByName(beanName, mbd, bw, newPvs);
 			}
 			// Add property values based on autowire by type if applicable.
-			if (mbd.getResolvedAutowireMode() == AUTOWIRE_BY_TYPE) {
+			if (resolvedAutowireMode == AUTOWIRE_BY_TYPE) {
 				autowireByType(beanName, mbd, bw, newPvs);
 			}
 			pvs = newPvs;

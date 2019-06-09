@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +36,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Base class for tests that read or write data buffers with a rule to check
@@ -96,7 +96,7 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 			String value =
 					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
 			DataBufferUtils.release(dataBuffer);
-			assertEquals(expected, value);
+			assertThat(value).isEqualTo(expected);
 		};
 	}
 
@@ -105,13 +105,15 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 	 */
 	protected void waitForDataBufferRelease(Duration duration) throws InterruptedException {
 		Instant start = Instant.now();
-		while (Instant.now().isBefore(start.plus(duration))) {
+		while (true) {
 			try {
 				verifyAllocations();
 				break;
 			}
 			catch (AssertionError ex) {
-				// ignore;
+				if (Instant.now().isAfter(start.plus(duration))) {
+					throw ex;
+				}
 			}
 			Thread.sleep(50);
 		}
@@ -121,9 +123,24 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 		if (this.bufferFactory instanceof NettyDataBufferFactory) {
 			ByteBufAllocator allocator = ((NettyDataBufferFactory) this.bufferFactory).getByteBufAllocator();
 			if (allocator instanceof PooledByteBufAllocator) {
-				PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
-				long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
-				assertEquals("ByteBuf Leak: " + total + " unreleased allocations", 0, total);
+				Instant start = Instant.now();
+				while (true) {
+					PooledByteBufAllocatorMetric metric = ((PooledByteBufAllocator) allocator).metric();
+					long total = getAllocations(metric.directArenas()) + getAllocations(metric.heapArenas());
+					if (total == 0) {
+						return;
+					}
+					if (Instant.now().isBefore(start.plus(Duration.ofSeconds(5)))) {
+						try {
+							Thread.sleep(50);
+						}
+						catch (InterruptedException ex) {
+							// ignore
+						}
+						continue;
+					}
+					assertThat(total).as("ByteBuf Leak: " + total + " unreleased allocations").isEqualTo(0);
+				}
 			}
 		}
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package org.springframework.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -28,8 +28,8 @@ public class PatternMatchUtilsTests {
 
 	@Test
 	public void testTrivial() {
-		assertEquals(false, PatternMatchUtils.simpleMatch((String) null, ""));
-		assertEquals(false, PatternMatchUtils.simpleMatch("1", null));
+		assertThat(PatternMatchUtils.simpleMatch((String) null, "")).isEqualTo(false);
+		assertThat(PatternMatchUtils.simpleMatch("1", null)).isEqualTo(false);
 		doTest("*", "123", true);
 		doTest("123", "123", true);
 	}
@@ -100,7 +100,7 @@ public class PatternMatchUtilsTests {
 	}
 
 	private void doTest(String pattern, String str, boolean shouldMatch) {
-		assertEquals(shouldMatch, PatternMatchUtils.simpleMatch(pattern, str));
+		assertThat(PatternMatchUtils.simpleMatch(pattern, str)).isEqualTo(shouldMatch);
 	}
 
 }

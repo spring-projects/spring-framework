@@ -20,7 +20,7 @@ dependencies {
 	optional("org.codehaus.groovy:groovy:${groovyVersion}")
 	optional("org.beanshell:bsh:2.0b5")
 	optional("joda-time:joda-time:2.10.1")
-	optional("org.hibernate:hibernate-validator:5.4.2.Final")
+	optional("org.hibernate:hibernate-validator:5.4.3.Final")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("org.codehaus.groovy:groovy-jsr223:${groovyVersion}")
@@ -28,6 +28,9 @@ dependencies {
 	testCompile("org.codehaus.groovy:groovy-xml:${groovyVersion}")
 	testCompile("org.apache.commons:commons-pool2:2.6.0")
 	testCompile("javax.inject:javax.inject-tck:1")
+	// Substitute for "javax.management:jmxremote_optional:1.0.1_04" which
+	// is not available on Maven Central
+	testRuntime("org.glassfish.external:opendmk_jmxremote_optional_jar:1.0-b01-ea")
 	testCompile("org.awaitility:awaitility:3.1.3")
 	testRuntime("javax.xml.bind:jaxb-api:2.3.1")
 	testRuntime("org.glassfish:javax.el:3.0.1-b08")

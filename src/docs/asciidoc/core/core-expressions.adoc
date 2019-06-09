@@ -10,8 +10,8 @@ While there are several other Java expression languages available -- OGNL, MVEL,
 EL, to name a few -- the Spring Expression Language was created to provide the Spring
 community with a single well supported expression language that can be used across all
 the products in the Spring portfolio. Its language features are driven by the
-requirements of the projects in the Spring portfolio, including tooling requirements for
-code completion support within the Eclipse-based Spring Tool Suite. That said,
+requirements of the projects in the Spring portfolio, including tooling requirements
+for code completion support within the Eclipse-based Spring Tool Suite. That said,
 SpEL is based on a technology-agnostic API that lets other expression language
 implementations be integrated, should the need arise.
 
@@ -20,14 +20,14 @@ portfolio, it is not directly tied to Spring and can be used independently. To
 be self contained, many of the examples in this chapter use SpEL as if it were an
 independent expression language. This requires creating a few bootstrapping
 infrastructure classes, such as the parser. Most Spring users need not deal with
-this infrastructure and can, instead, author only expression strings for evaluation. An
-example of this typical use is the integration of SpEL into creating XML or annotation-based
-bean definitions, as shown in <<expressions-beandef,Expression support
-for defining bean definitions>>.
+this infrastructure and can, instead, author only expression strings for evaluation.
+An example of this typical use is the integration of SpEL into creating XML or
+annotation-based bean definitions, as shown in
+<<expressions-beandef, Expression support for defining bean definitions>>.
 
 This chapter covers the features of the expression language, its API, and its language
-syntax. In several places, `Inventor` and `Society` classes are used as the
-target objects for expression evaluation. These class declarations and the data used to
+syntax. In several places, `Inventor` and `Society` classes are used as the target
+objects for expression evaluation. These class declarations and the data used to
 populate them are listed at the end of the chapter.
 
 The expression language supports the following functionality:
@@ -60,7 +60,7 @@ The expression language supports the following functionality:
 
 This section introduces the simple use of SpEL interfaces and its expression language.
 The complete language reference can be found in
-<<expressions-language-ref,Language Reference>>.
+<<expressions-language-ref, Language Reference>>.
 
 The following code introduces the SpEL API to evaluate the literal string expression,
 `Hello World`.
@@ -114,8 +114,10 @@ The following example of calling a JavaBean property calls the `String` property
 <1> This line converts the literal to a byte array.
 
 
-SpEL also supports nested properties by using standard dot notation (such as
-`prop1.prop2.prop3`) and the setting of property values. Public fields may also be accessed.
+SpEL also supports nested properties by using the standard dot notation (such as
+`prop1.prop2.prop3`) and also the corresponding setting of property values.
+Public fields may also be accessed.
+
 The following example shows how to use dot notation to get the length of a literal:
 
 [source,java,indent=0]
@@ -291,18 +293,16 @@ does not provide optimum performance. For occasional expression usage,
 this is fine, but, when used by other components such as Spring Integration,
 performance can be very important, and there is no real need for the dynamism.
 
-The SpEL compiler is intended to address this need. During evaluation, the
-compiler generates a real Java class that embodies the
-expression behavior and uses that to achieve much faster expression
-evaluation. Due to the lack of typing around expressions, the compiler
-uses information gathered during the interpreted evaluations of an
-expression when performing compilation. For example, it does not know the type
-of a property reference purely from the expression, but, during the first
-interpreted evaluation, it finds out what it is. Of course, basing the
-compilation on this information can cause trouble later if the types of
-the various expression elements change over time. For this reason, compilation
-is best suited to expressions whose type information is not going to change
-on repeated evaluations.
+The SpEL compiler is intended to address this need. During evaluation, the compiler
+generates a Java class that embodies the expression behavior at runtime and uses that
+class to achieve much faster expression evaluation. Due to the lack of typing around
+expressions, the compiler uses information gathered during the interpreted evaluations
+of an expression when performing compilation. For example, it does not know the type
+of a property reference purely from the expression, but during the first interpreted
+evaluation, it finds out what it is. Of course, basing compilation on such derived
+information can cause trouble later if the types of the various expression elements
+change over time. For this reason, compilation is best suited to expressions whose
+type information is not going to change on repeated evaluations.
 
 Consider the following basic expression:
 
@@ -319,13 +319,14 @@ interpreter and only 3ms using the compiled version of the expression.
 [[expressions-compiler-configuration]]
 ==== Compiler Configuration
 
-The compiler is not turned on by default, but you can turn it on in either of two different ways.
-You can turn it on by using the parser configuration process (<<expressions-parser-configuration,discussed earlier>>)
-or by using a system property when SpEL usage is embedded inside another component. This section
+The compiler is not turned on by default, but you can turn it on in either of two
+different ways. You can turn it on by using the parser configuration process
+(<<expressions-parser-configuration, discussed earlier>>) or by using a system
+property when SpEL usage is embedded inside another component. This section
 discusses both of these options.
 
-The compiler can operate in one of three modes, which are captured
-in the `org.springframework.expression.spel.SpelCompilerMode` enum. The modes are as follows:
+The compiler can operate in one of three modes, which are captured in the
+`org.springframework.expression.spel.SpelCompilerMode` enum. The modes are as follows:
 
 * `OFF` (default): The compiler is switched off.
 * `IMMEDIATE`: In immediate mode, the expressions are compiled as soon as possible. This
@@ -366,24 +367,22 @@ following example shows how to do so:
 When you specify the compiler mode, you can also specify a classloader (passing null is allowed).
 Compiled expressions are defined in a child classloader created under any that is supplied.
 It is important to ensure that, if a classloader is specified, it can see all the types involved in
-the expression evaluation process.
-If you do not specify a classloader, a default classloader is used (typically the context classloader for
-the thread that is running during expression evaluation).
+the expression evaluation process. If you do not specify a classloader, a default classloader is used
+(typically the context classloader for the thread that is running during expression evaluation).
 
 The second way to configure the compiler is for use when SpEL is embedded inside some other
-component and it may not be possible to configure it through a configuration object.
-In these cases, it is possible to use a system property. You can set the
-`spring.expression.compiler.mode` property to one of the `SpelCompilerMode`
-enum values (`off`, `immediate`, or `mixed`).
+component and it may not be possible to configure it through a configuration object. In these
+cases, it is possible to use a system property. You can set the `spring.expression.compiler.mode`
+property to one of the `SpelCompilerMode` enum values (`off`, `immediate`, or `mixed`).
 
 
 [[expressions-compiler-limitations]]
 ==== Compiler Limitations
 
-Since Spring Framework 4.1, the basic compilation framework is in place. However, the framework does not
-yet support compiling every kind of expression. The initial focus has been on the common expressions that are
-likely to be used in performance-critical contexts. The following kinds of expression cannot be compiled
-at the moment:
+Since Spring Framework 4.1, the basic compilation framework is in place. However, the framework
+does not yet support compiling every kind of expression. The initial focus has been on the
+common expressions that are likely to be used in performance-critical contexts. The following
+kinds of expression cannot be compiled at the moment:
 
 * Expressions involving assignment
 * Expressions relying on the conversion service
@@ -612,7 +611,7 @@ By default, real numbers are parsed by using Double.parseDouble().
 
 Navigating with property references is easy. To do so, use a period to indicate a nested
 property value. The instances of the `Inventor` class, `pupin` and `tesla`, were populated with
-data listed in the <<expressions-example-classes,Classes used in the examples>> section.
+data listed in the <<expressions-example-classes, Classes used in the examples>> section.
 To navigate "`down`" and get Tesla's year of birth and Pupin's city of birth, we use the following
 expressions:
 
@@ -1192,7 +1191,7 @@ The following example shows how to use the Elvis operator:
 	System.out.println(name);  // 'Unknown'
 ----
 
-The following listing shows A more complex example:
+The following listing shows a more complex example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1211,7 +1210,7 @@ The following listing shows A more complex example:
 
 [NOTE]
 =====
-You can use the Elvis operator to apply default values in expressions. The folloiwng
+You can use the Elvis operator to apply default values in expressions. The following
 example shows how to use the Elvis operator in a `@Value` expression:
 
 [source,java,indent=0]

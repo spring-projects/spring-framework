@@ -5,7 +5,7 @@
 The original web framework included in the Spring Framework, Spring Web MVC, was
 purpose-built for the Servlet API and Servlet containers. The reactive-stack web framework,
 Spring WebFlux, was added later in version 5.0. It is fully non-blocking, supports
-http://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on such servers as
+https://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on such servers as
 Netty, Undertow, and Servlet 3.1+ containers.
 
 Both web frameworks mirror the names of their source modules
@@ -62,9 +62,9 @@ https://github.com/reactive-streams/reactive-streams-jvm/blob/master/README.md#s
 (also https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.html[adopted] in Java 9)
 that defines the interaction between asynchronous components with back pressure.
 For example a data repository (acting as
-http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher])
+https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher])
 can produce data that an HTTP server (acting as
-http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber])
+https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber])
 can then write to the response. The main purpose of Reactive Streams is to let the
   subscriber to control how quickly or how slowly the publisher produces data.
 
@@ -107,8 +107,8 @@ of RxJava or another reactive library. See <<webflux-reactive-libraries>> for mo
 === Programming Models
 
 The `spring-web` module contains the reactive foundation that underlies Spring WebFlux,
-including HTTP abstractions, Reactive Streams <<webflux-httphandler,adapters>> for supported
-servers, <<webflux-codecs,codecs>>, and a core <<webflux-web-handler-api>> comparable to
+including HTTP abstractions, Reactive Streams <<webflux-httphandler, adapters>> for supported
+servers, <<webflux-codecs, codecs>>, and a core <<webflux-web-handler-api>> comparable to
 the Servlet API but with non-blocking contracts.
 
 On that foundation, Spring WebFlux provides a choice of two programming models:
@@ -167,7 +167,7 @@ RxJava to perform blocking calls on a separate thread but you would not be makin
 most of a non-blocking web stack.
 
 * If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
-You can return reactive types (Reactor, RxJava, <<webflux-reactive-libraries,or other>>)
+You can return reactive types (Reactor, RxJava, <<webflux-reactive-libraries, or other>>)
 directly from Spring MVC controller methods. The greater the latency per call or the
 interdependency among calls, the more dramatic the benefits. Spring MVC controllers
 can call other reactive components too.
@@ -186,12 +186,12 @@ unsure what benefits to look for, start by learning about how non-blocking I/O w
 
 Spring WebFlux is supported on Tomcat, Jetty, Servlet 3.1+ containers, as well as on
 non-Servlet runtimes such as Netty and Undertow. All servers are adapted to a low-level,
-<<webflux-httphandler,common API>> so that higher-level
-<<webflux-programming-models,programming models>> can be supported across servers.
+<<webflux-httphandler, common API>> so that higher-level
+<<webflux-programming-models, programming models>> can be supported across servers.
 
 Spring WebFlux does not have built-in support to start or stop a server. However, it is
-easy to <<webflux-web-handler-api,assemble>> an application from Spring configuration and
-<<webflux-config,WebFlux infrastructure>> and <<webflux-httphandler,run it>> with a few
+easy to <<webflux-web-handler-api, assemble>> an application from Spring configuration and
+<<webflux-config, WebFlux infrastructure>> and <<webflux-httphandler, run it>> with a few
 lines of code.
 
 Spring Boot has a WebFlux starter that automates these steps. By default, the starter uses
@@ -284,11 +284,11 @@ of their own.
 
 .Configuring
 The Spring Framework does not provide support for starting and stopping
-<<webflux-server-choice,servers>>. To configure the threading model for a server, you
-need to use server-specific configuration APIs, or, if you use Spring Boot, check the Spring
-Boot configuration options for each server. You can <<web-reactive.adoc#webflux-client-builder,configure>> The `WebClient`
-directly. For all other
-libraries, see their respective documentation.
+<<webflux-server-choice, servers>>. To configure the threading model for a server,
+you need to use server-specific configuration APIs, or, if you use Spring Boot,
+check the Spring Boot configuration options for each server. You can
+<<web-reactive.adoc#webflux-client-builder, configure>> the `WebClient` directly.
+For all other libraries, see their respective documentation.
 
 
 
@@ -300,7 +300,7 @@ The `spring-web` module contains the following foundational support for reactive
 applications:
 
 * For server request processing there are two levels of support.
-** <<webflux-httphandler,HttpHandler>>: Basic contract for HTTP request handling with
+** <<webflux-httphandler, HttpHandler>>: Basic contract for HTTP request handling with
 non-blocking I/O and Reactive Streams back pressure, along with adapters for Reactor Netty,
 Undertow, Tomcat, Jetty, and any Servlet 3.1+ container.
 ** <<webflux-web-handler-api>>: Slightly higher level, general-purpose web API for
@@ -310,9 +310,9 @@ controllers and functional endpoints are built.
 requests with non-blocking I/O and Reactive Streams back pressure, along with adapters for
 https://github.com/reactor/reactor-netty[Reactor Netty] and for the reactive
 https://github.com/jetty-project/jetty-reactive-httpclient[Jetty HttpClient].
-The higher level <<web-reactive.adoc#webflux-client,WebClient>> used in applications
+The higher level <<web-reactive.adoc#webflux-client, WebClient>> used in applications
 builds on this basic contract.
-* For client and server, <<webflux-codecs,codecs>> to use to serialize and
+* For client and server, <<webflux-codecs, codecs>> to use to serialize and
 deserialize HTTP request and response content.
 
 
@@ -432,7 +432,6 @@ server.addConnector(connector);
 server.start();
 ----
 
-
 *Servlet 3.1+ Container*
 
 To deploy as a WAR to any Servlet 3.1+ container, you can extend and include
@@ -452,7 +451,7 @@ to provide a general-purpose web API for processing requests through a chain of 
 {api-spring-framework}/web/server/WebHandler.html[`WebHandler`] component. The chain can
 be put together with `WebHttpHandlerBuilder` by simply pointing to a Spring
 `ApplicationContext` where components are
-<<webflux-web-handler-api-special-beans,auto-detected>>, and/or by registering components
+<<webflux-web-handler-api-special-beans, auto-detected>>, and/or by registering components
 with the builder.
 
 While `HttpHandler` has a simple goal to abstract the use of different HTTP servers, the
@@ -533,12 +532,12 @@ Mono<MultiValueMap<String, String>> getFormData();
 The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse form data
 (`application/x-www-form-urlencoded`) into a `MultiValueMap`. By default,
 `FormHttpMessageReader` is configured for use by the `ServerCodecConfigurer` bean
-(see the <<webflux-web-handler-api,Web Handler API>>).
+(see the <<webflux-web-handler-api, Web Handler API>>).
 
 
 [[webflux-multipart]]
 ==== Multipart Data
-[.small]#<<web.adoc#mvc-multipart,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-multipart, Same as in Spring MVC>>#
 
 `ServerWebExchange` exposes the following method for access to multipart data:
 
@@ -554,7 +553,7 @@ into a `MultiValueMap`. At present,
 https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is the only
 third-party library supported and the only library we know for non-blocking parsing of
 multipart requests. It is enabled through the `ServerCodecConfigurer` bean
-(see the <<webflux-web-handler-api,Web Handler API>>).
+(see the <<webflux-web-handler-api, Web Handler API>>).
 
 To parse multipart data in streaming fashion, you can use the `Flux<Part>` returned from an
 `HttpMessageReader<Part>` instead. For example, in an annotated controller, use of
@@ -565,7 +564,7 @@ content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 [[webflux-forwarded-headers]]
 ==== Forwarded Headers
-[.small]#<<web.adoc#filters-forwarded-headers,Same as in Spring MVC>>#
+[.small]#<<web.adoc#filters-forwarded-headers, Same as in Spring MVC>>#
 
 As a request goes through proxies (such as load balancers), the host, port, and
 scheme may change, and that makes it a challenge, from a client perspective, to create links that point to the correct
@@ -596,7 +595,7 @@ filters, and `ForwardedHeaderTransformer` is used instead.
 
 [[webflux-filters]]
 === Filters
-[.small]#<<web.adoc#filters,Same as in Spring MVC>>#
+[.small]#<<web.adoc#filters, Same as in Spring MVC>>#
 
 In the <<webflux-web-handler-api>>, you can use a `WebFilter` to apply interception-style
 logic before and after the rest of the processing chain of filters and the target
@@ -607,7 +606,7 @@ the bean declaration or by implementing `Ordered`.
 
 [[webflux-filters-cors]]
 ==== CORS
-[.small]#<<web.adoc#filters-cors,Same as in Spring MVC>>#
+[.small]#<<web.adoc#filters-cors, Same as in Spring MVC>>#
 
 Spring WebFlux provides fine-grained support for CORS configuration through annotations on
 controllers. However, when you use it with Spring Security, we advise relying on the built-in
@@ -619,7 +618,7 @@ See the section on <<webflux-cors>> and the <<webflux-cors-webfilter>> for more 
 
 [[webflux-exception-handler]]
 === Exceptions
-[.small]#<<web.adoc#mvc-ann-customer-servlet-container-error-page,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-customer-servlet-container-error-page, Same as in Spring MVC>>#
 
 In the <<webflux-web-handler-api>>, you can use a `WebExceptionHandler` to handle
 exceptions from the chain of `WebFilter` instances and the target `WebHandler`. When using the
@@ -650,7 +649,7 @@ The following table describes the available `WebExceptionHandler` implementation
 
 [[webflux-codecs]]
 === Codecs
-[.small]#<<integration.adoc#rest-message-conversion,Same as in Spring MVC>>#
+[.small]#<<integration.adoc#rest-message-conversion, Same as in Spring MVC>>#
 
 The `spring-web` and `spring-core` modules provide support for serializing and
 deserializing byte content to and from higher level objects through non-blocking I/O with
@@ -758,7 +757,7 @@ for repeated, map-like access to parts, or otherwise rely on the
 
 [[webflux-codecs-streaming]]
 ==== Streaming
-[.small]#<<web.adoc#mvc-ann-async-http-streaming,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-async-http-streaming, Same as in Spring MVC>>#
 
 When streaming to the HTTP response (for example, `text/event-stream`,
 `application/stream+json`), it is important to send data periodically, in order to
@@ -772,15 +771,15 @@ a heartbeat.
 
 `DataBuffer` is the representation for a byte buffer in WebFlux. The Spring Core part of
 the reference has more on that in the section on
-<<core#databuffers,Data Buffers and Codecs>>. The key point to understand is that on some
+<<core#databuffers, Data Buffers and Codecs>>. The key point to understand is that on some
 servers like Netty, byte buffers are pooled and reference counted, and must be released
 when consumed to avoid memory leaks.
 
 WebFlux applications generally do not need to be concerned with such issues, unless they
 consume or produce data buffers directly, as opposed to relying on codecs to convert to
 and from higher level objects. Or unless they choose to create custom codecs. For such
-cases please review the the information in <<core#databuffers,Data Buffers and Codecs>>,
-especially the section on <<core#databuffers-using,Using DataBuffer>>.
+cases please review the the information in <<core#databuffers, Data Buffers and Codecs>>,
+especially the section on <<core#databuffers-using, Using DataBuffer>>.
 
 
 
@@ -788,7 +787,7 @@ especially the section on <<core#databuffers-using,Using DataBuffer>>.
 
 [[webflux-logging]]
 === Logging
-[.small]#<<web.adoc#mvc-logging,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-logging, Same as in Spring MVC>>#
 
 DEBUG level logging in Spring WebFlux is designed to be compact, minimal, and
 human-friendly. It focuses on high value bits of information that are useful over and
@@ -820,7 +819,7 @@ while a fully formatted prefix based on that ID is available from
 
 [[webflux-logging-sensitive-data]]
 ==== Sensitive Data
-[.small]#<<web.adoc#mvc-logging-sensitive-data,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-logging-sensitive-data, Same as in Spring MVC>>#
 
 `DEBUG` and `TRACE` logging can log sensitive information. This is why form parameters and
 headers are masked by default and you must explicitly enable their logging in full.
@@ -859,11 +858,11 @@ WebClient webClient = WebClient.builder()
 
 [[webflux-dispatcher-handler]]
 == `DispatcherHandler`
-[.small]#<<web.adoc#mvc-servlet,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet, Same as in Spring MVC>>#
 
-Spring WebFlux, similarly to Spring MVC, is designed around the front controller pattern, where a
-central `WebHandler`, the `DispatcherHandler`, provides a shared algorithm for request
-processing, while actual work is performed by configurable, delegate components.
+Spring WebFlux, similarly to Spring MVC, is designed around the front controller pattern,
+where a central `WebHandler`, the `DispatcherHandler`, provides a shared algorithm for
+request processing, while actual work is performed by configurable, delegate components.
 This model is flexible and supports diverse workflows.
 
 `DispatcherHandler` discovers the delegate components it needs from Spring configuration.
@@ -871,8 +870,7 @@ It is also designed to be a Spring bean itself and implements `ApplicationContex
 for access to the context in which it runs. If `DispatcherHandler` is declared with a bean
 name of `webHandler`, it is, in turn, discovered by
 {api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html[`WebHttpHandlerBuilder`],
-which puts together a request-processing chain, as described in
-<<webflux-web-handler-api>>.
+which puts together a request-processing chain, as described in <<webflux-web-handler-api>>.
 
 Spring configuration in a WebFlux application typically contains:
 
@@ -891,14 +889,13 @@ ApplicationContext context = ...
 HttpHandler handler = WebHttpHandlerBuilder.applicationContext(context);
 ----
 
-The resulting `HttpHandler` is ready for use with a
-<<webflux-httphandler,server adapter>>.
+The resulting `HttpHandler` is ready for use with a <<webflux-httphandler, server adapter>>.
 
 
 
 [[webflux-special-bean-types]]
 === Special Bean Types
-[.small]#<<web.adoc#mvc-servlet-special-bean-types,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet-special-bean-types, Same as in Spring MVC>>#
 
 The `DispatcherHandler` delegates to special beans to process requests and render the
 appropriate responses. By "`special beans,`" we mean Spring-managed `Object` instances that
@@ -940,11 +937,11 @@ there are also some other beans detected at a lower level (see
 
 [[webflux-framework-config]]
 === WebFlux Config
-[.small]#<<web.adoc#mvc-servlet-config,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet-config, Same as in Spring MVC>>#
 
 Applications can declare the infrastructure beans (listed under
-<<webflux-web-handler-api-special-beans,Web Handler API>> and
-<<webflux-special-bean-types,`DispatcherHandler`>>) that are required to process requests.
+<<webflux-web-handler-api-special-beans, Web Handler API>> and
+<<webflux-special-bean-types, `DispatcherHandler`>>) that are required to process requests.
 However, in most cases, the <<webflux-config>> is the best starting point. It declares the
 required beans and provides a higher-level configuration callback API to customize it.
 
@@ -955,7 +952,7 @@ many extra convenient options.
 
 [[webflux-dispatcher-handler-sequence]]
 === Processing
-[.small]#<<web.adoc#mvc-servlet-sequence,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-servlet-sequence, Same as in Spring MVC>>#
 
 `DispatcherHandler` processes requests as follows:
 
@@ -1006,7 +1003,7 @@ as a `HandlerResult`, along with some additional context, and passed to the firs
 
 [[webflux-dispatcher-exceptions]]
 === Exceptions
-[.small]#<<web.adoc#mvc-exceptionhandlers,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-exceptionhandlers, Same as in Spring MVC>>#
 
 The `HandlerResult` returned from a `HandlerAdapter` can expose a function for error
 handling based on some handler-specific mechanism. This error function is called if:
@@ -1029,18 +1026,18 @@ See also <<webflux-ann-controller-exceptions>> in the "`Annotated Controller`" s
 
 [[webflux-viewresolution]]
 === View Resolution
-[.small]#<<web.adoc#mvc-viewresolver,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-viewresolver, Same as in Spring MVC>>#
 
 View resolution enables rendering to a browser with an HTML template and a model without
 tying you to a specific view technology. In Spring WebFlux, view resolution is
-supported through a dedicated <<webflux-resulthandling,HandlerResultHandler>> that uses
+supported through a dedicated <<webflux-resulthandling, HandlerResultHandler>> that uses
   `ViewResolver` instances to map a String (representing a logical view name) to a `View`
 instance. The `View` is then used to render the response.
 
 
 [[webflux-viewresolution-handling]]
 ==== Handling
-[.small]#<<web.adoc#mvc-handling,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-handling, Same as in Spring MVC>>#
 
 The `HandlerResult` passed into `ViewResolutionResultHandler` contains the return value
 from the handler and the model that contains attributes added during request
@@ -1068,7 +1065,7 @@ value or no value (if empty), while multi-value reactive types (for example, `Fl
 collected and resolved to `List<T>`.
 
 To configure view resolution is as simple as adding a `ViewResolutionResultHandler` bean
-to your Spring configuration. <<webflux-config-view-resolvers,WebFlux Config>> provides a
+to your Spring configuration. <<webflux-config-view-resolvers, WebFlux Config>> provides a
 dedicated configuration API for view resolution.
 
 See <<webflux-view>> for more on the view technologies integrated with Spring WebFlux.
@@ -1076,7 +1073,7 @@ See <<webflux-view>> for more on the view technologies integrated with Spring We
 
 [[webflux-redirecting-redirect-prefix]]
 ==== Redirecting
-[.small]#<<web.adoc#mvc-redirecting-redirect-prefix,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-redirecting-redirect-prefix, Same as in Spring MVC>>#
 
 The special `redirect:` prefix in a view name lets you perform a redirect. The
 `UrlBasedViewResolver` (and sub-classes) recognize this as an instruction that a
@@ -1086,12 +1083,12 @@ The net effect is the same as if the controller had returned a `RedirectView` or
 `Rendering.redirectTo("abc").build()`, but now the controller itself can
 operate in terms of logical view names. A view name such as
 `redirect:/some/resource` is relative to the current application, while a view name such as
-`redirect:http://example.com/arbitrary/path` redirects to an absolute URL.
+`redirect:https://example.com/arbitrary/path` redirects to an absolute URL.
 
 
 [[webflux-multiple-representations]]
 ==== Content Negotiation
-[.small]#<<web.adoc#mvc-multiple-representations,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-multiple-representations, Same as in Spring MVC>>#
 
 `ViewResolutionResultHandler` supports content negotiation. It compares the request
 media types with the media types supported by each selected `View`. The first `View`
@@ -1099,8 +1096,8 @@ that supports the requested media type(s) is used.
 
 In order to support media types such as JSON and XML, Spring WebFlux provides
 `HttpMessageWriterView`, which is a special `View` that renders through an
-<<webflux-codecs,HttpMessageWriter>>. Typically, you would configure these as default
-views through the <<webflux-config-view-resolvers,WebFlux Configuration>>. Default views are
+<<webflux-codecs, HttpMessageWriter>>. Typically, you would configure these as default
+views through the <<webflux-config-view-resolvers, WebFlux Configuration>>. Default views are
 always selected and used if they match the requested media type.
 
 
@@ -1108,7 +1105,7 @@ always selected and used if they match the requested media type.
 
 [[webflux-controller]]
 == Annotated Controllers
-[.small]#<<web.adoc#mvc-controller,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-controller, Same as in Spring MVC>>#
 
 Spring WebFlux provides an annotation-based programming model, where `@Controller` and
 `@RestController` components use annotations to express request mappings, request input,
@@ -1136,7 +1133,7 @@ In the preceding example, the method returns a `String` to be written to the res
 
 [[webflux-ann-controller]]
 === `@Controller`
-[.small]#<<web.adoc#mvc-ann-controller,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-controller, Same as in Spring MVC>>#
 
 You can define controller beans by using a standard Spring bean definition.
 The `@Controller` stereotype allows for auto-detection and is aligned with Spring general support
@@ -1159,8 +1156,7 @@ your Java configuration, as the following example shows:
 ----
 <1> Scan the `org.example.web` package.
 
-
-`@RestController` is a <<core.adoc#beans-meta-annotations,composed annotation>> that is
+`@RestController` is a <<core.adoc#beans-meta-annotations, composed annotation>> that is
 itself meta-annotated with `@Controller` and `@ResponseBody`, indicating a controller whose
 every method inherits the type-level `@ResponseBody` annotation and, therefore, writes
 directly to the response body versus view resolution and rendering with an HTML template.
@@ -1169,7 +1165,7 @@ directly to the response body versus view resolution and rendering with an HTML 
 
 [[webflux-ann-requestmapping]]
 === Request Mapping
-[.small]#<<web.adoc#mvc-ann-requestmapping,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping, Same as in Spring MVC>>#
 
 The `@RequestMapping` annotation is used to map requests to controllers methods. It has
 various attributes to match by URL, HTTP method, request parameters, headers, and media
@@ -1214,7 +1210,7 @@ The following example uses type and method level mappings:
 
 [[webflux-ann-requestmapping-uri-templates]]
 ==== URI Patterns
-[.small]#<<web.adoc#mvc-ann-requestmapping-uri-templates,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-uri-templates, Same as in Spring MVC>>#
 
 You can map requests by using glob patterns and wildcards:
 
@@ -1296,7 +1292,7 @@ explicit, and less vulnerable to URL path based exploits.
 
 [[webflux-ann-requestmapping-pattern-comparison]]
 ==== Pattern Comparison
-[.small]#<<web.adoc#mvc-ann-requestmapping-pattern-comparison,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-pattern-comparison, Same as in Spring MVC>>#
 
 When multiple patterns match a URL, they must be compared to find the best match. This is done
 with `PathPattern.SPECIFICITY_COMPARATOR`, which looks for patterns that are more specific.
@@ -1311,7 +1307,7 @@ sorted last instead. If two patterns are both catch-all, the longer is chosen.
 
 [[webflux-ann-requestmapping-consumes]]
 ==== Consumable Media Types
-[.small]#<<web.adoc#mvc-ann-requestmapping-consumes,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-consumes, Same as in Spring MVC>>#
 
 You can narrow the request mapping based on the `Content-Type` of the request,
 as the following example shows:
@@ -1319,7 +1315,7 @@ as the following example shows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping(path = "/pets", **consumes = "application/json"**)
+	@PostMapping(path = "/pets", consumes = "application/json")
 	public void addPet(@RequestBody Pet pet) {
 		// ...
 	}
@@ -1338,7 +1334,7 @@ TIP: `MediaType` provides constants for commonly used media types -- for example
 
 [[webflux-ann-requestmapping-produces]]
 ==== Producible Media Types
-[.small]#<<web.adoc#mvc-ann-requestmapping-produces,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-produces, Same as in Spring MVC>>#
 
 You can narrow the request mapping based on the `Accept` request header and the list of
 content types that a controller method produces, as the following example shows:
@@ -1346,7 +1342,7 @@ content types that a controller method produces, as the following example shows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping(path = "/pets/{petId}", **produces = "application/json;charset=UTF-8"**)
+	@GetMapping(path = "/pets/{petId}", produces = "application/json")
 	@ResponseBody
 	public Pet getPet(@PathVariable String petId) {
 		// ...
@@ -1356,22 +1352,17 @@ content types that a controller method produces, as the following example shows:
 The media type can specify a character set. Negated expressions are supported -- for example,
 `!text/plain` means any content type other than `text/plain`.
 
-NOTE: For JSON content type, you should specify the UTF-8 `charset` even if
-https://tools.ietf.org/html/rfc7159#section-11[RFC7159]
-clearly states that "`no charset parameter is defined for this registration,`" because some
-browsers require it to correctly interpret UTF-8 special characters.
-
 You can declare a shared `produces` attribute at the class level. Unlike most other request
 mapping attributes, however, when used at the class level, a method-level `produces` attribute
 overrides rather than extend the class level declaration.
 
 TIP: `MediaType` provides constants for commonly used media types -- e.g.
-`APPLICATION_JSON_UTF8_VALUE`, `APPLICATION_XML_VALUE`.
+`APPLICATION_JSON_VALUE`, `APPLICATION_XML_VALUE`.
 
 
 [[webflux-ann-requestmapping-params-and-headers]]
 ==== Parameters and Headers
-[.small]#<<web.adoc#mvc-ann-requestmapping-params-and-headers,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-params-and-headers, Same as in Spring MVC>>#
 
 You can narrow request mappings based on query parameter conditions. You can test for the
 presence of a query parameter (`myParam`), for its absence (`!myParam`), or for a
@@ -1404,7 +1395,7 @@ You can also use the same with request header conditions, as the follwing exampl
 
 [[webflux-ann-requestmapping-head-options]]
 ==== HTTP HEAD, OPTIONS
-[.small]#<<web.adoc#mvc-ann-requestmapping-head-options,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-head-options, Same as in Spring MVC>>#
 
 `@GetMapping` and `@RequestMapping(method=HttpMethod.GET)` support HTTP HEAD
 transparently for request mapping purposes. Controller methods need not change.
@@ -1425,9 +1416,9 @@ is not necessary in the common case.
 
 [[webflux-ann-requestmapping-composed]]
 ==== Custom Annotations
-[.small]#<<web.adoc#mvc-ann-requestmapping-composed,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-composed, Same as in Spring MVC>>#
 
-Spring WebFlux supports the use of <<core.adoc#beans-meta-annotations,composed annotations>>
+Spring WebFlux supports the use of <<core.adoc#beans-meta-annotations, composed annotations>>
 for request mapping. Those are annotations that are themselves meta-annotated with
 `@RequestMapping` and composed to redeclare a subset (or all) of the `@RequestMapping`
 attributes with a narrower, more specific purpose.
@@ -1446,7 +1437,7 @@ you can check the custom attribute and return your own `RequestCondition`.
 
 [[webflux-ann-requestmapping-registration]]
 ==== Explicit Registrations
-[.small]#<<web.adoc#mvc-ann-requestmapping-registration,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestmapping-registration, Same as in Spring MVC>>#
 
 You can programmatically register Handler methods, which can be used for dynamic
 registrations or for advanced cases, such as different instances of the same handler
@@ -1481,7 +1472,7 @@ public class MyConfig {
 
 [[webflux-ann-methods]]
 === Handler Methods
-[.small]#<<web.adoc#mvc-ann-methods,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-methods, Same as in Spring MVC>>#
 
 `@RequestMapping` handler methods have a flexible signature and can choose from a range of
 supported controller method arguments and return values.
@@ -1489,11 +1480,11 @@ supported controller method arguments and return values.
 
 [[webflux-ann-arguments]]
 ==== Method Arguments
-[.small]#<<web.adoc#mvc-ann-arguments,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-arguments, Same as in Spring MVC>>#
 
 The following table shows the supported controller method arguments.
 
-Reactive types (Reactor, RxJava, <<webflux-reactive-libraries,or other>>) are
+Reactive types (Reactor, RxJava, <<webflux-reactive-libraries, or other>>) are
 supported on arguments that require blocking I/O (for example, reading the request body) to
 be resolved. This is marked in the Description column. Reactive types are not expected
 on arguments that do not require blocking.
@@ -1610,10 +1601,10 @@ and others) and is equivalent to `required=false`.
 
 [[webflux-ann-return-types]]
 ==== Return Values
-[.small]#<<web.adoc#mvc-ann-return-types,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-return-types, Same as in Spring MVC>>#
 
-The following table shows the supported controller method return values. Note that reactive types
-from libraries such as Reactor, RxJava, <<webflux-reactive-libraries,or other>> are
+The following table shows the supported controller method return values. Note that reactive
+types from libraries such as Reactor, RxJava, <<webflux-reactive-libraries, or other>> are
 generally supported for all return values.
 
 [cols="1,2", options="header"]
@@ -1636,12 +1627,13 @@ generally supported for all return values.
 | A view name to be resolved with `ViewResolver` instances and used together with the implicit
   model -- determined through command objects and `@ModelAttribute` methods. The handler
   method can also programmatically enrich the model by declaring a `Model` argument
-  (described <<webflux-viewresolution-handling,earlier>>).
+  (described <<webflux-viewresolution-handling, earlier>>).
 
 | `View`
 | A `View` instance to use for rendering together with the implicit model -- determined
   through command objects and `@ModelAttribute` methods. The handler method can also
-  programmatically enrich the model by declaring a `Model` argument (described <<webflux-viewresolution-handling,earlier>>).
+  programmatically enrich the model by declaring a `Model` argument
+  (described <<webflux-viewresolution-handling, earlier>>).
 
 | `java.util.Map`, `org.springframework.ui.Model`
 | Attributes to be added to the implicit model, with the view name implicitly determined
@@ -1683,7 +1675,7 @@ generally supported for all return values.
 
 [[webflux-ann-typeconversion]]
 ==== Type Conversion
-[.small]#<<web.adoc#mvc-ann-typeconversion,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-typeconversion, Same as in Spring MVC>>#
 
 Some annotated controller method arguments that represent String-based request input (for example,
 `@RequestParam`, `@RequestHeader`, `@PathVariable`, `@MatrixVariable`, and `@CookieValue`)
@@ -1692,17 +1684,16 @@ can require type conversion if the argument is declared as something other than 
 For such cases, type conversion is automatically applied based on the configured converters.
 By default, simple types (such as `int`, `long`, `Date`, and others) are supported. Type conversion
 can be customized through a `WebDataBinder` (see <<mvc-ann-initbinder>>) or by registering
-`Formatters` with the `FormattingConversionService` (see
-<<core.adoc#format, Spring Field Formatting>>).
+`Formatters` with the `FormattingConversionService` (see <<core.adoc#format, Spring Field Formatting>>).
 
 
 [[webflux-ann-matrix-variables]]
 ==== Matrix Variables
-[.small]#<<web.adoc#mvc-ann-matrix-variables,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-matrix-variables, Same as in Spring MVC>>#
 
-http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring WebFlux, we refer to those as "`matrix variables`" based on an
-http://www.w3.org/DesignIssues/MatrixURIs.html["`old post`"] by Tim Berners-Lee, but they
+https://www.w3.org/DesignIssues/MatrixURIs.html["`old post`"] by Tim Berners-Lee, but they
 can be also be referred to as URI path parameters.
 
 Matrix variables can appear in any path segment, with each variable separated by a semicolon and
@@ -1783,7 +1774,7 @@ To get all matrix variables, use a `MultiValueMap`, as the following example sho
 
 [[webflux-ann-requestparam]]
 ==== `@RequestParam`
-[.small]#<<web.adoc#mvc-ann-requestparam,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestparam, Same as in Spring MVC>>#
 
 You can use the `@RequestParam` annotation to bind query parameters to a method argument in a
 controller. The following code snippet shows the usage:
@@ -1810,12 +1801,11 @@ controller. The following code snippet shows the usage:
 ----
 <1> Using `@RequestParam`.
 
-
 TIP: The Servlet API "`request parameter`" concept conflates query parameters, form
 data, and multiparts into one. However, in WebFlux, each is accessed individually through
 `ServerWebExchange`. While `@RequestParam` binds to query parameters only, you can use
 data binding to apply query parameters, form data, and multiparts to a
-<<webflux-ann-modelattrib-method-args,command object>>.
+<<webflux-ann-modelattrib-method-args, command object>>.
 
 Method parameters that use the `@RequestParam` annotation are required by default, but
 you can specify that a method parameter is optional by setting the required flag of a `@RequestParam`
@@ -1837,7 +1827,7 @@ with `@RequestParam`.
 
 [[webflux-ann-requestheader]]
 ==== `@RequestHeader`
-[.small]#<<web.adoc#mvc-ann-requestheader,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestheader, Same as in Spring MVC>>#
 
 You can use the `@RequestHeader` annotation to bind a request header to a method argument in a
 controller.
@@ -1870,7 +1860,6 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 <1> Get the value of the `Accept-Encoging` header.
 <2> Get the value of the `Keep-Alive` header.
 
-
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
 
@@ -1886,7 +1875,7 @@ example, a method parameter annotated with `@RequestHeader("Accept")` may be of 
 
 [[webflux-ann-cookievalue]]
 ==== `@CookieValue`
-[.small]#<<web.adoc#mvc-ann-cookievalue,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-cookievalue, Same as in Spring MVC>>#
 
 You can use the `@CookieValue` annotation to bind the value of an HTTP cookie to a method argument
 in a controller.
@@ -1918,7 +1907,7 @@ Type conversion is applied automatically if the target method parameter type is 
 
 [[webflux-ann-modelattrib-method-args]]
 ==== `@ModelAttribute`
-[.small]#<<web.adoc#mvc-ann-modelattrib-method-args,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-modelattrib-method-args, Same as in Spring MVC>>#
 
 You can use the `@ModelAttribute` annotation on a method argument to access an attribute from the
 model or have it instantiated if not present. The model attribute is also overlain with
@@ -1933,7 +1922,6 @@ converting individual query parameters and form fields. The following example bi
 	public String processSubmit(@ModelAttribute Pet pet) { } <1>
 ----
 <1> Bind an instance of `Pet`.
-
 
 The `Pet` instance in the preceding example is resolved as follows:
 
@@ -1968,17 +1956,16 @@ immediately next to the `@ModelAttribute`, as the following example shows:
 ----
 <1> Adding a `BindingResult`.
 
-
 You can automatically apply validation after data binding by adding the
 `javax.validation.Valid` annotation or Spring's `@Validated` annotation (see also
-<<core.adoc#validation-beanvalidation, Bean validation>> and
+<<core.adoc#validation-beanvalidation, Bean Validation>> and
 <<core.adoc#validation, Spring validation>>). The following example uses the `@Valid` annotation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(**@Valid @ModelAttribute("pet") Pet pet**, BindingResult result) { <1>
+	public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult result) { <1>
 		if (result.hasErrors()) {
 			return "petForm";
 		}
@@ -1986,7 +1973,6 @@ You can automatically apply validation after data binding by adding the
 	}
 ----
 <1> Using `@Valid` on a model attribute argument.
-
 
 Spring WebFlux, unlike Spring MVC, supports reactive types in the model -- for example,
 `Mono<Account>` or `io.reactivex.Single<Account>`. You can declare a `@ModelAttribute` argument
@@ -2020,7 +2006,7 @@ with `@ModelAttribute`.
 
 [[webflux-ann-sessionattributes]]
 ==== `@SessionAttributes`
-[.small]#<<web.adoc#mvc-ann-sessionattributes,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-sessionattributes, Same as in Spring MVC>>#
 
 `@SessionAttributes` is used to store model attributes in the `WebSession` between
 requests. It is a type-level annotation that declares session attributes used by a
@@ -2040,7 +2026,6 @@ Consider the following example:
 	}
 ----
 <1> Using the `@SessionAttributes` annotation.
-
 
 On the first request, when a model attribute with the name, `pet`, is added to the model,
 it is automatically promoted to and saved in the `WebSession`. It remains there until
@@ -2071,10 +2056,9 @@ as the following example shows:
 <2> Using a `SessionStatus` variable.
 
 
-
 [[webflux-ann-sessionattribute]]
 ==== `@SessionAttribute`
-[.small]#<<web.adoc#mvc-ann-sessionattribute,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-sessionattribute, Same as in Spring MVC>>#
 
 If you need access to pre-existing session attributes that are managed globally
 (that is, outside the controller -- for example, by a filter) and may or may not be present,
@@ -2090,7 +2074,6 @@ you can use the `@SessionAttribute` annotation on a method parameter, as the fol
 ----
 <1> Using `@SessionAttribute`.
 
-
 For use cases that require adding or removing session attributes, consider injecting
 `WebSession` into the controller method.
 
@@ -2100,8 +2083,8 @@ workflow, consider using `SessionAttributes`, as described in
 
 
 [[webflux-ann-requestattrib]]
-[.small]#<<web.adoc#mvc-ann-requestattrib,Same as in Spring MVC>>#
-
+==== `@RequestAttribute`
+[.small]#<<web.adoc#mvc-ann-requestattrib, Same as in Spring MVC>>#
 
 Similarly to `@SessionAttribute`, you can use the `@RequestAttribute` annotation to
 access pre-existing request attributes created earlier (for example, by a `WebFilter`),
@@ -2118,14 +2101,13 @@ as the following example shows:
 <1> Using `@RequestAttribute`.
 
 
-
 [[webflux-multipart-forms]]
 ==== Multipart Content
-[.small]#<<web.adoc#mvc-multipart-forms,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-multipart-forms, Same as in Spring MVC>>#
 
 As explained in <<webflux-multipart>>, `ServerWebExchange` provides access to multipart
 content. The best way to handle a file upload form (for example, from a browser) in a controller
-is through data binding to a <<webflux-ann-modelattrib-method-args,command object>>,
+is through data binding to a <<webflux-ann-modelattrib-method-args, command object>>,
 as the following example shows:
 
 [source,java,indent=0]
@@ -2190,7 +2172,6 @@ You can access individual parts with `@RequestPart`, as the following example sh
 <1> Using `@RequestPart` to get the metadata.
 <2> Using `@RequestPart` to get the file.
 
-
 To deserialize the raw part content (for example, to JSON -- similar to `@RequestBody`),
 you can declare a concrete target `Object`, instead of `Part`, as the following example shows:
 
@@ -2203,7 +2184,6 @@ you can declare a concrete target `Object`, instead of `Part`, as the following 
 	}
 ----
 <1> Using `@RequestPart` to get the metadata.
-
 
 You can use `@RequestPart` combination with `javax.validation.Valid` or Spring's
 `@Validated` annotation, which causes Standard Bean Validation to be applied.
@@ -2223,7 +2203,6 @@ public String handle(@Valid @RequestPart("meta-data") MetaData metadata, <1>
 <1> Using a `@Valid` annotation.
 <2> Using a `BindingResult` argument.
 
-
 To access all multipart data as a `MultiValueMap`, you can use `@RequestBody`,
 as the following example shows:
 
@@ -2236,7 +2215,6 @@ as the following example shows:
 	}
 ----
 <1> Using `@RequestBody`.
-
 
 To access multipart data sequentially, in streaming fashion, you can use `@RequestBody` with
 `Flux<Part>` instead, as the following example shows:
@@ -2252,10 +2230,9 @@ To access multipart data sequentially, in streaming fashion, you can use `@Reque
 <1> Using `@RequestBody`.
 
 
-
 [[webflux-ann-requestbody]]
 ==== `@RequestBody`
-[.small]#<<web.adoc#mvc-ann-requestbody,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-requestbody, Same as in Spring MVC>>#
 
 You can use the `@RequestBody` annotation to have the request body read and deserialized into an
 `Object` through an <<webflux-codecs,HttpMessageReader>>.
@@ -2305,7 +2282,7 @@ example uses a `BindingResult` argument`:
 
 [[webflux-ann-httpentity]]
 ==== `HttpEntity`
-[.small]#<<web.adoc#mvc-ann-httpentity,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-httpentity, Same as in Spring MVC>>#
 
 `HttpEntity` is more or less identical to using <<webflux-ann-requestbody>> but is based on a
 container object that exposes request headers and the body. The following example uses an
@@ -2323,10 +2300,11 @@ container object that exposes request headers and the body. The following exampl
 
 [[webflux-ann-responsebody]]
 ==== `@ResponseBody`
-[.small]#<<web.adoc#mvc-ann-responsebody,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-responsebody, Same as in Spring MVC>>#
 
-You can use the `@ResponseBody` annotation on a method to have the return serialized to the
-response body through an <<webflux-codecs,HttpMessageWriter>>. The following example shows how to do so:
+You can use the `@ResponseBody` annotation on a method to have the return serialized
+to the response body through an <<webflux-codecs, HttpMessageWriter>>. The following
+example shows how to do so:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2356,7 +2334,7 @@ configure or customize message writing.
 
 [[webflux-ann-responseentity]]
 ==== `ResponseEntity`
-[.small]#<<web.adoc#mvc-ann-responseentity,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-responseentity, Same as in Spring MVC>>#
 
 `ResponseEntity` is like <<webflux-ann-responsebody>> but with status and headers. For example:
 
@@ -2371,7 +2349,7 @@ configure or customize message writing.
 	}
 ----
 
-WebFlux supports using a single value <<webflux-reactive-libraries,reactive type>> to
+WebFlux supports using a single value <<webflux-reactive-libraries, reactive type>> to
 produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
 for the body.
 
@@ -2383,10 +2361,10 @@ Spring offers support for the Jackson JSON library.
 
 [[webflux-ann-jsonview]]
 ===== JSON Views
-[.small]#<<web.adoc#mvc-ann-jackson,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-jackson, Same as in Spring MVC>>#
 
 Spring WebFlux provides built-in support for
-http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views],
+https://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views],
 which allows rendering only a subset of all fields in an `Object`. To use it with
 `@ResponseBody` or `ResponseEntity` controller methods, you can use Jackson's
 `@JsonView` annotation to activate a serialization view class, as the following example shows:
@@ -2439,11 +2417,11 @@ controller method. Use a composite interface if you need to activate multiple vi
 
 [[webflux-ann-modelattrib-methods]]
 === `Model`
-[.small]#<<web.adoc#mvc-ann-modelattrib-methods,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-modelattrib-methods, Same as in Spring MVC>>#
 
 You can use the `@ModelAttribute` annotation:
 
-* On a <<webflux-ann-modelattrib-method-args,method argument>> in `@RequestMapping` methods
+* On a <<webflux-ann-modelattrib-method-args, method argument>> in `@RequestMapping` methods
 to create or access an Object from the model and to bind it to the request through a
 `WebDataBinder`.
 * As a method-level annotation in `@Controller` or `@ControllerAdvice` classes, helping
@@ -2534,7 +2512,7 @@ as the following example shows:
 
 [[webflux-ann-initbinder]]
 === `DataBinder`
-[.small]#<<web.adoc#mvc-ann-initbinder,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-initbinder, Same as in Spring MVC>>#
 
 `@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods, to
 initialize instances of `WebDataBinder`. Those, in turn, are used to:
@@ -2546,7 +2524,7 @@ headers, cookies, and others) to the target type of controller method arguments.
 
 `@InitBinder` methods can register controller-specific `java.bean.PropertyEditor` or
 Spring `Converter` and `Formatter` components. In addition, you can use the
-<<webflux-config-conversion,WebFlux Java configuration>> to register `Converter` and
+<<webflux-config-conversion, WebFlux Java configuration>> to register `Converter` and
 `Formatter` types in a globally shared `FormattingConversionService`.
 
 `@InitBinder` methods support many of the same arguments that `@RequestMapping` methods
@@ -2572,7 +2550,6 @@ The following example uses the `@InitBinder` annotation:
 ----
 <1> Using the `@InitBinder` annotation.
 
-
 Alternatively, when using a `Formatter`-based setup through a shared
 `FormattingConversionService`, you could re-use the same approach and register
 controller-specific `Formatter` instances, as the following example shows:
@@ -2595,12 +2572,11 @@ controller-specific `Formatter` instances, as the following example shows:
 
 
 
-
 [[webflux-ann-controller-exceptions]]
 === Managing Exceptions
-[.small]#<<web.adoc#mvc-ann-exceptionhandler,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-exceptionhandler, Same as in Spring MVC>>#
 
-`@Controller` and <<mvc-ann-controller-advice,@ControllerAdvice>> classes can have
+`@Controller` and <<mvc-ann-controller-advice, @ControllerAdvice>> classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods. The following
 example includes such a handler method:
 
@@ -2622,14 +2598,15 @@ example includes such a handler method:
 
 
 The exception can match against a top-level exception being propagated (that is, a direct
-`IOException` being thrown) or against the immediate cause within a top-level wrapper exception
-(for example, an `IOException` wrapped inside an `IllegalStateException`).
+`IOException` being thrown) or against the immediate cause within a top-level wrapper
+exception (for example, an `IOException` wrapped inside an `IllegalStateException`).
 
 For matching exception types, preferably declare the target exception as a method argument,
-as shown in the preceding example. Alternatively, the annotation declaration can narrow the exception types to
-match. We generally recommend being as specific as possible in the argument signature and to
-declare your primary root exception mappings on a `@ControllerAdvice` prioritized with a
-corresponding order. See <<web.adoc#mvc-ann-exceptionhandler,the MVC section>> for details.
+as shown in the preceding example. Alternatively, the annotation declaration can narrow the
+exception types to match. We generally recommend being as specific as possible in the
+argument signature and to declare your primary root exception mappings on a
+`@ControllerAdvice` prioritized with a corresponding order.
+See <<web.adoc#mvc-ann-exceptionhandler, the MVC section>> for details.
 
 NOTE: An `@ExceptionHandler` method in WebFlux supports the same method arguments and
 return values as a `@RequestMapping` method, with the exception of request body-
@@ -2642,7 +2619,7 @@ for more detail.
 
 [[webflux-ann-rest-exceptions]]
 ==== REST API exceptions
-[.small]#<<web.adoc#mvc-ann-rest-exceptions,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-rest-exceptions, Same as in Spring MVC>>#
 
 A common requirement for REST services is to include error details in the body of the
 response. The Spring Framework does not automatically do so, because the representation
@@ -2660,7 +2637,7 @@ an HTTP status code.
 
 [[webflux-ann-controller-advice]]
 === Controller Advice
-[.small]#<<web.adoc#mvc-ann-controller-advice,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-ann-controller-advice, Same as in Spring MVC>>#
 
 Typically, the `@ExceptionHandler`, `@InitBinder`, and `@ModelAttribute` methods apply within
 the `@Controller` class (or class hierarchy) in which they are declared. If you want such
@@ -2668,7 +2645,7 @@ methods to apply more globally (across controllers), you can declare them in a c
 marked with `@ControllerAdvice` or `@RestControllerAdvice`.
 
 `@ControllerAdvice` is marked with `@Component`, which means that such classes can be registered
-as Spring beans through <<core.adoc#beans-java-instantiating-container-scan,component scanning>>.
+as Spring beans through <<core.adoc#beans-java-instantiating-container-scan, component scanning>>.
 `@RestControllerAdvice` is also a meta-annotation marked with both `@ControllerAdvice` and
 `@ResponseBody`, which essentially means `@ExceptionHandler` methods are rendered to the
 response body through message conversion (versus view resolution or template rendering).
@@ -2711,7 +2688,7 @@ include::webflux-functional.adoc[leveloffset=+1]
 
 [[webflux-uri-building]]
 == URI Links
-[.small]#<<web.adoc#mvc-uri-building,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-uri-building, Same as in Spring MVC>>#
 
 This section describes various options available in the Spring Framework to prepare URIs.
 
@@ -2724,9 +2701,9 @@ include::webflux-cors.adoc[leveloffset=+1]
 
 [[webflux-web-security]]
 == Web Security
-[.small]#<<web.adoc#mvc-web-security,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-web-security, Same as in Spring MVC>>#
 
-The http://projects.spring.io/spring-security/[Spring Security] project provides support
+The https://projects.spring.io/spring-security/[Spring Security] project provides support
 for protecting web applications from malicious exploits. See the Spring Security
 reference documentation, including:
 
@@ -2742,7 +2719,7 @@ include::webflux-view.adoc[leveloffset=+1]
 
 [[webflux-caching]]
 == HTTP Caching
-[.small]#<<web.adoc#mvc-caching,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-caching, Same as in Spring MVC>>#
 
 HTTP caching can significantly improve the performance of a web application. HTTP caching
 revolves around the `Cache-Control` response header and subsequent conditional request
@@ -2758,7 +2735,7 @@ This section describes the HTTP caching related options available in Spring WebF
 
 [[webflux-caching-cachecontrol]]
 === `CacheControl`
-[.small]#<<web.adoc#mvc-caching-cachecontrol,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-caching-cachecontrol, Same as in Spring MVC>>#
 
 {api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
 configuring settings related to the `Cache-Control` header and is accepted as an argument
@@ -2790,7 +2767,7 @@ use case-oriented approach that focuses on the common scenarios, as the followin
 
 [[webflux-caching-etag-lastmodified]]
 === Controllers
-[.small]#<<web.adoc#mvc-caching-etag-lastmodified,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-caching-etag-lastmodified, Same as in Spring MVC>>#
 
 Controllers can add explicit support for HTTP caching. We recommend doing so, since the
 `lastModified` or `ETag` value for a resource needs to be calculated before it can be compared
@@ -2842,7 +2819,6 @@ as the following example shows:
 <2> Response has been set to 304 (NOT_MODIFIED). No further processing.
 <3> Continue with request processing.
 
-
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
 values, or both. For conditional `GET` and `HEAD` requests, you can set the response to
 304 (NOT_MODIFIED). For conditional `POST`, `PUT`, and `DELETE`, you can instead set the response
@@ -2852,7 +2828,7 @@ to 409 (PRECONDITION_FAILED) to prevent concurrent modification.
 
 [[webflux-caching-static-resources]]
 === Static Resources
-[.small]#<<web.adoc#mvc-caching-static-resources,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-caching-static-resources, Same as in Spring MVC>>#
 
 You should serve static resources with a `Cache-Control` and conditional response headers
 for optimal performance. See the section on configuring <<webflux-config-static-resources>>.
@@ -2862,13 +2838,14 @@ for optimal performance. See the section on configuring <<webflux-config-static-
 
 [[webflux-config]]
 == WebFlux Config
-[.small]#<<web.adoc#mvc-config,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config, Same as in Spring MVC>>#
 
-The WebFlux Java configuration declares the components that are required to process requests with annotated
-controllers or functional endpoints, and it offers an API to customize the configuration.
-That means you do not need to understand the underlying beans created by the Java configuration.
-However, if you want to understand them, you can see them in `WebFluxConfigurationSupport` or read more
-about what they are in <<webflux-special-bean-types>>.
+The WebFlux Java configuration declares the components that are required to process
+requests with annotated controllers or functional endpoints, and it offers an API to
+customize the configuration. That means you do not need to understand the underlying
+beans created by the Java configuration. However, if you want to understand them,
+you can see them in `WebFluxConfigurationSupport` or read more about what they are
+in <<webflux-special-bean-types>>.
 
 For more advanced customizations, not available in the configuration API, you can
 gain full control over the configuration through the
@@ -2878,7 +2855,7 @@ gain full control over the configuration through the
 
 [[webflux-config-enable]]
 === Enabling WebFlux Config
-[.small]#<<web.adoc#mvc-config-enable,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-enable, Same as in Spring MVC>>#
 
 You can use the `@EnableWebFlux` annotation in your Java config, as the following example shows:
 
@@ -2892,14 +2869,14 @@ You can use the `@EnableWebFlux` annotation in your Java config, as the followin
 ----
 
 The preceding example registers a number of Spring WebFlux
-<<mvc-webflux-special-bean-types,infrastructure beans>> and adapts to dependencies
+<<mvc-webflux-special-bean-types, infrastructure beans>> and adapts to dependencies
 available on the classpath -- for JSON, XML, and others.
 
 
 
 [[webflux-config-customize]]
 === WebFlux config API
-[.small]#<<web.adoc#mvc-config-customize,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-customize, Same as in Spring MVC>>#
 
 In your Java configuration, you can implement the `WebFluxConfigurer` interface,
 as the following example shows:
@@ -2920,7 +2897,7 @@ as the following example shows:
 
 [[webflux-config-conversion]]
 === Conversion, formatting
-[.small]#<<web.adoc#mvc-config-conversion,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-conversion, Same as in Spring MVC>>#
 
 By default, formatters for `Number` and `Date` types are installed, including support for
 the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
@@ -2943,19 +2920,20 @@ The following example shows how to register custom formatters and converters:
 	}
 ----
 
-NOTE: See <<core.adoc#format-FormatterRegistrar-SPI,`FormatterRegistrar` SPI>>
-and the `FormattingConversionServiceFactoryBean` for more information on when to use `FormatterRegistrar` implementations.
+NOTE: See <<core.adoc#format-FormatterRegistrar-SPI, `FormatterRegistrar` SPI>>
+and the `FormattingConversionServiceFactoryBean` for more information on when to
+use `FormatterRegistrar` implementations.
 
 
 
 [[webflux-config-validation]]
 === Validation
-[.small]#<<web.adoc#mvc-config-validation,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-validation, Same as in Spring MVC>>#
 
-By default, if <<core.adoc#validation-beanvalidation-overview,Bean Validation>> is present
-on the classpath (for example, the Hibernate Validator), the `LocalValidatorFactoryBean` is registered
-as a global <<core.adoc#validator,validator>> for use with `@Valid` and `Validated` on
-`@Controller` method arguments.
+By default, if <<core.adoc#validation-beanvalidation-overview, Bean Validation>> is present
+on the classpath (for example, the Hibernate Validator), the `LocalValidatorFactoryBean`
+is registered as a global <<core.adoc#validator,validator>> for use with `@Valid` and
+`Validated` on `@Controller` method arguments.
 
 In your Java configuration, you can customize the global `Validator` instance,
 as the following example shows:
@@ -2999,11 +2977,11 @@ mark it with `@Primary` in order to avoid conflict with the one declared in the 
 
 [[webflux-config-content-negotiation]]
 === Content Type Resolvers
-[.small]#<<web.adoc#mvc-config-content-negotiation,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-content-negotiation, Same as in Spring MVC>>#
 
 You can configure how Spring WebFlux determines the requested media types for
-`@Controller` instances from the request. By default, only the `Accept` header is checked, but you
-can also enable a query parameter-based strategy.
+`@Controller` instances from the request. By default, only the `Accept` header is checked,
+but you can also enable a query parameter-based strategy.
 
 The following example shows how to customize the requested content type resolution:
 
@@ -3025,7 +3003,7 @@ The following example shows how to customize the requested content type resoluti
 
 [[webflux-config-message-codecs]]
 === HTTP message codecs
-[.small]#<<web.adoc#mvc-config-message-converters,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-message-converters, Same as in Spring MVC>>#
 
 The following example shows how to customize how the request and response body are read and written:
 
@@ -3050,8 +3028,8 @@ For Jackson JSON and XML, consider using
 {api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`],
 which customizes Jackson's default properties with the following ones:
 
-* http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
-* http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
@@ -3064,7 +3042,7 @@ It also automatically registers the following well-known modules if they are det
 
 [[webflux-config-view-resolvers]]
 === View Resolvers
-[.small]#<<web.adoc#mvc-config-view-resolvers,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-view-resolvers, Same as in Spring MVC>>#
 
 The following example shows how to configure view resolution:
 
@@ -3159,7 +3137,7 @@ See <<webflux-view>> for more on the view technologies that are integrated with 
 
 [[webflux-config-static-resources]]
 === Static Resources
-[.small]#<<web.adoc#mvc-config-static-resources,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-static-resources, Same as in Spring MVC>>#
 
 This option provides a convenient way to serve static resources from a list of
 {api-spring-framework}/core/io/Resource.html[`Resource`]-based locations.
@@ -3233,17 +3211,18 @@ Note that, when using both `EncodedResourceResolver` (for example, Gzip, Brotli 
 `VersionedResourceResolver`, they must be registered in that order, to ensure content-based
 versions are always computed reliably based on the unencoded file.
 
-http://www.webjars.org/documentation[WebJars] is also supported through `WebJarsResourceResolver`
-and is automatically registered when `org.webjars:webjars-locator` is present on the
-classpath. The resolver can re-write URLs to include the version of the jar and can also
-match to incoming URLs without versions (for example, `/jquery/jquery.min.js` to
-`/jquery/1.2.0/jquery.min.js`).
+https://www.webjars.org/documentation[WebJars] are also supported through the
+`WebJarsResourceResolver` which is automatically registered when the
+`org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
+re-write URLs to include the version of the jar and can also match against incoming URLs
+without versions -- for example, from `/jquery/jquery.min.js` to
+`/jquery/1.2.0/jquery.min.js`.
 
 
 
 [[webflux-config-path-matching]]
 === Path Matching
-[.small]#<<web.adoc#mvc-config-path-matching,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-path-matching, Same as in Spring MVC>>#
 
 You can customize options related to path matching. For details on the individual options, see the
 {api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
@@ -3277,7 +3256,7 @@ whether to decode the request path nor whether to remove semicolon content for
 path matching purposes.
 
 Spring WebFlux also does not support suffix pattern matching, unlike in Spring MVC, where we
-are also <<web.adoc#mvc-ann-requestmapping-suffix-pattern-match,recommend>> moving away from
+are also <<web.adoc#mvc-ann-requestmapping-suffix-pattern-match, recommend>> moving away from
 reliance on it.
 ====
 
@@ -3285,7 +3264,7 @@ reliance on it.
 
 [[webflux-config-advanced-java]]
 === Advanced Configuration Mode
-[.small]#<<web.adoc#mvc-config-advanced-java,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-config-advanced-java, Same as in Spring MVC>>#
 
 `@EnableWebFlux` imports `DelegatingWebFluxConfiguration` that:
 
@@ -3317,7 +3296,7 @@ the classpath.
 
 [[webflux-http2]]
 == HTTP/2
-[.small]#<<web.adoc#mvc-http2,Same as in Spring MVC>>#
+[.small]#<<web.adoc#mvc-http2, Same as in Spring MVC>>#
 
 Servlet 4 containers are required to support HTTP/2, and Spring Framework 5 is compatible
 with Servlet API 4. From a programming model perspective, there is nothing specific that

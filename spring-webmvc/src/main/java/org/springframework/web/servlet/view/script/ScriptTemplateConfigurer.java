@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -137,7 +137,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * {@link #setEngineName(String)}. Using {@link #setEngine(ScriptEngine)} is not
 	 * possible because multiple instances of the script engine need to be created lazily
 	 * (one per thread).
-	 * @see <a href="http://docs.oracle.com/javase/8/docs/api/javax/script/ScriptEngineFactory.html#getParameter-java.lang.String-">THREADING ScriptEngine parameter</a>
+	 * @see <a href="https://docs.oracle.com/javase/8/docs/api/javax/script/ScriptEngineFactory.html#getParameter-java.lang.String-">THREADING ScriptEngine parameter</a>
 	 */
 	public void setSharedEngine(@Nullable Boolean sharedEngine) {
 		this.sharedEngine = sharedEngine;
@@ -158,7 +158,7 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	 * {@code configurer.setScripts("/META-INF/resources/webjars/library/version/library.js",
 	 * "com/myproject/script/render.js");}.
 	 * @see #setResourceLoaderPath
-	 * @see <a href="http://www.webjars.org">WebJars</a>
+	 * @see <a href="https://www.webjars.org">WebJars</a>
 	 */
 	public void setScripts(@Nullable String... scriptNames) {
 		this.scripts = scriptNames;

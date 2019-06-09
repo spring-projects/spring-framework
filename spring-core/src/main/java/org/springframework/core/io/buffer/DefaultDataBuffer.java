@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -80,10 +81,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	/**
-	 * Directly exposes the native {@code ByteBuffer} that this buffer is based on.
+	 * Directly exposes the native {@code ByteBuffer} that this buffer is based
+	 * on also updating the {@code ByteBuffer's} position and limit to match
+	 * the current {@link #readPosition()} and {@link #readableByteCount()}.
 	 * @return the wrapped byte buffer
 	 */
 	public ByteBuffer getNativeBuffer() {
+		this.byteBuffer.position(this.readPosition);
+		this.byteBuffer.limit(readableByteCount());
 		return this.byteBuffer;
 	}
 
@@ -407,7 +412,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,9 +53,9 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.web.method.MvcAnnotationPredicates.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestPart;
 
 /**
  * Unit tests for {@link RequestPartMethodArgumentResolver}.
@@ -87,25 +87,25 @@ public class RequestPartMethodArgumentResolverTests {
 		MethodParameter param;
 
 		param = this.testMethod.annot(requestPart()).arg(Person.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestPart()).arg(Mono.class, Person.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestPart()).arg(Flux.class, Person.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestPart()).arg(Part.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestPart()).arg(Mono.class, Part.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestPart()).arg(Flux.class, Part.class);
-		assertTrue(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annotNotPresent(RequestPart.class).arg(Person.class);
-		assertFalse(this.resolver.supportsParameter(param));
+		assertThat(this.resolver.supportsParameter(param)).isFalse();
 	}
 
 
@@ -116,7 +116,7 @@ public class RequestPartMethodArgumentResolverTests {
 		bodyBuilder.part("name", new Person("Jones"));
 		Person actual = resolveArgument(param, bodyBuilder);
 
-		assertEquals("Jones", actual.getName());
+		assertThat(actual.getName()).isEqualTo("Jones");
 	}
 
 	@Test
@@ -127,8 +127,8 @@ public class RequestPartMethodArgumentResolverTests {
 		bodyBuilder.part("name", new Person("James"));
 		List<Person> actual = resolveArgument(param, bodyBuilder);
 
-		assertEquals("Jones", actual.get(0).getName());
-		assertEquals("James", actual.get(1).getName());
+		assertThat(actual.get(0).getName()).isEqualTo("Jones");
+		assertThat(actual.get(1).getName()).isEqualTo("James");
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class RequestPartMethodArgumentResolverTests {
 		bodyBuilder.part("name", new Person("Jones"));
 		Mono<Person> actual = resolveArgument(param, bodyBuilder);
 
-		assertEquals("Jones", actual.block().getName());
+		assertThat(actual.block().getName()).isEqualTo("Jones");
 	}
 
 	@Test
@@ -150,8 +150,8 @@ public class RequestPartMethodArgumentResolverTests {
 		Flux<Person> actual = resolveArgument(param, bodyBuilder);
 
 		List<Person> persons = actual.collectList().block();
-		assertEquals("Jones", persons.get(0).getName());
-		assertEquals("James", persons.get(1).getName());
+		assertThat(persons.get(0).getName()).isEqualTo("Jones");
+		assertThat(persons.get(1).getName()).isEqualTo("James");
 	}
 
 	@Test
@@ -162,7 +162,7 @@ public class RequestPartMethodArgumentResolverTests {
 		Part actual = resolveArgument(param, bodyBuilder);
 
 		DataBuffer buffer = DataBufferUtils.join(actual.content()).block();
-		assertEquals("{\"name\":\"Jones\"}", DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8));
+		assertThat(DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8)).isEqualTo("{\"name\":\"Jones\"}");
 	}
 
 	@Test
@@ -173,8 +173,8 @@ public class RequestPartMethodArgumentResolverTests {
 		bodyBuilder.part("name", new Person("James"));
 		List<Part> actual = resolveArgument(param, bodyBuilder);
 
-		assertEquals("{\"name\":\"Jones\"}", partToUtf8String(actual.get(0)));
-		assertEquals("{\"name\":\"James\"}", partToUtf8String(actual.get(1)));
+		assertThat(partToUtf8String(actual.get(0))).isEqualTo("{\"name\":\"Jones\"}");
+		assertThat(partToUtf8String(actual.get(1))).isEqualTo("{\"name\":\"James\"}");
 	}
 
 	@Test
@@ -185,7 +185,7 @@ public class RequestPartMethodArgumentResolverTests {
 		Mono<Part> actual = resolveArgument(param, bodyBuilder);
 
 		Part part = actual.block();
-		assertEquals("{\"name\":\"Jones\"}", partToUtf8String(part));
+		assertThat(partToUtf8String(part)).isEqualTo("{\"name\":\"Jones\"}");
 	}
 
 	@Test
@@ -197,8 +197,8 @@ public class RequestPartMethodArgumentResolverTests {
 		Flux<Part> actual = resolveArgument(param, bodyBuilder);
 
 		List<Part> parts = actual.collectList().block();
-		assertEquals("{\"name\":\"Jones\"}", partToUtf8String(parts.get(0)));
-		assertEquals("{\"name\":\"James\"}", partToUtf8String(parts.get(1)));
+		assertThat(partToUtf8String(parts.get(0))).isEqualTo("{\"name\":\"Jones\"}");
+		assertThat(partToUtf8String(parts.get(1))).isEqualTo("{\"name\":\"James\"}");
 	}
 
 	@Test
@@ -244,8 +244,8 @@ public class RequestPartMethodArgumentResolverTests {
 		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
-		assertNotNull(value);
-		assertTrue(param.getParameterType().isAssignableFrom(value.getClass()));
+		assertThat(value).isNotNull();
+		assertThat(param.getParameterType().isAssignableFrom(value.getClass())).isTrue();
 		return (T) value;
 	}
 

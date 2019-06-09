@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -127,10 +127,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @since 5.1.2
 	 */
 	protected Object[] getMethodArgumentValues(Message<?> message, Object... providedArgs) throws Exception {
-		if (ObjectUtils.isEmpty(getMethodParameters())) {
+		MethodParameter[] parameters = getMethodParameters();
+		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
 		}
-		MethodParameter[] parameters = getMethodParameters();
+
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
@@ -147,11 +148,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				args[i] = this.resolvers.resolveArgument(parameter, message);
 			}
 			catch (Exception ex) {
-				// Leave stack trace for later, exception may actually be resolved and handled..
+				// Leave stack trace for later, exception may actually be resolved and handled...
 				if (logger.isDebugEnabled()) {
-					String error = ex.getMessage();
-					if (error != null && !error.contains(parameter.getExecutable().toGenericString())) {
-						logger.debug(formatArgumentError(parameter, error));
+					String exMsg = ex.getMessage();
+					if (exMsg != null && !exMsg.contains(parameter.getExecutable().toGenericString())) {
+						logger.debug(formatArgumentError(parameter, exMsg));
 					}
 				}
 				throw ex;

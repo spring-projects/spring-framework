@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -92,12 +92,11 @@ public class Projection extends SpelNodeImpl {
 					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
 			List<Object> result = new ArrayList<>();
-			int idx = 0;
 			Class<?> arrayElementType = null;
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
-					state.enterScope("index", idx);
+					state.enterScope("index", result.size());
 					Object value = this.children[0].getValueInternal(state).getValue();
 					if (value != null && operandIsArray) {
 						arrayElementType = determineCommonType(arrayElementType, value.getClass());
@@ -108,7 +107,6 @@ public class Projection extends SpelNodeImpl {
 					state.exitScope();
 					state.popActiveContextObject();
 				}
-				idx++;
 			}
 
 			if (operandIsArray) {

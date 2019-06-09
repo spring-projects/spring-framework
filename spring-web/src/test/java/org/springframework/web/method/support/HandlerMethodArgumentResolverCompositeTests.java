@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,8 @@ import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Test fixture with {@link HandlerMethodArgumentResolverComposite}.
@@ -53,8 +54,8 @@ public class HandlerMethodArgumentResolverCompositeTests {
 	public void supportsParameter() {
 		this.resolverComposite.addResolver(new StubArgumentResolver(Integer.class));
 
-		assertTrue(this.resolverComposite.supportsParameter(paramInt));
-		assertFalse(this.resolverComposite.supportsParameter(paramStr));
+		assertThat(this.resolverComposite.supportsParameter(paramInt)).isTrue();
+		assertThat(this.resolverComposite.supportsParameter(paramStr)).isFalse();
 	}
 
 	@Test
@@ -62,7 +63,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 		this.resolverComposite.addResolver(new StubArgumentResolver(55));
 		Object resolvedValue = this.resolverComposite.resolveArgument(paramInt, null, null, null);
 
-		assertEquals(55, resolvedValue);
+		assertThat(resolvedValue).isEqualTo(55);
 	}
 
 	@Test
@@ -71,12 +72,13 @@ public class HandlerMethodArgumentResolverCompositeTests {
 		this.resolverComposite.addResolver(new StubArgumentResolver(2));
 		Object resolvedValue = this.resolverComposite.resolveArgument(paramInt, null, null, null);
 
-		assertEquals("Didn't use the first registered resolver", 1, resolvedValue);
+		assertThat(resolvedValue).as("Didn't use the first registered resolver").isEqualTo(1);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void noSuitableArgumentResolver() throws Exception {
-		this.resolverComposite.resolveArgument(paramStr, null, null, null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.resolverComposite.resolveArgument(paramStr, null, null, null));
 	}
 
 

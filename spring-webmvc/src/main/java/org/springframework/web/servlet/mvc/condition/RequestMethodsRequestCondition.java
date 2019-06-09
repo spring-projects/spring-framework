@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,9 @@ package org.springframework.web.servlet.mvc.condition;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
@@ -40,8 +42,16 @@ import org.springframework.web.cors.CorsUtils;
  */
 public final class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
 
-	private static final RequestMethodsRequestCondition GET_CONDITION =
-			new RequestMethodsRequestCondition(RequestMethod.GET);
+	/** Per HTTP method cache to return ready instances from getMatchingCondition. */
+	private static final Map<String, RequestMethodsRequestCondition> requestMethodConditionCache;
+
+	static {
+		requestMethodConditionCache = new HashMap<>(RequestMethod.values().length);
+		for (RequestMethod method : RequestMethod.values()) {
+			requestMethodConditionCache.put(method.name(), new RequestMethodsRequestCondition(method));
+		}
+	}
+
 
 	private final Set<RequestMethod> methods;
 
@@ -108,7 +118,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 			if (RequestMethod.OPTIONS.name().equals(request.getMethod()) &&
 					!DispatcherType.ERROR.equals(request.getDispatcherType())) {
 
-				return null; // No implicit match for OPTIONS (we handle it)
+				return null; // We handle OPTIONS transparently, so don't match if no explicit declarations
 			}
 			return this;
 		}
@@ -136,11 +146,11 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		if (httpMethod != null) {
 			for (RequestMethod method : getMethods()) {
 				if (httpMethod.matches(method.name())) {
-					return new RequestMethodsRequestCondition(method);
+					return requestMethodConditionCache.get(method.name());
 				}
 			}
 			if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
-				return GET_CONDITION;
+				return requestMethodConditionCache.get(HttpMethod.GET.name());
 			}
 		}
 		return null;

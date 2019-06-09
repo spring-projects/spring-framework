@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,15 +18,10 @@ package org.springframework.jms.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 import javax.jms.JMSException;
 import javax.jms.MessageListener;
 
-import org.hamcrest.core.Is;
-
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -50,17 +45,14 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.stereotype.Component;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Stephane Nicoll
  * @author Sam Brannen
  */
 public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 
 	@Override
 	@Test
@@ -116,8 +108,8 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		JmsListenerContainerTestFactory factory =
 				context.getBean(JmsListenerContainerTestFactory.class);
 		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
-		assertTrue(container.isAutoStartup());
-		assertTrue(container.isStarted());
+		assertThat(container.isAutoStartup()).isTrue();
+		assertThat(container.isStarted()).isTrue();
 	}
 
 	@Test
@@ -127,11 +119,11 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		JmsListenerContainerTestFactory factory =
 				context.getBean(JmsListenerContainerTestFactory.class);
 		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
-		assertFalse(container.isAutoStartup());
-		assertFalse(container.isStarted());
+		assertThat(container.isAutoStartup()).isFalse();
+		assertThat(container.isStarted()).isFalse();
 		JmsListenerEndpointRegistry registry = context.getBean(JmsListenerEndpointRegistry.class);
 		registry.start();
-		assertTrue(container.isStarted());
+		assertThat(container.isStarted()).isTrue();
 	}
 
 	@Override
@@ -140,9 +132,9 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsHandlerMethodFactoryConfig.class, ValidationBean.class);
 
-		thrown.expect(ListenerExecutionFailedException.class);
-		thrown.expectCause(Is.<MethodArgumentNotValidException>isA(MethodArgumentNotValidException.class));
-		testJmsHandlerMethodFactoryConfiguration(context);
+		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
+				testJmsHandlerMethodFactoryConfiguration(context))
+			.withCauseInstanceOf(MethodArgumentNotValidException.class);
 	}
 
 	@Override
@@ -167,28 +159,29 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 			EnableJmsDefaultContainerFactoryConfig.class, ComposedJmsListenersBean.class)) {
 			JmsListenerContainerTestFactory simpleFactory = context.getBean("jmsListenerContainerFactory",
 				JmsListenerContainerTestFactory.class);
-			assertEquals(2, simpleFactory.getListenerContainers().size());
+			assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(2);
 
 			MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
 				"first").getEndpoint();
-			assertEquals("first", first.getId());
-			assertEquals("orderQueue", first.getDestination());
-			assertNull(first.getConcurrency());
+			assertThat(first.getId()).isEqualTo("first");
+			assertThat(first.getDestination()).isEqualTo("orderQueue");
+			assertThat(first.getConcurrency()).isNull();
 
 			MethodJmsListenerEndpoint second = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
 				"second").getEndpoint();
-			assertEquals("second", second.getId());
-			assertEquals("billingQueue", second.getDestination());
-			assertEquals("2-10", second.getConcurrency());
+			assertThat(second.getId()).isEqualTo("second");
+			assertThat(second.getDestination()).isEqualTo("billingQueue");
+			assertThat(second.getConcurrency()).isEqualTo("2-10");
 		}
 	}
 
 	@Test
 	@SuppressWarnings("resource")
 	public void unknownFactory() {
-		thrown.expect(BeanCreationException.class);
-		thrown.expectMessage("customFactory");  // not found
-		new AnnotationConfigApplicationContext(EnableJmsSampleConfig.class, CustomBean.class);
+		 // not found
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
+				new AnnotationConfigApplicationContext(EnableJmsSampleConfig.class, CustomBean.class))
+			.withMessageContaining("customFactory");
 	}
 
 	@Test
@@ -197,14 +190,14 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 				EnableJmsDefaultContainerFactoryConfig.class, LazyBean.class);
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
-		assertEquals(0, defaultFactory.getListenerContainers().size());
+		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(0);
 
 		context.getBean(LazyBean.class);  // trigger lazy resolution
-		assertEquals(1, defaultFactory.getListenerContainers().size());
+		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
 		MessageListenerTestContainer container = defaultFactory.getListenerContainers().get(0);
-		assertTrue("Should have been started " + container, container.isStarted());
+		assertThat(container.isStarted()).as("Should have been started " + container).isTrue();
 		context.close();  // close and stop the listeners
-		assertTrue("Should have been stopped " + container, container.isStopped());
+		assertThat(container.isStopped()).as("Should have been stopped " + container).isTrue();
 	}
 
 

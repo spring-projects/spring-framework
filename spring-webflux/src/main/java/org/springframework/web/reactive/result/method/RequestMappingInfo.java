@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -216,25 +216,34 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	@Nullable
 	public RequestMappingInfo getMatchingCondition(ServerWebExchange exchange) {
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(exchange);
-		ParamsRequestCondition params = this.paramsCondition.getMatchingCondition(exchange);
-		HeadersRequestCondition headers = this.headersCondition.getMatchingCondition(exchange);
-		ConsumesRequestCondition consumes = this.consumesCondition.getMatchingCondition(exchange);
-		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(exchange);
-
-		if (methods == null || params == null || headers == null || consumes == null || produces == null) {
+		if (methods == null) {
 			return null;
 		}
-
+		ParamsRequestCondition params = this.paramsCondition.getMatchingCondition(exchange);
+		if (params == null) {
+			return null;
+		}
+		HeadersRequestCondition headers = this.headersCondition.getMatchingCondition(exchange);
+		if (headers == null) {
+			return null;
+		}
+		// Match "Content-Type" and "Accept" (parsed ones and cached) before patterns
+		ConsumesRequestCondition consumes = this.consumesCondition.getMatchingCondition(exchange);
+		if (consumes == null) {
+			return null;
+		}
+		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(exchange);
+		if (produces == null) {
+			return null;
+		}
 		PatternsRequestCondition patterns = this.patternsCondition.getMatchingCondition(exchange);
 		if (patterns == null) {
 			return null;
 		}
-
 		RequestConditionHolder custom = this.customConditionHolder.getMatchingCondition(exchange);
 		if (custom == null) {
 			return null;
 		}
-
 		return new RequestMappingInfo(this.name, patterns,
 				methods, params, headers, consumes, produces, custom.getCondition());
 	}
@@ -279,7 +288,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

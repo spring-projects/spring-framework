@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * {@code @RequestMapping} integration tests with exception handling scenarios.
@@ -78,34 +79,26 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 
 	@Test  // SPR-16051
 	public void exceptionAfterSeveralItems() {
-		try {
-			performGet("/SPR-16051", new HttpHeaders(), String.class).getBody();
-			fail();
-		}
-		catch (Throwable ex) {
-			String message = ex.getMessage();
-			assertNotNull(message);
-			assertTrue("Actual: " + message, message.startsWith("Error while extracting response"));
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				performGet("/SPR-16051", new HttpHeaders(), String.class).getBody())
+			.withMessageStartingWith("Error while extracting response");
 	}
 
 	@Test  // SPR-16318
 	public void exceptionFromMethodWithProducesCondition() throws Exception {
-		try {
-			HttpHeaders headers = new HttpHeaders();
-			headers.add("Accept", "text/csv, application/problem+json");
-			performGet("/SPR-16318", headers, String.class).getBody();
-			fail();
-		}
-		catch (HttpStatusCodeException ex) {
-			assertEquals(500, ex.getRawStatusCode());
-			assertEquals("application/problem+json;charset=UTF-8", ex.getResponseHeaders().getContentType().toString());
-			assertEquals("{\"reason\":\"error\"}", ex.getResponseBodyAsString());
-		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Accept", "text/plain, application/problem+json");
+		assertThatExceptionOfType(HttpStatusCodeException.class).isThrownBy(() ->
+				performGet("/SPR-16318", headers, String.class).getBody())
+			.satisfies(ex -> {
+				assertThat(ex.getRawStatusCode()).isEqualTo(500);
+				assertThat(ex.getResponseHeaders().getContentType().toString()).isEqualTo("application/problem+json");
+				assertThat(ex.getResponseBodyAsString()).isEqualTo("{\"reason\":\"error\"}");
+			});
 	}
 
 	private void doTest(String url, String expected) throws Exception {
-		assertEquals(expected, performGet(url, new HttpHeaders(), String.class).getBody());
+		assertThat(performGet(url, new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 
@@ -152,9 +145,9 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 					});
 		}
 
-		@GetMapping(path = "/SPR-16318", produces = "text/csv")
-		public String handleCsv() throws Exception {
-			throw new Spr16318Exception();
+		@GetMapping(path = "/SPR-16318", produces = "text/plain")
+		public Mono<String> handleTextPlain() throws Exception {
+			return Mono.error(new Spr16318Exception());
 		}
 
 		@ExceptionHandler

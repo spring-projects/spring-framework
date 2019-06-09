@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +40,7 @@ import org.xml.sax.XMLReader;
 
 import org.springframework.util.xml.StaxUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -146,11 +146,9 @@ public abstract class AbstractUnmarshallerTests<U extends Unmarshaller> {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader streamReader = inputFactory.createXMLStreamReader(new StringReader(INPUT_STRING));
 		streamReader.nextTag(); // skip to flights
-		assertEquals("Invalid element", new QName("http://samples.springframework.org/flight", "flights"),
-				streamReader.getName());
+		assertThat(streamReader.getName()).as("Invalid element").isEqualTo(new QName("http://samples.springframework.org/flight", "flights"));
 		streamReader.nextTag(); // skip to flight
-		assertEquals("Invalid element", new QName("http://samples.springframework.org/flight", "flight"),
-				streamReader.getName());
+		assertThat(streamReader.getName()).as("Invalid element").isEqualTo(new QName("http://samples.springframework.org/flight", "flight"));
 		Source source = StaxUtils.createStaxSource(streamReader);
 		Object flight = unmarshaller.unmarshal(source);
 		testFlight(flight);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,8 @@ import org.springframework.transaction.TransactionDefinition;
 
 /**
  * This interface adds a {@code rollbackOn} specification to {@link TransactionDefinition}.
- * As custom {@code rollbackOn} is only possible with AOP, this class resides
- * in the AOP transaction package.
+ * As custom {@code rollbackOn} is only possible with AOP, it resides in the AOP-related
+ * transaction subpackage.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -36,6 +36,7 @@ public interface TransactionAttribute extends TransactionDefinition {
 	 * Return a qualifier value associated with this transaction attribute.
 	 * <p>This may be used for choosing a corresponding transaction manager
 	 * to process this specific transaction.
+	 * @since 3.0
 	 */
 	@Nullable
 	String getQualifier();

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,8 +37,6 @@ class LeakAwareDataBuffer implements PooledDataBuffer {
 
 	private final LeakAwareDataBufferFactory dataBufferFactory;
 
-	private int refCount = 1;
-
 
 	LeakAwareDataBuffer(DataBuffer delegate, LeakAwareDataBufferFactory dataBufferFactory) {
 		Assert.notNull(delegate, "Delegate must not be null");
@@ -65,21 +63,31 @@ class LeakAwareDataBuffer implements PooledDataBuffer {
 		return this.leakError;
 	}
 
+
+	public DataBuffer getDelegate() {
+		return this.delegate;
+	}
+
 	@Override
 	public boolean isAllocated() {
-		return this.refCount > 0;
+		return this.delegate instanceof PooledDataBuffer &&
+				((PooledDataBuffer) this.delegate).isAllocated();
 	}
 
 	@Override
 	public PooledDataBuffer retain() {
-		this.refCount++;
+		if (this.delegate instanceof PooledDataBuffer) {
+			((PooledDataBuffer) this.delegate).retain();
+		}
 		return this;
 	}
 
 	@Override
 	public boolean release() {
-		this.refCount--;
-		return this.refCount == 0;
+		if (this.delegate instanceof PooledDataBuffer) {
+			((PooledDataBuffer) this.delegate).release();
+		}
+		return isAllocated();
 	}
 
 	// delegation

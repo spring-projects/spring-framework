@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -65,10 +65,9 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 		RequestEntity<byte[]> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-		assertNotNull(response.getBody());
-		assertEquals(RESPONSE_SIZE,
-				response.getHeaders().getContentLength());
-		assertEquals(RESPONSE_SIZE, response.getBody().length);
+		assertThat(response.getBody()).isNotNull();
+		assertThat(response.getHeaders().getContentLength()).isEqualTo(RESPONSE_SIZE);
+		assertThat(response.getBody().length).isEqualTo(RESPONSE_SIZE);
 	}
 
 
@@ -88,8 +87,8 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 					reduce(0, (integer, dataBuffer) -> integer +
 							dataBuffer.readableByteCount()).
 					doOnSuccessOrError((size, throwable) -> {
-						assertNull(throwable);
-						assertEquals(REQUEST_SIZE, (long) size);
+						assertThat(throwable).isNull();
+						assertThat(size).isEqualTo(REQUEST_SIZE);
 					});
 
 			response.getHeaders().setContentLength(RESPONSE_SIZE);

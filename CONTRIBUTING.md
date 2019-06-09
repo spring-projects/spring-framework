@@ -46,14 +46,13 @@ When ready create a ticket in the [GitHub issue tracker](https://github.com/spri
 
 #### Ticket Lifecycle
 
-When an issue is first created, it may not be assigned and will not have a fix version.
-Within a day or two, the issue is assigned to a specific committer and the target
-version is set to "Waiting for Triage". The committer will then review the issue, ask for
-further information if needed, and based on the findings, the issue is either assigned a fix
-version or rejected.
+When an issue is first created, it is flagged `waiting-for-triage` waiting for a team
+member to triage it. Within a day or two, the issue will then be reviewed and the team
+may ask for further information if needed. Based on the findings, the issue is either
+assigned a fix version or declined.
 
-When a fix is ready, the issue is marked "Resolved" and may still be re-opened. Once a fix
-is released, the issue is permanently "Closed". If necessary, you will need to create a new,
+When a fix is ready, the issue is closed and may still be re-opened. Once a fix is
+released, the issue can't be reopened. If necessary, you will need to create a new,
 related ticket with a fresh description.
 
 #### Submit a Pull Request
@@ -80,13 +79,12 @@ otherwise using succinct, lower-case, dash (-) delimited names, such as `fix-war
 
 1. Choose the granularity of your commits consciously and squash commits that represent
 multiple edits or corrections of the same logical change. See
-[Rewriting History section of Pro Git](http://git-scm.com/book/en/Git-Tools-Rewriting-History)
+[Rewriting History section of Pro Git](https://git-scm.com/book/en/Git-Tools-Rewriting-History)
 for an overview of streamlining commit history.
 
-1. Format commit messages using 55 characters for the subject line, 72 lines for the
-description, followed by the issue fixed, e.g. `Fixes #22276`.
-See the
-[Commit Guidelines section of Pro Git](http://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
+1. Format commit messages using 55 characters for the subject line, 72 characters per line
+for the description, followed by the issue fixed, e.g. `Closes gh-22276`. See the
+[Commit Guidelines section of Pro Git](https://git-scm.com/book/en/Distributed-Git-Contributing-to-a-Project#Commit-Guidelines)
 for best practices around commit messages and use `git log` to see some examples.
 
 1. List the GitHub issue number in the PR description.
@@ -115,14 +113,14 @@ defines the source file coding standards we use along with some IDEA editor sett
 ### Reference Docs
 
 The reference documentation is in the [src/docs/asciidoc](src/docs/asciidoc) directory and, in
-[Asciidoctor](http://asciidoctor.org/) format. For trivial changes, you may be able to browse,
+[Asciidoctor](https://asciidoctor.org/) format. For trivial changes, you may be able to browse,
 edit source files, and submit directly from GitHub.
 
 When making changes locally, use `./gradlew asciidoctor` and then browse the result under
 `build/asciidoc/html5/index.html`.
 
 Asciidoctor also supports live editing. For more details read
-[Editing AsciiDoc with Live Preview](http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/).
+[Editing AsciiDoc with Live Preview](https://asciidoctor.org/docs/editing-asciidoc-with-live-preview/).
 Note that if you choose the
-[System Monitor](http://asciidoctor.org/docs/editing-asciidoc-with-live-preview/#using-a-system-monitor)
+[System Monitor](https://asciidoctor.org/docs/editing-asciidoc-with-live-preview/#using-a-system-monitor)
 option, you can find a Guardfile under `src/docs/asciidoc`.

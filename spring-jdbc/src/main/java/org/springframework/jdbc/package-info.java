@@ -14,7 +14,7 @@
  * </ul>
  *
  * <p>This package and related packages are discussed in Chapter 9 of
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
+ * <a href="https://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson (Wrox, 2002).
  */
 @NonNullApi

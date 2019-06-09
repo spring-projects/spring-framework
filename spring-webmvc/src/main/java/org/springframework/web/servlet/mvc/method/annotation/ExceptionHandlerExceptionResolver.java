@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,12 +105,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 
 	public ExceptionHandlerExceptionResolver() {
-		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
-
 		this.messageConverters = new ArrayList<>();
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
-		this.messageConverters.add(stringHttpMessageConverter);
+		this.messageConverters.add(new StringHttpMessageConverter());
 		try {
 			this.messageConverters.add(new SourceHttpMessageConverter<>());
 		}
@@ -127,7 +124,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * resolution use {@link #setArgumentResolvers} instead.
 	 */
 	public void setCustomArgumentResolvers(@Nullable List<HandlerMethodArgumentResolver> argumentResolvers) {
-		this.customArgumentResolvers= argumentResolvers;
+		this.customArgumentResolvers = argumentResolvers;
 	}
 
 	/**

@@ -1,18 +1,18 @@
 [[mvc-view]]
 = View Technologies
-[.small]#<<web-reactive.adoc#webflux-view,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view, Same as in Spring WebFlux>>#
 
-The use of view technologies in Spring MVC is pluggable, whether you decide to
-use Thymeleaf, Groovy Markup Templates, JSPs, or other technologies, is primarily a matter of a
-configuration change. This chapter covers view technologies integrated with Spring MVC.
-We assume you are already familiar with <<mvc-viewresolver>>.
+The use of view technologies in Spring MVC is pluggable, whether you decide to use
+Thymeleaf, Groovy Markup Templates, JSPs, or other technologies, is primarily a matter
+of a configuration change. This chapter covers view technologies integrated with
+Spring MVC. We assume you are already familiar with <<mvc-viewresolver>>.
 
 
 
 
 [[mvc-view-thymeleaf]]
 == Thymeleaf
-[.small]#<<web-reactive.adoc#webflux-view-thymeleaf,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-thymeleaf, Same as in Spring WebFlux>>#
 
 Thymeleaf is a modern server-side Java template engine that emphasizes natural HTML
 templates that can be previewed in a browser by double-clicking, which is very helpful
@@ -20,21 +20,21 @@ for independent work on UI templates (for example, by a designer) without the ne
 a running server. If you want to replace JSPs, Thymeleaf offers one of the most
 extensive set of features to make such a transition easier. Thymeleaf is actively
 developed and maintained. For a more complete introduction, see the
-http://www.thymeleaf.org/[Thymeleaf] project home page.
+https://www.thymeleaf.org/[Thymeleaf] project home page.
 
 The Thymeleaf integration with Spring MVC is managed by the Thymeleaf project.
 The configuration involves a few bean declarations, such as
 `ServletContextTemplateResolver`, `SpringTemplateEngine`, and `ThymeleafViewResolver`.
-See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more details.
+See https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more details.
 
 
 
 
 [[mvc-view-freemarker]]
 == FreeMarker
-[.small]#<<web-reactive.adoc#webflux-view-freemarker,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-freemarker, Same as in Spring WebFlux>>#
 
-http://www.freemarker.org[Apache FreeMarker] is a template engine for generating any
+https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
 kind of text output from HTML to email and others. The Spring Framework has a built-in
 integration for using Spring MVC with FreeMarker templates.
 
@@ -42,7 +42,7 @@ integration for using Spring MVC with FreeMarker templates.
 
 [[mvc-view-freemarker-contextconfig]]
 === View Configuration
-[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig, Same as in Spring WebFlux>>#
 
 The following example shows how to configure FreeMarker as a view technology:
 
@@ -105,7 +105,7 @@ of `welcome`, the resolver looks for the `/WEB-INF/freemarker/welcome.ftl` templ
 
 [[mvc-views-freemarker]]
 === FreeMarker Configuration
-[.small]#<<web-reactive.adoc#webflux-views-freemarker,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-views-freemarker, Same as in Spring WebFlux>>#
 
 You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
 `Configuration` object (which is managed by Spring) by setting the appropriate bean properties on
@@ -275,20 +275,20 @@ The parameters to any of the above macros have consistent meanings:
   and bound to the command object. Map objects stored against the keys are the labels
   displayed on the form to the user and may be different from the corresponding values
   posted back by the form. Usually, such a map is supplied as reference data by the
-  controller. You can use any `Map` implementation, depending on required behavior. For
-  strictly sorted maps, you can use a `SortedMap` (such as a `TreeMap`) with a suitable `Comparator`
-  and, for arbitrary Maps that should return values in insertion order, use a
-  `LinkedHashMap` or a `LinkedMap` from `commons-collections`.
-* `separator`: Where multiple options are available as discreet elements (radio buttons or
-  checkboxes), the sequence of characters used to separate each one in the list (such as
-  `<br>`).
-* `attributes`: An additional string of arbitrary tags or text to be included within the
-  HTML tag itself. This string is echoed literally by the macro. For example, in a
-  `textarea` field, you may supply attributes (such as 'rows="5" cols="60"'), or you could pass
-  style information such as 'style="border:1px solid silver"'.
-* `classOrStyle`: For the `showErrors` macro, the name of the CSS class that the `span` element
-  that wraps each error uses. If no information is supplied (or the value is empty),
-  the errors are wrapped in `<b></b>` tags.
+  controller. You can use any `Map` implementation, depending on required behavior.
+  For strictly sorted maps, you can use a `SortedMap` (such as a `TreeMap`) with a
+  suitable `Comparator` and, for arbitrary Maps that should return values in insertion
+  order, use a `LinkedHashMap` or a `LinkedMap` from `commons-collections`.
+* `separator`: Where multiple options are available as discreet elements (radio buttons
+  or checkboxes), the sequence of characters used to separate each one in the list
+  (such as `<br>`).
+* `attributes`: An additional string of arbitrary tags or text to be included within
+  the HTML tag itself. This string is echoed literally by the macro. For example, in a
+  `textarea` field, you may supply attributes (such as 'rows="5" cols="60"'), or you
+  could pass style information such as 'style="border:1px solid silver"'.
+* `classOrStyle`: For the `showErrors` macro, the name of the CSS class that the `span`
+  element that wraps each error uses. If no information is supplied (or the value is
+  empty), the errors are wrapped in `<b></b>` tags.
 
 The following sections outline examples of the macros (some in FTL and some in VTL). Where usage
 differences exist between the two languages, they are explained in the notes.
@@ -536,7 +536,7 @@ syntax. The following example shows a sample template for an HTML page:
 
 [[mvc-view-script]]
 == Script Views
-[.small]#<<web-reactive.adoc#webflux-view-script,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script, Same as in Spring WebFlux>>#
 
 The Spring Framework has a built-in integration for using Spring MVC with any
 templating library that can run on top of the
@@ -546,13 +546,13 @@ templating libraries on different script engines:
 [%header]
 |===
 |Scripting Library |Scripting Engine
-|http://handlebarsjs.com/[Handlebars] |http://openjdk.java.net/projects/nashorn/[Nashorn]
-|https://mustache.github.io/[Mustache] |http://openjdk.java.net/projects/nashorn/[Nashorn]
-|http://facebook.github.io/react/[React] |http://openjdk.java.net/projects/nashorn/[Nashorn]
-|http://www.embeddedjs.com/[EJS] |http://openjdk.java.net/projects/nashorn/[Nashorn]
-|http://www.stuartellis.eu/articles/erb/[ERB] |http://jruby.org[JRuby]
-|https://docs.python.org/2/library/string.html#template-strings[String templates] |http://www.jython.org/[Jython]
-|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |http://kotlinlang.org/[Kotlin]
+|https://handlebarsjs.com/[Handlebars] |https://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://mustache.github.io/[Mustache] |https://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://facebook.github.io/react/[React] |https://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://www.embeddedjs.com/[EJS] |https://openjdk.java.net/projects/nashorn/[Nashorn]
+|https://www.stuartellis.name/articles/erb/[ERB] |https://www.jruby.org[JRuby]
+|https://docs.python.org/2/library/string.html#template-strings[String templates] |https://www.jython.org/[Jython]
+|https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] |https://kotlinlang.org/[Kotlin]
 |===
 
 TIP: The basic rule for integrating any other script engine is that it must implement the
@@ -562,27 +562,27 @@ TIP: The basic rule for integrating any other script engine is that it must impl
 
 [[mvc-view-script-dependencies]]
 === Requirements
-[.small]#<<web-reactive.adoc#webflux-view-script-dependencies,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script-dependencies, Same as in Spring WebFlux>>#
 
 You need to have the script engine on your classpath, the details of which vary by script engine:
 
-* The http://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
+* The https://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
 Java 8+. Using the latest update release available is highly recommended.
-* http://jruby.org[JRuby] should be added as a dependency for Ruby support.
-* http://www.jython.org[Jython] should be added as a dependency for Python support.
+* https://www.jruby.org[JRuby] should be added as a dependency for Ruby support.
+* https://www.jython.org[Jython] should be added as a dependency for Python support.
 * `org.jetbrains.kotlin:kotlin-script-util` dependency and a `META-INF/services/javax.script.ScriptEngineFactory`
  file containing a `org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory`
  line should be added for Kotlin script support. See
  https://github.com/sdeleuze/kotlin-script-templating[this example] for more details.
 
 You need to have the script templating library. One way to do that for Javascript is
-through http://www.webjars.org/[WebJars].
+through https://www.webjars.org/[WebJars].
 
 
 
 [[mvc-view-script-integrate]]
 === Script Templates
-[.small]#<<web-reactive.adoc#webflux-script-integrate,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-script-integrate, Same as in Spring WebFlux>>#
 
 You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
@@ -672,9 +672,9 @@ The render function is called with the following parameters:
 `Mustache.render()` is natively compatible with this signature, so you can call it directly.
 
 If your templating technology requires some customization, you can provide a script that
-implements a custom render function. For example, http://handlebarsjs.com[Handlerbars]
+implements a custom render function. For example, https://handlebarsjs.com[Handlerbars]
 needs to compile templates before using them and requires a
-http://en.wikipedia.org/wiki/Polyfill[polyfill] to emulate some
+https://en.wikipedia.org/wiki/Polyfill[polyfill] to emulate some
 browser facilities that are not available in the server-side script engine.
 
 The following example shows how to do so:
@@ -752,8 +752,8 @@ When developing with JSPs, you can declare a `InternalResourceViewResolver` or a
 `ResourceBundleViewResolver` bean.
 
 `ResourceBundleViewResolver` relies on a properties file to define the view names
-mapped to a class and a URL. With a `ResourceBundleViewResolver`, you
-can mix different types of views byusing only one resolver, as the following example shows:
+mapped to a class and a URL. With a `ResourceBundleViewResolver`, you can mix
+different types of views by using only one resolver, as the following example shows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -763,7 +763,7 @@ can mix different types of views byusing only one resolver, as the following exa
 		<property name="basename" value="views"/>
 	</bean>
 
-	# And a sample properties file is uses (views.properties in WEB-INF/classes):
+	# And a sample properties file is used (views.properties in WEB-INF/classes):
 	welcome.(class)=org.springframework.web.servlet.view.JstlView
 	welcome.url=/WEB-INF/jsp/welcome.jsp
 
@@ -771,9 +771,9 @@ can mix different types of views byusing only one resolver, as the following exa
 	productList.url=/WEB-INF/jsp/productlist.jsp
 ----
 
-`InternalResourceBundleViewResolver` can also be used for JSPs. As a best practice, we
-strongly encourage placing your JSP files in a directory under the `'WEB-INF'`
-directory so there can be no direct access by clients.
+`InternalResourceViewResolver` can also be used for JSPs. As a best practice, we strongly
+encourage placing your JSP files in a directory under the `'WEB-INF'` directory so there
+can be no direct access by clients.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -790,7 +790,7 @@ directory so there can be no direct access by clients.
 [[mvc-view-jsp-jstl]]
 === JSPs versus JSTL
 
-When using the Java Standard Tag Library you must use a special view class, the
+When using the JSP Standard Tag Library (JSTL) you must use a special view class, the
 `JstlView`, as JSTL needs some preparation before things such as the I18N features can
 work.
 
@@ -943,7 +943,6 @@ For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag>>. You can als
 HTML5-specific types, such as `email`, `tel`, `date`, and others.
 
 
-
 [[mvc-view-jsp-formtaglib-checkboxtag]]
 ==== The `checkbox` Tag
 
@@ -1061,7 +1060,6 @@ telling Spring that "`the checkbox was visible in the form, and I want my object
 which the form data binds to reflect the state of the checkbox, no matter what.`"
 
 
-
 [[mvc-view-jsp-formtaglib-checkboxestag]]
 ==== The `checkboxes` Tag
 
@@ -1120,19 +1118,18 @@ but with different values, as the following example shows:
 ----
 
 
-
 [[mvc-view-jsp-formtaglib-radiobuttonstag]]
 ==== The `radiobuttons` Tag
 
 This tag renders multiple HTML `input` elements with the `type` set to `radio`.
 
-As with the <<mvc-view-jsp-formtaglib-checkboxestag,`checkboxes` tag>>, you might want to pass in the available options as
-a runtime variable. For this usage, you can use the `radiobuttons` tag. You pass in an
-`Array`, a `List`, or a `Map` that contains the available options in the `items` property.
-If you use a `Map`, the map entry key is used as the value and the map
-entry's value are used as the label to be displayed. You can also use a custom
-object where you can provide the property names for the value by using `itemValue` and the
-label by using `itemLabel`, as the following example shows:
+As with the <<mvc-view-jsp-formtaglib-checkboxestag, `checkboxes` tag>>, you might want to
+pass in the available options as a runtime variable. For this usage, you can use the
+`radiobuttons` tag. You pass in an `Array`, a `List`, or a `Map` that contains the
+available options in the `items` property. If you use a `Map`, the map entry key is
+used as the value and the map entry's value are used as the label to be displayed.
+You can also use a custom object where you can provide the property names for the value
+by using `itemValue` and the label by using `itemLabel`, as the following example shows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1212,7 +1209,6 @@ as follows:
 ----
 
 
-
 [[mvc-view-jsp-formtaglib-optiontag]]
 ==== The `option` Tag
 
@@ -1256,7 +1252,6 @@ as follows:
 <1> Note the addition of a `selected` attribute.
 
 
-
 [[mvc-view-jsp-formtaglib-optionstag]]
 ==== The `options` Tag
 
@@ -1296,7 +1291,6 @@ If the `User` lived in the UK, the HTML source of the 'Country' row would be as 
 ----
 <1> Note the addition of a `selected` attribute.
 
-
 As the preceding example shows, the combined usage of an `option` tag with the `options` tag
 generates the same standard HTML but lets you explicitly specify a value in the
 JSP that is for display only (where it belongs), such as the default string in the
@@ -1309,7 +1303,6 @@ you can specify a `Map` of items, in which case the map keys are interpreted as 
 values and the map values correspond to option labels. If `itemValue` or `itemLabel` (or both)
 happen to be specified as well, the item value property applies to the map key, and
 the item label property applies to the map value.
-
 
 
 [[mvc-view-jsp-formtaglib-textareatag]]
@@ -1513,7 +1506,7 @@ or see the tag library description.
 A key principle of REST is the use of the "`Uniform Interface`". This means that all
 resources (URLs) can be manipulated by using the same four HTTP methods: GET, PUT, POST,
 and DELETE. For each method, the HTTP specification defines the exact semantics. For
-instance, a GET should always be a safe operation, meaning that is has no side effects,
+instance, a GET should always be a safe operation, meaning that it has no side effects,
 and a PUT or DELETE should be idempotent, meaning that you can repeat these operations
 over and over again, but the end result should be the same. While HTTP defines these
 four methods, HTML only supports two: GET and POST. Fortunately, there are two possible
@@ -1526,8 +1519,7 @@ with a hidden `method` parameter is converted into the corresponding HTTP method
 request.
 
 To support HTTP method conversion, the Spring MVC form tag was updated to support setting
-the HTTP method. For example, the following snippet comes from the Pet Clinic
-sample:
+the HTTP method. For example, the following snippet comes from the Pet Clinic sample:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1537,8 +1529,8 @@ sample:
 	</form:form>
 ----
 
-The preceding example perform an HTTP POST, with the "`real`" DELETE method hidden behind a
-request parameter. It is picked up by the `HiddenHttpMethodFilter`, which is defined in
+The preceding example performs an HTTP POST, with the "`real`" DELETE method hidden behind
+a request parameter. It is picked up by the `HiddenHttpMethodFilter`, which is defined in
 web.xml, as the following example shows:
 
 [source,java,indent=0]
@@ -1597,7 +1589,7 @@ NOTE: This section focuses on Spring's support for Tiles version 3 in the
 === Dependencies
 
 To be able to use Tiles, you have to add a dependency on Tiles version 3.0.1 or higher
-and http://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
+and https://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
 to your project.
 
 
@@ -1607,7 +1599,7 @@ to your project.
 
 To be able to use Tiles, you have to configure it by using files that contain definitions
 (for basic information on definitions and other Tiles concepts, see
-http://tiles.apache.org[]). In Spring, this is done by using the `TilesConfigurer`.
+https://tiles.apache.org[]). In Spring, this is done by using the `TilesConfigurer`.
 The following example `ApplicationContext` configuration shows how to do so:
 
 [source,xml,indent=0]
@@ -1720,7 +1712,7 @@ implementations. See the Tiles documentation for details on how to use
 You can specify `SimpleSpringPreparerFactory` to autowire `ViewPreparer` instances based on
 specified preparer classes, applying Spring's container callbacks as well as applying
 configured Spring BeanPostProcessors. If Spring's context-wide annotation configuration has
-been activated, annotations in `ViewPreparer` classes aree automatically detected and
+been activated, annotations in `ViewPreparer` classes are automatically detected and
 applied. Note that this expects preparer classes in the Tiles definition files, as
 the default `PreparerFactory` does.
 
@@ -1730,7 +1722,7 @@ application context. The full bean creation process is in the control of the Spr
 application context in this case, allowing for the use of explicit dependency injection
 configuration, scoped beans, and so on. Note that you need to define one Spring bean definition
 for each preparer name (as used in your Tiles definitions). The following example shows
-how to define a set a `SpringBeanPreparerFactory` property on a `TilesConfigurer` bean:
+how to define a `SpringBeanPreparerFactory` property on a `TilesConfigurer` bean:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1793,7 +1785,7 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as the follow
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class SampleContentAtomView extends AbstractRssFeedView {
+	public class SampleContentRssView extends AbstractRssFeedView {
 
 		@Override
 		protected void buildFeedMetadata(Map<String, Object> model,
@@ -1837,13 +1829,13 @@ dynamically from the model data. The document is the view and is streamed from t
 server with the correct content type, to (hopefully) enable the client PC to run their
 spreadsheet or PDF viewer application in response.
 
-In order to use Excel views, you need to add the Apache POI library to your classpath,
+In order to use Excel views, you need to add the Apache POI library to your classpath.
 For PDF generation, you need to add (preferably) the OpenPDF library.
 
-NOTE: You should use the latest versions of the underlying document-generation libraries, if possible.
-In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.0.5) instead of the
-outdated original iText 2.1.7, since OpenPDF is actively maintained and fixes an important
-vulnerability for untrusted PDF content.
+NOTE: You should use the latest versions of the underlying document-generation libraries,
+if possible. In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.2.12)
+instead of the outdated original iText 2.1.7, since OpenPDF is actively maintained and
+fixes an important vulnerability for untrusted PDF content.
 
 
 
@@ -1892,7 +1884,7 @@ an external definition (by name) or as a `View` instance from the handler method
 
 [[mvc-view-jackson]]
 == Jackson
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, Same as in Spring WebFlux>>#
 
 Spring offers support for the Jackson JSON library.
 
@@ -1900,15 +1892,15 @@ Spring offers support for the Jackson JSON library.
 
 [[mvc-view-json-mapping]]
 === Jackson-based JSON MVC Views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, Same as in Spring WebFlux>>#
 
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
 framework-specific classes) are encoded as JSON. For cases where the contents of the
 map need to be filtered, you can specify a specific set of model attributes to encode
-by using the `modelKeys` property. You can also use the `extractValueFromSingleKeyModel` property
-to have the value in single-key models extracted and serialized directly rather than
-as a map of model attributes.
+by using the `modelKeys` property. You can also use the `extractValueFromSingleKeyModel`
+property to have the value in single-key models extracted and serialized directly rather
+than as a map of model attributes.
 
 You can customize JSON mapping as needed by using Jackson's provided
 annotations. When you need further control, you can inject a custom `ObjectMapper`
@@ -1919,13 +1911,13 @@ serializers and deserializers for specific types.
 
 [[mvc-view-xml-mapping]]
 === Jackson-based XML Views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same as in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, Same as in Spring WebFlux>>#
 
 `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`
-to render the response content as XML. If the model contains multiples entries, you should explicitly set the
-object to be serialized by using the `modelKey` bean property.
-If the model contains a single entry, it is serialized automatically.
+to render the response content as XML. If the model contains multiple entries, you should
+explicitly set the object to be serialized by using the `modelKey` bean property. If the
+model contains a single entry, it is serialized automatically.
 
 You can customized XML mapping as needed by using JAXB or Jackson's provided
 annotations. When you need further control, you can inject a custom `XmlMapper`
@@ -1939,12 +1931,11 @@ you need to provide serializers and deserializers for specific types.
 == XML Marshalling
 
 The `MarshallingView` uses an XML `Marshaller` (defined in the `org.springframework.oxm`
-package) to render the response content as XML. You can explicitly set the object to be marshalled
-by using a `MarshallingView` instance's `modelKey` bean property. Alternatively, the view
-iterates over all model properties and marshals the first type that is supported
+package) to render the response content as XML. You can explicitly set the object to be
+marshalled by using a `MarshallingView` instance's `modelKey` bean property. Alternatively,
+the view iterates over all model properties and marshals the first type that is supported
 by the `Marshaller`. For more information on the functionality in the
-`org.springframework.oxm` package, see
-<<data-access.adoc#oxm,Marshalling XML using O/X Mappers>>.
+`org.springframework.oxm` package, see <<data-access.adoc#oxm,Marshalling XML using O/X Mappers>>.
 
 
 

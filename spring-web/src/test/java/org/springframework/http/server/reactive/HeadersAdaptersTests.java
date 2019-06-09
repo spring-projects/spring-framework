@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,9 +32,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@code HeadersAdapters} {@code MultiValueMap} implementations.
@@ -66,19 +64,19 @@ public class HeadersAdaptersTests {
 
 	@Test
 	public void getWithUnknownHeaderShouldReturnNull() {
-		assertNull(this.headers.get("Unknown"));
+		assertThat(this.headers.get("Unknown")).isNull();
 	}
 
 	@Test
 	public void getFirstWithUnknownHeaderShouldReturnNull() {
-		assertNull(this.headers.getFirst("Unknown"));
+		assertThat(this.headers.getFirst("Unknown")).isNull();
 	}
 
 	@Test
 	public void sizeWithMultipleValuesForHeaderShouldCountHeaders() {
 		this.headers.add("TestHeader", "first");
 		this.headers.add("TestHeader", "second");
-		assertEquals(1, this.headers.size());
+		assertThat(this.headers.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -86,29 +84,29 @@ public class HeadersAdaptersTests {
 		this.headers.add("TestHeader", "first");
 		this.headers.add("OtherHeader", "test");
 		this.headers.add("TestHeader", "second");
-		assertEquals(2, this.headers.keySet().size());
+		assertThat(this.headers.keySet().size()).isEqualTo(2);
 	}
 
 	@Test
 	public void containsKeyShouldBeCaseInsensitive() {
 		this.headers.add("TestHeader", "first");
-		assertTrue(this.headers.containsKey("testheader"));
+		assertThat(this.headers.containsKey("testheader")).isTrue();
 	}
 
 	@Test
 	public void addShouldKeepOrdering() {
 		this.headers.add("TestHeader", "first");
 		this.headers.add("TestHeader", "second");
-		assertEquals("first", this.headers.getFirst("TestHeader"));
-		assertEquals("first", this.headers.get("TestHeader").get(0));
+		assertThat(this.headers.getFirst("TestHeader")).isEqualTo("first");
+		assertThat(this.headers.get("TestHeader").get(0)).isEqualTo("first");
 	}
 
 	@Test
 	public void putShouldOverrideExisting() {
 		this.headers.add("TestHeader", "first");
 		this.headers.put("TestHeader", Arrays.asList("override"));
-		assertEquals("override", this.headers.getFirst("TestHeader"));
-		assertEquals(1, this.headers.get("TestHeader").size());
+		assertThat(this.headers.getFirst("TestHeader")).isEqualTo("override");
+		assertThat(this.headers.get("TestHeader").size()).isEqualTo(1);
 	}
 
 }

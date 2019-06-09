@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,13 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrlPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrlTemplate;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlTemplate;
 
 /**
  * Unit tests for {@link MockMvcResultMatchers}.
@@ -46,9 +52,10 @@ public class MockMvcResultMatchersTests {
 		redirectedUrlPattern("/resource/*").match(getRedirectedUrlStubMvcResult("/resource/1"));
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void redirectWithNonMatchingPattern() throws Exception {
-		redirectedUrlPattern("/resource/").match(getRedirectedUrlStubMvcResult("/resource/1"));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				redirectedUrlPattern("/resource/").match(getRedirectedUrlStubMvcResult("/resource/1")));
 	}
 
 	@Test
@@ -71,9 +78,10 @@ public class MockMvcResultMatchersTests {
 		forwardedUrlPattern("/api/**/?").match(getForwardedUrlStubMvcResult("/api/resource/1"));
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void forwardWithNonMatchingPattern() throws Exception {
-		forwardedUrlPattern("/resource/").match(getForwardedUrlStubMvcResult("/resource/1"));
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				forwardedUrlPattern("/resource/").match(getForwardedUrlStubMvcResult("/resource/1")));
 	}
 
 	private StubMvcResult getRedirectedUrlStubMvcResult(String redirectUrl) throws Exception {

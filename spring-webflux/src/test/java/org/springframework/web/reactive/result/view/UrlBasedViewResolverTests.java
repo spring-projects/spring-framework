@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link UrlBasedViewResolver}.
@@ -58,10 +58,10 @@ public class UrlBasedViewResolverTests {
 		this.resolver.setViewNames("my*");
 
 		Mono<View> mono = this.resolver.resolveViewName("my-view", Locale.US);
-		assertNotNull(mono.block());
+		assertThat(mono.block()).isNotNull();
 
 		mono = this.resolver.resolveViewName("not-my-view", Locale.US);
-		assertNull(mono.block());
+		assertThat(mono.block()).isNull();
 	}
 
 	@Test
@@ -70,10 +70,10 @@ public class UrlBasedViewResolverTests {
 
 		StepVerifier.create(mono)
 				.consumeNextWith(view -> {
-					assertEquals(RedirectView.class, view.getClass());
+					assertThat(view.getClass()).isEqualTo(RedirectView.class);
 					RedirectView redirectView = (RedirectView) view;
-					assertEquals("foo", redirectView.getUrl());
-					assertEquals(HttpStatus.SEE_OTHER, redirectView.getStatusCode());
+					assertThat(redirectView.getUrl()).isEqualTo("foo");
+					assertThat(redirectView.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
 				})
 				.expectComplete()
 				.verify(Duration.ZERO);
@@ -86,10 +86,10 @@ public class UrlBasedViewResolverTests {
 
 		StepVerifier.create(mono)
 				.consumeNextWith(view -> {
-					assertEquals(RedirectView.class, view.getClass());
+					assertThat(view.getClass()).isEqualTo(RedirectView.class);
 					RedirectView redirectView = (RedirectView) view;
-					assertEquals("foo", redirectView.getUrl());
-					assertEquals(HttpStatus.FOUND, redirectView.getStatusCode());
+					assertThat(redirectView.getUrl()).isEqualTo("foo");
+					assertThat(redirectView.getStatusCode()).isEqualTo(HttpStatus.FOUND);
 				})
 				.expectComplete()
 				.verify(Duration.ZERO);

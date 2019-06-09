@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** @author Arjen Poutsma */
 public class HttpStatusTests {
@@ -106,8 +106,8 @@ public class HttpStatusTests {
 		for (Map.Entry<Integer, String> entry : statusCodes.entrySet()) {
 			int value = entry.getKey();
 			HttpStatus status = HttpStatus.valueOf(value);
-			assertEquals("Invalid value", value, status.value());
-			assertEquals("Invalid name for [" + value + "]", entry.getValue(), status.name());
+			assertThat(status.value()).as("Invalid value").isEqualTo(value);
+			assertThat(status.name()).as("Invalid name for [" + value + "]").isEqualTo(entry.getValue());
 		}
 	}
 
@@ -119,8 +119,8 @@ public class HttpStatusTests {
 			if (value == 302 || value == 413 || value == 414) {
 				continue;
 			}
-			assertTrue("Map has no value for [" + value + "]", statusCodes.containsKey(value));
-			assertEquals("Invalid name for [" + value + "]", statusCodes.get(value), status.name());
+			assertThat(statusCodes.containsKey(value)).as("Map has no value for [" + value + "]").isTrue();
+			assertThat(status.name()).as("Invalid name for [" + value + "]").isEqualTo(statusCodes.get(value));
 		}
 	}
 }

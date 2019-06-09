@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,8 +28,12 @@ import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter}.
@@ -57,7 +61,7 @@ public class StandardWebSocketHandlerAdapterTests {
 
 	@Test
 	public void onOpen() throws Throwable {
-		URI uri = URI.create("http://example.org");
+		URI uri = URI.create("https://example.org");
 		given(this.session.getRequestURI()).willReturn(uri);
 		this.adapter.onOpen(this.session, null);
 
@@ -65,7 +69,7 @@ public class StandardWebSocketHandlerAdapterTests {
 		verify(this.session, atLeast(2)).addMessageHandler(any(MessageHandler.Whole.class));
 
 		given(this.session.getRequestURI()).willReturn(uri);
-		assertEquals(uri, this.webSocketSession.getUri());
+		assertThat(this.webSocketSession.getUri()).isEqualTo(uri);
 	}
 
 	@Test

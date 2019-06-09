@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -156,6 +156,19 @@ class BeanDefinitionDslTests {
 		}
 		context.getBean<Baz>()
 	}
+
+	@Test  // gh-21845
+	fun `Declare beans leveraging callable reference`() {
+		val beans = beans {
+			bean<Bar>()
+			bean(::baz)
+		}
+		val context = GenericApplicationContext().apply {
+			beans.initialize(this)
+			refresh()
+		}
+		context.getBean<Baz>()
+	}
 	
 }
 
@@ -164,3 +177,5 @@ class Bar
 class Baz(val bar: Bar)
 class FooFoo(val name: String)
 class BarBar(val foos: Collection<Foo>)
+
+fun baz(bar: Bar) = Baz(bar)

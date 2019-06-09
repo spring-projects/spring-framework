@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,9 +42,10 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.util.pattern.PathPattern;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
+import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * Tests the use of {@link HandlerFunction} and {@link RouterFunction} in a
@@ -77,8 +78,8 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		ResponseEntity<Person> result =
 				this.restTemplate.getForEntity("http://localhost:" + this.port + "/mono", Person.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("John", result.getBody().getName());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getName()).isEqualTo("John");
 	}
 
 	@Test
@@ -88,11 +89,11 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 				this.restTemplate
 						.exchange("http://localhost:" + this.port + "/flux", HttpMethod.GET, null, reference);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		List<Person> body = result.getBody();
-		assertEquals(2, body.size());
-		assertEquals("John", body.get(0).getName());
-		assertEquals("Jane", body.get(1).getName());
+		assertThat(body.size()).isEqualTo(2);
+		assertThat(body.get(0).getName()).isEqualTo("John");
+		assertThat(body.get(1).getName()).isEqualTo("Jane");
 	}
 
 	@Test
@@ -100,8 +101,8 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		ResponseEntity<Person> result =
 				this.restTemplate.getForEntity("http://localhost:" + this.port + "/controller", Person.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("John", result.getBody().getName());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getName()).isEqualTo("John");
 	}
 
 	@Test
@@ -110,7 +111,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 				this.restTemplate
 						.getForEntity("http://localhost:" + this.port + "/attributes/bar", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 
@@ -171,31 +172,31 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 		@SuppressWarnings("unchecked")
 		public Mono<ServerResponse> attributes(ServerRequest request) {
-			assertTrue(request.attributes().containsKey(RouterFunctions.REQUEST_ATTRIBUTE));
-			assertTrue(request.attributes().containsKey(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
+			assertThat(request.attributes().containsKey(RouterFunctions.REQUEST_ATTRIBUTE)).isTrue();
+			assertThat(request.attributes().containsKey(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isTrue();
 
 			Map<String, String> pathVariables =
 					(Map<String, String>) request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-			assertNotNull(pathVariables);
-			assertEquals(1, pathVariables.size());
-			assertEquals("bar", pathVariables.get("foo"));
+			assertThat(pathVariables).isNotNull();
+			assertThat(pathVariables.size()).isEqualTo(1);
+			assertThat(pathVariables.get("foo")).isEqualTo("bar");
 
 			pathVariables =
 					(Map<String, String>) request.attributes().get(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-			assertNotNull(pathVariables);
-			assertEquals(1, pathVariables.size());
-			assertEquals("bar", pathVariables.get("foo"));
+			assertThat(pathVariables).isNotNull();
+			assertThat(pathVariables.size()).isEqualTo(1);
+			assertThat(pathVariables.get("foo")).isEqualTo("bar");
 
 
 			PathPattern pattern =
 					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
-			assertNotNull(pattern);
-			assertEquals("/attributes/{foo}", pattern.getPatternString());
+			assertThat(pattern).isNotNull();
+			assertThat(pattern.getPatternString()).isEqualTo("/attributes/{foo}");
 
 			pattern = (PathPattern) request.attributes()
 					.get(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-			assertNotNull(pattern);
-			assertEquals("/attributes/{foo}", pattern.getPatternString());
+			assertThat(pattern).isNotNull();
+			assertThat(pattern.getPatternString()).isEqualTo("/attributes/{foo}");
 
 			return ServerResponse.ok().build();
 		}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@code ResourceUrlEncodingFilter}.
@@ -94,7 +94,7 @@ public class ResourceUrlEncodingFilterTests {
 			request.setRequestURI("/forwarded");
 			request.setContextPath("/");
 			String result = ((HttpServletResponse) res).encodeURL("/context/resources/bar.css");
-			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
+			assertThat(result).isEqualTo("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css");
 		});
 	}
 
@@ -129,8 +129,8 @@ public class ResourceUrlEncodingFilterTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		request.setContextPath("/");
 
-		testEncodeUrl(request, "/resources/bar.css?foo=bar&url=http://example.org",
-				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org");
+		testEncodeUrl(request, "/resources/bar.css?foo=bar&url=https://example.org",
+				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=https://example.org");
 	}
 
 	@Test // SPR-13847
@@ -151,8 +151,8 @@ public class ResourceUrlEncodingFilterTests {
 				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css#something");
 
 		testEncodeUrl(request,
-				"/resources/bar.css?foo=bar&url=http://example.org#something",
-				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org#something");
+				"/resources/bar.css?foo=bar&url=https://example.org#something",
+				"/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=https://example.org#something");
 	}
 
 	private void testEncodeUrl(MockHttpServletRequest request, String url, String expected)
@@ -161,7 +161,7 @@ public class ResourceUrlEncodingFilterTests {
 		this.filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> {
 			req.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.urlProvider);
 			String result = ((HttpServletResponse) res).encodeURL(url);
-			assertEquals(expected, result);
+			assertThat(result).isEqualTo(expected);
 		});
 	}
 

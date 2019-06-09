@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,7 +67,7 @@ import org.springframework.util.ObjectUtils;
  * used within Spring {@code <beans>} XML. {@link #getPropertyDescriptors()} returns all
  * existing property descriptors from the wrapped {@code BeanInfo} as well any added for
  * non-void returning setters. Both standard ("non-indexed") and
- * <a href="http://docs.oracle.com/javase/tutorial/javabeans/writing/properties.html">
+ * <a href="https://docs.oracle.com/javase/tutorial/javabeans/writing/properties.html">
  * indexed properties</a> are fully supported.
  *
  * @author Chris Beams
@@ -138,7 +138,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 		// Sort non-void returning write methods to guard against the ill effects of
 		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
-		// under JDK 7. See http://bugs.sun.com/view_bug.do?bug_id=7023180
+		// under JDK 7. See https://bugs.java.com/view_bug.do?bug_id=7023180
 		matches.sort((m1, m2) -> m2.toString().compareTo(m1.toString()));
 		return matches;
 	}
@@ -339,7 +339,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof PropertyDescriptor &&
 					PropertyDescriptorUtils.equals(this, (PropertyDescriptor) other)));
 		}
@@ -491,7 +491,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		 * See java.beans.IndexedPropertyDescriptor#equals(java.lang.Object)
 		 */
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

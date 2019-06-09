@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.testng.ITestNGListener;
+import org.testng.TestNG;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -36,11 +38,9 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.testng.TrackingTestNGTestListener;
 
-import org.testng.ITestNGListener;
-import org.testng.TestNG;
-
-import static org.junit.Assert.*;
-import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.cache.ContextCacheTestUtils.assertContextCacheStatistics;
+import static org.springframework.test.context.cache.ContextCacheTestUtils.resetContextCache;
 
 /**
  * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
@@ -148,12 +148,9 @@ public class ClassLevelDirtiesContextTestNGTests {
 		testNG.setVerbose(0);
 		testNG.run();
 
-		assertEquals("Failures for test class [" + testClass + "].", expectedTestFailureCount,
-			listener.testFailureCount);
-		assertEquals("Tests started for test class [" + testClass + "].", expectedTestStartedCount,
-			listener.testStartCount);
-		assertEquals("Successful tests for test class [" + testClass + "].", expectedTestFinishedCount,
-			listener.testSuccessCount);
+		assertThat(listener.testFailureCount).as("Failures for test class [" + testClass + "].").isEqualTo(expectedTestFailureCount);
+		assertThat(listener.testStartCount).as("Tests started for test class [" + testClass + "].").isEqualTo(expectedTestStartedCount);
+		assertThat(listener.testSuccessCount).as("Successful tests for test class [" + testClass + "].").isEqualTo(expectedTestFinishedCount);
 	}
 
 	private void assertBehaviorForCleanTestCase() {
@@ -185,8 +182,7 @@ public class ClassLevelDirtiesContextTestNGTests {
 
 
 		protected void assertApplicationContextWasAutowired() {
-			org.testng.Assert.assertNotNull(this.applicationContext,
-				"The application context should have been autowired.");
+			assertThat(this.applicationContext).as("The application context should have been autowired.").isNotNull();
 		}
 	}
 

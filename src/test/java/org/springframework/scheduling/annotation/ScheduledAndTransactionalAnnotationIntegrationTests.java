@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,9 +39,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -65,13 +65,9 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 	public void failsWhenJdkProxyAndScheduledMethodNotPresentOnInterface() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigA.class);
-		try {
-			ctx.refresh();
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			assertTrue(ex.getRootCause() instanceof IllegalStateException);
-		}
+		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(
+				ctx::refresh)
+			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IllegalStateException.class));
 	}
 
 	@Test
@@ -84,9 +80,9 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		MyRepository repository = ctx.getBean(MyRepository.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat("repository is not a proxy", AopUtils.isCglibProxy(repository), equalTo(true));
-		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
-		assertThat("no transactions were committed", txManager.commits, greaterThan(0));
+		assertThat(AopUtils.isCglibProxy(repository)).isEqualTo(true);
+		assertThat(repository.getInvocationCount()).isGreaterThan(0);
+		assertThat(txManager.commits).isGreaterThan(0);
 	}
 
 	@Test
@@ -99,9 +95,9 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		MyRepositoryWithScheduledMethod repository = ctx.getBean(MyRepositoryWithScheduledMethod.class);
 		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
-		assertThat("repository is not a proxy", AopUtils.isJdkDynamicProxy(repository), is(true));
-		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
-		assertThat("no transactions were committed", txManager.commits, greaterThan(0));
+		assertThat(AopUtils.isJdkDynamicProxy(repository)).isTrue();
+		assertThat(repository.getInvocationCount()).isGreaterThan(0);
+		assertThat(txManager.commits).isGreaterThan(0);
 	}
 
 	@Test
@@ -113,8 +109,8 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		Thread.sleep(100);  // allow @Scheduled method to be called several times
 
 		MyRepositoryWithScheduledMethod repository = ctx.getBean(MyRepositoryWithScheduledMethod.class);
-		assertThat("repository is not a proxy", AopUtils.isCglibProxy(repository), is(true));
-		assertThat("@Scheduled method never called", repository.getInvocationCount(), greaterThan(0));
+		assertThat(AopUtils.isCglibProxy(repository)).isTrue();
+		assertThat(repository.getInvocationCount()).isGreaterThan(0);
 	}
 
 
@@ -251,7 +247,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		@Override
 		public int getInvocationCount() {
 			if (this.myAspect != null) {
-				assertEquals(this.count.get(), this.myAspect.count.get());
+				assertThat(this.myAspect.count.get()).isEqualTo(this.count.get());
 			}
 			return this.count.get();
 		}

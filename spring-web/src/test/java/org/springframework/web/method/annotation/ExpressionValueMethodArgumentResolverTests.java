@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link ExpressionValueMethodArgumentResolver}.
@@ -75,9 +75,9 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() throws Exception {
-		assertTrue(resolver.supportsParameter(paramSystemProperty));
-		assertTrue(resolver.supportsParameter(paramContextPath));
-		assertFalse(resolver.supportsParameter(paramNotSupported));
+		assertThat(resolver.supportsParameter(paramSystemProperty)).isTrue();
+		assertThat(resolver.supportsParameter(paramContextPath)).isTrue();
+		assertThat(resolver.supportsParameter(paramNotSupported)).isFalse();
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		Object value = resolver.resolveArgument(paramSystemProperty, null, webRequest, null);
 		System.clearProperty("systemProperty");
 
-		assertEquals("22", value);
+		assertThat(value).isEqualTo("22");
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		webRequest.getNativeRequest(MockHttpServletRequest.class).setContextPath("/contextPath");
 		Object value = resolver.resolveArgument(paramContextPath, null, webRequest, null);
 
-		assertEquals("/contextPath", value);
+		assertThat(value).isEqualTo("/contextPath");
 	}
 
 	public void params(@Value("#{systemProperties.systemProperty}") int param1,

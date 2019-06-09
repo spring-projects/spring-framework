@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -208,7 +208,7 @@ public interface BeanFactory {
 	<T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
 
 	/**
-	 * Return an provider for the specified bean, allowing for lazy on-demand retrieval
+	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
 	 * of instances, including availability and uniqueness options.
 	 * @param requiredType type the bean must match; can be an interface or superclass
 	 * @return a corresponding provider handle
@@ -218,7 +218,7 @@ public interface BeanFactory {
 	<T> ObjectProvider<T> getBeanProvider(Class<T> requiredType);
 
 	/**
-	 * Return an provider for the specified bean, allowing for lazy on-demand retrieval
+	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
 	 * of instances, including availability and uniqueness options.
 	 * @param requiredType type the bean must match; can be a generic type declaration.
 	 * Note that collection types are not supported here, in contrast to reflective

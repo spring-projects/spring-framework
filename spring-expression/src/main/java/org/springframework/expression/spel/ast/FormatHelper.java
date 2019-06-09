@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
@@ -36,22 +37,16 @@ abstract class FormatHelper {
 	 * @return a nicely formatted representation, e.g. {@code foo(String,int)}
 	 */
 	public static String formatMethodForMessage(String name, List<TypeDescriptor> argumentTypes) {
-		StringBuilder sb = new StringBuilder(name);
-		sb.append("(");
-		for (int i = 0; i < argumentTypes.size(); i++) {
-			if (i > 0) {
-				sb.append(",");
-			}
-			TypeDescriptor typeDescriptor = argumentTypes.get(i);
+		StringJoiner sj = new StringJoiner(",", "(", ")");
+		for (TypeDescriptor typeDescriptor : argumentTypes) {
 			if (typeDescriptor != null) {
-				sb.append(formatClassNameForMessage(typeDescriptor.getType()));
+				sj.add(formatClassNameForMessage(typeDescriptor.getType()));
 			}
 			else {
-				sb.append(formatClassNameForMessage(null));
+				sj.add(formatClassNameForMessage(null));
 			}
 		}
-		sb.append(")");
-		return sb.toString();
+		return name + sj.toString();
 	}
 
 	/**

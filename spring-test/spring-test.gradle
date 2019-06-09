@@ -28,7 +28,7 @@ dependencies {
 	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 	optional("javax.xml.bind:jaxb-api:2.3.1")
 	optional("javax.websocket:javax.websocket-api:1.1")
-	optional("junit:junit:4.12")
+	optional("junit:junit:4.13-beta-3")
 	optional("org.junit.jupiter:junit-jupiter-api")
 	optional("org.testng:testng:6.14.3")
 	optional("org.aspectj:aspectjweaver:${aspectjVersion}")
@@ -37,10 +37,10 @@ dependencies {
 	optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.5") {
 		exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 	}
-	optional("net.sourceforge.htmlunit:htmlunit:2.33") {
+	optional("net.sourceforge.htmlunit:htmlunit:2.35.0") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("org.seleniumhq.selenium:htmlunit-driver:2.33.3") {
+	optional("org.seleniumhq.selenium:htmlunit-driver:2.35.1") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -60,10 +60,10 @@ dependencies {
 	testCompile("javax.ejb:javax.ejb-api:3.2")
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.2")
 	testCompile("javax.mail:javax.mail-api:1.6.2")
-	testCompile("org.hibernate:hibernate-core:5.4.1.Final")
-	testCompile("org.hibernate:hibernate-validator:6.0.14.Final")
-	// Enable use of the JUnit Platform Runner
+	testCompile("org.hibernate:hibernate-core:5.4.2.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.16.Final")
 	testCompile("org.junit.platform:junit-platform-runner")
+	testCompile("org.junit.platform:junit-platform-testkit")
 	testCompile("org.junit.jupiter:junit-jupiter-params")
 	testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
@@ -72,7 +72,7 @@ dependencies {
 	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testCompile("org.apache.httpcomponents:httpclient:4.5.7") {
+	testCompile("org.apache.httpcomponents:httpclient:4.5.8") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	testCompile("io.projectreactor.netty:reactor-netty")
@@ -95,7 +95,6 @@ task testNG(type: Test) {
 	// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
 	// testLogging.showStandardStreams = true
 	// forkEvery 1
-	reports.junitXml.destination = file("$buildDir/test-results")
 }
 
 task testJUnitJupiter(type: Test) {
@@ -107,7 +106,6 @@ task testJUnitJupiter(type: Test) {
 	filter {
 		includeTestsMatching "org.springframework.test.context.junit.jupiter.*"
 	}
-	reports.junitXml.destination = file("$buildDir/test-results")
 	// Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
 }
@@ -119,7 +117,6 @@ test {
 	scanForTestClasses = false
 	include(["**/*Tests.class", "**/*Test.class"])
 	exclude(["**/testng/**/*.*", "**/jupiter/**/*.*"])
-	reports.junitXml.destination = file("$buildDir/test-results")
 }
 
 task aggregateTestReports(type: TestReport) {

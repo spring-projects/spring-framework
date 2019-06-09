@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractSingleValueEncoder;
@@ -97,8 +98,16 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 	}
 
 	@Override
-	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
-			ResolvableType type, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+	protected Flux<DataBuffer> encode(Object value, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		// we're relying on doOnDiscard in base class
+		return Mono.fromCallable(() -> encodeValue(value, bufferFactory, valueType, mimeType, hints)).flux();
+	}
+
+	@Override
+	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		if (!Hints.isLoggingSuppressed(hints)) {
 			LogFormatUtils.traceDebug(logger, traceOn -> {
@@ -108,22 +117,20 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 		}
 
 		boolean release = true;
-		DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
-		OutputStream outputStream = buffer.asOutputStream();
-		Class<?> clazz = ClassUtils.getUserClass(value);
-
+		DataBuffer buffer = bufferFactory.allocateBuffer(1024);
 		try {
+			OutputStream outputStream = buffer.asOutputStream();
+			Class<?> clazz = ClassUtils.getUserClass(value);
 			Marshaller marshaller = initMarshaller(clazz);
 			marshaller.marshal(value, outputStream);
 			release = false;
-			return Flux.just(buffer);
+			return buffer;
 		}
 		catch (MarshalException ex) {
-			return Flux.error(new EncodingException(
-					"Could not marshal " + value.getClass() + " to XML", ex));
+			throw new EncodingException("Could not marshal " + value.getClass() + " to XML", ex);
 		}
 		catch (JAXBException ex) {
-			return Flux.error(new CodecException("Invalid JAXB configuration", ex));
+			throw new CodecException("Invalid JAXB configuration", ex);
 		}
 		finally {
 			if (release) {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +24,9 @@ import java.util.HashSet;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.context.index.processor.Metadata.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
 
 /**
  * Tests for {@link PropertiesMarshaller}.
@@ -45,9 +45,9 @@ public class PropertiesMarshallerTests {
 		PropertiesMarshaller.write(metadata, outputStream);
 		CandidateComponentsMetadata readMetadata = PropertiesMarshaller.read(
 				new ByteArrayInputStream(outputStream.toByteArray()));
-		assertThat(readMetadata, hasComponent("com.foo", "first", "second"));
-		assertThat(readMetadata, hasComponent("com.bar", "first"));
-		assertThat(readMetadata.getItems(), hasSize(2));
+		assertThat(readMetadata).has(Metadata.of("com.foo", "first", "second"));
+		assertThat(readMetadata).has(Metadata.of("com.bar", "first"));
+		assertThat(readMetadata.getItems()).hasSize(2);
 	}
 
 	private static ItemMetadata createItem(String type, String... stereotypes) {

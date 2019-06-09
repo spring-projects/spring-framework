@@ -4,10 +4,10 @@
 `WebTestClient` is a thin shell around <<web-reactive.adoc#webflux-client, WebClient>>,
 using it to perform requests and exposing a dedicated, fluent API for verifying responses.
 `WebTestClient` binds to a WebFlux application by using a
-<<testing.adoc#mock-objects-web-reactive,mock request and response>>, or it can test any
+<<testing.adoc#mock-objects-web-reactive, mock request and response>>, or it can test any
 web server over an HTTP connection.
 
-TIP: Kotlin users: See <<languages.adoc#kotlin-webtestclient-issue,this section>>
+TIP: Kotlin users: See <<languages.adoc#kotlin-webtestclient-issue, this section>>
 related to use of the `WebTestClient`.
 
 
@@ -33,8 +33,8 @@ The following example shows how to create a server setup to test one `@Controlle
 	client = WebTestClient.bindToController(new TestController()).build();
 ----
 
-The preceding example loads the <<web-reactive.adoc#webflux-config,WebFlux Java configuration>> and
-registers the given controller. The resulting WebFlux application is tested
+The preceding example loads the <<web-reactive.adoc#webflux-config, WebFlux Java configuration>>
+and registers the given controller. The resulting WebFlux application is tested
 without an HTTP server by using mock request and response objects. There are more methods
 on the builder to customize the default WebFlux Java configuration.
 
@@ -44,7 +44,7 @@ on the builder to customize the default WebFlux Java configuration.
 === Bind to Router Function
 
 The following example shows how to set up a server from a
-<<web-reactive.adoc#webflux-fn,RouterFunction>>:
+<<web-reactive.adoc#webflux-fn, RouterFunction>>:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -88,11 +88,10 @@ some subset of it:
 <2> Inject the configuration
 <3> Create the `WebTestClient`
 
-Internally, the configuration is passed to `WebHttpHandlerBuilder` to set up
-the request processing chain. See
-<<web-reactive.adoc#webflux-web-handler-api,WebHandler API>> for more details. The
-resulting WebFlux application is tested without an HTTP server by using mock request
-and response objects.
+Internally, the configuration is passed to `WebHttpHandlerBuilder` to set up the request
+processing chain. See <<web-reactive.adoc#webflux-web-handler-api, WebHandler API>> for
+more details. The resulting WebFlux application is tested without an HTTP server by
+using mock request and response objects.
 
 
 
@@ -132,7 +131,7 @@ are readily available following `bindToServer`. For all others, you need to use
 [[webtestclient-tests]]
 == Writing Tests
 
-`WebTestClient` provides an API identical to <<web-reactive.adoc#webflux-client,WebClient>>
+`WebTestClient` provides an API identical to <<web-reactive.adoc#webflux-client, WebClient>>
 up to the point of performing a request by using `exchange()`. What follows after
 `exchange()` is a chained API workflow to verify responses.
 
@@ -142,10 +141,10 @@ Typically, you start by asserting the response status and headers, as follows:
 [subs="verbatim,quotes"]
 ----
 	client.get().uri("/persons/1")
-			.accept(MediaType.APPLICATION_JSON_UTF8)
+			.accept(MediaType.APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isOk()
-			.expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+			.expectHeader().contentType(MediaType.APPLICATION_JSON)
 			// ...
 ----
 
@@ -229,7 +228,7 @@ Alternatively, if you want to assert there is no response content, you can use c
 
 When you use `expectBody()`, the response is consumed as a `byte[]`. This is useful for
 raw content assertions. For example, you can use
-http://jsonassert.skyscreamer.org[JSONAssert] to verify JSON content, as follows:
+https://jsonassert.skyscreamer.org[JSONAssert] to verify JSON content, as follows:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -296,8 +295,8 @@ from the `reactor-test` module to do that, as the following example shows:
 [[webtestclient-request-body]]
 === Request Body
 
-When it comes to building requests, the `WebTestClient` offers an API  identical to the
-`WebClient`, and the implementation is mostly a simple pass-through. See
-the <<web-reactive.adoc#webflux-client-body,WebClient documentation>> for examples on
+When it comes to building requests, the `WebTestClient` offers an API  identical to
+the `WebClient`, and the implementation is mostly a simple pass-through. See the
+<<web-reactive.adoc#webflux-client-body, WebClient documentation>> for examples on
 how to prepare a request with a body, including submitting form data, multipart requests,
 and more.

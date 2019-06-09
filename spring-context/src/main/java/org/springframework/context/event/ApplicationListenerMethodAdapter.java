@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Delegates to {@link #processEvent(ApplicationEvent)} to give sub-classes
  * a chance to deviate from the default. Unwraps the content of a
- * {@link PayloadApplicationEvent} if necessary to allow method declaration
+ * {@link PayloadApplicationEvent} if necessary to allow a method declaration
  * to define any arbitrary event type. If a condition is defined, it is
  * evaluated prior to invoking the underlying method.
  *
@@ -171,7 +171,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	/**
 	 * Process the specified {@link ApplicationEvent}, checking if the condition
-	 * match and handling non-null result, if any.
+	 * matches and handling a non-null result, if any.
 	 */
 	public void processEvent(ApplicationEvent event) {
 		Object[] args = resolveArguments(event);
@@ -188,9 +188,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	/**
 	 * Resolve the method arguments to use for the specified {@link ApplicationEvent}.
-	 * <p>These arguments will be used to invoke the method handled by this instance. Can
-	 * return {@code null} to indicate that no suitable arguments could be resolved and
-	 * therefore the method should not be invoked at all for the specified event.
+	 * <p>These arguments will be used to invoke the method handled by this instance.
+	 * Can return {@code null} to indicate that no suitable arguments could be resolved
+	 * and therefore the method should not be invoked at all for the specified event.
 	 */
 	@Nullable
 	protected Object[] resolveArguments(ApplicationEvent event) {
@@ -201,13 +201,15 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (this.method.getParameterCount() == 0) {
 			return new Object[0];
 		}
-		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.toClass()) &&
+		Class<?> declaredEventClass = declaredEventType.toClass();
+		if (!ApplicationEvent.class.isAssignableFrom(declaredEventClass) &&
 				event instanceof PayloadApplicationEvent) {
-			return new Object[] {((PayloadApplicationEvent) event).getPayload()};
+			Object payload = ((PayloadApplicationEvent<?>) event).getPayload();
+			if (declaredEventClass.isInstance(payload)) {
+				return new Object[] {payload};
+			}
 		}
-		else {
-			return new Object[] {event};
-		}
+		return new Object[] {event};
 	}
 
 	protected void handleResult(Object result) {

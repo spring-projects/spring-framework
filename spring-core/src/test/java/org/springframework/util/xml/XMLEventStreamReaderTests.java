@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,22 +16,23 @@
 
 package org.springframework.util.xml;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.w3c.dom.Node;
-import org.xmlunit.util.Predicate;
-
+import java.io.StringReader;
+import java.io.StringWriter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.StringReader;
-import java.io.StringWriter;
 
-import static org.junit.Assert.assertThat;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import org.junit.Before;
+import org.junit.Test;
+import org.w3c.dom.Node;
+import org.xmlunit.util.Predicate;
+
+import org.springframework.tests.XmlContent;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class XMLEventStreamReaderTests {
 
@@ -63,7 +64,7 @@ public class XMLEventStreamReaderTests {
 		transformer.transform(source, new StreamResult(writer));
 		Predicate<Node> nodeFilter = n ->
 				n.getNodeType() != Node.DOCUMENT_TYPE_NODE && n.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE;
-		assertThat(writer.toString(), isSimilarTo(XML).withNodeFilter(nodeFilter));
+		assertThat(XmlContent.from(writer)).isSimilarTo(XML, nodeFilter);
 	}
 
 }

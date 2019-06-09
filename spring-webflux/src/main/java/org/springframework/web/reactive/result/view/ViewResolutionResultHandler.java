@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -245,10 +245,9 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 						model.addAttribute(name, returnValue);
 						viewsMono = resolveViews(getDefaultViewName(exchange), locale);
 					}
-
-					updateBindingContext(result.getBindingContext(), exchange);
-
-					return viewsMono.flatMap(views -> render(views, model.asMap(), exchange));
+					BindingContext bindingContext = result.getBindingContext();
+					updateBindingResult(bindingContext, exchange);
+					return viewsMono.flatMap(views -> render(views, model.asMap(), bindingContext, exchange));
 				});
 	}
 
@@ -288,44 +287,55 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport
 				.orElseGet(() -> Conventions.getVariableNameForParameter(returnType));
 	}
 
-	private void updateBindingContext(BindingContext context, ServerWebExchange exchange) {
+	private void updateBindingResult(BindingContext context, ServerWebExchange exchange) {
 		Map<String, Object> model = context.getModel().asMap();
-		model.keySet().stream()
-				.filter(name -> isBindingCandidate(name, model.get(name)))
-				.filter(name -> !model.containsKey(BindingResult.MODEL_KEY_PREFIX + name))
-				.forEach(name -> {
-					WebExchangeDataBinder binder = context.createDataBinder(exchange, model.get(name), name);
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			String name = entry.getKey();
+			Object value = entry.getValue();
+			if (isBindingCandidate(name, value)) {
+				if (!model.containsKey(BindingResult.MODEL_KEY_PREFIX + name)) {
+					WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
 					model.put(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
-				});
+				}
+			}
+		}
 	}
 
 	private boolean isBindingCandidate(String name, @Nullable Object value) {
 		return (!name.startsWith(BindingResult.MODEL_KEY_PREFIX) && value != null &&
-				!value.getClass().isArray() && !(value instanceof Collection) &&
-				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
+				!value.getClass().isArray() && !(value instanceof Collection) && !(value instanceof Map) &&
+				getAdapterRegistry().getAdapter(null, value) == null &&
+				!BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
 	private Mono<? extends Void> render(List<View> views, Map<String, Object> model,
-			ServerWebExchange exchange) {
+			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		for (View view : views) {
 			if (view.isRedirectView()) {
-				return view.render(model, null, exchange);
+				return renderWith(view, model, null, exchange, bindingContext);
 			}
 		}
-
 		List<MediaType> mediaTypes = getMediaTypes(views);
 		MediaType bestMediaType = selectMediaType(exchange, () -> mediaTypes);
 		if (bestMediaType != null) {
 			for (View view : views) {
 				for (MediaType mediaType : view.getSupportedMediaTypes()) {
 					if (mediaType.isCompatibleWith(bestMediaType)) {
-						return view.render(model, mediaType, exchange);
+						return renderWith(view, model, mediaType, exchange, bindingContext);
 					}
 				}
 			}
 		}
 		throw new NotAcceptableStatusException(mediaTypes);
+	}
+
+	private Mono<? extends Void> renderWith(View view, Map<String, Object> model,
+			@Nullable MediaType mediaType, ServerWebExchange exchange, BindingContext bindingContext) {
+
+		exchange.getAttributes().put(View.BINDING_CONTEXT_ATTRIBUTE, bindingContext);
+		return view.render(model, mediaType, exchange)
+				.doOnTerminate(() -> exchange.getAttributes().remove(View.BINDING_CONTEXT_ATTRIBUTE));
 	}
 
 	private List<MediaType> getMediaTypes(List<View> views) {

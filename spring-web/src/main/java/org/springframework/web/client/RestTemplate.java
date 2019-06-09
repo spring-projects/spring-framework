@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -950,9 +950,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						return;
 					}
 				}
-				String message = "No HttpMessageConverter for [" + requestBodyClass.getName() + "]";
+				String message = "No HttpMessageConverter for " + requestBodyClass.getName();
 				if (requestContentType != null) {
-					message += " and content type [" + requestContentType + "]";
+					message += " and content type \"" + requestContentType + "\"";
 				}
 				throw new RestClientException(message);
 			}
@@ -964,8 +964,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					logger.debug("Writing [" + body + "] as \"" + mediaType + "\"");
 				}
 				else {
-					String classname = converter.getClass().getName();
-					logger.debug("Writing [" + body + "] with " + classname);
+					logger.debug("Writing [" + body + "] with " + converter.getClass().getName());
 				}
 			}
 		}

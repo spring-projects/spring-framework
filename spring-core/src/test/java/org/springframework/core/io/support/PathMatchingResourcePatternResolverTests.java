@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,8 @@ import org.junit.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * If this test case fails, uncomment diagnostics in the
@@ -57,23 +58,24 @@ public class PathMatchingResourcePatternResolverTests {
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 
-	@Test(expected = FileNotFoundException.class)
+	@Test
 	public void invalidPrefixWithPatternElementInIt() throws IOException {
-		resolver.getResources("xx**:**/*.xy");
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
+				resolver.getResources("xx**:**/*.xy"));
 	}
 
 	@Test
 	public void singleResourceOnFileSystem() throws IOException {
 		Resource[] resources =
 				resolver.getResources("org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class");
-		assertEquals(1, resources.length);
+		assertThat(resources.length).isEqualTo(1);
 		assertProtocolAndFilenames(resources, "file", "PathMatchingResourcePatternResolverTests.class");
 	}
 
 	@Test
 	public void singleResourceInJar() throws IOException {
 		Resource[] resources = resolver.getResources("org/reactivestreams/Publisher.class");
-		assertEquals(1, resources.length);
+		assertThat(resources.length).isEqualTo(1);
 		assertProtocolAndFilenames(resources, "jar", "Publisher.class");
 	}
 
@@ -89,7 +91,7 @@ public class PathMatchingResourcePatternResolverTests {
 				noCloverResources.add(resource);
 			}
 		}
-		resources = noCloverResources.toArray(new Resource[noCloverResources.size()]);
+		resources = noCloverResources.toArray(new Resource[0]);
 		assertProtocolAndFilenames(resources, "file",
 				StringUtils.concatenateStringArrays(CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT));
 	}
@@ -113,9 +115,10 @@ public class PathMatchingResourcePatternResolverTests {
 		for (Resource resource : resources) {
 			if (resource.getFilename().equals("aspectj_1_5_0.dtd")) {
 				found = true;
+				break;
 			}
 		}
-		assertTrue("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar", found);
+		assertThat(found).as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar").isTrue();
 	}
 
 
@@ -140,18 +143,17 @@ public class PathMatchingResourcePatternResolverTests {
 //			System.out.println(resources[i]);
 //		}
 
-		assertEquals("Correct number of files found", filenames.length, resources.length);
+		assertThat(resources.length).as("Correct number of files found").isEqualTo(filenames.length);
 		for (Resource resource : resources) {
 			String actualProtocol = resource.getURL().getProtocol();
-			assertEquals(protocol, actualProtocol);
+			assertThat(actualProtocol).isEqualTo(protocol);
 			assertFilenameIn(resource, filenames);
 		}
 	}
 
 	private void assertFilenameIn(Resource resource, String... filenames) {
 		String filename = resource.getFilename();
-		assertTrue(resource + " does not have a filename that matches any of the specified names",
-				Arrays.stream(filenames).anyMatch(filename::endsWith));
+		assertThat(Arrays.stream(filenames).anyMatch(filename::endsWith)).as(resource + " does not have a filename that matches any of the specified names").isTrue();
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,9 +26,26 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.http.HttpStatus.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.http.HttpStatus.BAD_GATEWAY;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.GATEWAY_TIMEOUT;
+import static org.springframework.http.HttpStatus.HTTP_VERSION_NOT_SUPPORTED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
+import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
+import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
+import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
+import static org.springframework.http.HttpStatus.TOO_MANY_REQUESTS;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 /**
  * Unit tests for {@link DefaultResponseErrorHandler} handling of specific
@@ -75,7 +92,7 @@ public class DefaultResponseErrorHandlerHttpStatusTests {
 	@Test
 	public void hasErrorTrue() throws Exception {
 		given(this.response.getRawStatusCode()).willReturn(this.httpStatus.value());
-		assertTrue(this.handler.hasError(this.response));
+		assertThat(this.handler.hasError(this.response)).isTrue();
 	}
 
 	@Test
@@ -86,14 +103,8 @@ public class DefaultResponseErrorHandlerHttpStatusTests {
 		given(this.response.getRawStatusCode()).willReturn(this.httpStatus.value());
 		given(this.response.getHeaders()).willReturn(headers);
 
-		try {
-			this.handler.handleError(this.response);
-			fail("expected " + this.expectedExceptionClass.getSimpleName());
-		}
-		catch (HttpStatusCodeException ex) {
-			assertEquals("Expected " + this.expectedExceptionClass.getSimpleName(),
-					this.expectedExceptionClass, ex.getClass());
-		}
+		assertThatExceptionOfType(expectedExceptionClass).isThrownBy(() ->
+				this.handler.handleError(this.response));
 	}
 
 }

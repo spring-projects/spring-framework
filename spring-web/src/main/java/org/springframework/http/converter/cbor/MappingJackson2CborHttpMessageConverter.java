@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,11 +26,11 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write <a href="http://cbor.io/">CBOR</a> data format using
+ * that can read and write <a href="https://cbor.io/">CBOR</a> data format using
  * <a href="https://github.com/FasterXML/jackson-dataformats-binary/tree/master/cbor">
  * the dedicated Jackson 2.x extension</a>.
  *
- * <p>By default, this converter supports {@code "application/cbor"} media type. This can be
+ * <p>By default, this converter supports {@value MediaType#APPLICATION_CBOR_VALUE} media type. This can be
  * overridden by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
@@ -57,7 +57,7 @@ public class MappingJackson2CborHttpMessageConverter extends AbstractJackson2Htt
 	 * @see Jackson2ObjectMapperBuilder#cbor()
 	 */
 	public MappingJackson2CborHttpMessageConverter(ObjectMapper objectMapper) {
-		super(objectMapper, new MediaType("application", "cbor"));
+		super(objectMapper, MediaType.APPLICATION_CBOR);
 		Assert.isInstanceOf(CBORFactory.class, objectMapper.getFactory(), "CBORFactory required");
 	}
 

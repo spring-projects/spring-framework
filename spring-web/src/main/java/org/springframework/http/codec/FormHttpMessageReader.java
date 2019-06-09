@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,7 +56,7 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private static final ResolvableType MULTIVALUE_TYPE =
+	private static final ResolvableType MULTIVALUE_STRINGS_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
 
@@ -83,9 +83,11 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return ((MULTIVALUE_TYPE.isAssignableFrom(elementType) ||
-				(elementType.hasUnresolvableGenerics() &&
-						MultiValueMap.class.isAssignableFrom(elementType.toClass()))) &&
+		boolean multiValueUnresolved =
+				elementType.hasUnresolvableGenerics() &&
+						MultiValueMap.class.isAssignableFrom(elementType.toClass());
+
+		return ((MULTIVALUE_STRINGS_TYPE.isAssignableFrom(elementType) || multiValueUnresolved) &&
 				(mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)));
 	}
 

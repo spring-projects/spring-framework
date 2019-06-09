@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,9 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Juergen Hoeller
@@ -41,7 +42,7 @@ public class UserCredentialsDataSourceAdapterTests {
 		adapter.setTargetDataSource(dataSource);
 		adapter.setUsername("user");
 		adapter.setPassword("pw");
-		assertEquals(connection, adapter.getConnection());
+		assertThat(adapter.getConnection()).isEqualTo(connection);
 	}
 
 	@Test
@@ -51,7 +52,7 @@ public class UserCredentialsDataSourceAdapterTests {
 		given(dataSource.getConnection()).willReturn(connection);
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
 		adapter.setTargetDataSource(dataSource);
-		assertEquals(connection, adapter.getConnection());
+		assertThat(adapter.getConnection()).isEqualTo(connection);
 	}
 
 	@Test
@@ -65,7 +66,7 @@ public class UserCredentialsDataSourceAdapterTests {
 
 		adapter.setCredentialsForCurrentThread("user", "pw");
 		try {
-			assertEquals(connection, adapter.getConnection());
+			assertThat(adapter.getConnection()).isEqualTo(connection);
 		}
 		finally {
 			adapter.removeCredentialsFromCurrentThread();

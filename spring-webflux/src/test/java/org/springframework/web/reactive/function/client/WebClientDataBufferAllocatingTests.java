@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * WebClient integration tests focusing on data buffer management.
@@ -104,7 +104,7 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 				.bodyToMono(Void.class);
 
 		StepVerifier.create(mono).expectComplete().verify(Duration.ofSeconds(3));
-		assertEquals(1, this.server.getRequestCount());
+		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
 	@Test // SPR-17482
@@ -120,7 +120,7 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 				.bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
 		StepVerifier.create(mono).expectError(UnsupportedMediaTypeException.class).verify(Duration.ofSeconds(3));
-		assertEquals(1, this.server.getRequestCount());
+		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
 	@Test
@@ -163,8 +163,8 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 				.onStatus(status -> status.equals(errorStatus), exceptionFunction)
 				.bodyToMono(String.class);
 
-		StepVerifier.create(mono).expectErrorSatisfies(actual -> assertSame(expected, actual)).verify(DELAY);
-		assertEquals(1, this.server.getRequestCount());
+		StepVerifier.create(mono).expectErrorSatisfies(actual -> assertThat(actual).isSameAs(expected)).verify(DELAY);
+		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
 }

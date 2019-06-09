@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,9 +45,10 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
  * @since 3.0
- * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">
+ * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
+@SuppressWarnings("deprecation")
 public class MediaType extends MimeType implements Serializable {
 
 	private static final long serialVersionUID = 2069937152339670231L;
@@ -73,6 +74,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_ATOM_XML_VALUE = "application/atom+xml";
 
 	/**
+	 * Public constant media type for {@code application/cbor}.
+	 * @since 5.2
+	 */
+	public static final MediaType APPLICATION_CBOR;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_CBOR}.
+	 * @since 5.2
+	 */
+	public static final String APPLICATION_CBOR_VALUE = "application/cbor";
+
+	/**
 	 * Public constant media type for {@code application/x-www-form-urlencoded}.
 	 */
 	public static final MediaType APPLICATION_FORM_URLENCODED;
@@ -84,7 +97,6 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json}.
-	 * @see #APPLICATION_JSON_UTF8
 	 */
 	public static final MediaType APPLICATION_JSON;
 
@@ -96,24 +108,24 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json;charset=UTF-8}.
-	 *
-	 * <p>This {@link MediaType#APPLICATION_JSON} variant should be used to set JSON
-	 * content type because while
-	 * <a href="https://tools.ietf.org/html/rfc7159#section-11">RFC7159</a>
-	 * clearly states that "no charset parameter is defined for this registration", some
-	 * browsers require it for interpreting correctly UTF-8 special characters.
+	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_JSON}
+	 * since major browsers like Chrome
+	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
+	 * now comply with the specification</a> and interpret correctly UTF-8 special
+	 * characters without requiring a {@code charset=UTF-8} parameter.
 	 */
+	@Deprecated
 	public static final MediaType APPLICATION_JSON_UTF8;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
-	 *
-	 * <p>This {@link MediaType#APPLICATION_JSON_VALUE} variant should be used to set JSON
-	 * content type because while
-	 * <a href="https://tools.ietf.org/html/rfc7159#section-11">RFC7159</a>
-	 * clearly states that "no charset parameter is defined for this registration", some
-	 * browsers require it for interpreting correctly UTF-8 special characters.
+	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_JSON_VALUE}
+	 * since major browsers like Chrome
+	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
+	 * now comply with the specification</a> and interpret correctly UTF-8 special
+	 * characters without requiring a {@code charset=UTF-8} parameter.
 	 */
+	@Deprecated
 	public static final String APPLICATION_JSON_UTF8_VALUE = "application/json;charset=UTF-8";
 
 	/**
@@ -157,13 +169,25 @@ public class MediaType extends MimeType implements Serializable {
 	 * @since 5.0
 	 * @see <a href="https://tools.ietf.org/html/rfc7807#section-6.1">
 	 *     Problem Details for HTTP APIs, 6.1. application/problem+json</a>
+	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON}
+	 * since major browsers like Chrome
+	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
+	 * now comply with the specification</a> and interpret correctly UTF-8 special
+	 * characters without requiring a {@code charset=UTF-8} parameter.
 	 */
+	@Deprecated
 	public static final MediaType APPLICATION_PROBLEM_JSON_UTF8;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PROBLEM_JSON_UTF8}.
 	 * @since 5.0
+	 * @deprecated Deprecated as of Spring Framework 5.2 in favor of {@link #APPLICATION_PROBLEM_JSON_VALUE}
+	 * since major browsers like Chrome
+	 * <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=438464">
+	 * now comply with the specification</a> and interpret correctly UTF-8 special
+	 * characters without requiring a {@code charset=UTF-8} parameter.
 	 */
+	@Deprecated
 	public static final String APPLICATION_PROBLEM_JSON_UTF8_VALUE = "application/problem+json;charset=UTF-8";
 
 	/**
@@ -326,6 +350,7 @@ public class MediaType extends MimeType implements Serializable {
 		// Not using "valueOf' to avoid static init cost
 		ALL = new MediaType("*", "*");
 		APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
+		APPLICATION_CBOR = new MediaType("application", "cbor");
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
@@ -644,7 +669,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * <blockquote>audio/basic == text/html</blockquote>
 	 * <blockquote>audio/basic == audio/wave</blockquote>
 	 * @param mediaTypes the list of media types to be sorted
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.2">HTTP 1.1: Semantics
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.2">HTTP 1.1: Semantics
 	 * and Content, section 5.3.2</a>
 	 */
 	public static void sortBySpecificity(List<MediaType> mediaTypes) {

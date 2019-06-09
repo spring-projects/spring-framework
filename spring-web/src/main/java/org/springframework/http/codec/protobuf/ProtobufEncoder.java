@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.http.codec.protobuf;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageEncoder;
 import org.springframework.lang.Nullable;
@@ -73,25 +73,38 @@ public class ProtobufEncoder extends ProtobufCodecSupport implements HttpMessage
 	public Flux<DataBuffer> encode(Publisher<? extends Message> inputStream, DataBufferFactory bufferFactory,
 			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return Flux
-				.from(inputStream)
-				.map(message -> encodeMessage(message, bufferFactory, !(inputStream instanceof Mono)));
+		return Flux.from(inputStream).map(message ->
+				encodeValue(message, bufferFactory, !(inputStream instanceof Mono)));
 	}
 
-	private DataBuffer encodeMessage(Message message, DataBufferFactory bufferFactory, boolean streaming) {
+	@Override
+	public DataBuffer encodeValue(Message message, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		return encodeValue(message, bufferFactory, false);
+	}
+
+	private DataBuffer encodeValue(Message message, DataBufferFactory bufferFactory, boolean delimited) {
+
 		DataBuffer buffer = bufferFactory.allocateBuffer();
-		OutputStream outputStream = buffer.asOutputStream();
+		boolean release = true;
 		try {
-			if (streaming) {
-				message.writeDelimitedTo(outputStream);
+			if (delimited) {
+				message.writeDelimitedTo(buffer.asOutputStream());
 			}
 			else {
-				message.writeTo(outputStream);
+				message.writeTo(buffer.asOutputStream());
 			}
+			release = false;
 			return buffer;
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException("Unexpected I/O error while writing to data buffer", ex);
+		}
+		finally {
+			if (release) {
+				DataBufferUtils.release(buffer);
+			}
 		}
 	}
 

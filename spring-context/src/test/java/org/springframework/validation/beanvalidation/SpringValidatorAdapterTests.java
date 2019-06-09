@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,10 +51,10 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Kazuki Shimizu
@@ -71,7 +71,7 @@ public class SpringValidatorAdapterTests {
 
 	@Before
 	public void setupSpringValidatorAdapter() {
-		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} is must be between {2} and {1}");
+		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} must be between {2} and {1}");
 		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value as {1}");
 		messageSource.addMessage("password", Locale.ENGLISH, "Password");
 		messageSource.addMessage("confirmPassword", Locale.ENGLISH, "Password(Confirm)");
@@ -81,7 +81,7 @@ public class SpringValidatorAdapterTests {
 	@Test
 	public void testUnwrap() {
 		Validator nativeValidator = validatorAdapter.unwrap(Validator.class);
-		assertSame(this.nativeValidator, nativeValidator);
+		assertThat(nativeValidator).isSameAs(this.nativeValidator);
 	}
 
 	@Test  // SPR-13406
@@ -93,13 +93,13 @@ public class SpringValidatorAdapterTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(testBean, "testBean");
 		validatorAdapter.validate(testBean, errors);
 
-		assertThat(errors.getFieldErrorCount("password"), is(1));
-		assertThat(errors.getFieldValue("password"), is("pass"));
+		assertThat(errors.getFieldErrorCount("password")).isEqualTo(1);
+		assertThat(errors.getFieldValue("password")).isEqualTo("pass");
 		FieldError error = errors.getFieldError("password");
-		assertNotNull(error);
-		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Size of Password is must be between 8 and 128"));
-		assertTrue(error.contains(ConstraintViolation.class));
-		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("password"));
+		assertThat(error).isNotNull();
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH)).isEqualTo("Size of Password must be between 8 and 128");
+		assertThat(error.contains(ConstraintViolation.class)).isTrue();
+		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("password");
 	}
 
 	@Test  // SPR-13406
@@ -111,13 +111,13 @@ public class SpringValidatorAdapterTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(testBean, "testBean");
 		validatorAdapter.validate(testBean, errors);
 
-		assertThat(errors.getFieldErrorCount("password"), is(1));
-		assertThat(errors.getFieldValue("password"), is("password"));
+		assertThat(errors.getFieldErrorCount("password")).isEqualTo(1);
+		assertThat(errors.getFieldValue("password")).isEqualTo("password");
 		FieldError error = errors.getFieldError("password");
-		assertNotNull(error);
-		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Password must be same value as Password(Confirm)"));
-		assertTrue(error.contains(ConstraintViolation.class));
-		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("password"));
+		assertThat(error).isNotNull();
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH)).isEqualTo("Password must be same value as Password(Confirm)");
+		assertThat(error.contains(ConstraintViolation.class)).isTrue();
+		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("password");
 	}
 
 	@Test  // SPR-13406
@@ -129,19 +129,19 @@ public class SpringValidatorAdapterTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(testBean, "testBean");
 		validatorAdapter.validate(testBean, errors);
 
-		assertThat(errors.getFieldErrorCount("email"), is(1));
-		assertThat(errors.getFieldValue("email"), is("test@example.com"));
-		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
+		assertThat(errors.getFieldErrorCount("email")).isEqualTo(1);
+		assertThat(errors.getFieldValue("email")).isEqualTo("test@example.com");
+		assertThat(errors.getFieldErrorCount("confirmEmail")).isEqualTo(1);
 		FieldError error1 = errors.getFieldError("email");
 		FieldError error2 = errors.getFieldError("confirmEmail");
-		assertNotNull(error1);
-		assertNotNull(error2);
-		assertThat(messageSource.getMessage(error1, Locale.ENGLISH), is("email must be same value as confirmEmail"));
-		assertThat(messageSource.getMessage(error2, Locale.ENGLISH), is("Email required"));
-		assertTrue(error1.contains(ConstraintViolation.class));
-		assertThat(error1.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("email"));
-		assertTrue(error2.contains(ConstraintViolation.class));
-		assertThat(error2.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("confirmEmail"));
+		assertThat(error1).isNotNull();
+		assertThat(error2).isNotNull();
+		assertThat(messageSource.getMessage(error1, Locale.ENGLISH)).isEqualTo("email must be same value as confirmEmail");
+		assertThat(messageSource.getMessage(error2, Locale.ENGLISH)).isEqualTo("Email required");
+		assertThat(error1.contains(ConstraintViolation.class)).isTrue();
+		assertThat(error1.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("email");
+		assertThat(error2.contains(ConstraintViolation.class)).isTrue();
+		assertThat(error2.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("confirmEmail");
 	}
 
 	@Test  // SPR-15123
@@ -155,19 +155,37 @@ public class SpringValidatorAdapterTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(testBean, "testBean");
 		validatorAdapter.validate(testBean, errors);
 
-		assertThat(errors.getFieldErrorCount("email"), is(1));
-		assertThat(errors.getFieldValue("email"), is("test@example.com"));
-		assertThat(errors.getFieldErrorCount("confirmEmail"), is(1));
+		assertThat(errors.getFieldErrorCount("email")).isEqualTo(1);
+		assertThat(errors.getFieldValue("email")).isEqualTo("test@example.com");
+		assertThat(errors.getFieldErrorCount("confirmEmail")).isEqualTo(1);
 		FieldError error1 = errors.getFieldError("email");
 		FieldError error2 = errors.getFieldError("confirmEmail");
-		assertNotNull(error1);
-		assertNotNull(error2);
-		assertThat(messageSource.getMessage(error1, Locale.ENGLISH), is("email must be same value as confirmEmail"));
-		assertThat(messageSource.getMessage(error2, Locale.ENGLISH), is("Email required"));
-		assertTrue(error1.contains(ConstraintViolation.class));
-		assertThat(error1.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("email"));
-		assertTrue(error2.contains(ConstraintViolation.class));
-		assertThat(error2.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("confirmEmail"));
+		assertThat(error1).isNotNull();
+		assertThat(error2).isNotNull();
+		assertThat(messageSource.getMessage(error1, Locale.ENGLISH)).isEqualTo("email must be same value as confirmEmail");
+		assertThat(messageSource.getMessage(error2, Locale.ENGLISH)).isEqualTo("Email required");
+		assertThat(error1.contains(ConstraintViolation.class)).isTrue();
+		assertThat(error1.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("email");
+		assertThat(error2.contains(ConstraintViolation.class)).isTrue();
+		assertThat(error2.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("confirmEmail");
+	}
+
+	@Test
+	public void testPatternMessage() {
+		TestBean testBean = new TestBean();
+		testBean.setEmail("X");
+		testBean.setConfirmEmail("X");
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(testBean, "testBean");
+		validatorAdapter.validate(testBean, errors);
+
+		assertThat(errors.getFieldErrorCount("email")).isEqualTo(1);
+		assertThat(errors.getFieldValue("email")).isEqualTo("X");
+		FieldError error = errors.getFieldError("email");
+		assertThat(error).isNotNull();
+		assertThat(messageSource.getMessage(error, Locale.ENGLISH)).contains("[\\w.'-]{1,}@[\\w.'-]{1,}");
+		assertThat(error.contains(ConstraintViolation.class)).isTrue();
+		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("email");
 	}
 
 	@Test  // SPR-16177
@@ -179,7 +197,7 @@ public class SpringValidatorAdapterTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(parent, "parent");
 		validatorAdapter.validate(parent, errors);
 
-		assertTrue(errors.getErrorCount() > 0);
+		assertThat(errors.getErrorCount() > 0).isTrue();
 	}
 
 	@Test  // SPR-16177
@@ -191,7 +209,7 @@ public class SpringValidatorAdapterTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(parent, "parent");
 		validatorAdapter.validate(parent, errors);
 
-		assertTrue(errors.getErrorCount() > 0);
+		assertThat(errors.getErrorCount() > 0).isTrue();
 	}
 
 	private List<Child> createChildren(Parent parent) {
@@ -218,6 +236,7 @@ public class SpringValidatorAdapterTests {
 
 		private String confirmPassword;
 
+		@Pattern(regexp = "[\\w.'-]{1,}@[\\w.'-]{1,}")
 		private String email;
 
 		@Pattern(regexp = "[\\p{L} -]*", message = "Email required")
@@ -453,10 +472,10 @@ public class SpringValidatorAdapterTests {
 								.addPropertyNode(f.getName())
 								.addConstraintViolation();
 					}
-				} catch (IllegalAccessException ex) {
+				}
+				catch (IllegalAccessException ex) {
 					throw new IllegalStateException(ex);
 				}
-
 			});
 			return fieldsErros.isEmpty();
 		}

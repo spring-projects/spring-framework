@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -86,7 +86,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
 
 	/**
-	 * Indicates whether DTD parsing should be supported.
+	 * Indicate whether DTD parsing should be supported.
 	 * <p>Default is {@code false} meaning that DTD is disabled.
 	 */
 	public void setSupportDtd(boolean supportDtd) {
@@ -94,14 +94,14 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Whether DTD parsing is supported.
+	 * Return whether DTD parsing is supported.
 	 */
 	public boolean isSupportDtd() {
 		return this.supportDtd;
 	}
 
 	/**
-	 * Indicates whether external XML entities are processed when unmarshalling.
+	 * Indicate whether external XML entities are processed when unmarshalling.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
 	 * Note that processing of external entities will only be enabled/disabled when the
 	 * {@code Source} passed to {@link #unmarshal(Source)} is a {@link SAXSource} or
@@ -113,12 +113,12 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
 		if (processExternalEntities) {
-			setSupportDtd(true);
+			this.supportDtd = true;
 		}
 	}
 
 	/**
-	 * Returns the configured value for whether XML external entities are allowed.
+	 * Return whether XML external entities are allowed.
 	 * @see #createXmlReader()
 	 */
 	public boolean isProcessExternalEntities() {

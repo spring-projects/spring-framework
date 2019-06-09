@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,14 +17,13 @@
 package org.springframework.core.io;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests that serve as regression tests for the bugs described in SPR-6888
@@ -99,46 +98,41 @@ public class ClassPathResourceTests {
 
 	@Test
 	public void dropLeadingSlashForClassLoaderAccess() {
-		assertEquals("test.html", new ClassPathResource("/test.html").getPath());
-		assertEquals("test.html", ((ClassPathResource) new ClassPathResource("").createRelative("/test.html")).getPath());
+		assertThat(new ClassPathResource("/test.html").getPath()).isEqualTo("test.html");
+		assertThat(((ClassPathResource) new ClassPathResource("").createRelative("/test.html")).getPath()).isEqualTo("test.html");
 	}
 
 	@Test
 	public void preserveLeadingSlashForClassRelativeAccess() {
-		assertEquals("/test.html", new ClassPathResource("/test.html", getClass()).getPath());
-		assertEquals("/test.html", ((ClassPathResource) new ClassPathResource("", getClass()).createRelative("/test.html")).getPath());
+		assertThat(new ClassPathResource("/test.html", getClass()).getPath()).isEqualTo("/test.html");
+		assertThat(((ClassPathResource) new ClassPathResource("", getClass()).createRelative("/test.html")).getPath()).isEqualTo("/test.html");
 	}
 
 	@Test
 	public void directoryNotReadable() {
 		Resource fileDir = new ClassPathResource("org/springframework/core");
-		assertTrue(fileDir.exists());
-		assertFalse(fileDir.isReadable());
+		assertThat(fileDir.exists()).isTrue();
+		assertThat(fileDir.isReadable()).isFalse();
 
 		Resource jarDir = new ClassPathResource("reactor/core");
-		assertTrue(jarDir.exists());
-		assertFalse(jarDir.isReadable());
+		assertThat(jarDir.exists()).isTrue();
+		assertThat(jarDir.isReadable()).isFalse();
 	}
 
 
 	private void assertDescriptionContainsExpectedPath(ClassPathResource resource, String expectedPath) {
 		Matcher matcher = DESCRIPTION_PATTERN.matcher(resource.getDescription());
-		assertTrue(matcher.matches());
-		assertEquals(1, matcher.groupCount());
+		assertThat(matcher.matches()).isTrue();
+		assertThat(matcher.groupCount()).isEqualTo(1);
 		String match = matcher.group(1);
 
-		assertEquals(expectedPath, match);
+		assertThat(match).isEqualTo(expectedPath);
 	}
 
 	private void assertExceptionContainsFullyQualifiedPath(ClassPathResource resource) {
-		try {
-			resource.getInputStream();
-			fail("FileNotFoundException expected for resource: " + resource);
-		}
-		catch (IOException ex) {
-			assertThat(ex, instanceOf(FileNotFoundException.class));
-			assertThat(ex.getMessage(), containsString(FQ_RESOURCE_PATH));
-		}
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
+				resource::getInputStream)
+			.withMessageContaining(FQ_RESOURCE_PATH);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.core.codec;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -31,6 +32,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Abstract base class for {@link Decoder} unit tests. Subclasses need to implement
@@ -99,6 +102,7 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	 */
 	protected <T> void testDecodeAll(Publisher<DataBuffer> input, Class<? extends T> outputClass,
 			Consumer<StepVerifier.FirstStep<T>> stepConsumer) {
+
 		testDecodeAll(input, ResolvableType.forClass(outputClass), stepConsumer, null, null);
 	}
 
@@ -122,6 +126,7 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	protected <T> void testDecodeAll(Publisher<DataBuffer> input, ResolvableType outputType,
 			Consumer<StepVerifier.FirstStep<T>> stepConsumer,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		testDecode(input, outputType, stepConsumer, mimeType, hints);
 		testDecodeError(input, outputType, mimeType, hints);
 		testDecodeCancel(input, outputType, mimeType, hints);
@@ -151,6 +156,7 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	 */
 	protected <T> void testDecode(Publisher<DataBuffer> input, Class<? extends T> outputClass,
 			Consumer<StepVerifier.FirstStep<T>> stepConsumer) {
+
 		testDecode(input, ResolvableType.forClass(outputClass), stepConsumer, null, null);
 	}
 
@@ -202,16 +208,9 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	protected void testDecodeError(Publisher<DataBuffer> input, ResolvableType outputType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		input = Flux.concat(
-				Flux.from(input).take(1),
-				Flux.error(new InputException()));
-
-		Flux<?> result = this.decoder.decode(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.expectNextCount(1)
-				.expectError(InputException.class)
-				.verify();
+		Flux<DataBuffer> buffer = Mono.from(input).concatWith(Flux.error(new InputException()));
+		assertThatExceptionOfType(InputException.class).isThrownBy(() ->
+				this.decoder.decode(buffer, outputType, mimeType, hints).blockLast(Duration.ofSeconds(5)));
 	}
 
 	/**
@@ -229,11 +228,7 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Flux<?> result = this.decoder.decode(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.expectNextCount(1)
-				.thenCancel()
-				.verify();
+		StepVerifier.create(result).expectNextCount(1).thenCancel().verify();
 	}
 
 	/**
@@ -249,9 +244,7 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 
 		Flux<DataBuffer> input = Flux.empty();
 		Flux<?> result = this.decoder.decode(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.verifyComplete();
+		StepVerifier.create(result).verifyComplete();
 	}
 
 	// Mono
@@ -297,6 +290,7 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	protected <T> void testDecodeToMonoAll(Publisher<DataBuffer> input, ResolvableType outputType,
 			Consumer<StepVerifier.FirstStep<T>> stepConsumer,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		testDecodeToMono(input, outputType, stepConsumer, mimeType, hints);
 		testDecodeToMonoError(input, outputType, mimeType, hints);
 		testDecodeToMonoCancel(input, outputType, mimeType, hints);
@@ -304,7 +298,7 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	}
 
 	/**
-	 * Test a standard {@link Decoder#decodeToMono) decode} scenario. For example:
+	 * Test a standard {@link Decoder#decodeToMono decode} scenario. For example:
 	 * <pre class="code">
 	 * byte[] bytes1 = ...
 	 * byte[] bytes2 = ...
@@ -326,11 +320,12 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	 */
 	protected <T> void testDecodeToMono(Publisher<DataBuffer> input,
 			Class<? extends T> outputClass, Consumer<StepVerifier.FirstStep<T>> stepConsumer) {
+
 		testDecodeToMono(input, ResolvableType.forClass(outputClass), stepConsumer, null, null);
 	}
 
 	/**
-	 * Test a standard {@link Decoder#decodeToMono) decode} scenario. For example:
+	 * Test a standard {@link Decoder#decodeToMono decode} scenario. For example:
 	 * <pre class="code">
 	 * byte[] bytes1 = ...
 	 * byte[] bytes2 = ...
@@ -377,15 +372,9 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	protected void testDecodeToMonoError(Publisher<DataBuffer> input, ResolvableType outputType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		input = Flux.concat(
-				Flux.from(input).take(1),
-				Flux.error(new InputException()));
-
+		input = Mono.from(input).concatWith(Flux.error(new InputException()));
 		Mono<?> result = this.decoder.decodeToMono(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.expectError(InputException.class)
-				.verify();
+		StepVerifier.create(result).expectError(InputException.class).verify();
 	}
 
 	/**
@@ -401,10 +390,7 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Mono<?> result = this.decoder.decodeToMono(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.thenCancel()
-				.verify();
+		StepVerifier.create(result).thenCancel().verify();
 	}
 
 	/**
@@ -418,11 +404,8 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	protected void testDecodeToMonoEmpty(ResolvableType outputType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
 
-		Flux<DataBuffer> input = Flux.empty();
-		Mono<?> result = this.decoder.decodeToMono(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.verifyComplete();
+		Mono<?> result = this.decoder.decodeToMono(Flux.empty(), outputType, mimeType, hints);
+		StepVerifier.create(result).verifyComplete();
 	}
 
 	/**
@@ -431,10 +414,10 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	 * @return the deferred buffer
 	 */
 	protected Mono<DataBuffer> dataBuffer(byte[] bytes) {
-		return Mono.defer(() -> {
+		return Mono.fromCallable(() -> {
 			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(bytes.length);
 			dataBuffer.write(bytes);
-			return Mono.just(dataBuffer);
+			return dataBuffer;
 		});
 	}
 
@@ -442,9 +425,6 @@ public abstract class AbstractDecoderTestCase<D extends Decoder<?>>
 	 * Exception used in {@link #testDecodeError} and {@link #testDecodeToMonoError}
 	 */
 	@SuppressWarnings("serial")
-	public static class InputException extends RuntimeException {
-
-	}
-
+	public static class InputException extends RuntimeException {}
 
 }

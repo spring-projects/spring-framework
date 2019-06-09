@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -106,8 +106,8 @@ public class PropertiesPersisterTests {
 		else {
 			persister.load(props, new ByteArrayInputStream(propString.getBytes()));
 		}
-		assertEquals("message1", props.getProperty("code1"));
-		assertEquals("message2", props.getProperty("code2"));
+		assertThat(props.getProperty("code1")).isEqualTo("message1");
+		assertThat(props.getProperty("code2")).isEqualTo("message2");
 		return props;
 	}
 
@@ -125,10 +125,10 @@ public class PropertiesPersisterTests {
 			propCopy = new String(propOut.toByteArray());
 		}
 		if (header != null) {
-			assertTrue(propCopy.contains(header));
+			assertThat(propCopy.contains(header)).isTrue();
 		}
-		assertTrue(propCopy.contains("\ncode1=message1"));
-		assertTrue(propCopy.contains("\ncode2=message2"));
+		assertThat(propCopy.contains("\ncode1=message1")).isTrue();
+		assertThat(propCopy.contains("\ncode2=message2")).isTrue();
 		return propCopy;
 	}
 

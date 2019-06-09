@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -106,10 +106,11 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 		return stringDecoder.decode(message.getBody(), STRING_TYPE, null, hints)
 				.bufferUntil(line -> line.equals(""))
-				.concatMap(lines -> buildEvent(lines, valueType, shouldWrap, hints));
+				.concatMap(lines -> Mono.justOrEmpty(buildEvent(lines, valueType, shouldWrap, hints)));
 	}
 
-	private Mono<?> buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
+	@Nullable
+	private Object buildEvent(List<String> lines, ResolvableType valueType, boolean shouldWrap,
 			Map<String, Object> hints) {
 
 		ServerSentEvent.Builder<Object> sseBuilder = shouldWrap ? ServerSentEvent.builder() : null;
@@ -138,34 +139,32 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 			}
 		}
 
-		Mono<?> decodedData = (data != null ? decodeData(data.toString(), valueType, hints) : Mono.empty());
+		Object decodedData = data != null ? decodeData(data.toString(), valueType, hints) : null;
 
 		if (shouldWrap) {
 			if (comment != null) {
 				sseBuilder.comment(comment.toString().substring(0, comment.length() - 1));
 			}
-			return decodedData.map(o -> {
-				sseBuilder.data(o);
-				return sseBuilder.build();
-			});
+			if (decodedData != null) {
+				sseBuilder.data(decodedData);
+			}
+			return sseBuilder.build();
 		}
 		else {
 			return decodedData;
 		}
 	}
 
-	private Mono<?> decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
+	private Object decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
 		if (String.class == dataType.resolve()) {
-			return Mono.just(data.substring(0, data.length() - 1));
+			return data.substring(0, data.length() - 1);
 		}
-
 		if (this.decoder == null) {
-			return Mono.error(new CodecException("No SSE decoder configured and the data is not String."));
+			throw new CodecException("No SSE decoder configured and the data is not String.");
 		}
-
 		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
-		Mono<DataBuffer> input = Mono.just(bufferFactory.wrap(bytes));
-		return this.decoder.decodeToMono(input, dataType, MediaType.TEXT_EVENT_STREAM, hints);
+		DataBuffer buffer = bufferFactory.wrap(bytes);  // wrapping only, no allocation
+		return this.decoder.decode(buffer, dataType, MediaType.TEXT_EVENT_STREAM, hints);
 	}
 
 	@Override

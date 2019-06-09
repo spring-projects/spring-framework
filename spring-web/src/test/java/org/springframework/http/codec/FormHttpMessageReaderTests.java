@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +36,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
@@ -48,29 +48,29 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTestCase {
 
 	@Test
 	public void canRead() {
-		assertTrue(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
-		assertTrue(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				ResolvableType.forInstance(new LinkedMultiValueMap<String, String>()),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
 
-		assertFalse(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, Object.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isFalse();
 
-		assertFalse(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, Object.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isFalse();
 
-		assertFalse(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				ResolvableType.forClassWithGenerics(Map.class, String.class, String.class),
-				MediaType.APPLICATION_FORM_URLENCODED));
+				MediaType.APPLICATION_FORM_URLENCODED)).isFalse();
 
-		assertFalse(this.reader.canRead(
+		assertThat(this.reader.canRead(
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class),
-				MediaType.MULTIPART_FORM_DATA));
+				MediaType.MULTIPART_FORM_DATA)).isFalse();
 	}
 
 	@Test
@@ -79,13 +79,13 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTestCase {
 		MockServerHttpRequest request = request(body);
 		MultiValueMap<String, String> result = this.reader.readMono(null, request, null).block();
 
-		assertEquals("Invalid result", 3, result.size());
-		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
+		assertThat(result.size()).as("Invalid result").isEqualTo(3);
+		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
-		assertEquals("Invalid result", 2, values.size());
-		assertEquals("Invalid result", "value 2+1", values.get(0));
-		assertEquals("Invalid result", "value 2+2", values.get(1));
-		assertNull("Invalid result", result.getFirst("name 3"));
+		assertThat(values.size()).as("Invalid result").isEqualTo(2);
+		assertThat(values.get(0)).as("Invalid result").isEqualTo("value 2+1");
+		assertThat(values.get(1)).as("Invalid result").isEqualTo("value 2+2");
+		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
 	}
 
 	@Test
@@ -94,13 +94,13 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTestCase {
 		MockServerHttpRequest request = request(body);
 		MultiValueMap<String, String> result = this.reader.read(null, request, null).single().block();
 
-		assertEquals("Invalid result", 3, result.size());
-		assertEquals("Invalid result", "value 1", result.getFirst("name 1"));
+		assertThat(result.size()).as("Invalid result").isEqualTo(3);
+		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
-		assertEquals("Invalid result", 2, values.size());
-		assertEquals("Invalid result", "value 2+1", values.get(0));
-		assertEquals("Invalid result", "value 2+2", values.get(1));
-		assertNull("Invalid result", result.getFirst("name 3"));
+		assertThat(values.size()).as("Invalid result").isEqualTo(2);
+		assertThat(values.get(0)).as("Invalid result").isEqualTo("value 2+1");
+		assertThat(values.get(1)).as("Invalid result").isEqualTo("value 2+2");
+		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
 	}
 
 	@Test

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -264,13 +264,13 @@ public interface DataBuffer {
 					break;
 				}
 				if (cr.isOverflow()) {
-					writePosition(outBuffer.position());
+					writePosition(writePosition() + outBuffer.position());
 					int maximumSize = (int) (inBuffer.remaining() * charsetEncoder.maxBytesPerChar());
 					ensureCapacity(maximumSize);
 					outBuffer = asByteBuffer(writePosition(), writableByteCount());
 				}
 			}
-			writePosition(outBuffer.position());
+			writePosition(writePosition() + outBuffer.position());
 		}
 		return this;
 	}
@@ -288,6 +288,23 @@ public interface DataBuffer {
 	 * @return the specified slice of this data buffer
 	 */
 	DataBuffer slice(int index, int length);
+
+	/**
+	 * Create a new {@code DataBuffer} whose contents is a shared, retained subsequence of this
+	 * data buffer's content.  Data between this data buffer and the returned buffer is
+	 * shared; though changes in the returned buffer's position will not be reflected
+	 * in the reading nor writing position of this data buffer.
+	 * <p><strong>Note</strong> that unlike {@link #slice(int, int)}, this method
+	 * <strong>will</strong> call {@link DataBufferUtils#retain(DataBuffer)} (or equivalent) on the
+	 * resulting slice.
+	 * @param index the index at which to start the slice
+	 * @param length the length of the slice
+	 * @return the specified, retained slice of this data buffer
+	 * @since 5.2
+	 */
+	default DataBuffer retainedSlice(int index, int length) {
+		return DataBufferUtils.retain(slice(index, length));
+	}
 
 	/**
 	 * Expose this buffer's bytes as a {@link ByteBuffer}. Data between this

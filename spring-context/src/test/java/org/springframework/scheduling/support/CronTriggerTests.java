@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.scheduling.TriggerContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Dave Syer
@@ -78,7 +79,7 @@ public class CronTriggerTests {
 	public void testMatchAll() throws Exception {
 		CronTrigger trigger = new CronTrigger("* * * * * *", timeZone);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -104,7 +105,7 @@ public class CronTriggerTests {
 		Date date = calendar.getTime();
 		calendar.add(Calendar.SECOND, 1);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -115,7 +116,7 @@ public class CronTriggerTests {
 		context.update(calendar.getTime(), new Date(calendar.getTimeInMillis() - 100),
 				new Date(calendar.getTimeInMillis() - 90));
 		calendar.add(Calendar.MINUTE, 1);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -125,7 +126,7 @@ public class CronTriggerTests {
 		Date date = calendar.getTime();
 		calendar.add(Calendar.SECOND, 59);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -146,11 +147,11 @@ public class CronTriggerTests {
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context1 = getTriggerContext(date);
 		date = trigger.nextExecutionTime(context1);
-		assertEquals(calendar.getTime(), date);
+		assertThat(date).isEqualTo(calendar.getTime());
 		calendar.add(Calendar.MINUTE, 1);
 		TriggerContext context2 = getTriggerContext(date);
 		date = trigger.nextExecutionTime(context2);
-		assertEquals(calendar.getTime(), date);
+		assertThat(date).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -160,7 +161,7 @@ public class CronTriggerTests {
 		TriggerContext context = getTriggerContext(calendar.getTime());
 		calendar.add(Calendar.MINUTE, 1);
 		calendar.set(Calendar.SECOND, 0);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -171,7 +172,7 @@ public class CronTriggerTests {
 		Date date = calendar.getTime();
 		calendar.add(Calendar.MINUTE, 59);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -186,10 +187,11 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.HOUR_OF_DAY, 12);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual = date = trigger.nextExecutionTime(context1);
+		assertThat(actual).isEqualTo(calendar.getTime());
 		calendar.set(Calendar.HOUR_OF_DAY, 13);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context2));
+		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -205,10 +207,11 @@ public class CronTriggerTests {
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.DAY_OF_MONTH, 11);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual = date = trigger.nextExecutionTime(context1);
+		assertThat(actual).isEqualTo(calendar.getTime());
 		calendar.set(Calendar.HOUR_OF_DAY, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context2));
+		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -221,12 +224,14 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
-		assertEquals(2, calendar.get(Calendar.DAY_OF_MONTH));
+		Object actual1 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual1).isEqualTo(calendar.getTime());
+		assertThat(calendar.get(Calendar.DAY_OF_MONTH)).isEqualTo(2);
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
-		assertEquals(3, calendar.get(Calendar.DAY_OF_MONTH));
+		Object actual = date = trigger.nextExecutionTime(context2);
+		assertThat(actual).isEqualTo(calendar.getTime());
+		assertThat(calendar.get(Calendar.DAY_OF_MONTH)).isEqualTo(3);
 	}
 
 	@Test
@@ -239,7 +244,7 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -253,7 +258,7 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -268,10 +273,11 @@ public class CronTriggerTests {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual = date = trigger.nextExecutionTime(context1);
+		assertThat(actual).isEqualTo(calendar.getTime());
 		calendar.set(Calendar.DAY_OF_MONTH, 2);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context2));
+		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -285,11 +291,12 @@ public class CronTriggerTests {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.DAY_OF_MONTH, 31);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual = date = trigger.nextExecutionTime(context1);
+		assertThat(actual).isEqualTo(calendar.getTime());
 		calendar.set(Calendar.MONTH, 8); // September
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context2));
+		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -303,11 +310,12 @@ public class CronTriggerTests {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.DAY_OF_MONTH, 31);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual = date = trigger.nextExecutionTime(context1);
+		assertThat(actual).isEqualTo(calendar.getTime());
 		calendar.set(Calendar.MONTH, 10); // November
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context2));
+		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -322,10 +330,11 @@ public class CronTriggerTests {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MONTH, 10);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual = date = trigger.nextExecutionTime(context1);
+		assertThat(actual).isEqualTo(calendar.getTime());
 		calendar.set(Calendar.MONTH, 11);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context2));
+		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -342,10 +351,11 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MONTH, 0);
 		calendar.set(Calendar.YEAR, 2011);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual = date = trigger.nextExecutionTime(context1);
+		assertThat(actual).isEqualTo(calendar.getTime());
 		calendar.set(Calendar.MONTH, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context2));
+		assertThat(trigger.nextExecutionTime(context2)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -359,7 +369,7 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -374,7 +384,7 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -387,8 +397,8 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
-		assertEquals(Calendar.TUESDAY, calendar.get(Calendar.DAY_OF_WEEK));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
+		assertThat(calendar.get(Calendar.DAY_OF_WEEK)).isEqualTo(Calendar.TUESDAY);
 	}
 
 	@Test
@@ -401,8 +411,8 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
-		assertEquals(Calendar.TUESDAY, calendar.get(Calendar.DAY_OF_WEEK));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
+		assertThat(calendar.get(Calendar.DAY_OF_WEEK)).isEqualTo(Calendar.TUESDAY);
 	}
 
 	@Test
@@ -414,10 +424,12 @@ public class CronTriggerTests {
 		TriggerContext context1 = getTriggerContext(date);
 		calendar.add(Calendar.MINUTE, 1);
 		calendar.set(Calendar.SECOND, 55);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual1 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual1).isEqualTo(calendar.getTime());
 		calendar.add(Calendar.HOUR, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		Object actual = date = trigger.nextExecutionTime(context2);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -430,10 +442,12 @@ public class CronTriggerTests {
 		calendar.add(Calendar.HOUR_OF_DAY, 1);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 55);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual1 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual1).isEqualTo(calendar.getTime());
 		calendar.add(Calendar.MINUTE, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		Object actual = date = trigger.nextExecutionTime(context2);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -446,11 +460,13 @@ public class CronTriggerTests {
 		calendar.add(Calendar.HOUR_OF_DAY, 1);
 		calendar.set(Calendar.SECOND, 0);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual1 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual1).isEqualTo(calendar.getTime());
 		// next trigger is in one second because second is wildcard
 		calendar.add(Calendar.SECOND, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		Object actual = date = trigger.nextExecutionTime(context2);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -464,10 +480,12 @@ public class CronTriggerTests {
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 55);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual1 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual1).isEqualTo(calendar.getTime());
 		calendar.add(Calendar.MINUTE, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		Object actual = date = trigger.nextExecutionTime(context2);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -482,13 +500,15 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MONTH, 10); // 10=November
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual1 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual1).isEqualTo(calendar.getTime());
 		calendar.add(Calendar.SECOND, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		Object actual = date = trigger.nextExecutionTime(context2);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNonExistentSpecificDate() throws Exception {
 		// TODO: maybe try and detect this as a special case in parser?
 		CronTrigger trigger = new CronTrigger("0 0 0 31 6 *", timeZone);
@@ -496,7 +516,8 @@ public class CronTriggerTests {
 		calendar.set(Calendar.MONTH, 2);
 		Date date = calendar.getTime();
 		TriggerContext context1 = getTriggerContext(date);
-		trigger.nextExecutionTime(context1);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				trigger.nextExecutionTime(context1));
 		// new CronTrigger("0 0 0 30 1 ?", timeZone);
 	}
 
@@ -513,10 +534,12 @@ public class CronTriggerTests {
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual1 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual1).isEqualTo(calendar.getTime());
 		calendar.add(Calendar.YEAR, 4);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		Object actual = date = trigger.nextExecutionTime(context2);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -532,144 +555,159 @@ public class CronTriggerTests {
 		// Add two days because we start on Saturday
 		calendar.add(Calendar.DAY_OF_MONTH, 2);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual2 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual2).isEqualTo(calendar.getTime());
 		// Next day is a week day so add one
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		Object actual1 = date = trigger.nextExecutionTime(context2);
+		assertThat(actual1).isEqualTo(calendar.getTime());
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 		TriggerContext context3 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context3));
+		Object actual = date = trigger.nextExecutionTime(context3);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
 	@Test
 	public void testDayOfWeekIndifferent() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("* * * 2 * *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * 2 * ?", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
 	public void testSecondIncrementer() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("57,59 * * * * *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("57/2 * * * * *", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
 	public void testSecondIncrementerWithRange() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("1,3,5 * * * * *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("1-6/2 * * * * *", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
 	public void testHourIncrementer() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("* * 4,8,12,16,20 * * *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * 4/4 * * *", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
 	public void testDayNames() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("* * * * * 0-6", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * * TUE,WED,THU,FRI,SAT,SUN,MON", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
 	public void testSundayIsZero() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("* * * * * 0", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * * SUN", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
 	public void testSundaySynonym() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("* * * * * 0", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * * 7", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
 	public void testMonthNames() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("* * * * 1-12 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * FEB,JAN,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC *", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
 	public void testMonthNamesMixedCase() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("* * * * 2 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * Feb *", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSecondInvalid() throws Exception {
-		new CronTrigger("77 * * * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("77 * * * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSecondRangeInvalid() throws Exception {
-		new CronTrigger("44-77 * * * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("44-77 * * * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMinuteInvalid() throws Exception {
-		new CronTrigger("* 77 * * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* 77 * * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMinuteRangeInvalid() throws Exception {
-		new CronTrigger("* 44-77 * * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* 44-77 * * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testHourInvalid() throws Exception {
-		new CronTrigger("* * 27 * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * 27 * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testHourRangeInvalid() throws Exception {
-		new CronTrigger("* * 23-28 * * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * 23-28 * * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDayInvalid() throws Exception {
-		new CronTrigger("* * * 45 * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * * 45 * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDayRangeInvalid() throws Exception {
-		new CronTrigger("* * * 28-45 * *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * * 28-45 * *", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMonthInvalid() throws Exception {
-		new CronTrigger("0 0 0 25 13 ?", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("0 0 0 25 13 ?", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMonthInvalidTooSmall() throws Exception {
-		new CronTrigger("0 0 0 25 0 ?", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("0 0 0 25 0 ?", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDayOfMonthInvalid() throws Exception {
-		new CronTrigger("0 0 0 32 12 ?", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("0 0 0 32 12 ?", timeZone));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testMonthRangeInvalid() throws Exception {
-		new CronTrigger("* * * * 11-13 *", timeZone);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronTrigger("* * * * 11-13 *", timeZone));
 	}
 
 	@Test
 	public void testWhitespace() throws Exception {
 		CronTrigger trigger1 = new CronTrigger("*  *  * *  1 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * 1 *", timeZone);
-		assertEquals(trigger1, trigger2);
+		assertThat(trigger2).isEqualTo(trigger1);
 	}
 
 	@Test
@@ -683,15 +721,18 @@ public class CronTriggerTests {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.add(Calendar.MONTH, 1);
 		TriggerContext context1 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual2 = date = trigger.nextExecutionTime(context1);
+		assertThat(actual2).isEqualTo(calendar.getTime());
 		// Next trigger is 3 months latter
 		calendar.add(Calendar.MONTH, 3);
 		TriggerContext context2 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		Object actual1 = date = trigger.nextExecutionTime(context2);
+		assertThat(actual1).isEqualTo(calendar.getTime());
 		// Next trigger is 3 months latter
 		calendar.add(Calendar.MONTH, 3);
 		TriggerContext context3 = getTriggerContext(date);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context3));
+		Object actual = date = trigger.nextExecutionTime(context3);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
 	@Test
@@ -712,14 +753,15 @@ public class CronTriggerTests {
 		calendar.add(Calendar.HOUR_OF_DAY, 1);
 		calendar.set(Calendar.MINUTE, 10);
 		calendar.set(Calendar.SECOND, 0);
-		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		Object actual = date = trigger.nextExecutionTime(context1);
+		assertThat(actual).isEqualTo(calendar.getTime());
 	}
 
 	private void assertMatchesNextSecond(CronTrigger trigger, Calendar calendar) {
 		Date date = calendar.getTime();
 		roundup(calendar);
 		TriggerContext context = getTriggerContext(date);
-		assertEquals(calendar.getTime(), trigger.nextExecutionTime(context));
+		assertThat(trigger.nextExecutionTime(context)).isEqualTo(calendar.getTime());
 	}
 
 	private static TriggerContext getTriggerContext(Date lastCompletionTime) {

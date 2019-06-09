@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,13 +25,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based unit test which verifies proper
@@ -39,7 +40,7 @@ import static org.junit.Assert.*;
  * {@code resource locations} by a {@link GenericXmlContextLoader}
  * configured via {@link ContextConfiguration @ContextConfiguration}.
  * Specifically, this test addresses the issues raised in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3949"
+ * href="https://opensource.atlassian.com/projects/spring/browse/SPR-3949"
  * target="_blank">SPR-3949</a>:
  * <em>ContextConfiguration annotation should accept not only classpath resources</em>.
  *
@@ -77,12 +78,12 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 		class ExplicitFileLocationsTestCase {
 		}
 
-		@ContextConfiguration("http://example.com/context.xml")
+		@ContextConfiguration("https://example.com/context.xml")
 		class ExplicitUrlLocationsTestCase {
 		}
 
 		@ContextConfiguration({ "context1.xml", "classpath:context2.xml", "/context3.xml",
-			"file:/testing/directory/context.xml", "http://example.com/context.xml" })
+			"file:/testing/directory/context.xml", "https://example.com/context.xml" })
 		class ExplicitMixedPathTypesLocationsTestCase {
 		}
 
@@ -103,13 +104,13 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 
 			{ ExplicitFileLocationsTestCase.class.getSimpleName(), new String[] { "file:/testing/directory/context.xml" } },
 
-			{ ExplicitUrlLocationsTestCase.class.getSimpleName(), new String[] { "http://example.com/context.xml" } },
+			{ ExplicitUrlLocationsTestCase.class.getSimpleName(), new String[] { "https://example.com/context.xml" } },
 
 			{
 				ExplicitMixedPathTypesLocationsTestCase.class.getSimpleName(),
 				new String[] { "classpath:/org/springframework/test/context/support/context1.xml",
 					"classpath:context2.xml", "classpath:/context3.xml", "file:/testing/directory/context.xml",
-					"http://example.com/context.xml" } }
+					"https://example.com/context.xml" } }
 
 		});
 	}
@@ -134,8 +135,7 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 			logger.debug("Processed  locations: " + ObjectUtils.nullSafeToString(processedLocations));
 		}
 
-		assertArrayEquals("Verifying locations for test [" + this.testClass + "].", this.expectedLocations,
-			processedLocations);
+		assertThat(processedLocations).as("Verifying locations for test [" + this.testClass + "].").isEqualTo(this.expectedLocations);
 	}
 
 }

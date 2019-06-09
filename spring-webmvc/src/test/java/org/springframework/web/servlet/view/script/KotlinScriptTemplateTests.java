@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -33,8 +34,8 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
@@ -55,25 +56,27 @@ public class KotlinScriptTemplateTests {
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webAppContext);
 	}
 
-
+	@Ignore
 	@Test
 	public void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
 		String url = "org/springframework/web/servlet/view/script/kotlin/template.kts";
 		MockHttpServletResponse response = render(url, model, Locale.FRENCH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Bonjour Foo</p>\n</body></html>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>\n<p>Bonjour Foo</p>\n</body></html>");
 	}
 
+	@Ignore
 	@Test
 	public void renderTemplateWithEnglishLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
 		String url = "org/springframework/web/servlet/view/script/kotlin/template.kts";
 		MockHttpServletResponse response = render(url, model, Locale.ENGLISH, ScriptTemplatingConfiguration.class);
-		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>\n<p>Hello Foo</p>\n</body></html>");
 	}
 
+	@Ignore
 	@Test
 	public void renderTemplateWithoutRenderFunction() throws Exception {
 		Map<String, Object> model = new HashMap<>();
@@ -83,8 +86,7 @@ public class KotlinScriptTemplateTests {
 		model.put("footer", "</body></html>");
 		MockHttpServletResponse response = render("org/springframework/web/servlet/view/script/kotlin/eval.kts",
 				model, Locale.ENGLISH, ScriptTemplatingConfigurationWithoutRenderFunction.class);
-		assertEquals("<html><body>\n<p>Hello Foo</p>\n</body></html>",
-				response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("<html><body>\n<p>Hello Foo</p>\n</body></html>");
 	}
 
 

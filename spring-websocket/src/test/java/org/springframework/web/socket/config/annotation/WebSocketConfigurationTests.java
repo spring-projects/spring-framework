@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for WebSocket Java server-side configuration.
@@ -70,7 +70,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/ws").get();
 
 		TestHandler serverHandler = this.wac.getBean(TestHandler.class);
-		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
+		assertThat(serverHandler.connectLatch.await(2, TimeUnit.SECONDS)).isTrue();
 
 		session.close();
 	}
@@ -81,7 +81,7 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/sockjs/websocket").get();
 
 		TestHandler serverHandler = this.wac.getBean(TestHandler.class);
-		assertTrue(serverHandler.connectLatch.await(2, TimeUnit.SECONDS));
+		assertThat(serverHandler.connectLatch.await(2, TimeUnit.SECONDS)).isTrue();
 
 		session.close();
 	}

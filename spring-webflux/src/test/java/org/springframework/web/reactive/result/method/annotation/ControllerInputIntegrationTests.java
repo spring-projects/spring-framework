@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@code @RequestMapping} integration focusing on controller method parameters.
@@ -55,20 +55,20 @@ public class ControllerInputIntegrationTests extends AbstractRequestMappingInteg
 	@Test
 	public void handleWithParam() throws Exception {
 		String expected = "Hello George!";
-		assertEquals(expected, performGet("/param?name=George", new HttpHeaders(), String.class).getBody());
+		assertThat(performGet("/param?name=George", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test  // SPR-15140
 	public void handleWithEncodedParam() throws Exception {
 		String expected = "Hello  + \u00e0!";
-		assertEquals(expected, performGet("/param?name=%20%2B+%C3%A0", new HttpHeaders(), String.class).getBody());
+		assertThat(performGet("/param?name=%20%2B+%C3%A0", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 	@Test
 	public void matrixVariable() throws Exception {
 		String expected = "p=11, q2=22, q4=44";
 		String url = "/first;p=11/second;q=22/third-fourth;q=44";
-		assertEquals(expected, performGet(url, new HttpHeaders(), String.class).getBody());
+		assertThat(performGet(url, new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 

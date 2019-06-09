@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.File;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -34,14 +32,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests related to the use of context paths.
  *
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
 public class ContextPathIntegrationTests {
 
 
@@ -70,11 +67,11 @@ public class ContextPathIntegrationTests {
 
 			String url = "http://localhost:" + server.getPort() + "/webApp1/test";
 			actual = restTemplate.getForObject(url, String.class);
-			assertEquals("Tested in /webApp1", actual);
+			assertThat(actual).isEqualTo("Tested in /webApp1");
 
 			url = "http://localhost:" + server.getPort() + "/webApp2/test";
 			actual = restTemplate.getForObject(url, String.class);
-			assertEquals("Tested in /webApp2", actual);
+			assertThat(actual).isEqualTo("Tested in /webApp2");
 		}
 		finally {
 			server.stop();
@@ -104,7 +101,7 @@ public class ContextPathIntegrationTests {
 
 			String url = "http://localhost:" + server.getPort() + "/app/api/test";
 			actual = restTemplate.getForObject(url, String.class);
-			assertEquals("Tested in /app/api", actual);
+			assertThat(actual).isEqualTo("Tested in /app/api");
 		}
 		finally {
 			server.stop();

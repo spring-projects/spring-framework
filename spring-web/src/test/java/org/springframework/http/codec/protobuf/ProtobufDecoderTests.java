@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +36,8 @@ import org.springframework.protobuf.SecondMsg;
 import org.springframework.util.MimeType;
 
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
@@ -62,19 +63,20 @@ public class ProtobufDecoderTests extends AbstractDecoderTestCase<ProtobufDecode
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void extensionRegistryNull() {
-		new ProtobufDecoder(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ProtobufDecoder(null));
 	}
 
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(forClass(Msg.class), null));
-		assertTrue(this.decoder.canDecode(forClass(Msg.class), PROTOBUF_MIME_TYPE));
-		assertTrue(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM));
-		assertFalse(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_JSON));
-		assertFalse(this.decoder.canDecode(forClass(Object.class), PROTOBUF_MIME_TYPE));
+		assertThat(this.decoder.canDecode(forClass(Msg.class), null)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), PROTOBUF_MIME_TYPE)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_JSON)).isFalse();
+		assertThat(this.decoder.canDecode(forClass(Object.class), PROTOBUF_MIME_TYPE)).isFalse();
 	}
 
 	@Override
@@ -223,11 +225,11 @@ public class ProtobufDecoderTests extends AbstractDecoderTestCase<ProtobufDecode
 	}
 
 	private Mono<DataBuffer> dataBuffer(Msg msg) {
-		return Mono.defer(() -> {
+		return Mono.fromCallable(() -> {
 			byte[] bytes = msg.toByteArray();
 			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
 			buffer.write(bytes);
-			return Mono.just(buffer);
+			return buffer;
 		});
 	}
 

@@ -20,18 +20,19 @@ directly. Because this is reference documentation, however, we felt that some ex
 might be in order. We explain the `BeanWrapper` in this chapter, since, if you are
 going to use it at all, you are most likely do so when trying to bind data to objects.
 
-Spring's `DataBinder` and the lower-level `BeanWrapper` both use `PropertyEditorSupport` implementations to parse
-and format property values. The `PropertyEditor` and `PropertyEditorSupport` interfaces are part of the JavaBeans
-specification and are also explained in this chapter. Spring 3 introduced a
-`core.convert` package that provides a general type conversion facility, as well as a
-higher-level "`format`" package for formatting UI field values. You can use these packages
-as simpler alternatives to `PropertyEditorSupport` implementations. They are also discussed in this
-chapter.
+Spring's `DataBinder` and the lower-level `BeanWrapper` both use `PropertyEditorSupport`
+implementations to parse and format property values. The `PropertyEditor` and
+`PropertyEditorSupport` types are part of the JavaBeans specification and are also
+explained in this chapter. Spring 3 introduced a `core.convert` package that provides a
+general type conversion facility, as well as a higher-level "`format`" package for
+formatting UI field values. You can use these packages as simpler alternatives to
+`PropertyEditorSupport` implementations. They are also discussed in this chapter.
 
 .JSR-303/JSR-349 Bean Validation
 ****
-As of version 4.0, Spring Framework supports Bean Validation 1.0 (JSR-303) and Bean Validation 1.1
-(JSR-349) for setup support and adapting them to Spring's `Validator` interface.
+As of version 4.0, Spring Framework supports Bean Validation 1.0 (JSR-303) and
+Bean Validation 1.1 (JSR-349) for setup support and adapting them to Spring's
+`Validator` interface.
 
 An application can choose to enable Bean Validation once globally, as described in
 <<validation-beanvalidation>>, and use it exclusively for all validation needs.
@@ -167,22 +168,21 @@ methods it offers can be found in the {api-spring-framework}validation/Errors.ht
 [[validation-conversion]]
 == Resolving Codes to Error Messages
 
-We covered databinding and validation. This section covers outputting messages that correspond to
-validation errors. In the example shown in the <<validator,preceding section>>,
-we rejected the `name` and `age` fields. If we want to output the error
-messages by using a `MessageSource`, we can do so using the error code we provide when
-rejecting the field ('name' and 'age' in this case). When you call (either directly, or
-indirectly, by using, for example, the `ValidationUtils` class) `rejectValue` or one of the
-other `reject` methods from the `Errors` interface, the underlying implementation
-not only registers the code you passed in but also registers a number of additional error
-codes. The `MessageCodesResolver` determines which error codes the `Errors` interface registers.
-By default, the `DefaultMessageCodesResolver` is used, which (for example) not only
-registers a message with the code you gave but also registers messages that include the field
-name you passed to the reject method. So, if you reject a field by using
-`rejectValue("age", "too.darn.old")`, apart from the `too.darn.old` code, Spring
-also registers `too.darn.old.age` and `too.darn.old.age.int` (the first includes
-the field name and the second includes the type of the field). This is done as a
-convenience to aid developers when targeting error messages.
+We covered databinding and validation. This section covers outputting messages that correspond
+to validation errors. In the example shown in the <<validator, preceding section>>,
+we rejected the `name` and `age` fields. If we want to output the error messages by using a
+`MessageSource`, we can do so using the error code we provide when rejecting the field
+('name' and 'age' in this case). When you call (either directly, or indirectly, by using,
+for example, the `ValidationUtils` class) `rejectValue` or one of the other `reject` methods
+from the `Errors` interface, the underlying implementation not only registers the code you
+passed in but also registers a number of additional error codes. The `MessageCodesResolver`
+determines which error codes the `Errors` interface registers. By default, the
+`DefaultMessageCodesResolver` is used, which (for example) not only registers a message
+with the code you gave but also registers messages that include the field name you passed
+to the reject method. So, if you reject a field by using `rejectValue("age", "too.darn.old")`,
+apart from the `too.darn.old` code, Spring also registers `too.darn.old.age` and
+`too.darn.old.age.int` (the first includes the field name and the second includes the type
+of the field). This is done as a convenience to aid developers when targeting error messages.
 
 More information on the `MessageCodesResolver` and the default strategy can be found
 in the javadoc of
@@ -201,7 +201,7 @@ A JavaBean is a class with a default no-argument constructor and that follows
 a naming convention where (for example) a property named `bingoMadness` would
 have a setter method `setBingoMadness(..)` and a getter method `getBingoMadness()`. For
 more information about JavaBeans and the specification, see
-http://docs.oracle.com/javase/8/docs/api/java/beans/package-summary.html[javabeans].
+https://docs.oracle.com/javase/8/docs/api/java/beans/package-summary.html[javabeans].
 
 One quite important class in the beans package is the `BeanWrapper` interface and its
 corresponding implementation (`BeanWrapperImpl`). As quoted from the javadoc, the
@@ -253,8 +253,8 @@ object. The following table shows some examples of these conventions:
 
 (This next section is not vitally important to you if you do not plan to work with
 the `BeanWrapper` directly. If you use only the `DataBinder` and the `BeanFactory`
-and their default implementations, you should skip ahead to the <<beans-beans-conversion,section about
-`PropertyEditors`>>.)
+and their default implementations, you should skip ahead to the
+<<beans-beans-conversion, section on `PropertyEditors`>>.)
 
 The following two example classes use the `BeanWrapper` to get and set
 properties:
@@ -455,7 +455,7 @@ com
 
 Note that you can also use the standard `BeanInfo` JavaBeans mechanism here as well
 (described to some extent
-http://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[
+https://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[
 here]). The following example use the `BeanInfo` mechanism to
 explicitly register one or more `PropertyEditor` instances with the properties of an
 associated class:
@@ -521,17 +521,17 @@ where it can be automatically detected and applied.
 Note that all bean factories and application contexts automatically use a number of
 built-in property editors, through their use a `BeanWrapper` to
 handle property conversions. The standard property editors that the `BeanWrapper`
-registers are listed in <<beans-beans-conversion,the previous section>>. Additionally,
-`ApplicationContexts` also override or add additional editors to handle
+registers are listed in the <<beans-beans-conversion, previous section>>.
+Additionally, `ApplicationContexts` also override or add additional editors to handle
 resource lookups in a manner appropriate to the specific application context type.
 
 Standard JavaBeans `PropertyEditor` instances are used to convert property values
-expressed as strings to the actual complex type of the property.
-You can use `CustomEditorConfigurer`, a bean factory post-processor, to conveniently add
+expressed as strings to the actual complex type of the property. You can use
+`CustomEditorConfigurer`, a bean factory post-processor, to conveniently add
 support for additional `PropertyEditor` instances to an `ApplicationContext`.
 
-Consider the following example, which defines a user class called `ExoticType` and another class called `DependsOnExoticType`, which needs
-`ExoticType` set as a property:
+Consider the following example, which defines a user class called `ExoticType` and
+another class called `DependsOnExoticType`, which needs `ExoticType` set as a property:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -605,14 +605,15 @@ Finally, the following example shows how to use `CustomEditorConfigurer` to regi
 
 Another mechanism for registering property editors with the Spring container is to
 create and use a `PropertyEditorRegistrar`. This interface is particularly useful when
-you need to use the same set of property editors in several different situations. You can write
-a corresponding registrar and reuse it in each case. `PropertyEditorRegistrar` instances work
-in conjunction with an interface called `PropertyEditorRegistry`, an interface that is
-implemented by the Spring `BeanWrapper` (and `DataBinder`). `PropertyEditorRegistrar` instances
-are particularly convenient when used in conjunction with `CustomEditorConfigurer`
-(described <<beans-beans-conversion-customeditor-registration,here>>), which exposes a
-property called `setPropertyEditorRegistrars(..)`. `PropertyEditorRegistrar` instances added to a
-`CustomEditorConfigurer` in this fashion can easily be shared with `DataBinder` and
+you need to use the same set of property editors in several different situations.
+You can write a corresponding registrar and reuse it in each case.
+`PropertyEditorRegistrar` instances work in conjunction with an interface called
+`PropertyEditorRegistry`, an interface that is implemented by the Spring `BeanWrapper`
+(and `DataBinder`). `PropertyEditorRegistrar` instances are particularly convenient
+when used in conjunction with `CustomEditorConfigurer` (described
+<<beans-beans-conversion-customeditor-registration, here>>), which exposes a property
+called `setPropertyEditorRegistrars(..)`. `PropertyEditorRegistrar` instances added
+to a `CustomEditorConfigurer` in this fashion can easily be shared with `DataBinder` and
 Spring MVC controllers. Furthermore, it avoids the need for synchronization on custom
 editors: A `PropertyEditorRegistrar` is expected to create fresh `PropertyEditor`
 instances for each bean creation attempt.
@@ -659,7 +660,7 @@ The next example shows how to configure a `CustomEditorConfigurer` and inject an
 ----
 
 Finally (and in a bit of a departure from the focus of this chapter for those of you
-using <<web.adoc#mvc,Spring's MVC web framework>>), using `PropertyEditorRegistrars` in
+using <<web.adoc#mvc, Spring's MVC web framework>>), using `PropertyEditorRegistrars` in
 conjunction with data-binding `Controllers` (such as `SimpleFormController`) can be very
 convenient. The following example uses a `PropertyEditorRegistrar` in the
 implementation of an `initBinder(..)` method:
@@ -677,7 +678,7 @@ implementation of an `initBinder(..)` method:
 
 		protected void initBinder(HttpServletRequest request,
 				ServletRequestDataBinder binder) throws Exception {
-			**this.customPropertyEditorRegistrar.registerCustomEditors(binder);**
+			this.customPropertyEditorRegistrar.registerCustomEditors(binder);
 		}
 
 		// other methods to do with registering a User
@@ -954,8 +955,7 @@ It is also common to use a `ConversionService` within a Spring MVC application. 
 <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring MVC chapter.
 
 In certain situations, you may wish to apply formatting during conversion. See
-<<format-FormatterRegistry-SPI>> for details on using
-`FormattingConversionServiceFactoryBean`.
+<<format-FormatterRegistry-SPI>> for details on using `FormattingConversionServiceFactoryBean`.
 
 
 
@@ -1371,7 +1371,7 @@ Time):
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd>
+			https://www.springframework.org/schema/beans/spring-beans.xsd>
 
 		<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
 			<property name="registerDefaultFormatters" value="false" />
@@ -1459,7 +1459,7 @@ following example shows:
 When a JSR-303 Validator validates an instance of this class, these constraints
 are enforced.
 
-For general information on JSR-303 and JSR-349, see the http://beanvalidation.org/[Bean
+For general information on JSR-303 and JSR-349, see the https://beanvalidation.org/[Bean
 Validation website]. For information on the specific capabilities of the default
 reference implementation, see the https://www.hibernate.org/412.html[Hibernate
 Validator] documentation. To learn how to set up a bean validation provider as a Spring

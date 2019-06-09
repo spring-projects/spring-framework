@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,6 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
@@ -37,6 +36,7 @@ import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageReader;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -158,7 +158,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 		readers.add(new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new DataBufferDecoder()));
-		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
+		readers.add(new ResourceHttpMessageReader());
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
 		if (protobufPresent) {
 			Decoder<?> decoder = this.protobufDecoder != null ? this.protobufDecoder : new ProtobufDecoder();
@@ -226,7 +226,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs {
 	 * or for multipart requests only ("true"). Generally the two sets are the
 	 * same except for the multipart writer itself.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	final List<HttpMessageWriter<?>> getTypedWriters(boolean forMultipart) {
 		if (!this.registerDefaults) {
 			return Collections.emptyList();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,9 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -48,8 +46,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
-import static org.springframework.transaction.event.TransactionPhase.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMPLETION;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_ROLLBACK;
+import static org.springframework.transaction.event.TransactionPhase.BEFORE_COMMIT;
 
 /**
  * Integration tests for {@link TransactionalEventListener} support
@@ -65,9 +67,6 @@ public class TransactionalEventListenerTests {
 	private EventCollector eventCollector;
 
 	private TransactionTemplate transactionTemplate = new TransactionTemplate(new CallCountingTransactionManager());
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 
 	@After
@@ -95,17 +94,14 @@ public class TransactionalEventListenerTests {
 	@Test
 	public void immediatelyImpactsCurrentTransaction() {
 		load(ImmediateTestListener.class, BeforeCommitTestListener.class);
-		try {
-			this.transactionTemplate.execute(status -> {
-				getContext().publishEvent("FAIL");
-				fail("Should have thrown an exception at this point");
-				return null;
-			});
-		}
-		catch (IllegalStateException e) {
-			assertTrue(e.getMessage().contains("Test exception"));
-			assertTrue(e.getMessage().contains(EventCollector.IMMEDIATELY));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.transactionTemplate.execute(status -> {
+					getContext().publishEvent("FAIL");
+					throw new AssertionError("Should have thrown an exception at this point");
+				}))
+			.withMessageContaining("Test exception")
+			.withMessageContaining(EventCollector.IMMEDIATELY);
+
 		getEventCollector().assertEvents(EventCollector.IMMEDIATELY, "FAIL");
 		getEventCollector().assertTotalEventsCount(1);
 	}
@@ -203,24 +199,19 @@ public class TransactionalEventListenerTests {
 	@Test
 	public void beforeCommitWithException() { // Validates the custom synchronization is invoked
 		load(BeforeCommitTestListener.class);
-		try {
-			this.transactionTemplate.execute(status -> {
-				TransactionSynchronizationManager.registerSynchronization(new EventTransactionSynchronization(10) {
-					@Override
-					public void beforeCommit(boolean readOnly) {
-						throw new IllegalStateException("test");
-					}
-				});
-				getContext().publishEvent("test");
-				getEventCollector().assertNoEventReceived();
-				return null;
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.transactionTemplate.execute(status -> {
+					TransactionSynchronizationManager.registerSynchronization(new EventTransactionSynchronization(10) {
+						@Override
+						public void beforeCommit(boolean readOnly) {
+							throw new IllegalStateException("test");
+						}
+					});
+					getContext().publishEvent("test");
+					getEventCollector().assertNoEventReceived();
+					return null;
 
-			});
-			fail("Should have thrown an exception");
-		}
-		catch (IllegalStateException e) {
-			// Test exception - ignore
-		}
+				}));
 		getEventCollector().assertNoEventReceived(); // Before commit not invoked
 	}
 
@@ -384,16 +375,16 @@ public class TransactionalEventListenerTests {
 			}
 			for (String phase : phases) {
 				List<Object> eventsForPhase = getEvents(phase);
-				assertEquals("Expected no events for phase '" + phase + "' " +
-						"but got " + eventsForPhase + ":", 0, eventsForPhase.size());
+				assertThat(eventsForPhase.size()).as("Expected no events for phase '" + phase + "' " +
+								"but got " + eventsForPhase + ":").isEqualTo(0);
 			}
 		}
 
 		public void assertEvents(String phase, Object... expected) {
 			List<Object> actual = getEvents(phase);
-			assertEquals("wrong number of events for phase '" + phase + "'", expected.length, actual.size());
+			assertThat(actual.size()).as("wrong number of events for phase '" + phase + "'").isEqualTo(expected.length);
 			for (int i = 0; i < expected.length; i++) {
-				assertEquals("Wrong event for phase '" + phase + "' at index " + i, expected[i], actual.get(i));
+				assertThat(actual.get(i)).as("Wrong event for phase '" + phase + "' at index " + i).isEqualTo(expected[i]);
 			}
 		}
 
@@ -402,8 +393,8 @@ public class TransactionalEventListenerTests {
 			for (Map.Entry<String, List<Object>> entry : this.events.entrySet()) {
 				size += entry.getValue().size();
 			}
-			assertEquals("Wrong number of total events (" + this.events.size() + ") " +
-					"registered phase(s)", number, size);
+			assertThat(size).as("Wrong number of total events (" + this.events.size() + ") " +
+						"registered phase(s)").isEqualTo(number);
 		}
 	}
 
