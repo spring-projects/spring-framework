@@ -188,7 +188,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport
 	}
 
 	/**
-	 * Return the name of the @link RequestContext} attribute for all views, if any.
+	 * Return the name of the {@link RequestContext} attribute for all views, if any.
 	 */
 	@Nullable
 	protected String getRequestContextAttribute() {

@@ -44,10 +44,10 @@ import org.springframework.web.util.UriTemplate;
  * use, current locale, binding errors, etc. Provides easy access to localized
  * messages and Errors instances.
  *
- * <p>Suitable for exposition to views, and usage within FreeMarker templates,
+ * <p>Suitable for exposition to views, and usage within FreeMarker templates
  * and tag libraries.
  *
- * <p>Can be instantiated manually, or automatically exposed to views as model
+ * <p>Can be instantiated manually or automatically exposed to views as a model
  * attribute via AbstractView's "requestContextAttribute" property.
  *
  * @author Rossen Stoyanchev

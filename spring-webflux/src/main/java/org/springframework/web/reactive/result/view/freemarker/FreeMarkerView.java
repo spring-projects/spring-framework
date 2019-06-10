@@ -54,7 +54,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * <p>Depends on a single {@link FreeMarkerConfig} object such as
  * {@link FreeMarkerConfigurer} being accessible in the application context.
- * Alternatively set the FreeMarker configuration can be set directly on this
+ * Alternatively the FreeMarker configuration can be set directly on this
  * class via {@link #setConfiguration}.
  *
  * <p>The {@link #setUrl(String) url} property is the location of the FreeMarker

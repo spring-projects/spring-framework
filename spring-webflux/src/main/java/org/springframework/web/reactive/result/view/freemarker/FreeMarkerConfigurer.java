@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  * using {@link FreeMarkerView}. It exists purely to configure FreeMarker.
  * It is not meant to be referenced by application components but just internally
  * by {@code FreeMarkerView}. Implements {@link FreeMarkerConfig} to be found by
- * {@code FreeMarkerView} without depending on the bean name the configurer.
+ * {@code FreeMarkerView} without depending on the bean name of the configurer.
  *
  * <p>Note that you can also refer to a pre-configured FreeMarker Configuration
  * instance via the "configuration" property. This allows to share a FreeMarker
