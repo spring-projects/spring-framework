@@ -70,9 +70,8 @@
  *
  * This macro will participate in the default HTML escape setting for the given
  * RequestContext. This can be customized by calling "setDefaultHtmlEscape"
- * on the "springMacroRequestContext" context variable, or via the
- * "defaultHtmlEscape" context-param in web.xml (same as for the JSP bind tag).
- * Also regards an "htmlEscape" variable in the namespace of this library.
+ * on the "springMacroRequestContext" context variable. Also regards an "htmlEscape"
+ * variable in the namespace of this library.
  *
  * Producing no output, the following context variable will be available
  * each time this macro is referenced (assuming you import this library in
