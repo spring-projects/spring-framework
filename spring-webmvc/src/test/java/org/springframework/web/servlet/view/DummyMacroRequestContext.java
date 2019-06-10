@@ -25,7 +25,7 @@ import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.util.UriTemplate;
 
 /**
- * Dummy request context used for VTL and FTL macro tests.
+ * Dummy request context used for FreeMarker macro tests.
  *
  * @author Darren Davison
  * @author Juergen Hoeller
@@ -34,7 +34,7 @@ import org.springframework.web.util.UriTemplate;
  */
 public class DummyMacroRequestContext {
 
-	private HttpServletRequest request;
+	private final HttpServletRequest request;
 
 	private Map<String, String> messageMap;
 
@@ -147,14 +147,14 @@ public class DummyMacroRequestContext {
 	 * @see org.springframework.web.servlet.support.RequestContext#getBindStatus(String)
 	 */
 	public BindStatus getBindStatus(String path) throws IllegalStateException {
-		return new BindStatus(new RequestContext(this.request), path, false);
+		return getBindStatus(path, false);
 	}
 
 	/**
 	 * @see org.springframework.web.servlet.support.RequestContext#getBindStatus(String, boolean)
 	 */
 	public BindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
-		return new BindStatus(new RequestContext(this.request), path, true);
+		return new BindStatus(new RequestContext(this.request), path, htmlEscape);
 	}
 
 }

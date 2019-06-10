@@ -10,14 +10,15 @@
  * all macros within it available to any application using Spring's
  * FreeMarkerConfigurer.
  *
- * To take advantage of these macros, the "exposeSpringMacroHelpers" property
- * of the FreeMarker class needs to be set to "true". This will expose a
- * RequestContext under the name "springMacroRequestContext", as needed by
- * the macros in this library.
+ * To take advantage of these macros, the "requestContextAttribute" property of
+ * the FreeMarkerView class must be set to "springMacroRequestContext". This will
+ * expose a RequestContext under the name "springMacroRequestContext", as needed
+ * by the macros in this library.
  *
  * @author Darren Davison
  * @author Juergen Hoeller
  * @author Issam El-atif
+ * @author Sam Brannen
  * @since 5.2
  -->
 
@@ -71,7 +72,7 @@
  * RequestContext. This can be customized by calling "setDefaultHtmlEscape"
  * on the "springMacroRequestContext" context variable, or via the
  * "defaultHtmlEscape" context-param in web.xml (same as for the JSP bind tag).
- * Also regards a "htmlEscape" variable in the namespace of this library.
+ * Also regards an "htmlEscape" variable in the namespace of this library.
  *
  * Producing no output, the following context variable will be available
  * each time this macro is referenced (assuming you import this library in
@@ -173,8 +174,7 @@
  -->
 <#macro formTextarea path attributes="">
     <@bind path/>
-    <textarea id="${status.expression?replace('[','')?replace(']','')}" name="${status.expression}" ${attributes?no_esc}>
-${stringStatusValue}</textarea>
+    <textarea id="${status.expression?replace('[','')?replace(']','')}" name="${status.expression}" ${attributes?no_esc}>${stringStatusValue}</textarea>
 </#macro>
 
 <#--
@@ -320,10 +320,10 @@ ${stringStatusValue}</textarea>
  *
  * @param value the current value in a list iteration
 -->
-<#macro checkSelected value>
-    <#if stringStatusValue?is_number && stringStatusValue == value?number>selected="selected"</#if>
-    <#if stringStatusValue?is_string && stringStatusValue == value>selected="selected"</#if>
-</#macro>
+<#macro checkSelected value><#--
+    --><#if stringStatusValue?is_number && stringStatusValue == value?number> selected="selected"</#if><#--
+    --><#if stringStatusValue?is_string && stringStatusValue == value> selected="selected"</#if><#--
+--></#macro>
 
 <#--
  * contains

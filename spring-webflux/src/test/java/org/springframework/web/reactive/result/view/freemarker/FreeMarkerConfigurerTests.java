@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.view.freemarker;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -24,13 +23,9 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import org.junit.Test;
 
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -43,34 +38,34 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
 /**
  * @author Juergen Hoeller
  * @author Issam El-atif
+ * @author Sam Brannen
+ * @since 5.2
  */
 public class FreeMarkerConfigurerTests {
 
+	private final FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
+
 	@Test
-	public void freeMarkerConfigurerDefaultEncoding() throws IOException, TemplateException {
-		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-		configurer.afterPropertiesSet();
-		Configuration cfg = configurer.getConfiguration();
+	public void freeMarkerConfigurerDefaultEncoding() throws Exception {
+		freeMarkerConfigurer.afterPropertiesSet();
+		Configuration cfg = freeMarkerConfigurer.getConfiguration();
 		assertThat(cfg.getDefaultEncoding()).isEqualTo("UTF-8");
 	}
 
 	@Test
 	public void freeMarkerConfigurerWithConfigLocation() {
-		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-		configurer.setConfigLocation(new FileSystemResource("myprops.properties"));
+		freeMarkerConfigurer.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
-		configurer.setFreemarkerSettings(props);
-		assertThatIOException().isThrownBy(
-				configurer::afterPropertiesSet);
+		freeMarkerConfigurer.setFreemarkerSettings(props);
+		assertThatIOException().isThrownBy(freeMarkerConfigurer::afterPropertiesSet);
 	}
 
 	@Test
 	public void freeMarkerConfigurerWithResourceLoaderPath() throws Exception {
-		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-		configurer.setTemplateLoaderPath("file:/mydir");
-		configurer.afterPropertiesSet();
-		Configuration cfg = configurer.getConfiguration();
+		freeMarkerConfigurer.setTemplateLoaderPath("file:/mydir");
+		freeMarkerConfigurer.afterPropertiesSet();
+		Configuration cfg = freeMarkerConfigurer.getConfiguration();
 		assertThat(cfg.getTemplateLoader()).isInstanceOf(MultiTemplateLoader.class);
 		MultiTemplateLoader multiTemplateLoader = (MultiTemplateLoader)cfg.getTemplateLoader();
 		assertThat(multiTemplateLoader.getTemplateLoader(0)).isInstanceOf(SpringTemplateLoader.class);
@@ -80,12 +75,11 @@ public class FreeMarkerConfigurerTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void freeMarkerConfigurerWithNonFileResourceLoaderPath() throws Exception {
-		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-		configurer.setTemplateLoaderPath("file:/mydir");
+		freeMarkerConfigurer.setTemplateLoaderPath("file:/mydir");
 		Properties settings = new Properties();
 		settings.setProperty("localized_lookup", "false");
-		configurer.setFreemarkerSettings(settings);
-		configurer.setResourceLoader(new ResourceLoader() {
+		freeMarkerConfigurer.setFreemarkerSettings(settings);
+		freeMarkerConfigurer.setResourceLoader(new ResourceLoader() {
 			@Override
 			public Resource getResource(String location) {
 				if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
@@ -98,23 +92,11 @@ public class FreeMarkerConfigurerTests {
 				return getClass().getClassLoader();
 			}
 		});
-		configurer.afterPropertiesSet();
-		assertThat(configurer.getConfiguration()).isInstanceOf(Configuration.class);
-		Configuration fc = configurer.getConfiguration();
+		freeMarkerConfigurer.afterPropertiesSet();
+		assertThat(freeMarkerConfigurer.getConfiguration()).isInstanceOf(Configuration.class);
+		Configuration fc = freeMarkerConfigurer.getConfiguration();
 		Template ft = fc.getTemplate("test");
 		assertThat(FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap())).isEqualTo("test");
-	}
-
-	@Test  // SPR-12448
-	public void freeMarkerConfigurationAsBean() {
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		RootBeanDefinition loaderDef = new RootBeanDefinition(SpringTemplateLoader.class);
-		loaderDef.getConstructorArgumentValues().addGenericArgumentValue(new DefaultResourceLoader());
-		loaderDef.getConstructorArgumentValues().addGenericArgumentValue("/freemarker");
-		RootBeanDefinition configDef = new RootBeanDefinition(Configuration.class);
-		configDef.getPropertyValues().add("templateLoader", loaderDef);
-		beanFactory.registerBeanDefinition("freeMarkerConfig", configDef);
-		beanFactory.getBean(Configuration.class);
 	}
 
 }

@@ -45,7 +45,7 @@ public class FreeMarkerConfigurerTests {
 	private final FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
 
 	@Test
-	public void freeMarkerConfigurerWithConfigLocation() throws Exception {
+	public void freeMarkerConfigurerWithConfigLocation() {
 		freeMarkerConfigurer.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");

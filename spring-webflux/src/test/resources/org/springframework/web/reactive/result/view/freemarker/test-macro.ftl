@@ -1,5 +1,5 @@
 <#--
-test template for FreeMarker macro test class
+test template for FreeMarker macro support
 -->
 <#import "spring.ftl" as spring />
 

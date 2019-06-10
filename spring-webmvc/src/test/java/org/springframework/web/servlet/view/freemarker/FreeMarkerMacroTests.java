@@ -98,8 +98,7 @@ public class FreeMarkerMacroTests {
 			protected void processTemplate(Template template, SimpleHash fmModel, HttpServletResponse response)
 					throws TemplateException {
 				Map model = fmModel.toMap();
-				boolean condition = model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext;
-				assertThat(condition).isTrue();
+				assertThat(model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)).isInstanceOf(RequestContext.class);
 				RequestContext rc = (RequestContext) model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 				BindStatus status = rc.getBindStatus("tb.name");
 				assertThat(status.getExpression()).isEqualTo("name");
@@ -136,9 +135,8 @@ public class FreeMarkerMacroTests {
 			fv.render(model, request, response);
 		}
 		catch (Exception ex) {
-			boolean condition = ex instanceof ServletException;
-			assertThat(condition).isTrue();
-			assertThat(ex.getMessage().contains(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)).isTrue();
+			assertThat(ex).isInstanceOf(ServletException.class);
+			assertThat(ex.getMessage()).contains(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 		}
 	}
 
@@ -222,7 +220,7 @@ public class FreeMarkerMacroTests {
 		assertThat(getMacroOutput("FORM4")).isEqualTo("<textarea id=\"name\" name=\"name\" rows=10 cols=30>\nDarren</textarea>");
 	}
 
-	// TODO verify remaining output (fix whitespace)
+	// TODO verify remaining output for forms 5, 6, 7, 8, and 14 (fix whitespace)
 
 	@Test
 	public void testForm9() throws Exception {

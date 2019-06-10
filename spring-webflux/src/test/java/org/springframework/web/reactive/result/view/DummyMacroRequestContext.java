@@ -25,12 +25,12 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriTemplate;
 
 /**
- * Dummy request context used for VTL and FTL macro tests.
+ * Dummy request context used for FreeMarker macro tests.
  *
  * @author Darren Davison
  * @author Juergen Hoeller
  * @author Issam El-atif
- *
+ * @since 5.2
  * @see org.springframework.web.reactive.result.view.RequestContext
  */
 public class DummyMacroRequestContext {
@@ -115,14 +115,14 @@ public class DummyMacroRequestContext {
 	 * @see org.springframework.web.reactive.result.view.RequestContext#getBindStatus(String)
 	 */
 	public BindStatus getBindStatus(String path) throws IllegalStateException {
-		return new BindStatus(new RequestContext(this.exchange, this.model, this.context), path, false);
+		return getBindStatus(path, false);
 	}
 
 	/**
 	 * @see org.springframework.web.reactive.result.view.RequestContext#getBindStatus(String, boolean)
 	 */
 	public BindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
-		return new BindStatus(new RequestContext(this.exchange, this.model, this.context), path, true);
+		return new BindStatus(new RequestContext(this.exchange, this.model, this.context), path, htmlEscape);
 	}
 
 }
