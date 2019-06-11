@@ -62,7 +62,7 @@ class TimedTransactionalSpringExtensionTests {
 				.tests()
 				.assertStatistics(stats -> stats.started(4).succeeded(2).failed(2));
 
-		events.failed().assertThatEvents().haveAtMost(2,
+		events.failed().assertThatEvents().haveExactly(2,
 			event(test("WithExceededJUnitJupiterTimeout"),
 				finishedWithFailure(
 					instanceOf(TimeoutException.class),
