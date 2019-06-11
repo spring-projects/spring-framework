@@ -48,6 +48,19 @@ public class LinkedMultiValueMapTests {
 	}
 
 	@Test
+	public void addIfAbsentWhenAbsent() {
+		map.addIfAbsent("key", "value1");
+		assertThat(map.get("key")).containsExactly("value1");
+	}
+
+	@Test
+	public void addIfAbsentWhenPresent() {
+		map.add("key", "value1");
+		map.addIfAbsent("key", "value2");
+		assertThat(map.get("key")).containsExactly("value1");
+	}
+
+	@Test
 	public void set() {
 		map.set("key", "value1");
 		map.set("key", "value2");
