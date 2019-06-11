@@ -296,7 +296,9 @@ public final class WebAsyncManager {
 		final CallableInterceptorChain interceptorChain = new CallableInterceptorChain(interceptors);
 
 		this.asyncWebRequest.addTimeoutHandler(() -> {
-			logger.debug("Async request timeout for " + formatRequestUri());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Async request timeout for " + formatRequestUri());
+			}
 			Object result = interceptorChain.triggerAfterTimeout(this.asyncWebRequest, callable);
 			if (result != CallableProcessingInterceptor.RESULT_NONE) {
 				setConcurrentResultAndDispatch(result);
@@ -304,7 +306,9 @@ public final class WebAsyncManager {
 		});
 
 		this.asyncWebRequest.addErrorHandler(ex -> {
-			logger.debug("Async request error for " + formatRequestUri() + ": " + ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Async request error for " + formatRequestUri() + ": " + ex);
+			}
 			Object result = interceptorChain.triggerAfterError(this.asyncWebRequest, callable, ex);
 			result = (result != CallableProcessingInterceptor.RESULT_NONE ? result : ex);
 			setConcurrentResultAndDispatch(result);
@@ -339,7 +343,6 @@ public final class WebAsyncManager {
 		}
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	private void logExecutorWarning() {
 		if (taskExecutorWarning && logger.isWarnEnabled()) {
 			synchronized (DEFAULT_TASK_EXECUTOR) {
