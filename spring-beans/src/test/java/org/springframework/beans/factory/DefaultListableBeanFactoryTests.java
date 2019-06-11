@@ -55,6 +55,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
@@ -575,8 +576,92 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setPropertyValues(pvs);
 		lbf.registerBeanDefinition("self", bd);
+
 		TestBean self = (TestBean) lbf.getBean("self");
 		assertThat(self.getSpouse()).isEqualTo(self);
+	}
+
+	@Test
+	public void testReferenceByName() {
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("doctor", new RuntimeBeanReference("doc"));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		lbf.registerBeanDefinition("self", bd);
+		lbf.registerBeanDefinition("doc", new RootBeanDefinition(NestedTestBean.class));
+
+		TestBean self = (TestBean) lbf.getBean("self");
+		assertThat(self.getDoctor()).isEqualTo(lbf.getBean("doc"));
+	}
+
+	@Test
+	public void testReferenceByType() {
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("doctor", new RuntimeBeanReference(NestedTestBean.class));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		lbf.registerBeanDefinition("self", bd);
+		lbf.registerBeanDefinition("doc", new RootBeanDefinition(NestedTestBean.class));
+
+		TestBean self = (TestBean) lbf.getBean("self");
+		assertThat(self.getDoctor()).isEqualTo(lbf.getBean("doc"));
+	}
+
+	@Test
+	public void testReferenceByAutowire() {
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("doctor", AutowiredPropertyMarker.INSTANCE);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		lbf.registerBeanDefinition("self", bd);
+		lbf.registerBeanDefinition("doc", new RootBeanDefinition(NestedTestBean.class));
+
+		TestBean self = (TestBean) lbf.getBean("self");
+		assertThat(self.getDoctor()).isEqualTo(lbf.getBean("doc"));
+	}
+
+	@Test
+	public void testArrayReferenceByName() {
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("stringArray", new RuntimeBeanReference("string"));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		lbf.registerBeanDefinition("self", bd);
+		lbf.registerSingleton("string", "A");
+
+		TestBean self = (TestBean) lbf.getBean("self");
+		assertThat(self.getStringArray()).hasSize(1);
+		assertThat(self.getStringArray()).contains("A");
+	}
+
+	@Test
+	public void testArrayReferenceByType() {
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("stringArray", new RuntimeBeanReference(String.class));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		lbf.registerBeanDefinition("self", bd);
+		lbf.registerSingleton("string", "A");
+
+		TestBean self = (TestBean) lbf.getBean("self");
+		assertThat(self.getStringArray()).hasSize(1);
+		assertThat(self.getStringArray()).contains("A");
+	}
+
+	@Test
+	public void testArrayReferenceByAutowire() {
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("stringArray", AutowiredPropertyMarker.INSTANCE);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		lbf.registerBeanDefinition("self", bd);
+		lbf.registerSingleton("string1", "A");
+		lbf.registerSingleton("string2", "B");
+
+		TestBean self = (TestBean) lbf.getBean("self");
+		assertThat(self.getStringArray()).hasSize(2);
+		assertThat(self.getStringArray()).contains("A");
+		assertThat(self.getStringArray()).contains("B");
 	}
 
 	@Test
@@ -586,6 +671,7 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setPropertyValues(pvs);
 		lbf.registerBeanDefinition("tb", bd);
+
 		assertThatExceptionOfType(BeanCreationException.class).as("invalid property").isThrownBy(() ->
 				lbf.getBean("tb"))
 			.withCauseInstanceOf(NotWritablePropertyException.class)

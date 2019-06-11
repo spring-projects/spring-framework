@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.util.function.Supplier;
 
+import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.lang.Nullable;
@@ -209,7 +210,7 @@ public final class BeanDefinitionBuilder {
 	}
 
 	/**
-	 * Add the supplied property value under the given name.
+	 * Add the supplied property value under the given property name.
 	 */
 	public BeanDefinitionBuilder addPropertyValue(String name, @Nullable Object value) {
 		this.beanDefinition.getPropertyValues().add(name, value);
@@ -223,6 +224,17 @@ public final class BeanDefinitionBuilder {
 	 */
 	public BeanDefinitionBuilder addPropertyReference(String name, String beanName) {
 		this.beanDefinition.getPropertyValues().add(name, new RuntimeBeanReference(beanName));
+		return this;
+	}
+
+	/**
+	 * Add an autowired marker for the specified property on the specified bean.
+	 * @param name the name of the property to mark as autowired
+	 * @since 5.2
+	 * @see AutowiredPropertyMarker
+	 */
+	public BeanDefinitionBuilder addAutowiredProperty(String name) {
+		this.beanDefinition.getPropertyValues().add(name, AutowiredPropertyMarker.INSTANCE);
 		return this;
 	}
 
