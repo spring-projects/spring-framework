@@ -39,14 +39,15 @@ ext {
 	kotlinVersion        = "1.3.31"
 	log4jVersion         = "2.11.2"
 	nettyVersion         = "4.1.36.Final"
-	reactorVersion       = "Dysprosium-BUILD-SNAPSHOT"
+	reactorVersion       = "Dysprosium-M2"
+	rsocketVersion       = "0.12.2-RC4-SNAPSHOT"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
-	rxjava2Version       = "2.2.8"
+	rxjava2Version       = "2.2.9"
 	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.19"
-	undertowVersion      = "2.0.20.Final"
+	tomcatVersion        = "9.0.21"
+	undertowVersion      = "2.0.21.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4J = {
@@ -142,13 +143,13 @@ configure(allprojects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.20"
+		toolVersion = "8.21"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://repo.spring.io/snapshot" } // Reactor
+		maven { url "https://repo.spring.io/milestone" } // Reactor
 		maven { url "https://oss.jfrog.org/artifactory/libs-snapshot" } // RSocket
 		mavenLocal()
 	}
@@ -157,7 +158,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:4.13-beta-3") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.27.0") {
+		testCompile("org.mockito:mockito-core:2.28.2") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 		testCompile("io.mockk:mockk:1.9.3")
