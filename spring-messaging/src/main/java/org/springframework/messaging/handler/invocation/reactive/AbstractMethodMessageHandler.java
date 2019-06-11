@@ -165,8 +165,8 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	public String getBeanName() {
-		return this.beanName != null ? this.beanName :
-				getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this);
+		return (this.beanName != null ? this.beanName :
+				getClass().getSimpleName() + "@" + ObjectUtils.getIdentityHexString(this));
 	}
 
 	/**
@@ -269,7 +269,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Detect if the given handler has any methods that can handle messages and if
 	 * so register it with the extracted mapping information.
 	 * <p><strong>Note:</strong> This method is protected and can be invoked by
-	 * sub-classes, but this should be done on startup only as documented in
+	 * subclasses, but this should be done on startup only as documented in
 	 * {@link #registerHandlerMethod}.
 	 * @param handler the handler to check, either an instance of a Spring bean name
 	 */
@@ -321,7 +321,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Register a handler method and its unique mapping.
 	 * <p><strong>Note:</strong> This method is protected and can be invoked by
-	 * sub-classes. Keep in mind however that the registration is not protected
+	 * subclasses. Keep in mind however that the registration is not protected
 	 * for concurrent use, and is expected to be done on startup.
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
@@ -369,7 +369,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * Return String-based destinations for the given mapping, if any, that can
 	 * be used to find matches with a direct lookup (i.e. non-patterns).
 	 * <p><strong>Note:</strong> This is completely optional. The mapping
-	 * metadata for a sub-class may support neither direct lookups, nor String
+	 * metadata for a subclass may support neither direct lookups, nor String
 	 * based destinations.
 	 */
 	protected abstract Set<String> getDirectLookupMappings(T mapping);
@@ -395,7 +395,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		List<Match<T>> matches = new ArrayList<>();
 
 		RouteMatcher.Route destination = getDestination(message);
-		List<T> mappingsByUrl = destination != null ? this.destinationLookup.get(destination.value()) : null;
+		List<T> mappingsByUrl = (destination != null ? this.destinationLookup.get(destination.value()) : null);
 		if (mappingsByUrl != null) {
 			addMatchesToCollection(mappingsByUrl, message, matches);
 		}
@@ -419,10 +419,9 @@ public abstract class AbstractMethodMessageHandler<T>
 			if (comparator.compare(bestMatch, secondBestMatch) == 0) {
 				HandlerMethod m1 = bestMatch.handlerMethod;
 				HandlerMethod m2 = secondBestMatch.handlerMethod;
-				throw new IllegalStateException(
-						"Ambiguous handler methods mapped for destination '" +
-								destination.value() + "': {" +
-								m1.getShortLogMessage() + ", " + m2.getShortLogMessage() + "}");
+				throw new IllegalStateException("Ambiguous handler methods mapped for destination '" +
+						(destination != null ? destination.value() : "") + "': {" +
+						m1.getShortLogMessage() + ", " + m2.getShortLogMessage() + "}");
 			}
 		}
 		return bestMatch;
@@ -494,12 +493,10 @@ public abstract class AbstractMethodMessageHandler<T>
 
 		private final HandlerMethod handlerMethod;
 
-
 		Match(T mapping, HandlerMethod handlerMethod) {
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
 		}
-
 
 		public T getMapping() {
 			return this.mapping;
@@ -508,7 +505,6 @@ public abstract class AbstractMethodMessageHandler<T>
 		public HandlerMethod getHandlerMethod() {
 			return this.handlerMethod;
 		}
-
 
 		@Override
 		public String toString() {
@@ -521,11 +517,9 @@ public abstract class AbstractMethodMessageHandler<T>
 
 		private final Comparator<T> comparator;
 
-
 		MatchComparator(Comparator<T> comparator) {
 			this.comparator = comparator;
 		}
-
 
 		@Override
 		public int compare(Match<T> match1, Match<T> match2) {
