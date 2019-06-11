@@ -5263,6 +5263,7 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 ----
 
 With the following configuration:
+
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5272,6 +5273,7 @@ With the following configuration:
 ----
 
 And the following `application.properties` file:
+
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5282,7 +5284,7 @@ In that case, the `catalog` parameter and field will be equal to the `MovieCatal
 
 A default lenient embedded value resolver is provided by Spring. It will try to resolve the
 property value and if it cannot be resolved, the property name (for example `${catalog.name}`)
-will be injected as the value. If you want to maintain strict control over non existent
+will be injected as the value. If you want to maintain strict control over nonexistent
 values, you should declare a `PropertySourcesPlaceholderConfigurer` bean, as the following
 example shows:
 
@@ -5293,22 +5295,26 @@ example shows:
     public class AppConfig {
 
          @Bean
-         public PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+         public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
                return new PropertySourcesPlaceholderConfigurer();
          }
     }
 ----
 
-Using the above configuration ensures Spring initialization failure if any of `${}`
+NOTE: When configuring a `PropertySourcesPlaceholderConfigurer` using JavaConfig, the
+`@Bean` method must be `static`.
+
+Using the above configuration ensures Spring initialization failure if any `${}`
 placeholder could not be resolved. It is also possible to use methods like
-`setPlaceholderPrefix`, `setPlaceholderSuffix` or `setValueSeparator` to customize placeholders.
+`setPlaceholderPrefix`, `setPlaceholderSuffix`, or `setValueSeparator` to customize
+placeholders.
 
 NOTE: Spring Boot configures by default a `PropertySourcesPlaceholderConfigurer` bean that
 will get properties from `application.properties` and `application.yml` files.
 
 Built-in converter support provided by Spring allows simple type conversion (to `Integer`
-or `int` for example) to be automatically handled. Multiple comma separated values parameter
-can be automatically converted to String array without extra effort.
+or `int` for example) to be automatically handled. Multiple comma-separated values can be
+automatically converted to String array without extra effort.
 
 It is possible to provide a default value as following:
 
@@ -5326,10 +5332,10 @@ It is possible to provide a default value as following:
     }
 ----
 
-Spring BeanPostProcessor uses ConversionService instance behind the scene to handle the
-process from converting `@Value` value to the target type. If you want to provide conversion
-support for your own custom type, you can provide your own ConversionService bean instance
-as the following example shows:
+A Spring `BeanPostProcessor` uses a `ConversionService` behind the scene to handle the
+process for converting the String value in `@Value` to the target type. If you want to
+provide conversion support for your own custom type, you can provide your own
+`ConversionService` bean instance as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5346,8 +5352,8 @@ as the following example shows:
     }
 ----
 
-<<expressions, `SpEL` expression>> built-in support allows dynamically computed `@Value`
-at runtime as in the following example shows:
+When `@Value` contains a <<expressions, `SpEL` expression>> the value will be dynamically
+computed at runtime as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5357,13 +5363,13 @@ at runtime as in the following example shows:
 
         private final String catalog;
 
-        public MovieRecommender(@Value("#{systemProperties['user.catalog'] + 'Catalog' }") String catalog){
+        public MovieRecommender(@Value("#{systemProperties['user.catalog'] + 'Catalog' }") String catalog) {
             this.catalog = catalog;
         }
     }
 ----
 
-SpEL also enables to use more complex data structure:
+SpEL also enables the use of more complex data structures:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
