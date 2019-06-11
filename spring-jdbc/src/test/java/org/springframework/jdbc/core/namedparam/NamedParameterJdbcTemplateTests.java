@@ -475,11 +475,12 @@ public class NamedParameterJdbcTemplateTests {
 	@Test
 	public void testBatchUpdateWithInClause() throws Exception {
 		@SuppressWarnings("unchecked")
-		Map<String, Object>[] parameters = new Map[2];
+		Map<String, Object>[] parameters = new Map[3];
 		parameters[0] = Collections.singletonMap("ids", Arrays.asList(1, 2));
-		parameters[1] = Collections.singletonMap("ids", Arrays.asList(3, 4));
+		parameters[1] = Collections.singletonMap("ids", new Integer[] {3, 4});
+		parameters[2] = Collections.singletonMap("ids", (Iterable<Integer>) () -> Arrays.asList(5, 6).iterator());
 
-		final int[] rowsAffected = new int[] {1, 2};
+		final int[] rowsAffected = new int[] {1, 2, 3};
 		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 
@@ -491,7 +492,7 @@ public class NamedParameterJdbcTemplateTests {
 				parameters
 		);
 
-		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
+		assertThat(actualRowsAffected.length).as("executed 3 updates").isEqualTo(3);
 
 		InOrder inOrder = inOrder(preparedStatement);
 
@@ -501,6 +502,10 @@ public class NamedParameterJdbcTemplateTests {
 
 		inOrder.verify(preparedStatement).setObject(1, 3);
 		inOrder.verify(preparedStatement).setObject(2, 4);
+		inOrder.verify(preparedStatement).addBatch();
+
+		inOrder.verify(preparedStatement).setObject(1, 5);
+		inOrder.verify(preparedStatement).setObject(2, 6);
 		inOrder.verify(preparedStatement).addBatch();
 
 		inOrder.verify(preparedStatement, atLeastOnce()).close();

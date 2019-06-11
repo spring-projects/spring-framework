@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.jdbc.core.namedparam;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +29,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Helper methods for named parameter parsing.
@@ -284,8 +285,11 @@ public abstract class NamedParameterUtils {
 				if (value instanceof SqlParameterValue) {
 					value = ((SqlParameterValue) value).getValue();
 				}
-				if (value instanceof Collection) {
-					Iterator<?> entryIter = ((Collection<?>) value).iterator();
+				if (value != null && value.getClass().isArray()) {
+					value = Arrays.asList(ObjectUtils.toObjectArray(value));
+				}
+				if (value instanceof Iterable) {
+					Iterator<?> entryIter = ((Iterable<?>) value).iterator();
 					int k = 0;
 					while (entryIter.hasNext()) {
 						if (k > 0) {
