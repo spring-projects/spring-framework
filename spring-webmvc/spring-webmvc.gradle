@@ -50,7 +50,7 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server") {
 		exclude group: "javax.servlet", module: "javax.servlet"
 	}
-	testCompile("org.apache.httpcomponents:httpclient:4.5.8") {
+	testCompile("org.apache.httpcomponents:httpclient:4.5.9") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	testCompile("commons-fileupload:commons-fileupload:1.4")
