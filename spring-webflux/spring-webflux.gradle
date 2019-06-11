@@ -34,7 +34,7 @@ dependencies {
 	optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 		exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 	}
-	optional("org.apache.httpcomponents:httpclient:4.5.8") {
+	optional("org.apache.httpcomponents:httpclient:4.5.9") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")

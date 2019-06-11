@@ -60,7 +60,7 @@ dependencies {
 	testCompile("javax.ejb:javax.ejb-api:3.2")
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.2")
 	testCompile("javax.mail:javax.mail-api:1.6.2")
-	testCompile("org.hibernate:hibernate-core:5.3.7.Final")
+	testCompile("org.hibernate:hibernate-core:5.3.10.Final")
 	testCompile("org.hibernate:hibernate-validator:6.0.16.Final")
 	// Enable use of the JUnit Platform Runner
 	testCompile("org.junit.platform:junit-platform-runner")
@@ -72,7 +72,7 @@ dependencies {
 	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-	testCompile("org.apache.httpcomponents:httpclient:4.5.8") {
+	testCompile("org.apache.httpcomponents:httpclient:4.5.9") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
 	testCompile("io.projectreactor.netty:reactor-netty")
