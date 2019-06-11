@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -577,12 +577,20 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			if (this == other) {
 				return true;
 			}
+			if (!(other instanceof ConsumerCacheKey)) {
+				return false;
+			}
 			ConsumerCacheKey otherKey = (ConsumerCacheKey) other;
 			return (destinationEquals(otherKey) &&
 					ObjectUtils.nullSafeEquals(this.selector, otherKey.selector) &&
 					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&
 					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription) &&
 					this.durable == otherKey.durable);
+		}
+
+		@Override
+		public int hashCode() {
+			return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector);
 		}
 
 		@Override

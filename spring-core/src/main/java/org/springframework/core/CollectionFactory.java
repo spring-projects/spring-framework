@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public abstract class CollectionFactory {
 	 * Create the most appropriate collection for the given collection type.
 	 * <p>Delegates to {@link #createCollection(Class, Class, int)} with a
 	 * {@code null} element type.
-	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param collectionType the desired type of the target collection (never {@code null})
 	 * @param capacity the initial capacity
 	 * @return a new collection instance
 	 * @throws IllegalArgumentException if the supplied {@code collectionType}
@@ -160,7 +160,7 @@ public abstract class CollectionFactory {
 	 * supplied {@code elementType} is an enum type matching type {@code E}.
 	 * As an alternative, the caller may wish to treat the return value as a
 	 * raw collection or collection of {@link Object}.
-	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param collectionType the desired type of the target collection (never {@code null})
 	 * @param elementType the collection's element type, or {@code null} if unknown
 	 * (note: only relevant for {@link EnumSet} creation)
 	 * @param capacity the initial capacity
@@ -237,7 +237,7 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createApproximateMap(@Nullable Object map, int capacity) {
 		if (map instanceof EnumMap) {
 			EnumMap enumMap = new EnumMap((EnumMap) map);
@@ -276,7 +276,7 @@ public abstract class CollectionFactory {
 	 * may wish to treat the return value as a raw map or map keyed by
 	 * {@link Object}. Similarly, type safety cannot be enforced if the
 	 * desired {@code mapType} is {@link MultiValueMap}.
-	 * @param mapType the desired type of the target map; never {@code null}
+	 * @param mapType the desired type of the target map (never {@code null})
 	 * @param keyType the map's key type, or {@code null} if unknown
 	 * (note: only relevant for {@link EnumMap} creation)
 	 * @param capacity the initial capacity
@@ -290,7 +290,7 @@ public abstract class CollectionFactory {
 	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
 	 * the supplied {@code keyType} is not a subtype of {@link Enum}
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
 		if (mapType.isInterface()) {
