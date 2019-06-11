@@ -57,7 +57,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 			mediaTypes.forEach((extension, mediaType) -> {
 				String lowerCaseExtension = extension.toLowerCase(Locale.ENGLISH);
 				this.mediaTypes.put(lowerCaseExtension, mediaType);
-				addFileExtension(mediaType, extension);
+				addFileExtension(mediaType, lowerCaseExtension);
 				allFileExtensions.add(lowerCaseExtension);
 			});
 			this.allFileExtensions.addAll(allFileExtensions);
