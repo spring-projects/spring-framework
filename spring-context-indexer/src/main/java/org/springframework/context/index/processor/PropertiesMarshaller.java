@@ -28,6 +28,7 @@ import java.util.Set;
  * Marshaller to write {@link CandidateComponentsMetadata} as properties.
  *
  * @author Stephane Nicoll
+ * @author Vedran Pavic
  * @since 5.0
  */
 abstract class PropertiesMarshaller {
@@ -35,7 +36,7 @@ abstract class PropertiesMarshaller {
 	public static void write(CandidateComponentsMetadata metadata, OutputStream out) throws IOException {
 		Properties props = new SortedProperties(true);
 		metadata.getItems().forEach(m -> props.put(m.getType(), String.join(",", m.getStereotypes())));
-		props.store(out, "");
+		props.store(out, null);
 	}
 
 	public static CandidateComponentsMetadata read(InputStream in) throws IOException {

@@ -93,7 +93,7 @@ class SortedProperties extends Properties {
 		super.store(baos, (this.omitComments ? null : comments));
 		String contents = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
 		for (String line : contents.split(EOL)) {
-			if (!this.omitComments || !line.startsWith("#")) {
+			if (!(this.omitComments && line.startsWith("#"))) {
 				out.write((line + EOL).getBytes(StandardCharsets.ISO_8859_1));
 			}
 		}
@@ -105,7 +105,7 @@ class SortedProperties extends Properties {
 		super.store(stringWriter, (this.omitComments ? null : comments));
 		String contents = stringWriter.toString();
 		for (String line : contents.split(EOL)) {
-			if (!this.omitComments || !line.startsWith("#")) {
+			if (!(this.omitComments && line.startsWith("#"))) {
 				writer.write(line + EOL);
 			}
 		}
