@@ -956,7 +956,7 @@ public abstract class AnnotationUtils {
 			return false;
 		}
 		String name = clazz.getName();
-		return (name.startsWith("java") || name.startsWith("org.springframework.lang."));
+		return (name.startsWith("java.") || name.startsWith("org.springframework.lang."));
 	}
 
 	/**
