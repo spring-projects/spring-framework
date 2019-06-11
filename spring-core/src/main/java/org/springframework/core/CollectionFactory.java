@@ -241,7 +241,7 @@ public final class CollectionFactory {
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createApproximateMap(@Nullable Object map, int capacity) {
 		if (map instanceof EnumMap) {
 			EnumMap enumMap = new EnumMap((EnumMap) map);
@@ -294,7 +294,7 @@ public final class CollectionFactory {
 	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
 	 * the supplied {@code keyType} is not a subtype of {@link Enum}
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
 		if (mapType.isInterface()) {
