@@ -327,6 +327,17 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 
 	/**
+	 * Use this to clear {@link #MEDIA_TYPES_ATTRIBUTE} that contains the parsed,
+	 * requested media types.
+	 * @param request the current request
+	 * @since 5.2
+	 */
+	public static void clearMediaTypesAttribute(HttpServletRequest request) {
+		request.removeAttribute(MEDIA_TYPES_ATTRIBUTE);
+	}
+
+
+	/**
 	 * Parses and matches a single media type expression to a request's 'Accept' header.
 	 */
 	static class ProduceMediaTypeExpression extends AbstractMediaTypeExpression {
