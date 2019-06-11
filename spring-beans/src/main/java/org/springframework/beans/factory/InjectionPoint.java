@@ -180,7 +180,7 @@ public class InjectionPoint {
 		if (this == other) {
 			return true;
 		}
-		if (getClass() != other.getClass()) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
 		InjectionPoint otherPoint = (InjectionPoint) other;

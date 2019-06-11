@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,9 @@ public enum TypeCode {
 
 
 	public static TypeCode forName(String name) {
-		String searchingFor = name.toUpperCase();
 		TypeCode[] tcs = values();
 		for (int i = 1; i < tcs.length; i++) {
-			if (tcs[i].name().equals(searchingFor)) {
+			if (tcs[i].name().equalsIgnoreCase(name)) {
 				return tcs[i];
 			}
 		}

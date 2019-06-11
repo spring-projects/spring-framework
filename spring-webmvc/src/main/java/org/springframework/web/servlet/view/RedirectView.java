@@ -390,7 +390,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			result.append(UriUtils.encodePathSegment(value.toString(), encodingScheme));
 			endLastMatch = matcher.end();
 		}
-		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
+		result.append(targetUrl.substring(endLastMatch));
 		return result;
 	}
 
