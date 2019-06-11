@@ -346,8 +346,25 @@ public class FormattingConversionServiceTests {
 
 	@Test
 	public void introspectedFormatter() throws ParseException {
-		formattingService.addFormatter(new NumberStyleFormatter());
-		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
+		formattingService.addFormatter(new NumberStyleFormatter("#,#00.0#"));
+		assertThat(formattingService.convert(123, String.class)).isEqualTo("123.0");
+		assertThat(formattingService.convert("123.0", Integer.class)).isEqualTo(123);
+	}
+
+	@Test
+	public void introspectedPrinter() throws ParseException {
+		formattingService.addPrinter(new NumberStyleFormatter("#,#00.0#"));
+		assertThat(formattingService.convert(123, String.class)).isEqualTo("123.0");
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				assertThat(formattingService.convert("123.0", Integer.class)).isNull())
+			.withCauseInstanceOf(NumberFormatException.class);
+	}
+
+	@Test
+	public void introspectedParser() throws ParseException {
+		formattingService.addParser(new NumberStyleFormatter("#,#00.0#"));
+		assertThat(formattingService.convert("123.0", Integer.class)).isEqualTo(123);
+		assertThat(formattingService.convert(123, String.class)).isEqualTo("123");
 	}
 
 	@Test
