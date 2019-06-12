@@ -20,6 +20,9 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +34,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -696,11 +700,28 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
+	 * @see #queryParams(String, Collection)
 	 */
 	@Override
 	public UriComponentsBuilder queryParam(String name, Object... values) {
+		return queryParams(name, (!ObjectUtils.isEmpty(values) ? Arrays.asList(values) : Collections.emptyList()));
+	}
+
+	/**
+	 * Append the given query parameter to the existing query parameters. The
+	 * given name or any of the values may contain URI template variables. If no
+	 * values are given, the resulting URI will contain the query parameter name
+	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}).
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @return this UriComponentsBuilder
+	 * @since 5.2.0
+	 * @see #queryParam(String, Object...)
+	 */
+	@Override
+	public UriComponentsBuilder queryParams(String name, @Nullable Collection<?> values) {
 		Assert.notNull(name, "Name must not be null");
-		if (!ObjectUtils.isEmpty(values)) {
+		if (!CollectionUtils.isEmpty(values)) {
 			for (Object value : values) {
 				String valueAsString = (value != null ? value.toString() : null);
 				this.queryParams.add(name, valueAsString);
@@ -733,13 +754,28 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param name the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
+	 * @see #replaceQueryParams(String, Collection)
 	 */
 	@Override
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
+		return replaceQueryParams(name, (!ObjectUtils.isEmpty(values) ? Arrays.asList(values) : Collections.emptyList()));
+	}
+
+	/**
+	 * Set the query parameter values overriding all existing query values for
+	 * the same parameter. If no values are given, the query parameter is removed.
+	 * @param name the query parameter name
+	 * @param values the query parameter values
+	 * @return this UriComponentsBuilder
+	 * @see #replaceQueryParam(String, Object...)
+	 * @since 5.2.0
+	 */
+	@Override
+	public UriComponentsBuilder replaceQueryParams(String name, @Nullable Collection<?> values) {
 		Assert.notNull(name, "Name must not be null");
 		this.queryParams.remove(name);
-		if (!ObjectUtils.isEmpty(values)) {
-			queryParam(name, values);
+		if (!CollectionUtils.isEmpty(values)) {
+			queryParams(name, values);
 		}
 		resetSchemeSpecificPart();
 		return this;
