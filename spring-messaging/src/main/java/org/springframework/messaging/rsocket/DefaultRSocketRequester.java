@@ -16,12 +16,19 @@
 
 package org.springframework.messaging.rsocket;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.CompositeByteBuf;
+import io.netty.buffer.Unpooled;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
+import io.rsocket.metadata.CompositeMetadataFlyweight;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,6 +39,10 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -44,24 +55,42 @@ import org.springframework.util.MimeType;
  */
 final class DefaultRSocketRequester implements RSocketRequester {
 
+	static final MimeType COMPOSITE_METADATA = new MimeType("message", "x.rsocket.composite-metadata.v0");
+
+	static final MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
+
+	static final List<MimeType> METADATA_MIME_TYPES = Arrays.asList(COMPOSITE_METADATA, ROUTING);
+
+
 	private static final Map<String, Object> EMPTY_HINTS = Collections.emptyMap();
 
 
 	private final RSocket rsocket;
 
-	@Nullable
 	private final MimeType dataMimeType;
+
+	private final MimeType metadataMimeType;
 
 	private final RSocketStrategies strategies;
 
-	private DataBuffer emptyDataBuffer;
+	private final DataBuffer emptyDataBuffer;
 
 
-	DefaultRSocketRequester(RSocket rsocket, @Nullable MimeType dataMimeType, RSocketStrategies strategies) {
+	DefaultRSocketRequester(
+			RSocket rsocket, MimeType dataMimeType, MimeType metadataMimeType,
+			RSocketStrategies strategies) {
+
 		Assert.notNull(rsocket, "RSocket is required");
+		Assert.notNull(dataMimeType, "'dataMimeType' is required");
+		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
 		Assert.notNull(strategies, "RSocketStrategies is required");
+
+		Assert.isTrue(METADATA_MIME_TYPES.contains(metadataMimeType),
+				() -> "Unexpected metadatata mime type: '" + metadataMimeType + "'");
+
 		this.rsocket = rsocket;
 		this.dataMimeType = dataMimeType;
+		this.metadataMimeType = metadataMimeType;
 		this.strategies = strategies;
 		this.emptyDataBuffer = this.strategies.dataBufferFactory().wrap(new byte[0]);
 	}
@@ -70,6 +99,16 @@ final class DefaultRSocketRequester implements RSocketRequester {
 	@Override
 	public RSocket rsocket() {
 		return this.rsocket;
+	}
+
+	@Override
+	public MimeType dataMimeType() {
+		return this.dataMimeType;
+	}
+
+	@Override
+	public MimeType metadataMimeType() {
+		return this.metadataMimeType;
 	}
 
 	@Override
@@ -82,13 +121,28 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		return (Void.class.equals(elementType.resolve()) || void.class.equals(elementType.resolve()));
 	}
 
+	private DataBufferFactory bufferFactory() {
+		return this.strategies.dataBufferFactory();
+	}
+
 
 	private class DefaultRequestSpec implements RequestSpec {
 
-		private final String route;
+		private final Map<Object, MimeType> metadata = new LinkedHashMap<>(4);
 
-		DefaultRequestSpec(String route) {
-			this.route = route;
+
+		public DefaultRequestSpec(String route) {
+			Assert.notNull(route, "'route' is required");
+			metadata(route, ROUTING);
+		}
+
+
+		@Override
+		public RequestSpec metadata(Object metadata, MimeType mimeType) {
+			Assert.isTrue(this.metadata.isEmpty() || metadataMimeType().equals(COMPOSITE_METADATA),
+					"Additional metadata entries supported only with composite metadata");
+			this.metadata.put(metadata, mimeType);
+			return this;
 		}
 
 		@Override
@@ -122,7 +176,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			}
 			else {
 				Mono<Payload> payloadMono = Mono
-						.fromCallable(() -> encodeValue(input, ResolvableType.forInstance(input), null))
+						.fromCallable(() -> encodeData(input, ResolvableType.forInstance(input), null))
 						.map(this::firstPayload)
 						.doOnDiscard(Payload.class, Payload::release)
 						.switchIfEmpty(emptyPayload());
@@ -139,14 +193,14 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			if (adapter != null && !adapter.isMultiValue()) {
 				Mono<Payload> payloadMono = Mono.from(publisher)
-						.map(value -> encodeValue(value, dataType, encoder))
+						.map(value -> encodeData(value, dataType, encoder))
 						.map(this::firstPayload)
 						.switchIfEmpty(emptyPayload());
 				return new DefaultResponseSpec(payloadMono);
 			}
 
 			Flux<Payload> payloadFlux = Flux.from(publisher)
-					.map(value -> encodeValue(value, dataType, encoder))
+					.map(value -> encodeData(value, dataType, encoder))
 					.switchOnFirst((signal, inner) -> {
 						DataBuffer data = signal.get();
 						if (data != null) {
@@ -163,16 +217,28 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		@SuppressWarnings("unchecked")
-		private <T> DataBuffer encodeValue(T value, ResolvableType valueType, @Nullable Encoder<?> encoder) {
+		private <T> DataBuffer encodeData(T value, ResolvableType valueType, @Nullable Encoder<?> encoder) {
+			if (value instanceof DataBuffer) {
+				return (DataBuffer) value;
+			}
 			if (encoder == null) {
-				encoder = strategies.encoder(ResolvableType.forInstance(value), dataMimeType);
+				valueType = ResolvableType.forInstance(value);
+				encoder = strategies.encoder(valueType, dataMimeType);
 			}
 			return ((Encoder<T>) encoder).encodeValue(
-					value, strategies.dataBufferFactory(), valueType, dataMimeType, EMPTY_HINTS);
+					value, bufferFactory(), valueType, dataMimeType, EMPTY_HINTS);
 		}
 
 		private Payload firstPayload(DataBuffer data) {
-			return PayloadUtils.createPayload(getMetadata(), data);
+			DataBuffer metadata;
+			try {
+				metadata = getMetadata();
+				return PayloadUtils.createPayload(metadata, data);
+			}
+			catch (Throwable ex) {
+				DataBufferUtils.release(data);
+				throw ex;
+			}
 		}
 
 		private Mono<Payload> emptyPayload() {
@@ -180,7 +246,51 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		private DataBuffer getMetadata() {
-			return strategies.dataBufferFactory().wrap(this.route.getBytes(StandardCharsets.UTF_8));
+			if (metadataMimeType().equals(COMPOSITE_METADATA)) {
+				CompositeByteBuf metadata = getAllocator().compositeBuffer();
+				this.metadata.forEach((key, value) -> {
+					DataBuffer dataBuffer = encodeMetadata(key, value);
+					CompositeMetadataFlyweight.encodeAndAddMetadata(metadata, getAllocator(), value.toString(),
+							dataBuffer instanceof NettyDataBuffer ?
+									((NettyDataBuffer) dataBuffer).getNativeBuffer() :
+									Unpooled.wrappedBuffer(dataBuffer.asByteBuffer()));
+
+				});
+				return asDataBuffer(metadata);
+			}
+			Assert.isTrue(this.metadata.size() < 2, "Composite metadata required for multiple entries");
+			Map.Entry<Object, MimeType> entry = this.metadata.entrySet().iterator().next();
+			Assert.isTrue(metadataMimeType().equals(entry.getValue()),
+					() -> "Expected metadata MimeType '" + metadataMimeType() + "', actual " + this.metadata);
+			return encodeMetadata(entry.getKey(), entry.getValue());
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T> DataBuffer encodeMetadata(Object metadata, MimeType mimeType) {
+			if (metadata instanceof DataBuffer) {
+				return (DataBuffer) metadata;
+			}
+			ResolvableType type = ResolvableType.forInstance(metadata);
+			Encoder<T> encoder = strategies.encoder(type, mimeType);
+			Assert.notNull(encoder, () -> "No encoder for metadata " + metadata + ", mimeType '" + mimeType + "'");
+			return encoder.encodeValue((T) metadata, bufferFactory(), type, mimeType, EMPTY_HINTS);
+		}
+
+		private ByteBufAllocator getAllocator() {
+			return bufferFactory() instanceof NettyDataBufferFactory ?
+					((NettyDataBufferFactory) bufferFactory()).getByteBufAllocator() :
+					ByteBufAllocator.DEFAULT;
+		}
+
+		private DataBuffer asDataBuffer(ByteBuf byteBuf) {
+			if (bufferFactory() instanceof NettyDataBufferFactory) {
+				return ((NettyDataBufferFactory) bufferFactory()).wrap(byteBuf);
+			}
+			else {
+				DataBuffer dataBuffer = bufferFactory().wrap(byteBuf.nioBuffer());
+				byteBuf.release();
+				return dataBuffer;
+			}
 		}
 	}
 
@@ -259,7 +369,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		private DataBuffer retainDataAndReleasePayload(Payload payload) {
-			return PayloadUtils.retainDataAndReleasePayload(payload, strategies.dataBufferFactory());
+			return PayloadUtils.retainDataAndReleasePayload(payload, bufferFactory());
 		}
 	}
 

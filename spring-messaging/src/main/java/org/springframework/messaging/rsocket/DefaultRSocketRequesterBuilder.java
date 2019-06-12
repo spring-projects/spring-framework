@@ -44,6 +44,8 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	@Nullable
 	private MimeType dataMimeType;
 
+	private MimeType metadataMimeType = DefaultRSocketRequester.COMPOSITE_METADATA;
+
 	private List<Consumer<RSocketFactory.ClientRSocketFactory>> factoryConfigurers = new ArrayList<>();
 
 	@Nullable
@@ -53,8 +55,15 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 
 	@Override
-	public RSocketRequester.Builder dataMimeType(MimeType mimeType) {
+	public RSocketRequester.Builder dataMimeType(@Nullable MimeType mimeType) {
 		this.dataMimeType = mimeType;
+		return this;
+	}
+
+	@Override
+	public RSocketRequester.Builder metadataMimeType(MimeType mimeType) {
+		Assert.notNull(mimeType, "`metadataMimeType` is required");
+		this.metadataMimeType = mimeType;
 		return this;
 	}
 
@@ -100,10 +109,13 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		RSocketFactory.ClientRSocketFactory rsocketFactory = RSocketFactory.connect();
 		MimeType dataMimeType = getDataMimeType(rsocketStrategies);
 		rsocketFactory.dataMimeType(dataMimeType.toString());
+		rsocketFactory.metadataMimeType(this.metadataMimeType.toString());
 		this.factoryConfigurers.forEach(consumer -> consumer.accept(rsocketFactory));
 
-		return rsocketFactory.transport(transport).start()
-				.map(rsocket -> new DefaultRSocketRequester(rsocket, dataMimeType, rsocketStrategies));
+		return rsocketFactory.transport(transport)
+				.start()
+				.map(rsocket -> new DefaultRSocketRequester(
+						rsocket, dataMimeType, this.metadataMimeType, rsocketStrategies));
 	}
 
 	private RSocketStrategies getRSocketStrategies() {

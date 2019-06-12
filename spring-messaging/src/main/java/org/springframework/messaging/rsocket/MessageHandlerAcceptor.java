@@ -24,9 +24,9 @@ import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
@@ -47,16 +47,28 @@ public final class MessageHandlerAcceptor extends RSocketMessageHandler
 	@Nullable
 	private MimeType defaultDataMimeType;
 
+	private MimeType defaultMetadataMimeType = DefaultRSocketRequester.COMPOSITE_METADATA;
+
 
 	/**
-	 * Configure the default content type to use for data payloads.
-	 * <p>By default this is not set. However a server acceptor will use the
-	 * content type from the {@link ConnectionSetupPayload}, so this is typically
-	 * required for clients but can also be used on servers as a fallback.
-	 * @param defaultDataMimeType the MimeType to use
+	 * Configure the default content type to use for data payloads if the
+	 * {@code SETUP} frame did not specify one.
+	 * <p>By default this is not set.
+	 * @param mimeType the MimeType to use
 	 */
-	public void setDefaultDataMimeType(@Nullable MimeType defaultDataMimeType) {
-		this.defaultDataMimeType = defaultDataMimeType;
+	public void setDefaultDataMimeType(@Nullable MimeType mimeType) {
+		this.defaultDataMimeType = mimeType;
+	}
+
+	/**
+	 * Configure the default {@code MimeType} for payload data if the
+	 * {@code SETUP} frame did not specify one.
+	 * <p>By default this is set to {@code "message/x.rsocket.composite-metadata.v0"}
+	 * @param mimeType the MimeType to use
+	 */
+	public void setDefaultMetadataMimeType(MimeType mimeType) {
+		Assert.notNull(mimeType, "'metadataMimeType' is required");
+		this.defaultMetadataMimeType = mimeType;
 	}
 
 
@@ -76,12 +88,24 @@ public final class MessageHandlerAcceptor extends RSocketMessageHandler
 	}
 
 	private MessagingRSocket createRSocket(ConnectionSetupPayload setupPayload, RSocket rsocket) {
+
 		MimeType dataMimeType = StringUtils.hasText(setupPayload.dataMimeType()) ?
 				MimeTypeUtils.parseMimeType(setupPayload.dataMimeType()) :
 				this.defaultDataMimeType;
-		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, getRSocketStrategies());
-		DataBufferFactory bufferFactory = getRSocketStrategies().dataBufferFactory();
-		return new MessagingRSocket(this, getRouteMatcher(), requester, dataMimeType, bufferFactory);
+		Assert.notNull(dataMimeType,
+				"No `dataMimeType` in the ConnectionSetupPayload and no default value");
+
+		MimeType metadataMimeType = StringUtils.hasText(setupPayload.dataMimeType()) ?
+				MimeTypeUtils.parseMimeType(setupPayload.metadataMimeType()) :
+				this.defaultMetadataMimeType;
+		Assert.notNull(dataMimeType,
+				"No `metadataMimeType` in the ConnectionSetupPayload and no default value");
+
+		RSocketRequester requester = RSocketRequester.wrap(
+				rsocket, dataMimeType, metadataMimeType, getRSocketStrategies());
+
+		return new MessagingRSocket(this, getRouteMatcher(), requester,
+				dataMimeType, metadataMimeType, getRSocketStrategies().dataBufferFactory());
 	}
 
 }

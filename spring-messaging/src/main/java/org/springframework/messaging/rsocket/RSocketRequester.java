@@ -19,6 +19,7 @@ package org.springframework.messaging.rsocket;
 import java.net.URI;
 import java.util.function.Consumer;
 
+import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
 import io.rsocket.transport.ClientTransport;
@@ -47,15 +48,28 @@ public interface RSocketRequester {
 	 */
 	RSocket rsocket();
 
-	// For now we treat metadata as a simple string that is the route.
-	// This will change after the resolution of:
-	// https://github.com/rsocket/rsocket-java/issues/568
+	/**
+	 * Return the data {@code MimeType} selected for the underlying RSocket
+	 * at connection time. On the client side this is configured via
+	 * {@link RSocketRequester.Builder#dataMimeType(MimeType)} while on the
+	 * server side it's obtained from the {@link ConnectionSetupPayload}.
+	 */
+	MimeType dataMimeType();
 
 	/**
-	 * Entry point to prepare a new request to the given route.
-	 * <p>For requestChannel interactions, i.e. Flux-to-Flux the metadata is
-	 * attached to the first request payload.
-	 * @param route the routing destination
+	 * Return the metadata {@code MimeType} selected for the underlying RSocket
+	 * at connection time. On the client side this is configured via
+	 * {@link RSocketRequester.Builder#metadataMimeType(MimeType)} while on the
+	 * server side it's obtained from the {@link ConnectionSetupPayload}.
+	 */
+	MimeType metadataMimeType();
+
+
+	/**
+	 * Begin to specify a new request with the given route to a handler on the
+	 * remote side. The route will be encoded in the metadata of the first
+	 * payload.
+	 * @param route the route to a handler
 	 * @return a spec for further defining and executing the request
 	 */
 	RequestSpec route(String route);
@@ -72,31 +86,19 @@ public interface RSocketRequester {
 	}
 
 	/**
-	 * Wrap an existing {@link RSocket}. Typically used in a client or server
-	 * responder to wrap the remote {@code RSocket}.
+	 * Wrap an existing {@link RSocket}. This is typically used in a responder,
+	 * client or server, to wrap the remote/sending {@code RSocket}.
 	 * @param rsocket the RSocket to wrap
-	 * @param dataMimeType the data MimeType, obtained from the
-	 * {@link io.rsocket.ConnectionSetupPayload} (server) or the
-	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory} (client)
+	 * @param dataMimeType the data MimeType from the {@code ConnectionSetupPayload}
+	 * @param metadataMimeType the metadata MimeType from the {@code ConnectionSetupPayload}
 	 * @param strategies the strategies to use
 	 * @return the created RSocketRequester
 	 */
-	static RSocketRequester wrap(RSocket rsocket, @Nullable MimeType dataMimeType, RSocketStrategies strategies) {
-		return new DefaultRSocketRequester(rsocket, dataMimeType, strategies);
-	}
+	static RSocketRequester wrap(
+			RSocket rsocket, MimeType dataMimeType, MimeType metadataMimeType,
+			RSocketStrategies strategies) {
 
-	/**
-	 * Create a new {@code RSocketRequester} from the given {@link RSocket} and
-	 * strategies for encoding and decoding request and response payloads.
-	 * @param rsocket the sending RSocket to use
-	 * @param dataMimeType the MimeType for data (from the SETUP frame)
-	 * @param strategies encoders, decoders, and others
-	 * @return the created RSocketRequester wrapper
-	 * @deprecated use {@link #wrap(RSocket, MimeType, RSocketStrategies)} instead
-	 */
-	@Deprecated
-	static RSocketRequester create(RSocket rsocket, @Nullable MimeType dataMimeType, RSocketStrategies strategies) {
-		return new DefaultRSocketRequester(rsocket, dataMimeType, strategies);
+		return new DefaultRSocketRequester(rsocket, dataMimeType, metadataMimeType, strategies);
 	}
 
 
@@ -107,20 +109,37 @@ public interface RSocketRequester {
 	interface Builder {
 
 		/**
-		 * Configure the MimeType to use for payload data. This is set on the
-		 * {@code SETUP} frame for the whole connection.
+		 * Configure the MimeType to use for payload data. This is then
+		 * specified on the {@code SETUP} frame for the whole connection.
 		 * <p>By default this is set to the first concrete MimeType supported
 		 * by the configured encoders and decoders.
 		 * @param mimeType the data MimeType to use
 		 */
-		RSocketRequester.Builder dataMimeType(MimeType mimeType);
+		RSocketRequester.Builder dataMimeType(@Nullable MimeType mimeType);
+
+		/**
+		 * Configure the MimeType to use for payload metadata. This is then
+		 * specified on the {@code SETUP} frame for the whole connection.
+		 * <p>At present the metadata MimeType must be
+		 * {@code "message/x.rsocket.routing.v0"} to allow the request
+		 * {@link RSocketRequester#route(String) route} to be encoded, or it
+		 * could also be {@code "message/x.rsocket.composite-metadata.v0"} in
+		 * which case the route can be encoded along with other metadata entries.
+		 * <p>By default this is set to
+		 * {@code "message/x.rsocket.composite-metadata.v0"}.
+		 * @param mimeType the data MimeType to use
+		 */
+		RSocketRequester.Builder metadataMimeType(MimeType mimeType);
 
 		/**
 		 * Configure the {@code ClientRSocketFactory}.
-		 * <p><strong>Note:</strong> Please, do not set the {@code dataMimeType}
-		 * directly on the underlying {@code RSocketFactory.ClientRSocketFactory},
-		 * and use {@link #dataMimeType(MimeType)} instead.
-		 * @param configurer the configurer to apply
+		 * <p><strong>Note:</strong> This builder provides shortcuts for certain
+		 * {@code ClientRSocketFactory} options it needs to know about such as
+		 * {@link #dataMimeType(MimeType)} and {@link #metadataMimeType(MimeType)}.
+		 * Please, use these shortcuts vs configuring them directly on the
+		 * {@code ClientRSocketFactory} so that the resulting
+		 * {@code RSocketRequester} is aware of those changes.
+		 * @param configurer consumer to customize the factory
 		 */
 		RSocketRequester.Builder rsocketFactory(Consumer<RSocketFactory.ClientRSocketFactory> configurer);
 
@@ -168,6 +187,17 @@ public interface RSocketRequester {
 	 * Contract to provide input data for an RSocket request.
 	 */
 	interface RequestSpec {
+
+		/**
+		 * Use this to append additional metadata entries if the RSocket
+		 * connection is configured to use composite metadata. If not, an
+		 * {@link IllegalArgumentException} will be raised.
+		 * @param metadata an Object, to be encoded with a suitable
+		 * {@link org.springframework.core.codec.Encoder Encoder}, or a
+		 * {@link org.springframework.core.io.buffer.DataBuffer DataBuffer}
+		 * @param mimeType the mime type that describes the metadata
+		 */
+		RequestSpec metadata(Object metadata, MimeType mimeType);
 
 		/**
 		 * Provide request payload data. The given Object may be a synchronous

@@ -19,6 +19,7 @@ package org.springframework.messaging.rsocket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -28,6 +29,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.rsocket.AbstractRSocket;
 import io.rsocket.Payload;
+import io.rsocket.metadata.CompositeMetadata;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -61,37 +63,41 @@ public class DefaultRSocketRequesterTests {
 
 	private RSocketRequester requester;
 
+	private RSocketStrategies strategies;
+
 	private final DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	@Before
 	public void setUp() {
-		RSocketStrategies strategies = RSocketStrategies.builder()
+		this.strategies = RSocketStrategies.builder()
 				.decoder(StringDecoder.allMimeTypes())
 				.encoder(CharSequenceEncoder.allMimeTypes())
 				.build();
 		this.rsocket = new TestRSocket();
-		this.requester = RSocketRequester.wrap(this.rsocket, MimeTypeUtils.TEXT_PLAIN, strategies);
+		this.requester = RSocketRequester.wrap(this.rsocket,
+				MimeTypeUtils.TEXT_PLAIN, DefaultRSocketRequester.ROUTING,
+				this.strategies);
 	}
 
 
 	@Test
-	public void singlePayload() {
+	public void sendMono() {
 
 		// data(Object)
-		testSinglePayload(spec -> spec.data("bodyA"), "bodyA");
-		testSinglePayload(spec -> spec.data(Mono.delay(MILLIS_10).map(l -> "bodyA")), "bodyA");
-		testSinglePayload(spec -> spec.data(Mono.delay(MILLIS_10).then()), "");
-		testSinglePayload(spec -> spec.data(Single.timer(10, MILLISECONDS).map(l -> "bodyA")), "bodyA");
-		testSinglePayload(spec -> spec.data(Completable.complete()), "");
+		testSendMono(spec -> spec.data("bodyA"), "bodyA");
+		testSendMono(spec -> spec.data(Mono.delay(MILLIS_10).map(l -> "bodyA")), "bodyA");
+		testSendMono(spec -> spec.data(Mono.delay(MILLIS_10).then()), "");
+		testSendMono(spec -> spec.data(Single.timer(10, MILLISECONDS).map(l -> "bodyA")), "bodyA");
+		testSendMono(spec -> spec.data(Completable.complete()), "");
 
 		// data(Publisher<T>, Class<T>)
-		testSinglePayload(spec -> spec.data(Mono.delay(MILLIS_10).map(l -> "bodyA"), String.class), "bodyA");
-		testSinglePayload(spec -> spec.data(Mono.delay(MILLIS_10).map(l -> "bodyA"), Object.class), "bodyA");
-		testSinglePayload(spec -> spec.data(Mono.delay(MILLIS_10).then(), Void.class), "");
+		testSendMono(spec -> spec.data(Mono.delay(MILLIS_10).map(l -> "bodyA"), String.class), "bodyA");
+		testSendMono(spec -> spec.data(Mono.delay(MILLIS_10).map(l -> "bodyA"), Object.class), "bodyA");
+		testSendMono(spec -> spec.data(Mono.delay(MILLIS_10).then(), Void.class), "");
 	}
 
-	private void testSinglePayload(Function<RequestSpec, ResponseSpec> mapper, String expectedValue) {
+	private void testSendMono(Function<RequestSpec, ResponseSpec> mapper, String expectedValue) {
 		mapper.apply(this.requester.route("toA")).send().block(Duration.ofSeconds(5));
 
 		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("fireAndForget");
@@ -100,22 +106,22 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void multiPayload() {
+	public void sendFlux() {
 		String[] values = new String[] {"bodyA", "bodyB", "bodyC"};
 		Flux<String> stringFlux = Flux.fromArray(values).delayElements(MILLIS_10);
 
 		// data(Object)
-		testMultiPayload(spec -> spec.data(stringFlux), values);
-		testMultiPayload(spec -> spec.data(Flux.empty()), "");
-		testMultiPayload(spec -> spec.data(Observable.fromArray(values).delay(10, MILLISECONDS)), values);
-		testMultiPayload(spec -> spec.data(Observable.empty()), "");
+		testSendFlux(spec -> spec.data(stringFlux), values);
+		testSendFlux(spec -> spec.data(Flux.empty()), "");
+		testSendFlux(spec -> spec.data(Observable.fromArray(values).delay(10, MILLISECONDS)), values);
+		testSendFlux(spec -> spec.data(Observable.empty()), "");
 
 		// data(Publisher<T>, Class<T>)
-		testMultiPayload(spec -> spec.data(stringFlux, String.class), values);
-		testMultiPayload(spec -> spec.data(stringFlux.cast(Object.class), Object.class), values);
+		testSendFlux(spec -> spec.data(stringFlux, String.class), values);
+		testSendFlux(spec -> spec.data(stringFlux.cast(Object.class), Object.class), values);
 	}
 
-	private void testMultiPayload(Function<RequestSpec, ResponseSpec> mapper, String... expectedValues) {
+	private void testSendFlux(Function<RequestSpec, ResponseSpec> mapper, String... expectedValues) {
 		this.rsocket.reset();
 		mapper.apply(this.requester.route("toA")).retrieveFlux(String.class).blockLast(Duration.ofSeconds(5));
 
@@ -129,19 +135,50 @@ public class DefaultRSocketRequesterTests {
 			assertThat(payloads.get(0).getDataUtf8()).isEqualTo("");
 		}
 		else {
-			assertThat(payloads.stream().map(Payload::getMetadataUtf8).toArray(String[]::new)).isEqualTo(new String[] {"toA", "", ""});
-			assertThat(payloads.stream().map(Payload::getDataUtf8).toArray(String[]::new)).isEqualTo(expectedValues);
+			assertThat(payloads.stream().map(Payload::getMetadataUtf8).toArray(String[]::new))
+					.isEqualTo(new String[] {"toA", "", ""});
+			assertThat(payloads.stream().map(Payload::getDataUtf8).toArray(String[]::new))
+					.isEqualTo(expectedValues);
 		}
 	}
 
 	@Test
-	public void send() {
-		String value = "bodyA";
-		this.requester.route("toA").data(value).send().block(Duration.ofSeconds(5));
+	public void sendCompositeMetadata() {
+		RSocketRequester requester = RSocketRequester.wrap(this.rsocket,
+				MimeTypeUtils.TEXT_PLAIN, DefaultRSocketRequester.COMPOSITE_METADATA,
+				this.strategies);
 
-		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("fireAndForget");
-		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("toA");
-		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEqualTo("bodyA");
+		requester.route("toA")
+				.metadata("My metadata", MimeTypeUtils.TEXT_PLAIN).data("bodyA")
+				.send()
+				.block(Duration.ofSeconds(5));
+
+		CompositeMetadata entries = new CompositeMetadata(this.rsocket.getSavedPayload().metadata(), false);
+		Iterator<CompositeMetadata.Entry> iterator = entries.iterator();
+
+		assertThat(iterator.hasNext()).isTrue();
+		CompositeMetadata.Entry entry = iterator.next();
+		assertThat(entry.getMimeType()).isEqualTo(DefaultRSocketRequester.ROUTING.toString());
+		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
+
+		assertThat(iterator.hasNext()).isTrue();
+		entry = iterator.next();
+		assertThat(entry.getMimeType()).isEqualTo(MimeTypeUtils.TEXT_PLAIN.toString());
+		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("My metadata");
+
+		assertThat(iterator.hasNext()).isFalse();
+	}
+
+	@Test
+	public void supportedMetadataMimeTypes() {
+		RSocketRequester.wrap(this.rsocket, MimeTypeUtils.TEXT_PLAIN,
+				DefaultRSocketRequester.COMPOSITE_METADATA, this.strategies);
+
+		RSocketRequester.wrap(this.rsocket, MimeTypeUtils.TEXT_PLAIN,
+				DefaultRSocketRequester.ROUTING, this.strategies);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> RSocketRequester.wrap(
+				this.rsocket, MimeTypeUtils.TEXT_PLAIN, MimeTypeUtils.TEXT_PLAIN, this.strategies));
 	}
 
 	@Test
@@ -188,10 +225,10 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void rejectFluxToMono() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.requester.route("").data(Flux.just("a", "b")).retrieveMono(String.class))
-			.withMessage("No RSocket interaction model for Flux request to Mono response.");
+	public void fluxToMonoIsRejected() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.requester.route("").data(Flux.just("a", "b")).retrieveMono(String.class))
+				.withMessage("No RSocket interaction model for Flux request to Mono response.");
 	}
 
 	private Payload toPayload(String value) {

@@ -106,8 +106,9 @@ public class RSocketServerToClientIntegrationTests {
 		RSocket rsocket = null;
 		try {
 			rsocket = RSocketFactory.connect()
-					.setupPayload(DefaultPayload.create("", destination))
+					.metadataMimeType("message/x.rsocket.routing.v0")
 					.dataMimeType("text/plain")
+					.setupPayload(DefaultPayload.create("", destination))
 					.frameDecoder(PayloadDecoder.ZERO_COPY)
 					.acceptor(context.getBean("clientAcceptor", MessageHandlerAcceptor.class))
 					.transport(TcpClientTransport.create("localhost", 7000))

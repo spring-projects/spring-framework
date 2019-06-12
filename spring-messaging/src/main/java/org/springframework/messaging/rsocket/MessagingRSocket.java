@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.rsocket;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
@@ -23,6 +24,7 @@ import io.rsocket.AbstractRSocket;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
+import io.rsocket.metadata.CompositeMetadata;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -61,24 +63,31 @@ class MessagingRSocket extends AbstractRSocket {
 
 	private final RSocketRequester requester;
 
-	@Nullable
-	private MimeType dataMimeType;
+	private final MimeType dataMimeType;
+
+	private final MimeType metadataMimeType;
 
 	private final DataBufferFactory bufferFactory;
 
 
 	MessagingRSocket(RSocketMessageHandler messageHandler, RouteMatcher routeMatcher,
-			RSocketRequester requester, @Nullable MimeType defaultDataMimeType,
+			RSocketRequester requester, MimeType dataMimeType, MimeType metadataMimeType,
 			DataBufferFactory bufferFactory) {
 
 		Assert.notNull(messageHandler, "'messageHandler' is required");
 		Assert.notNull(routeMatcher, "'routeMatcher' is required");
 		Assert.notNull(requester, "'requester' is required");
+		Assert.notNull(requester, "'dataMimeType' is required");
+		Assert.notNull(requester, "'metadataMimeType' is required");
+
+		Assert.isTrue(DefaultRSocketRequester.METADATA_MIME_TYPES.contains(metadataMimeType),
+				() -> "Unexpected metadatata mime type: '" + metadataMimeType + "'");
 
 		this.messageHandler = messageHandler;
 		this.routeMatcher = routeMatcher;
 		this.requester = requester;
-		this.dataMimeType = defaultDataMimeType;
+		this.dataMimeType = dataMimeType;
+		this.metadataMimeType = metadataMimeType;
 		this.bufferFactory = bufferFactory;
 	}
 
@@ -169,13 +178,21 @@ class MessagingRSocket extends AbstractRSocket {
 	}
 
 	private String getDestination(Payload payload) {
-
-		// TODO:
-		// For now treat the metadata as a simple string with routing information.
-		// We'll have to get more sophisticated once the routing extension is completed.
-		// https://github.com/rsocket/rsocket-java/issues/568
-
-		return payload.getMetadataUtf8();
+		if (this.metadataMimeType.equals(DefaultRSocketRequester.COMPOSITE_METADATA)) {
+			CompositeMetadata metadata = new CompositeMetadata(payload.metadata(), false);
+			for (CompositeMetadata.Entry entry : metadata) {
+				String mimeType = entry.getMimeType();
+				if (DefaultRSocketRequester.ROUTING.toString().equals(mimeType)) {
+					return entry.getContent().toString(StandardCharsets.UTF_8);
+				}
+			}
+			return "";
+		}
+		else if (this.metadataMimeType.equals(DefaultRSocketRequester.ROUTING)) {
+			return payload.getMetadataUtf8();
+		}
+		// Should not happen (given constructor assertions)
+		throw new IllegalArgumentException("Unexpected metadata MimeType");
 	}
 
 	private DataBuffer retainDataAndReleasePayload(Payload payload) {
@@ -187,9 +204,7 @@ class MessagingRSocket extends AbstractRSocket {
 		headers.setLeaveMutable(true);
 		RouteMatcher.Route route = this.routeMatcher.parseRoute(destination);
 		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, route);
-		if (this.dataMimeType != null) {
-			headers.setContentType(this.dataMimeType);
-		}
+		headers.setContentType(this.dataMimeType);
 		headers.setHeader(RSocketRequesterMethodArgumentResolver.RSOCKET_REQUESTER_HEADER, this.requester);
 		if (replyMono != null) {
 			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, replyMono);

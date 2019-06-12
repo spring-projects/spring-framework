@@ -36,6 +36,15 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 public class ContentDispositionTests {
 
+
+	@Test
+	public void parseTest() {
+		ContentDisposition disposition = ContentDisposition
+				.parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123");
+		assertThat(disposition).isEqualTo(ContentDisposition.builder("form-data")
+				.name("foo").filename("foo.txt").size(123L).build());
+	}
+
 	@Test
 	public void parse() {
 		ContentDisposition disposition = ContentDisposition
