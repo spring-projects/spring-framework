@@ -45,6 +45,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
+import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.servlet.view.DummyMacroRequestContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Darren Davison
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 25.01.2005
  */
 public class FreeMarkerMacroTests {
@@ -107,7 +109,6 @@ public class FreeMarkerMacroTests {
 		};
 		fv.setUrl(TEMPLATE_FILE);
 		fv.setApplicationContext(wac);
-		fv.setExposeSpringMacroHelpers(true);
 
 		Map<String, Object> model = new HashMap<>();
 		model.put("tb", new TestBean("juergen", 99));
@@ -126,7 +127,6 @@ public class FreeMarkerMacroTests {
 		};
 		fv.setUrl(TEMPLATE_FILE);
 		fv.setApplicationContext(wac);
-		fv.setExposeSpringMacroHelpers(true);
 
 		Map<String, Object> model = new HashMap<>();
 		model.put(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
@@ -313,7 +313,7 @@ public class FreeMarkerMacroTests {
 		Configuration config = fc.getConfiguration();
 		Map<String, Object> model = new HashMap<>();
 		model.put("command", darren);
-		model.put("springMacroRequestContext", rc);
+		model.put(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, rc);
 		model.put("msgArgs", new Object[] { "World" });
 		model.put("nameOptionMap", names);
 		model.put("options", names.values());
