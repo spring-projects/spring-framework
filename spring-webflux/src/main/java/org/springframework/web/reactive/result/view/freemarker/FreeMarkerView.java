@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +48,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
+import org.springframework.web.reactive.result.view.RequestContext;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -64,15 +66,29 @@ import org.springframework.web.server.ServerWebExchange;
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public class FreeMarkerView extends AbstractUrlBasedView {
+
+	/**
+	 * Attribute name of the {@link RequestContext} instance in the template model,
+	 * available to Spring's macros &mdash; for example, for creating
+	 * {@link org.springframework.web.reactive.result.view.BindStatus BindStatus}
+	 * objects.
+	 * @since 5.2
+	 * @see #setExposeSpringMacroHelpers(boolean)
+	 */
+	public static final String SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE = "springMacroRequestContext";
+
 
 	@Nullable
 	private Configuration configuration;
 
 	@Nullable
 	private String encoding;
+
+	private boolean exposeSpringMacroHelpers = true;
 
 
 	/**
@@ -122,6 +138,19 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	@Nullable
 	protected String getEncoding() {
 		return this.encoding;
+	}
+
+	/**
+	 * Set whether to expose a {@link RequestContext} for use by Spring's macro
+	 * library, under the name {@value #SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE}.
+	 * <p>Default is {@code true}.
+	 * <p>Needed for Spring's FreeMarker default macros. Note that this is
+	 * <i>not</i> required for templates that use HTML forms <i>unless</i> you
+	 * wish to take advantage of the Spring helper macros.
+	 * @see #SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE
+	 */
+	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {
+		this.exposeSpringMacroHelpers = exposeSpringMacroHelpers;
 	}
 
 
@@ -178,6 +207,34 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			throw new ApplicationContextException(
 					"Could not load FreeMarker template for URL [" + getUrl() + "]", ex);
 		}
+	}
+
+	/**
+	 * Prepare the model to use for rendering by potentially exposing a
+	 * {@link RequestContext} for use in Spring FreeMarker macros and then
+	 * delegating to the inherited implementation of this method.
+	 * @since 5.2
+	 * @see #setExposeSpringMacroHelpers(boolean)
+	 * @see org.springframework.web.reactive.result.view.AbstractView#getModelAttributes(Map, ServerWebExchange)
+	 */
+	@Override
+	protected Mono<Map<String, Object>> getModelAttributes(Map<String, ?> model,
+			ServerWebExchange exchange) {
+
+		if (this.exposeSpringMacroHelpers) {
+			if (model.containsKey(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)) {
+				throw new IllegalStateException(
+						"Cannot expose bind macro helper '" + SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE +
+						"' because of an existing model object of the same name");
+			}
+			// Make a defensive copy of the model.
+			Map<String, Object> attributes = new HashMap<>(model);
+			// Expose RequestContext instance for Spring macros.
+			attributes.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(
+					exchange, attributes, obtainApplicationContext(), getRequestDataValueProcessor()));
+			return super.getModelAttributes(attributes, exchange);
+		}
+		return super.getModelAttributes(model, exchange);
 	}
 
 	@Override

@@ -40,7 +40,6 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.reactive.result.view.BindStatus;
 import org.springframework.web.reactive.result.view.DummyMacroRequestContext;
 import org.springframework.web.reactive.result.view.RequestContext;
@@ -59,23 +58,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class FreeMarkerMacroTests {
 
-	private static final String SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE = "springMacroRequestContext";
-
 	private static final String TEMPLATE_FILE = "test-macro.ftl";
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
+
+	private final GenericApplicationContext applicationContext = new GenericApplicationContext();
 
 	private Configuration freeMarkerConfig;
 
 	@Before
 	public void setUp() throws Exception {
+		this.applicationContext.refresh();
+
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setTemplateLoaderPaths("classpath:/", "file://" + System.getProperty("java.io.tmpdir"));
 		this.freeMarkerConfig = configurer.createConfiguration();
 	}
 
 	@Test
-	public void exposeRequestContextAsModelAttribute() throws Exception {
+	public void springMacroRequestContextIsAutomaticallyExposedAsModelAttribute() throws Exception {
 		storeTemplateInTempDir("<@spring.bind \"testBean.name\"/>\nHi ${spring.status.value}");
 
 		FreeMarkerView view = new FreeMarkerView() {
@@ -94,11 +95,7 @@ public class FreeMarkerMacroTests {
 			}
 		};
 
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.refresh();
-
-		view.setApplicationContext(wac);
-		view.setRequestContextAttribute(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
+		view.setApplicationContext(this.applicationContext);
 		view.setBeanName("myView");
 		view.setUrl("tmp.ftl");
 		view.setConfiguration(this.freeMarkerConfig);
@@ -314,19 +311,21 @@ public class FreeMarkerMacroTests {
 
 		ModelMap model = new ExtendedModelMap();
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(this.exchange, model,
-				new GenericApplicationContext());
+				this.applicationContext);
 		rc.setMessageMap(msgMap);
 		rc.setContextPath("/springtest");
 
 		model.put("command", darren);
-		model.put("springMacroRequestContext", rc);
+		model.put(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, rc);
 		model.put("msgArgs", new Object[] { "World" });
 		model.put("nameOptionMap", names);
 		model.put("options", names.values());
 
 		FreeMarkerView view = new FreeMarkerView();
+		view.setApplicationContext(this.applicationContext);
 		view.setBeanName("myView");
 		view.setUrl("tmp.ftl");
+		view.setExposeSpringMacroHelpers(false);
 		view.setConfiguration(freeMarkerConfig);
 
 		view.render(model, null, this.exchange).subscribe();

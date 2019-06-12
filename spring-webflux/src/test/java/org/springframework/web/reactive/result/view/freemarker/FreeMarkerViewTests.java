@@ -46,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 /**
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class FreeMarkerViewTests {
 
@@ -56,14 +57,13 @@ public class FreeMarkerViewTests {
 	private final MockServerWebExchange exchange =
 			MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
-	private GenericApplicationContext context;
+	private final GenericApplicationContext context = new GenericApplicationContext();
 
 	private Configuration freeMarkerConfig;
 
 
 	@Before
 	public void setup() throws Exception {
-		this.context = new GenericApplicationContext();
 		this.context.refresh();
 
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
@@ -104,6 +104,7 @@ public class FreeMarkerViewTests {
 	@Test
 	public void render() {
 		FreeMarkerView view = new FreeMarkerView();
+		view.setApplicationContext(this.context);
 		view.setConfiguration(this.freeMarkerConfig);
 		view.setUrl("test.ftl");
 
@@ -126,6 +127,7 @@ public class FreeMarkerViewTests {
 				new AcceptHeaderLocaleContextResolver());
 
 		FreeMarkerView view = new FreeMarkerView();
+		view.setApplicationContext(this.context);
 		view.setConfiguration(this.freeMarkerConfig);
 		view.setUrl("test.ftl");
 
