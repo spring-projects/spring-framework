@@ -45,7 +45,7 @@ import org.springframework.core.annotation.AliasFor;
  * @since 3.1
  * @see CacheConfig
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

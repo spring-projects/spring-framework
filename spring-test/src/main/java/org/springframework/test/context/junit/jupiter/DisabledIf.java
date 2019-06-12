@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@code @DisabledOnMac} annotation can be created as follows.
  *
  * <pre style="code">
- * {@literal @}Target({ ElementType.TYPE, ElementType.METHOD })
+ * {@literal @}Target({ElementType.TYPE, ElementType.METHOD})
  * {@literal @}Retention(RetentionPolicy.RUNTIME)
  * {@literal @}DisabledIf(
  *     expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
@@ -57,7 +57,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see EnabledIf
  * @see org.junit.jupiter.api.Disabled
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @ExtendWith(DisabledIfCondition.class)

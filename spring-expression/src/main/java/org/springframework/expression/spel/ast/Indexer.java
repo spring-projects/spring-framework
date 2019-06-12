@@ -636,7 +636,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private class CollectionIndexingValueRef implements ValueRef {
 
 		private final Collection collection;
