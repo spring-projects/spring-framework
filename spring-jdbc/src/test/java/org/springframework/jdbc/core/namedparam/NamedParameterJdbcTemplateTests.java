@@ -477,7 +477,7 @@ public class NamedParameterJdbcTemplateTests {
 		@SuppressWarnings("unchecked")
 		Map<String, Object>[] parameters = new Map[3];
 		parameters[0] = Collections.singletonMap("ids", Arrays.asList(1, 2));
-		parameters[1] = Collections.singletonMap("ids", new Integer[] {3, 4});
+		parameters[1] = Collections.singletonMap("ids", Arrays.asList("3", "4"));
 		parameters[2] = Collections.singletonMap("ids", (Iterable<Integer>) () -> Arrays.asList(5, 6).iterator());
 
 		final int[] rowsAffected = new int[] {1, 2, 3};
@@ -500,8 +500,8 @@ public class NamedParameterJdbcTemplateTests {
 		inOrder.verify(preparedStatement).setObject(2, 2);
 		inOrder.verify(preparedStatement).addBatch();
 
-		inOrder.verify(preparedStatement).setObject(1, 3);
-		inOrder.verify(preparedStatement).setObject(2, 4);
+		inOrder.verify(preparedStatement).setString(1, "3");
+		inOrder.verify(preparedStatement).setString(2, "4");
 		inOrder.verify(preparedStatement).addBatch();
 
 		inOrder.verify(preparedStatement).setObject(1, 5);

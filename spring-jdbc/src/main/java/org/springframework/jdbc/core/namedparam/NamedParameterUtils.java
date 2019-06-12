@@ -17,7 +17,6 @@
 package org.springframework.jdbc.core.namedparam;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +28,6 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Helper methods for named parameter parsing.
@@ -284,9 +282,6 @@ public abstract class NamedParameterUtils {
 				Object value = paramSource.getValue(paramName);
 				if (value instanceof SqlParameterValue) {
 					value = ((SqlParameterValue) value).getValue();
-				}
-				if (value != null && value.getClass().isArray()) {
-					value = Arrays.asList(ObjectUtils.toObjectArray(value));
 				}
 				if (value instanceof Iterable) {
 					Iterator<?> entryIter = ((Iterable<?>) value).iterator();

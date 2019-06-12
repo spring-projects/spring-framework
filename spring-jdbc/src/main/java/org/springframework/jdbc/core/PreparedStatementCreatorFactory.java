@@ -31,7 +31,6 @@ import java.util.Set;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Helper class that efficiently creates multiple {@link PreparedStatementCreator}
@@ -268,19 +267,13 @@ public class PreparedStatementCreatorFactory {
 					}
 					declaredParameter = declaredParameters.get(i);
 				}
-				if (in != null && in.getClass().isArray()) {
-					in = Arrays.asList(ObjectUtils.toObjectArray(in));
-				}
 				if (in instanceof Iterable && declaredParameter.getSqlType() != Types.ARRAY) {
 					Iterable<?> entries = (Iterable<?>) in;
 					for (Object entry : entries) {
-						if (entry != null && entry.getClass().isArray()) {
-							entry = Arrays.asList(ObjectUtils.toObjectArray(entry));
-						}
-						if (entry instanceof Iterable) {
-							Iterable<?> values = (Iterable<?>) entry;
-							for (Object value : values) {
-								StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, declaredParameter, value);
+						if (entry instanceof Object[]) {
+							Object[] valueArray = (Object[]) entry;
+							for (Object argValue : valueArray) {
+								StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, declaredParameter, argValue);
 							}
 						}
 						else {
