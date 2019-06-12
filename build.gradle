@@ -12,7 +12,7 @@ buildscript {
 plugins {
 	id "io.spring.dependency-management" version "1.0.7.RELEASE" apply false
 	id "org.jetbrains.kotlin.jvm" version "1.2.71" apply false
-	id "org.jetbrains.dokka" version "0.9.17"
+	id "org.jetbrains.dokka" version "0.9.18"
 	id "org.asciidoctor.convert" version "1.5.8"
 }
 
