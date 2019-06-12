@@ -1025,7 +1025,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				return FileCopyUtils.copyToByteArray(dataHandler.getInputStream());
 			}
 			catch (IOException ex) {
-				throw new UnmarshallingFailureException("Couldn't read attachment", ex);
+				throw new UnmarshallingFailureException("Could not read attachment", ex);
 			}
 		}
 
