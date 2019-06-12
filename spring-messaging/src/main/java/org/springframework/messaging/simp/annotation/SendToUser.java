@@ -40,7 +40,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.messaging.simp.user.UserDestinationMessageHandler
  * @see org.springframework.messaging.simp.SimpMessageHeaderAccessor#getUser()
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface SendToUser {
@@ -68,7 +68,7 @@ public @interface SendToUser {
 	 * or only to the session of the input message being handled.
 	 * <p>By default, this is set to {@code true} in which case messages are
 	 * broadcast to all sessions.
-     */
-    boolean broadcast() default true;
+	 */
+	boolean broadcast() default true;
 
 }

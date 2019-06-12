@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,18 +47,18 @@ import org.springframework.web.cors.CorsConfiguration;
  * @author Sam Brannen
  * @since 4.2
  */
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface CrossOrigin {
 
 	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
-	String[] DEFAULT_ORIGINS = { "*" };
+	String[] DEFAULT_ORIGINS = {"*"};
 
 	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
-	String[] DEFAULT_ALLOWED_HEADERS = { "*" };
+	String[] DEFAULT_ALLOWED_HEADERS = {"*"};
 
 	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
