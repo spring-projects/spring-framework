@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * @author Chris Beams
  * @since 3.1
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
