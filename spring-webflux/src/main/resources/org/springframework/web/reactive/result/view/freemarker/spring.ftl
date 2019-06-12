@@ -10,10 +10,10 @@
  * all macros within it available to any application using Spring's
  * FreeMarkerConfigurer.
  *
- * To take advantage of these macros, the "requestContextAttribute" property of
- * the FreeMarkerView class must be set to "springMacroRequestContext". This will
- * expose a RequestContext under the name "springMacroRequestContext", as needed
- * by the macros in this library.
+ * To take advantage of these macros, the "exposeSpringMacroHelpers" property
+ * of the FreeMarkerView class needs to be set to "true". This will expose a
+ * RequestContext under the name "springMacroRequestContext", as needed by
+ * the macros in this library.
  *
  * @author Darren Davison
  * @author Juergen Hoeller
