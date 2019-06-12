@@ -30,6 +30,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Specialization of {@link Properties} that sorts properties alphanumerically
  * based on their keys.
@@ -49,11 +51,10 @@ class SortedProperties extends Properties {
 
 	static final String EOL = System.lineSeparator();
 
-	private static final Comparator<Object> keyComparator = //
-		(key1, key2) -> String.valueOf(key1).compareTo(String.valueOf(key2));
+	private static final Comparator<Object> keyComparator = Comparator.comparing(String::valueOf);
 
-	private static final Comparator<Entry<Object, Object>> entryComparator = //
-		Entry.comparingByKey(keyComparator);
+	private static final Comparator<Entry<Object, Object>> entryComparator = Entry.comparingByKey(keyComparator);
+
 
 	private final boolean omitComments;
 
@@ -61,7 +62,6 @@ class SortedProperties extends Properties {
 	/**
 	 * Construct a new {@code SortedProperties} instance that honors the supplied
 	 * {@code omitComments} flag.
-	 *
 	 * @param omitComments {@code true} if comments should be omitted when
 	 * storing properties in a file
 	 */
@@ -73,10 +73,8 @@ class SortedProperties extends Properties {
 	 * Construct a new {@code SortedProperties} instance with properties populated
 	 * from the supplied {@link Properties} object and honoring the supplied
 	 * {@code omitComments} flag.
-	 *
 	 * <p>Default properties from the supplied {@code Properties} object will
 	 * not be copied.
-	 *
 	 * @param properties the {@code Properties} object from which to copy the
 	 * initial properties
 	 * @param omitComments {@code true} if comments should be omitted when
@@ -87,8 +85,9 @@ class SortedProperties extends Properties {
 		putAll(properties);
 	}
 
+
 	@Override
-	public void store(OutputStream out, String comments) throws IOException {
+	public void store(OutputStream out, @Nullable String comments) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		super.store(baos, (this.omitComments ? null : comments));
 		String contents = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
@@ -100,7 +99,7 @@ class SortedProperties extends Properties {
 	}
 
 	@Override
-	public void store(Writer writer, String comments) throws IOException {
+	public void store(Writer writer, @Nullable String comments) throws IOException {
 		StringWriter stringWriter = new StringWriter();
 		super.store(stringWriter, (this.omitComments ? null : comments));
 		String contents = stringWriter.toString();
@@ -112,12 +111,12 @@ class SortedProperties extends Properties {
 	}
 
 	@Override
-	public void storeToXML(OutputStream out, String comments) throws IOException {
+	public void storeToXML(OutputStream out, @Nullable String comments) throws IOException {
 		super.storeToXML(out, (this.omitComments ? null : comments));
 	}
 
 	@Override
-	public void storeToXML(OutputStream out, String comments, String encoding) throws IOException {
+	public void storeToXML(OutputStream out, @Nullable String comments, String encoding) throws IOException {
 		super.storeToXML(out, (this.omitComments ? null : comments), encoding);
 	}
 

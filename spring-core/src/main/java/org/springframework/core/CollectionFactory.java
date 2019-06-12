@@ -43,7 +43,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Factory for collections that is aware of Java 5, Java 6, and Spring collection types.
+ * Factory for collections that is aware of common Java and Spring collection types.
  *
  * <p>Mainly for internal use within the framework.
  *
@@ -353,12 +353,10 @@ public final class CollectionFactory {
 	/**
 	 * Create a variant of {@link java.util.Properties} that sorts properties
 	 * alphanumerically based on their keys.
-	 *
 	 * <p>This can be useful when storing the {@link Properties} instance in a
 	 * properties file, since it allows such files to be generated in a repeatable
 	 * manner with consistent ordering of properties. Comments in generated
 	 * properties files can also be optionally omitted.
-	 *
 	 * @param omitComments {@code true} if comments should be omitted when
 	 * storing properties in a file
 	 * @return a new {@code Properties} instance
@@ -373,16 +371,13 @@ public final class CollectionFactory {
 	/**
 	 * Create a variant of {@link java.util.Properties} that sorts properties
 	 * alphanumerically based on their keys.
-	 *
 	 * <p>This can be useful when storing the {@code Properties} instance in a
 	 * properties file, since it allows such files to be generated in a repeatable
 	 * manner with consistent ordering of properties. Comments in generated
 	 * properties files can also be optionally omitted.
-	 *
 	 * <p>The returned {@code Properties} instance will be populated with
 	 * properties from the supplied {@code properties} object, but default
 	 * properties from the supplied {@code properties} object will not be copied.
-	 *
 	 * @param properties the {@code Properties} object from which to copy the
 	 * initial properties
 	 * @param omitComments {@code true} if comments should be omitted when
