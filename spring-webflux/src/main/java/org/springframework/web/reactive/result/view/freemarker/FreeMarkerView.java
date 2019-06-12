@@ -219,17 +219,17 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	 * @see org.springframework.web.reactive.result.view.AbstractView#getModelAttributes(Map, ServerWebExchange)
 	 */
 	@Override
-	protected Mono<Map<String, Object>> getModelAttributes(Map<String, ?> model,
-			ServerWebExchange exchange) {
+	protected Mono<Map<String, Object>> getModelAttributes(
+			@Nullable Map<String, ?> model, ServerWebExchange exchange) {
 
 		if (this.exposeSpringMacroHelpers) {
-			if (model.containsKey(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)) {
+			if (model != null && model.containsKey(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)) {
 				throw new IllegalStateException(
 						"Cannot expose bind macro helper '" + SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE +
 						"' because of an existing model object of the same name");
 			}
 			// Make a defensive copy of the model.
-			Map<String, Object> attributes = new HashMap<>(model);
+			Map<String, Object> attributes = (model != null ? new HashMap<>(model) : new HashMap<>());
 			// Expose RequestContext instance for Spring macros.
 			attributes.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(
 					exchange, attributes, obtainApplicationContext(), getRequestDataValueProcessor()));
