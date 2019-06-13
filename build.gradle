@@ -48,6 +48,7 @@ ext {
 	tiles3Version        = "3.0.8"
 	tomcatVersion        = "9.0.21"
 	undertowVersion      = "2.0.21.Final"
+	bullVersion          = "1.4.5"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4J = {

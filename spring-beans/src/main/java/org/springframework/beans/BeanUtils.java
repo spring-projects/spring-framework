@@ -51,6 +51,8 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.hotels.beans.transformer.Transformer;
+
 /**
  * Static convenience methods for JavaBeans: for instantiating beans,
  * checking bean property types, copying bean properties, etc.
@@ -725,6 +727,37 @@ public abstract class BeanUtils {
 		}
 	}
 
+	/**
+	 * Copy the property values of the given source bean into the given target bean class.
+	 * <p>Note: The source and target classes have to match or even be derived.
+	 * <p>This is just a convenience method. For more complex transfer needs,
+	 * consider using a {@link com.hotels.beans.transformer.Transformer} and its settings.
+	 * @see <a href="https://hotelsdotcom.github.io/bull/apidocs">
+	 * https://hotelsdotcom.github.io/bull/apidocs</a>
+	 * @param source the source bean
+	 * @param targetClass the target bean class
+	 * @param <K> the target object type
+	 * @return a copy of the source object into the destination object
+	 * @throws BeansException if the copying failed
+	 * @see BeanWrapper
+	 */
+	public static <K> K copyProperties(Object source, Class<K> targetClass) throws BeansException {
+		return new com.hotels.beans.BeanUtils().getTransformer()
+				.setDefaultValueForMissingField(true)
+				.transform(source, targetClass);
+	}
+
+	/**
+	 * Returns a bean transformer able to copy properties of any type of java bean.
+	 * <p>Note: The {@link Transformer} can be configured in order to apply any type of transformation on a java bean.
+	 * @see <a href="https://hotelsdotcom.github.io/bull/apidocs/com/hotels/beans/transformer/Transformer.html">
+	 * https://hotelsdotcom.github.io/bull/apidocs/com/hotels/beans/transformer/Transformer.html</a>
+	 * @return Transformer instance
+	 * @see Transformer
+	 */
+	public static Transformer getBeanTransformer() {
+		return new com.hotels.beans.BeanUtils().getTransformer();
+	}
 
 	/**
 	 * Inner class to avoid a hard dependency on Kotlin at runtime.

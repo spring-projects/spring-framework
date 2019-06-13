@@ -10,6 +10,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	implementation("com.hotels.beans:bean-utils-library:${bullVersion}")
 }
 
 // This module does joint compilation for Java and Groovy code with the compileGroovy task.
