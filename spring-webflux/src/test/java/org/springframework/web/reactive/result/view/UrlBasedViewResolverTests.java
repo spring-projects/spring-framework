@@ -37,20 +37,60 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
 public class UrlBasedViewResolverTests {
 
-	private UrlBasedViewResolver resolver;
+	private final UrlBasedViewResolver resolver = new UrlBasedViewResolver();
 
 
 	@Before
 	public void setup() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.refresh();
-		this.resolver = new UrlBasedViewResolver();
 		this.resolver.setApplicationContext(context);
 	}
 
+	@Test
+	public void urlBasedViewResolverOverridesCustomRequestContextAttributeWithNonNullValue() throws Exception {
+		assertThat(new TestView().getRequestContextAttribute())
+			.as("requestContextAttribute when instantiated directly")
+			.isEqualTo("testRequestContext");
+
+		this.resolver.setViewClass(TestView.class);
+		this.resolver.setRequestContextAttribute("viewResolverRequestContext");
+
+		Mono<View> mono = this.resolver.resolveViewName("example", Locale.getDefault());
+		StepVerifier.create(mono)
+				.consumeNextWith(view -> {
+					assertThat(view).isInstanceOf(TestView.class);
+					assertThat(((TestView) view).getRequestContextAttribute())
+						.as("requestContextAttribute when instantiated dynamically by UrlBasedViewResolver")
+						.isEqualTo("viewResolverRequestContext");
+				})
+				.expectComplete()
+				.verify(Duration.ZERO);
+	}
+
+	@Test
+	public void urlBasedViewResolverDoesNotOverrideCustomRequestContextAttributeWithNull() throws Exception {
+		assertThat(new TestView().getRequestContextAttribute())
+			.as("requestContextAttribute when instantiated directly")
+			.isEqualTo("testRequestContext");
+
+		this.resolver.setViewClass(TestView.class);
+
+		Mono<View> mono = this.resolver.resolveViewName("example", Locale.getDefault());
+		StepVerifier.create(mono)
+				.consumeNextWith(view -> {
+					assertThat(view).isInstanceOf(TestView.class);
+					assertThat(((TestView) view).getRequestContextAttribute())
+						.as("requestContextAttribute when instantiated dynamically by UrlBasedViewResolver")
+						.isEqualTo("testRequestContext");
+				})
+				.expectComplete()
+				.verify(Duration.ZERO);
+	}
 
 	@Test
 	public void viewNames() throws Exception {
@@ -97,6 +137,10 @@ public class UrlBasedViewResolverTests {
 
 
 	private static class TestView extends AbstractUrlBasedView {
+
+		public TestView() {
+			setRequestContextAttribute("testRequestContext");
+		}
 
 		@Override
 		public boolean checkResourceExists(Locale locale) throws Exception {
