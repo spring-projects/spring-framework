@@ -379,6 +379,12 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
+	@Test // Issue #23123 (method postForObject in RestTemplate causes NPE)
+	public void postForObjectWithNullMessageConverter() throws Exception {
+		template.setMessageConverters(Arrays.asList(null, converter));
+		postForObject();
+	}
+
 	@Test
 	public void postForEntity() throws Exception {
 		mockTextPlainHttpMessageConverter();

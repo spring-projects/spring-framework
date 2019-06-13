@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -844,6 +845,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			if (this.responseType != null) {
 				List<MediaType> allSupportedMediaTypes = getMessageConverters().stream()
+						.filter(Objects::nonNull)
 						.filter(converter -> canReadResponse(this.responseType, converter))
 						.flatMap(this::getSupportedMediaTypes)
 						.distinct()
@@ -940,7 +942,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 							return;
 						}
 					}
-					else if (messageConverter.canWrite(requestBodyClass, requestContentType)) {
+					else if (messageConverter != null && messageConverter.canWrite(requestBodyClass, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
 							requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
 						}

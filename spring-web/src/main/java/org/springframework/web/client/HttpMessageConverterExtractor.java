@@ -103,7 +103,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 					}
 				}
 				if (this.responseClass != null) {
-					if (messageConverter.canRead(this.responseClass, contentType)) {
+					if (messageConverter != null && messageConverter.canRead(this.responseClass, contentType)) {
 						if (logger.isDebugEnabled()) {
 							String className = this.responseClass.getName();
 							logger.debug("Reading to [" + className + "] as \"" + contentType + "\"");
