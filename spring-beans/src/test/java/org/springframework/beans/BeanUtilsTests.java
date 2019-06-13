@@ -272,6 +272,23 @@ public class BeanUtilsTests {
 		assertSignatureEquals(desiredMethod, "doSomethingWithAMultiDimensionalArray(java.lang.String[][])");
 	}
 
+	//@Test
+	public void testCopyPropertiesForImmutableBean() throws Exception {
+		TestBean tb = new TestBean();
+		tb.setName("rod");
+		tb.setAge(32);
+		tb.setTouchy("touchy");
+		TestBean tb2 = BeanUtils.copyProperties(tb, TestBean.class);
+		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
+		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
+		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
+	}
+
+	@Test
+	public void testGetBeanTransformer() {
+		assertThat(BeanUtils.getBeanTransformer()).isNotNull();
+	}
+
 	@Test
 	public void testSPR6063() {
 		PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
