@@ -35,7 +35,7 @@ See https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more deta
 [.small]#<<web-reactive.adoc#webflux-view-freemarker, Same as in Spring WebFlux>>#
 
 https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
-kind of text output from HTML to email and others. The Spring Framework has a built-in
+kind of text output from HTML to email and others. The Spring Framework has built-in
 integration for using Spring MVC with FreeMarker templates.
 
 
@@ -98,8 +98,9 @@ properties, as the following example shows:
 ----
 
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
-shown in the preceding example. Given the preceding configuration, if your controller returns a view name
-of `welcome`, the resolver looks for the `/WEB-INF/freemarker/welcome.ftl` template.
+shown in the preceding example. Given the preceding configuration, if your controller
+returns a view name of `welcome`, the resolver looks for the
+`/WEB-INF/freemarker/welcome.ftl` template.
 
 
 
@@ -108,10 +109,10 @@ of `welcome`, the resolver looks for the `/WEB-INF/freemarker/welcome.ftl` templ
 [.small]#<<web-reactive.adoc#webflux-views-freemarker, Same as in Spring WebFlux>>#
 
 You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
-`Configuration` object (which is managed by Spring) by setting the appropriate bean properties on
-the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
-`java.util.Properties` object, and the `freemarkerVariables` property requires a
-`java.util.Map`. The following example shows how to do so:
+`Configuration` object (which is managed by Spring) by setting the appropriate bean
+properties on the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires
+a `java.util.Properties` object, and the `freemarkerVariables` property requires a
+`java.util.Map`. The following example shows how to use a `FreeMarkerConfigurer`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -145,14 +146,15 @@ with additional convenience macros for generating form input elements themselves
 
 [[mvc-view-bind-macros]]
 ==== The Bind Macros
+[.small]#<<web-reactive.adoc#webflux-view-bind-macros, Same as in Spring WebFlux>>#
 
-A standard set of macros are maintained within the `spring-webmvc.jar` file for both
-languages, so they are always available to a suitably configured application.
+A standard set of macros are maintained within the `spring-webmvc.jar` file for
+FreeMarker, so they are always available to a suitably configured application.
 
-Some of the macros defined in the Spring libraries are considered internal (private), but
-no such scoping exists in the macro definitions, making all macros visible to calling
-code and user templates. The following sections concentrate only on the macros you need
-to directly call from within your templates. If you wish to view the macro code
+Some of the macros defined in the Spring templating libraries are considered internal
+(private), but no such scoping exists in the macro definitions, making all macros visible
+to calling code and user templates. The following sections concentrate only on the macros
+you need to directly call from within your templates. If you wish to view the macro code
 directly, the file is called `spring.ftl` and is in the
 `org.springframework.web.servlet.view.freemarker` package.
 
@@ -160,27 +162,27 @@ directly, the file is called `spring.ftl` and is in the
 [[mvc-view-simple-binding]]
 ==== Simple Binding
 
-In your HTML forms (vm or ftl templates) that act as a form view for a Spring MVC
+In your HTML forms based on FreeMarker templates that act as a form view for a Spring MVC
 controller, you can use code similar to the next example to bind to field values and
-display error messages for each input field in similar fashion to the JSP equivalent.
-The following example shows the `personForm` view that was configured earlier:
+display error messages for each input field in similar fashion to the JSP equivalent. The
+following example shows a `personForm` view:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<!-- freemarker macros have to be imported into a namespace. We strongly
-	recommend sticking to 'spring' -->
+	<!-- FreeMarker macros have to be imported into a namespace.
+		We strongly recommend sticking to 'spring'. -->
 	<#import "/spring.ftl" as spring/>
 	<html>
 		...
 		<form action="" method="POST">
 			Name:
-			<@spring.bind "myModelObject.name"/>
+			<@spring.bind "personForm.name"/>
 			<input type="text"
 				name="${spring.status.expression}"
-				value="${spring.status.value?html}"/><br>
-			<#list spring.status.errorMessages as error> <b>${error}</b> <br> </#list>
-			<br>
+				value="${spring.status.value?html}"/><br />
+			<#list spring.status.errorMessages as error> <b>${error}</b> <br /> </#list>
+			<br />
 			...
 			<input type="submit" value="submit"/>
 		</form>
@@ -189,29 +191,29 @@ The following example shows the `personForm` view that was configured earlier:
 ----
 
 `<@spring.bind>` requires a 'path' argument, which consists of the name of your command
-object (it is 'command', unless you changed it in your `FormController` properties)
-followed by a period and the name of the field on the command object to which you wish to bind.
-You can also use nested fields, such as `command.address.street`. The `bind` macro assumes
-the default HTML escaping behavior specified by the ServletContext parameter
+object (it is 'command', unless you changed it in your controller configuration) followed
+by a period and the name of the field on the command object to which you wish to bind. You
+can also use nested fields, such as `command.address.street`. The `bind` macro assumes the
+default HTML escaping behavior specified by the `ServletContext` parameter
 `defaultHtmlEscape` in `web.xml`.
 
-The optional form of the macro called `<@spring.bindEscaped>` takes a second argument
-and explicitly specifies whether HTML escaping should be used in the status error
-messages or values. You can set it to `true` or `false` as required. Additional form handling macros
-simplify the use of HTML escaping, and you should use these macros wherever possible.
-They are explained in the next section.
+An alternative form of the macro called `<@spring.bindEscaped>` takes a second argument
+that explicitly specifies whether HTML escaping should be used in the status error
+messages or values. You can set it to `true` or `false` as required. Additional form
+handling macros simplify the use of HTML escaping, and you should use these macros
+wherever possible. They are explained in the next section.
 
 
 [[mvc-views-form-macros]]
-==== Input macros
+==== Input Macros
 
-Additional convenience macros for both languages simplify both binding and form
-generation (including validation error display). It is never necessary to use these
-macros to generate form input fields, and you can mix and match them with simple HTML
-or direct calls to the spring bind macros that we highlighted previously.
+Additional convenience macros for FreeMarker simplify both binding and form generation
+(including validation error display). It is never necessary to use these macros to
+generate form input fields, and you can mix and match them with simple HTML or direct
+calls to the Spring bind macros that we highlighted previously.
 
-The following table of available macros shows the FTL definitions and the
-parameter list that each takes:
+The following table of available macros shows the FreeMarker Template (FTL) definitions
+and the parameter list that each takes:
 
 [[views-macros-defs-tbl]]
 .Table of macro definitions
@@ -263,9 +265,9 @@ parameter list that each takes:
 | <@spring.showErrors separator, classOrStyle/>
 |===
 
-* In FTL (FreeMarker), `formHiddenInput` and `formPasswordInput` are not actually required,
-  as you can use the normal `formInput` macro, specifying `hidden` or `password` as the
-  value for the `fieldType` parameter.
+NOTE: In FreeMarker templates, `formHiddenInput` and `formPasswordInput` are not actually
+required, as you can use the normal `formInput` macro, specifying `hidden` or `password`
+as the value for the `fieldType` parameter.
 
 The parameters to any of the above macros have consistent meanings:
 
@@ -290,8 +292,7 @@ The parameters to any of the above macros have consistent meanings:
   element that wraps each error uses. If no information is supplied (or the value is
   empty), the errors are wrapped in `<b></b>` tags.
 
-The following sections outline examples of the macros (some in FTL and some in VTL). Where usage
-differences exist between the two languages, they are explained in the notes.
+The following sections outline examples of the macros.
 
 [[mvc-views-form-macros-input]]
 ===== Input Fields
@@ -300,7 +301,7 @@ The `formInput` macro takes the `path` parameter (`command.name`) and an additio
 parameter (which is empty in the upcoming example). The macro, along with all other form
 generation macros, performs an implicit Spring bind on the path parameter. The binding
 remains valid until a new bind occurs, so the `showErrors` macro does not need to pass the
-path parameter again -- it operates on the field for which a bind was last created.
+path parameter again -- it operates on the field for which a binding was last created.
 
 The `showErrors` macro takes a separator parameter (the characters that are used to
 separate multiple errors on a given field) and also accepts a second parameter -- this
@@ -333,7 +334,7 @@ The generated HTML resembles the following example:
 ----
 
 The `formTextarea` macro works the same way as the `formInput` macro and accepts the same
-parameter list. Commonly, the second parameter (attributes) is used to pass style
+parameter list. Commonly, the second parameter (`attributes`) is used to pass style
 information or `rows` and `cols` attributes for the `textarea`.
 
 [[mvc-views-form-macros-select]]
@@ -367,7 +368,7 @@ model under the name 'cityMap'. The following listing shows the example:
 The preceding listing renders a line of radio buttons, one for each value in `cityMap`, and uses a
 separator of `""`. No additional attributes are supplied (the last parameter to the macro is
 missing). The `cityMap` uses the same `String` for each key-value pair in the map. The map's
-keys are what the form actually submits as POSTed request parameters. The map values are the
+keys are what the form actually submits as `POST` request parameters. The map values are the
 labels that the user sees. In the preceding example, given a list of three well known cities
 and a default value in the form backing object, the HTML resembles the following:
 
@@ -414,7 +415,7 @@ user still sees the more user-friendly city names, as follows:
 [[mvc-views-form-macros-html-escaping]]
 ==== HTML Escaping
 
-Default usage of the form macros described earlier results in HTML elemets that are HTML 4.01
+Default usage of the form macros described earlier results in HTML elements that are HTML 4.01
 compliant and that use the default value for HTML escaping defined in your `web.xml` file, as
 used by Spring's bind support. To make the elements be XHTML compliant or to override
 the default HTML escaping value, you can specify two variables in your template (or in
@@ -432,8 +433,8 @@ model or context variable named `xhtmlCompliant`, as the following example shows
 	<#assign xhtmlCompliant = true>
 ----
 
-After processing
-this directive, any elements generated by the Spring macros are now XHTML compliant.
+After processing this directive, any elements generated by the Spring macros are now XHTML
+compliant.
 
 In similar fashion, you can specify HTML escaping per field, as the following example shows:
 
