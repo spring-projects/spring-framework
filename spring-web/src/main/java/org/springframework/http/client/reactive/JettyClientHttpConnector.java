@@ -57,7 +57,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	 * Constructor with an {@link JettyResourceFactory} that will manage shared resources.
 	 * @param resourceFactory the {@link JettyResourceFactory} to use
 	 * @param customizer the lambda used to customize the {@link HttpClient}
-	 * @deprecated in favor of {@link JettyClientHttpConnector#JettyClientHttpConnector(HttpClient, JettyResourceFactory)}
+	 * @deprecated as of 5.2, in favor of {@link JettyClientHttpConnector#JettyClientHttpConnector(HttpClient, JettyResourceFactory)}
 	 */
 	@Deprecated
 	public JettyClientHttpConnector(
@@ -80,6 +80,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	 * with the given {@link JettyResourceFactory}.
 	 * @param httpClient the {@link HttpClient} to use
 	 * @param resourceFactory the {@link JettyResourceFactory} to use
+	 * @since 5.2
 	 */
 	public JettyClientHttpConnector(HttpClient httpClient,
 			@Nullable JettyResourceFactory resourceFactory) {
