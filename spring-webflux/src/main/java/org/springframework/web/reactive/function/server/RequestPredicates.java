@@ -1026,6 +1026,11 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public Flux<Part> parts() {
+			return this.request.parts();
+		}
+
+		@Override
 		public ServerWebExchange exchange() {
 			return this.request.exchange();
 		}

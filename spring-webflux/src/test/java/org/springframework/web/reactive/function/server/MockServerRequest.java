@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,6 +245,13 @@ public class MockServerRequest implements ServerRequest {
 	public Mono<MultiValueMap<String, Part>> multipartData() {
 		Assert.state(this.body != null, "No body");
 		return (Mono<MultiValueMap<String, Part>>) this.body;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Flux<Part> parts() {
+		Assert.state(this.body != null, "No body");
+		return (Flux<Part>) this.body;
 	}
 
 	@Override

@@ -220,6 +220,11 @@ class DefaultServerRequest implements ServerRequest {
 		return this.exchange.getMultipartData();
 	}
 
+	@Override
+	public Flux<Part> parts() {
+		return this.exchange.getParts();
+	}
+
 	private ServerHttpRequest request() {
 		return this.exchange.getRequest();
 	}
