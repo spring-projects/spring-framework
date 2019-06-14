@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import io.netty.buffer.ByteBuf;
@@ -200,6 +201,13 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		BaseSubscriber<DataBuffer> subscriber = new ZeroDemandSubscriber();
 		flux.subscribe(subscriber);
 		subscriber.cancel();
+	}
+
+	@Test
+	public void readPath() throws IOException {
+		Flux<DataBuffer> flux = DataBufferUtils.read(this.resource.getFile().toPath(), this.bufferFactory, 3);
+
+		verifyReadData(flux);
 	}
 
 	@Test
@@ -472,6 +480,21 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		channel.close();
 
 		flux.subscribe(DataBufferUtils::release);
+	}
+
+	@Test
+	public void writePath() throws IOException {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		Flux<DataBuffer> flux = Flux.just(foo, bar);
+
+		Mono<Void> result = DataBufferUtils.write(flux, tempFile);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+
+		List<String> written = Files.readAllLines(tempFile);
+		assertThat(written).contains("foobar");
 	}
 
 	@Test
