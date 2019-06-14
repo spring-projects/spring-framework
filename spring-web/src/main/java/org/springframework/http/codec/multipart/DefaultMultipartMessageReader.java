@@ -16,14 +16,9 @@
 
 package org.springframework.http.codec.multipart;
 
-import java.io.IOException;
-import java.nio.channels.AsynchronousFileChannel;
-import java.nio.channels.Channel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -100,10 +95,6 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 			return Flux.error(new CodecException("No multipart boundary found in Content-Type: \"" +
 					message.getHeaders().getContentType() + "\""));
 		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("Boundary: " + toString(boundary));
-		}
-
 		byte[] boundaryNeedle = concat(BOUNDARY_PREFIX, boundary);
 		Flux<DataBuffer> body = skipUntilFirstBoundary(message.getBody(), boundary);
 
@@ -148,8 +139,10 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 					DataBuffer slice = dataBuffer.retainedSlice(endIdx + 1, length);
 					DataBufferUtils.release(dataBuffer);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Found first boundary at " + endIdx + " in " + toString(dataBuffer));
-					}
+							logger.trace(
+									"Found last byte of first boundary (" + toString(boundary)
+											+ ") at " + endIdx);
+						}
 					return Mono.just(slice);
 				}
 				else {
@@ -188,14 +181,14 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 			}
 		}
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Part data: " + toString(dataBuffer));
-		}
 		int endIdx = HEADER_MATCHER.match(dataBuffer);
 
 		HttpHeaders headers;
 		DataBuffer body;
 		if (endIdx > 0) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Found last byte of part header at " + endIdx );
+			}
 			readPosition = dataBuffer.readPosition();
 			int headersLength = endIdx + 1 - (readPosition + HEADER_BODY_SEPARATOR.length);
 			DataBuffer headersBuffer = dataBuffer.retainedSlice(readPosition, headersLength);
@@ -204,6 +197,9 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 			headers = toHeaders(headersBuffer);
 		}
 		else {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No header found");
+			}
 			headers = new HttpHeaders();
 			body = DataBufferUtils.retain(dataBuffer);
 		}
@@ -250,16 +246,6 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 			}
 		}
 		return result;
-	}
-
-
-	private static String toString(DataBuffer dataBuffer) {
-		byte[] bytes = new byte[dataBuffer.readableByteCount()];
-		int j = 0;
-		for (int i = dataBuffer.readPosition(); i < dataBuffer.writePosition(); i++) {
-			bytes[j++] = dataBuffer.getByte(i);
-		}
-		return toString(bytes);
 	}
 
 	private static String toString(byte[] bytes) {
@@ -368,10 +354,6 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 
 	private static class DefaultFilePart extends DefaultPart implements FilePart {
 
-		private static final OpenOption[] FILE_CHANNEL_OPTIONS =
-				{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
-
-
 		public DefaultFilePart(HttpHeaders headers, DataBuffer body) {
 			super(headers, body);
 		}
@@ -385,23 +367,9 @@ public class DefaultMultipartMessageReader extends LoggingCodecSupport implement
 
 		@Override
 		public Mono<Void> transferTo(Path dest) {
-			return Mono.using(() -> AsynchronousFileChannel.open(dest, FILE_CHANNEL_OPTIONS),
-					this::writeBody, this::close);
+			return DataBufferUtils.write(content(), dest);
 		}
 
-		private Mono<Void> writeBody(AsynchronousFileChannel channel) {
-			return DataBufferUtils.write(content(), channel)
-					.map(DataBufferUtils::release)
-					.then();
-		}
-
-		private void close(Channel channel) {
-			try {
-				channel.close();
-			}
-			catch (IOException ignore) {
-			}
-		}
 	}
 
 }
