@@ -31,9 +31,9 @@ class PersonController {
 	@GetMapping("/person/{id}")
 	Person getPerson(@PathVariable long id) {
 		if (id == 42) {
-			return new Person("Dilbert");
+			return new Person(id, "Dilbert");
 		}
-		return new Person("Wally");
+		return new Person(id, "Wally");
 	}
 
 }

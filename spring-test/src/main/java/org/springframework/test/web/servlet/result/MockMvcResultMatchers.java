@@ -205,6 +205,20 @@ public abstract class MockMvcResultMatchers {
 	}
 
 	/**
+	 * An overloaded variant of {@link #jsonPath(String, Matcher)} (Matcher)} that also accepts
+	 * a target type for the resulting value that the matcher can work reliably against.
+	 * <p> This can be useful for matching numbers reliably &mdash; for example,
+	 * to coerce an integer into a double.</p>
+	 *
+	 * @param expression the JSON path expression
+	 * @param targetClass the target class to coerce the matching type into.
+	 * @param matcher a matcher for the value expected at the JSON path
+	 */
+	public static <T> ResultMatcher jsonPath(String expression, Class<T> targetClass, Matcher<T> matcher) {
+		return new JsonPathResultMatchers(expression).value(matcher, targetClass);
+	}
+
+	/**
 	 * Access to response body assertions using an XPath expression to
 	 * inspect a specific subset of the body.
 	 * <p>The XPath expression can be a parameterized string using formatting

@@ -24,8 +24,19 @@ package org.springframework.test.context.junit.jupiter.comics;
  */
 public class Person extends Character {
 
+	private final long id;
+
 	public Person(String name) {
+		this(0, name);
+	}
+
+	public Person(long id, String name) {
 		super(name);
+		this.id = id;
+	}
+
+	public long getId() {
+		return id;
 	}
 
 }
