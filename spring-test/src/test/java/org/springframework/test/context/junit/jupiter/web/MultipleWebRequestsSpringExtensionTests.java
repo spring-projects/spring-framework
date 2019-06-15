@@ -68,6 +68,20 @@ class MultipleWebRequestsSpringExtensionTests {
 	}
 
 	@Test
+	void getPerson1() throws Exception {
+		// Tests for #23121 (Target type in jsonPath method of MockMvcResultMatchers) coercing into Long
+		this.mockMvc.perform(get("/person/1").accept(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.id", Long.class, is(1L)));
+	}
+
+	@Test
+	void getPerson2() throws Exception {
+		// Tests for #23121 (Target type in jsonPath method of MockMvcResultMatchers) coercing into String
+		this.mockMvc.perform(get("/person/2").accept(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.id", String.class, is("2")));
+	}
+
+	@Test
 	void getPerson99() throws Exception {
 		this.mockMvc.perform(get("/person/99").accept(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.name", is("Wally")));
