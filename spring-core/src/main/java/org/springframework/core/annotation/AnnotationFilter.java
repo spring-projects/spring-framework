@@ -29,13 +29,14 @@ public interface AnnotationFilter {
 
 	/**
 	 * {@link AnnotationFilter} that matches annotations in the
-	 * {@code java.lang.*} and {@code org.springframework.lang.*} packages.
+	 * {@code java.lang} and {@code org.springframework.lang} packages
+	 * and their subpackages.
 	 */
 	AnnotationFilter PLAIN = packages("java.lang", "org.springframework.lang");
 
 	/**
 	 * {@link AnnotationFilter} that matches annotations in the
-	 * {@code java.*} and {@code javax.*} namespaces.
+	 * {@code java} and {@code javax} packages and their subpackages.
 	 */
 	AnnotationFilter JAVA = packages("java", "javax");
 
