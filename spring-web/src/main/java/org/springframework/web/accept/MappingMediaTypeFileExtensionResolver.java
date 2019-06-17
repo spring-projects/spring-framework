@@ -85,9 +85,8 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	}
 
 	private void addFileExtension(MediaType mediaType, String extension) {
-		List<String> newList = new CopyOnWriteArrayList<>();
-		List<String> oldList = this.fileExtensions.putIfAbsent(mediaType, newList);
-		(oldList != null ? oldList : newList).add(extension);
+		List<String> list = this.fileExtensions.computeIfAbsent(mediaType, key -> new CopyOnWriteArrayList<>());
+		list.add(extension);
 	}
 
 
