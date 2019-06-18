@@ -1025,6 +1025,7 @@ and can be used anywhere in the Spring Framework.
 
 * `@Autowired`
 * `@Qualifier`
+* `@Value`
 * `@Resource` (javax.annotation) if JSR-250 is present
 * `@ManagedBean` (javax.annotation) if JSR-250 is present
 * `@Inject` (javax.inject) if JSR-330 is present
@@ -1032,7 +1033,8 @@ and can be used anywhere in the Spring Framework.
 * `@PersistenceContext` (javax.persistence) if JPA is present
 * `@PersistenceUnit` (javax.persistence) if JPA is present
 * `@Required`
-* `@Transactional`
+* `@Transactional` (org.springframework.transaction.annotation)
+  _with <<testcontext-tx-attribute-support, limited attribute support>>_
 
 .JSR-250 Lifecycle Annotations
 [NOTE]
@@ -3617,8 +3619,28 @@ hierarchy runs within a transaction. Test methods that are not annotated with
 `@Transactional` (at the class or method level) are not run within a transaction. Note
 that `@Transactional` is not supported on test lifecycle methods — for example, methods
 annotated with JUnit Jupiter's `@BeforeAll`, `@BeforeEach`, etc. Furthermore, tests that
-are annotated with `@Transactional` but have the `propagation` type set to
+are annotated with `@Transactional` but have the `propagation` attribute set to
 `NOT_SUPPORTED` are not run within a transaction.
+
+[[testcontext-tx-attribute-support]]
+.`@Transactional` attribute support
+|===
+|Attribute |Supported for test-managed transactions
+
+|`value` and `transactionManager` |yes
+
+|`propagation` |only `Propagation.NOT_SUPPORTED` is supported
+
+|`isolation` |no
+
+|`timeout` |no
+
+|`readOnly` |no
+
+|`rollbackFor` and `rollbackForClassName` |no: use `TestTransaction.flagForRollback()` instead
+
+|`noRollbackFor` and `noRollbackForClassName` |no: use `TestTransaction.flagForCommit()` instead
+|===
 
 [TIP]
 ====
