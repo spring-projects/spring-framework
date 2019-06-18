@@ -85,8 +85,8 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	}
 
 	private void addFileExtension(MediaType mediaType, String extension) {
-		List<String> list = this.fileExtensions.computeIfAbsent(mediaType, key -> new CopyOnWriteArrayList<>());
-		list.add(extension);
+		this.fileExtensions.computeIfAbsent(mediaType, key -> new CopyOnWriteArrayList<>())
+				.add(extension);
 	}
 
 
@@ -103,7 +103,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 
 	/**
 	 * Use this method for a reverse lookup from extension to MediaType.
-	 * @return a MediaType for the key, or {@code null} if none found
+	 * @return a MediaType for the extension, or {@code null} if none found
 	 */
 	@Nullable
 	protected MediaType lookupMediaType(String extension) {
