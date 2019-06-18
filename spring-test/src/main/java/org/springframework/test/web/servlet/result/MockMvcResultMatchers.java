@@ -187,35 +187,42 @@ public abstract class MockMvcResultMatchers {
 	 * {@link String#format(String, Object...)}.
 	 * @param expression the JSON path expression, optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
+	 * @see #jsonPath(String, Matcher)
+	 * @see #jsonPath(String, Matcher, Class)
 	 */
 	public static JsonPathResultMatchers jsonPath(String expression, Object... args) {
 		return new JsonPathResultMatchers(expression, args);
 	}
 
 	/**
-	 * Access to response body assertions using a
-	 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression
-	 * to inspect a specific subset of the body and a Hamcrest matcher for
-	 * asserting the value found at the JSON path.
+	 * Evaluate the given <a href="https://github.com/jayway/JsonPath">JsonPath</a>
+	 * expression against the response body and assert the resulting value with
+	 * the given Hamcrest {@link Matcher}.
 	 * @param expression the JSON path expression
 	 * @param matcher a matcher for the value expected at the JSON path
+	 * @see #jsonPath(String, Object...)
+	 * @see #jsonPath(String, Matcher, Class)
 	 */
 	public static <T> ResultMatcher jsonPath(String expression, Matcher<T> matcher) {
 		return new JsonPathResultMatchers(expression).value(matcher);
 	}
 
 	/**
-	 * An overloaded variant of {@link #jsonPath(String, Matcher)} (Matcher)} that also accepts
-	 * a target type for the resulting value that the matcher can work reliably against.
-	 * <p> This can be useful for matching numbers reliably &mdash; for example,
-	 * to coerce an integer into a double.</p>
-	 *
+	 * Evaluate the given <a href="https://github.com/jayway/JsonPath">JsonPath</a>
+	 * expression against the response body and assert the resulting value with
+	 * the given Hamcrest {@link Matcher}, coercing the resulting value into the
+	 * given target type before applying the matcher.
+	 * <p>This can be useful for matching numbers reliably &mdash; for example,
+	 * to coerce an integer into a double.
 	 * @param expression the JSON path expression
-	 * @param targetClass the target class to coerce the matching type into.
 	 * @param matcher a matcher for the value expected at the JSON path
+	 * @param targetType the target type to coerce the matching value into
+	 * @since 5.2
+	 * @see #jsonPath(String, Object...)
+	 * @see #jsonPath(String, Matcher)
 	 */
-	public static <T> ResultMatcher jsonPath(String expression, Class<T> targetClass, Matcher<T> matcher) {
-		return new JsonPathResultMatchers(expression).value(matcher, targetClass);
+	public static <T> ResultMatcher jsonPath(String expression, Matcher<T> matcher, Class<T> targetType) {
+		return new JsonPathResultMatchers(expression).value(matcher, targetType);
 	}
 
 	/**
