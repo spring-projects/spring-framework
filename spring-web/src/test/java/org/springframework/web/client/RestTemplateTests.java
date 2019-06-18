@@ -49,6 +49,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -65,9 +66,12 @@ import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.MediaType.parseMediaType;
 
 /**
+ * Unit tests for {@link RestTemplate}.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 @SuppressWarnings("unchecked")
 public class RestTemplateTests {
@@ -98,6 +102,25 @@ public class RestTemplateTests {
 		template.setErrorHandler(errorHandler);
 	}
 
+	@Test
+	public void constructorPreconditions() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new RestTemplate((List<HttpMessageConverter<?>>) null))
+				.withMessage("At least one HttpMessageConverter is required");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new RestTemplate(Arrays.asList(null, this.converter)))
+				.withMessage("The HttpMessageConverter list must not contain null elements");
+	}
+
+	@Test
+	public void setMessageConvertersPreconditions() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> template.setMessageConverters((List<HttpMessageConverter<?>>) null))
+				.withMessage("At least one HttpMessageConverter is required");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> template.setMessageConverters(Arrays.asList(null, this.converter)))
+				.withMessage("The HttpMessageConverter list must not contain null elements");
+	}
 
 	@Test
 	public void varArgsTemplateVariables() throws Exception {
