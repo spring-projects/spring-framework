@@ -77,8 +77,8 @@ class MessagingRSocket extends AbstractRSocket {
 		Assert.notNull(messageHandler, "'messageHandler' is required");
 		Assert.notNull(routeMatcher, "'routeMatcher' is required");
 		Assert.notNull(requester, "'requester' is required");
-		Assert.notNull(requester, "'dataMimeType' is required");
-		Assert.notNull(requester, "'metadataMimeType' is required");
+		Assert.notNull(dataMimeType, "'dataMimeType' is required");
+		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
 
 		Assert.isTrue(DefaultRSocketRequester.METADATA_MIME_TYPES.contains(metadataMimeType),
 				() -> "Unexpected metadatata mime type: '" + metadataMimeType + "'");
@@ -192,7 +192,7 @@ class MessagingRSocket extends AbstractRSocket {
 			return payload.getMetadataUtf8();
 		}
 		// Should not happen (given constructor assertions)
-		throw new IllegalArgumentException("Unexpected metadata MimeType");
+		throw new IllegalArgumentException("Unexpected metadataMimeType");
 	}
 
 	private DataBuffer retainDataAndReleasePayload(Payload payload) {

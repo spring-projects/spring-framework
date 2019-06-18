@@ -89,23 +89,19 @@ public final class MessageHandlerAcceptor extends RSocketMessageHandler
 
 	private MessagingRSocket createRSocket(ConnectionSetupPayload setupPayload, RSocket rsocket) {
 
-		MimeType dataMimeType = StringUtils.hasText(setupPayload.dataMimeType()) ?
-				MimeTypeUtils.parseMimeType(setupPayload.dataMimeType()) :
-				this.defaultDataMimeType;
-		Assert.notNull(dataMimeType,
-				"No `dataMimeType` in the ConnectionSetupPayload and no default value");
+		String s = setupPayload.dataMimeType();
+		MimeType dataMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultDataMimeType;
+		Assert.notNull(dataMimeType, "No `dataMimeType` in ConnectionSetupPayload and no default value");
 
-		MimeType metadataMimeType = StringUtils.hasText(setupPayload.dataMimeType()) ?
-				MimeTypeUtils.parseMimeType(setupPayload.metadataMimeType()) :
-				this.defaultMetadataMimeType;
-		Assert.notNull(dataMimeType,
-				"No `metadataMimeType` in the ConnectionSetupPayload and no default value");
+		s = setupPayload.metadataMimeType();
+		MimeType metaMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
+		Assert.notNull(dataMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
 
 		RSocketRequester requester = RSocketRequester.wrap(
-				rsocket, dataMimeType, metadataMimeType, getRSocketStrategies());
+				rsocket, dataMimeType, metaMimeType, getRSocketStrategies());
 
 		return new MessagingRSocket(this, getRouteMatcher(), requester,
-				dataMimeType, metadataMimeType, getRSocketStrategies().dataBufferFactory());
+				dataMimeType, metaMimeType, getRSocketStrategies().dataBufferFactory());
 	}
 
 }
