@@ -125,7 +125,7 @@ public class YamlProcessorTests {
 			assertThat(bar.get("spam")).isEqualTo("bucket");
 
 			List<Object> keysFromProperties = properties.keySet().stream().collect(toList());
-			List<Object> keysFromFlattenedMap = flattenedMap.keySet().stream().collect(toList());
+			List<String> keysFromFlattenedMap = flattenedMap.keySet().stream().collect(toList());
 			assertThat(keysFromProperties).containsExactlyInAnyOrderElementsOf(keysFromFlattenedMap);
 			// Keys in the Properties object are sorted.
 			assertThat(keysFromProperties).containsExactly("bar.spam", "cat", "foo");
