@@ -1190,7 +1190,7 @@ and writes the media type supported by the Java I/O API.
 [[rest-template-jsonview]]
 ===== Jackson JSON Views
 
-You can specify a https://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON View]
+You can specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON View]
 to serialize only a subset of the object properties, as the following example shows:
 
 [source,java,indent=0]

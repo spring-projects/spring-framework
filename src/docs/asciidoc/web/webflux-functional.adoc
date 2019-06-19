@@ -165,7 +165,7 @@ ServerResponse.created(location).build();
 ----
 
 Depending on the codec used, it is possible to pass hint parameters to customize how the
-body is serialized or deserialized. For example, to specify a https://wiki.fasterxml.com/JacksonJsonViews[Jackson JSON view]:
+body is serialized or deserialized. For example, to specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON view]:
 
 ====
 [source,java]
