@@ -254,7 +254,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 							dataBuffer instanceof NettyDataBuffer ?
 									((NettyDataBuffer) dataBuffer).getNativeBuffer() :
 									Unpooled.wrappedBuffer(dataBuffer.asByteBuffer()));
-
 				});
 				return asDataBuffer(metadata);
 			}

@@ -18,6 +18,13 @@ package org.springframework.messaging.rsocket;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+import io.rsocket.ConnectionSetupPayload;
+import io.rsocket.RSocket;
+import io.rsocket.SocketAcceptor;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
@@ -27,15 +34,19 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.RouteMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * RSocket-specific extension of {@link MessageMappingMessageHandler}.
- *
- * <p>The configured {@link #setEncoders(List) encoders} are used to encode the
- * return values from handler methods, with the help of
- * {@link RSocketPayloadReturnValueHandler}.
+ * Extension of {@link MessageMappingMessageHandler} to use as an RSocket
+ * responder by handling incoming streams via {@code @MessageMapping} annotated
+ * methods.
+ * <p>Use {@link #clientAcceptor()} and {@link #serverAcceptor()} to obtain
+ * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#acceptor(Function) client} or
+ * {@link io.rsocket.RSocketFactory.ServerRSocketFactory#acceptor(SocketAcceptor) server}
+ * side adapters.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
@@ -46,6 +57,11 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 	@Nullable
 	private RSocketStrategies rsocketStrategies;
+
+	@Nullable
+	private MimeType defaultDataMimeType;
+
+	private MimeType defaultMetadataMimeType = DefaultRSocketRequester.COMPOSITE_METADATA;
 
 
 	/**
@@ -95,6 +111,27 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		return this.rsocketStrategies;
 	}
 
+	/**
+	 * Configure the default content type to use for data payloads if the
+	 * {@code SETUP} frame did not specify one.
+	 * <p>By default this is not set.
+	 * @param mimeType the MimeType to use
+	 */
+	public void setDefaultDataMimeType(@Nullable MimeType mimeType) {
+		this.defaultDataMimeType = mimeType;
+	}
+
+	/**
+	 * Configure the default {@code MimeType} for payload data if the
+	 * {@code SETUP} frame did not specify one.
+	 * <p>By default this is set to {@code "message/x.rsocket.composite-metadata.v0"}
+	 * @param mimeType the MimeType to use
+	 */
+	public void setDefaultMetadataMimeType(MimeType mimeType) {
+		Assert.notNull(mimeType, "'metadataMimeType' is required");
+		this.defaultMetadataMimeType = mimeType;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -122,6 +159,51 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		if (destination != null && StringUtils.hasText(destination.value())) {
 			throw new MessageDeliveryException("No handler for destination '" + destination.value() + "'");
 		}
+	}
+
+	/**
+	 * Return an adapter for a
+	 * {@link io.rsocket.RSocketFactory.ServerRSocketFactory#acceptor(SocketAcceptor)
+	 * server acceptor}. The adapter implements a responding {@link RSocket} by
+	 * wrapping {@code Payload} data and metadata as {@link Message} and
+	 * delegating to this {@link RSocketMessageHandler} to handle and reply.
+	 */
+	public SocketAcceptor serverAcceptor() {
+		return (setupPayload, sendingRSocket) -> {
+			MessagingRSocket rsocket = createRSocket(setupPayload, sendingRSocket);
+
+			// Allow handling of the ConnectionSetupPayload via @MessageMapping methods.
+			// However, if the handling is to make requests to the client, it's expected
+			// it will do so decoupled from the handling, e.g. via .subscribe().
+			return rsocket.handleConnectionSetupPayload(setupPayload).then(Mono.just(rsocket));
+		};
+	}
+
+	/**
+	 * Return an adapter for a
+	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#acceptor(BiFunction)
+	 * client acceptor}. The adapter implements a responding {@link RSocket} by
+	 * wrapping {@code Payload} data and metadata as {@link Message} and
+	 * delegating to this {@link RSocketMessageHandler} to handle and reply.
+	 */
+	public BiFunction<ConnectionSetupPayload, RSocket, RSocket> clientAcceptor() {
+		return this::createRSocket;
+	}
+
+	private MessagingRSocket createRSocket(ConnectionSetupPayload setupPayload, RSocket rsocket) {
+		String s = setupPayload.dataMimeType();
+		MimeType dataMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultDataMimeType;
+		Assert.notNull(dataMimeType, "No `dataMimeType` in ConnectionSetupPayload and no default value");
+
+		s = setupPayload.metadataMimeType();
+		MimeType metaMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
+		Assert.notNull(dataMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
+
+		RSocketRequester requester = RSocketRequester.wrap(
+				rsocket, dataMimeType, metaMimeType, getRSocketStrategies());
+
+		return new MessagingRSocket(this, getRouteMatcher(), requester,
+				dataMimeType, metaMimeType, getRSocketStrategies().dataBufferFactory());
 	}
 
 }
