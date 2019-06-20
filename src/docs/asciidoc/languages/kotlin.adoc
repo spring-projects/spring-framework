@@ -402,6 +402,21 @@ Spring Framework provides support for Coroutines on the following scope:
 * Suspending function and `Flow` support in RSocket `@MessageMapping` annotated methods
 * Extensions for {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.messaging.rsocket/index.html[`RSocketRequester`]
 
+=== Dependencies
+
+Coroutines support is enabled when `kotlinx-coroutines-core` and `kotlinx-coroutines-reactor`
+dependencies are in the classpath:
+
+`build.gradle.kts`
+[source,kotlin,indent=0]
+----
+dependencies {
+
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${coroutinesVersion}")
+}
+----
+
 === How Reactive translates to Coroutines?
 
 For return values, the translation from Reactive to Coroutines APIs is the following:
