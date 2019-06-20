@@ -339,7 +339,7 @@ public class PathPattern implements Comparable<PathPattern> {
 					}
 				}
 			}
-			resultPath = PathContainer.parsePath(buf.toString());
+			resultPath = PathContainer.parsePath(buf.toString(), String.valueOf(this.separator));
 		}
 		else if (startIndex >= endIndex) {
 			resultPath = PathContainer.parsePath("");

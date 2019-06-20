@@ -708,6 +708,17 @@ public class PathPatternTests {
 	}
 
 	@Test
+	public void extractPathWithinPatternCustomSeparator() {
+		PathPatternParser ppp = new PathPatternParser();
+		ppp.setSeparator('.');
+		PathPattern pp = ppp.parse("test.**");
+		PathContainer pathContainer = PathContainer.parsePath("test.projects..spring-framework", ".");
+		PathContainer result = pp.extractPathWithinPattern(pathContainer);
+		assertThat(result.value()).isEqualTo("projects.spring-framework");
+		assertThat(result.elements()).hasSize(3);
+	}
+
+	@Test
 	public void extractUriTemplateVariables_spr15264() {
 		PathPattern pp;
 		pp = new PathPatternParser().parse("/{foo}");
