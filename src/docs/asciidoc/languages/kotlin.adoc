@@ -337,39 +337,49 @@ mockMvc.get("/person/{name}", "Lee") {
 
 === Kotlin Script Templates
 
-As of version 4.3, Spring Framework provides a
+Spring Framework provides a
 https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/script/ScriptTemplateView.html[`ScriptTemplateView`]
-to render templates by using script engines. It supports
-https://www.jcp.org/en/jsr/detail?id=223[JSR-223].
-Spring Framework 5 goes even further by extending this feature to WebFlux and supporting
-https://jira.spring.io/browse/SPR-15064[i18n and nested templates].
+which supports https://www.jcp.org/en/jsr/detail?id=223[JSR-223] to render templates by using script engines.
 
-Kotlin provides similar support and allows the rendering of Kotlin-based templates. See
-https://github.com/spring-projects/spring-framework/commit/badde3a479a53e1dd0777dd1bd5b55cb1021cf9e[this commit] for details.
+By leveraging `kotlin-script-runtime` and `scripting-jsr223-embeddable` dependencies, it
+is possible to use such feature to render Kotlin-based templates with
+https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or Kotlin multiline interpolated `String`.
 
-This enables some interesting use cases - such as writing type-safe templates by using
-https://github.com/Kotlin/kotlinx.html[kotlinx.html] DSL or by a using Kotlin multiline `String` with interpolation.
-
-This can let you write Kotlin templates with full autocompletion and
-refactoring support in a supported IDE, as the following example shows:
-
+`build.gradle.kts`
 [source,kotlin,indent=0]
 ----
-	import io.spring.demo.*
-
-	"""
-	${include("header")}
-	<h1>${i18n("title")}</h1>
-	<ul>
-	${users.joinToLine{ "<li>${i18n("user")} ${it.firstname} ${it.lastname}</li>" }}
-	</ul>
-	${include("footer")}
-	"""
+dependencies {
+	compile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
+	runtime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable:${kotlinVersion}")
+}
 ----
 
-WARNING: Kotlin Script Templates support is experimental and not compatible yet with Spring Boot fatjar mechanism, see related
-https://youtrack.jetbrains.com/issue/KT-21443[KT-21443] and https://youtrack.jetbrains.com/issue/KT-27956[KT-27956]
-issues.
+Configuration is usually done with `ScriptTemplateConfigurer` and `ScriptTemplateViewResolver`
+beans.
+
+
+`KotlinScriptConfiguration.kt`
+[source,kotlin,indent=0]
+----
+@Configuration
+class KotlinScriptConfiguration {
+
+    @Bean
+	fun kotlinScriptConfigurer() = ScriptTemplateConfigurer().apply {
+		engineName = "kotlin"
+		setScripts("scripts/render.kts")
+		renderFunction = "render"
+		isSharedEngine = false
+	}
+
+    @Bean
+    fun kotlinScriptViewResolver() = ScriptTemplateViewResolver().apply {
+        setPrefix("templates/")
+        setSuffix(".kts")
+    }
+}
+----
+
 
 See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
