@@ -86,7 +86,7 @@ public class RSocketBufferLeakTests {
 
 		server = RSocketFactory.receive()
 				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.addServerPlugin(payloadInterceptor) // intercept responding
+				.addResponderPlugin(payloadInterceptor) // intercept responding
 				.acceptor(context.getBean(RSocketMessageHandler.class).serverAcceptor())
 				.transport(TcpServerTransport.create("localhost", 7000))
 				.start()
@@ -95,7 +95,7 @@ public class RSocketBufferLeakTests {
 		requester = RSocketRequester.builder()
 				.rsocketFactory(factory -> {
 					factory.frameDecoder(PayloadDecoder.ZERO_COPY);
-					factory.addClientPlugin(payloadInterceptor); // intercept outgoing requests
+					factory.addRequesterPlugin(payloadInterceptor); // intercept outgoing requests
 				})
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
 				.connectTcp("localhost", 7000)
