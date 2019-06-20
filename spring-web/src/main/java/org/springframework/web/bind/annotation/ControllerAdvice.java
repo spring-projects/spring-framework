@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
  * <p>Classes with {@code @ControllerAdvice} can be declared explicitly as Spring
  * beans or auto-detected via classpath scanning. All such beans are sorted via
  * {@link org.springframework.core.annotation.AnnotationAwareOrderComparator
- * AnnotationAwareOrderComparator}, i.e. based on
+ * AnnotationAwareOrderComparator}, based on
  * {@link org.springframework.core.annotation.Order @Order} and
  * {@link org.springframework.core.Ordered Ordered}, and applied in that order
  * at runtime. For handling exceptions, an {@code @ExceptionHandler} will be
@@ -51,12 +51,12 @@ import org.springframework.stereotype.Component;
  * root exception mappings on a prioritized advice bean with a corresponding order.
  *
  * <p>By default, the methods in an {@code @ControllerAdvice} apply globally to
- * all controllers. Use selectors {@link #annotations},
+ * all controllers. Use selectors such as {@link #annotations},
  * {@link #basePackageClasses}, and {@link #basePackages} (or its alias
  * {@link #value}) to define a more narrow subset of targeted controllers.
  * If multiple selectors are declared, boolean {@code OR} logic is applied, meaning
  * selected controllers should match at least one selector. Note that selector checks
- * are performed at runtime and so adding many selectors may negatively impact
+ * are performed at runtime, so adding many selectors may negatively impact
  * performance and add complexity.
  *
  * @author Rossen Stoyanchev

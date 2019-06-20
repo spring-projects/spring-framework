@@ -267,11 +267,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	public void write(MultiValueMap<String, ?> map, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		if (!isMultipart(map, contentType)) {
-			writeForm((MultiValueMap<String, Object>) map, contentType, outputMessage);
+		if (isMultipart(map, contentType)) {
+			writeMultipart((MultiValueMap<String, Object>) map, outputMessage);
 		}
 		else {
-			writeMultipart((MultiValueMap<String, Object>) map, outputMessage);
+			writeForm((MultiValueMap<String, Object>) map, contentType, outputMessage);
 		}
 	}
 
