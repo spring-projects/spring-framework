@@ -83,10 +83,6 @@ import org.springframework.validation.Validator;
 public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<CompositeMessageCondition>
 		implements EmbeddedValueResolverAware {
 
-	@Nullable
-	private Predicate<Class<?>> handlerPredicate =
-			beanType -> AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
-
 	private final List<Decoder<?>> decoders = new ArrayList<>();
 
 	@Nullable
@@ -104,58 +100,9 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		AntPathMatcher pathMatcher = new AntPathMatcher();
 		pathMatcher.setPathSeparator(".");
 		this.routeMatcher = new SimpleRouteMatcher(pathMatcher);
+		setHandlerPredicate(type -> AnnotatedElementUtils.hasAnnotation(type, Controller.class));
 	}
 
-
-	/**
-	 * Manually configure handlers to check for {@code @MessageMapping} methods.
-	 * <p><strong>Note:</strong> the given handlers are not required to be
-	 * annotated with {@code @Controller}. Consider also using
-	 * {@link #setAutoDetectDisabled()} if the intent is to use these handlers
-	 * instead of, and not in addition to {@code @Controller} classes. Or
-	 * alternatively use {@link #setHandlerPredicate(Predicate)} to select a
-	 * different set of beans based on a different criteria.
-	 * @param handlers the handlers to register
-	 * @see #setAutoDetectDisabled()
-	 * @see #setHandlerPredicate(Predicate)
-	 */
-	public void setHandlers(List<Object> handlers) {
-		for (Object handler : handlers) {
-			detectHandlerMethods(handler);
-		}
-		// Disable auto-detection..
-		this.handlerPredicate = null;
-	}
-
-	/**
-	 * Configure the predicate to use for selecting which Spring beans to check
-	 * for {@code @MessageMapping} methods. When set to {@code null},
-	 * auto-detection is turned off which is what
-	 * {@link #setAutoDetectDisabled()} does internally.
-	 * <p>The predicate used by default selects {@code @Controller} classes.
-	 * @see #setHandlers(List)
-	 * @see #setAutoDetectDisabled()
-	 */
-	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
-		this.handlerPredicate = handlerPredicate;
-	}
-
-	/**
-	 * Return the {@link #setHandlerPredicate configured} handler predicate.
-	 */
-	@Nullable
-	public Predicate<Class<?>> getHandlerPredicate() {
-		return this.handlerPredicate;
-	}
-
-	/**
-	 * Disable auto-detection of {@code @MessageMapping} methods, e.g. in
-	 * {@code @Controller}s, by setting {@link #setHandlerPredicate(Predicate)
-	 * setHandlerPredicate(null)}.
-	 */
-	public void setAutoDetectDisabled() {
-		this.handlerPredicate = null;
-	}
 
 	/**
 	 * Configure the decoders to use for incoming payloads.
@@ -262,11 +209,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
 		return Collections.emptyList();
-	}
-
-	@Override
-	protected Predicate<Class<?>> initHandlerPredicate() {
-		return this.handlerPredicate;
 	}
 
 

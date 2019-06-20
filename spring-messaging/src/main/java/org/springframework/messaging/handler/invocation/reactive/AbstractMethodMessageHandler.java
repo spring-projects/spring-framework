@@ -86,6 +86,12 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
+	@Nullable
+	private Predicate<Class<?>> handlerPredicate;
+
+	@Nullable
+	List<Object> handlers;
+
 	private ArgumentResolverConfigurer argumentResolverConfigurer = new ArgumentResolverConfigurer();
 
 	private ReturnValueHandlerConfigurer returnValueHandlerConfigurer = new ReturnValueHandlerConfigurer();
@@ -102,6 +108,38 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
 
+
+	/**
+	 * Configure a predicate for selecting which Spring beans to check for the
+	 * presence of message handler methods.
+	 * <p>This is not set by default. However sub-classes may initialize it to
+	 * some default strategy (e.g. {@code @Controller} classes).
+	 * @see #setHandlers(List)
+	 */
+	public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {
+		this.handlerPredicate = handlerPredicate;
+	}
+
+	/**
+	 * Return the {@link #setHandlerPredicate configured} handler predicate.
+	 */
+	@Nullable
+	public Predicate<Class<?>> getHandlerPredicate() {
+		return this.handlerPredicate;
+	}
+
+	/**
+	 * Manually configure the handlers to check for the presence of message
+	 * handling methods, which also disables auto-detection via a
+	 * {@link #setHandlerPredicate(Predicate) handlerPredicate}. If you do not
+	 * want to disable auto-detection, then call this method first, and then set
+	 * the handler predicate.
+	 * @param handlers the handlers to check
+	 */
+	public void setHandlers(List<Object> handlers) {
+		this.handlers = handlers;
+		this.handlerPredicate = null;
+	}
 
 	/**
 	 * Configure custom resolvers for handler method arguments.
@@ -233,9 +271,14 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.warn("No ApplicationContext available for detecting beans with message handling methods.");
 			return;
 		}
-		Predicate<Class<?>> handlerPredicate = initHandlerPredicate();
-		if (handlerPredicate == null) {
-			logger.warn("[" + getBeanName() + "] No auto-detection of handler methods (e.g. in @Controller).");
+		if (this.handlers != null) {
+			for (Object handler : this.handlers) {
+				detectHandlerMethods(handler);
+			}
+		}
+		Predicate<Class<?>> predicate = this.handlerPredicate;
+		if (predicate == null) {
+			logger.warn("[" + getBeanName() + "] Auto-detection of message handling methods is off.");
 			return;
 		}
 		for (String beanName : this.applicationContext.getBeanNamesForType(Object.class)) {
@@ -250,20 +293,12 @@ public abstract class AbstractMethodMessageHandler<T>
 						logger.debug("Could not resolve target class for bean with name '" + beanName + "'", ex);
 					}
 				}
-				if (beanType != null && handlerPredicate.test(beanType)) {
+				if (beanType != null && predicate.test(beanType)) {
 					detectHandlerMethods(beanName);
 				}
 			}
 		}
 	}
-
-	/**
-	 * Return the predicate to use to check whether a given Spring bean should
-	 * be introspected for message handling methods. If {@code null} is
-	 * returned, auto-detection is effectively disabled.
-	 */
-	@Nullable
-	protected abstract Predicate<Class<?>> initHandlerPredicate();
 
 	/**
 	 * Detect if the given handler has any methods that can handle messages and if
