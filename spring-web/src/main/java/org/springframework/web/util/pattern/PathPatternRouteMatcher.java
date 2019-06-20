@@ -36,18 +36,21 @@ public class PathPatternRouteMatcher implements RouteMatcher {
 
 	private final PathPatternParser parser;
 
+	private final String separator;
+
 	private final Map<String, PathPattern> pathPatternCache = new ConcurrentHashMap<>();
 
 
 	public PathPatternRouteMatcher(PathPatternParser parser) {
 		Assert.notNull(parser, "PathPatternParser must not be null");
 		this.parser = parser;
+		this.separator = String.valueOf(parser.getSeparator());
 	}
 
 
 	@Override
 	public Route parseRoute(String routeValue) {
-		return new PathContainerRoute(PathContainer.parsePath(routeValue));
+		return new PathContainerRoute(PathContainer.parsePath(routeValue, this.separator));
 	}
 
 	@Override
