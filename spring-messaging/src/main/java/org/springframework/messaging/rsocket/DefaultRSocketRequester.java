@@ -152,17 +152,21 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> ResponseSpec data(P publisher, Class<T> dataType) {
-			Assert.notNull(publisher, "'publisher' must not be null");
-			Assert.notNull(dataType, "'dataType' must not be null");
-			return toResponseSpec(publisher, ResolvableType.forClass(dataType));
+		public ResponseSpec data(Object producer, Class<?> elementType) {
+			Assert.notNull(producer, "'producer' must not be null");
+			Assert.notNull(elementType, "'dataType' must not be null");
+			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(producer.getClass());
+			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
+			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forClass(elementType));
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> ResponseSpec data(P publisher, ParameterizedTypeReference<T> dataTypeRef) {
-			Assert.notNull(publisher, "'publisher' must not be null");
+		public ResponseSpec data(Object producer, ParameterizedTypeReference<?> dataTypeRef) {
+			Assert.notNull(producer, "'producer' must not be null");
 			Assert.notNull(dataTypeRef, "'dataTypeRef' must not be null");
-			return toResponseSpec(publisher, ResolvableType.forType(dataTypeRef));
+			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(producer.getClass());
+			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
+			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forType(dataTypeRef));
 		}
 
 		private ResponseSpec toResponseSpec(Object input, ResolvableType dataType) {
