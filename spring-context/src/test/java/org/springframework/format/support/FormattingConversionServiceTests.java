@@ -18,7 +18,6 @@ package org.springframework.format.support;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,7 +82,7 @@ public class FormattingConversionServiceTests {
 
 
 	@Test
-	public void formatFieldForTypeWithFormatter() throws ParseException {
+	public void formatFieldForTypeWithFormatter() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		String formatted = formattingService.convert(3, String.class);
 		assertThat(formatted).isEqualTo("3");
@@ -92,7 +91,7 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
-	public void formatFieldForTypeWithPrinterParserWithCoercion() throws ParseException {
+	public void formatFieldForTypeWithPrinterParserWithCoercion() {
 		formattingService.addConverter(new Converter<DateTime, LocalDate>() {
 			@Override
 			public LocalDate convert(DateTime source) {
@@ -241,58 +240,58 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
-	public void printNull() throws ParseException {
+	public void printNull() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isEqualTo("");
 	}
 
 	@Test
-	public void parseNull() throws ParseException {
+	public void parseNull() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService
 				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseEmptyString() throws ParseException {
+	public void parseEmptyString() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseBlankString() throws ParseException {
+	public void parseBlankString() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert("     ", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseParserReturnsNull() throws ParseException {
+	public void parseParserReturnsNull() {
 		formattingService.addFormatterForFieldType(Integer.class, new NullReturningFormatter());
 		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
 				formattingService.convert("1", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
-	public void parseNullPrimitiveProperty() throws ParseException {
+	public void parseNullPrimitiveProperty() {
 		formattingService.addFormatterForFieldType(Integer.class, new NumberStyleFormatter());
 		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
 				formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
 	}
 
 	@Test
-	public void printNullDefault() throws ParseException {
+	public void printNullDefault() {
 		assertThat(formattingService
 				.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isEqualTo(null);
 	}
 
 	@Test
-	public void parseNullDefault() throws ParseException {
+	public void parseNullDefault() {
 		assertThat(formattingService
 				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseEmptyStringDefault() throws ParseException {
+	public void parseEmptyStringDefault() {
 		assertThat(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
@@ -330,7 +329,7 @@ public class FormattingConversionServiceTests {
 	private <T> void registerDefaultValue(Class<T> clazz, final T defaultValue) {
 		formattingService.addFormatterForFieldType(clazz, new Formatter<T>() {
 			@Override
-			public T parse(String text, Locale locale) throws ParseException {
+			public T parse(String text, Locale locale) {
 				return defaultValue;
 			}
 			@Override
@@ -345,30 +344,30 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
-	public void introspectedFormatter() throws ParseException {
+	public void introspectedFormatter() {
 		formattingService.addFormatter(new NumberStyleFormatter("#,#00.0#"));
 		assertThat(formattingService.convert(123, String.class)).isEqualTo("123.0");
 		assertThat(formattingService.convert("123.0", Integer.class)).isEqualTo(123);
 	}
 
 	@Test
-	public void introspectedPrinter() throws ParseException {
+	public void introspectedPrinter() {
 		formattingService.addPrinter(new NumberStyleFormatter("#,#00.0#"));
 		assertThat(formattingService.convert(123, String.class)).isEqualTo("123.0");
 		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
-				assertThat(formattingService.convert("123.0", Integer.class)).isNull())
+				formattingService.convert("123.0", Integer.class))
 			.withCauseInstanceOf(NumberFormatException.class);
 	}
 
 	@Test
-	public void introspectedParser() throws ParseException {
+	public void introspectedParser() {
 		formattingService.addParser(new NumberStyleFormatter("#,#00.0#"));
 		assertThat(formattingService.convert("123.0", Integer.class)).isEqualTo(123);
 		assertThat(formattingService.convert(123, String.class)).isEqualTo("123");
 	}
 
 	@Test
-	public void proxiedFormatter() throws ParseException {
+	public void proxiedFormatter() {
 		Formatter<?> formatter = new NumberStyleFormatter();
 		formattingService.addFormatter((Formatter<?>) new ProxyFactory(formatter).getProxy());
 		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
@@ -483,7 +482,7 @@ public class FormattingConversionServiceTests {
 		}
 
 		@Override
-		public Integer parse(String text, Locale locale) throws ParseException {
+		public Integer parse(String text, Locale locale) {
 			return null;
 		}
 	}
