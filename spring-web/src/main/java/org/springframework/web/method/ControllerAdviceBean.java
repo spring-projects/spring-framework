@@ -49,11 +49,14 @@ public class ControllerAdviceBean implements Ordered {
 	private final Object bean;
 
 	@Nullable
+	private final Class<?> beanType;
+
+	private final HandlerTypePredicate beanTypePredicate;
+
+	@Nullable
 	private final BeanFactory beanFactory;
 
 	private final int order;
-
-	private final HandlerTypePredicate beanTypePredicate;
 
 
 	/**
@@ -87,13 +90,18 @@ public class ControllerAdviceBean implements Ordered {
 						"] does not contain specified controller advice bean '" + beanName + "'");
 			}
 			beanType = this.beanFactory.getType(beanName);
+			if (beanType != null) {
+				beanType = ClassUtils.getUserClass(beanType);
+			}
 			this.order = initOrderFromBeanType(beanType);
 		}
 		else {
 			Assert.notNull(bean, "Bean must not be null");
-			beanType = bean.getClass();
+			beanType = ClassUtils.getUserClass(bean.getClass());
 			this.order = initOrderFromBean(bean);
 		}
+
+		this.beanType = beanType;
 
 		ControllerAdvice annotation = (beanType != null ?
 				AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class) : null);
@@ -123,14 +131,12 @@ public class ControllerAdviceBean implements Ordered {
 
 	/**
 	 * Return the type of the contained bean.
-	 * <p>If the bean type is a CGLIB-generated class, the original
-	 * user-defined class is returned.
+	 * <p>If the bean type is a CGLIB-generated class, the original user-defined
+	 * class is returned.
 	 */
 	@Nullable
 	public Class<?> getBeanType() {
-		Class<?> beanType = (this.bean instanceof String ?
-				obtainBeanFactory().getType((String) this.bean) : this.bean.getClass());
-		return (beanType != null ? ClassUtils.getUserClass(beanType) : null);
+		return this.beanType;
 	}
 
 	/**
