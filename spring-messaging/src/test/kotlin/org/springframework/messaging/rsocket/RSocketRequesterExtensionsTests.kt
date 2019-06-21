@@ -3,7 +3,6 @@ package org.springframework.messaging.rsocket
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -54,11 +53,19 @@ class RSocketRequesterExtensionsTests {
 	}
 
 	@Test
-	fun dataFlow() {
+	fun dataFlowWithType() {
 		val requestSpec = mockk<RSocketRequester.RequestSpec>()
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
 		every { requestSpec.data(any<Publisher<String>>(), any<ParameterizedTypeReference<String>>()) } returns responseSpec
-		assertEquals(responseSpec, requestSpec.dataFlow(mockk<Flow<String>>()))
+		assertEquals(responseSpec, requestSpec.data<String>(mockk()))
+	}
+
+	@Test
+	fun dataFlowWithoutType() {
+		val requestSpec = mockk<RSocketRequester.RequestSpec>()
+		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
+		every { requestSpec.data(any()) } returns responseSpec
+		assertEquals(responseSpec, requestSpec.data(mockk()))
 	}
 
 	@Test
@@ -86,6 +93,24 @@ class RSocketRequesterExtensionsTests {
 		every { responseSpec.retrieveFlux(any<ParameterizedTypeReference<String>>()) } returns Flux.just("foo", "bar")
 		runBlocking {
 			assertEquals(listOf("foo", "bar"), responseSpec.retrieveFlow<String>().toList())
+		}
+	}
+
+	@Test
+	fun retrieveMono() {
+		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
+		every { responseSpec.retrieveMono(any<ParameterizedTypeReference<String>>()) } returns Mono.just("foo")
+		runBlocking {
+			assertEquals("foo", responseSpec.retrieveMono<String>().block())
+		}
+	}
+
+	@Test
+	fun retrieveFlux() {
+		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
+		every { responseSpec.retrieveFlux(any<ParameterizedTypeReference<String>>()) } returns Flux.just("foo", "bar")
+		runBlocking {
+			assertEquals(listOf("foo", "bar"), responseSpec.retrieveFlux<String>().collectList().block())
 		}
 	}
 }
