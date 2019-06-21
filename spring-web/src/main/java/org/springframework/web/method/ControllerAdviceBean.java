@@ -70,9 +70,10 @@ public class ControllerAdviceBean implements Ordered {
 	/**
 	 * Create a {@code ControllerAdviceBean} using the given bean name.
 	 * @param beanName the name of the bean
-	 * @param beanFactory a BeanFactory that can be used later to resolve the bean
+	 * @param beanFactory a {@code BeanFactory} to retrieve the bean type initially
+	 * and later to resolve the actual bean
 	 */
-	public ControllerAdviceBean(String beanName, @Nullable BeanFactory beanFactory) {
+	public ControllerAdviceBean(String beanName, BeanFactory beanFactory) {
 		this((Object) beanName, beanFactory);
 	}
 
@@ -83,7 +84,7 @@ public class ControllerAdviceBean implements Ordered {
 
 		if (bean instanceof String) {
 			String beanName = (String) bean;
-			Assert.hasText(beanName, "Bean name must not be null");
+			Assert.hasText(beanName, "Bean name must not be empty");
 			Assert.notNull(beanFactory, "BeanFactory must not be null");
 			if (!beanFactory.containsBean(beanName)) {
 				throw new IllegalArgumentException("BeanFactory [" + beanFactory +
@@ -140,7 +141,8 @@ public class ControllerAdviceBean implements Ordered {
 	}
 
 	/**
-	 * Return a bean instance if necessary resolving the bean name through the BeanFactory.
+	 * Get the bean instance for this {@code ControllerAdviceBean}, if necessary
+	 * resolving the bean name through the {@link BeanFactory}.
 	 */
 	public Object resolveBean() {
 		return (this.bean instanceof String ? obtainBeanFactory().getBean((String) this.bean) : this.bean);
