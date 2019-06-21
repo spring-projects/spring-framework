@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.rsocket;
+package org.springframework.messaging.rsocket.annotation.support;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
@@ -39,6 +41,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.PayloadUtils;
+import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
@@ -56,6 +60,13 @@ import org.springframework.util.RouteMatcher;
  * @since 5.2
  */
 class MessagingRSocket extends AbstractRSocket {
+
+	static final MimeType COMPOSITE_METADATA = new MimeType("message", "x.rsocket.composite-metadata.v0");
+
+	private static final MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
+
+	private static final List<MimeType> METADATA_MIME_TYPES = Arrays.asList(COMPOSITE_METADATA, ROUTING);
+
 
 	private final RSocketMessageHandler messageHandler;
 
@@ -80,7 +91,7 @@ class MessagingRSocket extends AbstractRSocket {
 		Assert.notNull(dataMimeType, "'dataMimeType' is required");
 		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
 
-		Assert.isTrue(DefaultRSocketRequester.METADATA_MIME_TYPES.contains(metadataMimeType),
+		Assert.isTrue(METADATA_MIME_TYPES.contains(metadataMimeType),
 				() -> "Unexpected metadatata mime type: '" + metadataMimeType + "'");
 
 		this.messageHandler = messageHandler;
@@ -178,17 +189,17 @@ class MessagingRSocket extends AbstractRSocket {
 	}
 
 	private String getDestination(Payload payload) {
-		if (this.metadataMimeType.equals(DefaultRSocketRequester.COMPOSITE_METADATA)) {
+		if (this.metadataMimeType.equals(COMPOSITE_METADATA)) {
 			CompositeMetadata metadata = new CompositeMetadata(payload.metadata(), false);
 			for (CompositeMetadata.Entry entry : metadata) {
 				String mimeType = entry.getMimeType();
-				if (DefaultRSocketRequester.ROUTING.toString().equals(mimeType)) {
+				if (ROUTING.toString().equals(mimeType)) {
 					return entry.getContent().toString(StandardCharsets.UTF_8);
 				}
 			}
 			return "";
 		}
-		else if (this.metadataMimeType.equals(DefaultRSocketRequester.ROUTING)) {
+		else if (this.metadataMimeType.equals(ROUTING)) {
 			return payload.getMetadataUtf8();
 		}
 		// Should not happen (given constructor assertions)

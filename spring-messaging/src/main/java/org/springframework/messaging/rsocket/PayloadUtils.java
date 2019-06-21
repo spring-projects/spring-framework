@@ -34,7 +34,7 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-abstract class PayloadUtils {
+public abstract class PayloadUtils {
 
 	/**
 	 * Use this method to slice, retain and wrap the data portion of the

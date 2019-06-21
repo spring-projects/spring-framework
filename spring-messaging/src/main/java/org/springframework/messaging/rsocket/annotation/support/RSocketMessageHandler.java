@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.rsocket;
+package org.springframework.messaging.rsocket.annotation.support;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +33,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -61,7 +63,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	@Nullable
 	private MimeType defaultDataMimeType;
 
-	private MimeType defaultMetadataMimeType = DefaultRSocketRequester.COMPOSITE_METADATA;
+	private MimeType defaultMetadataMimeType = MessagingRSocket.COMPOSITE_METADATA;
 
 
 	/**

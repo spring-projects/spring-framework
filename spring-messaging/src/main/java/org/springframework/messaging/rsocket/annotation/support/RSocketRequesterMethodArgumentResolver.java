@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.rsocket;
+package org.springframework.messaging.rsocket.annotation.support;
 
 import io.rsocket.RSocket;
 import reactor.core.publisher.Mono;
@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodArgumentResolver;
+import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.util.Assert;
 
 /**

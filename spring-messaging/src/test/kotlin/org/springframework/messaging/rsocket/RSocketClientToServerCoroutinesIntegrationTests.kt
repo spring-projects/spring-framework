@@ -37,6 +37,7 @@ import org.springframework.core.codec.StringDecoder
 import org.springframework.core.io.buffer.NettyDataBufferFactory
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler
 import org.springframework.messaging.handler.annotation.MessageMapping
+import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler
 import org.springframework.stereotype.Controller
 import reactor.core.publisher.Flux
 import reactor.test.StepVerifier

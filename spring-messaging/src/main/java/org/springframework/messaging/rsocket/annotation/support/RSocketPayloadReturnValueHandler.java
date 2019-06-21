@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.messaging.rsocket;
+package org.springframework.messaging.rsocket.annotation.support;
 
 import java.util.List;
 
@@ -30,6 +30,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.reactive.AbstractEncoderMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.PayloadUtils;
 import org.springframework.util.Assert;
 
 /**
