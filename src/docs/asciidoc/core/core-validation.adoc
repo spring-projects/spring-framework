@@ -1093,7 +1093,7 @@ The `number` package provides `NumberStyleFormatter`, `CurrencyStyleFormatter`, 
 `PercentStyleFormatter` to format `Number` objects that use a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
 a `java.text.DateFormat`. The `datetime.joda` package provides comprehensive datetime
-formatting support based on the http://joda-time.sourceforge.net[Joda-Time library].
+formatting support based on the https://www.joda.org/joda-time/[Joda-Time library].
 
 The following `DateFormatter` is an example `Formatter` implementation:
 

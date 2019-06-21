@@ -6056,7 +6056,7 @@ See the following resources for more information about testing:
   using Java's proxy mechanism.`" Used by the Spring Framework in its test suite.
 * https://jmock.org/[JMock]: Library that supports test-driven development of Java
   code with mock objects.
-* http://dbunit.sourceforge.net/[DbUnit]: JUnit extension (also usable with Ant and
+* https://www.dbunit.org/[DbUnit]: JUnit extension (also usable with Ant and
   Maven) that is targeted at database-driven projects and, among other things, puts your
   database into a known state between test runs.
 * https://sourceforge.net/projects/grinder/[The Grinder]: Java load testing framework.
