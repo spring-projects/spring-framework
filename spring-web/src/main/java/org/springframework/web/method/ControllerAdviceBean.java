@@ -46,7 +46,18 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
  */
 public class ControllerAdviceBean implements Ordered {
 
+	/**
+	 * Declared as {@code Object} since this may be a reference to a
+	 * {@code String} representing the bean name or a reference to the actual
+	 * bean instance.
+	 */
 	private final Object bean;
+
+	/**
+	 * A reference to the resolved bean instance, potentially lazily retrieved
+	 * via the {@code BeanFactory}.
+	 */
+	private Object resolvedBean;
 
 	@Nullable
 	private final Class<?> beanType;
@@ -99,6 +110,7 @@ public class ControllerAdviceBean implements Ordered {
 		else {
 			Assert.notNull(bean, "Bean must not be null");
 			beanType = ClassUtils.getUserClass(bean.getClass());
+			this.resolvedBean = bean;
 			this.order = initOrderFromBean(bean);
 		}
 
@@ -143,9 +155,16 @@ public class ControllerAdviceBean implements Ordered {
 	/**
 	 * Get the bean instance for this {@code ControllerAdviceBean}, if necessary
 	 * resolving the bean name through the {@link BeanFactory}.
+	 * <p>As of Spring Framework 5.2, once the bean instance has been resolved it
+	 * will be cached, thereby avoiding repeated lookups in the {@code BeanFactory}.
 	 */
 	public Object resolveBean() {
-		return (this.bean instanceof String ? obtainBeanFactory().getBean((String) this.bean) : this.bean);
+		if (this.resolvedBean == null) {
+			// this.bean must be a String representing the bean name if
+			// this.resolvedBean is null.
+			this.resolvedBean = obtainBeanFactory().getBean((String) this.bean);
+		}
+		return this.resolvedBean;
 	}
 
 	private BeanFactory obtainBeanFactory() {
