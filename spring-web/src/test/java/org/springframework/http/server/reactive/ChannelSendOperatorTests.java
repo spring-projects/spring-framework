@@ -92,7 +92,7 @@ public class ChannelSendOperatorTests {
 
 
 	@Test
-	public void writeMultipleItems() throws Exception {
+	public void writeMultipleItems() {
 		List<String> items = Arrays.asList("one", "two", "three");
 		Mono<Void> completion = Flux.fromIterable(items).as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().block();
@@ -108,7 +108,7 @@ public class ChannelSendOperatorTests {
 	}
 
 	@Test
-	public void errorAfterMultipleItems() throws Exception {
+	public void errorAfterMultipleItems() {
 		IllegalStateException error = new IllegalStateException("boo");
 		Flux<String> publisher = Flux.generate(() -> 0, (idx , subscriber) -> {
 			int i = ++idx;
@@ -212,6 +212,25 @@ public class ChannelSendOperatorTests {
 		StepVerifier.create(operator).expectErrorMessage("err").verify(Duration.ofSeconds(5));
 		bufferFactory.checkForLeaks();
 	}
+
+	@Test // gh-23175
+	public void errorInWriteFunction() {
+
+		StepVerifier
+				.create(new ChannelSendOperator<>(Mono.just("one"), p -> {
+					throw new IllegalStateException("boo");
+				}))
+				.expectErrorMessage("boo")
+				.verify(Duration.ofMillis(5000));
+
+		StepVerifier
+				.create(new ChannelSendOperator<>(Mono.empty(), p -> {
+					throw new IllegalStateException("boo");
+				}))
+				.expectErrorMessage("boo")
+				.verify(Duration.ofMillis(5000));
+	}
+
 
 	private <T> Mono<Void> sendOperator(Publisher<String> source){
 		return new ChannelSendOperator<>(source, writer::send);
