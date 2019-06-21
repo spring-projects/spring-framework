@@ -74,11 +74,11 @@ public @interface ControllerAdvice {
 
 	/**
 	 * Alias for the {@link #basePackages} attribute.
-	 * <p>Allows for more concise annotation declarations e.g.:
+	 * <p>Allows for more concise annotation declarations &mdash; for example,
 	 * {@code @ControllerAdvice("org.my.pkg")} is equivalent to
-	 * {@code @ControllerAdvice(basePackages="org.my.pkg")}.
+	 * {@code @ControllerAdvice(basePackages = "org.my.pkg")}.
 	 * @since 4.0
-	 * @see #basePackages()
+	 * @see #basePackages
 	 */
 	@AliasFor("basePackages")
 	String[] value() default {};
@@ -86,11 +86,12 @@ public @interface ControllerAdvice {
 	/**
 	 * Array of base packages.
 	 * <p>Controllers that belong to those base packages or sub-packages thereof
-	 * will be included, e.g.: {@code @ControllerAdvice(basePackages="org.my.pkg")}
-	 * or {@code @ControllerAdvice(basePackages={"org.my.pkg", "org.my.other.pkg"})}.
+	 * will be included &mdash; for example,
+	 * {@code @ControllerAdvice(basePackages = "org.my.pkg")} or
+	 * {@code @ControllerAdvice(basePackages = {"org.my.pkg", "org.my.other.pkg"})}.
 	 * <p>{@link #value} is an alias for this attribute, simply allowing for
 	 * more concise use of the annotation.
-	 * <p>Also consider using {@link #basePackageClasses()} as a type-safe
+	 * <p>Also consider using {@link #basePackageClasses} as a type-safe
 	 * alternative to String-based package names.
 	 * @since 4.0
 	 */
@@ -116,9 +117,9 @@ public @interface ControllerAdvice {
 	Class<?>[] assignableTypes() default {};
 
 	/**
-	 * Array of annotations.
-	 * <p>Controllers that are annotated with at least one of the supplied annotations
-	 * will be advised by the {@code @ControllerAdvice} annotated class.
+	 * Array of annotation types.
+	 * <p>Controllers that are annotated with at least one of the supplied annotation
+	 * types will be advised by the {@code @ControllerAdvice} annotated class.
 	 * <p>Consider creating a custom composed annotation or use a predefined one,
 	 * like {@link RestController @RestController}.
 	 * @since 4.0
