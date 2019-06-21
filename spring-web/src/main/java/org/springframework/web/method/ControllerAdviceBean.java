@@ -16,9 +16,8 @@
 
 package org.springframework.web.method;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -42,6 +41,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.2
  */
 public class ControllerAdviceBean implements Ordered {
@@ -186,10 +186,13 @@ public class ControllerAdviceBean implements Ordered {
 	 * instances.
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
-		return Arrays.stream(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class))
-				.filter(name -> context.findAnnotationOnBean(name, ControllerAdvice.class) != null)
-				.map(name -> new ControllerAdviceBean(name, context))
-				.collect(Collectors.toList());
+		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();
+		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class)) {
+			if (context.findAnnotationOnBean(name, ControllerAdvice.class) != null) {
+				adviceBeans.add(new ControllerAdviceBean(name, context));
+			}
+		}
+		return adviceBeans;
 	}
 
 	private static int initOrderFromBean(Object bean) {
