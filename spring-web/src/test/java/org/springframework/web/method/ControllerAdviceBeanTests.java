@@ -32,6 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link ControllerAdviceBean}.
@@ -90,19 +92,36 @@ public class ControllerAdviceBeanTests {
 	}
 
 	@Test
+	public void orderedWithLowestPrecedenceByDefaultForBeanName() {
+		assertOrder(SimpleControllerAdvice.class, Ordered.LOWEST_PRECEDENCE);
+	}
+
+	@Test
 	public void orderedWithLowestPrecedenceByDefaultForBeanInstance() {
 		assertOrder(new SimpleControllerAdvice(), Ordered.LOWEST_PRECEDENCE);
+	}
+
+	@Test
+	public void orderedViaOrderedInterfaceForBeanName() {
+		// TODO Change expectedOrder once Ordered is properly supported
+		assertOrder(OrderedControllerAdvice.class, Ordered.LOWEST_PRECEDENCE);
+	}
+
+	@Test
+	public void orderedViaOrderedInterfaceForBeanInstance() {
+		assertOrder(new OrderedControllerAdvice(), 42);
+	}
+
+	@Test
+	public void orderedViaAnnotationForBeanName() {
+		assertOrder(OrderAnnotationControllerAdvice.class, 42);
+		assertOrder(PriorityAnnotationControllerAdvice.class, 42);
 	}
 
 	@Test
 	public void orderedViaAnnotationForBeanInstance() {
 		assertOrder(new OrderAnnotationControllerAdvice(), 42);
 		assertOrder(new PriorityAnnotationControllerAdvice(), 42);
-	}
-
-	@Test
-	public void orderedViaOrderedInterfaceForBeanInstance() {
-		assertOrder(new OrderedControllerAdvice(), 42);
 	}
 
 	@Test
@@ -184,6 +203,23 @@ public class ControllerAdviceBeanTests {
 
 	private void assertOrder(Object bean, int expectedOrder) {
 		assertThat(new ControllerAdviceBean(bean).getOrder()).isEqualTo(expectedOrder);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void assertOrder(Class beanType, int expectedOrder) {
+		String beanName = "myBean";
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		given(beanFactory.containsBean(beanName)).willReturn(true);
+		given(beanFactory.getType(beanName)).willReturn(beanType);
+
+		ControllerAdviceBean controllerAdviceBean = new ControllerAdviceBean(beanName, beanFactory);
+
+		assertThat(controllerAdviceBean.getOrder()).isEqualTo(expectedOrder);
+		verify(beanFactory).containsBean(beanName);
+		verify(beanFactory).getType(beanName);
+		// Expecting 0 invocations of getBean() since Ordered is not yet supported.
+		// TODO Change expected number of invocations once Ordered is properly supported
+		verify(beanFactory, times(0)).getBean(beanName);
 	}
 
 	private void assertApplicable(String message, ControllerAdviceBean controllerAdvice, Class<?> controllerBeanType) {
