@@ -28,12 +28,12 @@ ext {
 		!it.name.equals("spring-build-src") && !it.name.equals("spring-framework-bom")
 	}
 
-	aspectjVersion       = "1.9.3"
+	aspectjVersion       = "1.9.4"
 	freemarkerVersion    = "2.3.28"
 	groovyVersion        = "2.5.7"
 	hsqldbVersion        = "2.4.1"
 	jackson2Version      = "2.9.9"
-	jettyVersion         = "9.4.18.v20190429"
+	jettyVersion         = "9.4.19.v20190610"
 	junit5Version        = "5.3.2"
 	kotlinVersion        = "1.2.71"
 	log4jVersion         = "2.11.2"
@@ -41,14 +41,14 @@ ext {
 	reactorVersion       = "Californium-SR9"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
-	rxjava2Version       = "2.2.9"
+	rxjava2Version       = "2.2.10"
 	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
 	tomcatVersion        = "9.0.21"
-	undertowVersion      = "2.0.21.Final"
+	undertowVersion      = "2.0.22.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
-	withoutJclOverSlf4J = {
+	withoutJclOverSlf4j = {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 	}
 }

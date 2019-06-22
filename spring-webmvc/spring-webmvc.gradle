@@ -30,11 +30,11 @@ dependencies {
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
-	optional("org.apache.tiles:tiles-api:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-jsp:${tiles3Version}", withoutJclOverSlf4J)
-	optional("org.apache.tiles:tiles-el:${tiles3Version}", withoutJclOverSlf4J)
+	optional("org.apache.tiles:tiles-api:${tiles3Version}", withoutJclOverSlf4j)
+	optional("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4j)
+	optional("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4j)
+	optional("org.apache.tiles:tiles-jsp:${tiles3Version}", withoutJclOverSlf4j)
+	optional("org.apache.tiles:tiles-el:${tiles3Version}", withoutJclOverSlf4j)
 	optional("org.apache.tiles:tiles-extras:${tiles3Version}") {
 		exclude group: "org.springframework", module: "spring-web"
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
@@ -66,7 +66,7 @@ dependencies {
 		exclude group: "xerces", module: "xercesImpl"
 	}
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
-	testCompile("org.hibernate:hibernate-validator:6.0.16.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.17.Final")
 	testCompile("io.projectreactor:reactor-core")
 	testCompile("io.reactivex:rxjava:${rxjavaVersion}")
 	testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
