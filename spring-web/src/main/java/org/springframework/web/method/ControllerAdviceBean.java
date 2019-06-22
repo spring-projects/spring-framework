@@ -56,6 +56,7 @@ public class ControllerAdviceBean implements Ordered {
 	 * Reference to the resolved bean instance, potentially lazily retrieved
 	 * via the {@code BeanFactory}.
 	 */
+	@Nullable
 	private Object resolvedBean;
 
 	@Nullable
