@@ -40,7 +40,7 @@ and the conversations that result from it provide a continuous flow of ideas.
 
 Before you create a ticket, please take the time to [research first](#discuss).
 
-If creating a ticket after a discussion on StackOverflow, please provide a self-sufficient description in the ticket, independent of the details on StackOverview. We understand this is extra work but the issue tracker is an important place of record for design discussions and decisions that can often be referenced long after the fix version, for example to revisit decisions, to understand the origin of a feature, and so on.
+If creating a ticket after a discussion on StackOverflow, please provide a self-sufficient description in the ticket, independent of the details on StackOverflow. We understand this is extra work but the issue tracker is an important place of record for design discussions and decisions that can often be referenced long after the fix version, for example to revisit decisions, to understand the origin of a feature, and so on.
 
 When ready create a ticket in the [GitHub issue tracker](https://github.com/spring-projects/spring-framework/issues).
 
