@@ -51,15 +51,15 @@ public class ControllerAdviceBeanTests {
 
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> new ControllerAdviceBean((String) null, null))
-			.withMessage("Bean must not be null");
+			.withMessage("Bean name must contain text");
 
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> new ControllerAdviceBean("", null))
-			.withMessage("Bean name must not be empty");
+			.withMessage("Bean name must contain text");
 
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> new ControllerAdviceBean("\t", null))
-			.withMessage("Bean name must not be empty");
+			.withMessage("Bean name must contain text");
 
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> new ControllerAdviceBean("myBean", null))
