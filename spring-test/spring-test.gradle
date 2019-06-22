@@ -61,7 +61,7 @@ dependencies {
 	testCompile("javax.interceptor:javax.interceptor-api:1.2.2")
 	testCompile("javax.mail:javax.mail-api:1.6.2")
 	testCompile("org.hibernate:hibernate-core:5.4.3.Final")
-	testCompile("org.hibernate:hibernate-validator:6.0.16.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.17.Final")
 	testCompile("org.junit.platform:junit-platform-runner")
 	testCompile("org.junit.platform:junit-platform-testkit")
 	testCompile("org.junit.jupiter:junit-jupiter-params")
@@ -69,8 +69,8 @@ dependencies {
 	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
 	testCompile("com.rometools:rome:1.12.0")
 	testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
-	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4J)
-	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4J)
+	testCompile("org.apache.tiles:tiles-core:${tiles3Version}", withoutJclOverSlf4j)
+	testCompile("org.apache.tiles:tiles-servlet:${tiles3Version}", withoutJclOverSlf4j)
 	testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 	testCompile("org.apache.httpcomponents:httpclient:4.5.9") {
 		exclude group: "commons-logging", module: "commons-logging"
