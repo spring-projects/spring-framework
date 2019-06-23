@@ -67,7 +67,8 @@ public class ControllerAdviceBean implements Ordered {
 	@Nullable
 	private final BeanFactory beanFactory;
 
-	private final int order;
+	@Nullable
+	private Integer order;
 
 
 	/**
@@ -81,7 +82,6 @@ public class ControllerAdviceBean implements Ordered {
 		this.beanType = ClassUtils.getUserClass(bean.getClass());
 		this.beanTypePredicate = createBeanTypePredicate(this.beanType);
 		this.beanFactory = null;
-		this.order = initOrderFromBean(bean);
 	}
 
 	/**
@@ -117,16 +117,32 @@ public class ControllerAdviceBean implements Ordered {
 		this.beanTypePredicate = (controllerAdvice != null ? createBeanTypePredicate(controllerAdvice)
 				: createBeanTypePredicate(this.beanType));
 		this.beanFactory = beanFactory;
-		this.order = initOrderFromBeanType(this.beanType);
 	}
 
 
 	/**
-	 * Return the order value extracted from the {@link ControllerAdvice}
-	 * annotation, or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
+	 * Get the order value for the contained bean.
+	 * <p>As of Spring Framework 5.2, the order value is lazily retrieved using
+	 * the following algorithm and cached.
+	 * <ul>
+	 * <li>If the {@linkplain #resolveBean resolved bean} implements {@link Ordered},
+	 * use the value returned by {@link Ordered#getOrder()}.</li>
+	 * <li>Otherwise use the value returned by {@link OrderUtils#getOrder(Class, int)}
+	 * with {@link Ordered#LOWEST_PRECEDENCE} used as the default order value.</li>
+	 * </ul>
+	 * @see #resolveBean()
 	 */
 	@Override
 	public int getOrder() {
+		if (this.order == null) {
+			Object resolvedBean = resolveBean();
+			if (resolvedBean instanceof Ordered) {
+				this.order = ((Ordered) resolvedBean).getOrder();
+			}
+			else {
+				this.order = OrderUtils.getOrder(getBeanType(), Ordered.LOWEST_PRECEDENCE);
+			}
+		}
 		return this.order;
 	}
 
@@ -234,18 +250,6 @@ public class ControllerAdviceBean implements Ordered {
 					.build();
 		}
 		return HandlerTypePredicate.forAnyHandlerType();
-	}
-
-	private static int initOrderFromBean(Object bean) {
-		return (bean instanceof Ordered ? ((Ordered) bean).getOrder() : initOrderFromBeanType(bean.getClass()));
-	}
-
-	private static int initOrderFromBeanType(@Nullable Class<?> beanType) {
-		Integer order = null;
-		if (beanType != null) {
-			order = OrderUtils.getOrder(beanType);
-		}
-		return (order != null ? order : Ordered.LOWEST_PRECEDENCE);
 	}
 
 }

@@ -33,15 +33,15 @@ import org.springframework.stereotype.Component;
  * multiple {@code @Controller} classes.
  *
  * <p>Classes with {@code @ControllerAdvice} can be declared explicitly as Spring
- * beans or auto-detected via classpath scanning. All such beans are sorted via
- * {@link org.springframework.core.annotation.AnnotationAwareOrderComparator
- * AnnotationAwareOrderComparator}, based on
- * {@link org.springframework.core.annotation.Order @Order} and
- * {@link org.springframework.core.Ordered Ordered}, and applied in that order
- * at runtime. For handling exceptions, an {@code @ExceptionHandler} will be
- * picked on the first advice with a matching exception handler method. For
- * model attributes and {@code InitBinder} initialization, {@code @ModelAttribute}
- * and {@code @InitBinder} methods will also follow {@code @ControllerAdvice} order.
+ * beans or auto-detected via classpath scanning. All such beans are sorted based
+ * on {@link org.springframework.core.Ordered Ordered},
+ * {@link org.springframework.core.annotation.Order @Order}, and
+ * {@link javax.annotation.Priority @Priority} (in that order of precedence),
+ * and applied in that order at runtime. For handling exceptions, an
+ * {@code @ExceptionHandler} will be picked on the first advice with a matching
+ * exception handler method. For model attributes and {@code InitBinder}
+ * initialization, {@code @ModelAttribute} and {@code @InitBinder} methods will
+ * also follow {@code @ControllerAdvice} order.
  *
  * <p>Note: For {@code @ExceptionHandler} methods, a root exception match will be
  * preferred to just matching a cause of the current exception, among the handler

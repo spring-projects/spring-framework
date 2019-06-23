@@ -22,6 +22,7 @@ import javax.annotation.Priority;
 
 import org.junit.Test;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -32,7 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -103,8 +103,7 @@ public class ControllerAdviceBeanTests {
 
 	@Test
 	public void orderedViaOrderedInterfaceForBeanName() {
-		// TODO Change expectedOrder once Ordered is properly supported
-		assertOrder(OrderedControllerAdvice.class, Ordered.LOWEST_PRECEDENCE);
+		assertOrder(OrderedControllerAdvice.class, 42);
 	}
 
 	@Test
@@ -211,15 +210,14 @@ public class ControllerAdviceBeanTests {
 		BeanFactory beanFactory = mock(BeanFactory.class);
 		given(beanFactory.containsBean(beanName)).willReturn(true);
 		given(beanFactory.getType(beanName)).willReturn(beanType);
+		given(beanFactory.getBean(beanName)).willReturn(BeanUtils.instantiateClass(beanType));
 
 		ControllerAdviceBean controllerAdviceBean = new ControllerAdviceBean(beanName, beanFactory);
 
 		assertThat(controllerAdviceBean.getOrder()).isEqualTo(expectedOrder);
 		verify(beanFactory).containsBean(beanName);
 		verify(beanFactory).getType(beanName);
-		// Expecting 0 invocations of getBean() since Ordered is not yet supported.
-		// TODO Change expected number of invocations once Ordered is properly supported
-		verify(beanFactory, times(0)).getBean(beanName);
+		verify(beanFactory).getBean(beanName);
 	}
 
 	private void assertApplicable(String message, ControllerAdviceBean controllerAdvice, Class<?> controllerBeanType) {
