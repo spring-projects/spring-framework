@@ -64,7 +64,7 @@ suspend fun RSocketRequester.Builder.connectWebSocketAndAwait(uri: URI): RSocket
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 @FlowPreview
-fun <T : Any> RSocketRequester.RequestSpec.data(producer: Any): RSocketRequester.ResponseSpec =
+inline fun <reified T : Any> RSocketRequester.RequestSpec.data(producer: Any): RSocketRequester.ResponseSpec =
 		data(producer, object : ParameterizedTypeReference<T>() {})
 
 /**
@@ -83,7 +83,7 @@ suspend fun RSocketRequester.ResponseSpec.sendAndAwait() {
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun <T : Any> RSocketRequester.ResponseSpec.retrieveAndAwait(): T =
+suspend inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveAndAwait(): T =
 		retrieveMono(object : ParameterizedTypeReference<T>() {}).awaitSingle()
 
 /**
@@ -93,7 +93,7 @@ suspend fun <T : Any> RSocketRequester.ResponseSpec.retrieveAndAwait(): T =
  * @since 5.2
  */
 @FlowPreview
-fun <T : Any> RSocketRequester.ResponseSpec.retrieveFlow(batchSize: Int = 1): Flow<T> =
+inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveFlow(batchSize: Int = 1): Flow<T> =
 		retrieveFlux(object : ParameterizedTypeReference<T>() {}).asFlow(batchSize)
 
 /**
@@ -104,7 +104,7 @@ fun <T : Any> RSocketRequester.ResponseSpec.retrieveFlow(batchSize: Int = 1): Fl
  * @author Sebastien Deleuze
  * @since 5.2
  */
-fun <T : Any> RSocketRequester.ResponseSpec.retrieveMono(): Mono<T> =
+inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveMono(): Mono<T> =
 		retrieveMono(object : ParameterizedTypeReference<T>() {})
 
 
@@ -116,5 +116,5 @@ fun <T : Any> RSocketRequester.ResponseSpec.retrieveMono(): Mono<T> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-fun <T : Any> RSocketRequester.ResponseSpec.retrieveFlux(): Flux<T> =
+inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveFlux(): Flux<T> =
 		retrieveFlux(object : ParameterizedTypeReference<T>() {})
