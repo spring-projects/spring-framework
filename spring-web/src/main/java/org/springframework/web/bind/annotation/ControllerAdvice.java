@@ -34,17 +34,18 @@ import org.springframework.stereotype.Component;
  *
  * <p>Classes annotated with {@code @ControllerAdvice} can be declared explicitly
  * as Spring beans or auto-detected via classpath scanning. All such beans are
- * sorted based on {@link org.springframework.core.Ordered Ordered} /
- * {@link org.springframework.core.PriorityOrdered PriorityOrdered} semantics or
+ * sorted based on {@link org.springframework.core.Ordered Ordered} semantics or
  * {@link org.springframework.core.annotation.Order @Order} /
- * {@link javax.annotation.Priority @Priority} declarations, with {@code Ordered} /
- * {@code PriorityOrdered} semantics taking precedence over {@code @Order} /
- * {@code @Priority} declarations. {@code @ControllerAdvice} beans are then
- * applied in that order at runtime. For handling exceptions, an
- * {@code @ExceptionHandler} will be picked on the first advice with a matching
- * exception handler method. For model attributes and {@code InitBinder}
- * initialization, {@code @ModelAttribute} and {@code @InitBinder} methods will
- * also follow {@code @ControllerAdvice} order.
+ * {@link javax.annotation.Priority @Priority} declarations, with {@code Ordered}
+ * semantics taking precedence over {@code @Order} / {@code @Priority} declarations.
+ * {@code @ControllerAdvice} beans are then applied in that order at runtime.
+ * Note, however, that {@code @ControllerAdvice} beans that implement
+ * {@link org.springframework.core.PriorityOrdered PriorityOrdered} are <em>not</em>
+ * given priority over {@code @ControllerAdvice} beans that implement {@code Ordered}.
+ * For handling exceptions, an {@code @ExceptionHandler} will be picked on the
+ * first advice with a matching exception handler method. For model attributes
+ * and {@code InitBinder} initialization, {@code @ModelAttribute} and
+ * {@code @InitBinder} methods will also follow {@code @ControllerAdvice} order.
  *
  * <p>Note: For {@code @ExceptionHandler} methods, a root exception match will be
  * preferred to just matching a cause of the current exception, among the handler

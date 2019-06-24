@@ -18,13 +18,19 @@ package org.springframework.web.method;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+
 import javax.annotation.Priority;
 
 import org.junit.Test;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +42,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Unit tests for {@link ControllerAdviceBean}.
+ * Unit and integration tests for {@link ControllerAdviceBean}.
  *
  * @author Brian Clozel
  * @author Sam Brannen
@@ -113,14 +119,14 @@ public class ControllerAdviceBeanTests {
 
 	@Test
 	public void orderedViaAnnotationForBeanName() {
-		assertOrder(OrderAnnotationControllerAdvice.class, 42);
-		assertOrder(PriorityAnnotationControllerAdvice.class, 42);
+		assertOrder(OrderAnnotationControllerAdvice.class, 100);
+		assertOrder(PriorityAnnotationControllerAdvice.class, 200);
 	}
 
 	@Test
 	public void orderedViaAnnotationForBeanInstance() {
-		assertOrder(new OrderAnnotationControllerAdvice(), 42);
-		assertOrder(new PriorityAnnotationControllerAdvice(), 42);
+		assertOrder(new OrderAnnotationControllerAdvice(), 100);
+		assertOrder(new PriorityAnnotationControllerAdvice(), 200);
 	}
 
 	@Test
@@ -192,6 +198,25 @@ public class ControllerAdviceBeanTests {
 		assertNotApplicable("should not match", bean, InheritanceController.class);
 	}
 
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void findAnnotatedBeansSortsBeans() {
+		Class[] expectedTypes = {
+			// Since ControllerAdviceBean currently treats PriorityOrdered the same as Ordered,
+			// OrderedControllerAdvice is sorted before PriorityOrderedControllerAdvice.
+			OrderedControllerAdvice.class,
+			PriorityOrderedControllerAdvice.class,
+			OrderAnnotationControllerAdvice.class,
+			PriorityAnnotationControllerAdvice.class,
+			SimpleControllerAdvice.class,
+		};
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(context);
+
+		assertThat(adviceBeans).extracting(ControllerAdviceBean::getBeanType).containsExactly(expectedTypes);
+	}
+
 	private void assertEqualsHashCodeAndToString(ControllerAdviceBean bean1, ControllerAdviceBean bean2, String toString) {
 		assertThat(bean1).isEqualTo(bean2);
 		assertThat(bean2).isEqualTo(bean1);
@@ -237,19 +262,34 @@ public class ControllerAdviceBeanTests {
 	static class SimpleControllerAdvice {}
 
 	@ControllerAdvice
-	@Order(42)
+	@Order(100)
 	static class OrderAnnotationControllerAdvice {}
 
 	@ControllerAdvice
-	@Priority(42)
+	@Priority(200)
 	static class PriorityAnnotationControllerAdvice {}
 
 	@ControllerAdvice
+	// @Order and @Priority should be ignored due to implementation of Ordered.
+	@Order(100)
+	@Priority(200)
 	static class OrderedControllerAdvice implements Ordered {
 
 		@Override
 		public int getOrder() {
 			return 42;
+		}
+	}
+
+	@ControllerAdvice
+	// @Order and @Priority should be ignored due to implementation of PriorityOrdered.
+	@Order(100)
+	@Priority(200)
+	static class PriorityOrderedControllerAdvice implements PriorityOrdered {
+
+		@Override
+		public int getOrder() {
+			return 55;
 		}
 	}
 
@@ -293,5 +333,34 @@ public class ControllerAdviceBeanTests {
 	static abstract class AbstractController {}
 
 	static class InheritanceController extends AbstractController {}
+
+	@Configuration(proxyBeanMethods = false)
+	static class Config {
+
+		@Bean
+		SimpleControllerAdvice simpleControllerAdvice() {
+			return new SimpleControllerAdvice();
+		}
+
+		@Bean
+		OrderAnnotationControllerAdvice orderAnnotationControllerAdvice() {
+			return new OrderAnnotationControllerAdvice();
+		}
+
+		@Bean
+		PriorityAnnotationControllerAdvice priorityAnnotationControllerAdvice() {
+			return new PriorityAnnotationControllerAdvice();
+		}
+
+		@Bean
+		OrderedControllerAdvice orderedControllerAdvice() {
+			return new OrderedControllerAdvice();
+		}
+
+		@Bean
+		PriorityOrderedControllerAdvice priorityOrderedControllerAdvice() {
+			return new PriorityOrderedControllerAdvice();
+		}
+	}
 
 }

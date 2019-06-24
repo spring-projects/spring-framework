@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.OrderUtils;
@@ -215,6 +216,11 @@ public class ControllerAdviceBean implements Ordered {
 	 * Find beans annotated with {@link ControllerAdvice @ControllerAdvice} in the
 	 * given {@link ApplicationContext} and wrap them as {@code ControllerAdviceBean}
 	 * instances.
+	 * <p>As of Spring Framework 5.2, the {@code ControllerAdviceBean} instances
+	 * in the returned list are sorted using {@link OrderComparator#sort(List)}.
+	 * @see #getOrder()
+	 * @see OrderComparator
+	 * @see Ordered
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();
@@ -226,6 +232,7 @@ public class ControllerAdviceBean implements Ordered {
 				adviceBeans.add(new ControllerAdviceBean(name, context, controllerAdvice));
 			}
 		}
+		OrderComparator.sort(adviceBeans);
 		return adviceBeans;
 	}
 
