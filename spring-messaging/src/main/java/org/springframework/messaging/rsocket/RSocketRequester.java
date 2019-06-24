@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
+import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.util.MimeType;
 
 /**
@@ -157,6 +158,17 @@ public interface RSocketRequester {
 		 * @param configurer the configurer to apply
 		 */
 		RSocketRequester.Builder rsocketStrategies(Consumer<RSocketStrategies.Builder> configurer);
+
+		/**
+		 * Add handlers for processing requests sent by the server.
+		 * <p>This is a shortcut for registering client handlers (i.e. annotated controllers)
+		 * to a {@link RSocketMessageHandler} and configuring it as an acceptor.
+		 * You can take full control by manually registering an acceptor on the
+		 * {@link RSocketFactory.ClientRSocketFactory} using {@link #rsocketFactory(Consumer)}
+		 * instead.
+		 * @param handlers the client handlers to configure on the requester
+		 */
+		RSocketRequester.Builder annotatedHandlers(Object... handlers);
 
 		/**
 		 * Connect to the RSocket server over TCP.
