@@ -3,7 +3,6 @@ package org.springframework.messaging.rsocket
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
