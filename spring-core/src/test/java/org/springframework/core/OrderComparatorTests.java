@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rick Evans
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class OrderComparatorTests {
 
@@ -70,6 +71,40 @@ public class OrderComparatorTests {
 	}
 
 	@Test
+	public void comparePriorityOrderedInstancesBefore() {
+		assertThat(this.comparator.compare(new StubPriorityOrdered(100), new StubPriorityOrdered(2000))).isEqualTo(-1);
+	}
+
+	@Test
+	public void comparePriorityOrderedInstancesSame() {
+		assertThat(this.comparator.compare(new StubPriorityOrdered(100), new StubPriorityOrdered(100))).isEqualTo(0);
+	}
+
+	@Test
+	public void comparePriorityOrderedInstancesAfter() {
+		assertThat(this.comparator.compare(new StubPriorityOrdered(982300), new StubPriorityOrdered(100))).isEqualTo(1);
+	}
+
+	@Test
+	public void comparePriorityOrderedInstanceToStandardOrderedInstanceWithSamePriority() {
+		// PriorityOrdered wins in a tie.
+		assertThat(this.comparator.compare(new StubPriorityOrdered(100), new StubOrdered(100))).isEqualTo(-1);
+	}
+
+	@Test
+	public void comparePriorityOrderedInstanceToStandardOrderedInstanceWithLowerPriority() {
+		// PriorityOrdered should not be taken into account.
+		assertThat(this.comparator.compare(new StubPriorityOrdered(100), new StubOrdered(200))).isEqualTo(-1);
+	}
+
+	@Test
+	public void comparePriorityOrderedInstanceToStandardOrderedInstanceWithHigherPriority() {
+		// PriorityOrdered should probably not be taken into account, but it currently is.
+		// assertThat(this.comparator.compare(new StubPriorityOrdered(200), new StubOrdered(100))).isEqualTo(1);
+		assertThat(this.comparator.compare(new StubPriorityOrdered(200), new StubOrdered(100))).isEqualTo(-1);
+	}
+
+	@Test
 	public void compareWithSimpleSourceProvider() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
 				new TestSourceProvider(5L, new StubOrdered(25)));
@@ -86,7 +121,7 @@ public class OrderComparatorTests {
 	@Test
 	public void compareWithSourceProviderArrayNoMatch() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
-				new TestSourceProvider(5L, new Object[]{new Object(), new Object()}));
+				new TestSourceProvider(5L, new Object[] {new Object(), new Object()}));
 		assertThat(customComparator.compare(new Object(), 5L)).isEqualTo(0);
 	}
 
@@ -98,13 +133,41 @@ public class OrderComparatorTests {
 	}
 
 
-	private static final class TestSourceProvider implements OrderComparator.OrderSourceProvider {
+	private static class StubOrdered implements Ordered {
+
+		private final int order;
+
+		StubOrdered(int order) {
+			this.order = order;
+		}
+
+		@Override
+		public int getOrder() {
+			return this.order;
+		}
+	}
+
+	private static class StubPriorityOrdered implements PriorityOrdered {
+
+		private final int order;
+
+		StubPriorityOrdered(int order) {
+			this.order = order;
+		}
+
+		@Override
+		public int getOrder() {
+			return this.order;
+		}
+	}
+
+	private static class TestSourceProvider implements OrderComparator.OrderSourceProvider {
 
 		private final Object target;
 
 		private final Object orderSource;
 
-		public TestSourceProvider(Object target, Object orderSource) {
+		TestSourceProvider(Object target, Object orderSource) {
 			this.target = target;
 			this.orderSource = orderSource;
 		}
@@ -115,22 +178,6 @@ public class OrderComparatorTests {
 				return orderSource;
 			}
 			return null;
-		}
-	}
-
-
-	private static final class StubOrdered implements Ordered {
-
-		private final int order;
-
-
-		public StubOrdered(int order) {
-			this.order = order;
-		}
-
-		@Override
-		public int getOrder() {
-			return this.order;
 		}
 	}
 
