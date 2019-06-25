@@ -784,7 +784,6 @@ public class AnnotatedElementUtilsTests {
 	public void nullableAnnotationTypeViaFindMergedAnnotation() throws Exception {
 		Method method = TransactionalServiceImpl.class.getMethod("doIt");
 		assertThat(findMergedAnnotation(method, Resource.class)).isEqualTo(method.getAnnotation(Resource.class));
-		assertThat(findMergedAnnotation(method, Resource.class)).isEqualTo(method.getAnnotation(Resource.class));
 	}
 
 	@Test
