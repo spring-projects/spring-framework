@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
@@ -42,7 +43,6 @@ import org.springframework.util.Assert;
  * if no existing context-relative resource could be found.
  *
  * @author Juergen Hoeller
- * @since 4.3.2
  * @see java.nio.file.Path
  * @see Paths#get(URI)
  * @see ResourceEditor
@@ -53,6 +53,7 @@ import org.springframework.util.Assert;
 public class PathEditor extends PropertyEditorSupport {
 
 	private final ResourceEditor resourceEditor;
+	private final Pattern WINDOWS_OS_ABSOLUTE_PATH_PREFIX_PATTERN = Pattern.compile("^[a-zA-Z]:.*$");
 
 
 	/**
@@ -75,20 +76,25 @@ public class PathEditor extends PropertyEditorSupport {
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		boolean nioPathCandidate = !text.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX);
-		if (nioPathCandidate && !text.startsWith("/")) {
-			try {
-				URI uri = new URI(text);
-				if (uri.getScheme() != null) {
-					nioPathCandidate = false;
-					// Let's try NIO file system providers via Paths.get(URI)
-					setValue(Paths.get(uri).normalize());
-					return;
-				}
+		if (nioPathCandidate) {
+			if (WINDOWS_OS_ABSOLUTE_PATH_PREFIX_PATTERN.matcher(text).matches()) {
+				setValue(Paths.get(text).normalize());
+				return;
 			}
-			catch (URISyntaxException | FileSystemNotFoundException ex) {
-				// Not a valid URI (let's try as Spring resource location),
-				// or a URI scheme not registered for NIO (let's try URL
-				// protocol handlers via Spring's resource mechanism).
+			if (!text.startsWith("/")) {
+				try {
+					URI uri = new URI(text);
+					if (uri.getScheme() != null) {
+						nioPathCandidate = false;
+						// Let's try NIO file system providers via Paths.get(URI)
+						setValue(Paths.get(uri).normalize());
+						return;
+					}
+				} catch (URISyntaxException | FileSystemNotFoundException ex) {
+					// Not a valid URI (let's try as Spring resource location),
+					// or a URI scheme not registered for NIO (let's try URL
+					// protocol handlers via Spring's resource mechanism).
+				}
 			}
 		}
 

@@ -77,6 +77,24 @@ public class PathEditorTests {
 	}
 
 	@Test
+	public void testAbsoluteDirectoryWindowsPath(){
+		PropertyEditor pathEditor = new PathEditor();
+		pathEditor.setAsText("C:/windows/system/noexistentdirectory/");
+		Object value = pathEditor.getValue();
+		boolean condition1 = value instanceof Path;
+		assertThat(condition1).isTrue();
+	}
+
+	@Test
+	public void testAbsoluteWindowsPath(){
+		PropertyEditor pathEditor = new PathEditor();
+		pathEditor.setAsText("C:/windows/system/directory/notFoundButYetNoException.doc");
+		Object value = pathEditor.getValue();
+		boolean condition1 = value instanceof Path;
+		assertThat(condition1).isTrue();
+	}
+
+	@Test
 	public void testUnqualifiedPathNameFound() throws Exception {
 		PropertyEditor pathEditor = new PathEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
