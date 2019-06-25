@@ -86,22 +86,23 @@ public class OrderComparatorTests {
 	}
 
 	@Test
+	public void comparePriorityOrderedInstanceToStandardOrderedInstanceWithHigherPriority() {
+		assertThatPriorityOrderedAlwaysWins(new StubPriorityOrdered(200), new StubOrdered(100));
+	}
+
+	@Test
 	public void comparePriorityOrderedInstanceToStandardOrderedInstanceWithSamePriority() {
-		// PriorityOrdered wins in a tie.
-		assertThat(this.comparator.compare(new StubPriorityOrdered(100), new StubOrdered(100))).isEqualTo(-1);
+		assertThatPriorityOrderedAlwaysWins(new StubPriorityOrdered(100), new StubOrdered(100));
 	}
 
 	@Test
 	public void comparePriorityOrderedInstanceToStandardOrderedInstanceWithLowerPriority() {
-		// PriorityOrdered should not be taken into account.
-		assertThat(this.comparator.compare(new StubPriorityOrdered(100), new StubOrdered(200))).isEqualTo(-1);
+		assertThatPriorityOrderedAlwaysWins(new StubPriorityOrdered(100), new StubOrdered(200));
 	}
 
-	@Test
-	public void comparePriorityOrderedInstanceToStandardOrderedInstanceWithHigherPriority() {
-		// PriorityOrdered should probably not be taken into account, but it currently is.
-		// assertThat(this.comparator.compare(new StubPriorityOrdered(200), new StubOrdered(100))).isEqualTo(1);
-		assertThat(this.comparator.compare(new StubPriorityOrdered(200), new StubOrdered(100))).isEqualTo(-1);
+	private void assertThatPriorityOrderedAlwaysWins(StubPriorityOrdered priority, StubOrdered standard) {
+		assertThat(this.comparator.compare(priority, standard)).isEqualTo(-1);
+		assertThat(this.comparator.compare(standard, priority)).isEqualTo(1);
 	}
 
 	@Test
