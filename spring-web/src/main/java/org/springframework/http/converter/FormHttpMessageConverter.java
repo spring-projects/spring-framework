@@ -51,14 +51,14 @@ import org.springframework.util.StringUtils;
  *
  * <p>In other words, this converter can read and write the
  * {@code "application/x-www-form-urlencoded"} media type as
- * {@link MultiValueMap MultiValueMap&lt;String, String&gt;} and it can also
+ * {@link MultiValueMap MultiValueMap&lt;String, String&gt;}, and it can also
  * write (but not read) the {@code "multipart/form-data"} media type as
  * {@link MultiValueMap MultiValueMap&lt;String, Object&gt;}.
  *
  * <p>When writing multipart data, this converter uses other
  * {@link HttpMessageConverter HttpMessageConverters} to write the respective
- * MIME parts. By default, basic converters are registered (for {@code Strings}
- * and {@code Resources}). These can be overridden through the
+ * MIME parts. By default, basic converters are registered (e.g., for {@code String}
+ * and {@code Resource}). These can be overridden through the
  * {@link #setPartConverters partConverters} property.
  *
  * <p>For example, the following snippet shows how to submit an HTML form:
@@ -157,14 +157,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Set the default character set to use for reading and writing form data when
-	 * the request or response Content-Type header does not explicitly specify it.
+	 * the request or response {@code Content-Type} header does not explicitly
+	 * specify it.
 	 * <p>As of 4.3, this is also used as the default charset for the conversion
 	 * of text bodies in a multipart request.
-	 * <p>As of 5.0 this is also used for part headers including
-	 * "Content-Disposition" (and its filename parameter) unless (the mutually
-	 * exclusive) {@link #setMultipartCharset} is also set, in which case part
-	 * headers are encoded as ASCII and <i>filename</i> is encoded with the
-	 * "encoded-word" syntax from RFC 2047.
+	 * <p>As of 5.0, this is also used for part headers including
+	 * {@code Content-Disposition} (and its filename parameter) unless (the mutually
+	 * exclusive) {@link #setMultipartCharset multipartCharset} is also set, in
+	 * which case part headers are encoded as ASCII and <i>filename</i> is encoded
+	 * with the {@code encoded-word} syntax from RFC 2047.
 	 * <p>By default this is set to "UTF-8".
 	 */
 	public void setCharset(@Nullable Charset charset) {
@@ -191,10 +192,10 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Set the character set to use when writing multipart data to encode file
-	 * names. Encoding is based on the "encoded-word" syntax defined in RFC 2047
-	 * and relies on {@code MimeUtility} from "javax.mail".
-	 * <p>As of 5.0 by default part headers, including Content-Disposition (and
-	 * its filename parameter) will be encoded based on the setting of
+	 * names. Encoding is based on the {@code encoded-word} syntax defined in
+	 * RFC 2047 and relies on {@code MimeUtility} from {@code javax.mail}.
+	 * <p>As of 5.0 by default part headers, including {@code Content-Disposition}
+	 * (and its filename parameter) will be encoded based on the setting of
 	 * {@link #setCharset(Charset)} or {@code UTF-8} by default.
 	 * @since 4.1.1
 	 * @see <a href="https://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
@@ -374,8 +375,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * When {@link #setMultipartCharset(Charset)} is configured (i.e. RFC 2047,
-	 * "encoded-word" syntax) we need to use ASCII for part headers or otherwise
-	 * we encode directly using the configured {@link #setCharset(Charset)}.
+	 * {@code encoded-word} syntax) we need to use ASCII for part headers, or
+	 * otherwise we encode directly using the configured {@link #setCharset(Charset)}.
 	 */
 	private boolean isFilenameCharsetSet() {
 		return (this.multipartCharset != null);
