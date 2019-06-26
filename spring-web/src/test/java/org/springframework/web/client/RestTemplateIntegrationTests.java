@@ -56,12 +56,16 @@ import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeFalse;
 import static org.springframework.http.HttpMethod.POST;
 
 /**
+ * Integration tests for {@link RestTemplate}.
+ *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 @RunWith(Parameterized.class)
 public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
@@ -72,7 +76,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	public ClientHttpRequestFactory clientHttpRequestFactory;
 
 	@SuppressWarnings("deprecation")
-	@Parameters
+	@Parameters(name = "{0}")
 	public static Iterable<? extends ClientHttpRequestFactory> data() {
 		return Arrays.asList(
 				new SimpleClientHttpRequestFactory(),
@@ -225,7 +229,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
 
-		template.postForLocation(baseUrl + "/multipart", parts);
+		convertHttpServerErrorToAssertionError(() -> template.postForLocation(baseUrl + "/multipart", parts));
 	}
 
 	@Test
@@ -235,7 +239,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		form.add("name 2", "value 2+1");
 		form.add("name 2", "value 2+2");
 
-		template.postForLocation(baseUrl + "/form", form);
+		convertHttpServerErrorToAssertionError(() -> template.postForLocation(baseUrl + "/form", form));
 	}
 
 	@Test
@@ -312,6 +316,30 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	@Test  // SPR-15015
 	public void postWithoutBody() throws Exception {
 		assertThat(template.postForObject(baseUrl + "/jsonpost", null, String.class)).isNull();
+	}
+
+
+	/**
+	 * Execute the supplied {@code Runnable}, and if it throws an
+	 * {@link HttpServerErrorException}, rethrow it wrapped in an {@link AssertionError}
+	 * with the {@link HttpServerErrorException#getResponseBodyAsString() response body}
+	 * as the error message.
+	 *
+	 * <p>This mechanism provides an actually meaningful failure message if the
+	 * test fails.
+	 */
+	private static void convertHttpServerErrorToAssertionError(Runnable runnable) {
+		try {
+			runnable.run();
+		}
+		catch (HttpServerErrorException ex) {
+			String responseBody = ex.getResponseBodyAsString();
+			String prefix = "java.lang.AssertionError: ";
+			if (responseBody.startsWith(prefix)) {
+				responseBody = responseBody.substring(prefix.length());
+			}
+			fail(responseBody, ex);
+		}
 	}
 
 
