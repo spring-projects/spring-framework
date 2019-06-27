@@ -93,12 +93,11 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	public void addSupportedMediaType() {
+	public void addSupportedMediaTypes() {
 		assertCannotWrite(MULTIPART_MIXED);
 		assertCannotWrite(MULTIPART_RELATED);
 
-		this.converter.addSupportedMediaType(MULTIPART_MIXED);
-		this.converter.addSupportedMediaType(MULTIPART_RELATED);
+		this.converter.addSupportedMediaTypes(MULTIPART_MIXED, MULTIPART_RELATED);
 
 		assertCanWrite(MULTIPART_MIXED);
 		assertCanWrite(MULTIPART_RELATED);
