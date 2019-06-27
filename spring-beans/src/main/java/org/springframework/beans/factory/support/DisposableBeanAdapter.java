@@ -342,15 +342,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		catch (InvocationTargetException ex) {
 			String msg = "Destroy method '" + this.destroyMethodName + "' on bean with name '" +
 					this.beanName + "' threw an exception";
-			if (logger.isDebugEnabled()) {
-				logger.info(msg, ex.getTargetException());
-			}
-			else {
-				logger.error(msg + ": " + ex.getTargetException());
-			}
+			logger.error(msg, ex.getTargetException());
 		}
 		catch (Throwable ex) {
-			logger.error("Failed to invoke destroy method '" + this.destroyMethodName +
+			logger.info("Failed to invoke destroy method '" + this.destroyMethodName +
 					"' on bean with name '" + this.beanName + "'", ex);
 		}
 	}
