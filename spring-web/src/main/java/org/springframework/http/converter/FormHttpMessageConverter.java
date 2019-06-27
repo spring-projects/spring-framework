@@ -88,6 +88,7 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter
  * @see org.springframework.util.MultiValueMap
@@ -127,9 +128,23 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Set the list of {@link MediaType} objects supported by this converter.
+	 * @see #addSupportedMediaType(MediaType)
+	 * @see #getSupportedMediaTypes()
 	 */
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
-		this.supportedMediaTypes = supportedMediaTypes;
+		Assert.notNull(supportedMediaTypes, "'supportedMediaTypes' must not be null");
+		// Ensure internal list is mutable.
+		this.supportedMediaTypes = new ArrayList<>(supportedMediaTypes);
+	}
+
+	/**
+	 * Add a {@link MediaType} to be supported by this converter.
+	 * @since 5.2
+	 * @see #setSupportedMediaTypes(List)
+	 */
+	public void addSupportedMediaType(MediaType supportedMediaType) {
+		Assert.notNull(supportedMediaType, "'supportedMediaType' must not be null");
+		this.supportedMediaTypes.add(supportedMediaType);
 	}
 
 	@Override

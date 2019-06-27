@@ -58,36 +58,58 @@ import static org.mockito.Mockito.verify;
  */
 public class FormHttpMessageConverterTests {
 
+	protected static final MediaType MULTIPART_MIXED = new MediaType("multipart", "mixed");
+	protected static final MediaType MULTIPART_RELATED = new MediaType("multipart", "related");
+
 	private final FormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
 
 
 	@Test
 	public void canRead() {
-		assertThat(this.converter.canRead(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded"))).isTrue();
-		assertThat(this.converter.canRead(MultiValueMap.class, new MediaType("multipart", "form-data"))).isFalse();
+		assertThat(this.converter.canRead(MultiValueMap.class, MediaType.APPLICATION_FORM_URLENCODED)).isTrue();
+		assertThat(this.converter.canRead(MultiValueMap.class, MediaType.MULTIPART_FORM_DATA)).isFalse();
 	}
 
 	@Test
 	public void canWrite() {
-		assertCanWrite(MultiValueMap.class, new MediaType("application", "x-www-form-urlencoded"));
-		assertCanWrite(MultiValueMap.class, new MediaType("multipart", "form-data"));
-		assertCanWrite(MultiValueMap.class, new MediaType("multipart", "form-data", StandardCharsets.UTF_8));
-		assertCanWrite(MultiValueMap.class, MediaType.ALL);
+		assertCanWrite(MediaType.APPLICATION_FORM_URLENCODED);
+		assertCanWrite(MediaType.MULTIPART_FORM_DATA);
+		assertCanWrite(new MediaType("multipart", "form-data", StandardCharsets.UTF_8));
+		assertCanWrite(MediaType.ALL);
 	}
 
 	@Test
-	public void canWriteMultipartMixedAndMultipartRelated() {
+	public void setSupportedMediaTypes() {
+		assertCannotWrite(MULTIPART_MIXED);
+		assertCannotWrite(MULTIPART_RELATED);
+
 		List<MediaType> supportedMediaTypes = new ArrayList<>(this.converter.getSupportedMediaTypes());
-		supportedMediaTypes.add(new MediaType("multipart", "mixed"));
-		supportedMediaTypes.add(new MediaType("multipart", "related"));
+		supportedMediaTypes.add(MULTIPART_MIXED);
+		supportedMediaTypes.add(MULTIPART_RELATED);
 		this.converter.setSupportedMediaTypes(supportedMediaTypes);
 
-		assertCanWrite(MultiValueMap.class, new MediaType("multipart", "mixed"));
-		assertCanWrite(MultiValueMap.class, new MediaType("multipart", "related"));
+		assertCanWrite(MULTIPART_MIXED);
+		assertCanWrite(MULTIPART_RELATED);
 	}
 
-	private void assertCanWrite(Class<?> clazz, MediaType mediaType) {
-		assertThat(this.converter.canWrite(clazz, mediaType)).isTrue();
+	@Test
+	public void addSupportedMediaType() {
+		assertCannotWrite(MULTIPART_MIXED);
+		assertCannotWrite(MULTIPART_RELATED);
+
+		this.converter.addSupportedMediaType(MULTIPART_MIXED);
+		this.converter.addSupportedMediaType(MULTIPART_RELATED);
+
+		assertCanWrite(MULTIPART_MIXED);
+		assertCanWrite(MULTIPART_RELATED);
+	}
+
+	private void assertCanWrite(MediaType mediaType) {
+		assertThat(this.converter.canWrite(MultiValueMap.class, mediaType)).isTrue();
+	}
+
+	private void assertCannotWrite(MediaType mediaType) {
+		assertThat(this.converter.canWrite(MultiValueMap.class, mediaType)).isFalse();
 	}
 
 	@Test
