@@ -432,7 +432,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Copy-constructor that copies the type and subtype of the given {@code MediaType},
-	 * and allows for different parameter.
+	 * and allows for different parameters.
 	 * @param other the other media type
 	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
@@ -479,7 +479,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html},
 	 * and {@code application/*+xml} includes {@code application/soap+xml}, etc.
 	 * This method is <b>not</b> symmetric.
-	 * <p>Simply calls {@link #includes(MimeType)} but declared with a
+	 * <p>Simply calls {@link MimeType#includes(MimeType)} but declared with a
 	 * {@code MediaType} parameter for binary backwards compatibility.
 	 * @param other the reference media type with which to compare
 	 * @return {@code true} if this media type includes the given media type;
@@ -494,7 +494,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * <p>For instance, {@code text/*} is compatible with {@code text/plain},
 	 * {@code text/html}, and vice versa. In effect, this method is similar to
 	 * {@link #includes}, except that it <b>is</b> symmetric.
-	 * <p>Simply calls {@link #isCompatibleWith(MimeType)} but declared with a
+	 * <p>Simply calls {@link MimeType#isCompatibleWith(MimeType)} but declared with a
 	 * {@code MediaType} parameter for binary backwards compatibility.
 	 * @param other the reference media type with which to compare
 	 * @return {@code true} if this media type is compatible with the given media type;
