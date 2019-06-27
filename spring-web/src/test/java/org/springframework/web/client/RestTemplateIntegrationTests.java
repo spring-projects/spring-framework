@@ -30,11 +30,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.junit.runners.model.Statement;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
@@ -56,7 +60,6 @@ import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeFalse;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -71,6 +74,40 @@ import static org.springframework.http.HttpMethod.POST;
 public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
 
 	private RestTemplate template;
+
+	/**
+	 * Custom JUnit 4 rule that executes the supplied {@code Statement} in a
+	 * try-catch block.
+	 *
+	 * <p>If the statement throws an {@link HttpServerErrorException}, this rule will
+	 * throw an {@link AssertionError} that wraps the {@code HttpServerErrorException}
+	 * using the {@link HttpServerErrorException#getResponseBodyAsString() response body}
+	 * as the failure message.
+	 *
+	 * <p>This mechanism provides an actually meaningful failure message if the
+	 * test fails due to an {@code AssertionError} on the server.
+	 */
+	@Rule
+	public TestRule serverErrorToAssertionErrorConverter = (Statement next, Description description) -> {
+		return new Statement() {
+
+			@Override
+			public void evaluate() throws Throwable {
+				try {
+					next.evaluate();
+				}
+				catch (HttpServerErrorException ex) {
+					String responseBody = ex.getResponseBodyAsString();
+					String prefix = AssertionError.class.getName() + ": ";
+					if (responseBody.startsWith(prefix)) {
+						responseBody = responseBody.substring(prefix.length());
+					}
+					throw new AssertionError(responseBody, ex);
+				}
+			}
+		};
+	};
+
 
 	@Parameter
 	public ClientHttpRequestFactory clientHttpRequestFactory;
@@ -229,7 +266,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
 
-		convertHttpServerErrorToAssertionError(() -> template.postForLocation(baseUrl + "/multipart", parts));
+		template.postForLocation(baseUrl + "/multipart", parts);
 	}
 
 	@Test
@@ -239,7 +276,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 		form.add("name 2", "value 2+1");
 		form.add("name 2", "value 2+2");
 
-		convertHttpServerErrorToAssertionError(() -> template.postForLocation(baseUrl + "/form", form));
+		template.postForLocation(baseUrl + "/form", form);
 	}
 
 	@Test
@@ -316,30 +353,6 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	@Test  // SPR-15015
 	public void postWithoutBody() throws Exception {
 		assertThat(template.postForObject(baseUrl + "/jsonpost", null, String.class)).isNull();
-	}
-
-
-	/**
-	 * Execute the supplied {@code Runnable}, and if it throws an
-	 * {@link HttpServerErrorException}, rethrow it wrapped in an {@link AssertionError}
-	 * with the {@link HttpServerErrorException#getResponseBodyAsString() response body}
-	 * as the error message.
-	 *
-	 * <p>This mechanism provides an actually meaningful failure message if the
-	 * test fails.
-	 */
-	private static void convertHttpServerErrorToAssertionError(Runnable runnable) {
-		try {
-			runnable.run();
-		}
-		catch (HttpServerErrorException ex) {
-			String responseBody = ex.getResponseBodyAsString();
-			String prefix = "java.lang.AssertionError: ";
-			if (responseBody.startsWith(prefix)) {
-				responseBody = responseBody.substring(prefix.length());
-			}
-			fail(responseBody, ex);
-		}
 	}
 
 
