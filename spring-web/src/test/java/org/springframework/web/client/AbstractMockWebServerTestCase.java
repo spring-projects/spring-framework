@@ -35,12 +35,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 /**
  * @author Brian Clozel
  * @author Sam Brannen
  */
 public class AbstractMockWebServerTestCase {
+
+	protected static final MediaType MULTIPART_MIXED = new MediaType("multipart", "mixed");
+	protected static final MediaType MULTIPART_RELATED = new MediaType("multipart", "related");
 
 	protected static final MediaType textContentType =
 			new MediaType("text", "plain", Collections.singletonMap("charset", "UTF-8"));
@@ -120,10 +124,31 @@ public class AbstractMockWebServerTestCase {
 				.setResponseCode(201);
 	}
 
-	private MockResponse multipartRequest(RecordedRequest request) {
-		MediaType mediaType = MediaType.parseMediaType(request.getHeader("Content-Type"));
-		assertThat(mediaType.isCompatibleWith(MediaType.MULTIPART_FORM_DATA)).isTrue();
+	private MockResponse multipartFormDataRequest(RecordedRequest request) {
+		MediaType mediaType = MediaType.parseMediaType(request.getHeader(CONTENT_TYPE));
+		assertThat(mediaType.isCompatibleWith(MULTIPART_FORM_DATA)).as(MULTIPART_FORM_DATA.toString()).isTrue();
+		assertMultipart(request, mediaType);
+		return new MockResponse().setResponseCode(200);
+	}
+
+	private MockResponse multipartMixedRequest(RecordedRequest request) {
+		MediaType mediaType = MediaType.parseMediaType(request.getHeader(CONTENT_TYPE));
+		assertThat(mediaType.isCompatibleWith(MULTIPART_MIXED)).as(MULTIPART_MIXED.toString()).isTrue();
+		assertMultipart(request, mediaType);
+		return new MockResponse().setResponseCode(200);
+	}
+
+	private MockResponse multipartRelatedRequest(RecordedRequest request) {
+		MediaType mediaType = MediaType.parseMediaType(request.getHeader(CONTENT_TYPE));
+		assertThat(mediaType.isCompatibleWith(MULTIPART_RELATED)).as(MULTIPART_RELATED.toString()).isTrue();
+		assertMultipart(request, mediaType);
+		return new MockResponse().setResponseCode(200);
+	}
+
+	private void assertMultipart(RecordedRequest request, MediaType mediaType) {
+		assertThat(mediaType.isCompatibleWith(new MediaType("multipart", "*"))).as("multipart/*").isTrue();
 		String boundary = mediaType.getParameter("boundary");
+		assertThat(boundary).as("boundary").isNotBlank();
 		Buffer body = request.getBody();
 		try {
 			assertPart(body, "form-data", boundary, "name 1", "text/plain", "value 1");
@@ -132,9 +157,8 @@ public class AbstractMockWebServerTestCase {
 			assertFilePart(body, "form-data", boundary, "logo", "logo.jpg", "image/jpeg");
 		}
 		catch (EOFException ex) {
-			throw new IllegalStateException(ex);
+			throw new AssertionError(ex);
 		}
-		return new MockResponse().setResponseCode(200);
 	}
 
 	private void assertPart(Buffer buffer, String disposition, String boundary, String name,
@@ -245,8 +269,14 @@ public class AbstractMockWebServerTestCase {
 				else if (request.getPath().contains("/uri/")) {
 					return new MockResponse().setBody(request.getPath()).setHeader(CONTENT_TYPE, "text/plain");
 				}
-				else if (request.getPath().equals("/multipart")) {
-					return multipartRequest(request);
+				else if (request.getPath().equals("/multipartFormData")) {
+					return multipartFormDataRequest(request);
+				}
+				else if (request.getPath().equals("/multipartMixed")) {
+					return multipartMixedRequest(request);
+				}
+				else if (request.getPath().equals("/multipartRelated")) {
+					return multipartRelatedRequest(request);
 				}
 				else if (request.getPath().equals("/form")) {
 					return formRequest(request);

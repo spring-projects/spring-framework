@@ -55,15 +55,29 @@ import org.springframework.util.StringUtils;
  * write (but not read) the {@code "multipart/form-data"} media type as
  * {@link MultiValueMap MultiValueMap&lt;String, Object&gt;}.
  *
+ * <h3>Multipart Data</h3>
+ *
+ * <p>By default, {@code "multipart/form-data"} is used as the content type when
+ * {@linkplain #write writing} multipart data. As of Spring Framework 5.2 it is
+ * also possible to write multipart data using other multipart subtypes such as
+ * {@code "multipart/mixed"} and {@code "multipart/related"}, as long as the
+ * multipart subtype is registered as a {@linkplain #getSupportedMediaTypes
+ * supported media type} <em>and</em> the desired multipart subtype is specified
+ * as the content type when {@linkplain #write writing} the multipart data.
+ *
  * <p>When writing multipart data, this converter uses other
  * {@link HttpMessageConverter HttpMessageConverters} to write the respective
- * MIME parts. By default, basic converters are registered (e.g., for {@code String}
- * and {@code Resource}). These can be overridden through the
- * {@link #setPartConverters partConverters} property.
+ * MIME parts. By default, basic converters are registered for byte array,
+ * {@code String}, and {@code Resource}. These can be overridden via
+ * {@link #setPartConverters} or augmented via {@link #addPartConverter}.
  *
- * <p>For example, the following snippet shows how to submit an HTML form:
+ * <h3>Examples</h3>
+ *
+ * <p>The following snippet shows how to submit an HTML form using the
+ * {@code "multipart/form-data"} content type.
+ *
  * <pre class="code">
- * RestTemplate template = new RestTemplate();
+ * RestTemplate restTemplate = new RestTemplate();
  * // AllEncompassingFormHttpMessageConverter is configured by default
  *
  * MultiValueMap&lt;String, Object&gt; form = new LinkedMultiValueMap&lt;&gt;();
@@ -71,16 +85,45 @@ import org.springframework.util.StringUtils;
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
  * form.add("field 3", 4);  // non-String form values supported as of 5.1.4
- * template.postForLocation("https://example.com/myForm", form);
+ * restTemplate.postForLocation("https://example.com/myForm", form);
  * </pre>
  *
- * <p>The following snippet shows how to do a file upload:
+ * <p>The following snippet shows how to do a file upload using the
+ * {@code "multipart/form-data"} content type.
+ *
  * <pre class="code">
  * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
  * parts.add("field 1", "value 1");
  * parts.add("file", new ClassPathResource("myFile.jpg"));
- * template.postForLocation("https://example.com/myFileUpload", parts);
+ * restTemplate.postForLocation("https://example.com/myFileUpload", parts);
  * </pre>
+ *
+ * <p>The following snippet shows how to do a file upload using the
+ * {@code "multipart/mixed"} content type.
+ *
+ * <pre class="code">
+ * MediaType multipartMixed = new MediaType("multipart", "mixed");
+ *
+ * restTemplate.getMessageConverters().stream()
+ *     .filter(FormHttpMessageConverter.class::isInstance)
+ *     .map(FormHttpMessageConverter.class::cast)
+ *     .findFirst()
+ *     .orElseThrow(() -&gt; new IllegalStateException("Failed to find FormHttpMessageConverter"))
+ *     .addSupportedMediaTypes(multipartMixed);
+ *
+ * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
+ * parts.add("field 1", "value 1");
+ * parts.add("file", new ClassPathResource("myFile.jpg"));
+ *
+ * HttpHeaders requestHeaders = new HttpHeaders();
+ * requestHeaders.setContentType(multipartMixed);
+ * HttpEntity&lt;MultiValueMap&lt;String, Object&gt;&gt; requestEntity =
+ *     new HttpEntity&lt;&gt;(parts, requestHeaders);
+ *
+ * restTemplate.postForLocation("https://example.com/myFileUpload", requestEntity);
+ * </pre>
+ *
+ * <h3>Miscellaneous</h3>
  *
  * <p>Some methods in this class were inspired by
  * {@code org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity}.
@@ -94,6 +137,8 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.util.MultiValueMap
  */
 public class FormHttpMessageConverter implements HttpMessageConverter<MultiValueMap<String, ?>> {
+
+	private static final MediaType MULTIPART_ALL = new MediaType("multipart", "*");
 
 	/**
 	 * The default charset used by the converter.
@@ -154,6 +199,12 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see #setSupportedMediaTypes(List)
+	 * @see #addSupportedMediaTypes(MediaType...)
+	 */
 	@Override
 	public List<MediaType> getSupportedMediaTypes() {
 		return Collections.unmodifiableList(this.supportedMediaTypes);
@@ -236,8 +287,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return true;
 		}
 		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
-			// We can't read multipart....
-			if (!supportedMediaType.equals(MediaType.MULTIPART_FORM_DATA) && supportedMediaType.includes(mediaType)) {
+			if (MULTIPART_ALL.includes(supportedMediaType)) {
+				// We can't read multipart, so skip this supported media type.
+				continue;
+			}
+			if (supportedMediaType.includes(mediaType)) {
 				return true;
 			}
 		}
@@ -291,7 +345,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			throws IOException, HttpMessageNotWritableException {
 
 		if (isMultipart(map, contentType)) {
-			writeMultipart((MultiValueMap<String, Object>) map, outputMessage);
+			writeMultipart((MultiValueMap<String, Object>) map, contentType, outputMessage);
 		}
 		else {
 			writeForm((MultiValueMap<String, Object>) map, contentType, outputMessage);
@@ -301,7 +355,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private boolean isMultipart(MultiValueMap<String, ?> map, @Nullable MediaType contentType) {
 		if (contentType != null) {
-			return MediaType.MULTIPART_FORM_DATA.includes(contentType);
+			return MULTIPART_ALL.includes(contentType);
 		}
 		for (List<?> values : map.values()) {
 			for (Object value : values) {
@@ -368,8 +422,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return builder.toString();
 	}
 
-	private void writeMultipart(final MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
+	private void writeMultipart(final MultiValueMap<String, Object> parts, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException {
+
+		// If the supplied content type is null, fall back to multipart/form-data.
+		// Otherwise rely on the fact that isMultipart() already verified the
+		// supplied content type is multipart/*.
+		if (contentType == null) {
+			contentType = MediaType.MULTIPART_FORM_DATA;
+		}
 
 		final byte[] boundary = generateMultipartBoundary();
 		Map<String, String> parameters = new LinkedHashMap<>(2);
@@ -378,9 +439,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 		parameters.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
 
-		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
-		HttpHeaders headers = outputMessage.getHeaders();
-		headers.setContentType(contentType);
+		// Add parameters to output content type
+		contentType = new MediaType(contentType, parameters);
+		outputMessage.getHeaders().setContentType(contentType);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;

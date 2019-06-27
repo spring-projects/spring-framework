@@ -1142,7 +1142,10 @@ request and response. By default, this converter supports all text media types
 | An `HttpMessageConverter` implementation that can read and write form data from the HTTP
 request and response. By default, this converter reads and writes the
 `application/x-www-form-urlencoded` media type. Form data is read from and written into a
-`MultiValueMap<String, String>`.
+`MultiValueMap<String, String>`. The converter can also write (but not read) multipart
+data read from a `MultiValueMap<String, Object>`. By default, `multipart/form-data` is
+supported. As of Spring Framework 5.2, additional multipart subtypes can be supported for
+writing form data. Consult the javadoc for `FormHttpMessageConverter` for further details.
 
 | `ByteArrayHttpMessageConverter`
 | An `HttpMessageConverter` implementation that can read and write byte arrays from the

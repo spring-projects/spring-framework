@@ -54,6 +54,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -65,6 +66,16 @@ import static org.springframework.http.HttpMethod.POST;
 
 /**
  * Integration tests for {@link RestTemplate}.
+ *
+ * <h3>Logging configuration for {@code MockWebServer}</h3>
+ *
+ * <p>In order for our log4j2 configuration to be used in an IDE, you must
+ * set the following system property before running any tests &mdash; for
+ * example, in <em>Run Configurations</em> in Eclipse.
+ *
+ * <pre class="code">
+ * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
+ * </pre>
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
@@ -258,19 +269,55 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	}
 
 	@Test
-	public void multipart() throws UnsupportedEncodingException {
+	public void multipartFormData() {
+		template.postForLocation(baseUrl + "/multipartFormData", createMultipartParts());
+	}
+
+	@Test
+	public void multipartMixed() {
+		addSupportedMediaTypeToFormHttpMessageConverter(MULTIPART_MIXED);
+
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setContentType(MULTIPART_MIXED);
+		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(createMultipartParts(),
+			requestHeaders);
+
+		template.postForLocation(baseUrl + "/multipartMixed", requestEntity);
+	}
+
+	@Test
+	public void multipartRelated() {
+		addSupportedMediaTypeToFormHttpMessageConverter(MULTIPART_RELATED);
+
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setContentType(MULTIPART_RELATED);
+		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(createMultipartParts(),
+			requestHeaders);
+
+		template.postForLocation(baseUrl + "/multipartRelated", requestEntity);
+	}
+
+	private MultiValueMap<String, Object> createMultipartParts() {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("name 1", "value 1");
 		parts.add("name 2", "value 2+1");
 		parts.add("name 2", "value 2+2");
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("logo", logo);
+		return parts;
+	}
 
-		template.postForLocation(baseUrl + "/multipart", parts);
+	private void addSupportedMediaTypeToFormHttpMessageConverter(MediaType mediaType) {
+		this.template.getMessageConverters().stream()
+				.filter(FormHttpMessageConverter.class::isInstance)
+				.map(FormHttpMessageConverter.class::cast)
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("Failed to find FormHttpMessageConverter"))
+				.addSupportedMediaTypes(mediaType);
 	}
 
 	@Test
-	public void form() throws UnsupportedEncodingException {
+	public void form() {
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
 		form.add("name 1", "value 1");
 		form.add("name 2", "value 2+1");
