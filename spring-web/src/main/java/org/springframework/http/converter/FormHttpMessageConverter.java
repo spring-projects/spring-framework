@@ -376,7 +376,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		Charset charset = contentType.getCharset();
 		Assert.notNull(charset, "No charset"); // should never occur
 
-		final byte[] bytes = serializeForm(formData, charset).getBytes(charset);
+		byte[] bytes = serializeForm(formData, charset).getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
@@ -422,17 +422,17 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return builder.toString();
 	}
 
-	private void writeMultipart(final MultiValueMap<String, Object> parts, MediaType contentType, HttpOutputMessage outputMessage)
+	private void writeMultipart(MultiValueMap<String, Object> parts, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException {
 
 		// If the supplied content type is null, fall back to multipart/form-data.
 		// Otherwise rely on the fact that isMultipart() already verified the
-		// supplied content type is multipart/*.
+		// supplied content type is multipart.
 		if (contentType == null) {
 			contentType = MediaType.MULTIPART_FORM_DATA;
 		}
 
-		final byte[] boundary = generateMultipartBoundary();
+		byte[] boundary = generateMultipartBoundary();
 		Map<String, String> parameters = new LinkedHashMap<>(2);
 		if (!isFilenameCharsetSet()) {
 			parameters.put("charset", this.charset.name());
