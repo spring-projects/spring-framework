@@ -61,6 +61,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	private RSocketStrategies rsocketStrategies;
 
 	@Nullable
+	private MetadataExtractor metadataExtractor;
+
+	@Nullable
 	private MimeType defaultDataMimeType;
 
 	private MimeType defaultMetadataMimeType = MessagingRSocket.COMPOSITE_METADATA;
@@ -88,29 +91,31 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * {@link RSocketStrategies} encapsulates required configuration for re-use.
 	 * @param rsocketStrategies the strategies to use
 	 */
-	public void setRSocketStrategies(RSocketStrategies rsocketStrategies) {
-		Assert.notNull(rsocketStrategies, "RSocketStrategies must not be null");
+	public void setRSocketStrategies(@Nullable RSocketStrategies rsocketStrategies) {
 		this.rsocketStrategies = rsocketStrategies;
-		setDecoders(rsocketStrategies.decoders());
-		setEncoders(rsocketStrategies.encoders());
-		setReactiveAdapterRegistry(rsocketStrategies.reactiveAdapterRegistry());
+		if (rsocketStrategies != null) {
+			setDecoders(rsocketStrategies.decoders());
+			setEncoders(rsocketStrategies.encoders());
+			setReactiveAdapterRegistry(rsocketStrategies.reactiveAdapterRegistry());
+		}
+	}
+
+	@Nullable
+	public RSocketStrategies getRSocketStrategies() {
+		return this.rsocketStrategies;
 	}
 
 	/**
-	 * Return the {@code RSocketStrategies} instance provided via
-	 * {@link #setRSocketStrategies rsocketStrategies}, or
-	 * otherwise initialize it with the configured {@link #setEncoders(List)
-	 * encoders}, {@link #setDecoders(List) decoders}, and others.
+	 * Configure a {@link MetadataExtractor} to extract the route and possibly
+	 * other metadata from the first payload of incoming requests.
+	 * <p>By default this is a {@link DefaultMetadataExtractor} with the
+	 * configured {@link RSocketStrategies} (and decoders), extracting a route
+	 * from {@code "message/x.rsocket.routing.v0"} or {@code "text/plain"}
+	 * metadata entries.
+	 * @param extractor the extractor to use
 	 */
-	public RSocketStrategies getRSocketStrategies() {
-		if (this.rsocketStrategies == null) {
-			this.rsocketStrategies = RSocketStrategies.builder()
-					.decoder(getDecoders().toArray(new Decoder<?>[0]))
-					.encoder(getEncoders().toArray(new Encoder<?>[0]))
-					.reactiveAdapterStrategy(getReactiveAdapterRegistry())
-					.build();
-		}
-		return this.rsocketStrategies;
+	public void setMetadataExtractor(MetadataExtractor extractor) {
+		this.metadataExtractor = extractor;
 	}
 
 	/**
@@ -137,6 +142,18 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 	@Override
 	public void afterPropertiesSet() {
+		if (this.rsocketStrategies == null) {
+			this.rsocketStrategies = RSocketStrategies.builder()
+					.decoder(getDecoders().toArray(new Decoder<?>[0]))
+					.encoder(getEncoders().toArray(new Encoder<?>[0]))
+					.reactiveAdapterStrategy(getReactiveAdapterRegistry())
+					.build();
+		}
+		if (this.metadataExtractor == null) {
+			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(this.rsocketStrategies);
+			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
+			this.metadataExtractor = extractor;
+		}
 		getArgumentResolverConfigurer().addCustomResolver(new RSocketRequesterMethodArgumentResolver());
 		super.afterPropertiesSet();
 	}
@@ -201,11 +218,14 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		MimeType metaMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
 		Assert.notNull(dataMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
 
-		RSocketRequester requester = RSocketRequester.wrap(
-				rsocket, dataMimeType, metaMimeType, getRSocketStrategies());
+		RSocketStrategies strategies = this.rsocketStrategies;
+		Assert.notNull(strategies, "No RSocketStrategies. Was afterPropertiesSet not called?");
+		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metaMimeType, strategies);
 
-		return new MessagingRSocket(this, getRouteMatcher(), requester,
-				dataMimeType, metaMimeType, getRSocketStrategies().dataBufferFactory());
+		Assert.notNull(this.metadataExtractor, () -> "No MetadataExtractor. Was afterPropertiesSet not called?");
+
+		return new MessagingRSocket(dataMimeType, metaMimeType, this.metadataExtractor, requester,
+				this, getRouteMatcher(), strategies.dataBufferFactory());
 	}
 
 }

@@ -67,13 +67,24 @@ public interface RSocketRequester {
 
 
 	/**
-	 * Begin to specify a new request with the given route to a handler on the
-	 * remote side. The route will be encoded in the metadata of the first
-	 * payload.
+	 * Begin to specify a new request with the given route to a remote handler.
+	 * <p>If the connection is set to use composite metadata, the route is
+	 * encoded as {@code "message/x.rsocket.routing.v0"}. Otherwise the route
+	 * is encoded according to the mime type for the connection.
 	 * @param route the route to a handler
 	 * @return a spec for further defining and executing the request
 	 */
 	RequestSpec route(String route);
+
+	/**
+	 * Begin to specify a new request with the given metadata.
+	 * <p>If using composite metadata then the mime type argument is required.
+	 * Otherwise the mime type should be {@code null}, or it must match the
+	 * mime type for the connection.
+	 * @param metadata the metadata value to encode
+	 * @param mimeType the mime type that describes the metadata;
+	 */
+	RequestSpec metadata(Object metadata, @Nullable MimeType mimeType);
 
 
 	/**
@@ -110,24 +121,24 @@ public interface RSocketRequester {
 	interface Builder {
 
 		/**
-		 * Configure the MimeType to use for payload data. This is then
-		 * specified on the {@code SETUP} frame for the whole connection.
-		 * <p>By default this is set to the first concrete MimeType supported
+		 * Configure the MimeType for payload data which is then specified
+		 * on the {@code SETUP} frame and applies to the whole connection.
+		 * <p>By default this is set to the first concrete mime type supported
 		 * by the configured encoders and decoders.
 		 * @param mimeType the data MimeType to use
 		 */
 		RSocketRequester.Builder dataMimeType(@Nullable MimeType mimeType);
 
 		/**
-		 * Configure the MimeType to use for payload metadata. This is then
-		 * specified on the {@code SETUP} frame for the whole connection.
-		 * <p>At present the metadata MimeType must be
-		 * {@code "message/x.rsocket.routing.v0"} to allow the request
-		 * {@link RSocketRequester#route(String) route} to be encoded, or it
-		 * could also be {@code "message/x.rsocket.composite-metadata.v0"} in
-		 * which case the route can be encoded along with other metadata entries.
+		 * Configure the MimeType for payload metadata which is then specified
+		 * on the {@code SETUP} frame and applies to the whole connection.
 		 * <p>By default this is set to
-		 * {@code "message/x.rsocket.composite-metadata.v0"}.
+		 * {@code "message/x.rsocket.composite-metadata.v0"} in which case the
+		 * route, if provided, is encoded as a
+		 * {@code "message/x.rsocket.routing.v0"} metadata entry, potentially
+		 * with other metadata entries added too. If this is set to any other
+		 * mime type, and a route is provided, it is assumed the mime type is
+		 * for the route.
 		 * @param mimeType the data MimeType to use
 		 */
 		RSocketRequester.Builder metadataMimeType(MimeType mimeType);

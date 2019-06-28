@@ -43,11 +43,14 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.rsocket.RSocketRequester.RequestSpec;
 import org.springframework.messaging.rsocket.RSocketRequester.ResponseSpec;
-import org.springframework.util.MimeTypeUtils;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.messaging.rsocket.DefaultRSocketRequester.COMPOSITE_METADATA;
+import static org.springframework.messaging.rsocket.DefaultRSocketRequester.ROUTING;
+import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 
 /**
  * Unit tests for {@link DefaultRSocketRequester}.
@@ -75,9 +78,7 @@ public class DefaultRSocketRequesterTests {
 				.encoder(CharSequenceEncoder.allMimeTypes())
 				.build();
 		this.rsocket = new TestRSocket();
-		this.requester = RSocketRequester.wrap(this.rsocket,
-				MimeTypeUtils.TEXT_PLAIN, DefaultRSocketRequester.ROUTING,
-				this.strategies);
+		this.requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
 	}
 
 
@@ -143,13 +144,32 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
-	public void sendCompositeMetadata() {
-		RSocketRequester requester = RSocketRequester.wrap(this.rsocket,
-				MimeTypeUtils.TEXT_PLAIN, DefaultRSocketRequester.COMPOSITE_METADATA,
-				this.strategies);
+	public void metadataCompositeWithRoute() {
+
+		RSocketRequester requester = RSocketRequester.wrap(
+				this.rsocket, TEXT_PLAIN, COMPOSITE_METADATA, this.strategies);
+
+		requester.route("toA").data("bodyA").send().block(Duration.ofSeconds(5));
+
+		CompositeMetadata entries = new CompositeMetadata(this.rsocket.getSavedPayload().metadata(), false);
+		Iterator<CompositeMetadata.Entry> iterator = entries.iterator();
+
+		assertThat(iterator.hasNext()).isTrue();
+		CompositeMetadata.Entry entry = iterator.next();
+		assertThat(entry.getMimeType()).isEqualTo(ROUTING.toString());
+		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
+
+		assertThat(iterator.hasNext()).isFalse();
+	}
+
+	@Test
+	public void metadataCompositeWithRouteAndTextEntry() {
+
+		RSocketRequester requester = RSocketRequester.wrap(
+				this.rsocket, TEXT_PLAIN, COMPOSITE_METADATA, this.strategies);
 
 		requester.route("toA")
-				.metadata("My metadata", MimeTypeUtils.TEXT_PLAIN).data("bodyA")
+				.metadata("My metadata", TEXT_PLAIN).data("bodyA")
 				.send()
 				.block(Duration.ofSeconds(5));
 
@@ -158,27 +178,46 @@ public class DefaultRSocketRequesterTests {
 
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
-		assertThat(entry.getMimeType()).isEqualTo(DefaultRSocketRequester.ROUTING.toString());
+		assertThat(entry.getMimeType()).isEqualTo(ROUTING.toString());
 		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
 
 		assertThat(iterator.hasNext()).isTrue();
 		entry = iterator.next();
-		assertThat(entry.getMimeType()).isEqualTo(MimeTypeUtils.TEXT_PLAIN.toString());
+		assertThat(entry.getMimeType()).isEqualTo(TEXT_PLAIN.toString());
 		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("My metadata");
 
 		assertThat(iterator.hasNext()).isFalse();
 	}
 
 	@Test
+	public void metadataRouteAsText() {
+		RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
+		requester.route("toA").data("bodyA").send().block(Duration.ofSeconds(5));
+		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("toA");
+	}
+
+	@Test
+	public void metadataAsText() {
+		RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
+		requester.metadata("toA", null).data("bodyA").send().block(Duration.ofSeconds(5));
+		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("toA");
+	}
+
+	@Test
+	public void metadataMimeTypeMismatch() {
+		RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
+		assertThatThrownBy(() -> requester.metadata("toA", ROUTING).data("bodyA").send().block())
+				.hasMessageStartingWith("Connection configured for metadata mime type");
+	}
+
+	@Test
 	public void supportedMetadataMimeTypes() {
-		RSocketRequester.wrap(this.rsocket, MimeTypeUtils.TEXT_PLAIN,
-				DefaultRSocketRequester.COMPOSITE_METADATA, this.strategies);
 
-		RSocketRequester.wrap(this.rsocket, MimeTypeUtils.TEXT_PLAIN,
-				DefaultRSocketRequester.ROUTING, this.strategies);
+		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN,
+				COMPOSITE_METADATA, this.strategies);
 
-		assertThatIllegalArgumentException().isThrownBy(() -> RSocketRequester.wrap(
-				this.rsocket, MimeTypeUtils.TEXT_PLAIN, MimeTypeUtils.TEXT_PLAIN, this.strategies));
+		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN,
+				ROUTING, this.strategies);
 	}
 
 	@Test

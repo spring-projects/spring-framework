@@ -16,10 +16,8 @@
 
 package org.springframework.messaging.rsocket;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
@@ -59,8 +57,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 	static final MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
 
-	static final List<MimeType> METADATA_MIME_TYPES = Arrays.asList(COMPOSITE_METADATA, ROUTING);
-
 
 	private static final Map<String, Object> EMPTY_HINTS = Collections.emptyMap();
 
@@ -84,9 +80,6 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		Assert.notNull(dataMimeType, "'dataMimeType' is required");
 		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
 		Assert.notNull(strategies, "RSocketStrategies is required");
-
-		Assert.isTrue(METADATA_MIME_TYPES.contains(metadataMimeType),
-				() -> "Unexpected metadatata mime type: '" + metadataMimeType + "'");
 
 		this.rsocket = rsocket;
 		this.dataMimeType = dataMimeType;
@@ -113,7 +106,13 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 	@Override
 	public RequestSpec route(String route) {
-		return new DefaultRequestSpec(route);
+		Assert.notNull(route, "'route' is required");
+		return new DefaultRequestSpec(route, metadataMimeType().equals(COMPOSITE_METADATA) ? ROUTING : null);
+	}
+
+	@Override
+	public RequestSpec metadata(Object metadata, @Nullable MimeType mimeType) {
+		return new DefaultRequestSpec(metadata, mimeType);
 	}
 
 
@@ -131,16 +130,22 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		private final Map<Object, MimeType> metadata = new LinkedHashMap<>(4);
 
 
-		public DefaultRequestSpec(String route) {
-			Assert.notNull(route, "'route' is required");
-			metadata(route, ROUTING);
+		public DefaultRequestSpec(Object metadata, @Nullable MimeType mimeType) {
+			mimeType = (mimeType == null && !isCompositeMetadata() ? metadataMimeType() : mimeType);
+			Assert.notNull(mimeType, "MimeType is required for composite metadata");
+			metadata(metadata, mimeType);
 		}
 
+		private boolean isCompositeMetadata() {
+			return metadataMimeType().equals(COMPOSITE_METADATA);
+		}
 
 		@Override
 		public RequestSpec metadata(Object metadata, MimeType mimeType) {
-			Assert.isTrue(this.metadata.isEmpty() || metadataMimeType().equals(COMPOSITE_METADATA),
-					"Additional metadata entries supported only with composite metadata");
+			Assert.notNull(metadata, "Metadata content is required");
+			Assert.notNull(mimeType, "MimeType is required");
+			Assert.isTrue(this.metadata.isEmpty() || isCompositeMetadata(),
+					"Composite metadata required for multiple metadata entries.");
 			this.metadata.put(metadata, mimeType);
 			return this;
 		}
@@ -250,22 +255,27 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		private DataBuffer getMetadata() {
-			if (metadataMimeType().equals(COMPOSITE_METADATA)) {
+			if (isCompositeMetadata()) {
 				CompositeByteBuf metadata = getAllocator().compositeBuffer();
-				this.metadata.forEach((key, value) -> {
-					DataBuffer dataBuffer = encodeMetadata(key, value);
-					CompositeMetadataFlyweight.encodeAndAddMetadata(metadata, getAllocator(), value.toString(),
+				this.metadata.forEach((value, mimeType) -> {
+					DataBuffer dataBuffer = encodeMetadata(value, mimeType);
+					CompositeMetadataFlyweight.encodeAndAddMetadata(metadata, getAllocator(), mimeType.toString(),
 							dataBuffer instanceof NettyDataBuffer ?
 									((NettyDataBuffer) dataBuffer).getNativeBuffer() :
 									Unpooled.wrappedBuffer(dataBuffer.asByteBuffer()));
 				});
 				return asDataBuffer(metadata);
 			}
-			Assert.isTrue(this.metadata.size() < 2, "Composite metadata required for multiple entries");
-			Map.Entry<Object, MimeType> entry = this.metadata.entrySet().iterator().next();
-			Assert.isTrue(metadataMimeType().equals(entry.getValue()),
-					() -> "Expected metadata MimeType '" + metadataMimeType() + "', actual " + this.metadata);
-			return encodeMetadata(entry.getKey(), entry.getValue());
+			else {
+				Assert.isTrue(this.metadata.size() == 1, "Composite metadata required for multiple entries");
+				Map.Entry<Object, MimeType> entry = this.metadata.entrySet().iterator().next();
+				if (!metadataMimeType().equals(entry.getValue())) {
+					throw new IllegalArgumentException(
+							"Connection configured for metadata mime type " +
+									"'" + metadataMimeType() + "', but actual is `" + this.metadata + "`");
+				}
+				return encodeMetadata(entry.getKey(), entry.getValue());
+			}
 		}
 
 		@SuppressWarnings("unchecked")
