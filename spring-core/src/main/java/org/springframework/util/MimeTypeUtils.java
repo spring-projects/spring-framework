@@ -433,7 +433,13 @@ public abstract class MimeTypeUtils {
 		public V get(K key) {
 			this.lock.readLock().lock();
 			try {
-				if (this.queue.remove(key)) {
+				if (this.queue.size() < this.maxSize / 2) {
+					V cached = this.cache.get(key);
+					if (cached != null) {
+						return cached;
+					}
+				}
+				else if (this.queue.remove(key)) {
 					this.queue.add(key);
 					return this.cache.get(key);
 				}
