@@ -26,6 +26,7 @@ import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.lang.Nullable;
@@ -70,7 +71,25 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 
 	/**
+	 * {@inheritDoc}
+	 * <p>If {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
+	 * is also set, this property is re-initialized with the decoders in it.
+	 * Or vice versa, if {@link #setRSocketStrategies(RSocketStrategies)
+	 * rsocketStrategies} is not set, it will be initialized from this and
+	 * other properties.
+	 */
+	@Override
+	public void setDecoders(List<? extends Decoder<?>> decoders) {
+		super.setDecoders(decoders);
+	}
+
+	/**
 	 * Configure the encoders to use for encoding handler method return values.
+	 * <p>If {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
+	 * is also set, this property is re-initialized with the encoders in it.
+	 * Or vice versa, if {@link #setRSocketStrategies(RSocketStrategies)
+	 * rsocketStrategies} is not set, it will be initialized from this and
+	 * other properties.
 	 */
 	public void setEncoders(List<? extends Encoder<?>> encoders) {
 		this.encoders.addAll(encoders);
@@ -84,12 +103,12 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	/**
-	 * Provide configuration in the form of {@link RSocketStrategies}. This is
-	 * an alternative to using {@link #setEncoders(List)},
-	 * {@link #setDecoders(List)}, and others directly. It is convenient when
-	 * you also configuring an {@link RSocketRequester} in which case the
-	 * {@link RSocketStrategies} encapsulates required configuration for re-use.
-	 * @param rsocketStrategies the strategies to use
+	 * Provide configuration in the form of {@link RSocketStrategies} instance
+	 * which can also be re-used to initialize a client-side
+	 * {@link RSocketRequester}. When this property is set, it also sets
+	 * {@link #setDecoders(List) decoders}, {@link #setEncoders(List) encoders},
+	 * and {@link #setReactiveAdapterRegistry(ReactiveAdapterRegistry)
+	 * reactiveAdapterRegistry}.
 	 */
 	public void setRSocketStrategies(@Nullable RSocketStrategies rsocketStrategies) {
 		this.rsocketStrategies = rsocketStrategies;
@@ -100,6 +119,10 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		}
 	}
 
+	/**
+	 * Return the configured {@link RSocketStrategies}. This may be {@code null}
+	 * before {@link #afterPropertiesSet()} is called.
+	 */
 	@Nullable
 	public RSocketStrategies getRSocketStrategies() {
 		return this.rsocketStrategies;

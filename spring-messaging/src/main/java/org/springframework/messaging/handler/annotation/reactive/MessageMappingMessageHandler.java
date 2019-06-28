@@ -201,7 +201,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 		// Catch-all
 		resolvers.add(new PayloadMethodArgumentResolver(
-				this.decoders, this.validator, getReactiveAdapterRegistry(), true));
+				getDecoders(), this.validator, getReactiveAdapterRegistry(), true));
 
 		return resolvers;
 	}
