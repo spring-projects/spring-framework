@@ -443,6 +443,11 @@ public abstract class MimeTypeUtils {
 			}
 			this.lock.writeLock().lock();
 			try {
+				// retrying in case of concurrent reads on the same key
+				if (this.queue.remove(key)) {
+					this.queue.add(key);
+					return this.cache.get(key);
+				}
 				if (this.queue.size() == this.maxSize) {
 					K leastUsed = this.queue.poll();
 					if (leastUsed != null) {
