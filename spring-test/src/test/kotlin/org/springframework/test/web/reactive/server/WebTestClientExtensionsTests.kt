@@ -21,6 +21,7 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.reactivestreams.Publisher
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.server.router
 
 /**
@@ -38,8 +39,8 @@ class WebTestClientExtensionsTests {
 	@Test
 	fun `RequestBodySpec#body with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<Foo>>()
-		requestBodySpec.body(body)
-		verify { requestBodySpec.body(body, Foo::class.java) }
+		requestBodySpec.body<Foo>(body)
+		verify { requestBodySpec.body(body as Any, object : ParameterizedTypeReference<Foo>() {}) }
 	}
 
 	@Test
@@ -51,7 +52,7 @@ class WebTestClientExtensionsTests {
 	@Test
 	fun `KotlinBodySpec#isEqualTo`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().body("foo") } } )
 				.build()
 				.get().uri("/").exchange().expectBody<String>().isEqualTo("foo")
 	}
@@ -59,7 +60,7 @@ class WebTestClientExtensionsTests {
 	@Test
 	fun `KotlinBodySpec#consumeWith`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().body("foo") } } )
 				.build()
 				.get().uri("/").exchange().expectBody<String>().consumeWith { assertEquals("foo", it.responseBody) }
 	}
@@ -67,7 +68,7 @@ class WebTestClientExtensionsTests {
 	@Test
 	fun `KotlinBodySpec#returnResult`() {
 		WebTestClient
-				.bindToRouterFunction( router { GET("/") { ok().syncBody("foo") } } )
+				.bindToRouterFunction( router { GET("/") { ok().body("foo") } } )
 				.build()
 				.get().uri("/").exchange().expectBody<String>().returnResult().apply { assertEquals("foo", responseBody) }
 	}

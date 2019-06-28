@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -44,6 +46,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public abstract class BodyInserters {
@@ -72,18 +75,85 @@ public abstract class BodyInserters {
 	}
 
 	/**
-	 * Inserter to write the given object.
-	 * <p>Alternatively, consider using the {@code syncBody(Object)} shortcuts on
+	 * Inserter to write the given object. The body can be one of the following:
+	 * <ul>
+	 * <li>Concrete value
+	 * <li>{@link Publisher} of value(s)
+	 * <li>Any other producer of value(s) that can be adapted to a
+	 * {@link Publisher} via {@link ReactiveAdapterRegistry}
+	 * </ul>
+	 * <p>Alternatively, consider using the {@code body(Object)} shortcuts on
 	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
 	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
-	 * @param body the body to write to the response
+	 * @param body the body to write
 	 * @param <T> the type of the body
 	 * @return the inserter to write a single object
 	 */
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
+		Assert.notNull(body, "'body' must not be null");
+		ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(body.getClass());
+		ResolvableType bodyType;
+		if (body instanceof Publisher || adapter != null) {
+			bodyType = ResolvableType.forClass(Object.class);
+		}
+		else {
+			bodyType = ResolvableType.forInstance(body);
+		}
 		return (message, context) ->
-				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forInstance(body));
+				writeWithMessageWriters(message, context, body, bodyType, adapter);
 	}
+
+	/**
+	 * Alternative of {@link #fromObject(Object)} that accepts not only a producer
+	 * of value(s) but also a hint for the types of values that will be
+	 * produced. The class hint is used to find a compatible {@code Encoder}
+	 * once, up front, and used for all values.
+	 * <p>Consider using the {@code body(Object, Class)} shortcuts on
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
+	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
+	 * @param producer the source of body value(s). This must be a
+	 * {@link Publisher} or another producer adaptable to a
+	 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+	 * @param elementClass the type of values to be produced
+	 * @param <T> the type of the body
+	 * @return the inserter to write a single object
+	 * @since 5.2
+	 */
+	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T producer, Class<?> elementClass) {
+		Assert.notNull(producer, "'producer' must not be null");
+		Assert.notNull(elementClass, "'elementClass' must not be null");
+		ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(producer.getClass());
+		Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
+		return (message, context) ->
+				writeWithMessageWriters(message, context, producer, ResolvableType.forClass(elementClass), adapter);
+	}
+
+	/**
+	 * Alternative of {@link #fromObject(Object)} that accepts not only a producer
+	 * of value(s) but also a hint for the types of values that will be
+	 * produced. The class hint is used to find a compatible {@code Encoder}
+	 * once, up front, and used for all values.
+	 * <p>Consider using the {@code body(Object, Class)} shortcuts on
+	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
+	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
+	 * @param producer the source of body value(s). This must be a
+	 * {@link Publisher} or another producer adaptable to a
+	 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+	 * @param elementTypeRef the type of values to be produced
+	 * @param <T> the type of the body
+	 * @return the inserter to write a single object
+	 * @since 5.2
+	 */
+	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T producer, ParameterizedTypeReference<?> elementTypeRef) {
+		Assert.notNull(producer, "'producer' must not be null");
+		Assert.notNull(elementTypeRef, "'bodyTypeRef' must not be null");
+		ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(producer.getClass());
+		Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
+		return (message, context) ->
+				writeWithMessageWriters(message, context, producer, ResolvableType.forType(elementTypeRef), adapter);
+	}
+
+
 
 	/**
 	 * Inserter to write the given {@link Publisher}.
@@ -95,14 +165,16 @@ public abstract class BodyInserters {
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <P> the {@code Publisher} type
 	 * @return the inserter to write a {@code Publisher}
+	 * @deprecated as of Spring Framework 5.2 in favor of {@link #fromObject(Object, Class)}
 	 */
+	@Deprecated
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
 			P publisher, Class<T> elementClass) {
 
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.notNull(elementClass, "Element Class must not be null");
 		return (message, context) ->
-				writeWithMessageWriters(message, context, publisher, ResolvableType.forClass(elementClass));
+				writeWithMessageWriters(message, context, publisher, ResolvableType.forClass(elementClass), null);
 	}
 
 	/**
@@ -115,14 +187,16 @@ public abstract class BodyInserters {
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <P> the {@code Publisher} type
 	 * @return the inserter to write a {@code Publisher}
+	 * @deprecated as of Spring Framework 5.2 in favor of {@link #fromObject(Object, ParameterizedTypeReference)}
 	 */
+	@Deprecated
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
 			P publisher, ParameterizedTypeReference<T> typeReference) {
 
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.notNull(typeReference, "ParameterizedTypeReference must not be null");
 		return (message, context) ->
-				writeWithMessageWriters(message, context, publisher, ResolvableType.forType(typeReference.getType()));
+				writeWithMessageWriters(message, context, publisher, ResolvableType.forType(typeReference.getType()), null);
 	}
 
 	/**
@@ -169,7 +243,7 @@ public abstract class BodyInserters {
 	 * Return a {@link FormInserter} to write the given {@code MultiValueMap}
 	 * as URL-encoded form data. The returned inserter allows for additional
 	 * entries to be added via {@link FormInserter#with(String, Object)}.
-	 * <p>Note that you can also use the {@code syncBody(Object)} method in the
+	 * <p>Note that you can also use the {@code body(Object)} method in the
 	 * request builders of both the {@code WebClient} and {@code WebTestClient}.
 	 * In that case the setting of the request content type is also not required,
 	 * just be sure the map contains String values only or otherwise it would be
@@ -201,7 +275,7 @@ public abstract class BodyInserters {
 	 * Object or an {@link HttpEntity}.
 	 * <p>Note that you can also build the multipart data externally with
 	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
-	 * {@code syncBody(Object)} shortcut method in {@code WebClient}.
+	 * {@code body(Object)} shortcut method in {@code WebClient}.
 	 * @param multipartData the form data to write to the output message
 	 * @return the inserter that allows adding more parts
 	 * @see MultipartBodyBuilder
@@ -217,7 +291,7 @@ public abstract class BodyInserters {
 	 * {@link HttpEntity}.
 	 * <p>Note that you can also build the multipart data externally with
 	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
-	 * {@code syncBody(Object)} shortcut method in {@code WebClient}.
+	 * {@code body(Object)} shortcut method in {@code WebClient}.
 	 * @param name the part name
 	 * @param value the part value, an Object or {@code HttpEntity}
 	 * @return the inserter that allows adding more parts
@@ -233,7 +307,7 @@ public abstract class BodyInserters {
 	 * as multipart data.
 	 * <p>Note that you can also build the multipart data externally with
 	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
-	 * {@code syncBody(Object)} shortcut method in {@code WebClient}.
+	 * {@code body(Object)} shortcut method in {@code WebClient}.
 	 * @param name the part name
 	 * @param publisher the publisher that forms the part value
 	 * @param elementClass the class contained in the {@code publisher}
@@ -251,7 +325,7 @@ public abstract class BodyInserters {
 	 * allows specifying generic type information.
 	 * <p>Note that you can also build the multipart data externally with
 	 * {@link MultipartBodyBuilder}, and pass the resulting map directly to the
-	 * {@code syncBody(Object)} shortcut method in {@code WebClient}.
+	 * {@code body(Object)} shortcut method in {@code WebClient}.
 	 * @param name the part name
 	 * @param publisher the publisher that forms the part value
 	 * @param typeReference the type contained in the {@code publisher}
@@ -278,15 +352,25 @@ public abstract class BodyInserters {
 	}
 
 
-	private static <P extends Publisher<?>, M extends ReactiveHttpOutputMessage> Mono<Void> writeWithMessageWriters(
-			M outputMessage, BodyInserter.Context context, P body, ResolvableType bodyType) {
+	private static <M extends ReactiveHttpOutputMessage> Mono<Void> writeWithMessageWriters(
+			M outputMessage, BodyInserter.Context context, Object body, ResolvableType bodyType, @Nullable ReactiveAdapter adapter) {
 
+		Publisher<?> publisher;
+		if (body instanceof Publisher) {
+			publisher = (Publisher<?>) body;
+		}
+		else if (adapter != null) {
+			publisher = adapter.toPublisher(body);
+		}
+		else {
+			publisher = Mono.just(body);
+		}
 		MediaType mediaType = outputMessage.getHeaders().getContentType();
 		return context.messageWriters().stream()
 				.filter(messageWriter -> messageWriter.canWrite(bodyType, mediaType))
 				.findFirst()
 				.map(BodyInserters::cast)
-				.map(writer -> write(body, bodyType, mediaType, outputMessage, context, writer))
+				.map(writer -> write(publisher, bodyType, mediaType, outputMessage, context, writer))
 				.orElseGet(() -> Mono.error(unsupportedError(bodyType, context, mediaType)));
 	}
 

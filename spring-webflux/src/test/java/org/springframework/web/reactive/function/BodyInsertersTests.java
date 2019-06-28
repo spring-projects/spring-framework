@@ -36,6 +36,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
@@ -155,6 +156,48 @@ public class BodyInsertersTests {
 
 		StepVerifier.create(response.getBodyAsString())
 				.expectNext("{\"username\":\"foo\"}")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofObjectWithPublisher() {
+		Mono<User> body = Mono.just(new User("foo", "bar"));
+		BodyInserter<Mono<User>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofObjectWithPublisherAndClass() {
+		Mono<User> body = Mono.just(new User("foo", "bar"));
+		BodyInserter<Mono<User>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body, User.class);
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	public void ofObjectWithPublisherAndTypeReference() {
+		Mono<User> body = Mono.just(new User("foo", "bar"));
+		BodyInserter<Mono<User>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body, new ParameterizedTypeReference<User>() {});
+
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		Mono<Void> result = inserter.insert(response, this.context);
+		StepVerifier.create(result).expectComplete().verify();
+		StepVerifier.create(response.getBodyAsString())
+				.expectNext("{\"username\":\"foo\",\"password\":\"bar\"}")
 				.expectComplete()
 				.verify();
 	}

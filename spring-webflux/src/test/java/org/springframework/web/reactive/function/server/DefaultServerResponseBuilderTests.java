@@ -308,7 +308,7 @@ public class DefaultServerResponseBuilderTests {
 	public void copyCookies() {
 		Mono<ServerResponse> serverResponse = ServerResponse.ok()
 				.cookie(ResponseCookie.from("foo", "bar").build())
-				.syncBody("body");
+				.body("body");
 
 		assertThat(serverResponse.block().cookies().isEmpty()).isFalse();
 
@@ -360,7 +360,7 @@ public class DefaultServerResponseBuilderTests {
 		Mono<Void> mono = Mono.empty();
 
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				ServerResponse.ok().syncBody(mono));
+				ServerResponse.ok().body(mono));
 	}
 
 	@Test
@@ -368,7 +368,7 @@ public class DefaultServerResponseBuilderTests {
 		String etag = "\"foo\"";
 		ServerResponse responseMono = ServerResponse.ok()
 				.eTag(etag)
-				.syncBody("bar")
+				.body("bar")
 				.block();
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com")
@@ -392,7 +392,7 @@ public class DefaultServerResponseBuilderTests {
 
 		ServerResponse responseMono = ServerResponse.ok()
 				.lastModified(oneMinuteBeforeNow)
-				.syncBody("bar")
+				.body("bar")
 				.block();
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("https://example.com")

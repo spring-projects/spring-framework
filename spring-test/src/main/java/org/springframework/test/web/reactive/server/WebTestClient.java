@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.reactivestreams.Publisher;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,6 +47,7 @@ import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -643,6 +645,28 @@ public interface WebTestClient {
 		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
 
 		/**
+		 * Set the body of the request to the given producer.
+		 * @param producer the source of payload data value(s). This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementClass the class of elements contained in the producer
+		 * @return spec for decoding the response
+		 * @since 5.2
+		 */
+		RequestHeadersSpec<?> body(Object producer, Class<?> elementClass);
+
+		/**
+		 * Set the body of the request to the given producer.
+		 * @param producer the source of payload data value(s). This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementTypeRef the type reference of elements contained in the producer
+		 * @return spec for decoding the response
+		 * @since 5.2
+		 */
+		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
+
+		/**
 		 * Set the body of the request to the given synchronous {@code Object} and
 		 * perform the request.
 		 * <p>This method is a convenient shortcut for:
@@ -658,8 +682,48 @@ public interface WebTestClient {
 		 * conveniently using
 		 * @param body the {@code Object} to write to the request
 		 * @return a {@code Mono} with the response
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
 		 */
+		@Deprecated
 		RequestHeadersSpec<?> syncBody(Object body);
+
+		/**
+		 * A shortcut for {@link #body(BodyInserter)} with an
+		 * {@linkplain BodyInserters#fromObject Object inserter}.
+		 *
+		 * <p>The body of the request can be one of the following:
+		 * <ul>
+		 * <li>Concrete value
+		 * <li>{@link Publisher} of value(s)
+		 * <li>Any other producer of value(s) that can be adapted to a
+		 * {@link Publisher} via {@link ReactiveAdapterRegistry}
+		 * </ul>.
+
+		 * For example:
+		 * <p><pre class="code">
+		 * Person person = ... ;
+		 *
+		 * Mono&lt;Void&gt; result = client.post()
+		 *     .uri("/persons/{id}", id)
+		 *     .contentType(MediaType.APPLICATION_JSON)
+		 *     .body(person)
+		 *     .retrieve()
+		 *     .bodyToMono(Void.class);
+		 * </pre>
+		 *
+		 * <p>For multipart requests, provide a
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap}. The
+		 * values in the {@code MultiValueMap} can be any Object representing
+		 * the body of the part, or an
+		 * {@link org.springframework.http.HttpEntity HttpEntity} representing
+		 * a part with body and headers. The {@code MultiValueMap} can be built
+		 * with {@link org.springframework.http.client.MultipartBodyBuilder
+		 * MultipartBodyBuilder}.
+		 * @param body the body to write to the request
+		 * @return spec for decoding the response
+		 * @since 5.2
+		 */
+		RequestHeadersSpec<?> body(Object body);
 	}
 
 

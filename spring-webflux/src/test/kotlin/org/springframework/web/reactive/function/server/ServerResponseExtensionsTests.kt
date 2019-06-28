@@ -42,7 +42,7 @@ class ServerResponseExtensionsTests {
 	@Test
 	fun `BodyBuilder#body with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<List<Foo>>>()
-		bodyBuilder.body(body)
+		bodyBuilder.body<List<Foo>>(body)
 		verify { bodyBuilder.body(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
@@ -84,25 +84,25 @@ class ServerResponseExtensionsTests {
 	fun `bodyAndAwait with object parameter`() {
 		val response = mockk<ServerResponse>()
 		val body = "foo"
-		every { bodyBuilder.syncBody(ofType<String>()) } returns Mono.just(response)
+		every { bodyBuilder.body<String>(ofType<String>()) } returns Mono.just(response)
 		runBlocking {
-			bodyBuilder.bodyAndAwait(body)
+			bodyBuilder.bodyAndAwait<String>(body)
 		}
 		verify {
-			bodyBuilder.syncBody(ofType<String>())
+			bodyBuilder.body<String>(ofType<String>())
 		}
 	}
 
 	@Test
 	@FlowPreview
-	fun bodyFlowAndAwait() {
+	fun `bodyAndAwait with flow parameter`() {
 		val response = mockk<ServerResponse>()
 		val body = mockk<Flow<List<Foo>>>()
-		every { bodyBuilder.body(ofType<Publisher<List<Foo>>>()) } returns Mono.just(response)
+		every { bodyBuilder.body<List<Foo>>(ofType<Flow<List<Foo>>>()) } returns Mono.just(response)
 		runBlocking {
-			bodyBuilder.bodyFlowAndAwait(body)
+			bodyBuilder.bodyAndAwait<List<Foo>>(body)
 		}
-		verify { bodyBuilder.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+		verify { bodyBuilder.body(ofType<Flow<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test

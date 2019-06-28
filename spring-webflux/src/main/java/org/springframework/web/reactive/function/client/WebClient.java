@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -56,8 +57,8 @@ import org.springframework.web.util.UriBuilderFactory;
  * </ul>
  * <p>For examples with a request body see:
  * <ul>
- * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}
- * <li>{@link RequestBodySpec#syncBody(Object) syncBody(Object)}
+ * <li>{@link RequestBodySpec#body(Object) body(Object)}
+ * <li>{@link RequestBodySpec#body(Object, Class) body(Publisher,Class)}
  * <li>{@link RequestBodySpec#body(BodyInserter) body(BodyInserter)}
  * </ul>
  *
@@ -549,17 +550,53 @@ public interface WebClient {
 		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass);
 
 		/**
+		 * A shortcut for {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromObject inserter}.
+		 * For example:
+		 * <p><pre>
+		 * Mono&lt;Person&gt; personMono = ... ;
+		 *
+		 * Mono&lt;Void&gt; result = client.post()
+		 *     .uri("/persons/{id}", id)
+		 *     .contentType(MediaType.APPLICATION_JSON)
+		 *     .body(personMono, Person.class)
+		 *     .retrieve()
+		 *     .bodyToMono(Void.class);
+		 * </pre>
+		 * @param producer the source of payload data value(s). This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementClass the class of elements contained in the producer
+		 * @return this builder
+		 * @since 5.2
+		 */
+		RequestHeadersSpec<?> body(Object producer, Class<?> elementClass);
+
+		/**
 		 * A variant of {@link #body(Publisher, Class)} that allows providing
 		 * element type information that includes generics via a
 		 * {@link ParameterizedTypeReference}.
 		 * @param publisher the {@code Publisher} to write to the request
-		 * @param typeReference the type reference of elements contained in the publisher
+		 * @param elementTypeRef the type reference of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
 		 * @return this builder
 		 */
 		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher,
-				ParameterizedTypeReference<T> typeReference);
+				ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * A variant of {@link #body(Object, Class)} that allows providing
+		 * element type information that includes generics via a
+		 * {@link ParameterizedTypeReference}.
+		 * @param producer the source of payload data value(s). This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementTypeRef the type reference of elements contained in the producer
+		 * @return this builder
+		 * @since 5.2
+		 */
+		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 		/**
 		 * A shortcut for {@link #body(BodyInserter)} with an
@@ -571,7 +608,7 @@ public interface WebClient {
 		 * Mono&lt;Void&gt; result = client.post()
 		 *     .uri("/persons/{id}", id)
 		 *     .contentType(MediaType.APPLICATION_JSON)
-		 *     .syncBody(person)
+		 *     .body(person)
 		 *     .retrieve()
 		 *     .bodyToMono(Void.class);
 		 * </pre>
@@ -585,8 +622,46 @@ public interface WebClient {
 		 * MultipartBodyBuilder}.
 		 * @param body the {@code Object} to write to the request
 		 * @return this builder
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
 		 */
+		@Deprecated
 		RequestHeadersSpec<?> syncBody(Object body);
+
+		/**
+		 * A shortcut for {@link #body(BodyInserter)} with an
+		 * {@linkplain BodyInserters#fromObject Object inserter}.
+		 * The body of the request can be one of the following:
+		 * <ul>
+		 * <li>Concrete value
+		 * <li>{@link Publisher} of value(s)
+		 * <li>Any other producer of value(s) that can be adapted to a
+		 * {@link Publisher} via {@link ReactiveAdapterRegistry}
+		 * </ul>.
+
+		 * For example:
+		 * <p><pre class="code">
+		 * Person person = ... ;
+		 *
+		 * Mono&lt;Void&gt; result = client.post()
+		 *     .uri("/persons/{id}", id)
+		 *     .contentType(MediaType.APPLICATION_JSON)
+		 *     .body(person)
+		 *     .retrieve()
+		 *     .bodyToMono(Void.class);
+		 * </pre>
+		 * <p>For multipart requests, provide a
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap}. The
+		 * values in the {@code MultiValueMap} can be any Object representing
+		 * the body of the part, or an
+		 * {@link org.springframework.http.HttpEntity HttpEntity} representing
+		 * a part with body and headers. The {@code MultiValueMap} can be built
+		 * with {@link org.springframework.http.client.MultipartBodyBuilder
+		 * MultipartBodyBuilder}.
+		 * @param body the body to write to the request
+		 * @return this builder
+		 * @since 5.2
+		 */
+		RequestHeadersSpec<?> body(Object body);
 	}
 
 	/**

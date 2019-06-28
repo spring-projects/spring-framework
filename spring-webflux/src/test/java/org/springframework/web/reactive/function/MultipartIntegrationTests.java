@@ -169,7 +169,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 							Path tempFile = Files.createTempFile("MultipartIntegrationTests", null);
 							return part.transferTo(tempFile)
 									.then(ServerResponse.ok()
-											.syncBody(tempFile.toString()));
+											.body(tempFile.toString()));
 						}
 						catch (Exception e) {
 							return Mono.error(e);

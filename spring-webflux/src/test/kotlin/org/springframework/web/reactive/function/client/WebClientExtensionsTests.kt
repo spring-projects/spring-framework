@@ -43,16 +43,16 @@ class WebClientExtensionsTests {
 	@Test
 	fun `RequestBodySpec#body with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<List<Foo>>>()
-		requestBodySpec.body(body)
-		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
+		requestBodySpec.body<List<Foo>>(body)
+		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
 	@FlowPreview
 	fun `RequestBodySpec#body with Flow and reified type parameters`() {
 		val body = mockk<Flow<List<Foo>>>()
-		requestBodySpec.body(body)
-		verify { requestBodySpec.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+		requestBodySpec.body<List<Foo>>(body)
+		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
@@ -89,7 +89,7 @@ class WebClientExtensionsTests {
 		val supplier: suspend () -> String = mockk()
 		every { requestBodySpec.body(ofType<Mono<String>>()) } returns headerSpec
 		runBlocking {
-			requestBodySpec.body(supplier)
+			requestBodySpec.body<String>(supplier)
 		}
 		verify {
 			requestBodySpec.body(ofType<Mono<String>>())

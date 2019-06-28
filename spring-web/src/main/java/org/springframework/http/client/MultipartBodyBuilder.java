@@ -41,7 +41,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * Builder for the body of a multipart request, producing
  * {@code MultiValueMap<String, HttpEntity>}, which can be provided to the
- * {@code WebClient} through the {@code syncBody} method.
+ * {@code WebClient} through the {@code body} method.
  *
  * Examples:
  * <pre class="code">
@@ -67,7 +67,7 @@ import org.springframework.util.MultiValueMap;
  *
  * Mono&lt;Void&gt; result = webClient.post()
  *     .uri("...")
- *     .syncBody(multipartBody)
+ *     .body(multipartBody)
  *     .retrieve()
  *     .bodyToMono(Void.class)
  * </pre>

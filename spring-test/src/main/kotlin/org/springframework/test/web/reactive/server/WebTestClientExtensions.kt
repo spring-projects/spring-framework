@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server
 
 import org.reactivestreams.Publisher
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.util.AssertionErrors.assertEquals
 import org.springframework.test.web.reactive.server.WebTestClient.*
 
@@ -28,7 +29,17 @@ import org.springframework.test.web.reactive.server.WebTestClient.*
  * @since 5.0
  */
 inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S): RequestHeadersSpec<*>
-		= body(publisher, T::class.java)
+		= body(publisher, object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Extension for [RequestBodySpec.body] providing a variant without explicit class
+ * parameter thanks to Kotlin reified type parameters.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+inline fun <reified T : Any> RequestBodySpec.body(producer: Any): RequestHeadersSpec<*>
+		= body(producer, object : ParameterizedTypeReference<T>() {})
 
 /**
  * Extension for [ResponseSpec.expectBody] providing an `expectBody<Foo>()` variant and

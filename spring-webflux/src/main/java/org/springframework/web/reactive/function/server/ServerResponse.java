@@ -30,6 +30,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -387,7 +388,7 @@ public interface ServerResponse {
 		/**
 		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
+		 * {@link BodyInserters#fromObject(Object, Class)}.
 		 * @param publisher the {@code Publisher} to write to the response
 		 * @param elementClass the class of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
@@ -399,7 +400,20 @@ public interface ServerResponse {
 		/**
 		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
+		 * {@link BodyInserters#fromObject(Object, Class)}.
+		 * @param producer the source of payload data value(s). This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementClass the class of elements contained in the producer
+		 * @return the built response
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object producer, Class<?> elementClass);
+
+		/**
+		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromObject(Object, ParameterizedTypeReference)}.
 		 * @param publisher the {@code Publisher} to write to the response
 		 * @param typeReference a type reference describing the elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
@@ -410,6 +424,19 @@ public interface ServerResponse {
 				ParameterizedTypeReference<T> typeReference);
 
 		/**
+		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromObject(Object, ParameterizedTypeReference)}.
+		 * @param producer the source of payload data value(s). This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param typeReference a type reference describing the elements contained in the producer
+		 * @return the built response
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> typeReference);
+
+		/**
 		 * Set the body of the response to the given synchronous {@code Object} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
 		 * {@link BodyInserters#fromObject(Object)}.
@@ -417,8 +444,25 @@ public interface ServerResponse {
 		 * @return the built response
 		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher}, for which
 		 * {@link #body(Publisher, Class)} should be used.
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
 		 */
+		@Deprecated
 		Mono<ServerResponse> syncBody(Object body);
+
+		/**
+		 * Set the body of the response to the given {@code Object} and return it.
+		 * The body can be one of the following:
+		 * <ul>
+		 * <li>Concrete value
+		 * <li>{@link Publisher} of value(s)
+		 * <li>Any other producer of value(s) that can be adapted to a
+		 * {@link Publisher} via {@link ReactiveAdapterRegistry}
+		 * </ul>
+		 * @param body the body of the response
+		 * @return the built response
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object body);
 
 		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.

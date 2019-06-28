@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 
 	@Override
 	public <S, P extends Publisher<S>> ClientRequest.Builder body(P publisher, Class<S> elementClass) {
-		this.body = BodyInserters.fromPublisher(publisher, elementClass);
+		this.body = BodyInserters.fromObject(publisher, elementClass);
 		return this;
 	}
 
@@ -134,7 +134,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 	public <S, P extends Publisher<S>> ClientRequest.Builder body(
 			P publisher, ParameterizedTypeReference<S> typeReference) {
 
-		this.body = BodyInserters.fromPublisher(publisher, typeReference);
+		this.body = BodyInserters.fromObject(publisher, typeReference);
 		return this;
 	}
 

@@ -59,6 +59,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
@@ -223,28 +224,31 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass) {
-		Assert.notNull(publisher, "Publisher must not be null");
-		Assert.notNull(elementClass, "Element Class must not be null");
-
-		return new DefaultEntityResponseBuilder<>(publisher,
-				BodyInserters.fromPublisher(publisher, elementClass))
-				.status(this.statusCode)
-				.headers(this.headers)
-				.cookies(cookies -> cookies.addAll(this.cookies))
-				.hints(hints -> hints.putAll(this.hints))
-				.build()
-				.map(entityResponse -> entityResponse);
+		return body((Object) publisher, elementClass);
 	}
 
 	@Override
 	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
 			ParameterizedTypeReference<T> typeReference) {
+		return body((Object) publisher, typeReference);
+	}
 
-		Assert.notNull(publisher, "Publisher must not be null");
-		Assert.notNull(typeReference, "ParameterizedTypeReference must not be null");
+	@Override
+	@Deprecated
+	public Mono<ServerResponse> syncBody(Object body) {
+		return body(body);
+	}
 
-		return new DefaultEntityResponseBuilder<>(publisher,
-				BodyInserters.fromPublisher(publisher, typeReference))
+	@Override
+	public Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter) {
+		return Mono.just(
+				new BodyInserterResponse<>(this.statusCode, this.headers, this.cookies, inserter, this.hints));
+	}
+
+	@Override
+	public Mono<ServerResponse> body(Object producer, Class<?> elementClass) {
+		return new DefaultEntityResponseBuilder<>(producer,
+				BodyInserters.fromObject(producer, elementClass))
 				.status(this.statusCode)
 				.headers(this.headers)
 				.cookies(cookies -> cookies.addAll(this.cookies))
@@ -254,7 +258,19 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public Mono<ServerResponse> syncBody(Object body) {
+	public Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> typeReference) {
+		return new DefaultEntityResponseBuilder<>(producer,
+				BodyInserters.fromObject(producer, typeReference))
+				.status(this.statusCode)
+				.headers(this.headers)
+				.cookies(cookies -> cookies.addAll(this.cookies))
+				.hints(hints -> hints.putAll(this.hints))
+				.build()
+				.map(entityResponse -> entityResponse);
+	}
+
+	@Override
+	public Mono<ServerResponse> body(Object body) {
 		Assert.notNull(body, "Body must not be null");
 		Assert.isTrue(!(body instanceof Publisher),
 				"Please specify the element class by using body(Publisher, Class)");
@@ -267,12 +283,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.hints(hints -> hints.putAll(this.hints))
 				.build()
 				.map(entityResponse -> entityResponse);
-	}
-
-	@Override
-	public Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter) {
-		return Mono.just(
-				new BodyInserterResponse<>(this.statusCode, this.headers, this.cookies, inserter, this.hints));
 	}
 
 	@Override

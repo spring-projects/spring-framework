@@ -22,7 +22,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.flow.asFlow
-import kotlinx.coroutines.reactive.flow.asPublisher
 import kotlinx.coroutines.reactor.mono
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
@@ -39,6 +38,7 @@ import reactor.core.publisher.Mono
  * @author Sebastien Deleuze
  * @since 5.0
  */
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S): RequestHeadersSpec<*> =
 		body(publisher, object : ParameterizedTypeReference<T>() {})
 
@@ -50,9 +50,9 @@ inline fun <reified T : Any, S : Publisher<T>> RequestBodySpec.body(publisher: S
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@FlowPreview
-inline fun <reified T : Any, S : Flow<T>> RequestBodySpec.body(flow: S): RequestHeadersSpec<*> =
-		body(flow.asPublisher(), object : ParameterizedTypeReference<T>() {})
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+inline fun <reified T : Any> RequestBodySpec.body(producer: Any): RequestHeadersSpec<*> =
+		body(producer, object : ParameterizedTypeReference<T>() {})
 
 /**
  * Extension for [WebClient.ResponseSpec.bodyToMono] providing a `bodyToMono<Foo>()` variant
@@ -106,6 +106,7 @@ suspend fun RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(): Clien
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T: Any> RequestBodySpec.body(crossinline supplier: suspend () -> T)
 		= body(GlobalScope.mono(Dispatchers.Unconfined) { supplier.invoke() })
 

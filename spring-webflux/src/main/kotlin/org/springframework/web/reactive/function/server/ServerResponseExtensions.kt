@@ -16,25 +16,35 @@
 
 package org.springframework.web.reactive.function.server
 
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactive.flow.asPublisher
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import reactor.core.publisher.Mono
 
 /**
- * Extension for [ServerResponse.BodyBuilder.body] providing a `body(Publisher<T>)`
- * variant. This extension is not subject to type erasure and retains actual generic
- * type arguments.
+ * Extension for [ServerResponse.BodyBuilder.body] providing a variant leveraging Kotlin
+ * reified type parameters. This extension is not subject to type erasure and retains
+ * actual generic type arguments.
  *
  * @author Sebastien Deleuze
  * @since 5.0
  */
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T : Any> ServerResponse.BodyBuilder.body(publisher: Publisher<T>): Mono<ServerResponse> =
 		body(publisher, object : ParameterizedTypeReference<T>() {})
+
+/**
+ * Extension for [ServerResponse.BodyBuilder.body] providing a variant leveraging Kotlin
+ * reified type parameters. This extension is not subject to type erasure and retains
+ * actual generic type arguments.
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+inline fun <reified T : Any> ServerResponse.BodyBuilder.body(producer: Any): Mono<ServerResponse> =
+		body(producer, object : ParameterizedTypeReference<T>() {})
 
 /**
  * Extension for [ServerResponse.BodyBuilder.body] providing a
@@ -86,29 +96,16 @@ suspend fun ServerResponse.HeadersBuilder<out ServerResponse.HeadersBuilder<*>>.
 		build().awaitSingle()
 
 /**
- * Coroutines [Flow] based extension for [ServerResponse.BodyBuilder.body] providing a
- * `bodyFlowAndAwait(Flow<T>)` variant. This extension is not subject to type erasure and retains
- * actual generic type arguments.
+ * Coroutines variant of [ServerResponse.BodyBuilder.body].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@FlowPreview
-suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyFlowAndAwait(flow: Flow<T>): ServerResponse =
-		body(flow.asPublisher(), object : ParameterizedTypeReference<T>() {}).awaitSingle()
+suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyAndAwait(body: Any): ServerResponse =
+		body<T>(body).awaitSingle()
 
 /**
- * Coroutines variant of [ServerResponse.BodyBuilder.syncBody].
- *
- * @author Sebastien Deleuze
- * @since 5.2
- */
-suspend fun ServerResponse.BodyBuilder.bodyAndAwait(body: Any): ServerResponse =
-		syncBody(body).awaitSingle()
-
-/**
- * Coroutines variant of [ServerResponse.BodyBuilder.syncBody] without the sync prefix since it is ok to use it within
- * another suspendable function.
+ * Coroutines variant of [ServerResponse.BodyBuilder.render].
  *
  * @author Sebastien Deleuze
  * @since 5.2
@@ -117,8 +114,7 @@ suspend fun ServerResponse.BodyBuilder.renderAndAwait(name: String, vararg model
 		render(name, *modelAttributes).awaitSingle()
 
 /**
- * Coroutines variant of [ServerResponse.BodyBuilder.syncBody] without the sync prefix since it is ok to use it within
- * another suspendable function.
+ * Coroutines variant of [ServerResponse.BodyBuilder.render].
  *
  * @author Sebastien Deleuze
  * @since 5.2
