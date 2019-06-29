@@ -63,6 +63,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assume.assumeFalse;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.MULTIPART_MIXED;
 
 /**
  * Integration tests for {@link RestTemplate}.
@@ -274,15 +275,10 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 	}
 
 	@Test
-	public void multipartMixed() {
-		addSupportedMediaTypeToFormHttpMessageConverter(MULTIPART_MIXED);
-
+	public void multipartMixed() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MULTIPART_MIXED);
-		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(createMultipartParts(),
-			requestHeaders);
-
-		template.postForLocation(baseUrl + "/multipartMixed", requestEntity);
+		template.postForLocation(baseUrl + "/multipartMixed", new HttpEntity<>(createMultipartParts(), requestHeaders));
 	}
 
 	@Test
@@ -291,10 +287,7 @@ public class RestTemplateIntegrationTests extends AbstractMockWebServerTestCase 
 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MULTIPART_RELATED);
-		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(createMultipartParts(),
-			requestHeaders);
-
-		template.postForLocation(baseUrl + "/multipartRelated", requestEntity);
+		template.postForLocation(baseUrl + "/multipartRelated", new HttpEntity<>(createMultipartParts(), requestHeaders));
 	}
 
 	private MultiValueMap<String, Object> createMultipartParts() {

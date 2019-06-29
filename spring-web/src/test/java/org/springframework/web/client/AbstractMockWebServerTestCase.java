@@ -36,6 +36,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.LOCATION;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+import static org.springframework.http.MediaType.MULTIPART_MIXED;
 
 /**
  * @author Brian Clozel
@@ -43,7 +44,6 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
  */
 public class AbstractMockWebServerTestCase {
 
-	protected static final MediaType MULTIPART_MIXED = new MediaType("multipart", "mixed");
 	protected static final MediaType MULTIPART_RELATED = new MediaType("multipart", "related");
 
 	protected static final MediaType textContentType =

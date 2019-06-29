@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
+ * @author Sam Brannen
  * @since 3.0
  * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
@@ -289,6 +290,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String MULTIPART_FORM_DATA_VALUE = "multipart/form-data";
 
 	/**
+	 * Public constant media type for {@code multipart/mixed}.
+	 * @since 5.2
+	 */
+	public static final MediaType MULTIPART_MIXED;
+
+	/**
+	 * A String equivalent of {@link MediaType#MULTIPART_MIXED}.
+	 * @since 5.2
+	 */
+	public static final String MULTIPART_MIXED_VALUE = "multipart/mixed";
+
+	/**
 	 * Public constant media type for {@code text/event-stream}.
 	 * @since 4.3.6
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
@@ -367,6 +380,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_JPEG = new MediaType("image", "jpeg");
 		IMAGE_PNG = new MediaType("image", "png");
 		MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
+		MULTIPART_MIXED = new MediaType("multipart", "mixed");
 		TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
 		TEXT_HTML = new MediaType("text", "html");
 		TEXT_MARKDOWN = new MediaType("text", "markdown");

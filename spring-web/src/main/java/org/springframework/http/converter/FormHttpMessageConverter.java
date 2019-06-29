@@ -52,7 +52,8 @@ import org.springframework.util.StringUtils;
  * <p>In other words, this converter can read and write the
  * {@code "application/x-www-form-urlencoded"} media type as
  * {@link MultiValueMap MultiValueMap&lt;String, String&gt;}, and it can also
- * write (but not read) the {@code "multipart/form-data"} media type as
+ * write (but not read) the {@code "multipart/form-data"} and
+ * {@code "multipart/mixed"} media types as
  * {@link MultiValueMap MultiValueMap&lt;String, Object&gt;}.
  *
  * <h3>Multipart Data</h3>
@@ -63,7 +64,9 @@ import org.springframework.util.StringUtils;
  * {@code "multipart/mixed"} and {@code "multipart/related"}, as long as the
  * multipart subtype is registered as a {@linkplain #getSupportedMediaTypes
  * supported media type} <em>and</em> the desired multipart subtype is specified
- * as the content type when {@linkplain #write writing} the multipart data.
+ * as the content type when {@linkplain #write writing} the multipart data. Note
+ * that {@code "multipart/mixed"} is registered as a supported media type by
+ * default.
  *
  * <p>When writing multipart data, this converter uses other
  * {@link HttpMessageConverter HttpMessageConverters} to write the respective
@@ -85,8 +88,8 @@ import org.springframework.util.StringUtils;
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
  * form.add("field 3", 4);  // non-String form values supported as of 5.1.4
- * restTemplate.postForLocation("https://example.com/myForm", form);
- * </pre>
+ *
+ * restTemplate.postForLocation("https://example.com/myForm", form);</pre>
  *
  * <p>The following snippet shows how to do a file upload using the
  * {@code "multipart/form-data"} content type.
@@ -95,33 +98,45 @@ import org.springframework.util.StringUtils;
  * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
  * parts.add("field 1", "value 1");
  * parts.add("file", new ClassPathResource("myFile.jpg"));
- * restTemplate.postForLocation("https://example.com/myFileUpload", parts);
- * </pre>
+ *
+ * restTemplate.postForLocation("https://example.com/myFileUpload", parts);</pre>
  *
  * <p>The following snippet shows how to do a file upload using the
  * {@code "multipart/mixed"} content type.
  *
  * <pre class="code">
- * MediaType multipartMixed = new MediaType("multipart", "mixed");
+ * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
+ * parts.add("field 1", "value 1");
+ * parts.add("file", new ClassPathResource("myFile.jpg"));
+ *
+ * HttpHeaders requestHeaders = new HttpHeaders();
+ * requestHeaders.setContentType(MediaType.MULTIPART_MIXED);
+ *
+ * restTemplate.postForLocation("https://example.com/myFileUpload",
+ *     new HttpEntity&lt;&gt;(parts, requestHeaders));</pre>
+ *
+ * <p>The following snippet shows how to do a file upload using the
+ * {@code "multipart/related"} content type.
+ *
+ * <pre class="code">
+ * MediaType multipartRelated = new MediaType("multipart", "related");
  *
  * restTemplate.getMessageConverters().stream()
  *     .filter(FormHttpMessageConverter.class::isInstance)
  *     .map(FormHttpMessageConverter.class::cast)
  *     .findFirst()
  *     .orElseThrow(() -&gt; new IllegalStateException("Failed to find FormHttpMessageConverter"))
- *     .addSupportedMediaTypes(multipartMixed);
+ *     .addSupportedMediaTypes(multipartRelated);
  *
  * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
  * parts.add("field 1", "value 1");
  * parts.add("file", new ClassPathResource("myFile.jpg"));
  *
  * HttpHeaders requestHeaders = new HttpHeaders();
- * requestHeaders.setContentType(multipartMixed);
- * HttpEntity&lt;MultiValueMap&lt;String, Object&gt;&gt; requestEntity =
- *     new HttpEntity&lt;&gt;(parts, requestHeaders);
+ * requestHeaders.setContentType(multipartRelated);
  *
- * restTemplate.postForLocation("https://example.com/myFileUpload", requestEntity);
- * </pre>
+ * restTemplate.postForLocation("https://example.com/myFileUpload",
+ *     new HttpEntity&lt;&gt;(parts, requestHeaders));</pre>
  *
  * <h3>Miscellaneous</h3>
  *
@@ -138,12 +153,12 @@ import org.springframework.util.StringUtils;
  */
 public class FormHttpMessageConverter implements HttpMessageConverter<MultiValueMap<String, ?>> {
 
-	private static final MediaType MULTIPART_ALL = new MediaType("multipart", "*");
-
 	/**
 	 * The default charset used by the converter.
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
+	static final MediaType MULTIPART_ALL = new MediaType("multipart", "*");
 
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
 			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
@@ -162,6 +177,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	public FormHttpMessageConverter() {
 		this.supportedMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED);
 		this.supportedMediaTypes.add(MediaType.MULTIPART_FORM_DATA);
+		this.supportedMediaTypes.add(MediaType.MULTIPART_MIXED);
 
 		this.partConverters.add(new ByteArrayHttpMessageConverter());
 		this.partConverters.add(new StringHttpMessageConverter());
