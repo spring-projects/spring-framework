@@ -189,14 +189,13 @@ public abstract class MimeTypeUtils {
 	 * @throws InvalidMimeTypeException if the string cannot be parsed
 	 */
 	public static MimeType parseMimeType(String mimeType) {
+		if (!StringUtils.hasLength(mimeType)) {
+			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
+		}
 		return cachedMimeTypes.get(mimeType);
 	}
 
 	private static MimeType parseMimeTypeInternal(String mimeType) {
-		if (!StringUtils.hasLength(mimeType)) {
-			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
-		}
-
 		int index = mimeType.indexOf(';');
 		String fullType = (index >= 0 ? mimeType.substring(0, index) : mimeType).trim();
 		if (fullType.isEmpty()) {

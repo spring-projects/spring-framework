@@ -286,6 +286,12 @@ public class MimeTypeTests {
 	}
 
 	@Test
+	public void parseMimeTypeNull() {
+		assertThatExceptionOfType(InvalidMimeTypeException.class).isThrownBy(() ->
+				MimeTypeUtils.parseMimeType(null));
+	}
+
+	@Test
 	public void parseMimeTypes() {
 		String s = "text/plain, text/html, text/x-dvi, text/x-c";
 		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes(s);
