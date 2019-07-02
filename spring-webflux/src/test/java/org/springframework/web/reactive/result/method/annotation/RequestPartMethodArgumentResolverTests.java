@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,18 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
-import static org.springframework.web.method.MvcAnnotationPredicates.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.web.method.MvcAnnotationPredicates.requestPart;
 
 /**
  * Unit tests for {@link RequestPartMethodArgumentResolver}.
  * @author Rossen Stoyanchev
+ * @author Ilya Lukyanovich
  */
 public class RequestPartMethodArgumentResolverTests {
 
@@ -131,6 +136,15 @@ public class RequestPartMethodArgumentResolverTests {
 		assertEquals("James", actual.get(1).getName());
 	}
 
+	@Test // gh-23060
+	public void listPersonNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(List.class, Person.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		List<Person> actual = resolveArgument(param, bodyBuilder);
+
+		assertEquals(Collections.emptyList(), actual);
+	}
+
 	@Test
 	public void monoPerson() {
 		MethodParameter param = this.testMethod.annot(requestPart()).arg(Mono.class, Person.class);
@@ -139,6 +153,15 @@ public class RequestPartMethodArgumentResolverTests {
 		Mono<Person> actual = resolveArgument(param, bodyBuilder);
 
 		assertEquals("Jones", actual.block().getName());
+	}
+
+	@Test // gh-23060
+	public void monoPersonNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Mono.class, Person.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		Mono<Person> actual = resolveArgument(param, bodyBuilder);
+
+		assertNull(actual.block());
 	}
 
 	@Test
@@ -152,6 +175,15 @@ public class RequestPartMethodArgumentResolverTests {
 		List<Person> persons = actual.collectList().block();
 		assertEquals("Jones", persons.get(0).getName());
 		assertEquals("James", persons.get(1).getName());
+	}
+
+	@Test // gh-23060
+	public void fluxPersonNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Flux.class, Person.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		Flux<Person> actual = resolveArgument(param, bodyBuilder);
+
+		assertEquals(Collections.emptyList(), actual.collectList().block());
 	}
 
 	@Test
@@ -177,6 +209,15 @@ public class RequestPartMethodArgumentResolverTests {
 		assertEquals("{\"name\":\"James\"}", partToUtf8String(actual.get(1)));
 	}
 
+	@Test // gh-23060
+	public void listPartNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(List.class, Part.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		List<Part> actual = resolveArgument(param, bodyBuilder);
+
+		assertEquals(Collections.emptyList(), actual);
+	}
+
 	@Test
 	public void monoPart() {
 		MethodParameter param = this.testMethod.annot(requestPart()).arg(Mono.class, Part.class);
@@ -186,6 +227,15 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Part part = actual.block();
 		assertEquals("{\"name\":\"Jones\"}", partToUtf8String(part));
+	}
+
+	@Test // gh-23060
+	public void monoPartNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Mono.class, Part.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		Mono<Part> actual = resolveArgument(param, bodyBuilder);
+
+		assertNull(actual.block());
 	}
 
 	@Test
@@ -199,6 +249,15 @@ public class RequestPartMethodArgumentResolverTests {
 		List<Part> parts = actual.collectList().block();
 		assertEquals("{\"name\":\"Jones\"}", partToUtf8String(parts.get(0)));
 		assertEquals("{\"name\":\"James\"}", partToUtf8String(parts.get(1)));
+	}
+
+	@Test // gh-23060
+	public void fluxPartNotRequired() {
+		MethodParameter param = this.testMethod.annot(requestPart().notRequired()).arg(Flux.class, Part.class);
+		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+		Flux<Part> actual = resolveArgument(param, bodyBuilder);
+
+		assertEquals(Collections.emptyList(), actual.collectList().block());
 	}
 
 	@Test
@@ -278,7 +337,13 @@ public class RequestPartMethodArgumentResolverTests {
 			@RequestPart("name") Flux<Part> partFlux,
 			@RequestPart("name") List<Part> partList,
 			@RequestPart(name = "anotherPart", required = false) Person anotherPerson,
+			@RequestPart(name = "name", required = false) Mono<Person> anotherPersonMono,
+			@RequestPart(name = "name", required = false) Flux<Person> anotherPersonFlux,
+			@RequestPart(name = "name", required = false) List<Person> anotherPersonList,
 			@RequestPart(name = "anotherPart", required = false) Part anotherPart,
+			@RequestPart(name = "name", required = false) Mono<Part> anotherPartMono,
+			@RequestPart(name = "name", required = false) Flux<Part> anotherPartFlux,
+			@RequestPart(name = "name", required = false) List<Part> anotherPartList,
 			Person notAnnotated) {}
 
 

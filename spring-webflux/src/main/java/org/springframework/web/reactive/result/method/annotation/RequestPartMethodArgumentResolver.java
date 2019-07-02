@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,19 +96,12 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(parameter.getParameterType());
 		if (adapter != null) {
-			// Mono<Part> or Flux<Part>
 			MethodParameter elementType = parameter.nested();
-			if (Part.class.isAssignableFrom(elementType.getNestedParameterType())) {
-				parts = (adapter.isMultiValue() ? parts : parts.take(1));
-				return Mono.just(adapter.fromPublisher(parts));
-			}
-			// We have to decode the content for each part, one at a time
-			if (adapter.isMultiValue()) {
-				return Mono.just(decodePartValues(parts, elementType, bindingContext, exchange, isRequired));
-			}
+			return Mono.just(adapter.fromPublisher(
+					Part.class.isAssignableFrom(elementType.getNestedParameterType()) ?
+							parts : decodePartValues(parts, elementType, bindingContext, exchange, isRequired)));
 		}
 
-		// <T> or Mono<T>
 		return decodePartValues(parts, parameter, bindingContext, exchange, isRequired)
 				.next().cast(Object.class);
 	}
