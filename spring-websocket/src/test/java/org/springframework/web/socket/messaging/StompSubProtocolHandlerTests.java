@@ -383,6 +383,15 @@ public class StompSubProtocolHandlerTests {
 		Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
 		assertThat(user).isNotNull();
 		assertThat(user.getName()).isEqualTo("__pete__@gmail.com");
+
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+		handler.handleMessageToClient(this.session, message);
+
+		assertThat(this.session.getSentMessages()).hasSize(1);
+		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
+		assertThat(textMessage.getPayload())
+				.isEqualTo("CONNECTED\n" + "user-name:__pete__@gmail.com\n" + "\n" + "\u0000");
 	}
 
 	@Test
