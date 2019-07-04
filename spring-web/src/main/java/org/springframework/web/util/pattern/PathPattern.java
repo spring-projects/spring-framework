@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.PathContainer.Element;
@@ -465,13 +466,13 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 	String toChainString() {
-		StringBuilder buf = new StringBuilder();
+		StringJoiner buf = new StringJoiner(" ");
 		PathElement pe = this.head;
 		while (pe != null) {
-			buf.append(pe.toString()).append(" ");
+			buf.add(pe.toString());
 			pe = pe.next;
 		}
-		return buf.toString().trim();
+		return buf.toString();
 	}
 
 	/**
