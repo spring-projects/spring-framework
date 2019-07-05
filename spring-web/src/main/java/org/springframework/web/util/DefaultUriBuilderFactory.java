@@ -328,8 +328,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder queryParams(String name, @Nullable Collection<?> values) {
-			this.uriComponentsBuilder.queryParams(name, values);
+		public DefaultUriBuilder queryParam(String name, @Nullable Collection<?> values) {
+			this.uriComponentsBuilder.queryParam(name, values);
 			return this;
 		}
 
@@ -340,8 +340,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder replaceQueryParams(String name, @Nullable Collection<?> values) {
-			this.uriComponentsBuilder.replaceQueryParams(name, values);
+		public DefaultUriBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
+			this.uriComponentsBuilder.replaceQueryParam(name, values);
 			return this;
 		}
 
