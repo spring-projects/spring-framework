@@ -776,7 +776,10 @@ public class AntPathMatcher implements PathMatcher {
 				return 1;
 			}
 
-			if (info1.isPrefixPattern() && info2.getDoubleWildcards() == 0) {
+			if (info1.isPrefixPattern() && info2.isPrefixPattern()) {
+				return info2.getLength() - info1.getLength();
+			}
+			else if (info1.isPrefixPattern() && info2.getDoubleWildcards() == 0) {
 				return 1;
 			}
 			else if (info2.isPrefixPattern() && info1.getDoubleWildcards() == 0) {
