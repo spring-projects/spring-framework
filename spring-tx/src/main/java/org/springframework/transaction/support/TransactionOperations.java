@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,5 +43,24 @@ public interface TransactionOperations {
 	 */
 	@Nullable
 	<T> T execute(TransactionCallback<T> action) throws TransactionException;
+
+
+	/**
+	 * Return an implementation of the {@code TransactionOperations} interface which
+	 * executes a given {@link TransactionCallback} without an actual transaction.
+	 * <p>Useful for testing: The behavior is equivalent to running with a
+	 * transaction manager with no actual transaction (PROPAGATION_SUPPORTS)
+	 * and no synchronization (SYNCHRONIZATION_NEVER).
+	 * <p>For a {@link TransactionOperations} implementation with actual
+	 * transaction processing, use {@link TransactionTemplate} with an appropriate
+	 * {@link org.springframework.transaction.PlatformTransactionManager}.
+	 * @since 5.2
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_SUPPORTS
+	 * @see AbstractPlatformTransactionManager#SYNCHRONIZATION_NEVER
+	 * @see TransactionTemplate
+	 */
+	static TransactionOperations withoutTransaction() {
+		return WithoutTransactionOperations.INSTANCE;
+	};
 
 }
