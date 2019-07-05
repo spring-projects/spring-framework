@@ -2,6 +2,12 @@ description = "Spring Context"
 
 apply plugin: "groovy"
 
+dependencyManagement {
+	imports {
+		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+	}
+}
+
 dependencies {
 	compile(project(":spring-aop"))
 	compile(project(":spring-beans"))
@@ -23,6 +29,8 @@ dependencies {
 	optional("org.hibernate:hibernate-validator:5.4.3.Final")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("org.reactivestreams:reactive-streams")
+	testCompile("io.projectreactor:reactor-core")
 	testCompile("org.codehaus.groovy:groovy-jsr223:${groovyVersion}")
 	testCompile("org.codehaus.groovy:groovy-test:${groovyVersion}")
 	testCompile("org.codehaus.groovy:groovy-xml:${groovyVersion}")

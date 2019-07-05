@@ -99,8 +99,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 
 	@Test
 	public void listenerWithSubTypeSeveralGenerics() {
-		Method method = ReflectionUtils.findMethod(SampleEvents.class,
-				"handleString", String.class);
+		Method method = ReflectionUtils.findMethod(SampleEvents.class, "handleString", String.class);
 		supportsEventType(true, method, ResolvableType.forClass(PayloadTestEvent.class));
 	}
 
@@ -141,23 +140,20 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 	public void listenerWithTooManyParameters() {
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "tooManyParameters", String.class, String.class);
-		assertThatIllegalStateException().isThrownBy(() ->
-				createTestInstance(method));
+		assertThatIllegalStateException().isThrownBy(() -> createTestInstance(method));
 	}
 
 	@Test
 	public void listenerWithNoParameter() {
 		Method method = ReflectionUtils.findMethod(SampleEvents.class, "noParameter");
-		assertThatIllegalStateException().isThrownBy(() ->
-				createTestInstance(method));
+		assertThatIllegalStateException().isThrownBy(() -> createTestInstance(method));
 	}
 
 	@Test
 	public void listenerWithMoreThanOneParameter() {
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "moreThanOneParameter", String.class, Integer.class);
-		assertThatIllegalStateException().isThrownBy(() ->
-				createTestInstance(method));
+		assertThatIllegalStateException().isThrownBy(() -> createTestInstance(method));
 	}
 
 	@Test
@@ -331,7 +327,8 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 
 	private void supportsEventType(boolean match, Method method, ResolvableType eventType) {
 		ApplicationListenerMethodAdapter adapter = createTestInstance(method);
-		assertThat(adapter.supportsEventType(eventType)).as("Wrong match for event '" + eventType + "' on " + method).isEqualTo(match);
+		assertThat(adapter.supportsEventType(eventType))
+				.as("Wrong match for event '" + eventType + "' on " + method).isEqualTo(match);
 	}
 
 	private void invokeListener(Method method, ApplicationEvent event) {

@@ -16,7 +16,6 @@
 
 package org.springframework.context.event;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -42,16 +41,11 @@ import static org.mockito.Mockito.mock;
  */
 public class EventPublicationInterceptorTests {
 
-	private ApplicationEventPublisher publisher;
+	private final ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
 
-
-	@Before
-	public void setUp() {
-		this.publisher = mock(ApplicationEventPublisher.class);
-	}
 
 	@Test
-	public void testWithNoApplicationEventClassSupplied() throws Exception {
+	public void testWithNoApplicationEventClassSupplied() {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
 		assertThatIllegalArgumentException().isThrownBy(
@@ -59,7 +53,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 	@Test
-	public void testWithNonApplicationEventClassSupplied() throws Exception {
+	public void testWithNonApplicationEventClassSupplied() {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
 		assertThatIllegalArgumentException().isThrownBy(() -> {
@@ -69,7 +63,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 	@Test
-	public void testWithAbstractStraightApplicationEventClassSupplied() throws Exception {
+	public void testWithAbstractStraightApplicationEventClassSupplied() {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
 		assertThatIllegalArgumentException().isThrownBy(() -> {
@@ -79,7 +73,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 	@Test
-	public void testWithApplicationEventClassThatDoesntExposeAValidCtor() throws Exception {
+	public void testWithApplicationEventClassThatDoesntExposeAValidCtor() {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventPublisher(this.publisher);
 		assertThatIllegalArgumentException().isThrownBy(() -> {
@@ -89,7 +83,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 	@Test
-	public void testExpectedBehavior() throws Exception {
+	public void testExpectedBehavior() {
 		TestBean target = new TestBean();
 		final TestListener listener = new TestListener();
 
