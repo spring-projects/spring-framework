@@ -45,7 +45,9 @@
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.FinalClassCheck" />
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.InterfaceIsTypeCheck" />
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.HideUtilityClassConstructorCheck" />
-		<module name="com.puppycrawl.tools.checkstyle.checks.design.MutableExceptionCheck" />
+		<module name="com.puppycrawl.tools.checkstyle.checks.design.MutableExceptionCheck">
+			<property name="format" value="^.*Exception$" />
+		</module>
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.InnerTypeLastCheck" />
 		<module name="com.puppycrawl.tools.checkstyle.checks.design.OneTopLevelClassCheck" />
 

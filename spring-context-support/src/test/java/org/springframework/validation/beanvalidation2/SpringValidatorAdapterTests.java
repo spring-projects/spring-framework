@@ -17,9 +17,11 @@
 package org.springframework.validation.beanvalidation2;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -50,13 +52,11 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.SerializationTestUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -88,7 +88,7 @@ public class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-13406
-	public void testNoStringArgumentValue() {
+	public void testNoStringArgumentValue() throws Exception {
 		TestBean testBean = new TestBean();
 		testBean.setPassword("pass");
 		testBean.setConfirmPassword("pass");
@@ -103,10 +103,11 @@ public class SpringValidatorAdapterTests {
 		assertThat(messageSource.getMessage(error, Locale.ENGLISH)).isEqualTo("Size of Password must be between 8 and 128");
 		assertThat(error.contains(ConstraintViolation.class)).isTrue();
 		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("password");
+		assertThat(SerializationTestUtils.serializeAndDeserialize(error.toString())).isEqualTo(error.toString());
 	}
 
 	@Test  // SPR-13406
-	public void testApplyMessageSourceResolvableToStringArgumentValueWithResolvedLogicalFieldName() {
+	public void testApplyMessageSourceResolvableToStringArgumentValueWithResolvedLogicalFieldName() throws Exception {
 		TestBean testBean = new TestBean();
 		testBean.setPassword("password");
 		testBean.setConfirmPassword("PASSWORD");
@@ -121,6 +122,7 @@ public class SpringValidatorAdapterTests {
 		assertThat(messageSource.getMessage(error, Locale.ENGLISH)).isEqualTo("Password must be same value as Password(Confirm)");
 		assertThat(error.contains(ConstraintViolation.class)).isTrue();
 		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString()).isEqualTo("password");
+		assertThat(SerializationTestUtils.serializeAndDeserialize(error.toString())).isEqualTo(error.toString());
 	}
 
 	@Test  // SPR-13406
@@ -323,8 +325,8 @@ public class SpringValidatorAdapterTests {
 
 	@Documented
 	@Constraint(validatedBy = {SameValidator.class})
-	@Target({TYPE, ANNOTATION_TYPE})
-	@Retention(RUNTIME)
+	@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(SameGroup.class)
 	@interface Same {
 
@@ -338,8 +340,8 @@ public class SpringValidatorAdapterTests {
 
 		String comparingField();
 
-		@Target({TYPE, ANNOTATION_TYPE})
-		@Retention(RUNTIME)
+		@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+		@Retention(RetentionPolicy.RUNTIME)
 		@Documented
 		@interface List {
 			Same[] value();
@@ -349,8 +351,8 @@ public class SpringValidatorAdapterTests {
 
 	@Documented
 	@Inherited
-	@Retention(RUNTIME)
-	@Target({TYPE, ANNOTATION_TYPE})
+	@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
 	@interface SameGroup {
 
 		Same[] value();
@@ -486,7 +488,7 @@ public class SpringValidatorAdapterTests {
 
 
 	@Constraint(validatedBy = AnythingValidator.class)
-	@Retention(RUNTIME)
+	@Retention(RetentionPolicy.RUNTIME)
 	public @interface AnythingValid {
 
 		String message() default "{AnythingValid.message}";
@@ -507,23 +509,22 @@ public class SpringValidatorAdapterTests {
 
 		@Override
 		public boolean isValid(Object value, ConstraintValidatorContext context) {
-			List<Field> fieldsErros = new ArrayList<>();
-			Arrays.asList(value.getClass().getDeclaredFields()).forEach(f -> {
-				f.setAccessible(true);
+			List<Field> fieldsErrors = new ArrayList<>();
+			Arrays.asList(value.getClass().getDeclaredFields()).forEach(field -> {
+				field.setAccessible(true);
 				try {
-					if (!f.getName().equals(ID) && f.get(value) == null) {
-						fieldsErros.add(f);
+					if (!field.getName().equals(ID) && field.get(value) == null) {
+						fieldsErrors.add(field);
 						context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
-								.addPropertyNode(f.getName())
+								.addPropertyNode(field.getName())
 								.addConstraintViolation();
 					}
 				}
 				catch (IllegalAccessException ex) {
 					throw new IllegalStateException(ex);
 				}
-
 			});
-			return fieldsErros.isEmpty();
+			return fieldsErrors.isEmpty();
 		}
 	}
 
