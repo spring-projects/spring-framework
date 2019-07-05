@@ -17,9 +17,11 @@
 package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -52,8 +54,6 @@ import org.springframework.util.SerializationTestUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
 import static org.hamcrest.core.Is.*;
 import static org.hamcrest.core.StringContains.*;
 import static org.junit.Assert.*;
@@ -282,8 +282,8 @@ public class SpringValidatorAdapterTests {
 
 	@Documented
 	@Constraint(validatedBy = {SameValidator.class})
-	@Target({TYPE, ANNOTATION_TYPE})
-	@Retention(RUNTIME)
+	@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(SameGroup.class)
 	@interface Same {
 
@@ -297,8 +297,8 @@ public class SpringValidatorAdapterTests {
 
 		String comparingField();
 
-		@Target({TYPE, ANNOTATION_TYPE})
-		@Retention(RUNTIME)
+		@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+		@Retention(RetentionPolicy.RUNTIME)
 		@Documented
 		@interface List {
 			Same[] value();
@@ -308,8 +308,8 @@ public class SpringValidatorAdapterTests {
 
 	@Documented
 	@Inherited
-	@Retention(RUNTIME)
-	@Target({TYPE, ANNOTATION_TYPE})
+	@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
 	@interface SameGroup {
 
 		Same[] value();
@@ -445,7 +445,7 @@ public class SpringValidatorAdapterTests {
 
 
 	@Constraint(validatedBy = AnythingValidator.class)
-	@Retention(RUNTIME)
+	@Retention(RetentionPolicy.RUNTIME)
 	public @interface AnythingValid {
 
 		String message() default "{AnythingValid.message}";
@@ -466,14 +466,14 @@ public class SpringValidatorAdapterTests {
 
 		@Override
 		public boolean isValid(Object value, ConstraintValidatorContext context) {
-			List<Field> fieldsErros = new ArrayList<>();
-			Arrays.asList(value.getClass().getDeclaredFields()).forEach(f -> {
-				f.setAccessible(true);
+			List<Field> fieldsErrors = new ArrayList<>();
+			Arrays.asList(value.getClass().getDeclaredFields()).forEach(field -> {
+				field.setAccessible(true);
 				try {
-					if (!f.getName().equals(ID) && f.get(value) == null) {
-						fieldsErros.add(f);
+					if (!field.getName().equals(ID) && field.get(value) == null) {
+						fieldsErrors.add(field);
 						context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
-								.addPropertyNode(f.getName())
+								.addPropertyNode(field.getName())
 								.addConstraintViolation();
 					}
 				}
@@ -481,7 +481,7 @@ public class SpringValidatorAdapterTests {
 					throw new IllegalStateException(ex);
 				}
 			});
-			return fieldsErros.isEmpty();
+			return fieldsErrors.isEmpty();
 		}
 	}
 
