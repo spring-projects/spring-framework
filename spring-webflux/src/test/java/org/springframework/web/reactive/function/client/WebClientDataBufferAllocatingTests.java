@@ -147,6 +147,15 @@ public class WebClientDataBufferAllocatingTests extends AbstractDataBufferAlloca
 		testOnStatus(ex, response -> response.bodyToMono(Void.class).then(Mono.error(ex)));
 	}
 
+	@Test // gh-23230
+	public void onStatusWithImmediateErrorAndBodyNotConsumed() {
+		RuntimeException ex = new RuntimeException("response error");
+		testOnStatus(ex, response -> {
+			throw ex;
+		});
+	}
+
+
 	private void testOnStatus(Throwable expected,
 			Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 

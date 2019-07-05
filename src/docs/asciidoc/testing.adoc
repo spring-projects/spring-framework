@@ -5079,20 +5079,43 @@ resulting links by using XPath expressions:
 		.andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));
 ----
 
-[[spring-mvc-test-server-filters]]
-===== Filter Registrations
 
-When setting up a `MockMvc` instance, you can register one or more Servlet `Filter`
-instances, as the following example shows:
+[[spring-mvc-test-async-requests]]
+===== Async Requests
+
+Servlet 3.0 asynchronous requests,
+<<web.adoc#mvc-ann-async,supported in Spring MVC>>, work by exiting the Servlet container
+thread and allowing the application to compute the response asynchronously, after which
+an async dispatch is made to complete processing on a Servlet container thread.
+
+In Spring MVC Test, async requests can be tested by asserting the produced async value
+first, then manually performing the async dispatch, and finally verifying the response.
+Below is an example test for controller methods that return `DeferredResult`, `Callable`,
+or reactive type such as Reactor `Mono`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	mockMvc = standaloneSetup(new PersonController()).addFilters(new CharacterEncodingFilter()).build();
-----
+@Test
+public void test() throws Exception {
+	MvcResult mvcResult = this.mockMvc.perform(get("/path"))
+		.andExpect(status().isOk()) <1>
+		.andExpect(request().asyncStarted()) <2>
+		.andExpect(request().asyncResult("body")) <3>
+		.andReturn();
 
-Registered filters are invoked through the `MockFilterChain` from `spring-test`, and the
-last filter delegates to the `DispatcherServlet`.
+	this.mockMvc.perform(asyncDispatch(mvcResult)) <4>
+		.andExpect(status().isOk()) <5>
+		.andExpect(content().string("body"));
+}
+----
+<1> Check response status is still unchanged
+<2> Async processing must have started
+<3> Wait and assert the async result
+<4> Manually perform an ASYNC dispatch (as there is no running container)
+<5> Verify the final response
+
+====
 
 
 [[spring-mvc-test-vs-streaming-response]]
@@ -5108,13 +5131,31 @@ with `WebTestClient`. One extra advantage is the ability to use the `StepVerifie
 project Reactor that allows declaring expectations on a stream of data.
 
 
-[[spring-mvc-test-vs-end-to-end-integration-tests]]
-===== Differences Between Out-of-Container and End-to-End Integration Tests
+[[spring-mvc-test-server-filters]]
+===== Filter Registrations
 
-As mentioned earlier Spring MVC Test is built on the Servlet API mock objects from the
-`spring-test` module and does not use a running Servlet container. Therefore, there are
-some important differences compared to full end-to-end integration tests with an actual
-client and server running.
+When setting up a `MockMvc` instance, you can register one or more Servlet `Filter`
+instances, as the following example shows:
+
+====
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	mockMvc = standaloneSetup(new PersonController()).addFilters(new CharacterEncodingFilter()).build();
+----
+====
+
+Registered filters are invoked through the `MockFilterChain` from `spring-test`, and the
+last filter delegates to the `DispatcherServlet`.
+
+
+[[spring-mvc-test-vs-end-to-end-integration-tests]]
+===== Spring MVC Test vs End-to-End Tests
+
+Spring MVC Test is built on Servlet API mock implementations from the
+`spring-test` module and does not rely on a running container. Therefore, there are
+some differences when compared to full end-to-end integration tests with an actual
+client and a live server running.
 
 The easiest way to think about this is by starting with a blank `MockHttpServletRequest`.
 Whatever you add to it is what the request becomes. Things that may catch you by surprise
@@ -5155,7 +5196,7 @@ important thing to check. In short, there is room here for multiple styles and s
 of testing even within the same project.
 
 [[spring-mvc-test-server-resources]]
-===== Further Server-Side Test Examples
+===== Further Examples
 
 The framework's own tests include
 https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[many

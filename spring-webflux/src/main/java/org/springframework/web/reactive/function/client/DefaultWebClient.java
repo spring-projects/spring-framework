@@ -463,9 +463,15 @@ class DefaultWebClient implements WebClient {
 				for (StatusHandler handler : this.statusHandlers) {
 					if (handler.test(response.statusCode())) {
 						HttpRequest request = this.requestSupplier.get();
-						Mono<? extends Throwable> exMono = handler.apply(response, request);
-						exMono = exMono.flatMap(ex -> drainBody(response, ex));
-						exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
+						Mono<? extends Throwable> exMono;
+						try {
+							exMono = handler.apply(response, request);
+							exMono = exMono.flatMap(ex -> drainBody(response, ex));
+							exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
+						}
+						catch (Throwable ex2) {
+							exMono = drainBody(response, ex2);
+						}
 						T result = errorFunction.apply(exMono);
 						return insertCheckpoint(result, response.statusCode(), request);
 					}
