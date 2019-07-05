@@ -138,6 +138,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			// The readerCache will only contain gettable properties (let's not worry about setters for now).
 			Property property = new Property(type, method, null);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+			method = ClassUtils.getInterfaceMethodIfPossible(method);
 			this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
@@ -180,6 +181,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					// The readerCache will only contain gettable properties (let's not worry about setters for now).
 					Property property = new Property(type, method, null);
 					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+					method = ClassUtils.getInterfaceMethodIfPossible(method);
 					invoker = new InvokerPair(method, typeDescriptor);
 					this.lastReadInvokerPair = invoker;
 					this.readerCache.put(cacheKey, invoker);
@@ -239,6 +241,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			// Treat it like a property
 			Property property = new Property(type, null, method);
 			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+			method = ClassUtils.getInterfaceMethodIfPossible(method);
 			this.writerCache.put(cacheKey, method);
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;
@@ -287,6 +290,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (method == null) {
 				method = findSetterForProperty(name, type, target);
 				if (method != null) {
+					method = ClassUtils.getInterfaceMethodIfPossible(method);
 					cachedMember = method;
 					this.writerCache.put(cacheKey, cachedMember);
 				}
@@ -414,11 +418,22 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 						method.getParameterCount() == numberOfParams &&
 						(!mustBeStatic || Modifier.isStatic(method.getModifiers())) &&
 						(requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
-					return ClassUtils.getInterfaceMethodIfPossible(method);
+					return method;
 				}
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Return class methods ordered with non-bridge methods appearing higher.
+	 */
+	private Method[] getSortedMethods(Class<?> clazz) {
+		return this.sortedMethodsCache.computeIfAbsent(clazz, key -> {
+			Method[] methods = key.getMethods();
+			Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge() ? 0 : (o1.isBridge() ? 1 : -1)));
+			return methods;
+		});
 	}
 
 	/**
@@ -432,17 +447,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	protected boolean isCandidateForProperty(Method method, Class<?> targetClass) {
 		return true;
-	}
-
-	/**
-	 * Return class methods ordered with non-bridge methods appearing higher.
-	 */
-	private Method[] getSortedMethods(Class<?> clazz) {
-		return this.sortedMethodsCache.computeIfAbsent(clazz, key -> {
-			Method[] methods = key.getMethods();
-			Arrays.sort(methods, (o1, o2) -> (o1.isBridge() == o2.isBridge() ? 0 : (o1.isBridge() ? 1 : -1)));
-			return methods;
-		});
 	}
 
 	/**
@@ -536,7 +540,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (method == null) {
 				method = findGetterForProperty(name, clazz, target);
 				if (method != null) {
-					invocationTarget = new InvokerPair(method, new TypeDescriptor(new MethodParameter(method, -1)));
+					TypeDescriptor typeDescriptor = new TypeDescriptor(new MethodParameter(method, -1));
+					method = ClassUtils.getInterfaceMethodIfPossible(method);
+					invocationTarget = new InvokerPair(method, typeDescriptor);
 					ReflectionUtils.makeAccessible(method);
 					this.readerCache.put(cacheKey, invocationTarget);
 				}
