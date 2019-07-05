@@ -261,10 +261,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			catch (Throwable ex) {
 				String msg = "Invocation of destroy method failed on bean with name '" + this.beanName + "'";
 				if (logger.isDebugEnabled()) {
-					logger.info(msg, ex);
+					logger.warn(msg, ex);
 				}
 				else {
-					logger.info(msg + ": " + ex);
+					logger.warn(msg + ": " + ex);
 				}
 			}
 		}
@@ -343,14 +343,14 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			String msg = "Destroy method '" + this.destroyMethodName + "' on bean with name '" +
 					this.beanName + "' threw an exception";
 			if (logger.isDebugEnabled()) {
-				logger.info(msg, ex.getTargetException());
+				logger.warn(msg, ex.getTargetException());
 			}
 			else {
-				logger.info(msg + ": " + ex.getTargetException());
+				logger.warn(msg + ": " + ex.getTargetException());
 			}
 		}
 		catch (Throwable ex) {
-			logger.info("Failed to invoke destroy method '" + this.destroyMethodName +
+			logger.warn("Failed to invoke destroy method '" + this.destroyMethodName +
 					"' on bean with name '" + this.beanName + "'", ex);
 		}
 	}
