@@ -407,9 +407,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			}
 		}
 		catch (Throwable invocationEx) {
-			// Any other than the original exception is unintended here,
+			// Any other than the original exception (or its cause) is unintended here,
 			// probably an accident (e.g. failed assertion or the like).
-			if (invocationEx != exception && logger.isWarnEnabled()) {
+			if (invocationEx != exception && invocationEx != exception.getCause() && logger.isWarnEnabled()) {
 				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
 			}
 			// Continue with default processing of the original exception...
