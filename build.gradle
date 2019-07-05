@@ -37,7 +37,7 @@ ext {
 	junit5Version        = "5.3.2"
 	kotlinVersion        = "1.2.71"
 	log4jVersion         = "2.11.2"
-	nettyVersion         = "4.1.36.Final"
+	nettyVersion         = "4.1.37.Final"
 	reactorVersion       = "Californium-SR9"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
