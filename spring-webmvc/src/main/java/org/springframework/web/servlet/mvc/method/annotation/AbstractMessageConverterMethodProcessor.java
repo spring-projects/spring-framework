@@ -218,7 +218,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		MediaType selectedMediaType = null;
 		MediaType contentType = outputMessage.getHeaders().getContentType();
-		if (contentType != null && contentType.isConcrete()) {
+		boolean isContentTypePreset = contentType != null && contentType.isConcrete();
+		if (isContentTypePreset) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found 'Content-Type:" + contentType + "' in response");
 			}
@@ -304,6 +305,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 
 		if (body != null) {
+			if (isContentTypePreset) {
+				throw new IllegalStateException(
+						"No converter for [" + valueType + "] with preset Content-Type '" + contentType + "'");
+			}
 			throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
 		}
 	}

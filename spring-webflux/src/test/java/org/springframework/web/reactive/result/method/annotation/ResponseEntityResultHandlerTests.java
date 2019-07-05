@@ -337,7 +337,7 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	@Test // SPR-17082
-	public void handleResponseEntityWithExistingResponseHeaders() throws Exception {
+	public void handleWithPresetContentType() {
 		ResponseEntity<Void> value = ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
 		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(Void.class));
 		HandlerResult result = handlerResult(value, returnType);
@@ -351,6 +351,24 @@ public class ResponseEntityResultHandlerTests {
 		assertResponseBodyIsEmpty(exchange);
 	}
 
+	@Test // gh-23205
+	public void handleWithPresetContentTypeShouldFailWithServerError() {
+		ResponseEntity<String> value = ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body("<foo/>");
+		MethodParameter returnType = on(TestController.class).resolveReturnType(entity(String.class));
+		HandlerResult result = handlerResult(value, returnType);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(get("/path"));
+		ResponseEntityResultHandler resultHandler = new ResponseEntityResultHandler(
+				Collections.singletonList(new EncoderHttpMessageWriter<>(CharSequenceEncoder.textPlainOnly())),
+				new RequestedContentTypeResolverBuilder().build()
+		);
+
+		StepVerifier.create(resultHandler.handleResult(exchange, result))
+				.consumeErrorWith(ex -> assertThat(ex)
+						.isInstanceOf(IllegalStateException.class)
+						.hasMessageContaining("with preset Content-Type"))
+				.verify();
+	}
 
 
 	private void testHandle(Object returnValue, MethodParameter returnType) {

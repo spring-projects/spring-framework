@@ -161,10 +161,17 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 		}
 
+		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
+		if (contentType != null && contentType.equals(bestMediaType)) {
+			return Mono.error(new IllegalStateException(
+					"No Encoder for [" + elementType + "] with preset Content-Type '" + contentType + "'"));
+		}
+
 		List<MediaType> mediaTypes = getMediaTypesFor(elementType);
 		if (bestMediaType == null && mediaTypes.isEmpty()) {
 			return Mono.error(new IllegalStateException("No HttpMessageWriter for " + elementType));
 		}
+
 		return Mono.error(new NotAcceptableStatusException(mediaTypes));
 	}
 
