@@ -186,7 +186,7 @@ public class ReactiveAdapterRegistryTests {
 		Object target = getAdapter(io.reactivex.Completable.class).fromPublisher(source);
 		boolean condition = target instanceof io.reactivex.Completable;
 		assertThat(condition).isTrue();
-		assertThat(((io.reactivex.Completable) target).blockingGet()).isNull();
+		((io.reactivex.Completable) target).blockingAwait();
 	}
 
 	@Test
