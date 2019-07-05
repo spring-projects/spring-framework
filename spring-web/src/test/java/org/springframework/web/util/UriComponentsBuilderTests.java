@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -643,9 +644,20 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void queryParams() {
+	public void queryParam() {
+		UriComponents result = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42).build();
+
+		assertThat(result.getQuery()).isEqualTo("baz=qux&baz=42");
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(2);
+		expectedQueryParams.add("baz", "qux");
+		expectedQueryParams.add("baz", "42");
+		assertThat(result.getQueryParams()).isEqualTo(expectedQueryParams);
+	}
+
+	@Test
+	public void queryParamWithList() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		UriComponents result = builder.queryParam("baz", "qux", 42).build();
+		UriComponents result = builder.queryParam("baz", Arrays.asList("qux", 42)).build();
 
 		assertThat(result.getQuery()).isEqualTo("baz=qux&baz=42");
 		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(2);
@@ -666,6 +678,20 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
+	public void emptyQueryParams() {
+		UriComponents result = UriComponentsBuilder.newInstance()
+				.queryParam("baz", Collections.emptyList())
+				.queryParam("foo", (Collection<?>) null)
+				.build();
+
+		assertThat(result.getQuery()).isEqualTo("baz&foo");
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(2);
+		expectedQueryParams.add("baz", null);
+		expectedQueryParams.add("foo", null);
+		assertThat(result.getQueryParams()).isEqualTo(expectedQueryParams);
+	}
+
+	@Test
 	public void replaceQueryParam() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
 		builder.replaceQueryParam("baz", "xuq", 24);
@@ -675,6 +701,21 @@ public class UriComponentsBuilderTests {
 
 		builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
 		builder.replaceQueryParam("baz");
+		result = builder.build();
+
+		assertThat(result.getQuery()).as("Query param should have been deleted").isNull();
+	}
+
+	@Test
+	public void replaceQueryParams() {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().queryParam("baz", Arrays.asList("qux", 42));
+		builder.replaceQueryParam("baz", Arrays.asList("xuq", 24));
+		UriComponents result = builder.build();
+
+		assertThat(result.getQuery()).isEqualTo("baz=xuq&baz=24");
+
+		builder = UriComponentsBuilder.newInstance().queryParam("baz", Arrays.asList("qux", 42));
+		builder.replaceQueryParam("baz", Collections.emptyList());
 		result = builder.build();
 
 		assertThat(result.getQuery()).as("Query param should have been deleted").isNull();
