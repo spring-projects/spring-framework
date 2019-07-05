@@ -50,6 +50,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.SerializationTestUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
@@ -89,7 +90,7 @@ public class SpringValidatorAdapterTests {
 	}
 
 	@Test  // SPR-13406
-	public void testNoStringArgumentValue() {
+	public void testNoStringArgumentValue() throws Exception {
 		TestBean testBean = new TestBean();
 		testBean.setPassword("pass");
 		testBean.setConfirmPassword("pass");
@@ -104,10 +105,11 @@ public class SpringValidatorAdapterTests {
 		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Size of Password must be between 8 and 128"));
 		assertTrue(error.contains(ConstraintViolation.class));
 		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("password"));
+		assertThat(SerializationTestUtils.serializeAndDeserialize(error.toString()), is(error.toString()));
 	}
 
 	@Test  // SPR-13406
-	public void testApplyMessageSourceResolvableToStringArgumentValueWithResolvedLogicalFieldName() {
+	public void testApplyMessageSourceResolvableToStringArgumentValueWithResolvedLogicalFieldName() throws Exception {
 		TestBean testBean = new TestBean();
 		testBean.setPassword("password");
 		testBean.setConfirmPassword("PASSWORD");
@@ -122,6 +124,7 @@ public class SpringValidatorAdapterTests {
 		assertThat(messageSource.getMessage(error, Locale.ENGLISH), is("Password must be same value as Password(Confirm)"));
 		assertTrue(error.contains(ConstraintViolation.class));
 		assertThat(error.unwrap(ConstraintViolation.class).getPropertyPath().toString(), is("password"));
+		assertThat(SerializationTestUtils.serializeAndDeserialize(error.toString()), is(error.toString()));
 	}
 
 	@Test  // SPR-13406
@@ -518,10 +521,10 @@ public class SpringValidatorAdapterTests {
 								.addPropertyNode(f.getName())
 								.addConstraintViolation();
 					}
-				} catch (IllegalAccessException ex) {
+				}
+				catch (IllegalAccessException ex) {
 					throw new IllegalStateException(ex);
 				}
-
 			});
 			return fieldsErros.isEmpty();
 		}
