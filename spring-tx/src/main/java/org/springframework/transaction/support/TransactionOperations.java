@@ -61,6 +61,6 @@ public interface TransactionOperations {
 	 */
 	static TransactionOperations withoutTransaction() {
 		return WithoutTransactionOperations.INSTANCE;
-	};
+	}
 
 }
