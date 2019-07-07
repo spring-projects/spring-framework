@@ -1521,11 +1521,11 @@ public class ResolvableType implements Serializable {
 		public String getTypeName() {
 			String typeName = this.rawType.getTypeName();
 			if (this.typeArguments.length > 0) {
-				StringJoiner result = new StringJoiner(", ", "<", ">");
+				StringJoiner stringJoiner = new StringJoiner(", ", "<", ">");
 				for (Type argument : this.typeArguments) {
-					result.add(argument.getTypeName());
+					stringJoiner.add(argument.getTypeName());
 				}
-				return typeName + result.toString();
+				return typeName + stringJoiner;
 			}
 			return typeName;
 		}

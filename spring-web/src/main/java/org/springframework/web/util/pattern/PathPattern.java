@@ -421,6 +421,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		return this.parser.parse(file2 + (firstExtensionWild ? secondExtension : firstExtension));
 	}
 
+	@Override
 	public boolean equals(@Nullable Object other) {
 		if (!(other instanceof PathPattern)) {
 			return false;
@@ -431,10 +432,12 @@ public class PathPattern implements Comparable<PathPattern> {
 				this.caseSensitive == otherPattern.caseSensitive);
 	}
 
+	@Override
 	public int hashCode() {
 		return (this.patternString.hashCode() + this.separator) * 17 + (this.caseSensitive ? 1 : 0);
 	}
 
+	@Override
 	public String toString() {
 		return this.patternString;
 	}
@@ -466,13 +469,13 @@ public class PathPattern implements Comparable<PathPattern> {
 	}
 
 	String toChainString() {
-		StringJoiner buf = new StringJoiner(" ");
+		StringJoiner stringJoiner = new StringJoiner(" ");
 		PathElement pe = this.head;
 		while (pe != null) {
-			buf.add(pe.toString());
+			stringJoiner.add(pe.toString());
 			pe = pe.next;
 		}
-		return buf.toString();
+		return stringJoiner.toString();
 	}
 
 	/**

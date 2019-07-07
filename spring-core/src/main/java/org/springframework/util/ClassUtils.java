@@ -657,11 +657,11 @@ public abstract class ClassUtils {
 		if (CollectionUtils.isEmpty(classes)) {
 			return "[]";
 		}
-		StringJoiner sj = new StringJoiner(", ", "[", "]");
+		StringJoiner stringJoiner = new StringJoiner(", ", "[", "]");
 		for (Class<?> clazz : classes) {
-			sj.add(clazz.getName());
+			stringJoiner.add(clazz.getName());
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
