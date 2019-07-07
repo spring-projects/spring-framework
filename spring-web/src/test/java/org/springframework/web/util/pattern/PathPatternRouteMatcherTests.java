@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for the {@link PathPatternRouteMatcher}
  * @author Brian Clozel
  */
-public class PathPatternRouteMatcherTest {
+public class PathPatternRouteMatcherTests {
 
 	PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher(new PathPatternParser());
 
