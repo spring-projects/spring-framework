@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
+ * @author Sam Brannen
  * @since 3.0
  * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
@@ -553,7 +554,9 @@ public class MediaType extends MimeType implements Serializable {
 			return Collections.emptyList();
 		}
 		return MimeTypeUtils.tokenize(mediaTypes).stream()
-				.map(MediaType::parseMediaType).collect(Collectors.toList());
+				.filter(StringUtils::hasText)
+				.map(MediaType::parseMediaType)
+				.collect(Collectors.toList());
 	}
 
 	/**

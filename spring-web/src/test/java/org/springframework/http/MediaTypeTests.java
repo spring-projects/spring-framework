@@ -143,6 +143,13 @@ public class MediaTypeTests {
 		assertEquals("Invalid amount of media types", 0, mediaTypes.size());
 	}
 
+	@Test // gh-23241
+	public void parseMediaTypesWithTrailingComma() {
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes("text/plain, text/html, ");
+		assertNotNull("No media types returned", mediaTypes);
+		assertEquals("Incorrect number of media types", 2, mediaTypes.size());
+	}
+
 	@Test
 	public void compareTo() {
 		MediaType audioBasic = new MediaType("audio", "basic");
