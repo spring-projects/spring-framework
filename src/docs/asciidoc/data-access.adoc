@@ -1822,7 +1822,7 @@ settings by using Spring XML configuration:
 			class="org.springframework.transaction.support.TransactionTemplate">
 		<property name="isolationLevelName" value="ISOLATION_READ_UNCOMMITTED"/>
 		<property name="timeout" value="30"/>
-	</bean>"
+	</bean>
 ----
 
 You can then inject the `sharedTransactionTemplate`
