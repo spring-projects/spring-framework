@@ -303,6 +303,13 @@ public class MimeTypeTests {
 		assertThat(mimeTypes.size()).as("Invalid amount of mime types").isEqualTo(0);
 	}
 
+	@Test // gh-23241
+	public void parseMimeTypesWithTrailingComma() {
+		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes("text/plain, text/html,");
+		assertThat(mimeTypes).as("No mime types returned").isNotNull();
+		assertThat(mimeTypes.size()).as("Incorrect number of mime types").isEqualTo(2);
+	}
+
 	@Test // SPR-17459
 	public void parseMimeTypesWithQuotedParameters() {
 		testWithQuotedParameters("foo/bar;param=\",\"");

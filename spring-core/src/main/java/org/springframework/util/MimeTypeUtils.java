@@ -44,6 +44,7 @@ import org.springframework.lang.Nullable;
  * @author Rossen Stoyanchev
  * @author Dimitrios Liapis
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 4.0
  */
 public abstract class MimeTypeUtils {
@@ -273,9 +274,10 @@ public abstract class MimeTypeUtils {
 			return Collections.emptyList();
 		}
 		return tokenize(mimeTypes).stream()
-				.map(MimeTypeUtils::parseMimeType).collect(Collectors.toList());
+				.filter(StringUtils::hasText)
+				.map(MimeTypeUtils::parseMimeType)
+				.collect(Collectors.toList());
 	}
-
 
 	/**
 	 * Tokenize the given comma-separated string of {@code MimeType} objects

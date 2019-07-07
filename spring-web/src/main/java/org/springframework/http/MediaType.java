@@ -596,7 +596,9 @@ public class MediaType extends MimeType implements Serializable {
 		List<String> tokenizedTypes = MimeTypeUtils.tokenize(mediaTypes);
 		List<MediaType> result = new ArrayList<>(tokenizedTypes.size());
 		for (String type : tokenizedTypes) {
-			result.add(parseMediaType(type));
+			if (StringUtils.hasText(type)) {
+				result.add(parseMediaType(type));
+			}
 		}
 		return result;
 	}
