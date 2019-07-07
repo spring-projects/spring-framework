@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.assertj.core.api.ObjectAssert;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -36,27 +35,19 @@ import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Test fixture for testing {@link AbstractFlashMapManager} methods.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class FlashMapManagerTests {
 
-	private TestFlashMapManager flashMapManager;
+	private final TestFlashMapManager flashMapManager = new TestFlashMapManager();
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private MockHttpServletResponse response;
-
-
-	@Before
-	public void setup() {
-		this.flashMapManager = new TestFlashMapManager();
-		this.request = new MockHttpServletRequest();
-		this.response = new MockHttpServletResponse();
-	}
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 
 	@Test
@@ -73,9 +64,7 @@ public class FlashMapManagerTests {
 		assertThatFlashMap(inputFlashMap).isEqualTo(flashMap);
 	}
 
-	// SPR-8779
-
-	@Test
+	@Test // SPR-8779
 	public void retrieveAndUpdateMatchByOriginatingPath() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
@@ -133,9 +122,7 @@ public class FlashMapManagerTests {
 		assertThat(this.flashMapManager.getFlashMaps().size()).as("Input FlashMap should have been removed").isEqualTo(0);
 	}
 
-	// SPR-8798
-
-	@Test
+	@Test // SPR-8798
 	public void retrieveAndUpdateMatchWithMultiValueParam() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("name", "value");
@@ -180,7 +167,7 @@ public class FlashMapManagerTests {
 	}
 
 	@Test
-	public void retrieveAndUpdateRemoveExpired() throws InterruptedException {
+	public void retrieveAndUpdateRemoveExpired() {
 		List<FlashMap> flashMaps = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
 			FlashMap expiredFlashMap = new FlashMap();
@@ -194,7 +181,7 @@ public class FlashMapManagerTests {
 	}
 
 	@Test
-	public void saveOutputFlashMapEmpty() throws InterruptedException {
+	public void saveOutputFlashMapEmpty() {
 		FlashMap flashMap = new FlashMap();
 
 		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
@@ -204,7 +191,7 @@ public class FlashMapManagerTests {
 	}
 
 	@Test
-	public void saveOutputFlashMap() throws InterruptedException {
+	public void saveOutputFlashMap() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("name", "value");
 
@@ -218,7 +205,7 @@ public class FlashMapManagerTests {
 	}
 
 	@Test
-	public void saveOutputFlashMapDecodeTargetPath() throws InterruptedException {
+	public void saveOutputFlashMapDecodeTargetPath() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 
@@ -229,7 +216,7 @@ public class FlashMapManagerTests {
 	}
 
 	@Test
-	public void saveOutputFlashMapNormalizeTargetPath() throws InterruptedException {
+	public void saveOutputFlashMapNormalizeTargetPath() {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 
@@ -264,11 +251,19 @@ public class FlashMapManagerTests {
 		assertThat(flashMap.getTargetRequestPath()).isEqualTo("/once/only");
 	}
 
-	// SPR-9657, SPR-11504
+	@Test // gh-23240
+	public void saveOutputFlashMapAndNormalizeEmptyTargetPath() {
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("key", "value");
 
-	@Test
+		flashMap.setTargetRequestPath("");
+		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
+
+		assertThat(flashMap.getTargetRequestPath()).isEqualTo("");
+	}
+
+	@Test // SPR-9657, SPR-11504
 	public void saveOutputFlashMapDecodeParameters() throws Exception {
-
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("key", "value");
 		flashMap.setTargetRequestPath("/path");
@@ -294,11 +289,8 @@ public class FlashMapManagerTests {
 		assertThat(flashMap.get("key")).isEqualTo("value");
 	}
 
-	// SPR-12569
-
-	@Test
+	@Test // SPR-12569
 	public void flashAttributesWithQueryParamsWithSpace() throws Exception {
-
 		String encodedValue = URLEncoder.encode("1 2", "UTF-8");
 
 		FlashMap flashMap = new FlashMap();
