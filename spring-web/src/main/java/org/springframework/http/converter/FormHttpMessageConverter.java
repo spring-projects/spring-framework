@@ -189,7 +189,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Set the list of {@link MediaType} objects supported by this converter.
-	 * @see #addSupportedMediaType(MediaType)
+	 * @see #addSupportedMediaTypes(MediaType...)
 	 * @see #getSupportedMediaTypes()
 	 */
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
