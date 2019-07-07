@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.springframework.core.SerializableTypeWrapper.FieldTypeProvider;
 import org.springframework.core.SerializableTypeWrapper.MethodParameterTypeProvider;
@@ -1518,18 +1519,15 @@ public class ResolvableType implements Serializable {
 
 		@Override
 		public String getTypeName() {
-			StringBuilder result = new StringBuilder(this.rawType.getTypeName());
+			String typeName = this.rawType.getTypeName();
 			if (this.typeArguments.length > 0) {
-				result.append('<');
-				for (int i = 0; i < this.typeArguments.length; i++) {
-					if (i > 0) {
-						result.append(", ");
-					}
-					result.append(this.typeArguments[i].getTypeName());
+				StringJoiner result = new StringJoiner(", ", "<", ">");
+				for (Type argument : this.typeArguments) {
+					result.add(argument.getTypeName());
 				}
-				result.append('>');
+				return typeName + result.toString();
 			}
-			return result.toString();
+			return typeName;
 		}
 
 		@Override

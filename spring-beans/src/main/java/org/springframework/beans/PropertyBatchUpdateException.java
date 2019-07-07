@@ -18,6 +18,7 @@ package org.springframework.beans;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -85,12 +86,9 @@ public class PropertyBatchUpdateException extends BeansException {
 
 	@Override
 	public String getMessage() {
-		StringBuilder sb = new StringBuilder("Failed properties: ");
-		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
-			sb.append(this.propertyAccessExceptions[i].getMessage());
-			if (i < this.propertyAccessExceptions.length - 1) {
-				sb.append("; ");
-			}
+		StringJoiner sb = new StringJoiner("; ", "Failed properties: ", "");
+		for (PropertyAccessException exception : this.propertyAccessExceptions) {
+			sb.add(exception.getMessage());
 		}
 		return sb.toString();
 	}
