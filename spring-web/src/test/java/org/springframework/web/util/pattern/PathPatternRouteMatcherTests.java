@@ -22,23 +22,23 @@ import org.springframework.util.RouteMatcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
- * Tests for the {@link PathPatternRouteMatcher}
+ * Tests for the {@link PathPatternRouteMatcher}.
+ *
  * @author Brian Clozel
+ * @since 5.2
  */
 public class PathPatternRouteMatcherTests {
 
-	PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher(new PathPatternParser());
-
 	@Test
 	public void matchRoute() {
+		PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher(new PathPatternParser());
 		RouteMatcher.Route route = routeMatcher.parseRoute("/projects/spring-framework");
 		assertThat(routeMatcher.match("/projects/{name}", route)).isTrue();
 	}
 
 	@Test
-	public void matchRouteCustomSeparator() {
+	public void matchRouteWithCustomSeparator() {
 		PathPatternParser pathPatternParser = new PathPatternParser();
 		pathPatternParser.setSeparator('.');
 		PathPatternRouteMatcher routeMatcher = new PathPatternRouteMatcher(pathPatternParser);
