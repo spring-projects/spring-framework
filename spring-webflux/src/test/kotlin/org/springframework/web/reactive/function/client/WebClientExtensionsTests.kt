@@ -27,6 +27,7 @@ import org.junit.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import reactor.core.publisher.Mono
+import java.util.concurrent.CompletableFuture
 
 /**
  * Mock object based tests for [WebClient] Kotlin extensions
@@ -41,9 +42,9 @@ class WebClientExtensionsTests {
 
 
 	@Test
-	fun `RequestBodySpec#body with Publisher and reified type parameters`() {
+	fun `RequestBodySpec#bodyWithType with Publisher and reified type parameters`() {
 		val body = mockk<Publisher<List<Foo>>>()
-		requestBodySpec.body(body)
+		requestBodySpec.bodyWithType(body)
 		verify { requestBodySpec.body(body, object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
@@ -51,8 +52,16 @@ class WebClientExtensionsTests {
 	@FlowPreview
 	fun `RequestBodySpec#body with Flow and reified type parameters`() {
 		val body = mockk<Flow<List<Foo>>>()
-		requestBodySpec.body(body)
-		verify { requestBodySpec.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+		requestBodySpec.bodyWithType(body)
+		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	@FlowPreview
+	fun `RequestBodySpec#body with CompletableFuture and reified type parameters`() {
+		val body = mockk<CompletableFuture<List<Foo>>>()
+		requestBodySpec.bodyWithType<List<Foo>>(body)
+		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
@@ -80,19 +89,6 @@ class WebClientExtensionsTests {
 		every { requestBodySpec.exchange() } returns Mono.just(response)
 		runBlocking {
 			assertEquals(response, requestBodySpec.awaitExchange())
-		}
-	}
-
-	@Test
-	fun body() {
-		val headerSpec = mockk<WebClient.RequestHeadersSpec<*>>()
-		val supplier: suspend () -> String = mockk()
-		every { requestBodySpec.body(ofType<Mono<String>>()) } returns headerSpec
-		runBlocking {
-			requestBodySpec.body(supplier)
-		}
-		verify {
-			requestBodySpec.body(ofType<Mono<String>>())
 		}
 	}
 

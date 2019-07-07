@@ -53,6 +53,8 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	optional("io.projectreactor:reactor-test")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${coroutinesVersion}")
 	testCompile(project(":spring-context-support"))
 	testCompile(project(":spring-oxm"))
 	testCompile("javax.annotation:javax.annotation-api:1.3.2")

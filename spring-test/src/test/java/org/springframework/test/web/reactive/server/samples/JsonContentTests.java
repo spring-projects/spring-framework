@@ -82,7 +82,7 @@ public class JsonContentTests {
 	public void postJsonContent() {
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_JSON)
-				.syncBody("{\"name\":\"John\"}")
+				.body("{\"name\":\"John\"}")
 				.exchange()
 				.expectStatus().isCreated()
 				.expectBody().isEmpty();

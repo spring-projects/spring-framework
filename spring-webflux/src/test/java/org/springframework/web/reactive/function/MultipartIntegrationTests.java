@@ -61,7 +61,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/multipartData")
-				.syncBody(generateBody())
+				.body(generateBody())
 				.exchange();
 
 		StepVerifier
@@ -75,7 +75,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/parts")
-				.syncBody(generateBody())
+				.body(generateBody())
 				.exchange();
 
 		StepVerifier
@@ -89,7 +89,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 		Mono<String> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/transferTo")
-				.syncBody(generateBody())
+				.body(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
@@ -169,7 +169,7 @@ public class MultipartIntegrationTests extends AbstractRouterFunctionIntegration
 							Path tempFile = Files.createTempFile("MultipartIntegrationTests", null);
 							return part.transferTo(tempFile)
 									.then(ServerResponse.ok()
-											.syncBody(tempFile.toString()));
+											.body(tempFile.toString()));
 						}
 						catch (Exception e) {
 							return Mono.error(e);

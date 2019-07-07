@@ -125,7 +125,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 		public Mono<ServerResponse> pattern(ServerRequest request) {
 			String pattern = matchingPattern(request).getPatternString();
-			return ServerResponse.ok().syncBody(pattern);
+			return ServerResponse.ok().body(pattern);
 		}
 
 		@SuppressWarnings("unchecked")

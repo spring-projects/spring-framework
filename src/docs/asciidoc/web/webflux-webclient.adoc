@@ -318,7 +318,8 @@ is closed and is not placed back in the pool.
 [[webflux-client-body]]
 == Request Body
 
-The request body can be encoded from an `Object`, as the following example shows:
+The request body can be encoded from any asynchronous type handled by `ReactiveAdapterRegistry`,
+like `Mono` as the following example shows:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -348,7 +349,7 @@ You can also have a stream of objects be encoded, as the following example shows
 			.bodyToMono(Void.class);
 ----
 
-Alternatively, if you have the actual value, you can use the `syncBody` shortcut method,
+Alternatively, if you have the actual value, you can use the `body` shortcut method,
 as the following example shows:
 
 [source,java,intent=0]
@@ -359,7 +360,7 @@ as the following example shows:
 	Mono<Void> result = client.post()
 			.uri("/persons/{id}", id)
 			.contentType(MediaType.APPLICATION_JSON)
-			.syncBody(person)
+			.body(person)
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
@@ -380,7 +381,7 @@ content is automatically set to `application/x-www-form-urlencoded` by the
 
 	Mono<Void> result = client.post()
 			.uri("/path", id)
-			.syncBody(formData)
+			.body(formData)
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
@@ -428,7 +429,7 @@ explicitly provide the `MediaType` to use for each part through one of the overl
 builder `part` methods.
 
 Once a `MultiValueMap` is prepared, the easiest way to pass it to the the `WebClient` is
-through the `syncBody` method, as the following example shows:
+through the `body` method, as the following example shows:
 
 [source,java,intent=0]
 [subs="verbatim,quotes"]
@@ -437,7 +438,7 @@ through the `syncBody` method, as the following example shows:
 
 	Mono<Void> result = client.post()
 			.uri("/path", id)
-			.syncBody(builder.build())
+			.body(builder.build())
 			.retrieve()
 			.bodyToMono(Void.class);
 ----

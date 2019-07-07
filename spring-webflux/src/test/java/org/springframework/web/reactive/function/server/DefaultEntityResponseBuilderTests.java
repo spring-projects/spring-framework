@@ -24,6 +24,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import io.reactivex.Single;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -73,6 +74,14 @@ public class DefaultEntityResponseBuilderTests {
 		Flux<String> body = Flux.just("foo", "bar");
 		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
 		EntityResponse<Flux<String>> response = EntityResponse.fromPublisher(body, typeReference).build().block();
+		assertThat(response.entity()).isSameAs(body);
+	}
+
+	@Test
+	public void fromProducer() {
+		Single<String> body = Single.just("foo");
+		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
+		EntityResponse<Single<String>> response = EntityResponse.fromProducer(body, typeReference).build().block();
 		assertThat(response.entity()).isSameAs(body);
 	}
 

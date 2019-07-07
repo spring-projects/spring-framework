@@ -61,6 +61,7 @@ import org.springframework.web.util.UriBuilderFactory;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 class DefaultWebClient implements WebClient {
@@ -290,16 +291,27 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
-			this.inserter = inserter;
+		public RequestHeadersSpec<?> body(Object body) {
+			this.inserter = BodyInserters.fromObject(body);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
+			this.inserter = BodyInserters.fromProducer(producer, elementClass);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementType) {
+			this.inserter = BodyInserters.fromProducer(producer, elementType);
 			return this;
 		}
 
 		@Override
 		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(
-				P publisher, ParameterizedTypeReference<T> typeReference) {
-
-			this.inserter = BodyInserters.fromPublisher(publisher, typeReference);
+				P publisher, ParameterizedTypeReference<T> elementType) {
+			this.inserter = BodyInserters.fromPublisher(publisher, elementType);
 			return this;
 		}
 
@@ -310,11 +322,15 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> syncBody(Object body) {
-			Assert.isTrue(!(body instanceof Publisher),
-					"Please specify the element class by using body(Publisher, Class)");
-			this.inserter = BodyInserters.fromObject(body);
+		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
+			this.inserter = inserter;
 			return this;
+		}
+
+		@Override
+		@Deprecated
+		public RequestHeadersSpec<?> syncBody(Object body) {
+			return body(body);
 		}
 
 		@Override

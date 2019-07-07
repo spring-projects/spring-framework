@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,8 +261,20 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
-			this.bodySpec.body(inserter);
+		public RequestHeadersSpec<?> body(Object body) {
+			this.bodySpec.body(body);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
+			this.bodySpec.body(producer, elementClass);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementType) {
+			this.bodySpec.body(producer, elementType);
 			return this;
 		}
 
@@ -273,9 +285,21 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> syncBody(Object body) {
-			this.bodySpec.syncBody(body);
+		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementType) {
+			this.bodySpec.body(publisher, elementType);
 			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
+			this.bodySpec.body(inserter);
+			return this;
+		}
+
+		@Override
+		@Deprecated
+		public RequestHeadersSpec<?> syncBody(Object body) {
+			return body(body);
 		}
 
 		@Override

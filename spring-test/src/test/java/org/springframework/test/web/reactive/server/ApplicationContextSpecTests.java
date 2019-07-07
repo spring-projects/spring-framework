@@ -61,7 +61,7 @@ public class ApplicationContextSpecTests {
 					.GET("/sessionClassName", request ->
 							request.session().flatMap(session -> {
 								String className = session.getClass().getSimpleName();
-								return ServerResponse.ok().syncBody(className);
+								return ServerResponse.ok().body(className);
 							}))
 					.build();
 		}

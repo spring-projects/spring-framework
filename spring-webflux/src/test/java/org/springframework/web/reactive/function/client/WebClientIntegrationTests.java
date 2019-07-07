@@ -354,7 +354,7 @@ public class WebClientIntegrationTests {
 				.uri("/pojo/capitalize")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
-				.syncBody(new Pojo("foofoo", "barbar"))
+				.body(new Pojo("foofoo", "barbar"))
 				.retrieve()
 				.bodyToMono(Pojo.class);
 
