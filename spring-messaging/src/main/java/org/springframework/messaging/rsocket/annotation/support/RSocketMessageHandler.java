@@ -149,6 +149,15 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	/**
+	 * Return the configured {@link #setMetadataExtractor MetadataExtractor}.
+	 * This may be {@code null} before {@link #afterPropertiesSet()}.
+	 */
+	@Nullable
+	public MetadataExtractor getMetadataExtractor() {
+		return this.metadataExtractor;
+	}
+
+	/**
 	 * Configure the default content type to use for data payloads if the
 	 * {@code SETUP} frame did not specify one.
 	 * <p>By default this is not set.
@@ -156,6 +165,15 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 */
 	public void setDefaultDataMimeType(@Nullable MimeType mimeType) {
 		this.defaultDataMimeType = mimeType;
+	}
+
+	/**
+	 * Return the configured
+	 * {@link #setDefaultDataMimeType defaultDataMimeType}, or {@code null}.
+	 */
+	@Nullable
+	public MimeType getDefaultDataMimeType() {
+		return this.defaultDataMimeType;
 	}
 
 	/**
@@ -167,6 +185,14 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	public void setDefaultMetadataMimeType(MimeType mimeType) {
 		Assert.notNull(mimeType, "'metadataMimeType' is required");
 		this.defaultMetadataMimeType = mimeType;
+	}
+
+	/**
+	 * Return the configured
+	 * {@link #setDefaultMetadataMimeType defaultMetadataMimeType}.
+	 */
+	public MimeType getDefaultMetadataMimeType() {
+		return this.defaultMetadataMimeType;
 	}
 
 
