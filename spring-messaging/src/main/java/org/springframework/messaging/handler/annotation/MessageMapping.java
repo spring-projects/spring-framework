@@ -58,7 +58,7 @@ import org.springframework.messaging.simp.annotation.SendToUser;
  * a specialization such as
  * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor
  * SimpMessageHeaderAccessor}.</li>
- * <li>{@link Message Message<T>} for access to body and headers with the body
+ * <li>{@link Message Message&lt;T&gt;} for access to body and headers with the body
  * de-serialized if necessary to match the declared type.</li>
  * <li>{@link java.security.Principal} method arguments are supported in
  * some processing scenarios such as STOMP over WebSocket. It reflects the
