@@ -92,7 +92,7 @@ public abstract class BodyInserters {
 	 * @see #fromProducer(Object, Class)
 	 */
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
-		Assert.notNull(body, "Body must not be null");
+		Assert.notNull(body, "'body' must not be null");
 		Assert.isNull(registry.getAdapter(body.getClass()), "'body' should be an object, for reactive types use a variant specifying a publisher/producer and its related element type");
 		return (message, context) ->
 				writeWithMessageWriters(message, context, Mono.just(body), ResolvableType.forInstance(body), null);
@@ -107,7 +107,7 @@ public abstract class BodyInserters {
 	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
 	 * @param <T> the type of the body
 	 * @param producer the source of body value(s).
-	 * @param elementClass the type of values to be produced
+	 * @param elementClass the class of values to be produced
 	 * @return the inserter to write a producer
 	 * @since 5.2
 	 */
@@ -129,17 +129,18 @@ public abstract class BodyInserters {
 	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
 	 * @param <T> the type of the body
 	 * @param producer the source of body value(s).
-	 * @param elementType the type of values to be produced
+	 * @param elementTypeRef the type of values to be produced
 	 * @return the inserter to write a producer
 	 * @since 5.2
 	 */
-	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromProducer(T producer, ParameterizedTypeReference<?> elementType) {
+	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromProducer(T producer,
+			ParameterizedTypeReference<?> elementTypeRef) {
 		Assert.notNull(producer, "'producer' must not be null");
-		Assert.notNull(elementType, "'elementType' must not be null");
+		Assert.notNull(elementTypeRef, "'elementTypeRef' must not be null");
 		ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(producer.getClass());
 		Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
 		return (message, context) ->
-				writeWithMessageWriters(message, context, producer, ResolvableType.forType(elementType), adapter);
+				writeWithMessageWriters(message, context, producer, ResolvableType.forType(elementTypeRef), adapter);
 	}
 
 	/**
@@ -148,7 +149,7 @@ public abstract class BodyInserters {
 	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
 	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
 	 * @param publisher the publisher to write with
-	 * @param elementClass the type of elements in the publisher
+	 * @param elementClass the class of elements in the publisher
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <P> the {@code Publisher} type
 	 * @return the inserter to write a {@code Publisher}
@@ -156,8 +157,8 @@ public abstract class BodyInserters {
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
 			P publisher, Class<T> elementClass) {
 
-		Assert.notNull(publisher, "Publisher must not be null");
-		Assert.notNull(elementClass, "Element Class must not be null");
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(elementClass, "'elementClass' must not be null");
 		return (message, context) ->
 				writeWithMessageWriters(message, context, publisher, ResolvableType.forClass(elementClass), null);
 	}
@@ -168,18 +169,18 @@ public abstract class BodyInserters {
 	 * {@link org.springframework.web.reactive.function.client.WebClient WebClient} and
 	 * {@link org.springframework.web.reactive.function.server.ServerResponse ServerResponse}.
 	 * @param publisher the publisher to write with
-	 * @param typeReference the type of elements contained in the publisher
+	 * @param elementTypeRef the type of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <P> the {@code Publisher} type
 	 * @return the inserter to write a {@code Publisher}
 	 */
 	public static <T, P extends Publisher<T>> BodyInserter<P, ReactiveHttpOutputMessage> fromPublisher(
-			P publisher, ParameterizedTypeReference<T> typeReference) {
+			P publisher, ParameterizedTypeReference<T> elementTypeRef) {
 
-		Assert.notNull(publisher, "Publisher must not be null");
-		Assert.notNull(typeReference, "ParameterizedTypeReference must not be null");
+		Assert.notNull(publisher, "'publisher' must not be null");
+		Assert.notNull(elementTypeRef, "'elementTypeRef' must not be null");
 		return (message, context) ->
-				writeWithMessageWriters(message, context, publisher, ResolvableType.forType(typeReference.getType()), null);
+				writeWithMessageWriters(message, context, publisher, ResolvableType.forType(elementTypeRef.getType()), null);
 	}
 
 	/**
@@ -191,7 +192,7 @@ public abstract class BodyInserters {
 	 * @return the inserter to write a {@code Publisher}
 	 */
 	public static <T extends Resource> BodyInserter<T, ReactiveHttpOutputMessage> fromResource(T resource) {
-		Assert.notNull(resource, "Resource must not be null");
+		Assert.notNull(resource, "'resource' must not be null");
 		return (outputMessage, context) -> {
 			ResolvableType elementType = RESOURCE_TYPE;
 			HttpMessageWriter<Resource> writer = findWriter(context, elementType, null);
@@ -213,7 +214,7 @@ public abstract class BodyInserters {
 	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(
 			S eventsPublisher) {
 
-		Assert.notNull(eventsPublisher, "Publisher must not be null");
+		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		return (serverResponse, context) -> {
 			ResolvableType elementType = SSE_TYPE;
 			MediaType mediaType = MediaType.TEXT_EVENT_STREAM;
@@ -330,7 +331,7 @@ public abstract class BodyInserters {
 	public static <T extends Publisher<DataBuffer>> BodyInserter<T, ReactiveHttpOutputMessage> fromDataBuffers(
 			T publisher) {
 
-		Assert.notNull(publisher, "Publisher must not be null");
+		Assert.notNull(publisher, "'publisher' must not be null");
 		return (outputMessage, context) -> outputMessage.writeWith(publisher);
 	}
 

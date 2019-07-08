@@ -660,11 +660,11 @@ public interface WebTestClient {
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
-		 * @param elementType the type reference of elements contained in the producer
+		 * @param elementTypeRef the type reference of elements contained in the producer
 		 * @return spec for decoding the response
 		 * @since 5.2
 		 */
-		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementType);
+		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 		/**
 		 * Set the body of the request to the given asynchronous {@code Publisher}.
@@ -679,13 +679,13 @@ public interface WebTestClient {
 		/**
 		 * Set the body of the request to the given asynchronous {@code Publisher}.
 		 * @param publisher the request body data
-		 * @param elementType the type reference of elements contained in the publisher
+		 * @param elementTypeRef the type reference of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <S> the type of the {@code Publisher}
 		 * @return spec for decoding the response
 		 * @since 5.2
 		 */
-		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementType);
+		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
@@ -796,13 +796,13 @@ public interface WebTestClient {
 		 * {@code expectBody(Void.class)} which ensures that resources are
 		 * released regardless of whether the response has content or not.
 		 */
-		<T> FluxExchangeResult<T> returnResult(Class<T> elementType);
+		<T> FluxExchangeResult<T> returnResult(Class<T> elementClass);
 
 		/**
 		 * Alternative to {@link #returnResult(Class)} that accepts information
 		 * about a target type with generics.
 		 */
-		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType);
+		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef);
 	}
 
 

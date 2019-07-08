@@ -303,15 +303,15 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementType) {
-			this.inserter = BodyInserters.fromProducer(producer, elementType);
+		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
+			this.inserter = BodyInserters.fromProducer(producer, elementTypeRef);
 			return this;
 		}
 
 		@Override
 		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(
-				P publisher, ParameterizedTypeReference<T> elementType) {
-			this.inserter = BodyInserters.fromPublisher(publisher, elementType);
+				P publisher, ParameterizedTypeReference<T> elementTypeRef) {
+			this.inserter = BodyInserters.fromPublisher(publisher, elementTypeRef);
 			return this;
 		}
 
@@ -449,27 +449,27 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public <T> Mono<T> bodyToMono(Class<T> bodyType) {
+		public <T> Mono<T> bodyToMono(Class<T> elementClass) {
 			return this.responseMono.flatMap(response -> handleBody(response,
-					response.bodyToMono(bodyType), mono -> mono.flatMap(Mono::error)));
+					response.bodyToMono(elementClass), mono -> mono.flatMap(Mono::error)));
 		}
 
 		@Override
-		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> bodyType) {
+		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef) {
 			return this.responseMono.flatMap(response ->
-					handleBody(response, response.bodyToMono(bodyType), mono -> mono.flatMap(Mono::error)));
+					handleBody(response, response.bodyToMono(elementTypeRef), mono -> mono.flatMap(Mono::error)));
 		}
 
 		@Override
-		public <T> Flux<T> bodyToFlux(Class<T> elementType) {
+		public <T> Flux<T> bodyToFlux(Class<T> elementClass) {
 			return this.responseMono.flatMapMany(response ->
-					handleBody(response, response.bodyToFlux(elementType), mono -> mono.handle((t, sink) -> sink.error(t))));
+					handleBody(response, response.bodyToFlux(elementClass), mono -> mono.handle((t, sink) -> sink.error(t))));
 		}
 
 		@Override
-		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementType) {
+		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef) {
 			return this.responseMono.flatMapMany(response ->
-					handleBody(response, response.bodyToFlux(elementType), mono -> mono.handle((t, sink) -> sink.error(t))));
+					handleBody(response, response.bodyToFlux(elementTypeRef), mono -> mono.handle((t, sink) -> sink.error(t))));
 		}
 
 		private <T extends Publisher<?>> T handleBody(ClientResponse response,

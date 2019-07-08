@@ -103,8 +103,8 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
-	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-		return this.delegate.bodyToMono(typeReference);
+	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef) {
+		return this.delegate.bodyToMono(elementTypeRef);
 	}
 
 	@Override
@@ -113,8 +113,8 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
-	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-		return this.delegate.bodyToFlux(typeReference);
+	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef) {
+		return this.delegate.bodyToFlux(elementTypeRef);
 	}
 
 	@Override
@@ -123,18 +123,18 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference) {
-		return this.delegate.toEntity(typeReference);
+	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
+		return this.delegate.toEntity(bodyTypeReference);
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType) {
-		return this.delegate.toEntityList(elementType);
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass) {
+		return this.delegate.toEntityList(elementClass);
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference) {
-		return this.delegate.toEntityList(typeReference);
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
+		return this.delegate.toEntityList(elementTypeRef);
 	}
 
 	/**

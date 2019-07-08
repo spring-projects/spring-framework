@@ -157,24 +157,24 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		@Override
-		public ResponseSpec data(Object producer, Class<?> elementType) {
+		public ResponseSpec data(Object producer, Class<?> elementClass) {
 			Assert.notNull(producer, "'producer' must not be null");
-			Assert.notNull(elementType, "'dataType' must not be null");
+			Assert.notNull(elementClass, "'elementClass' must not be null");
 			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(producer.getClass());
 			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
-			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forClass(elementType));
+			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forClass(elementClass));
 		}
 
 		@Override
-		public ResponseSpec data(Object producer, ParameterizedTypeReference<?> dataTypeRef) {
+		public ResponseSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
 			Assert.notNull(producer, "'producer' must not be null");
-			Assert.notNull(dataTypeRef, "'dataTypeRef' must not be null");
+			Assert.notNull(elementTypeRef, "'elementTypeRef' must not be null");
 			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(producer.getClass());
 			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
-			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forType(dataTypeRef));
+			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forType(elementTypeRef));
 		}
 
-		private ResponseSpec toResponseSpec(Object input, ResolvableType dataType) {
+		private ResponseSpec toResponseSpec(Object input, ResolvableType elementType) {
 			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(input.getClass());
 			Publisher<?> publisher;
 			if (input instanceof Publisher) {
@@ -192,24 +192,24 @@ final class DefaultRSocketRequester implements RSocketRequester {
 				return new DefaultResponseSpec(payloadMono);
 			}
 
-			if (isVoid(dataType) || (adapter != null && adapter.isNoValue())) {
+			if (isVoid(elementType) || (adapter != null && adapter.isNoValue())) {
 				Mono<Payload> payloadMono = Mono.when(publisher).then(emptyPayload());
 				return new DefaultResponseSpec(payloadMono);
 			}
 
-			Encoder<?> encoder = dataType != ResolvableType.NONE && !Object.class.equals(dataType.resolve()) ?
-					strategies.encoder(dataType, dataMimeType) : null;
+			Encoder<?> encoder = elementType != ResolvableType.NONE && !Object.class.equals(elementType.resolve()) ?
+					strategies.encoder(elementType, dataMimeType) : null;
 
 			if (adapter != null && !adapter.isMultiValue()) {
 				Mono<Payload> payloadMono = Mono.from(publisher)
-						.map(value -> encodeData(value, dataType, encoder))
+						.map(value -> encodeData(value, elementType, encoder))
 						.map(this::firstPayload)
 						.switchIfEmpty(emptyPayload());
 				return new DefaultResponseSpec(payloadMono);
 			}
 
 			Flux<Payload> payloadFlux = Flux.from(publisher)
-					.map(value -> encodeData(value, dataType, encoder))
+					.map(value -> encodeData(value, elementType, encoder))
 					.switchOnFirst((signal, inner) -> {
 						DataBuffer data = signal.get();
 						if (data != null) {
@@ -226,16 +226,16 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		@SuppressWarnings("unchecked")
-		private <T> DataBuffer encodeData(T value, ResolvableType valueType, @Nullable Encoder<?> encoder) {
+		private <T> DataBuffer encodeData(T value, ResolvableType elementType, @Nullable Encoder<?> encoder) {
 			if (value instanceof DataBuffer) {
 				return (DataBuffer) value;
 			}
 			if (encoder == null) {
-				valueType = ResolvableType.forInstance(value);
-				encoder = strategies.encoder(valueType, dataMimeType);
+				elementType = ResolvableType.forInstance(value);
+				encoder = strategies.encoder(elementType, dataMimeType);
 			}
 			return ((Encoder<T>) encoder).encodeValue(
-					value, bufferFactory(), valueType, dataMimeType, EMPTY_HINTS);
+					value, bufferFactory(), elementType, dataMimeType, EMPTY_HINTS);
 		}
 
 		private Payload firstPayload(DataBuffer data) {

@@ -108,15 +108,15 @@ public interface ClientResponse {
 
 	/**
 	 * Extract the body to a {@code Mono}.
-	 * @param typeReference a type reference describing the expected response body type
+	 * @param elementTypeRef the type reference of element in the {@code Mono}
 	 * @param <T> the element type
 	 * @return a mono containing the body of the given type {@code T}
 	 */
-	<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference);
+	<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef);
 
 	/**
 	 * Extract the body to a {@code Flux}.
-	 * @param elementClass the class of element in the {@code Flux}
+	 * @param elementClass the class of elements in the {@code Flux}
 	 * @param <T> the element type
 	 * @return a flux containing the body of the given type {@code T}
 	 */
@@ -124,43 +124,43 @@ public interface ClientResponse {
 
 	/**
 	 * Extract the body to a {@code Flux}.
-	 * @param typeReference a type reference describing the expected response body type
+	 * @param elementTypeRef the type reference of elements in the {@code Flux}
 	 * @param <T> the element type
 	 * @return a flux containing the body of the given type {@code T}
 	 */
-	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
+	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef);
 
 	/**
 	 * Return this response as a delayed {@code ResponseEntity}.
-	 * @param bodyType the expected response body type
+	 * @param bodyClass the expected response body type
 	 * @param <T> response body type
 	 * @return {@code Mono} with the {@code ResponseEntity}
 	 */
-	<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType);
+	<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass);
 
 	/**
 	 * Return this response as a delayed {@code ResponseEntity}.
-	 * @param typeReference a type reference describing the expected response body type
+	 * @param bodyTypeReference a type reference describing the expected response body type
 	 * @param <T> response body type
 	 * @return {@code Mono} with the {@code ResponseEntity}
 	 */
-	<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference);
+	<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference);
 
 	/**
 	 * Return this response as a delayed list of {@code ResponseEntity}s.
-	 * @param elementType the expected response body list element type
+	 * @param elementClass the expected response body list element class
 	 * @param <T> the type of elements in the list
 	 * @return {@code Mono} with the list of {@code ResponseEntity}s
 	 */
-	<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType);
+	<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass);
 
 	/**
 	 * Return this response as a delayed list of {@code ResponseEntity}s.
-	 * @param typeReference a type reference describing the expected response body type
+	 * @param elementTypeRef the expected response body list element reference type
 	 * @param <T> the type of elements in the list
 	 * @return {@code Mono} with the list of {@code ResponseEntity}s
 	 */
-	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference);
+	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
 
 
 	// Static builder methods

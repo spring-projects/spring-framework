@@ -247,9 +247,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 	@Override
-	public Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementType) {
+	public Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
 		return new DefaultEntityResponseBuilder<>(producer,
-				BodyInserters.fromProducer(producer, elementType))
+				BodyInserters.fromProducer(producer, elementTypeRef))
 				.status(this.statusCode)
 				.headers(this.headers)
 				.cookies(cookies -> cookies.addAll(this.cookies))
@@ -272,9 +272,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public <T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
-			ParameterizedTypeReference<T> elementType) {
+			ParameterizedTypeReference<T> elementTypeRef) {
 		return new DefaultEntityResponseBuilder<>(publisher,
-				BodyInserters.fromPublisher(publisher, elementType))
+				BodyInserters.fromPublisher(publisher, elementTypeRef))
 				.status(this.statusCode)
 				.headers(this.headers)
 				.cookies(cookies -> cookies.addAll(this.cookies))

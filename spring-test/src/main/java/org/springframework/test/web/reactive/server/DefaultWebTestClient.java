@@ -273,8 +273,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementType) {
-			this.bodySpec.body(producer, elementType);
+		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
+			this.bodySpec.body(producer, elementTypeRef);
 			return this;
 		}
 
@@ -285,8 +285,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementType) {
-			this.bodySpec.body(publisher, elementType);
+		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef) {
+			this.bodySpec.body(publisher, elementTypeRef);
 			return this;
 		}
 
@@ -379,14 +379,14 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T> FluxExchangeResult<T> returnResult(Class<T> elementType) {
-			Flux<T> body = this.response.bodyToFlux(elementType);
+		public <T> FluxExchangeResult<T> returnResult(Class<T> elementClass) {
+			Flux<T> body = this.response.bodyToFlux(elementClass);
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 
 		@Override
-		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType) {
-			Flux<T> body = this.response.bodyToFlux(elementType);
+		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
+			Flux<T> body = this.response.bodyToFlux(elementTypeRef);
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 	}

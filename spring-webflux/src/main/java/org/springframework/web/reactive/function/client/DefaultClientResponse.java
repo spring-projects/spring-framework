@@ -132,8 +132,8 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
-	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-		return body(BodyExtractors.toMono(typeReference));
+	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef) {
+		return body(BodyExtractors.toMono(elementTypeRef));
 	}
 
 	@Override
@@ -142,8 +142,8 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
-	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-		return body(BodyExtractors.toFlux(typeReference));
+	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef) {
+		return body(BodyExtractors.toFlux(elementTypeRef));
 	}
 
 	@Override
@@ -152,8 +152,8 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference) {
-		return toEntityInternal(bodyToMono(typeReference));
+	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
+		return toEntityInternal(bodyToMono(bodyTypeReference));
 	}
 
 	private <T> Mono<ResponseEntity<T>> toEntityInternal(Mono<T> bodyMono) {
@@ -166,13 +166,13 @@ class DefaultClientResponse implements ClientResponse {
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> responseType) {
-		return toEntityListInternal(bodyToFlux(responseType));
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass) {
+		return toEntityListInternal(bodyToFlux(elementClass));
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference) {
-		return toEntityListInternal(bodyToFlux(typeReference));
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
+		return toEntityListInternal(bodyToFlux(elementTypeRef));
 	}
 
 	private <T> Mono<ResponseEntity<List<T>>> toEntityListInternal(Flux<T> bodyFlux) {

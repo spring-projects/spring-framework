@@ -580,11 +580,11 @@ public interface WebClient {
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
-		 * @param elementType the type reference of elements contained in the producer
+		 * @param elementTypeRef the type reference of elements contained in the producer
 		 * @return this builder
 		 * @since 5.2
 		 */
-		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementType);
+		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 		/**
 		 * A shortcut for {@link #body(BodyInserter)} with a
@@ -613,13 +613,13 @@ public interface WebClient {
 		 * element type information that includes generics via a
 		 * {@link ParameterizedTypeReference}.
 		 * @param publisher the {@code Publisher} to write to the request
-		 * @param elementType the type reference of elements contained in the publisher
+		 * @param elementTypeRef the type reference of elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
 		 * @return this builder
 		 */
 		<T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher,
-				ParameterizedTypeReference<T> elementType);
+				ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
 		 * Set the body of the request using the given body inserter.
@@ -690,45 +690,45 @@ public interface WebClient {
 		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
 		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
 		 * with {@link #onStatus(Predicate, Function)}.
-		 * @param bodyType the expected response body type
+		 * @param elementClass the expected response body element class
 		 * @param <T> response body type
 		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
 		 * status code is 4xx or 5xx
 		 */
-		<T> Mono<T> bodyToMono(Class<T> bodyType);
+		<T> Mono<T> bodyToMono(Class<T> elementClass);
 
 		/**
 		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
 		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
 		 * with {@link #onStatus(Predicate, Function)}.
-		 * @param typeReference a type reference describing the expected response body type
+		 * @param elementTypeRef a type reference describing the expected response body element type
 		 * @param <T> response body type
 		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
 		 * status code is 4xx or 5xx
 		 */
-		<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference);
+		<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
 		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
 		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
          * with {@link #onStatus(Predicate, Function)}.
-		 * @param elementType the type of element in the response
+		 * @param elementClass the class of elements in the response
 		 * @param <T> the type of elements in the response
 		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
 		 * status code is 4xx or 5xx
 		 */
-		<T> Flux<T> bodyToFlux(Class<T> elementType);
+		<T> Flux<T> bodyToFlux(Class<T> elementClass);
 
 		/**
 		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
 		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
          * with {@link #onStatus(Predicate, Function)}.
-		 * @param typeReference a type reference describing the expected response body type
+		 * @param elementTypeRef a type reference describing the expected response body element type
 		 * @param <T> the type of elements in the response
 		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
 		 * status code is 4xx or 5xx
 		 */
-		<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference);
+		<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef);
 
 	}
 

@@ -243,10 +243,10 @@ public interface RSocketRequester {
 		 * @param producer the source of payload data value(s). This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
-		 * @param elementType the type of values to be produced
+		 * @param elementClass the type of values to be produced
 		 * @return spec for declaring the expected response
 		 */
-		ResponseSpec data(Object producer, Class<?> elementType);
+		ResponseSpec data(Object producer, Class<?> elementClass);
 
 		/**
 		 * Alternative of {@link #data(Object, Class)} but with a
