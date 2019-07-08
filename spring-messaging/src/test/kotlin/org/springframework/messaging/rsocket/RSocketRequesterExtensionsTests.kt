@@ -3,6 +3,7 @@ package org.springframework.messaging.rsocket
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -12,6 +13,7 @@ import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.concurrent.CompletableFuture
 
 /**
  * Mock object based tests for [RSocketRequester] Kotlin extensions
@@ -55,11 +57,30 @@ class RSocketRequesterExtensionsTests {
 	}
 
 	@Test
-	fun dataFlowWithType() {
+	fun `dataWithType with Publisher`() {
 		val requestSpec = mockk<RSocketRequester.RequestSpec>()
 		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
+		val data = mockk<Publisher<String>>()
 		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
-		assertEquals(responseSpec, requestSpec.data<String>(mockk()))
+		assertEquals(responseSpec, requestSpec.dataWithType(data))
+	}
+
+	@Test
+	fun `dataWithType with Flow`() {
+		val requestSpec = mockk<RSocketRequester.RequestSpec>()
+		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
+		val data = mockk<Flow<String>>()
+		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
+		assertEquals(responseSpec, requestSpec.dataWithType(data))
+	}
+
+	@Test
+	fun `dataWithType with CompletableFuture`() {
+		val requestSpec = mockk<RSocketRequester.RequestSpec>()
+		val responseSpec = mockk<RSocketRequester.ResponseSpec>()
+		val data = mockk<CompletableFuture<String>>()
+		every { requestSpec.data(any<Publisher<String>>(), match<ParameterizedTypeReference<*>>(stringTypeRefMatcher)) } returns responseSpec
+		assertEquals(responseSpec, requestSpec.dataWithType<String>(data))
 	}
 
 	@Test
