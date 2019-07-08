@@ -224,20 +224,34 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		return methodCondition;
 	}
 
+	/**
+	 * Determine the mapping condition for the given annotated element.
+	 * @param element the element to check
+	 * @return the condition, or {@code null}
+	 */
 	@Nullable
-	private CompositeMessageCondition getCondition(AnnotatedElement element) {
+	protected CompositeMessageCondition getCondition(AnnotatedElement element) {
 		MessageMapping annot = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
 		if (annot == null || annot.value().length == 0) {
 			return null;
 		}
-		String[] destinations = annot.value();
+		String[] patterns = processDestinations(annot.value());
+		return new CompositeMessageCondition(
+				new DestinationPatternsMessageCondition(patterns, this.routeMatcher));
+	}
+
+	/**
+	 * Resolve placeholders in the given destinations.
+	 * @param destinations the destinations
+	 * @return new array with the processed destinations or the same array
+	 */
+	protected String[] processDestinations(String[] destinations) {
 		if (this.valueResolver != null) {
-			destinations = Arrays.stream(annot.value())
+			destinations = Arrays.stream(destinations)
 					.map(s -> this.valueResolver.resolveStringValue(s))
 					.toArray(String[]::new);
 		}
-		return new CompositeMessageCondition(
-				new DestinationPatternsMessageCondition(destinations, this.routeMatcher));
+		return destinations;
 	}
 
 	@Override

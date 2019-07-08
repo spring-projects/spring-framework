@@ -96,6 +96,11 @@ public class SimpleRouteMatcher implements RouteMatcher {
 		public String value() {
 			return this.path;
 		}
+
+		@Override
+		public String toString() {
+			return value();
+		}
 	}
 
 }

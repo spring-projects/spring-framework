@@ -105,6 +105,12 @@ public class PathPatternRouteMatcher implements RouteMatcher {
 		public String value() {
 			return this.pathContainer.value();
 		}
+
+
+		@Override
+		public String toString() {
+			return value();
+		}
 	}
 
 }

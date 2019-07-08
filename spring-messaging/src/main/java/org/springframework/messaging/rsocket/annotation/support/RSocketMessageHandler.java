@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.rsocket.annotation.support;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -24,18 +25,24 @@ import java.util.function.Function;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
+import io.rsocket.frame.FrameType;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.handler.CompositeMessageCondition;
+import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
+import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -189,50 +196,84 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		return handlers;
 	}
 
+
+	@Nullable
+	protected CompositeMessageCondition getCondition(AnnotatedElement element) {
+		MessageMapping annot1 = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
+		if (annot1 != null && annot1.value().length > 0) {
+			String[] patterns = processDestinations(annot1.value());
+			return new CompositeMessageCondition(
+					RSocketFrameTypeMessageCondition.REQUEST_CONDITION,
+					new DestinationPatternsMessageCondition(patterns, getRouteMatcher()));
+		}
+		ConnectMapping annot2 = AnnotatedElementUtils.findMergedAnnotation(element, ConnectMapping.class);
+		if (annot2 != null) {
+			String[] patterns = processDestinations(annot2.value());
+			return new CompositeMessageCondition(
+					RSocketFrameTypeMessageCondition.CONNECT_CONDITION,
+					new DestinationPatternsMessageCondition(patterns, getRouteMatcher()));
+		}
+		return null;
+	}
+
+
 	@Override
 	protected void handleNoMatch(@Nullable RouteMatcher.Route destination, Message<?> message) {
-
-		// MessagingRSocket will raise an error anyway if reply Mono is expected
-		// Here we raise a more helpful message if a destination is present
-
-		// It is OK if some messages (ConnectionSetupPayload, metadataPush) are not handled
-		// This works but would be better to have a more explicit way to differentiate
-
-		if (destination != null && StringUtils.hasText(destination.value())) {
-			throw new MessageDeliveryException("No handler for destination '" + destination.value() + "'");
+		FrameType frameType = RSocketFrameTypeMessageCondition.getFrameType(message);
+		if (frameType == FrameType.SETUP || frameType == FrameType.METADATA_PUSH) {
+			return;  // optional handling
 		}
+		if (frameType == FrameType.REQUEST_FNF) {
+			// Can't propagate error to client, so just log
+			logger.warn("No handler for fireAndForget to '" + destination + "'");
+			return;
+		}
+		throw new MessageDeliveryException("No handler for destination '" + destination + "'");
 	}
 
 	/**
-	 * Return an adapter for a
+	 * Return an adapter for a server side
 	 * {@link io.rsocket.RSocketFactory.ServerRSocketFactory#acceptor(SocketAcceptor)
-	 * server acceptor}. The adapter implements a responding {@link RSocket} by
-	 * wrapping {@code Payload} data and metadata as {@link Message} and
-	 * delegating to this {@link RSocketMessageHandler} to handle and reply.
+	 * acceptor} that delegate to this {@link RSocketMessageHandler} for
+	 * handling.
+	 * <p>The initial {@link ConnectionSetupPayload} can be handled with a
+	 * {@link ConnectMapping @ConnectionMapping} method which can be asynchronous
+	 * and return {@code Mono<Void>} with an error signal preventing the
+	 * connection. Such a method can also start requests to the client but that
+	 * must be done decoupled from handling and from the current thread.
+	 * <p>Subsequent stream requests can be handled with
+	 * {@link MessageMapping MessageMapping} methods.
 	 */
 	public SocketAcceptor serverAcceptor() {
 		return (setupPayload, sendingRSocket) -> {
-			MessagingRSocket rsocket = createRSocket(setupPayload, sendingRSocket);
-
-			// Allow handling of the ConnectionSetupPayload via @MessageMapping methods.
-			// However, if the handling is to make requests to the client, it's expected
-			// it will do so decoupled from the handling, e.g. via .subscribe().
-			return rsocket.handleConnectionSetupPayload(setupPayload).then(Mono.just(rsocket));
+			MessagingRSocket responder = createResponder(setupPayload, sendingRSocket);
+			return responder.handleConnectionSetupPayload(setupPayload).then(Mono.just(responder));
 		};
 	}
 
 	/**
-	 * Return an adapter for a
+	 * Return an adapter for a client side
 	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#acceptor(BiFunction)
-	 * client acceptor}. The adapter implements a responding {@link RSocket} by
-	 * wrapping {@code Payload} data and metadata as {@link Message} and
-	 * delegating to this {@link RSocketMessageHandler} to handle and reply.
+	 * acceptor} that delegate to this {@link RSocketMessageHandler} for
+	 * handling.
+	 * <p>The initial {@link ConnectionSetupPayload} can be processed with a
+	 * {@link ConnectMapping @ConnectionMapping} method but, unlike the
+	 * server side, such a method is merely a callback and cannot prevent the
+	 * connection unless the method throws an error immediately. Such a method
+	 * can also start requests to the server but must do so decoupled from
+	 * handling and from the current thread.
+	 * <p>Subsequent stream requests can be handled with
+	 * {@link MessageMapping MessageMapping} methods.
 	 */
 	public BiFunction<ConnectionSetupPayload, RSocket, RSocket> clientAcceptor() {
-		return this::createRSocket;
+		return (setupPayload, sendingRSocket) -> {
+			MessagingRSocket responder = createResponder(setupPayload, sendingRSocket);
+			responder.handleConnectionSetupPayload(setupPayload).subscribe();
+			return responder;
+		};
 	}
 
-	private MessagingRSocket createRSocket(ConnectionSetupPayload setupPayload, RSocket rsocket) {
+	private MessagingRSocket createResponder(ConnectionSetupPayload setupPayload, RSocket rsocket) {
 		String s = setupPayload.dataMimeType();
 		MimeType dataMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultDataMimeType;
 		Assert.notNull(dataMimeType, "No `dataMimeType` in ConnectionSetupPayload and no default value");

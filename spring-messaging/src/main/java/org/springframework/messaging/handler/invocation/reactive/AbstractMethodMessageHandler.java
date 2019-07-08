@@ -274,12 +274,13 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 		Predicate<Class<?>> predicate = this.handlerPredicate;
 		if (predicate == null) {
-			logger.warn("[" + getBeanName() + "] Auto-detection of message handling methods is off.");
+			if (logger.isDebugEnabled()) {
+				logger.debug("[" + getBeanName() + "] Skip auto-detection of message handling methods");
+			}
 			return;
 		}
 		if (this.applicationContext == null) {
-			logger.warn("No ApplicationContext available " +
-					"for auto-detection of beans with message handling methods.");
+			logger.warn("No ApplicationContext for auto-detection of beans with message handling methods.");
 			return;
 		}
 		for (String beanName : this.applicationContext.getBeanNamesForType(Object.class)) {

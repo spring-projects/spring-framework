@@ -24,6 +24,7 @@ import io.rsocket.AbstractRSocket;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
+import io.rsocket.frame.FrameType;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -103,7 +104,7 @@ class MessagingRSocket extends AbstractRSocket {
 
 	/**
 	 * Wrap the {@link ConnectionSetupPayload} with a {@link Message} and
-	 * delegate to {@link #handle(Payload)} for handling.
+	 * delegate to {@link #handle(Payload, FrameType)} for handling.
 	 * @param payload the connection payload
 	 * @return completion handle for success or error
 	 */
@@ -111,23 +112,23 @@ class MessagingRSocket extends AbstractRSocket {
 		// frameDecoder does not apply to connectionSetupPayload
 		// so retain here since handle expects it..
 		payload.retain();
-		return handle(payload);
+		return handle(payload, FrameType.SETUP);
 	}
 
 
 	@Override
 	public Mono<Void> fireAndForget(Payload payload) {
-		return handle(payload);
+		return handle(payload, FrameType.REQUEST_FNF);
 	}
 
 	@Override
 	public Mono<Payload> requestResponse(Payload payload) {
-		return handleAndReply(payload, Flux.just(payload)).next();
+		return handleAndReply(payload, FrameType.REQUEST_RESPONSE, Flux.just(payload)).next();
 	}
 
 	@Override
 	public Flux<Payload> requestStream(Payload payload) {
-		return handleAndReply(payload, Flux.just(payload));
+		return handleAndReply(payload, FrameType.REQUEST_STREAM, Flux.just(payload));
 	}
 
 	@Override
@@ -135,19 +136,20 @@ class MessagingRSocket extends AbstractRSocket {
 		return Flux.from(payloads)
 				.switchOnFirst((signal, innerFlux) -> {
 					Payload firstPayload = signal.get();
-					return firstPayload == null ? innerFlux : handleAndReply(firstPayload, innerFlux);
+					return firstPayload == null ? innerFlux :
+							handleAndReply(firstPayload, FrameType.REQUEST_CHANNEL, innerFlux);
 				});
 	}
 
 	@Override
 	public Mono<Void> metadataPush(Payload payload) {
 		// Not very useful until createHeaders does more with metadata
-		return handle(payload);
+		return handle(payload, FrameType.METADATA_PUSH);
 	}
 
 
-	private Mono<Void> handle(Payload payload) {
-		MessageHeaders headers = createHeaders(payload, null);
+	private Mono<Void> handle(Payload payload, FrameType frameType) {
+		MessageHeaders headers = createHeaders(payload, frameType, null);
 		DataBuffer dataBuffer = retainDataAndReleasePayload(payload);
 		int refCount = refCount(dataBuffer);
 		Message<?> message = MessageBuilder.createMessage(dataBuffer, headers);
@@ -164,9 +166,9 @@ class MessagingRSocket extends AbstractRSocket {
 				((NettyDataBuffer) dataBuffer).getNativeBuffer().refCnt() : 1;
 	}
 
-	private Flux<Payload> handleAndReply(Payload firstPayload, Flux<Payload> payloads) {
+	private Flux<Payload> handleAndReply(Payload firstPayload, FrameType frameType, Flux<Payload> payloads) {
 		MonoProcessor<Flux<Payload>> replyMono = MonoProcessor.create();
-		MessageHeaders headers = createHeaders(firstPayload, replyMono);
+		MessageHeaders headers = createHeaders(firstPayload, frameType, replyMono);
 
 		AtomicBoolean read = new AtomicBoolean();
 		Flux<DataBuffer> buffers = payloads.map(this::retainDataAndReleasePayload).doOnSubscribe(s -> read.set(true));
@@ -188,7 +190,9 @@ class MessagingRSocket extends AbstractRSocket {
 		return PayloadUtils.retainDataAndReleasePayload(payload, this.bufferFactory);
 	}
 
-	private MessageHeaders createHeaders(Payload payload, @Nullable MonoProcessor<?> replyMono) {
+	private MessageHeaders createHeaders(Payload payload, FrameType frameType,
+			@Nullable MonoProcessor<?> replyMono) {
+
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setLeaveMutable(true);
 
@@ -205,6 +209,7 @@ class MessagingRSocket extends AbstractRSocket {
 		}
 
 		headers.setContentType(this.dataMimeType);
+		headers.setHeader(RSocketFrameTypeMessageCondition.FRAME_TYPE_HEADER, frameType);
 		headers.setHeader(RSocketRequesterMethodArgumentResolver.RSOCKET_REQUESTER_HEADER, this.requester);
 		if (replyMono != null) {
 			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, replyMono);
