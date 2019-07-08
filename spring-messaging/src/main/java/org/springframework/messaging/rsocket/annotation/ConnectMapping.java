@@ -59,7 +59,7 @@ public @interface ConnectMapping {
 	 * <p>Depending on the configured
 	 * {@link org.springframework.util.RouteMatcher RouteMatcher} the pattern may be
 	 * {@link org.springframework.util.AntPathMatcher AntPathMatcher} or
-	 * {@link org.springframework.web.util.pattern.PathPattern PathPattern} based
+	 * {@link org.springframework.web.util.pattern.PathPattern PathPattern} based.
 	 *
 	 * <p>By default this is an empty array in which case it matches all
 	 * {@link ConnectionSetupPayload} and metadata pushes.
