@@ -29,7 +29,59 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PropertyAccessorUtilsTests {
 
 	@Test
+	public void testGetPropertyName() {
+		assertThat(PropertyAccessorUtils.getPropertyName("foo"))
+				.isEqualTo("foo");
+		assertThat(PropertyAccessorUtils.getPropertyName("[foo]"))
+				.isEqualTo("");
+	}
+
+	@Test
+	public void testIsNestedOrIndexedProperty() {
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty(null))
+				.isFalse();
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("foo"))
+				.isFalse();
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("[foo]"))
+				.isTrue();
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("foo.txt"))
+				.isTrue();
+	}
+
+	@Test
+	public void testGetFirstNestedPropertySeparatorIndex() {
+		assertThat(PropertyAccessorUtils
+				.getFirstNestedPropertySeparatorIndex("[foo]")).isEqualTo(-1);
+		assertThat(PropertyAccessorUtils
+				.getFirstNestedPropertySeparatorIndex("foo.txt")).isEqualTo(3);
+	}
+
+	@Test
+	public void testGetLastNestedPropertySeparatorIndex() {
+		assertThat(PropertyAccessorUtils
+				.getLastNestedPropertySeparatorIndex("[foo]")).isEqualTo(-1);
+		assertThat(PropertyAccessorUtils
+				.getLastNestedPropertySeparatorIndex("foo.txt")).isEqualTo(3);
+	}
+
+	@Test
+	public void testMatchesProperty() {
+		assertThat(PropertyAccessorUtils
+				.matchesProperty("foo", "bar")).isFalse();
+		assertThat(PropertyAccessorUtils
+				.matchesProperty("foobar", "foo")).isFalse();
+		assertThat(PropertyAccessorUtils
+				.matchesProperty("bar[foo]", "foo")).isFalse();
+
+		assertThat(PropertyAccessorUtils
+				.matchesProperty("foo", "foo")).isTrue();
+		assertThat(PropertyAccessorUtils
+				.matchesProperty("foo[bar]", "foo")).isTrue();
+	}
+
+	@Test
 	public void canonicalPropertyName() {
+		assertThat(PropertyAccessorUtils.canonicalPropertyName(null)).isEqualTo("");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map")).isEqualTo("map");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[key1]")).isEqualTo("map[key1]");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key1']")).isEqualTo("map[key1]");
@@ -51,6 +103,7 @@ public class PropertyAccessorUtilsTests {
 											"map[key1][key2]", "map[key1].name", "map[key1].name", "map[key1].name"};
 
 		assertThat(PropertyAccessorUtils.canonicalPropertyNames(original)).isEqualTo(canonical);
+		assertThat(PropertyAccessorUtils.canonicalPropertyNames(null)).isNull();
 	}
 
 }
