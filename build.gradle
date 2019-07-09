@@ -158,7 +158,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:4.13-beta-3") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.28.2") {
+		testCompile("org.mockito:mockito-core:3.0.0") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 		testCompile("io.mockk:mockk:1.9.3")
