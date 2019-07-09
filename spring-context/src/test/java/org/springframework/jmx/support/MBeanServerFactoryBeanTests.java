@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import org.springframework.util.MBeanTestUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -54,7 +54,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.afterPropertiesSet();
 		try {
 			MBeanServer server = bean.getObject();
-			assertNotNull("The MBeanServer should not be null", server);
+			assertThat(server).as("The MBeanServer should not be null").isNotNull();
 		}
 		finally {
 			bean.destroy();
@@ -68,7 +68,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.afterPropertiesSet();
 		try {
 			MBeanServer server = bean.getObject();
-			assertEquals("The default domain should be foo", "foo", server.getDefaultDomain());
+			assertThat(server.getDefaultDomain()).as("The default domain should be foo").isEqualTo("foo");
 		}
 		finally {
 			bean.destroy();
@@ -84,7 +84,7 @@ public class MBeanServerFactoryBeanTests {
 			bean.afterPropertiesSet();
 			try {
 				MBeanServer otherServer = bean.getObject();
-				assertSame("Existing MBeanServer not located", server, otherServer);
+				assertThat(otherServer).as("Existing MBeanServer not located").isSameAs(server);
 			}
 			finally {
 				bean.destroy();
@@ -101,7 +101,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.setLocateExistingServerIfPossible(true);
 		bean.afterPropertiesSet();
 		try {
-			assertSame(ManagementFactory.getPlatformMBeanServer(), bean.getObject());
+			assertThat(bean.getObject()).isSameAs(ManagementFactory.getPlatformMBeanServer());
 		}
 		finally {
 			bean.destroy();
@@ -114,7 +114,7 @@ public class MBeanServerFactoryBeanTests {
 		bean.setAgentId("");
 		bean.afterPropertiesSet();
 		try {
-			assertSame(ManagementFactory.getPlatformMBeanServer(), bean.getObject());
+			assertThat(bean.getObject()).isSameAs(ManagementFactory.getPlatformMBeanServer());
 		}
 		finally {
 			bean.destroy();
@@ -135,26 +135,23 @@ public class MBeanServerFactoryBeanTests {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setRegisterWithFactory(referenceShouldExist);
 		bean.afterPropertiesSet();
-
 		try {
 			MBeanServer server = bean.getObject();
 			List<MBeanServer> servers = MBeanServerFactory.findMBeanServer(null);
-
-			boolean found = false;
-			for (MBeanServer candidate : servers) {
-				if (candidate == server) {
-					found = true;
-					break;
-				}
-			}
-
-			if (!(found == referenceShouldExist)) {
-				fail(failMsg);
-			}
+			assertThat(hasInstance(servers, server)).as(failMsg).isEqualTo(referenceShouldExist);
 		}
 		finally {
 			bean.destroy();
 		}
+	}
+
+	private boolean hasInstance(List<MBeanServer> servers, MBeanServer server) {
+		for (MBeanServer candidate : servers) {
+			if (candidate == server) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

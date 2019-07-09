@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,7 @@ import java.io.UnsupportedEncodingException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -46,10 +46,10 @@ public class DigestUtilsTests {
 				{-0x4f, 0xa, -0x73, -0x4f, 0x64, -0x20, 0x75, 0x41, 0x5, -0x49, -0x57, -0x65, -0x19, 0x2e, 0x3f, -0x1b};
 
 		byte[] result = DigestUtils.md5Digest(bytes);
-		assertArrayEquals("Invalid hash", expected, result);
+		assertThat(result).as("Invalid hash").isEqualTo(expected);
 
 		result = DigestUtils.md5Digest(new ByteArrayInputStream(bytes));
-		assertArrayEquals("Invalid hash", expected, result);
+		assertThat(result).as("Invalid hash").isEqualTo(expected);
 	}
 
 	@Test
@@ -57,10 +57,10 @@ public class DigestUtilsTests {
 		String expected = "b10a8db164e0754105b7a99be72e3fe5";
 
 		String hash = DigestUtils.md5DigestAsHex(bytes);
-		assertEquals("Invalid hash", expected, hash);
+		assertThat(hash).as("Invalid hash").isEqualTo(expected);
 
 		hash = DigestUtils.md5DigestAsHex(new ByteArrayInputStream(bytes));
-		assertEquals("Invalid hash", expected, hash);
+		assertThat(hash).as("Invalid hash").isEqualTo(expected);
 	}
 
 	@Test
@@ -69,11 +69,11 @@ public class DigestUtilsTests {
 
 		StringBuilder builder = new StringBuilder();
 		DigestUtils.appendMd5DigestAsHex(bytes, builder);
-		assertEquals("Invalid hash", expected, builder.toString());
+		assertThat(builder.toString()).as("Invalid hash").isEqualTo(expected);
 
 		builder = new StringBuilder();
 		DigestUtils.appendMd5DigestAsHex(new ByteArrayInputStream(bytes), builder);
-		assertEquals("Invalid hash", expected, builder.toString());
+		assertThat(builder.toString()).as("Invalid hash").isEqualTo(expected);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -96,7 +97,7 @@ public class AnnotationMatchingPointcut implements Pointcut {
 			this.classFilter = new AnnotationClassFilter(classAnnotationType, checkInherited);
 		}
 		else {
-			this.classFilter = ClassFilter.TRUE;
+			this.classFilter = new AnnotationCandidateClassFilter(methodAnnotationType);
 		}
 
 		if (methodAnnotationType != null) {
@@ -119,7 +120,7 @@ public class AnnotationMatchingPointcut implements Pointcut {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -162,6 +163,25 @@ public class AnnotationMatchingPointcut implements Pointcut {
 	public static AnnotationMatchingPointcut forMethodAnnotation(Class<? extends Annotation> annotationType) {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		return new AnnotationMatchingPointcut(null, annotationType);
+	}
+
+
+	/**
+	 * {@link ClassFilter} that delegates to {@link AnnotationUtils#isCandidateClass}
+	 * for filtering classes whose methods are not worth searching to begin with.
+	 */
+	private static class AnnotationCandidateClassFilter implements ClassFilter {
+
+		private final Class<? extends Annotation> annotationType;
+
+		public AnnotationCandidateClassFilter(Class<? extends Annotation> annotationType) {
+			this.annotationType = annotationType;
+		}
+
+		@Override
+		public boolean matches(Class<?> clazz) {
+			return AnnotationUtils.isCandidateClass(clazz, this.annotationType);
+		}
 	}
 
 }

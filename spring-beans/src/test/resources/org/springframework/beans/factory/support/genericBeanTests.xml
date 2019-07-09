@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -64,7 +64,7 @@
   </bean>
 
   <bean id="setBean" class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$UrlSet">
-    <property name="urlNames" value="http://www.springframework.org"/>
+    <property name="urlNames" value="https://www.springframework.org"/>
   </bean>
 
 </beans>

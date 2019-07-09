@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,6 +36,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -75,23 +76,23 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			ResourceTransformerChain transformerChain) {
 
 		return transformerChain.transform(exchange, inputResource)
-				.flatMap(ouptputResource -> {
-					String filename = ouptputResource.getFilename();
+				.flatMap(outputResource -> {
+					String filename = outputResource.getFilename();
 					if (!"css".equals(StringUtils.getFilenameExtension(filename)) ||
 							inputResource instanceof EncodedResourceResolver.EncodedResource ||
 							inputResource instanceof GzipResourceResolver.GzippedResource) {
-						return Mono.just(ouptputResource);
+						return Mono.just(outputResource);
 					}
 
 					DataBufferFactory bufferFactory = exchange.getResponse().bufferFactory();
 					Flux<DataBuffer> flux = DataBufferUtils
-							.read(ouptputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
+							.read(outputResource, bufferFactory, StreamUtils.BUFFER_SIZE);
 					return DataBufferUtils.join(flux)
 							.flatMap(dataBuffer -> {
 								CharBuffer charBuffer = DEFAULT_CHARSET.decode(dataBuffer.asByteBuffer());
 								DataBufferUtils.release(dataBuffer);
 								String cssContent = charBuffer.toString();
-								return transformContent(cssContent, ouptputResource, transformerChain, exchange);
+								return transformContent(cssContent, outputResource, transformerChain, exchange);
 							});
 				});
 	}
@@ -284,7 +285,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

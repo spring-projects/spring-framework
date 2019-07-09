@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.messaging.simp;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -82,6 +83,10 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	 * The header is simply checked for presence or absence.
 	 */
 	public static final String IGNORE_ERROR = "simpIgnoreError";
+
+
+	@Nullable
+	private Consumer<Principal> userCallback;
 
 
 	/**
@@ -171,6 +176,9 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public void setUser(@Nullable Principal principal) {
 		setHeader(USER_HEADER, principal);
+		if (this.userCallback != null) {
+			this.userCallback.accept(principal);
+		}
 	}
 
 	/**
@@ -179,6 +187,18 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 	@Nullable
 	public Principal getUser() {
 		return (Principal) getHeader(USER_HEADER);
+	}
+
+	/**
+	 * Provide a callback to be invoked if and when {@link #setUser(Principal)}
+	 * is called. This is used internally on the inbound channel to detect
+	 * token-based authentications through an interceptor.
+	 * @param callback the callback to invoke
+	 * @since 5.1.9
+	 */
+	public void setUserChangeCallback(Consumer<Principal> callback) {
+		Assert.notNull(callback, "'callback' is required");
+		this.userCallback = this.userCallback != null ? this.userCallback.andThen(callback) : callback;
 	}
 
 	@Override

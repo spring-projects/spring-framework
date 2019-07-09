@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,14 +15,12 @@
  */
 package org.springframework.web.reactive.socket.adapter;
 
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.NettyInbound;
 import reactor.netty.NettyOutbound;
-import reactor.netty.NettyPipeline;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 
@@ -43,18 +41,35 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class ReactorNettyWebSocketSession
 		extends NettyWebSocketSessionSupport<ReactorNettyWebSocketSession.WebSocketConnection> {
 
+	private final int maxFramePayloadLength;
 
+
+	/**
+	 * Constructor for the session, using the {@link #DEFAULT_FRAME_MAX_SIZE} value.
+	 */
 	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
 			HandshakeInfo info, NettyDataBufferFactory bufferFactory) {
 
+		this(inbound, outbound, info, bufferFactory, DEFAULT_FRAME_MAX_SIZE);
+	}
+
+	/**
+	 * Constructor with an additional maxFramePayloadLength argument.
+	 * @since 5.1
+	 */
+	public ReactorNettyWebSocketSession(WebsocketInbound inbound, WebsocketOutbound outbound,
+			HandshakeInfo info, NettyDataBufferFactory bufferFactory,
+			int maxFramePayloadLength) {
+
 		super(new WebSocketConnection(inbound, outbound), info, bufferFactory);
+		this.maxFramePayloadLength = maxFramePayloadLength;
 	}
 
 
 	@Override
 	public Flux<WebSocketMessage> receive() {
 		return getDelegate().getInbound()
-				.aggregateFrames(DEFAULT_FRAME_MAX_SIZE)
+				.aggregateFrames(this.maxFramePayloadLength)
 				.receiveFrames()
 				.map(super::toMessage)
 				.doOnNext(message -> {
@@ -74,15 +89,13 @@ public class ReactorNettyWebSocketSession
 				})
 				.map(this::toFrame);
 		return getDelegate().getOutbound()
-				.options(NettyPipeline.SendOptions::flushOnEach)
 				.sendObject(frames)
 				.then();
 	}
 
 	@Override
 	public Mono<Void> close(CloseStatus status) {
-		WebSocketFrame closeFrame = new CloseWebSocketFrame(status.getCode(), status.getReason());
-		return getDelegate().getOutbound().sendObject(closeFrame).then();
+		return getDelegate().getOutbound().sendClose(status.getCode(), status.getReason());
 	}
 
 

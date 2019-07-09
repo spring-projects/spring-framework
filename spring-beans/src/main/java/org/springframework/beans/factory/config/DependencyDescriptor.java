@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,7 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
@@ -76,6 +77,9 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Nullable
 	private transient volatile ResolvableType resolvableType;
+
+	@Nullable
+	private transient volatile TypeDescriptor typeDescriptor;
 
 
 	/**
@@ -200,23 +204,6 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	}
 
 	/**
-	 * Return whether this descriptor allows for stream-style access to
-	 * result instances.
-	 * <p>By default, dependencies are strictly resolved to the declaration of
-	 * the injection point and therefore only resolve multiple entries if the
-	 * injection point is declared as an array, collection or map. This is
-	 * indicated by returning {@code false} here.
-	 * <p>Overriding this method to return {@code true} indicates that the
-	 * injection point declares the bean type but the resolution is meant to
-	 * end up in a {@link java.util.stream.Stream} for the declared bean type,
-	 * with the caller handling the multi-instance case for the injection point.
-	 * @since 5.1
-	 */
-	public boolean isStreamAccess() {
-		return false;
-	}
-
-	/**
 	 * Resolve the specified not-unique scenario: by default,
 	 * throwing a {@link NoUniqueBeanDefinitionException}.
 	 * <p>Subclasses may override this to select one of the instances or
@@ -318,7 +305,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	}
 
 	/**
-	 * Build a ResolvableType object for the wrapped parameter/field.
+	 * Build a {@link ResolvableType} object for the wrapped parameter/field.
 	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
@@ -330,6 +317,21 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 			this.resolvableType = resolvableType;
 		}
 		return resolvableType;
+	}
+
+	/**
+	 * Build a {@link TypeDescriptor} object for the wrapped parameter/field.
+	 * @since 5.1.4
+	 */
+	public TypeDescriptor getTypeDescriptor() {
+		TypeDescriptor typeDescriptor = this.typeDescriptor;
+		if (typeDescriptor == null) {
+			typeDescriptor = (this.field != null ?
+					new TypeDescriptor(getResolvableType(), getDependencyType(), getAnnotations()) :
+					new TypeDescriptor(obtainMethodParameter()));
+			this.typeDescriptor = typeDescriptor;
+		}
+		return typeDescriptor;
 	}
 
 	/**
@@ -414,7 +416,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

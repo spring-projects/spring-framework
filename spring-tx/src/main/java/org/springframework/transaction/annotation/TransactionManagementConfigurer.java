@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,16 @@
 
 package org.springframework.transaction.annotation;
 
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 
 /**
  * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
  * Configuration} classes annotated with @{@link EnableTransactionManagement} that wish to
- * or need to explicitly specify the default {@link PlatformTransactionManager} bean to be
- * used for annotation-driven transaction management, as opposed to the default approach
- * of a by-type lookup. One reason this might be necessary is if there are two
- * {@code PlatformTransactionManager} beans present in the container.
+ * (or need to) explicitly specify the default {@code PlatformTransactionManager} bean
+ * (or {@code ReactiveTransactionManager} bean) to be used for annotation-driven
+ * transaction management, as opposed to the default approach of a by-type lookup.
+ * One reason this might be necessary is if there are two {@code PlatformTransactionManager}
+ * beans present in the container.
  *
  * <p>See @{@link EnableTransactionManagement} for general examples and context;
  * see {@link #annotationDrivenTransactionManager()} for detailed instructions.
@@ -40,6 +41,8 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @since 3.1
  * @see EnableTransactionManagement
  * @see org.springframework.context.annotation.Primary
+ * @see org.springframework.transaction.PlatformTransactionManager
+ * @see org.springframework.transaction.ReactiveTransactionManager
  */
 public interface TransactionManagementConfigurer {
 
@@ -76,7 +79,9 @@ public interface TransactionManagementConfigurer {
 	 * container as all {@code PlatformTransactionManager} implementations take advantage
 	 * of Spring lifecycle callbacks such as {@code InitializingBean} and
 	 * {@code BeanFactoryAware}.
+	 * @return a {@link org.springframework.transaction.PlatformTransactionManager} or
+	 * {@link org.springframework.transaction.ReactiveTransactionManager} implementation
 	 */
-	PlatformTransactionManager annotationDrivenTransactionManager();
+	TransactionManager annotationDrivenTransactionManager();
 
 }

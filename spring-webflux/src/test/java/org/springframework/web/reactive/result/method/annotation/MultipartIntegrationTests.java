@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +35,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -52,7 +57,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -80,12 +85,12 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<ClientResponse> result = webClient
 				.post()
 				.uri("/requestPart")
-				.syncBody(generateBody())
+				.body(generateBody())
 				.exchange();
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertEquals(HttpStatus.OK, response.statusCode()))
+				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 
@@ -94,13 +99,12 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<String> result = webClient
 				.post()
 				.uri("/requestBodyMap")
-				.syncBody(generateBody())
+				.body(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(body -> assertEquals(
-						"Map[[fieldPart],[fileParts:foo.txt,fileParts:logo.png],[jsonPart]]", body))
+				.consumeNextWith(body -> assertThat(body).isEqualTo("Map[[fieldPart],[fileParts:foo.txt,fileParts:logo.png],[jsonPart]]"))
 				.verifyComplete();
 	}
 
@@ -109,28 +113,82 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		Mono<String> result = webClient
 				.post()
 				.uri("/requestBodyFlux")
-				.syncBody(generateBody())
+				.body(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(body -> assertEquals(
-						"[fieldPart,fileParts:foo.txt,fileParts:logo.png,jsonPart]", body))
+				.consumeNextWith(body -> assertThat(body).isEqualTo("[fieldPart,fileParts:foo.txt,fileParts:logo.png,jsonPart]"))
 				.verifyComplete();
 	}
+
+	@Test
+	public void filePartsFlux() {
+		Mono<String> result = webClient
+				.post()
+				.uri("/filePartFlux")
+				.body(generateBody())
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(body -> assertThat(body).isEqualTo("[fileParts:foo.txt,fileParts:logo.png]"))
+				.verifyComplete();
+	}
+
+	@Test
+	public void filePartsMono() {
+		Mono<String> result = webClient
+				.post()
+				.uri("/filePartMono")
+				.body(generateBody())
+				.retrieve()
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(body -> assertThat(body).isEqualTo("[fileParts:foo.txt]"))
+				.verifyComplete();
+	}
+
+	@Test
+	public void transferTo() {
+		Flux<String> result = webClient
+				.post()
+				.uri("/transferTo")
+				.body(generateBody())
+				.retrieve()
+				.bodyToFlux(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(filename -> verifyContents(Paths.get(filename), new ClassPathResource("foo.txt", MultipartHttpMessageReader.class)))
+				.consumeNextWith(filename -> verifyContents(Paths.get(filename), new ClassPathResource("logo.png", getClass())))
+				.verifyComplete();
+
+	}
+
+	private static void verifyContents(Path tempFile, Resource resource) {
+		try {
+			byte[] tempBytes = Files.readAllBytes(tempFile);
+			byte[] resourceBytes = Files.readAllBytes(resource.getFile().toPath());
+			assertThat(tempBytes).isEqualTo(resourceBytes);
+		}
+		catch (IOException ex) {
+			throw new AssertionError(ex);
+		}
+	}
+
 
 	@Test
 	public void modelAttribute() {
 		Mono<String> result = webClient
 				.post()
 				.uri("/modelAttribute")
-				.syncBody(generateBody())
+				.body(generateBody())
 				.retrieve()
 				.bodyToMono(String.class);
 
 		StepVerifier.create(result)
-				.consumeNextWith(body -> assertEquals(
-						"FormBean[fieldValue,[fileParts:foo.txt,fileParts:logo.png]]", body))
+				.consumeNextWith(body -> assertThat(body).isEqualTo("FormBean[fieldValue,[fileParts:foo.txt,fileParts:logo.png]]"))
 				.verifyComplete();
 	}
 
@@ -160,28 +218,15 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	static class MultipartController {
 
 		@PostMapping("/requestPart")
-		void requestPart(
-				@RequestPart FormFieldPart fieldPart,
+		void requestPart(@RequestPart FormFieldPart fieldPart,
 				@RequestPart("fileParts") FilePart fileParts,
-				@RequestPart("fileParts") Mono<FilePart> filePartsMono,
-				@RequestPart("fileParts") Flux<FilePart> filePartsFlux,
-				@RequestPart("jsonPart") Person person,
 				@RequestPart("jsonPart") Mono<Person> personMono) {
 
-			assertEquals("fieldValue", fieldPart.value());
-			assertEquals("fileParts:foo.txt", partDescription(fileParts));
-			assertEquals("Jason", person.getName());
-
-			StepVerifier.create(partFluxDescription(filePartsFlux))
-					.consumeNextWith(content -> assertEquals("[fileParts:foo.txt,fileParts:logo.png]", content))
-					.verifyComplete();
-
-			StepVerifier.create(filePartsMono)
-					.consumeNextWith(filePart -> assertEquals("fileParts:foo.txt", partDescription(filePart)))
-					.verifyComplete();
+			assertThat(fieldPart.value()).isEqualTo("fieldValue");
+			assertThat(partDescription(fileParts)).isEqualTo("fileParts:foo.txt");
 
 			StepVerifier.create(personMono)
-					.consumeNextWith(p -> assertEquals("Jason", p.getName()))
+					.consumeNextWith(p -> assertThat(p.getName()).isEqualTo("Jason"))
 					.verifyComplete();
 		}
 
@@ -193,6 +238,31 @@ public class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTes
 		@PostMapping("/requestBodyFlux")
 		Mono<String> requestBodyFlux(@RequestBody Flux<Part> parts) {
 			return partFluxDescription(parts);
+		}
+
+		@PostMapping("/filePartFlux")
+		Mono<String> filePartsFlux(@RequestPart("fileParts") Flux<FilePart> parts) {
+			return partFluxDescription(parts);
+		}
+
+		@PostMapping("/filePartMono")
+		Mono<String> filePartsFlux(@RequestPart("fileParts") Mono<FilePart> parts) {
+			return partFluxDescription(Flux.from(parts));
+		}
+
+		@PostMapping("/transferTo")
+		Flux<String> transferTo(@RequestPart("fileParts") Flux<FilePart> parts) {
+			return parts.flatMap(filePart -> {
+				try {
+					Path tempFile = Files.createTempFile("MultipartIntegrationTests", filePart.filename());
+					return filePart.transferTo(tempFile)
+							.then(Mono.just(tempFile.toString() + "\n"));
+
+				}
+				catch (IOException e) {
+					return Mono.error(e);
+				}
+			});
 		}
 
 		@PostMapping("/modelAttribute")

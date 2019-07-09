@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests that poitncut matching is correct with generic method parameter.
@@ -57,19 +57,19 @@ public class GenericParameterMatchingTests {
 	@Test
 	public void testGenericInterfaceGenericArgExecution() {
 		testBean.save("");
-		assertEquals(1, counterAspect.genericInterfaceGenericArgExecutionCount);
+		assertThat(counterAspect.genericInterfaceGenericArgExecutionCount).isEqualTo(1);
 	}
 
 	@Test
 	public void testGenericInterfaceGenericCollectionArgExecution() {
 		testBean.saveAll(null);
-		assertEquals(1, counterAspect.genericInterfaceGenericCollectionArgExecutionCount);
+		assertThat(counterAspect.genericInterfaceGenericCollectionArgExecutionCount).isEqualTo(1);
 	}
 
 	@Test
 	public void testGenericInterfaceSubtypeGenericCollectionArgExecution() {
 		testBean.saveAll(null);
-		assertEquals(1, counterAspect.genericInterfaceSubtypeGenericCollectionArgExecutionCount);
+		assertThat(counterAspect.genericInterfaceSubtypeGenericCollectionArgExecutionCount).isEqualTo(1);
 	}
 
 

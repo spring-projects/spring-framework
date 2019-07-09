@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,17 +25,18 @@ import javax.persistence.Converter;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
+import javax.transaction.Transactional;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import org.springframework.context.index.sample.AbstractController;
 import org.springframework.context.index.sample.MetaControllerIndexed;
 import org.springframework.context.index.sample.SampleComponent;
 import org.springframework.context.index.sample.SampleController;
+import org.springframework.context.index.sample.SampleEmbedded;
 import org.springframework.context.index.sample.SampleMetaController;
 import org.springframework.context.index.sample.SampleMetaIndexedController;
 import org.springframework.context.index.sample.SampleNonStaticEmbedded;
@@ -44,9 +45,9 @@ import org.springframework.context.index.sample.SampleRepository;
 import org.springframework.context.index.sample.SampleService;
 import org.springframework.context.index.sample.cdi.SampleManagedBean;
 import org.springframework.context.index.sample.cdi.SampleNamed;
+import org.springframework.context.index.sample.cdi.SampleTransactional;
 import org.springframework.context.index.sample.jpa.SampleConverter;
 import org.springframework.context.index.sample.jpa.SampleEmbeddable;
-import org.springframework.context.index.sample.SampleEmbedded;
 import org.springframework.context.index.sample.jpa.SampleEntity;
 import org.springframework.context.index.sample.jpa.SampleMappedSuperClass;
 import org.springframework.context.index.sample.type.Repo;
@@ -59,14 +60,16 @@ import org.springframework.context.index.test.TestCompiler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.context.index.processor.Metadata.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+
 
 /**
  * Tests for {@link CandidateComponentsIndexer}.
  *
  * @author Stephane Nicoll
+ * @author Vedran Pavic
  */
 public class CandidateComponentsIndexerTests {
 
@@ -75,129 +78,130 @@ public class CandidateComponentsIndexerTests {
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 
 	@Before
 	public void createCompiler() throws IOException {
 		this.compiler = new TestCompiler(this.temporaryFolder);
 	}
 
-
 	@Test
-	public void noCandidate() throws IOException {
+	public void noCandidate() {
 		CandidateComponentsMetadata metadata = compile(SampleNone.class);
-		assertThat(metadata.getItems(), hasSize(0));
+		assertThat(metadata.getItems()).hasSize(0);
 	}
 
 	@Test
-	public void noAnnotation() throws IOException {
+	public void noAnnotation() {
 		CandidateComponentsMetadata metadata = compile(CandidateComponentsIndexerTests.class);
-		assertThat(metadata.getItems(), hasSize(0));
+		assertThat(metadata.getItems()).hasSize(0);
 	}
 
 	@Test
-	public void stereotypeComponent() throws IOException {
+	public void stereotypeComponent() {
 		testComponent(SampleComponent.class);
 	}
 
 	@Test
-	public void stereotypeService() throws IOException {
+	public void stereotypeService() {
 		testComponent(SampleService.class);
 	}
 
 	@Test
-	public void stereotypeController() throws IOException {
+	public void stereotypeController() {
 		testComponent(SampleController.class);
 	}
 
 	@Test
-	public void stereotypeControllerMetaAnnotation() throws IOException {
+	public void stereotypeControllerMetaAnnotation() {
 		testComponent(SampleMetaController.class);
 	}
 
 	@Test
-	public void stereotypeRepository() throws IOException {
+	public void stereotypeRepository() {
 		testSingleComponent(SampleRepository.class, Component.class);
 	}
 
 	@Test
-	public void stereotypeControllerMetaIndex() throws IOException {
+	public void stereotypeControllerMetaIndex() {
 		testSingleComponent(SampleMetaIndexedController.class,
 				Component.class, MetaControllerIndexed.class);
 	}
 
 	@Test
-	public void stereotypeOnAbstractClass() throws IOException {
+	public void stereotypeOnAbstractClass() {
 		testComponent(AbstractController.class);
 	}
 
 	@Test
-	public void cdiManagedBean() throws IOException {
+	public void cdiManagedBean() {
 		testSingleComponent(SampleManagedBean.class, ManagedBean.class);
 	}
 
 	@Test
-	public void cdiNamed() throws IOException {
+	public void cdiNamed() {
 		testSingleComponent(SampleNamed.class, Named.class);
 	}
 
 	@Test
-	public void persistenceEntity() throws IOException {
+	public void cdiTransactional() {
+		testSingleComponent(SampleTransactional.class, Transactional.class);
+	}
+
+	@Test
+	public void persistenceEntity() {
 		testSingleComponent(SampleEntity.class, Entity.class);
 	}
 
 	@Test
-	public void persistenceMappedSuperClass() throws IOException {
+	public void persistenceMappedSuperClass() {
 		testSingleComponent(SampleMappedSuperClass.class, MappedSuperclass.class);
 	}
 
 	@Test
-	public void persistenceEmbeddable() throws IOException {
+	public void persistenceEmbeddable() {
 		testSingleComponent(SampleEmbeddable.class, Embeddable.class);
 	}
 
 	@Test
-	public void persistenceConverter() throws IOException {
+	public void persistenceConverter() {
 		testSingleComponent(SampleConverter.class, Converter.class);
 	}
 
 	@Test
-	public void packageInfo() throws IOException {
+	public void packageInfo() {
 		CandidateComponentsMetadata metadata = compile(
 				"org/springframework/context/index/sample/jpa/package-info");
-		assertThat(metadata, hasComponent(
+		assertThat(metadata).has(Metadata.of(
 				"org.springframework.context.index.sample.jpa", "package-info"));
 	}
 
 	@Test
-	public void typeStereotypeFromMetaInterface() throws IOException {
+	public void typeStereotypeFromMetaInterface() {
 		testSingleComponent(SampleSpecializedRepo.class, Repo.class);
 	}
 
 	@Test
-	public void typeStereotypeFromInterfaceFromSuperClass() throws IOException {
+	public void typeStereotypeFromInterfaceFromSuperClass() {
 		testSingleComponent(SampleRepo.class, Repo.class);
 	}
 
 	@Test
-	public void typeStereotypeFromSeveralInterfaces() throws IOException {
+	public void typeStereotypeFromSeveralInterfaces() {
 		testSingleComponent(SampleSmartRepo.class, Repo.class, SmartRepo.class);
 	}
 
 	@Test
-	public void typeStereotypeOnInterface() throws IOException {
+	public void typeStereotypeOnInterface() {
 		testSingleComponent(SpecializedRepo.class, Repo.class);
 	}
 
 	@Test
-	public void typeStereotypeOnInterfaceFromSeveralInterfaces() throws IOException {
+	public void typeStereotypeOnInterfaceFromSeveralInterfaces() {
 		testSingleComponent(SmartRepo.class, Repo.class, SmartRepo.class);
 	}
 
 	@Test
-	public void typeStereotypeOnIndexedInterface() throws IOException {
+	public void typeStereotypeOnIndexedInterface() {
 		testSingleComponent(Repo.class, Repo.class);
 	}
 
@@ -207,42 +211,42 @@ public class CandidateComponentsIndexerTests {
 		// Validate nested type structure
 		String nestedType = "org.springframework.context.index.sample.SampleEmbedded.Another$AnotherPublicCandidate";
 		Class<?> type = ClassUtils.forName(nestedType, getClass().getClassLoader());
-		assertThat(type, sameInstance(SampleEmbedded.Another.AnotherPublicCandidate.class));
+		assertThat(type).isSameAs(SampleEmbedded.Another.AnotherPublicCandidate.class);
 
 		CandidateComponentsMetadata metadata = compile(SampleEmbedded.class);
-		assertThat(metadata, hasComponent(
+		assertThat(metadata).has(Metadata.of(
 				SampleEmbedded.PublicCandidate.class, Component.class));
-		assertThat(metadata, hasComponent(nestedType, Component.class.getName()));
-		assertThat(metadata.getItems(), hasSize(2));
+		assertThat(metadata).has(Metadata.of(nestedType, Component.class.getName()));
+		assertThat(metadata.getItems()).hasSize(2);
 	}
 
 	@Test
-	public void embeddedNonStaticCandidateAreIgnored() throws IOException {
+	public void embeddedNonStaticCandidateAreIgnored() {
 		CandidateComponentsMetadata metadata = compile(SampleNonStaticEmbedded.class);
-		assertThat(metadata.getItems(), hasSize(0));
+		assertThat(metadata.getItems()).hasSize(0);
 	}
 
-	private void testComponent(Class<?>... classes) throws IOException {
+	private void testComponent(Class<?>... classes) {
 		CandidateComponentsMetadata metadata = compile(classes);
 		for (Class<?> c : classes) {
-			assertThat(metadata, hasComponent(c, Component.class));
+			assertThat(metadata).has(Metadata.of(c, Component.class));
 		}
-		assertThat(metadata.getItems(), hasSize(classes.length));
+		assertThat(metadata.getItems()).hasSize(classes.length);
 	}
 
-	private void testSingleComponent(Class<?> target, Class<?>... stereotypes) throws IOException {
+	private void testSingleComponent(Class<?> target, Class<?>... stereotypes) {
 		CandidateComponentsMetadata metadata = compile(target);
-		assertThat(metadata, hasComponent(target, stereotypes));
-		assertThat(metadata.getItems(), hasSize(1));
+		assertThat(metadata).has(Metadata.of(target, stereotypes));
+		assertThat(metadata.getItems()).hasSize(1);
 	}
 
-	private CandidateComponentsMetadata compile(Class<?>... types) throws IOException {
+	private CandidateComponentsMetadata compile(Class<?>... types) {
 		CandidateComponentsIndexer processor = new CandidateComponentsIndexer();
 		this.compiler.getTask(types).call(processor);
 		return readGeneratedMetadata(this.compiler.getOutputLocation());
 	}
 
-	private CandidateComponentsMetadata compile(String... types) throws IOException {
+	private CandidateComponentsMetadata compile(String... types) {
 		CandidateComponentsIndexer processor = new CandidateComponentsIndexer();
 		this.compiler.getTask(types).call(processor);
 		return readGeneratedMetadata(this.compiler.getOutputLocation());

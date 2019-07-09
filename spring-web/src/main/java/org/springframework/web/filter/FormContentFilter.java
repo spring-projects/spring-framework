@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -109,16 +109,17 @@ public class FormContentFilter extends OncePerRequestFilter {
 	}
 
 	private boolean shouldParse(HttpServletRequest request) {
-		if (!HTTP_METHODS.contains(request.getMethod())) {
-			return false;
+		String contentType = request.getContentType();
+		String method = request.getMethod();
+		if (StringUtils.hasLength(contentType) && HTTP_METHODS.contains(method)) {
+			try {
+				MediaType mediaType = MediaType.parseMediaType(contentType);
+				return MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType);
+			}
+			catch (IllegalArgumentException ex) {
+			}
 		}
-		try {
-			MediaType mediaType = MediaType.parseMediaType(request.getContentType());
-			return MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType);
-		}
-		catch (IllegalArgumentException ex) {
-			return false;
-		}
+		return false;
 	}
 
 

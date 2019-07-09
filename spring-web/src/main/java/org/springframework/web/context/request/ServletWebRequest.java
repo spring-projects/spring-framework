@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -49,16 +50,6 @@ import org.springframework.web.util.WebUtils;
  * @since 2.0
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
-
-	private static final String ETAG = "ETag";
-
-	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
-
-	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
-
-	private static final String IF_NONE_MATCH = "If-None-Match";
-
-	private static final String LAST_MODIFIED = "Last-Modified";
 
 	private static final List<String> SAFE_METHODS = Arrays.asList("GET", "HEAD");
 
@@ -244,11 +235,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 						HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
 			}
 			if (isHttpGetOrHead) {
-				if (lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(LAST_MODIFIED)) == -1) {
-					response.setDateHeader(LAST_MODIFIED, lastModifiedTimestamp);
+				if (lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
+					response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
 				}
-				if (StringUtils.hasLength(etag) && response.getHeader(ETAG) == null) {
-					response.setHeader(ETAG, padEtagIfNecessary(etag));
+				if (StringUtils.hasLength(etag) && response.getHeader(HttpHeaders.ETAG) == null) {
+					response.setHeader(HttpHeaders.ETAG, padEtagIfNecessary(etag));
 				}
 			}
 		}
@@ -260,7 +251,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (lastModifiedTimestamp < 0) {
 			return false;
 		}
-		long ifUnmodifiedSince = parseDateHeader(IF_UNMODIFIED_SINCE);
+		long ifUnmodifiedSince = parseDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
 		if (ifUnmodifiedSince == -1) {
 			return false;
 		}
@@ -276,7 +267,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 		Enumeration<String> ifNoneMatch;
 		try {
-			ifNoneMatch = getRequest().getHeaders(IF_NONE_MATCH);
+			ifNoneMatch = getRequest().getHeaders(HttpHeaders.IF_NONE_MATCH);
 		}
 		catch (IllegalArgumentException ex) {
 			return false;
@@ -287,13 +278,15 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
+		if (etag.startsWith("W/")) {
+			etag = etag.substring(2);
+		}
 		while (ifNoneMatch.hasMoreElements()) {
 			String clientETags = ifNoneMatch.nextElement();
 			Matcher etagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 			while (etagMatcher.find()) {
-				if (StringUtils.hasLength(etagMatcher.group()) &&
-						etag.replaceFirst("^W/", "").equals(etagMatcher.group(3))) {
+				if (StringUtils.hasLength(etagMatcher.group()) && etag.equals(etagMatcher.group(3))) {
 					this.notModified = true;
 					break;
 				}
@@ -317,7 +310,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (lastModifiedTimestamp < 0) {
 			return false;
 		}
-		long ifModifiedSince = parseDateHeader(IF_MODIFIED_SINCE);
+		long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
 		if (ifModifiedSince == -1) {
 			return false;
 		}

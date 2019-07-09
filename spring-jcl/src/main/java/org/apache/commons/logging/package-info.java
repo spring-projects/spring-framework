@@ -1,6 +1,6 @@
 /**
  * Spring's variant of the
- * <a href="http://commons.apache.org/logging">Commons Logging API</a>:
+ * <a href="https://commons.apache.org/logging">Commons Logging API</a>:
  * with special support for Log4J 2, SLF4J and {@code java.util.logging}.
  *
  * <p>This is a custom bridge along the lines of {@code jcl-over-slf4j}.

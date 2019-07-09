@@ -1,7 +1,7 @@
 /**
  * Spring's repackaging of
- * <a href="http://cglib.sourceforge.net">CGLIB</a>
- * (for internal use only).
+ * <a href="https://github.com/cglib/cglib">CGLIB 3.2</a>
+ * (with Spring-specific patches; for internal use only).
  *
  * <p>This repackaging technique avoids any potential conflicts with
  * dependencies on CGLIB at the application level or from third-party

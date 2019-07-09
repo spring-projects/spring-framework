@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -371,8 +372,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			try {
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
 					try {
-						UrlResource jarResource = new UrlResource(
-								ResourceUtils.JAR_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR);
+						UrlResource jarResource = (ResourceUtils.URL_PROTOCOL_JAR.equals(url.getProtocol()) ?
+								new UrlResource(url) :
+								new UrlResource(ResourceUtils.JAR_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR));
 						if (jarResource.exists()) {
 							result.add(jarResource);
 						}
@@ -697,10 +699,16 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		try {
 			rootDir = rootDirResource.getFile().getAbsoluteFile();
 		}
-		catch (IOException ex) {
+		catch (FileNotFoundException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot search for matching files underneath " + rootDirResource +
+						" in the file system: " + ex.getMessage());
+			}
+			return Collections.emptySet();
+		}
+		catch (Exception ex) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Cannot search for matching files underneath " + rootDirResource +
-						" because it does not correspond to a directory in the file system", ex);
+				logger.info("Failed to resolve " + rootDirResource + " in the file system: " + ex);
 			}
 			return Collections.emptySet();
 		}
@@ -755,7 +763,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 		if (!rootDir.canRead()) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Cannot search for matching files underneath directory [" + rootDir.getAbsolutePath() +
+				logger.info("Skipping search for matching files underneath directory [" + rootDir.getAbsolutePath() +
 						"] because the application is not allowed to read the directory");
 			}
 			return Collections.emptySet();

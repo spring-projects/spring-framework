@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,8 +57,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.socket.messaging.StompTextMessageBuilder.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.socket.messaging.StompTextMessageBuilder.create;
 
 /**
  * Integration tests with annotated message-handling methods.
@@ -94,7 +94,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 		SimpleController controller = this.wac.getBean(SimpleController.class);
 		try {
-			assertTrue(controller.latch.await(TIMEOUT, TimeUnit.SECONDS));
+			assertThat(controller.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 		}
 		finally {
 			session.close();
@@ -113,7 +113,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
 		try {
-			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
+			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 		}
 		finally {
 			session.close();
@@ -130,10 +130,10 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
 		try {
-			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
+			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 
 			String payload = clientHandler.actual.get(1).getPayload();
-			assertTrue("Expected STOMP MESSAGE, got " + payload, payload.startsWith("MESSAGE\n"));
+			assertThat(payload.startsWith("MESSAGE\n")).as("Expected STOMP MESSAGE, got " + payload).isTrue();
 		}
 		finally {
 			session.close();
@@ -150,10 +150,10 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
 		try {
-			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
+			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
-			assertTrue("Expected STOMP destination=/app/number, got " + payload, payload.contains(destHeader));
-			assertTrue("Expected STOMP Payload=42, got " + payload, payload.contains("42"));
+			assertThat(payload.contains(destHeader)).as("Expected STOMP destination=/app/number, got " + payload).isTrue();
+			assertThat(payload.contains("42")).as("Expected STOMP Payload=42, got " + payload).isTrue();
 		}
 		finally {
 			session.close();
@@ -171,11 +171,11 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
 		try {
-			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
+			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
-			assertTrue(payload.startsWith("MESSAGE\n"));
-			assertTrue(payload.contains("destination:/user/queue/error\n"));
-			assertTrue(payload.endsWith("Got error: Bad input\0"));
+			assertThat(payload.startsWith("MESSAGE\n")).isTrue();
+			assertThat(payload.contains("destination:/user/queue/error\n")).isTrue();
+			assertThat(payload.endsWith("Got error: Bad input\0")).isTrue();
 		}
 		finally {
 			session.close();
@@ -194,11 +194,11 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
 		try {
-			assertTrue(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS));
+			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
-			assertTrue(payload.startsWith("MESSAGE\n"));
-			assertTrue(payload.contains("destination:/topic/scopedBeanValue\n"));
-			assertTrue(payload.endsWith("55\0"));
+			assertThat(payload.startsWith("MESSAGE\n")).isTrue();
+			assertThat(payload.contains("destination:/topic/scopedBeanValue\n")).isTrue();
+			assertThat(payload.endsWith("55\0")).isTrue();
 		}
 		finally {
 			session.close();

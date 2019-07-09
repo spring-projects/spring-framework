@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -206,8 +206,8 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	private Mono<Object> getDefaultValue(NamedValueInfo namedValueInfo, MethodParameter parameter,
 			BindingContext bindingContext, Model model, ServerWebExchange exchange) {
 
-		Object value = null;
-		try {
+		return Mono.fromSupplier(() -> {
+			Object value = null;
 			if (namedValueInfo.defaultValue != null) {
 				value = resolveStringValue(namedValueInfo.defaultValue);
 			}
@@ -217,11 +217,8 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 			value = handleNullValue(namedValueInfo.name, value, parameter.getNestedParameterType());
 			value = applyConversion(value, namedValueInfo, parameter, bindingContext, exchange);
 			handleResolvedValue(value, namedValueInfo.name, parameter, model, exchange);
-			return Mono.justOrEmpty(value);
-		}
-		catch (Throwable ex) {
-			return Mono.error(ex);
-		}
+			return value;
+		});
 	}
 
 	/**

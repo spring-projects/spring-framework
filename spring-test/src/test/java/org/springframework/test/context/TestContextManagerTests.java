@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based unit test for {@link TestContextManager}, which verifies proper
@@ -53,7 +53,7 @@ public class TestContextManagerTests {
 	@Test
 	public void listenerExecutionOrder() throws Exception {
 		// @formatter:off
-		assertEquals("Registered TestExecutionListeners", 3, this.testContextManager.getTestExecutionListeners().size());
+		assertThat(this.testContextManager.getTestExecutionListeners().size()).as("Registered TestExecutionListeners").isEqualTo(3);
 
 		this.testContextManager.beforeTestMethod(this, this.testMethod);
 		assertExecutionOrder("beforeTestMethod",
@@ -104,8 +104,7 @@ public class TestContextManagerTests {
 	}
 
 	private static void assertExecutionOrder(String usageContext, String... expectedBeforeTestMethodCalls) {
-		assertEquals("execution order (" + usageContext + ") ==>", Arrays.asList(expectedBeforeTestMethodCalls),
-			executionOrder);
+		assertThat(executionOrder).as("execution order (" + usageContext + ") ==>").isEqualTo(Arrays.asList(expectedBeforeTestMethodCalls));
 	}
 
 

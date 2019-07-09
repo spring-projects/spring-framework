@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
@@ -240,7 +241,7 @@ public abstract class CommonsFileUploadSupport {
 	/**
 	 * Parse the given List of Commons FileItems into a Spring MultipartParsingResult,
 	 * containing Spring MultipartFile instances and a Map of multipart parameter.
-	 * @param fileItems the Commons FileIterms to parse
+	 * @param fileItems the Commons FileItems to parse
 	 * @param encoding the encoding to use for form fields
 	 * @return the Spring MultipartParsingResult
 	 * @see CommonsMultipartFile#CommonsMultipartFile(org.apache.commons.fileupload.FileItem)
@@ -281,16 +282,11 @@ public abstract class CommonsFileUploadSupport {
 				// multipart file field
 				CommonsMultipartFile file = createMultipartFile(fileItem);
 				multipartFiles.add(file.getName(), file);
-				if (logger.isDebugEnabled()) {
-					String message = "Part '" + file.getName() + "', " +
-							"size " + file.getSize() + " bytes, filename='" + file.getOriginalFilename() + "'";
-					if (logger.isTraceEnabled()) {
-						logger.trace(message + ", storage=" + file.getStorageDescription());
-					}
-					else {
-						logger.debug(message);
-					}
-				}
+				LogFormatUtils.traceDebug(logger, traceOn ->
+						"Part '" + file.getName() + "', size " + file.getSize() +
+								" bytes, filename='" + file.getOriginalFilename() + "'" +
+								(traceOn ? ", storage=" + file.getStorageDescription() : "")
+				);
 			}
 		}
 		return new MultipartParsingResult(multipartFiles, multipartParameters, multipartParameterContentTypes);
@@ -323,16 +319,10 @@ public abstract class CommonsFileUploadSupport {
 				if (file instanceof CommonsMultipartFile) {
 					CommonsMultipartFile cmf = (CommonsMultipartFile) file;
 					cmf.getFileItem().delete();
-					if (logger.isDebugEnabled()) {
-						String filename = cmf.getOriginalFilename();
-						String message = "Cleaning up part '" + cmf.getName() + "', filename '" + filename + "'";
-						if (logger.isTraceEnabled()) {
-							logger.trace(message + ", stored " + cmf.getStorageDescription());
-						}
-						else {
-							logger.debug(message);
-						}
-					}
+					LogFormatUtils.traceDebug(logger, traceOn ->
+							"Cleaning up part '" + cmf.getName() +
+									"', filename '" + cmf.getOriginalFilename() + "'" +
+									(traceOn ? ", stored " + cmf.getStorageDescription() : ""));
 				}
 			}
 		}

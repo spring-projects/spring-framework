@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -239,7 +239,12 @@ public abstract class AbstractApplicationEventMulticaster
 								beanFactory.getBean(listenerBeanName, ApplicationListener.class);
 						if (!allListeners.contains(listener) && supportsEvent(listener, eventType, sourceType)) {
 							if (retriever != null) {
-								retriever.applicationListenerBeans.add(listenerBeanName);
+								if (beanFactory.isSingleton(listenerBeanName)) {
+									retriever.applicationListeners.add(listener);
+								}
+								else {
+									retriever.applicationListenerBeans.add(listenerBeanName);
+								}
 							}
 							allListeners.add(listener);
 						}
@@ -252,6 +257,10 @@ public abstract class AbstractApplicationEventMulticaster
 			}
 		}
 		AnnotationAwareOrderComparator.sort(allListeners);
+		if (retriever != null && retriever.applicationListenerBeans.isEmpty()) {
+			retriever.applicationListeners.clear();
+			retriever.applicationListeners.addAll(allListeners);
+		}
 		return allListeners;
 	}
 
@@ -260,7 +269,7 @@ public abstract class AbstractApplicationEventMulticaster
 	 * type before trying to instantiate it.
 	 * <p>If this method returns {@code true} for a given listener as a first pass,
 	 * the listener instance will get retrieved and fully evaluated through a
-	 * {@link #supportsEvent(ApplicationListener,ResolvableType, Class)}  call afterwards.
+	 * {@link #supportsEvent(ApplicationListener, ResolvableType, Class)} call afterwards.
 	 * @param listenerType the listener's type as determined by the BeanFactory
 	 * @param eventType the event type to check
 	 * @return whether the given listener should be included in the candidates
@@ -313,9 +322,12 @@ public abstract class AbstractApplicationEventMulticaster
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
+			}
+			if (!(other instanceof ListenerCacheKey)) {
+				return false;
 			}
 			ListenerCacheKey otherKey = (ListenerCacheKey) other;
 			return (this.eventType.equals(otherKey.eventType) &&
@@ -356,15 +368,13 @@ public abstract class AbstractApplicationEventMulticaster
 	 */
 	private class ListenerRetriever {
 
-		public final Set<ApplicationListener<?>> applicationListeners;
+		public final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
-		public final Set<String> applicationListenerBeans;
+		public final Set<String> applicationListenerBeans = new LinkedHashSet<>();
 
 		private final boolean preFiltered;
 
 		public ListenerRetriever(boolean preFiltered) {
-			this.applicationListeners = new LinkedHashSet<>();
-			this.applicationListenerBeans = new LinkedHashSet<>();
 			this.preFiltered = preFiltered;
 		}
 
@@ -387,7 +397,9 @@ public abstract class AbstractApplicationEventMulticaster
 					}
 				}
 			}
-			AnnotationAwareOrderComparator.sort(allListeners);
+			if (!this.preFiltered || !this.applicationListenerBeans.isEmpty()) {
+				AnnotationAwareOrderComparator.sort(allListeners);
+			}
 			return allListeners;
 		}
 	}

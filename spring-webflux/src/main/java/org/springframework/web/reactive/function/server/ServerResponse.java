@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -285,6 +287,16 @@ public interface ServerResponse {
 		B lastModified(ZonedDateTime lastModified);
 
 		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(long)
+		 */
+		B lastModified(Instant lastModified);
+
+		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.
 		 * @param location the location
 		 * @return this builder
@@ -366,6 +378,53 @@ public interface ServerResponse {
 		BodyBuilder hint(String key, Object value);
 
 		/**
+		 * Customize the serialization hints with the given consumer.
+		 * @param hintsConsumer a function that consumes the hints
+		 * @return this builder
+		 * @since 5.1.6
+		 */
+		BodyBuilder hints(Consumer<Map<String, Object>> hintsConsumer);
+
+		/**
+		 * Set the body of the response to the given {@code Object} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromObject(Object)}.
+		 * @param body the body of the response
+		 * @return the built response
+		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
+		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
+		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object body);
+
+		/**
+		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromProducer(Object, Class)}.
+		 * @param producer the producer to write to the response. This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementClass the class of elements contained in the producer
+		 * @return the built response
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object producer, Class<?> elementClass);
+
+		/**
+		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromProducer(Object, ParameterizedTypeReference)}.
+		 * @param producer the producer to write to the response. This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementTypeRef a type reference describing the elements contained in the producer
+		 * @return the built response
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
+
+		/**
 		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
 		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
@@ -380,26 +439,15 @@ public interface ServerResponse {
 		/**
 		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
 		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
+		 * {@link BodyInserters#fromPublisher(Publisher, ParameterizedTypeReference)}.
 		 * @param publisher the {@code Publisher} to write to the response
-		 * @param typeReference a type reference describing the elements contained in the publisher
+		 * @param elementTypeRef a type reference describing the elements contained in the publisher
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
 		 * @return the built response
 		 */
 		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
-				ParameterizedTypeReference<T> typeReference);
-
-		/**
-		 * Set the body of the response to the given synchronous {@code Object} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromObject(Object)}.
-		 * @param body the body of the response
-		 * @return the built response
-		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher}, for which
-		 * {@link #body(Publisher, Class)} should be used.
-		 */
-		Mono<ServerResponse> syncBody(Object body);
+				ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.
@@ -407,6 +455,22 @@ public interface ServerResponse {
 		 * @return the built response
 		 */
 		Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter);
+
+		/**
+		 * Set the body of the response to the given {@code Object} and return it.
+		 * This convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromObject(Object)}.
+		 * @param body the body of the response
+		 * @return the built response
+		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher}, for which
+		 * {@link #body(Publisher, Class)} should be used.
+		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
+		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
+		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
+		 */
+		@Deprecated
+		Mono<ServerResponse> syncBody(Object body);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -194,7 +194,7 @@ public class GroovyMarkupConfigurer extends TemplateConfiguration
 	protected URL resolveTemplate(ClassLoader classLoader, String templatePath) throws IOException {
 		MarkupTemplateEngine.TemplateResource resource = MarkupTemplateEngine.TemplateResource.parse(templatePath);
 		Locale locale = LocaleContextHolder.getLocale();
-		URL url = classLoader.getResource(resource.withLocale(locale.toString().replace("-", "_")).toString());
+		URL url = classLoader.getResource(resource.withLocale(StringUtils.replace(locale.toString(), "-", "_")).toString());
 		if (url == null) {
 			url = classLoader.getResource(resource.withLocale(locale.getLanguage()).toString());
 		}

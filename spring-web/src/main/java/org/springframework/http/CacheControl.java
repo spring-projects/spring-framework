@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
@@ -50,7 +51,8 @@ import org.springframework.util.StringUtils;
  */
 public class CacheControl {
 
-	private long maxAge = -1;
+	@Nullable
+	private Duration maxAge;
 
 	private boolean noCache = false;
 
@@ -66,11 +68,14 @@ public class CacheControl {
 
 	private boolean proxyRevalidate = false;
 
-	private long staleWhileRevalidate = -1;
+	@Nullable
+	private Duration staleWhileRevalidate;
 
-	private long staleIfError = -1;
+	@Nullable
+	private Duration staleIfError;
 
-	private long sMaxAge = -1;
+	@Nullable
+	private Duration sMaxAge;
 
 
 	/**
@@ -103,11 +108,30 @@ public class CacheControl {
 	 * @param maxAge the maximum time the response should be cached
 	 * @param unit the time unit of the {@code maxAge} argument
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #maxAge(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.8">rfc7234 section 5.2.2.8</a>
 	 */
 	public static CacheControl maxAge(long maxAge, TimeUnit unit) {
+		return maxAge(Duration.ofSeconds(unit.toSeconds(maxAge)));
+	}
+
+	/**
+	 * Add a "max-age=" directive.
+	 * <p>This directive is well suited for publicly caching resources, knowing that
+	 * they won't change within the configured amount of time. Additional directives
+	 * can be also used, in case resources shouldn't be cached ({@link #cachePrivate()})
+	 * or transformed ({@link #noTransform()}) by shared caches.
+	 * <p>In order to prevent caches to reuse the cached response even when it has
+	 * become stale (i.e. the "max-age" delay is passed), the "must-revalidate"
+	 * directive should be set ({@link #mustRevalidate()}
+	 * @param maxAge the maximum time the response should be cached
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
+	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.8">rfc7234 section 5.2.2.8</a>
+	 */
+	public static CacheControl maxAge(Duration maxAge) {
 		CacheControl cc = new CacheControl();
-		cc.maxAge = unit.toSeconds(maxAge);
+		cc.maxAge = maxAge;
 		return cc;
 	}
 
@@ -213,10 +237,24 @@ public class CacheControl {
 	 * @param sMaxAge the maximum time the response should be cached
 	 * @param unit the time unit of the {@code sMaxAge} argument
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #sMaxAge(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.9">rfc7234 section 5.2.2.9</a>
 	 */
 	public CacheControl sMaxAge(long sMaxAge, TimeUnit unit) {
-		this.sMaxAge = unit.toSeconds(sMaxAge);
+		return sMaxAge(Duration.ofSeconds(unit.toSeconds(sMaxAge)));
+	}
+
+	/**
+	 * Add an "s-maxage" directive.
+	 * <p>This directive indicates that, in shared caches, the maximum age specified
+	 * by this directive overrides the maximum age specified by other directives.
+	 * @param sMaxAge the maximum time the response should be cached
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
+	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.9">rfc7234 section 5.2.2.9</a>
+	 */
+	public CacheControl sMaxAge(Duration sMaxAge) {
+		this.sMaxAge = sMaxAge;
 		return this;
 	}
 
@@ -230,10 +268,27 @@ public class CacheControl {
 	 * @param staleWhileRevalidate the maximum time the response should be used while being revalidated
 	 * @param unit the time unit of the {@code staleWhileRevalidate} argument
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #staleWhileRevalidate(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-3">rfc5861 section 3</a>
 	 */
 	public CacheControl staleWhileRevalidate(long staleWhileRevalidate, TimeUnit unit) {
-		this.staleWhileRevalidate = unit.toSeconds(staleWhileRevalidate);
+		return staleWhileRevalidate(Duration.ofSeconds(unit.toSeconds(staleWhileRevalidate)));
+	}
+
+	/**
+	 * Add a "stale-while-revalidate" directive.
+	 * <p>This directive indicates that caches MAY serve the response in which it
+	 * appears after it becomes stale, up to the indicated number of seconds.
+	 * If a cached response is served stale due to the presence of this extension,
+	 * the cache SHOULD attempt to revalidate it while still serving stale responses
+	 * (i.e. without blocking).
+	 * @param staleWhileRevalidate the maximum time the response should be used while being revalidated
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
+	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-3">rfc5861 section 3</a>
+	 */
+	public CacheControl staleWhileRevalidate(Duration staleWhileRevalidate) {
+		this.staleWhileRevalidate = staleWhileRevalidate;
 		return this;
 	}
 
@@ -244,57 +299,77 @@ public class CacheControl {
 	 * @param staleIfError the maximum time the response should be used when errors are encountered
 	 * @param unit the time unit of the {@code staleIfError} argument
 	 * @return {@code this}, to facilitate method chaining
+	 * @see #staleIfError(Duration)
 	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-4">rfc5861 section 4</a>
 	 */
 	public CacheControl staleIfError(long staleIfError, TimeUnit unit) {
-		this.staleIfError = unit.toSeconds(staleIfError);
+		return staleIfError(Duration.ofSeconds(unit.toSeconds(staleIfError)));
+	}
+
+	/**
+	 * Add a "stale-if-error" directive.
+	 * <p>This directive indicates that when an error is encountered, a cached stale response
+	 * MAY be used to satisfy the request, regardless of other freshness information.
+	 * @param staleIfError the maximum time the response should be used when errors are encountered
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 5.2
+	 * @see <a href="https://tools.ietf.org/html/rfc5861#section-4">rfc5861 section 4</a>
+	 */
+	public CacheControl staleIfError(Duration staleIfError) {
+		this.staleIfError = staleIfError;
 		return this;
 	}
 
-
 	/**
-	 * Return the "Cache-Control" header value.
-	 * @return {@code null} if no directive was added, or the header value otherwise
+	 * Return the "Cache-Control" header value, if any.
+	 * @return the header value, or {@code null} if no directive was added
 	 */
 	@Nullable
 	public String getHeaderValue() {
-		StringBuilder ccValue = new StringBuilder();
-		if (this.maxAge != -1) {
-			appendDirective(ccValue, "max-age=" + Long.toString(this.maxAge));
+		String headerValue = toHeaderValue();
+		return (StringUtils.hasText(headerValue) ? headerValue : null);
+	}
+
+	/**
+	 * Return the "Cache-Control" header value.
+	 * @return the header value (potentially empty)
+	 */
+	private String toHeaderValue() {
+		StringBuilder headerValue = new StringBuilder();
+		if (this.maxAge != null) {
+			appendDirective(headerValue, "max-age=" + this.maxAge.getSeconds());
 		}
 		if (this.noCache) {
-			appendDirective(ccValue, "no-cache");
+			appendDirective(headerValue, "no-cache");
 		}
 		if (this.noStore) {
-			appendDirective(ccValue, "no-store");
+			appendDirective(headerValue, "no-store");
 		}
 		if (this.mustRevalidate) {
-			appendDirective(ccValue, "must-revalidate");
+			appendDirective(headerValue, "must-revalidate");
 		}
 		if (this.noTransform) {
-			appendDirective(ccValue, "no-transform");
+			appendDirective(headerValue, "no-transform");
 		}
 		if (this.cachePublic) {
-			appendDirective(ccValue, "public");
+			appendDirective(headerValue, "public");
 		}
 		if (this.cachePrivate) {
-			appendDirective(ccValue, "private");
+			appendDirective(headerValue, "private");
 		}
 		if (this.proxyRevalidate) {
-			appendDirective(ccValue, "proxy-revalidate");
+			appendDirective(headerValue, "proxy-revalidate");
 		}
-		if (this.sMaxAge != -1) {
-			appendDirective(ccValue, "s-maxage=" + Long.toString(this.sMaxAge));
+		if (this.sMaxAge != null) {
+			appendDirective(headerValue, "s-maxage=" + this.sMaxAge.getSeconds());
 		}
-		if (this.staleIfError != -1) {
-			appendDirective(ccValue, "stale-if-error=" + Long.toString(this.staleIfError));
+		if (this.staleIfError != null) {
+			appendDirective(headerValue, "stale-if-error=" + this.staleIfError.getSeconds());
 		}
-		if (this.staleWhileRevalidate != -1) {
-			appendDirective(ccValue, "stale-while-revalidate=" + Long.toString(this.staleWhileRevalidate));
+		if (this.staleWhileRevalidate != null) {
+			appendDirective(headerValue, "stale-while-revalidate=" + this.staleWhileRevalidate.getSeconds());
 		}
-
-		String ccHeaderValue = ccValue.toString();
-		return (StringUtils.hasText(ccHeaderValue) ? ccHeaderValue : null);
+		return headerValue.toString();
 	}
 
 	private void appendDirective(StringBuilder builder, String value) {
@@ -304,8 +379,10 @@ public class CacheControl {
 		builder.append(value);
 	}
 
+
 	@Override
 	public String toString() {
-		return "CacheControl [" + getHeaderValue() + "]";
+		return "CacheControl [" + toHeaderValue() + "]";
 	}
+
 }

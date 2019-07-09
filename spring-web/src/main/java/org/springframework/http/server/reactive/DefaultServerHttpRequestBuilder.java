@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -72,8 +72,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		this.httpMethodValue = original.getMethodValue();
 		this.body = original.getBody();
 
-		this.httpHeaders = new HttpHeaders();
-		copyMultiValueMap(original.getHeaders(), this.httpHeaders);
+		this.httpHeaders = HttpHeaders.writableHttpHeaders(original.getHeaders());
 
 		this.cookies = new LinkedMultiValueMap<>(original.getCookies().size());
 		copyMultiValueMap(original.getCookies(), this.cookies);

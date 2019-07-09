@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -120,6 +120,13 @@ public interface WebSocketSession extends Closeable {
 
 	/**
 	 * Send a WebSocket message: either {@link TextMessage} or {@link BinaryMessage}.
+	 *
+	 * <p><strong>Note:</strong> The underlying standard WebSocket session (JSR-356) does
+	 * not allow concurrent sending. Therefore sending must be synchronized. To ensure
+	 * that, one option is to wrap the {@code WebSocketSession} with the
+	 * {@link org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator
+	 * ConcurrentWebSocketSessionDecorator}.
+	 * @see org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator
 	 */
 	void sendMessage(WebSocketMessage<?> message) throws IOException;
 

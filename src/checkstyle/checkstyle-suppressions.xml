@@ -1,12 +1,9 @@
 <?xml version="1.0"?>
-<!DOCTYPE suppressions PUBLIC
-    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
-    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN" "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
 
 	<!-- global -->
-	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks=".*" />
-	<suppress files="ValueConstants" checks="InterfaceIsType" />
+	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis" />
 
 	<!-- spring-beans -->
 	<suppress files="TypeMismatchException" checks="MutableException"/>
@@ -17,18 +14,23 @@
 	<suppress files="GenericBeanDefinition" checks="EqualsHashCode" />
 	<suppress files="RootBeanDefinition" checks="EqualsHashCode" />
 
+	<!-- spring-context -->
+	<suppress files="SpringAtInjectTckTests" checks="IllegalImportCheck" />
+
 	<!-- spring-core -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]asm[\\/]" checks=".*" />
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]cglib[\\/]" checks=".*" />
+	<suppress files="ByteArrayEncoder" checks="SpringLambda" />
 	<suppress files="SocketUtils" checks="HideUtilityClassConstructor" />
 	<suppress files="ResolvableType" checks="FinalClass" />
 
 	<!-- spring-expression -->
 	<suppress files="ExpressionException" checks="MutableException" />
 	<suppress files="SpelMessage" checks="JavadocVariable|JavadocStyle" />
+	<suppress files="SpelReproTests" checks="InterfaceIsType" />
 
 	<!-- spring-jcl -->
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="Header|SpringNoThis" />
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]apache[\\/]commons[\\/]logging[\\/]" checks="Header|SpringNoThis|IllegalImport" />
 
 	<!-- spring-jdbc -->
 	<suppress files="ResultSetWrappingSqlRowSet" checks="JavadocStyle" />
@@ -46,6 +48,7 @@
 	<suppress files="StompCommand" checks="JavadocVariable" />
 	<suppress files="StompHeaderAccessor" checks="JavadocVariable" />
 	<suppress files="StompHeaders" checks="JavadocVariable" />
+	<suppress files="org[\\/]springframework[\\/]messaging[\\/]handler[\\/]annotation[\\/]ValueConstants" checks="InterfaceIsType" />
 
 	<!-- spring-orm -->
 	<suppress files="jpa[\\/]vendor[\\/]Database" checks="JavadocVariable|JavadocStyle"/>
@@ -56,6 +59,17 @@
 
 	<!-- spring-test -->
 	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]jdbc[\\/]MergedSqlConfig" checks="JavadocStyle" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/]ExpectedExceptionSpringRunnerTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]junit4[\\/]StandardJUnit4FeaturesTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]support[\\/]ContextLoaderUtilsContextHierarchyTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]testng[\\/]transaction[\\/]programmatic/ProgrammaticTxMgmtTestNGTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="org[\\/]springframework[\\/]test[\\/]context[\\/]transaction[\\/]programmatic[\\/]ProgrammaticTxMgmtTests" checks="RegexpSinglelineJava" id="expectedExceptionAnnotation" />
+	<suppress files="JsonPathExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="XpathExpectationsHelper" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="DefaultWebTestClient" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="HeaderAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="StatusAssertions" checks="IllegalImport" id="bannedHamcrestImports" />
+	<suppress files="JsonPathResultMatchers" checks="IllegalImport" id="bannedHamcrestImports" />
 
 	<!-- spring-web -->
 	<suppress files="SpringHandlerInstantiator" checks="JavadocStyle" />
@@ -63,16 +77,21 @@
 	<suppress files="org[\\/]springframework[\\/]http[\\/]HttpStatus" checks="JavadocVariable|JavadocStyle" />
 	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]CrossOrigin" checks="JavadocStyle" />
 	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]RequestMethod" checks="JavadocVariable" />
+	<suppress files="org[\\/]springframework[\\/]web[\\/]bind[\\/]annotation[\\/]ValueConstants" checks="InterfaceIsType" />
 	<suppress files="PatternParseException" checks="JavadocVariable" />
 	<suppress files="web[\\/]reactive[\\/]socket[\\/]CloseStatus" checks="JavadocStyle" />
 
 	<!-- spring-webmvc -->
 	<suppress files="org[\\/]springframework[\\/]web[\\/]servlet[\\/]tags[\\/]form[\\/].*Tag" checks="JavadocVariable" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]protobuf[\\/].*" checks=".*" />
+	<suppress files="ExtractingResponseErrorHandlerTests" checks="MutableException" />
+	<suppress files="ServletAnnotationControllerHandlerMethodTests" checks="InterfaceIsType" />
 
 	<!-- spring-websocket -->
 	<suppress files="web[\\/]socket[\\/]CloseStatus" checks="JavadocStyle" />
 	<suppress files="web[\\/]socket[\\/]WebSocketHttpHeaders" checks="JavadocVariable" />
 	<suppress files="sockjs[\\/]frame[\\/]SockJsFrameType" checks="JavadocVariable" />
 	<suppress files="sockjs[\\/]transport[\\/]TransportType" checks="JavadocVariable" />
+	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]reactive[\\/]protobuf[\\/].*" checks=".*" />
 
 </suppressions>

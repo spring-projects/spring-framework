@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,6 +62,19 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	void addAll(MultiValueMap<K, V> values);
 
 	/**
+	 * {@link #add(Object, Object) Add} the given value, only when the map does not
+	 * {@link #containsKey(Object) contain} the given key.
+	 * @param key the key
+	 * @param value the value to be added
+	 * @since 5.2
+	 */
+	default void addIfAbsent(K key, @Nullable V value) {
+		if (!containsKey(key)) {
+			add(key, value);
+		}
+	}
+
+	/**
 	 * Set the given single value under the given key.
 	 * @param key the key
 	 * @param value the value to set
@@ -75,7 +88,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	void setAll(Map<K, V> values);
 
 	/**
-	 * Returns the first values contained in this {@code MultiValueMap}.
+	 * Return a {@code Map} with the first values contained in this {@code MultiValueMap}.
 	 * @return a single value representation of this map
 	 */
 	Map<K, V> toSingleValueMap();

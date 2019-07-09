@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -254,13 +254,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	@SuppressWarnings("unchecked")
 	private <T> T doGetSingleton(String name, @Nullable Class<T> requiredType) throws NamingException {
 		synchronized (this.singletonObjects) {
-			if (this.singletonObjects.containsKey(name)) {
-				Object jndiObject = this.singletonObjects.get(name);
-				if (requiredType != null && !requiredType.isInstance(jndiObject)) {
-					throw new TypeMismatchNamingException(
-							convertJndiName(name), requiredType, (jndiObject != null ? jndiObject.getClass() : null));
+			Object singleton = this.singletonObjects.get(name);
+			if (singleton != null) {
+				if (requiredType != null && !requiredType.isInstance(singleton)) {
+					throw new TypeMismatchNamingException(convertJndiName(name), requiredType, singleton.getClass());
 				}
-				return (T) jndiObject;
+				return (T) singleton;
 			}
 			T jndiObject = lookup(name, requiredType);
 			this.singletonObjects.put(name, jndiObject);
@@ -274,14 +273,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		}
 		else {
 			synchronized (this.resourceTypes) {
-				if (this.resourceTypes.containsKey(name)) {
-					return this.resourceTypes.get(name);
-				}
-				else {
-					Class<?> type = lookup(name, null).getClass();
+				Class<?> type = this.resourceTypes.get(name);
+				if (type == null) {
+					type = lookup(name, null).getClass();
 					this.resourceTypes.put(name, type);
-					return type;
 				}
+				return type;
 			}
 		}
 	}

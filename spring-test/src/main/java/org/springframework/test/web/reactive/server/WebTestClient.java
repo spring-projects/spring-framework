@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import org.reactivestreams.Publisher;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -625,26 +626,7 @@ public interface WebTestClient {
 		RequestBodySpec contentType(MediaType contentType);
 
 		/**
-		 * Set the body of the request to the given {@code BodyInserter}.
-		 * @param inserter the inserter
-		 * @return spec for decoding the response
-		 * @see org.springframework.web.reactive.function.BodyInserters
-		 */
-		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
-
-		/**
-		 * Set the body of the request to the given asynchronous {@code Publisher}.
-		 * @param publisher the request body data
-		 * @param elementClass the class of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <S> the type of the {@code Publisher}
-		 * @return spec for decoding the response
-		 */
-		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
-
-		/**
-		 * Set the body of the request to the given synchronous {@code Object} and
-		 * perform the request.
+		 * Set the body of the request to the given {@code Object} and perform the request.
 		 * <p>This method is a convenient shortcut for:
 		 * <pre class="code">
 		 * .body(BodyInserters.fromObject(object))
@@ -657,8 +639,83 @@ public interface WebTestClient {
 		 * part with body and headers. The {@code MultiValueMap} can be built
 		 * conveniently using
 		 * @param body the {@code Object} to write to the request
-		 * @return a {@code Mono} with the response
+		 * @return spec for decoding the response
+		 * @since 5.2
 		 */
+		RequestHeadersSpec<?> body(Object body);
+
+		/**
+		 * Set the body of the request to the given producer.
+		 * @param producer the producer to write to the request. This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementClass the class of elements contained in the producer
+		 * @return spec for decoding the response
+		 * @since 5.2
+		 */
+		RequestHeadersSpec<?> body(Object producer, Class<?> elementClass);
+
+		/**
+		 * Set the body of the request to the given producer.
+		 * @param producer the producer to write to the request. This must be a
+		 * {@link Publisher} or another producer adaptable to a
+		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
+		 * @param elementTypeRef the type reference of elements contained in the producer
+		 * @return spec for decoding the response
+		 * @since 5.2
+		 */
+		RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
+
+		/**
+		 * Set the body of the request to the given asynchronous {@code Publisher}.
+		 * @param publisher the request body data
+		 * @param elementClass the class of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <S> the type of the {@code Publisher}
+		 * @return spec for decoding the response
+		 */
+		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass);
+
+		/**
+		 * Set the body of the request to the given asynchronous {@code Publisher}.
+		 * @param publisher the request body data
+		 * @param elementTypeRef the type reference of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <S> the type of the {@code Publisher}
+		 * @return spec for decoding the response
+		 * @since 5.2
+		 */
+		<T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * Set the body of the request to the given {@code BodyInserter}.
+		 * @param inserter the inserter
+		 * @return spec for decoding the response
+		 * @see org.springframework.web.reactive.function.BodyInserters
+		 */
+		RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter);
+
+		/**
+		 * Set the body of the request to the given {@code Object} and perform the request.
+		 * <p>This method is a convenient shortcut for:
+		 * <pre class="code">
+		 * .body(BodyInserters.fromObject(object))
+		 * </pre>
+		 * <p>The body can be a
+		 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create
+		 * a multipart request. The values in the {@code MultiValueMap} can be
+		 * any Object representing the body of the part, or an
+		 * {@link org.springframework.http.HttpEntity HttpEntity} representing a
+		 * part with body and headers. The {@code MultiValueMap} can be built
+		 * conveniently using
+		 * @param body the {@code Object} to write to the request
+		 * @return spec for decoding the response
+		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher} or an
+		 * instance of a type supported by {@link ReactiveAdapterRegistry#getSharedInstance()},
+		 * for which {@link #body(Publisher, Class)} or {@link #body(Object, Class)} should be used.
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #body(Object)}
+		 */
+		@Deprecated
 		RequestHeadersSpec<?> syncBody(Object body);
 	}
 
@@ -739,13 +796,13 @@ public interface WebTestClient {
 		 * {@code expectBody(Void.class)} which ensures that resources are
 		 * released regardless of whether the response has content or not.
 		 */
-		<T> FluxExchangeResult<T> returnResult(Class<T> elementType);
+		<T> FluxExchangeResult<T> returnResult(Class<T> elementClass);
 
 		/**
 		 * Alternative to {@link #returnResult(Class)} that accepts information
 		 * about a target type with generics.
 		 */
-		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType);
+		<T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef);
 	}
 
 
@@ -837,7 +894,7 @@ public interface WebTestClient {
 		 * Parse the expected and actual response content as JSON and perform a
 		 * "lenient" comparison verifying the same attribute-value pairs.
 		 * <p>Use of this option requires the
-		 * <a href="http://jsonassert.skyscreamer.org/">JSONassert</a> library
+		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * on to be on the classpath.
 		 * @param expectedJson the expected JSON content.
 		 */

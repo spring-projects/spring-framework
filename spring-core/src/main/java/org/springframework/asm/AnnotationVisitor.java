@@ -29,8 +29,8 @@ package org.springframework.asm;
 
 /**
  * A visitor to visit a Java annotation. The methods of this class must be called in the following
- * order: ( <tt>visit</tt> | <tt>visitEnum</tt> | <tt>visitAnnotation</tt> | <tt>visitArray</tt> )*
- * <tt>visitEnd</tt>.
+ * order: ( {@code visit} | {@code visitEnum} | {@code visitAnnotation} | {@code visitArray} )*
+ * {@code visitEnd}.
  *
  * @author Eric Bruneton
  * @author Eugene Kuleshov
@@ -39,19 +39,21 @@ public abstract class AnnotationVisitor {
 
   /**
    * The ASM API version implemented by this visitor. The value of this field must be one of {@link
-   * Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7_EXPERIMENTAL}.
+   * Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
    */
   protected final int api;
 
-  /** The annotation visitor to which this visitor must delegate method calls. May be null. */
+  /**
+   * The annotation visitor to which this visitor must delegate method calls. May be {@literal
+   * null}.
+   */
   protected AnnotationVisitor av;
 
   /**
    * Constructs a new {@link AnnotationVisitor}.
    *
    * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link
-   *     Opcodes#ASM7_EXPERIMENTAL}.
+   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
    */
   public AnnotationVisitor(final int api) {
     this(api, null);
@@ -61,17 +63,13 @@ public abstract class AnnotationVisitor {
    * Constructs a new {@link AnnotationVisitor}.
    *
    * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link
-   *     Opcodes#ASM7_EXPERIMENTAL}.
+   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
    * @param annotationVisitor the annotation visitor to which this visitor must delegate method
-   *     calls. May be null.
+   *     calls. May be {@literal null}.
    */
   public AnnotationVisitor(final int api, final AnnotationVisitor annotationVisitor) {
-    if (api != Opcodes.ASM6
-        && api != Opcodes.ASM5
-        && api != Opcodes.ASM4
-        && api != Opcodes.ASM7_EXPERIMENTAL) {
-      throw new IllegalArgumentException();
+    if (api != Opcodes.ASM7 && api != Opcodes.ASM6 && api != Opcodes.ASM5 && api != Opcodes.ASM4) {
+      throw new IllegalArgumentException("Unsupported api " + api);
     }
     this.api = api;
     this.av = annotationVisitor;
@@ -112,9 +110,9 @@ public abstract class AnnotationVisitor {
    *
    * @param name the value name.
    * @param descriptor the class descriptor of the nested annotation class.
-   * @return a visitor to visit the actual nested annotation value, or <tt>null</tt> if this visitor
-   *     is not interested in visiting this nested annotation. <i>The nested annotation value must
-   *     be fully visited before calling other methods on this annotation visitor</i>.
+   * @return a visitor to visit the actual nested annotation value, or {@literal null} if this
+   *     visitor is not interested in visiting this nested annotation. <i>The nested annotation
+   *     value must be fully visited before calling other methods on this annotation visitor</i>.
    */
   public AnnotationVisitor visitAnnotation(final String name, final String descriptor) {
     if (av != null) {
@@ -129,8 +127,8 @@ public abstract class AnnotationVisitor {
    * visit}. This is what {@link ClassReader} does.
    *
    * @param name the value name.
-   * @return a visitor to visit the actual array value elements, or <tt>null</tt> if this visitor is
-   *     not interested in visiting these values. The 'name' parameters passed to the methods of
+   * @return a visitor to visit the actual array value elements, or {@literal null} if this visitor
+   *     is not interested in visiting these values. The 'name' parameters passed to the methods of
    *     this visitor are ignored. <i>All the array values must be visited before calling other
    *     methods on this annotation visitor</i>.
    */

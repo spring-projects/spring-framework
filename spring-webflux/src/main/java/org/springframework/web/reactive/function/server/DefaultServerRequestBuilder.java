@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -140,7 +140,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder body(Flux<DataBuffer> body) {
-		Assert.notNull(body, "'body' must not be null");
+		Assert.notNull(body, "Body must not be null");
 		releaseBody();
 		this.body = body;
 		return this;
@@ -148,7 +148,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder body(String body) {
-		Assert.notNull(body, "'body' must not be null");
+		Assert.notNull(body, "Body must not be null");
 		releaseBody();
 		DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 		this.body = Flux.just(body).
@@ -165,7 +165,6 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder attribute(String name, Object value) {
-		Assert.notNull(name, "'name' must not be null");
 		this.attributes.put(name, value);
 		return this;
 	}
@@ -291,8 +290,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		private static final ResolvableType FORM_DATA_TYPE =
 				ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
-		private static final ResolvableType MULTIPART_DATA_TYPE = ResolvableType.forClassWithGenerics(
-				MultiValueMap.class, String.class, Part.class);
+		private static final ResolvableType PARTS_DATA_TYPE = ResolvableType.forClass(Part.class);
 
 		private static final Mono<MultiValueMap<String, String>> EMPTY_FORM_DATA =
 				Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0))).cache();
@@ -308,13 +306,16 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
+		private final Flux<Part> parts;
+
 		public DelegatingServerWebExchange(
 				ServerHttpRequest request, ServerWebExchange delegate, List<HttpMessageReader<?>> messageReaders) {
 
 			this.request = request;
 			this.delegate = delegate;
 			this.formDataMono = initFormData(request, messageReaders);
-			this.multipartDataMono = initMultipartData(request, messageReaders);
+			this.parts = initParts(request, messageReaders);
+			this.multipartDataMono = initMultipartData(this.parts);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -340,26 +341,32 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@SuppressWarnings("unchecked")
-		private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
-				List<HttpMessageReader<?>> readers) {
+		private static Flux<Part> initParts(ServerHttpRequest request, List<HttpMessageReader<?>> readers) {
 
 			try {
 				MediaType contentType = request.getHeaders().getContentType();
 				if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
-					return ((HttpMessageReader<MultiValueMap<String, Part>>) readers.stream()
-							.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
+					return ((HttpMessageReader<Part>)readers.stream()
+							.filter(reader -> reader.canRead(PARTS_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
-							.readMono(MULTIPART_DATA_TYPE, request, Hints.none())
-							.switchIfEmpty(EMPTY_MULTIPART_DATA)
-							.cache();
+							.read(PARTS_DATA_TYPE, request, Hints.none());
 				}
 			}
 			catch (InvalidMediaTypeException ex) {
 				// Ignore
 			}
-			return EMPTY_MULTIPART_DATA;
+			return Flux.empty();
 		}
+
+		private static Mono<MultiValueMap<String, Part>> initMultipartData(Flux<Part> parts) {
+			return parts.collect(
+					() -> (MultiValueMap<String, Part>) new LinkedMultiValueMap<String, Part>(),
+					(map, part) -> map.add(part.name(), part))
+					.switchIfEmpty(EMPTY_MULTIPART_DATA)
+					.cache();
+		}
+
 		@Override
 		public ServerHttpRequest getRequest() {
 			return this.request;
@@ -373,6 +380,11 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		@Override
 		public Mono<MultiValueMap<String, Part>> getMultipartData() {
 			return this.multipartDataMono;
+		}
+
+		@Override
+		public Flux<Part> getParts() {
+			return this.parts;
 		}
 
 		// Delegating methods

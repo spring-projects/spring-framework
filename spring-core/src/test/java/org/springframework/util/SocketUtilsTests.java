@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,14 +22,13 @@ import java.net.ServerSocket;
 import java.util.SortedSet;
 import javax.net.ServerSocketFactory;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.util.SocketUtils.PORT_RANGE_MIN;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.util.SocketUtils.PORT_RANGE_MAX;
+import static org.springframework.util.SocketUtils.PORT_RANGE_MIN;
 
 /**
  * Unit tests for {@link SocketUtils}.
@@ -38,9 +37,6 @@ import static org.springframework.util.SocketUtils.PORT_RANGE_MAX;
  * @author Gary Russell
  */
 public class SocketUtilsTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void canBeInstantiated() {
@@ -54,14 +50,14 @@ public class SocketUtilsTests {
 
 	@Test
 	public void findAvailableTcpPortWithZeroMinPort() {
-		exception.expect(IllegalArgumentException.class);
-		SocketUtils.findAvailableTcpPort(0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SocketUtils.findAvailableTcpPort(0));
 	}
 
 	@Test
 	public void findAvailableTcpPortWithNegativeMinPort() {
-		exception.expect(IllegalArgumentException.class);
-		SocketUtils.findAvailableTcpPort(-500);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SocketUtils.findAvailableTcpPort(-500));
 	}
 
 	@Test
@@ -74,7 +70,7 @@ public class SocketUtilsTests {
 	public void findAvailableTcpPortWithMinPortEqualToMaxPort() {
 		int minMaxPort = SocketUtils.findAvailableTcpPort();
 		int port = SocketUtils.findAvailableTcpPort(minMaxPort, minMaxPort);
-		assertEquals(minMaxPort, port);
+		assertThat(port).isEqualTo(minMaxPort);
 	}
 
 	@Test
@@ -82,11 +78,11 @@ public class SocketUtilsTests {
 		int port = SocketUtils.findAvailableTcpPort();
 		ServerSocket socket = ServerSocketFactory.getDefault().createServerSocket(port, 1, InetAddress.getByName("localhost"));
 		try {
-			exception.expect(IllegalStateException.class);
-			exception.expectMessage(startsWith("Could not find an available TCP port"));
-			exception.expectMessage(endsWith("after 1 attempts"));
 			// will only look for the exact port
-			SocketUtils.findAvailableTcpPort(port, port);
+			assertThatIllegalStateException().isThrownBy(() ->
+					SocketUtils.findAvailableTcpPort(port, port))
+				.withMessageStartingWith("Could not find an available TCP port")
+				.withMessageEndingWith("after 1 attempts");
 		}
 		finally {
 			socket.close();
@@ -129,8 +125,8 @@ public class SocketUtilsTests {
 
 	@Test
 	public void findAvailableTcpPortsWithRequestedNumberGreaterThanSizeOfRange() {
-		exception.expect(IllegalArgumentException.class);
-		findAvailableTcpPorts(50, 45000, 45010);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				findAvailableTcpPorts(50, 45000, 45010));
 	}
 
 
@@ -138,14 +134,14 @@ public class SocketUtilsTests {
 
 	@Test
 	public void findAvailableUdpPortWithZeroMinPort() {
-		exception.expect(IllegalArgumentException.class);
-		SocketUtils.findAvailableUdpPort(0);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SocketUtils.findAvailableUdpPort(0));
 	}
 
 	@Test
 	public void findAvailableUdpPortWithNegativeMinPort() {
-		exception.expect(IllegalArgumentException.class);
-		SocketUtils.findAvailableUdpPort(-500);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				SocketUtils.findAvailableUdpPort(-500));
 	}
 
 	@Test
@@ -159,11 +155,11 @@ public class SocketUtilsTests {
 		int port = SocketUtils.findAvailableUdpPort();
 		DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
 		try {
-			exception.expect(IllegalStateException.class);
-			exception.expectMessage(startsWith("Could not find an available UDP port"));
-			exception.expectMessage(endsWith("after 1 attempts"));
 			// will only look for the exact port
-			SocketUtils.findAvailableUdpPort(port, port);
+			assertThatIllegalStateException().isThrownBy(() ->
+					SocketUtils.findAvailableUdpPort(port, port))
+				.withMessageStartingWith("Could not find an available UDP port")
+				.withMessageEndingWith("after 1 attempts");
 		}
 		finally {
 			socket.close();
@@ -206,8 +202,8 @@ public class SocketUtilsTests {
 
 	@Test
 	public void findAvailableUdpPortsWithRequestedNumberGreaterThanSizeOfRange() {
-		exception.expect(IllegalArgumentException.class);
-		findAvailableUdpPorts(50, 45000, 45010);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				findAvailableUdpPorts(50, 45000, 45010));
 	}
 
 
@@ -233,12 +229,12 @@ public class SocketUtilsTests {
 		assertAvailablePorts(ports, numRequested, minPort, maxPort);
 	}
 	private void assertPortInRange(int port, int minPort, int maxPort) {
-		assertTrue("port [" + port + "] >= " + minPort, port >= minPort);
-		assertTrue("port [" + port + "] <= " + maxPort, port <= maxPort);
+		assertThat(port >= minPort).as("port [" + port + "] >= " + minPort).isTrue();
+		assertThat(port <= maxPort).as("port [" + port + "] <= " + maxPort).isTrue();
 	}
 
 	private void assertAvailablePorts(SortedSet<Integer> ports, int numRequested, int minPort, int maxPort) {
-		assertEquals("number of ports requested", numRequested, ports.size());
+		assertThat(ports.size()).as("number of ports requested").isEqualTo(numRequested);
 		for (int port : ports) {
 			assertPortInRange(port, minPort, maxPort);
 		}

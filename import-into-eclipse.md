@@ -7,7 +7,7 @@ recent version of Eclipse or STS. As a bare minimum you will need Eclipse with f
 
 The following instructions have been tested against
 [Spring Tool Suite](https://spring.io/tools) (_STS_) 3.9.4 and 4.0.0.M11 with
-[Eclipse Buildship](http://projects.eclipse.org/projects/tools.buildship) (Eclipse
+[Eclipse Buildship](https://projects.eclipse.org/projects/tools.buildship) (Eclipse
 Plug-ins for Gradle). The instructions should work with the latest Eclipse distribution
 as long as you install
 [Buildship](https://marketplace.eclipse.org/content/buildship-gradle-integration). Note
@@ -22,7 +22,7 @@ _Within your locally cloned `spring-framework` working directory:_
    to directory -> Select Finish)
 3. If prompted, exclude the `spring-aspects` module (or after the import by closing or
    deleting the project)
-4. In the `spring-oxm` project, add the two folders (`castor` and `jaxb`) in
+4. In the `spring-oxm` project, add the `jaxb` folder in
    `build/generated-sources` to the build path (right click on them and select
    `Build Path -> Use as Source Folder`)
 5. To apply project specific settings run `./gradlew eclipseBuildship`

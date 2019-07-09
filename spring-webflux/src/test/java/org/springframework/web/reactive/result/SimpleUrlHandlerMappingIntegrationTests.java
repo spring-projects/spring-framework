@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,13 +39,12 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests with requests mapped via
@@ -66,14 +65,15 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 				.build();
 	}
 
+
 	@Test
 	public void testRequestToFooHandler() throws Exception {
 		URI url = new URI("http://localhost:" + this.port + "/foo");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertArrayEquals("foo".getBytes("UTF-8"), response.getBody());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isEqualTo("foo".getBytes("UTF-8"));
 	}
 
 	@Test
@@ -82,8 +82,8 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertArrayEquals("bar".getBytes("UTF-8"), response.getBody());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isEqualTo("bar".getBytes("UTF-8"));
 	}
 
 	@Test
@@ -92,8 +92,8 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals("bar", response.getHeaders().getFirst("foo"));
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 			new RestTemplate().exchange(request, byte[].class);
 		}
 		catch (HttpClientErrorException ex) {
-			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+			assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -115,7 +115,6 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 
 	@Configuration
-	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig {
 
 		@Bean

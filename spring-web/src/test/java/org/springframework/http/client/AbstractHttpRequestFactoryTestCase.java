@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.http.client;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -32,7 +33,9 @@ import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Arjen Poutsma
@@ -65,29 +68,25 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 	public void status() throws Exception {
 		URI uri = new URI(baseUrl + "/status/notfound");
 		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
-		assertEquals("Invalid HTTP method", HttpMethod.GET, request.getMethod());
-		assertEquals("Invalid HTTP URI", uri, request.getURI());
+		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.GET);
+		assertThat(request.getURI()).as("Invalid HTTP URI").isEqualTo(uri);
 
-		ClientHttpResponse response = request.execute();
-		try {
-			assertEquals("Invalid status code", HttpStatus.NOT_FOUND, response.getStatusCode());
-		}
-		finally {
-			response.close();
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.NOT_FOUND);
 		}
 	}
 
 	@Test
 	public void echo() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.PUT);
-		assertEquals("Invalid HTTP method", HttpMethod.PUT, request.getMethod());
+		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.PUT);
 
 		String headerName = "MyHeader";
 		String headerValue1 = "value1";
 		request.getHeaders().add(headerName, headerValue1);
 		String headerValue2 = "value2";
 		request.getHeaders().add(headerName, headerValue2);
-		final byte[] body = "Hello World".getBytes("UTF-8");
+		final byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
 		request.getHeaders().setContentLength(body.length);
 
 		if (request instanceof StreamingHttpOutputMessage) {
@@ -98,25 +97,20 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 			StreamUtils.copy(body, request.getBody());
 		}
 
-		ClientHttpResponse response = request.execute();
-		try {
-			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
-			assertTrue("Header not found", response.getHeaders().containsKey(headerName));
-			assertEquals("Header value not found", Arrays.asList(headerValue1, headerValue2),
-					response.getHeaders().get(headerName));
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
+			assertThat(response.getHeaders().containsKey(headerName)).as("Header not found").isTrue();
+			assertThat(response.getHeaders().get(headerName)).as("Header value not found").isEqualTo(Arrays.asList(headerValue1, headerValue2));
 			byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
-			assertTrue("Invalid body", Arrays.equals(body, result));
-		}
-		finally {
-			response.close();
+			assertThat(Arrays.equals(body, result)).as("Invalid body").isTrue();
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void multipleWrites() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 
-		final byte[] body = "Hello World".getBytes("UTF-8");
+		final byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
 		if (request instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingRequest = (StreamingHttpOutputMessage) request;
 			streamingRequest.setBody(outputStream -> {
@@ -130,24 +124,23 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 		}
 
 		request.execute();
-		FileCopyUtils.copy(body, request.getBody());
+		assertThatIllegalStateException().isThrownBy(() ->
+				FileCopyUtils.copy(body, request.getBody()));
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
+	@SuppressWarnings("try")
 	public void headersAfterExecute() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/status/ok"), HttpMethod.POST);
 
 		request.getHeaders().add("MyHeader", "value");
-		byte[] body = "Hello World".getBytes("UTF-8");
-		FileCopyUtils.copy(body, request.getBody());
-
-		ClientHttpResponse response = request.execute();
-		try {
-			request.getHeaders().add("MyHeader", "value");
-		}
-		finally {
-			response.close();
-		}
+		byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
+				FileCopyUtils.copy(body, request.getBody());
+				try (ClientHttpResponse response = request.execute()) {
+					request.getHeaders().add("MyHeader", "value");
+				}
+		});
 	}
 
 	@Test
@@ -174,8 +167,8 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 				}
 			}
 			response = request.execute();
-			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());
-			assertEquals("Invalid method", path.toUpperCase(Locale.ENGLISH), request.getMethod().name());
+			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
+			assertThat(request.getMethod().name()).as("Invalid method").isEqualTo(path.toUpperCase(Locale.ENGLISH));
 		}
 		finally {
 			if (response != null) {
@@ -189,12 +182,8 @@ public abstract class AbstractHttpRequestFactoryTestCase extends AbstractMockWeb
 		URI uri = new URI(baseUrl + "/params?param1=value&param2=value1&param2=value2");
 		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
 
-		ClientHttpResponse response = request.execute();
-		try {
-			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
-		}
-		finally {
-			response.close();
+		try (ClientHttpResponse response = request.execute()) {
+			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 		}
 	}
 

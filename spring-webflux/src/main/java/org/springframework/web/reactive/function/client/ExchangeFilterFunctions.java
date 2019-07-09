@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyExtractors;
 
@@ -115,12 +116,10 @@ public abstract class ExchangeFilterFunctions {
 	 */
 	@Deprecated
 	public static ExchangeFilterFunction basicAuthentication() {
-
 		return (request, next) -> {
-			Credentials cred = (Credentials) request
-					.attribute(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE).orElse(null);
-
-			if (cred != null) {
+			Object attr = request.attributes().get(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE);
+			if (attr instanceof Credentials) {
+				Credentials cred = (Credentials) attr;
 				return next.exchange(ClientRequest.from(request)
 						.headers(headers -> headers.setBasicAuth(cred.username, cred.password))
 						.build());
@@ -173,7 +172,7 @@ public abstract class ExchangeFilterFunctions {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

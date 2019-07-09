@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -153,7 +153,7 @@ public final class ContentDisposition {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -331,6 +331,7 @@ public final class ContentDisposition {
 			do {
 				int nextIndex = index + 1;
 				boolean quoted = false;
+				boolean escaped = false;
 				while (nextIndex < headerValue.length()) {
 					char ch = headerValue.charAt(nextIndex);
 					if (ch == ';') {
@@ -338,9 +339,10 @@ public final class ContentDisposition {
 							break;
 						}
 					}
-					else if (ch == '"') {
+					else if (!escaped && ch == '"') {
 						quoted = !quoted;
 					}
+					escaped = (!escaped && ch == '\\');
 					nextIndex++;
 				}
 				String part = headerValue.substring(index + 1, nextIndex).trim();

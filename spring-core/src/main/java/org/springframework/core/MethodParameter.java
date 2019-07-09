@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import kotlin.reflect.KFunction;
@@ -401,7 +402,9 @@ public class MethodParameter {
 		if (paramType == null) {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
-				paramType = (method != null ? method.getReturnType() : void.class);
+				paramType = (method != null ?
+						(KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(getContainingClass()) ?
+						KotlinDelegate.getReturnType(method) : method.getReturnType()) : void.class);
 			}
 			else {
 				paramType = this.executable.getParameterTypes()[this.parameterIndex];
@@ -421,7 +424,9 @@ public class MethodParameter {
 		if (paramType == null) {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
-				paramType = (method != null ? method.getGenericReturnType() : void.class);
+				paramType = (method != null ?
+						(KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(getContainingClass()) ?
+						KotlinDelegate.getGenericReturnType(method) : method.getGenericReturnType()) : void.class);
 			}
 			else {
 				Type[] genericParameterTypes = this.executable.getGenericParameterTypes();
@@ -649,7 +654,7 @@ public class MethodParameter {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -732,8 +737,16 @@ public class MethodParameter {
 	protected static int findParameterIndex(Parameter parameter) {
 		Executable executable = parameter.getDeclaringExecutable();
 		Parameter[] allParams = executable.getParameters();
+		// Try first with identity checks for greater performance.
 		for (int i = 0; i < allParams.length; i++) {
 			if (parameter == allParams[i]) {
+				return i;
+			}
+		}
+		// Potentially try again with object equality checks in order to avoid race
+		// conditions while invoking java.lang.reflect.Executable.getParameters().
+		for (int i = 0; i < allParams.length; i++) {
+			if (parameter.equals(allParams[i])) {
 				return i;
 			}
 		}
@@ -768,17 +781,21 @@ public class MethodParameter {
 			}
 			else {
 				KFunction<?> function = null;
+				Predicate<KParameter> predicate = null;
 				if (method != null) {
 					function = ReflectJvmMapping.getKotlinFunction(method);
+					predicate = p -> KParameter.Kind.VALUE.equals(p.getKind());
 				}
 				else if (ctor != null) {
 					function = ReflectJvmMapping.getKotlinFunction(ctor);
+					predicate = p -> KParameter.Kind.VALUE.equals(p.getKind()) ||
+							KParameter.Kind.INSTANCE.equals(p.getKind());
 				}
 				if (function != null) {
 					List<KParameter> parameters = function.getParameters();
 					KParameter parameter = parameters
 							.stream()
-							.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()))
+							.filter(predicate)
 							.collect(Collectors.toList())
 							.get(index);
 					return (parameter.getType().isMarkedNullable() || parameter.isOptional());
@@ -786,6 +803,32 @@ public class MethodParameter {
 			}
 			return false;
 		}
-	}
 
+		/**
+		 * Return the generic return type of the method, with support of suspending
+		 * functions via Kotlin reflection.
+		 */
+		static private Type getGenericReturnType(Method method) {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			if (function != null && function.isSuspend()) {
+				return ReflectJvmMapping.getJavaType(function.getReturnType());
+			}
+			return method.getGenericReturnType();
+		}
+
+		/**
+		 * Return the return type of the method, with support of suspending
+		 * functions via Kotlin reflection.
+		 */
+		static private Class<?> getReturnType(Method method) {
+			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+			if (function != null && function.isSuspend()) {
+				Type paramType = ReflectJvmMapping.getJavaType(function.getReturnType());
+				Class<?> paramClass = ResolvableType.forType(paramType).resolve();
+				Assert.notNull(paramClass, "Type " + paramType + "can't be resolved to a class");
+				return paramClass;
+			}
+			return method.getReturnType();
+		}
+	}
 }

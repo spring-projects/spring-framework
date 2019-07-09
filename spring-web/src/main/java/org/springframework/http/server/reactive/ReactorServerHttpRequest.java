@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -123,11 +123,8 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private static HttpHeaders initHeaders(HttpServerRequest channel) {
-		HttpHeaders headers = new HttpHeaders();
-		for (String name : channel.requestHeaders().names()) {
-			headers.put(name, channel.requestHeaders().getAll(name));
-		}
-		return headers;
+		NettyHeadersAdapter headersMap = new NettyHeadersAdapter(channel.requestHeaders());
+		return new HttpHeaders(headersMap);
 	}
 
 
@@ -153,6 +150,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return this.request.remoteAddress();
 	}
 
+	@Override
 	@Nullable
 	protected SslInfo initSslInfo() {
 		SslHandler sslHandler = ((Connection) this.request).channel().pipeline().get(SslHandler.class);

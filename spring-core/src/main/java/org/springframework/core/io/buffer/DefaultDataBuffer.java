@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -37,6 +38,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 5.0
  * @see DefaultDataBufferFactory
  */
@@ -79,10 +81,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	/**
-	 * Directly exposes the native {@code ByteBuffer} that this buffer is based on.
+	 * Directly exposes the native {@code ByteBuffer} that this buffer is based
+	 * on also updating the {@code ByteBuffer's} position and limit to match
+	 * the current {@link #readPosition()} and {@link #readableByteCount()}.
 	 * @return the wrapped byte buffer
 	 */
 	public ByteBuffer getNativeBuffer() {
+		this.byteBuffer.position(this.readPosition);
+		this.byteBuffer.limit(readableByteCount());
 		return this.byteBuffer;
 	}
 
@@ -99,8 +105,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public int indexOf(IntPredicate predicate, int fromIndex) {
-		Assert.notNull(predicate, "'predicate' must not be null");
-
+		Assert.notNull(predicate, "IntPredicate must not be null");
 		if (fromIndex < 0) {
 			fromIndex = 0;
 		}
@@ -118,7 +123,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public int lastIndexOf(IntPredicate predicate, int fromIndex) {
-		Assert.notNull(predicate, "'predicate' must not be null");
+		Assert.notNull(predicate, "IntPredicate must not be null");
 		int i = Math.min(fromIndex, this.writePosition - 1);
 		for (; i >= 0; i--) {
 			byte b = this.byteBuffer.get(i);
@@ -149,7 +154,6 @@ public class DefaultDataBuffer implements DataBuffer {
 		assertIndex(readPosition >= 0, "'readPosition' %d must be >= 0", readPosition);
 		assertIndex(readPosition <= this.writePosition, "'readPosition' %d must be <= %d",
 				readPosition, this.writePosition);
-
 		this.readPosition = readPosition;
 		return this;
 	}
@@ -165,7 +169,6 @@ public class DefaultDataBuffer implements DataBuffer {
 				writePosition, this.readPosition);
 		assertIndex(writePosition <= this.capacity, "'writePosition' %d must be <= %d",
 				writePosition, this.capacity);
-
 		this.writePosition = writePosition;
 		return this;
 	}
@@ -177,9 +180,9 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public DefaultDataBuffer capacity(int newCapacity) {
-		Assert.isTrue(newCapacity > 0,
-				String.format("'newCapacity' %d must be higher than 0", newCapacity));
-
+		if (newCapacity <= 0) {
+			throw new IllegalArgumentException(String.format("'newCapacity' %d must be higher than 0", newCapacity));
+		}
 		int readPosition = readPosition();
 		int writePosition = writePosition();
 		int oldCapacity = capacity();
@@ -215,16 +218,23 @@ public class DefaultDataBuffer implements DataBuffer {
 		return this;
 	}
 
+	@Override
+	public DataBuffer ensureCapacity(int length) {
+		if (length > writableByteCount()) {
+			int newCapacity = calculateCapacity(this.writePosition + length);
+			capacity(newCapacity);
+		}
+		return this;
+	}
+
 	private static ByteBuffer allocate(int capacity, boolean direct) {
-		return direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity);
+		return (direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity));
 	}
 
 	@Override
 	public byte getByte(int index) {
 		assertIndex(index >= 0, "index %d must be >= 0", index);
-		assertIndex(index <= this.writePosition - 1, "index %d must be <= %d",
-				index, this.writePosition - 1);
-
+		assertIndex(index <= this.writePosition - 1, "index %d must be <= %d", index, this.writePosition - 1);
 		return this.byteBuffer.get(index);
 	}
 
@@ -240,14 +250,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public DefaultDataBuffer read(byte[] destination) {
-		Assert.notNull(destination, "'destination' must not be null");
+		Assert.notNull(destination, "Byte array must not be null");
 		read(destination, 0, destination.length);
 		return this;
 	}
 
 	@Override
 	public DefaultDataBuffer read(byte[] destination, int offset, int length) {
-		Assert.notNull(destination, "'destination' must not be null");
+		Assert.notNull(destination, "Byte array must not be null");
 		assertIndex(this.readPosition <= this.writePosition - length,
 				"readPosition %d and length %d should be smaller than writePosition %d",
 				this.readPosition, length, this.writePosition);
@@ -272,14 +282,14 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public DefaultDataBuffer write(byte[] source) {
-		Assert.notNull(source, "'source' must not be null");
+		Assert.notNull(source, "Byte array must not be null");
 		write(source, 0, source.length);
 		return this;
 	}
 
 	@Override
 	public DefaultDataBuffer write(byte[] source, int offset, int length) {
-		Assert.notNull(source, "'source' must not be null");
+		Assert.notNull(source, "Byte array must not be null");
 		ensureCapacity(length);
 
 		ByteBuffer tmp = this.byteBuffer.duplicate();
@@ -294,20 +304,18 @@ public class DefaultDataBuffer implements DataBuffer {
 	@Override
 	public DefaultDataBuffer write(DataBuffer... buffers) {
 		if (!ObjectUtils.isEmpty(buffers)) {
-			ByteBuffer[] byteBuffers =
-					Arrays.stream(buffers).map(DataBuffer::asByteBuffer)
-							.toArray(ByteBuffer[]::new);
-			write(byteBuffers);
+			write(Arrays.stream(buffers).map(DataBuffer::asByteBuffer).toArray(ByteBuffer[]::new));
 		}
 		return this;
 	}
 
 	@Override
-	public DefaultDataBuffer write(ByteBuffer... byteBuffers) {
-		Assert.notEmpty(byteBuffers, "'byteBuffers' must not be empty");
-		int capacity = Arrays.stream(byteBuffers).mapToInt(ByteBuffer::remaining).sum();
-		ensureCapacity(capacity);
-		Arrays.stream(byteBuffers).forEach(this::write);
+	public DefaultDataBuffer write(ByteBuffer... buffers) {
+		if (!ObjectUtils.isEmpty(buffers)) {
+			int capacity = Arrays.stream(buffers).mapToInt(ByteBuffer::remaining).sum();
+			ensureCapacity(capacity);
+			Arrays.stream(buffers).forEach(this::write);
+		}
 		return this;
 	}
 
@@ -372,13 +380,6 @@ public class DefaultDataBuffer implements DataBuffer {
 		return new DefaultDataBufferOutputStream();
 	}
 
-	private void ensureCapacity(int length) {
-		if (length <= writableByteCount()) {
-			return;
-		}
-		int newCapacity = calculateCapacity(this.writePosition + length);
-		capacity(newCapacity);
-	}
 
 	/**
 	 * Calculate the capacity of the buffer.
@@ -411,7 +412,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -431,7 +432,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	@Override
 	public String toString() {
-		return String.format("DefaultDataBuffer (r: %d, w %d, c %d)",
+		return String.format("DefaultDataBuffer (r: %d, w: %d, c: %d)",
 				this.readPosition, this.writePosition, this.capacity);
 	}
 
@@ -443,7 +444,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		assertIndex(length <= this.capacity, "length %d must be <= %d", index, this.capacity);
 	}
 
-	private static void assertIndex(boolean expression, String format, Object... args) {
+	private void assertIndex(boolean expression, String format, Object... args) {
 		if (!expression) {
 			String message = String.format(format, args);
 			throw new IndexOutOfBoundsException(message);

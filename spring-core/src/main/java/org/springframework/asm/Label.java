@@ -178,7 +178,7 @@ public class Label {
    *       and {@link #FORWARD_REFERENCE_HANDLE_MASK}.
    * </ul>
    *
-   * For instance, for an ifnull instruction at bytecode offset x, 'sourceInsnBytecodeOffset' is
+   * <p>For instance, for an ifnull instruction at bytecode offset x, 'sourceInsnBytecodeOffset' is
    * equal to x, and 'reference' is of type {@link #FORWARD_REFERENCE_TYPE_SHORT} with value x + 1
    * (because the ifnull instruction uses a 2 bytes bytecode offset operand stored one byte after
    * the start of the instruction itself). For the default case of a lookupswitch instruction at
@@ -227,7 +227,8 @@ public class Label {
 
   /**
    * The maximum height reached by the output stack, relatively to the top of the input stack, in
-   * the basic block corresponding to this label. This maximum is always positive or null.
+   * the basic block corresponding to this label. This maximum is always positive or {@literal
+   * null}.
    */
   short outputStackMax;
 
@@ -264,12 +265,12 @@ public class Label {
   Edge outgoingEdges;
 
   /**
-   * The next element in the list of labels to which this label belongs, or null if it does not
-   * belong to any list. All lists of labels must end with the {@link #EMPTY_LIST} sentinel, in
-   * order to ensure that this field is null if and only if this label does not belong to a list of
-   * labels. Note that there can be several lists of labels at the same time, but that a label can
-   * belong to at most one list at a time (unless some lists share a common tail, but this is not
-   * used in practice).
+   * The next element in the list of labels to which this label belongs, or {@literal null} if it
+   * does not belong to any list. All lists of labels must end with the {@link #EMPTY_LIST}
+   * sentinel, in order to ensure that this field is null if and only if this label does not belong
+   * to a list of labels. Note that there can be several lists of labels at the same time, but that
+   * a label can belong to at most one list at a time (unless some lists share a common tail, but
+   * this is not used in practice).
    *
    * <p>List of labels are used in {@link MethodWriter#computeAllFrames} and {@link
    * MethodWriter#computeMaxStackAndLocal} to compute stack map frames and the maximum stack size,
@@ -435,7 +436,7 @@ public class Label {
    *
    * @param code the bytecode of the method.
    * @param bytecodeOffset the bytecode offset of this label.
-   * @return <tt>true</tt> if a blank that was left for this label was too small to store the
+   * @return {@literal true} if a blank that was left for this label was too small to store the
    *     offset. In such a case the corresponding jump instruction is replaced with an equivalent
    *     ASM specific instruction using an unsigned two bytes offset. These ASM specific
    *     instructions are later replaced with standard bytecode instructions with wider offsets (4

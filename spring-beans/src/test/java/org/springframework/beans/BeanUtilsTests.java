@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.springframework.beans;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -28,11 +28,14 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link BeanUtils}.
@@ -40,40 +43,55 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
+ * @author Sebastien Deleuze
  * @since 19.05.2003
  */
 public class BeanUtilsTests {
 
 	@Test
-	public void testInstantiateClass() {
-		// give proper class
-		BeanUtils.instantiateClass(ArrayList.class);
+	public void testInstantiateClassGivenInterface() {
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+				BeanUtils.instantiateClass(List.class));
+	}
 
-		try {
-			// give interface
-			BeanUtils.instantiateClass(List.class);
-			fail("Should have thrown FatalBeanException");
-		}
-		catch (FatalBeanException ex) {
-			// expected
-		}
+	@Test
+	public void testInstantiateClassGivenClassWithoutDefaultConstructor() {
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+				BeanUtils.instantiateClass(CustomDateEditor.class));
+	}
 
-		try {
-			// give class without default constructor
-			BeanUtils.instantiateClass(CustomDateEditor.class);
-			fail("Should have thrown FatalBeanException");
-		}
-		catch (FatalBeanException ex) {
-			// expected
-		}
+	@Test  // gh-22531
+	public void testInstantiateClassWithOptionalNullableType() throws NoSuchMethodException {
+		Constructor<BeanWithNullableTypes> ctor = BeanWithNullableTypes.class.getDeclaredConstructor(
+				Integer.class, Boolean.class, String.class);
+		BeanWithNullableTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
+		assertThat(bean.getCounter()).isNull();
+		assertThat(bean.isFlag()).isNull();
+		assertThat(bean.getValue()).isEqualTo("foo");
+	}
+
+	@Test  // gh-22531
+	public void testInstantiateClassWithOptionalPrimitiveType() throws NoSuchMethodException {
+		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
+		BeanWithPrimitiveTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
+		assertThat(bean.getCounter()).isEqualTo(0);
+		assertThat(bean.isFlag()).isEqualTo(false);
+		assertThat(bean.getValue()).isEqualTo("foo");
+	}
+
+	@Test // gh-22531
+	public void testInstantiateClassWithMoreArgsThanParameters() throws NoSuchMethodException {
+		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
+		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
+				BeanUtils.instantiateClass(ctor, null, null, "foo", null));
 	}
 
 	@Test
 	public void testGetPropertyDescriptors() throws Exception {
 		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
-		assertNotNull("Descriptors should not be null", descriptors);
-		assertEquals("Invalid number of descriptors returned", actual.length, descriptors.length);
+		assertThat(descriptors).as("Descriptors should not be null").isNotNull();
+		assertThat(descriptors.length).as("Invalid number of descriptors returned").isEqualTo(actual.length);
 	}
 
 	@Test
@@ -81,15 +99,15 @@ public class BeanUtilsTests {
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(ContainerBean.class);
 		for (PropertyDescriptor descriptor : descriptors) {
 			if ("containedBeans".equals(descriptor.getName())) {
-				assertTrue("Property should be an array", descriptor.getPropertyType().isArray());
-				assertEquals(descriptor.getPropertyType().getComponentType(), ContainedBean.class);
+				assertThat(descriptor.getPropertyType().isArray()).as("Property should be an array").isTrue();
+				assertThat(ContainedBean.class).isEqualTo(descriptor.getPropertyType().getComponentType());
 			}
 		}
 	}
 
 	@Test
 	public void testFindEditorByConvention() {
-		assertEquals(ResourceEditor.class, BeanUtils.findEditorByConvention(Resource.class).getClass());
+		assertThat(BeanUtils.findEditorByConvention(Resource.class).getClass()).isEqualTo(ResourceEditor.class);
 	}
 
 	@Test
@@ -99,13 +117,13 @@ public class BeanUtilsTests {
 		tb.setAge(32);
 		tb.setTouchy("touchy");
 		TestBean tb2 = new TestBean();
-		assertTrue("Name empty", tb2.getName() == null);
-		assertTrue("Age empty", tb2.getAge() == 0);
-		assertTrue("Touchy empty", tb2.getTouchy() == null);
+		assertThat(tb2.getName() == null).as("Name empty").isTrue();
+		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
+		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
 		BeanUtils.copyProperties(tb, tb2);
-		assertTrue("Name copied", tb2.getName().equals(tb.getName()));
-		assertTrue("Age copied", tb2.getAge() == tb.getAge());
-		assertTrue("Touchy copied", tb2.getTouchy().equals(tb.getTouchy()));
+		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
+		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
+		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
 	}
 
 	@Test
@@ -115,13 +133,13 @@ public class BeanUtilsTests {
 		tb.setAge(32);
 		tb.setTouchy("touchy");
 		TestBean tb2 = new TestBean();
-		assertTrue("Name empty", tb2.getName() == null);
-		assertTrue("Age empty", tb2.getAge() == 0);
-		assertTrue("Touchy empty", tb2.getTouchy() == null);
+		assertThat(tb2.getName() == null).as("Name empty").isTrue();
+		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
+		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
 		BeanUtils.copyProperties(tb, tb2);
-		assertTrue("Name copied", tb2.getName().equals(tb.getName()));
-		assertTrue("Age copied", tb2.getAge() == tb.getAge());
-		assertTrue("Touchy copied", tb2.getTouchy().equals(tb.getTouchy()));
+		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
+		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
+		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
 	}
 
 	@Test
@@ -131,49 +149,49 @@ public class BeanUtilsTests {
 		tb.setAge(32);
 		tb.setTouchy("touchy");
 		DerivedTestBean tb2 = new DerivedTestBean();
-		assertTrue("Name empty", tb2.getName() == null);
-		assertTrue("Age empty", tb2.getAge() == 0);
-		assertTrue("Touchy empty", tb2.getTouchy() == null);
+		assertThat(tb2.getName() == null).as("Name empty").isTrue();
+		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
+		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
 		BeanUtils.copyProperties(tb, tb2);
-		assertTrue("Name copied", tb2.getName().equals(tb.getName()));
-		assertTrue("Age copied", tb2.getAge() == tb.getAge());
-		assertTrue("Touchy copied", tb2.getTouchy().equals(tb.getTouchy()));
+		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
+		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
+		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
 	}
 
 	@Test
 	public void testCopyPropertiesWithEditable() throws Exception {
 		TestBean tb = new TestBean();
-		assertTrue("Name empty", tb.getName() == null);
+		assertThat(tb.getName() == null).as("Name empty").isTrue();
 		tb.setAge(32);
 		tb.setTouchy("bla");
 		TestBean tb2 = new TestBean();
 		tb2.setName("rod");
-		assertTrue("Age empty", tb2.getAge() == 0);
-		assertTrue("Touchy empty", tb2.getTouchy() == null);
+		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
+		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
 
 		// "touchy" should not be copied: it's not defined in ITestBean
 		BeanUtils.copyProperties(tb, tb2, ITestBean.class);
-		assertTrue("Name copied", tb2.getName() == null);
-		assertTrue("Age copied", tb2.getAge() == 32);
-		assertTrue("Touchy still empty", tb2.getTouchy() == null);
+		assertThat(tb2.getName() == null).as("Name copied").isTrue();
+		assertThat(tb2.getAge() == 32).as("Age copied").isTrue();
+		assertThat(tb2.getTouchy() == null).as("Touchy still empty").isTrue();
 	}
 
 	@Test
 	public void testCopyPropertiesWithIgnore() throws Exception {
 		TestBean tb = new TestBean();
-		assertTrue("Name empty", tb.getName() == null);
+		assertThat(tb.getName() == null).as("Name empty").isTrue();
 		tb.setAge(32);
 		tb.setTouchy("bla");
 		TestBean tb2 = new TestBean();
 		tb2.setName("rod");
-		assertTrue("Age empty", tb2.getAge() == 0);
-		assertTrue("Touchy empty", tb2.getTouchy() == null);
+		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
+		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
 
 		// "spouse", "touchy", "age" should not be copied
 		BeanUtils.copyProperties(tb, tb2, "spouse", "touchy", "age");
-		assertTrue("Name copied", tb2.getName() == null);
-		assertTrue("Age still empty", tb2.getAge() == 0);
-		assertTrue("Touchy still empty", tb2.getTouchy() == null);
+		assertThat(tb2.getName() == null).as("Name copied").isTrue();
+		assertThat(tb2.getAge() == 0).as("Age still empty").isTrue();
+		assertThat(tb2.getTouchy() == null).as("Touchy still empty").isTrue();
 	}
 
 	@Test
@@ -182,7 +200,7 @@ public class BeanUtilsTests {
 		source.setName("name");
 		TestBean target = new TestBean();
 		BeanUtils.copyProperties(source, target, "specialProperty");
-		assertEquals(target.getName(), "name");
+		assertThat("name").isEqualTo(target.getName());
 	}
 
 	@Test
@@ -193,9 +211,9 @@ public class BeanUtilsTests {
 		source.setFlag2(true);
 		InvalidProperty target = new InvalidProperty();
 		BeanUtils.copyProperties(source, target);
-		assertEquals("name", target.getName());
-		assertTrue(target.getFlag1());
-		assertTrue(target.getFlag2());
+		assertThat(target.getName()).isEqualTo("name");
+		assertThat((boolean) target.getFlag1()).isTrue();
+		assertThat(target.getFlag2()).isTrue();
 	}
 
 	@Test
@@ -206,29 +224,22 @@ public class BeanUtilsTests {
 	}
 
 	@Test
-	public void testResolveInvalidSignature() throws Exception {
-		try {
-			BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class);
-			fail("Should not be able to parse with opening but no closing paren.");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+	public void testResolveInvalidSignatureEndParen() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class));
+	}
 
-		try {
-			BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class);
-			fail("Should not be able to parse with closing but no opening paren.");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+	@Test
+	public void testResolveInvalidSignatureStartParen() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class));
 	}
 
 	@Test
 	public void testResolveWithAndWithoutArgList() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", String.class, int.class);
 		assertSignatureEquals(desiredMethod, "doSomethingElse");
-		assertNull(BeanUtils.resolveSignature("doSomethingElse()", MethodSignatureBean.class));
+		assertThat(BeanUtils.resolveSignature("doSomethingElse()", MethodSignatureBean.class)).isNull();
 	}
 
 	@Test
@@ -266,17 +277,16 @@ public class BeanUtilsTests {
 		PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
 
 		PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
-		assertEquals(String.class, keyDescr.getPropertyType());
+		assertThat(keyDescr.getPropertyType()).isEqualTo(String.class);
 		for (PropertyDescriptor propertyDescriptor : descrs) {
 			if (propertyDescriptor.getName().equals(keyDescr.getName())) {
-				assertEquals(propertyDescriptor.getName() + " has unexpected type",
-						keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
+				assertThat(propertyDescriptor.getPropertyType()).as(propertyDescriptor.getName() + " has unexpected type").isEqualTo(keyDescr.getPropertyType());
 			}
 		}
 	}
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
-		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
+		assertThat(BeanUtils.resolveSignature(signature, MethodSignatureBean.class)).isEqualTo(desiredMethod);
 	}
 
 
@@ -445,16 +455,61 @@ public class BeanUtilsTests {
 		}
 	}
 
-	private static class BeanWithSingleNonDefaultConstructor {
+	private static class BeanWithNullableTypes {
 
-		private final String name;
+		private Integer counter;
 
-		public BeanWithSingleNonDefaultConstructor(String name) {
-			this.name = name;
+		private Boolean flag;
+
+		private String value;
+
+		@SuppressWarnings("unused")
+		public BeanWithNullableTypes(@Nullable Integer counter, @Nullable Boolean flag, String value) {
+			this.counter = counter;
+			this.flag = flag;
+			this.value = value;
 		}
 
-		public String getName() {
-			return name;
+		@Nullable
+		public Integer getCounter() {
+			return counter;
+		}
+
+		@Nullable
+		public Boolean isFlag() {
+			return flag;
+		}
+
+		public String getValue() {
+			return value;
+		}
+	}
+
+	private static class BeanWithPrimitiveTypes {
+
+		private int counter;
+
+		private boolean flag;
+
+		private String value;
+
+		@SuppressWarnings("unused")
+		public BeanWithPrimitiveTypes(int counter, boolean flag, String value) {
+			this.counter = counter;
+			this.flag = flag;
+			this.value = value;
+		}
+
+		public int getCounter() {
+			return counter;
+		}
+
+		public boolean isFlag() {
+			return flag;
+		}
+
+		public String getValue() {
+			return value;
 		}
 	}
 
