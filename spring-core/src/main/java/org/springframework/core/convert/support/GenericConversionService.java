@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
@@ -164,6 +165,23 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		return (converter == NO_OP_CONVERTER);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public <S, T> List<T> convertList(final @Nullable List<S> sourceList, final Class<T> targetClass) {
+
+		if (sourceList == null) {
+			return null;
+		}
+
+		if (sourceList.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		return sourceList.stream()
+			.map(source -> convert(source, targetClass))
+			.collect(Collectors.toList());
 	}
 
 	@Override
