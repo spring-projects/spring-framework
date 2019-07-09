@@ -16,20 +16,20 @@
 
 package org.springframework.beans;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link PropertyAccessorUtils}.
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  */
 public class PropertyAccessorUtilsTests {
 
 	@Test
-	public void testCanonicalPropertyName() {
+	public void canonicalPropertyName() {
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map")).isEqualTo("map");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[key1]")).isEqualTo("map[key1]");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key1']")).isEqualTo("map[key1]");
@@ -42,7 +42,7 @@ public class PropertyAccessorUtilsTests {
 	}
 
 	@Test
-	public void testCanonicalPropertyNames() {
+	public void canonicalPropertyNames() {
 		String[] original =
 				new String[] {"map", "map[key1]", "map['key1']", "map[\"key1\"]", "map[key1][key2]",
 											"map['key1'][\"key2\"]", "map[key1].name", "map['key1'].name", "map[\"key1\"].name"};
@@ -50,7 +50,7 @@ public class PropertyAccessorUtilsTests {
 				new String[] {"map", "map[key1]", "map[key1]", "map[key1]", "map[key1][key2]",
 											"map[key1][key2]", "map[key1].name", "map[key1].name", "map[key1].name"};
 
-		assertThat(Arrays.equals(canonical, PropertyAccessorUtils.canonicalPropertyNames(original))).isTrue();
+		assertThat(PropertyAccessorUtils.canonicalPropertyNames(original)).isEqualTo(canonical);
 	}
 
 }
