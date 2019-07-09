@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation
 
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.reactive.config.EnableWebFlux
 
-@FlowPreview
+@ExperimentalCoroutinesApi
 class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 	override fun initApplicationContext(): ApplicationContext {

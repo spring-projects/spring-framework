@@ -2,7 +2,7 @@ package org.springframework.messaging.rsocket
 
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Sebastien Deleuze
  */
-@FlowPreview
+@ExperimentalCoroutinesApi
 class RSocketRequesterExtensionsTests {
 
 	private val stringTypeRefMatcher: (ParameterizedTypeReference<*>) -> Boolean  = { it.type == String::class.java }

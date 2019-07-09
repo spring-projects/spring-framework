@@ -17,7 +17,7 @@
 package org.springframework.messaging.rsocket
 
 import io.rsocket.transport.ClientTransport
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -90,7 +90,7 @@ inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(publisher
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@FlowPreview
+@ExperimentalCoroutinesApi
 inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(flow: Flow<T>): RSocketRequester.ResponseSpec =
 		data(flow, object : ParameterizedTypeReference<T>() {})
 
@@ -120,9 +120,9 @@ suspend inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveAndAw
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@FlowPreview
-inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveFlow(batchSize: Int = 1): Flow<T> =
-		retrieveFlux(object : ParameterizedTypeReference<T>() {}).asFlow(batchSize)
+@ExperimentalCoroutinesApi
+inline fun <reified T : Any> RSocketRequester.ResponseSpec.retrieveFlow(): Flow<T> =
+		retrieveFlux(object : ParameterizedTypeReference<T>() {}).asFlow()
 
 /**
  * Extension for [RSocketRequester.ResponseSpec.retrieveMono] providing a `retrieveMono<Foo>()`

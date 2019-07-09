@@ -20,7 +20,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.reactivex.Flowable
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -77,7 +77,7 @@ class ServerResponseExtensionsTests {
 	}
 
 	@Test
-	@FlowPreview
+	@ExperimentalCoroutinesApi
 	fun `BodyBuilder#bodyAndAwait with flow parameter`() {
 		val response = mockk<ServerResponse>()
 		val body = mockk<Flow<List<Foo>>>()

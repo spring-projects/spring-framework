@@ -17,7 +17,7 @@
 package org.springframework.core
 
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -35,6 +35,7 @@ import reactor.test.StepVerifier
 import java.time.Duration
 import kotlin.reflect.KClass
 
+@ExperimentalCoroutinesApi
 class KotlinReactiveAdapterRegistryTests {
 
 	private val registry = ReactiveAdapterRegistry.getSharedInstance()
@@ -57,7 +58,6 @@ class KotlinReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	@FlowPreview
 	fun flowToPublisher() {
 		val source = flow {
 			emit(1)
@@ -74,7 +74,6 @@ class KotlinReactiveAdapterRegistryTests {
 	}
 
 	@Test
-	@FlowPreview
 	fun publisherToFlow() {
 		val source = Flux.just(1, 2, 3)
 		val target = getAdapter(Flow::class).fromPublisher(source)

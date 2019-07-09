@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.function.client
 
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -51,15 +51,12 @@ inline fun <reified T : Any> ClientResponse.bodyToFlux(): Flux<T> =
 /**
  * Coroutines [kotlinx.coroutines.flow.Flow] based variant of [ClientResponse.bodyToFlux].
  *
- * Backpressure is controlled by [batchSize] parameter that controls the size of in-flight elements
- * and [org.reactivestreams.Subscription.request] size.
- *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@FlowPreview
-inline fun <reified T : Any> ClientResponse.bodyToFlow(batchSize: Int = 1): Flow<T> =
-		bodyToFlux<T>().asFlow(batchSize)
+@ExperimentalCoroutinesApi
+inline fun <reified T : Any> ClientResponse.bodyToFlow(): Flow<T> =
+		bodyToFlux<T>().asFlow()
 
 /**
  * Extension for [ClientResponse.toEntity] providing a `toEntity<Foo>()` variant

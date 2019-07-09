@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.function.server
 
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.reactivestreams.Publisher
@@ -85,7 +85,7 @@ suspend fun ServerResponse.BodyBuilder.bodyAndAwait(body: Any): ServerResponse =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@FlowPreview
+@ExperimentalCoroutinesApi
 suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyAndAwait(flow: Flow<T>): ServerResponse =
 		body(flow, object : ParameterizedTypeReference<T>() {}).awaitSingle()
 
