@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.lang.annotation.Target;
 import io.rsocket.ConnectionSetupPayload;
 
 /**
- * Annotation to map the initial {@link ConnectionSetupPayload
- * ConnectionSetupPayload} and subsequent metadata pushes onto a handler method.
+ * Annotation to map the initial {@link ConnectionSetupPayload} and subsequent
+ * metadata pushes onto a handler method.
  *
  * <p>This is a method-level annotation that can be combined with a type-level
  * {@link org.springframework.messaging.handler.annotation.MessageMapping @MessageMapping}
@@ -57,7 +57,7 @@ public @interface ConnectMapping {
 	 * subsequent metadata pushes.
 	 *
 	 * <p>Depending on the configured
-	 * {@link org.springframework.util.RouteMatcher RouteMatcher} the pattern may be
+	 * {@link org.springframework.util.RouteMatcher RouteMatcher}, the pattern may be
 	 * {@link org.springframework.util.AntPathMatcher AntPathMatcher} or
 	 * {@link org.springframework.web.util.pattern.PathPattern PathPattern} based.
 	 *
