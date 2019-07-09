@@ -106,6 +106,14 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void convertList() {
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		assertThat(
+				conversionService.convertList(Arrays.asList("3", "4", "5"), Integer.class)
+		).isEqualTo(Arrays.asList(3, 4, 5));
+	}
+
+	@Test
 	public void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertThat(conversionService.convert("3", Integer.class)).isEqualTo((int) Integer.valueOf(3));
