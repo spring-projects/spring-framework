@@ -216,6 +216,7 @@ configure(subprojects.findAll { (it.name != "spring-build-src") && (it.name != "
 	javadoc {
 		description = "Generates project-level javadoc for use in -javadoc jar"
 
+		options.encoding = "UTF-8"
 		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
 		options.author = true
 		options.header = project.name
