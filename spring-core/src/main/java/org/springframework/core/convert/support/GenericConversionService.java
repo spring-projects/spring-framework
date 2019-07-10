@@ -169,14 +169,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public <S, T> List<T> convertList(final @Nullable List<S> sourceList, final Class<T> targetClass) {
+	public <S, T> List<T> convertList(@Nullable List<S> sourceList, Class<T> targetClass) {
 
 		if (sourceList == null) {
 			return null;
 		}
 
 		if (sourceList.isEmpty()) {
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
 
 		return sourceList.stream()
