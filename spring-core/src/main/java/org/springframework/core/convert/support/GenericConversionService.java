@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.ResolvableType;
@@ -170,18 +172,39 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	public <S, T> List<T> convertList(@Nullable List<S> sourceList, Class<T> targetClass) {
+		return (List<T>) convertCollection(sourceList, TypeDescriptor.valueOf(targetClass), ArrayList::new);
+	}
 
-		if (sourceList == null) {
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public <S, T> List<T> convertList(@Nullable List<S> sourceList, TypeDescriptor targetType) {
+		return (List<T>) convertCollection(sourceList, targetType, ArrayList::new);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public <S, T> Collection<T> convertCollection(
+		@Nullable Collection<S> sourceCollection, Class<T> targetClass, Supplier<Collection<T>> supplier) {
+
+		return convertCollection(sourceCollection, TypeDescriptor.valueOf(targetClass), supplier);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public <S, T> Collection<T> convertCollection(
+		@Nullable Collection<S> sourceCollection, TypeDescriptor targetType, Supplier<Collection<T>> supplier) {
+
+		if (sourceCollection == null) {
 			return null;
 		}
 
-		if (sourceList.isEmpty()) {
+		if (sourceCollection.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		return sourceList.stream()
-			.map(source -> convert(source, targetClass))
-			.collect(Collectors.toList());
+		return sourceCollection.stream()
+			.map(source -> (T) convert(source, targetType))
+			.collect(Collectors.toCollection(supplier));
 	}
 
 	@Override
