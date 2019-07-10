@@ -243,7 +243,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		if (rawValues == null) {
 			return Arrays.copyOf(DEFAULT_HEARTBEAT, 2);
 		}
-		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
+		return new long[] {Long.parseLong(rawValues[0]), Long.parseLong(rawValues[1])};
 	}
 
 	public void setAcceptVersion(String acceptVersion) {

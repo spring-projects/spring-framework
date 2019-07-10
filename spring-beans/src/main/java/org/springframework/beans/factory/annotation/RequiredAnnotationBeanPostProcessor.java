@@ -183,7 +183,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 			return true;
 		}
 		Object value = beanDefinition.getAttribute(SKIP_REQUIRED_CHECK_ATTRIBUTE);
-		return (value != null && (Boolean.TRUE.equals(value) || Boolean.valueOf(value.toString())));
+		return (value != null && (Boolean.TRUE.equals(value) || Boolean.parseBoolean(value.toString())));
 	}
 
 	/**

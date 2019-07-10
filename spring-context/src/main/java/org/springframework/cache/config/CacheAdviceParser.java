@@ -111,7 +111,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			CacheableOperation.Builder builder = prop.merge(opElement,
 					parserContext.getReaderContext(), new CacheableOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
-			builder.setSync(Boolean.valueOf(getAttributeValue(opElement, "sync", "false")));
+			builder.setSync(Boolean.parseBoolean(getAttributeValue(opElement, "sync", "false")));
 
 			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
 			if (col == null) {
@@ -132,12 +132,12 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 			String wide = opElement.getAttribute("all-entries");
 			if (StringUtils.hasText(wide)) {
-				builder.setCacheWide(Boolean.valueOf(wide.trim()));
+				builder.setCacheWide(Boolean.parseBoolean(wide.trim()));
 			}
 
 			String after = opElement.getAttribute("before-invocation");
 			if (StringUtils.hasText(after)) {
-				builder.setBeforeInvocation(Boolean.valueOf(after.trim()));
+				builder.setBeforeInvocation(Boolean.parseBoolean(after.trim()));
 			}
 
 			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
