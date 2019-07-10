@@ -29,54 +29,42 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PropertyAccessorUtilsTests {
 
 	@Test
-	public void testGetPropertyName() {
-		assertThat(PropertyAccessorUtils.getPropertyName("foo"))
-				.isEqualTo("foo");
-		assertThat(PropertyAccessorUtils.getPropertyName("[foo]"))
-				.isEqualTo("");
+	public void getPropertyName() {
+		assertThat(PropertyAccessorUtils.getPropertyName("")).isEqualTo("");
+		assertThat(PropertyAccessorUtils.getPropertyName("[user]")).isEqualTo("");
+		assertThat(PropertyAccessorUtils.getPropertyName("user")).isEqualTo("user");
 	}
 
 	@Test
-	public void testIsNestedOrIndexedProperty() {
-		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty(null))
-				.isFalse();
-		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("foo"))
-				.isFalse();
-		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("[foo]"))
-				.isTrue();
-		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("foo.txt"))
-				.isTrue();
+	public void isNestedOrIndexedProperty() {
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty(null)).isFalse();
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("")).isFalse();
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("user")).isFalse();
+
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("[user]")).isTrue();
+		assertThat(PropertyAccessorUtils.isNestedOrIndexedProperty("user.name")).isTrue();
 	}
 
 	@Test
-	public void testGetFirstNestedPropertySeparatorIndex() {
-		assertThat(PropertyAccessorUtils
-				.getFirstNestedPropertySeparatorIndex("[foo]")).isEqualTo(-1);
-		assertThat(PropertyAccessorUtils
-				.getFirstNestedPropertySeparatorIndex("foo.txt")).isEqualTo(3);
+	public void getFirstNestedPropertySeparatorIndex() {
+		assertThat(PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex("[user]")).isEqualTo(-1);
+		assertThat(PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex("user.name")).isEqualTo(4);
 	}
 
 	@Test
-	public void testGetLastNestedPropertySeparatorIndex() {
-		assertThat(PropertyAccessorUtils
-				.getLastNestedPropertySeparatorIndex("[foo]")).isEqualTo(-1);
-		assertThat(PropertyAccessorUtils
-				.getLastNestedPropertySeparatorIndex("foo.txt")).isEqualTo(3);
+	public void getLastNestedPropertySeparatorIndex() {
+		assertThat(PropertyAccessorUtils.getLastNestedPropertySeparatorIndex("[user]")).isEqualTo(-1);
+		assertThat(PropertyAccessorUtils.getLastNestedPropertySeparatorIndex("user.address.street")).isEqualTo(12);
 	}
 
 	@Test
-	public void testMatchesProperty() {
-		assertThat(PropertyAccessorUtils
-				.matchesProperty("foo", "bar")).isFalse();
-		assertThat(PropertyAccessorUtils
-				.matchesProperty("foobar", "foo")).isFalse();
-		assertThat(PropertyAccessorUtils
-				.matchesProperty("bar[foo]", "foo")).isFalse();
+	public void matchesProperty() {
+		assertThat(PropertyAccessorUtils.matchesProperty("user", "email")).isFalse();
+		assertThat(PropertyAccessorUtils.matchesProperty("username", "user")).isFalse();
+		assertThat(PropertyAccessorUtils.matchesProperty("admin[user]", "user")).isFalse();
 
-		assertThat(PropertyAccessorUtils
-				.matchesProperty("foo", "foo")).isTrue();
-		assertThat(PropertyAccessorUtils
-				.matchesProperty("foo[bar]", "foo")).isTrue();
+		assertThat(PropertyAccessorUtils.matchesProperty("user", "user")).isTrue();
+		assertThat(PropertyAccessorUtils.matchesProperty("user[name]", "user")).isTrue();
 	}
 
 	@Test
@@ -95,6 +83,8 @@ public class PropertyAccessorUtilsTests {
 
 	@Test
 	public void canonicalPropertyNames() {
+		assertThat(PropertyAccessorUtils.canonicalPropertyNames(null)).isNull();
+
 		String[] original =
 				new String[] {"map", "map[key1]", "map['key1']", "map[\"key1\"]", "map[key1][key2]",
 											"map['key1'][\"key2\"]", "map[key1].name", "map['key1'].name", "map[\"key1\"].name"};
@@ -103,7 +93,6 @@ public class PropertyAccessorUtilsTests {
 											"map[key1][key2]", "map[key1].name", "map[key1].name", "map[key1].name"};
 
 		assertThat(PropertyAccessorUtils.canonicalPropertyNames(original)).isEqualTo(canonical);
-		assertThat(PropertyAccessorUtils.canonicalPropertyNames(null)).isNull();
 	}
 
 }
