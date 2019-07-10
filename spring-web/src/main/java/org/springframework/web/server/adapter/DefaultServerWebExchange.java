@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -66,7 +65,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	private static final ResolvableType FORM_DATA_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
-	private static final ResolvableType PARTS_DATA_TYPE = ResolvableType.forClass(Part.class);
+	private static final ResolvableType MULTIPART_DATA_TYPE = ResolvableType.forClassWithGenerics(
+			MultiValueMap.class, String.class, Part.class);
 
 	private static final Mono<MultiValueMap<String, String>> EMPTY_FORM_DATA =
 			Mono.just(CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0)))
@@ -90,8 +90,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	private final Mono<MultiValueMap<String, String>> formDataMono;
 
 	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
-
-	private final Flux<Part> partFlux;
 
 	@Nullable
 	private final ApplicationContext applicationContext;
@@ -131,8 +129,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.sessionMono = sessionManager.getSession(this).cache();
 		this.localeContextResolver = localeContextResolver;
 		this.formDataMono = initFormData(request, codecConfigurer, getLogPrefix());
-		this.partFlux = initParts(request, codecConfigurer, getLogPrefix());
-		this.multipartDataMono = initMultipartData(this.partFlux);
+		this.multipartDataMono = initMultipartData(request, codecConfigurer, getLogPrefix());
 		this.applicationContext = applicationContext;
 	}
 
@@ -159,32 +156,26 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Flux<Part> initParts(ServerHttpRequest request, ServerCodecConfigurer configurer, String logPrefix) {
+	private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
+			ServerCodecConfigurer configurer, String logPrefix) {
+
 		try {
 			MediaType contentType = request.getHeaders().getContentType();
 			if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
-				return ((HttpMessageReader<Part>)configurer.getReaders().stream()
-						.filter(reader -> reader.canRead(PARTS_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
+				return ((HttpMessageReader<MultiValueMap<String, Part>>) configurer.getReaders().stream()
+						.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
 						.findFirst()
 						.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
-						.read(PARTS_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+						.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+						.switchIfEmpty(EMPTY_MULTIPART_DATA)
 						.cache();
 			}
 		}
 		catch (InvalidMediaTypeException ex) {
 			// Ignore
 		}
-		return Flux.empty();
+		return EMPTY_MULTIPART_DATA;
 	}
-
-	private static Mono<MultiValueMap<String, Part>> initMultipartData(Flux<Part> parts) {
-		return parts.collect(
-				() -> (MultiValueMap<String, Part>) new LinkedMultiValueMap<String, Part>(),
-				(map, part) -> map.add(part.name(), part))
-				.switchIfEmpty(EMPTY_MULTIPART_DATA)
-				.cache();
-	}
-
 
 
 	@Override
@@ -228,11 +219,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, Part>> getMultipartData() {
 		return this.multipartDataMono;
-	}
-
-	@Override
-	public Flux<Part> getParts() {
-		return this.partFlux;
 	}
 
 	@Override

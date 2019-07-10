@@ -209,11 +209,6 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	public Flux<Part> parts() {
-		return this.delegate.parts();
-	}
-
-	@Override
 	public ServerWebExchange exchange() {
 		return this.delegate.exchange();
 	}

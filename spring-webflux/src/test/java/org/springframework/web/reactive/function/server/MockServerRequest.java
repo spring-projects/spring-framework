@@ -248,13 +248,6 @@ public class MockServerRequest implements ServerRequest {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Flux<Part> parts() {
-		Assert.state(this.body != null, "No body");
-		return (Flux<Part>) this.body;
-	}
-
-	@Override
 	public ServerWebExchange exchange() {
 		Assert.state(this.exchange != null, "No exchange");
 		return this.exchange;

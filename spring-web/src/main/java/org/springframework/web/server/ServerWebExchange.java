@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -139,22 +138,8 @@ public interface ServerWebExchange {
 	 * cached so that this method is safe to call more than once.
 	 * <p><strong>Note:</strong>the {@linkplain Part#content() contents} of each
 	 * part is not cached, and can only be read once.
-	 * @see #getParts()
 	 */
 	Mono<MultiValueMap<String, Part>> getMultipartData();
-
-	/**
-	 * Return the parts of a multipart request if the Content-Type is
-	 * {@code "multipart/form-data"} or an empty flux otherwise.
-	 * <p><strong>Note:</strong> calling this method causes the request body to
-	 * be read and parsed in full and the resulting {@code Flux} is
-	 * cached so that this method is safe to call more than once.
-	 * <p><strong>Note:</strong>the {@linkplain Part#content() contents} of each
-	 * part is not cached, and can only be read once.
-	 * @since 5.2
-	 * @see #getMultipartData()
-	 */
-	Flux<Part> getParts();
 
 	/**
 	 * Return the {@link LocaleContext} using the configured

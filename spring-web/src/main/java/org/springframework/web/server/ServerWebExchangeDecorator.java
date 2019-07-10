@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.function.Function;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -106,11 +105,6 @@ public class ServerWebExchangeDecorator implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, Part>> getMultipartData() {
 		return getDelegate().getMultipartData();
-	}
-
-	@Override
-	public Flux<Part> getParts() {
-		return getDelegate().getParts();
 	}
 
 	@Override
