@@ -119,7 +119,7 @@ inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlux(): Flux<T> =
  * @since 5.2
  */
 @ExperimentalCoroutinesApi
-inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlow(batchSize: Int = 1): Flow<T> =
+inline fun <reified T : Any> WebClient.ResponseSpec.bodyToFlow(): Flow<T> =
 		bodyToFlux<T>().asFlow()
 
 /**
