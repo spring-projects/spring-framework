@@ -29,7 +29,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.springframework.core.DecoratingProxy;
 import org.springframework.core.ResolvableType;
@@ -169,30 +173,19 @@ public class GenericConversionService implements ConfigurableConversionService {
 		return (converter == NO_OP_CONVERTER);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Nullable
 	public <S, T> List<T> convertList(@Nullable List<S> sourceList, Class<T> targetClass) {
-		return (List<T>) convertCollection(sourceList, TypeDescriptor.valueOf(targetClass), ArrayList::new);
+		return convertCollection(sourceList, targetClass, ArrayList::new);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Nullable
 	public <S, T> List<T> convertList(@Nullable List<S> sourceList, TypeDescriptor targetType) {
-		return (List<T>) convertCollection(sourceList, targetType, ArrayList::new);
+		return convertCollection(sourceList, targetType, ArrayList::new);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Nullable
-	public <S, T> Collection<T> convertCollection(
-		@Nullable Collection<S> sourceCollection, Class<T> targetClass, Supplier<Collection<T>> supplier) {
-
-		return convertCollection(sourceCollection, TypeDescriptor.valueOf(targetClass), supplier);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Nullable
-	public <S, T> Collection<T> convertCollection(
-		@Nullable Collection<S> sourceCollection, TypeDescriptor targetType, Supplier<Collection<T>> supplier) {
+	public <S, T, C extends Collection<T>> C convertCollection(
+		@Nullable Collection<S> sourceCollection, Class<T> targetClass, Supplier<C> supplier) {
 
 		if (sourceCollection == null) {
 			return null;
@@ -203,8 +196,16 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		return sourceCollection.stream()
-			.map(source -> (T) convert(source, targetType))
-			.collect(Collectors.toCollection(supplier));
+				.map(source -> convert(source, targetClass))
+				.collect(Collectors.toCollection(supplier));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public <S, T, C extends Collection<T>> C convertCollection(
+		@Nullable Collection<S> sourceCollection, TypeDescriptor targetType, Supplier<C> supplier) {
+
+		return convertCollection(sourceCollection, (Class<T>) targetType.getType(), supplier);
 	}
 
 	@Override

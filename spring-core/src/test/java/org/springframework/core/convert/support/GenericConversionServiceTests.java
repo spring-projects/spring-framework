@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.function.Supplier;
 import org.junit.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
@@ -108,26 +109,33 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertList() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertThat(
-				conversionService.convertList(Arrays.asList("3", "4", "5"), Integer.class)
-		).isEqualTo(Arrays.asList(3, 4, 5));
+
+		List<Integer> numbers = conversionService.convertList(Arrays.asList("3", "4", "5"), Integer.class);
+		assertThat(numbers).isEqualTo(Arrays.asList(3, 4, 5));
 	}
 
 	@Test
 	public void convertEmptyCollection() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertThat(
-				conversionService.convertCollection(Collections.emptySet(), Integer.class, HashSet::new)
-		).isEqualTo(Collections.emptySet());
+
+		Set<Integer> numbers = conversionService.convertCollection(Collections.emptySet(), Integer.class, HashSet::new);
+		assertThat(numbers).isEqualTo(Collections.emptySet());
 	}
 
 	@Test
 	public void convertCollection() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 
-		assertThat(
-				conversionService.convertCollection(new HashSet<>(Arrays.asList("3", "4", "5")), Integer.class, HashSet::new)
-		).isEqualTo(new HashSet<>(Arrays.asList(3, 4, 5)));
+		Set<Integer> numbers = conversionService.convertCollection(new HashSet<>(Arrays.asList("3", "4", "5")), Integer.class, HashSet::new);
+		assertThat(numbers).isEqualTo(new HashSet<>(Arrays.asList(3, 4, 5)));
+	}
+
+	@Test
+	public void convertCollectionWithTypeDescriptor() {
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+
+		Set<Integer> numbers = conversionService.convertCollection(new HashSet<>(Arrays.asList("3", "4", "5")), TypeDescriptor.valueOf(Integer.class), HashSet::new);
+		assertThat(numbers).isEqualTo(new HashSet<>(Arrays.asList(3, 4, 5)));
 	}
 
 	@Test
