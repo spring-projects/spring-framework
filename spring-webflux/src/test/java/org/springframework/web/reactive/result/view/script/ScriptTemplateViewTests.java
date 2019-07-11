@@ -169,7 +169,28 @@ public class ScriptTemplateViewTests {
 		this.view.setRenderFunction("render");
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.view.setApplicationContext(this.context))
-			.withMessageContaining("'engine' or 'engineName'");
+			.withMessageContaining("You should define either 'engine', 'engineSupplier' or 'engineName'.");
+	}
+
+	@Test  // gh-23258
+	public void engineAndEngineSupplierBothDefined() {
+		ScriptEngine engine = mock(InvocableScriptEngine.class);
+		this.view.setEngineSupplier(() -> engine);
+		this.view.setEngine(engine);
+		this.view.setRenderFunction("render");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.view.setApplicationContext(this.context))
+				.withMessageContaining("You should define either 'engine', 'engineSupplier' or 'engineName'.");
+	}
+
+	@Test  // gh-23258
+	public void engineNameAndEngineSupplierBothDefined() {
+		this.view.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
+		this.view.setEngineName("test");
+		this.view.setRenderFunction("render");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.view.setApplicationContext(this.context))
+				.withMessageContaining("You should define either 'engine', 'engineSupplier' or 'engineName'.");
 	}
 
 	@Test
@@ -180,6 +201,43 @@ public class ScriptTemplateViewTests {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.view.setApplicationContext(this.context))
 			.withMessageContaining("sharedEngine");
+	}
+
+	@Test  // gh-23258
+	public void engineSupplierWithSharedEngine() {
+		this.configurer.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
+		this.configurer.setRenderObject("Template");
+		this.configurer.setRenderFunction("render");
+		this.configurer.setSharedEngine(true);
+
+		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
+		this.view.setApplicationContext(this.context);
+		ScriptEngine engine1 = this.view.getEngine();
+		ScriptEngine engine2 = this.view.getEngine();
+		assertThat(engine1).isNotNull();
+		assertThat(engine2).isNotNull();
+		assertThat(accessor.getPropertyValue("renderObject")).isEqualTo("Template");
+		assertThat(accessor.getPropertyValue("renderFunction")).isEqualTo("render");
+		assertThat(accessor.getPropertyValue("sharedEngine")).isEqualTo(true);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test  // gh-23258
+	public void engineSupplierWithNonSharedEngine() {
+		this.configurer.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
+		this.configurer.setRenderObject("Template");
+		this.configurer.setRenderFunction("render");
+		this.configurer.setSharedEngine(false);
+
+		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
+		this.view.setApplicationContext(this.context);
+		ScriptEngine engine1 = this.view.getEngine();
+		ScriptEngine engine2 = this.view.getEngine();
+		assertThat(engine1).isNotNull();
+		assertThat(engine2).isNotNull();
+		assertThat(accessor.getPropertyValue("renderObject")).isEqualTo("Template");
+		assertThat(accessor.getPropertyValue("renderFunction")).isEqualTo("render");
+		assertThat(accessor.getPropertyValue("sharedEngine")).isEqualTo(false);
 	}
 
 	private interface InvocableScriptEngine extends ScriptEngine, Invocable {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -89,6 +90,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	private ScriptEngine engine;
 
 	@Nullable
+	private Supplier<ScriptEngine> engineSupplier;
+
+	@Nullable
 	private String engineName;
 
 	@Nullable
@@ -136,6 +140,13 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 */
 	public void setEngine(ScriptEngine engine) {
 		this.engine = engine;
+	}
+
+	/**
+	 * See {@link ScriptTemplateConfigurer#setEngineSupplier(Supplier)} documentation.
+	 */
+	public void setEngineSupplier(Supplier<ScriptEngine> engineSupplier) {
+		this.engineSupplier = engineSupplier;
 	}
 
 	/**
@@ -203,7 +214,10 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 		ScriptTemplateConfig viewConfig = autodetectViewConfig();
 		if (this.engine == null && viewConfig.getEngine() != null) {
-			setEngine(viewConfig.getEngine());
+			this.engine = viewConfig.getEngine();
+		}
+		if (this.engineSupplier == null && viewConfig.getEngineSupplier() != null) {
+			this.engineSupplier = viewConfig.getEngineSupplier();
 		}
 		if (this.engineName == null && viewConfig.getEngineName() != null) {
 			this.engineName = viewConfig.getEngineName();
@@ -231,21 +245,32 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			this.sharedEngine = viewConfig.isSharedEngine();
 		}
 
-		Assert.isTrue(!(this.engine != null && this.engineName != null),
-				"You should define either 'engine' or 'engineName', not both.");
-		Assert.isTrue(!(this.engine == null && this.engineName == null),
-				"No script engine found, please specify either 'engine' or 'engineName'.");
+		int engineCount = 0;
+		if (this.engine != null) {
+			engineCount++;
+		}
+		if (this.engineSupplier != null) {
+			engineCount++;
+		}
+		if (this.engineName != null) {
+			engineCount++;
+		}
+		Assert.isTrue(engineCount == 1,
+				"You should define either 'engine', 'engineSupplier' or 'engineName'.");
 
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
-			Assert.isTrue(this.engineName != null,
+			Assert.isTrue(this.engine == null,
 					"When 'sharedEngine' is set to false, you should specify the " +
-					"script engine using the 'engineName' property, not the 'engine' one.");
+					"script engine using 'engineName' or 'engineSupplier' , not 'engine'.");
 		}
 		else if (this.engine != null) {
 			loadScripts(this.engine);
 		}
-		else {
+		else if (this.engineName != null) {
 			setEngine(createEngineFromName(this.engineName));
+		}
+		else {
+			setEngine(createEngineFromSupplier());
 		}
 
 		if (this.renderFunction != null && this.engine != null) {
@@ -261,12 +286,17 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				engines = new HashMap<>(4);
 				enginesHolder.set(engines);
 			}
-			Assert.state(this.engineName != null, "No engine name specified");
+			String name = (this.engineName != null ? this.engineName : this.engineSupplier.getClass().getSimpleName());
 			Object engineKey = (!ObjectUtils.isEmpty(this.scripts) ?
-					new EngineKey(this.engineName, this.scripts) : this.engineName);
+					new EngineKey(name, this.scripts) : name);
 			ScriptEngine engine = engines.get(engineKey);
 			if (engine == null) {
-				engine = createEngineFromName(this.engineName);
+				if (this.engineName != null) {
+					engine = createEngineFromName(this.engineName);
+				}
+				else {
+					engine = createEngineFromSupplier();
+				}
 				engines.put(engineKey, engine);
 			}
 			return engine;
@@ -278,14 +308,21 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
-	protected ScriptEngine createEngineFromName(String engineName) {
-		ScriptEngineManager scriptEngineManager = this.scriptEngineManager;
-		if (scriptEngineManager == null) {
-			scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
-			this.scriptEngineManager = scriptEngineManager;
+	protected ScriptEngine createEngineFromName(@Nullable String engineName) {
+		if (this.scriptEngineManager == null) {
+			this.scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
 		}
+		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(this.scriptEngineManager, engineName);
+		loadScripts(engine);
+		return engine;
+	}
 
-		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(scriptEngineManager, engineName);
+	private ScriptEngine createEngineFromSupplier() {
+		ScriptEngine engine = this.engineSupplier.get();
+		if (this.renderFunction != null && engine != null) {
+			Assert.isInstanceOf(Invocable.class, engine,
+					"ScriptEngine must implement Invocable when 'renderFunction' is specified");
+		}
 		loadScripts(engine);
 		return engine;
 	}
