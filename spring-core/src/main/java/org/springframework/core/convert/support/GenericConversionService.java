@@ -199,7 +199,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		if (sourceCollection.isEmpty()) {
-			return Collections.emptyList();
+			return supplier.get();
 		}
 
 		return sourceCollection.stream()

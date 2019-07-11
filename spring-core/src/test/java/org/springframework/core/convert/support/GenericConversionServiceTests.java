@@ -114,6 +114,23 @@ public class GenericConversionServiceTests {
 	}
 
 	@Test
+	public void convertEmptyCollection() {
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		assertThat(
+				conversionService.convertCollection(Collections.emptySet(), Integer.class, HashSet::new)
+		).isEqualTo(Collections.emptySet());
+	}
+
+	@Test
+	public void convertCollection() {
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+
+		assertThat(
+				conversionService.convertCollection(new HashSet<>(Arrays.asList("3", "4", "5")), Integer.class, HashSet::new)
+		).isEqualTo(new HashSet<>(Arrays.asList(3, 4, 5)));
+	}
+
+	@Test
 	public void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertThat(conversionService.convert("3", Integer.class)).isEqualTo((int) Integer.valueOf(3));
