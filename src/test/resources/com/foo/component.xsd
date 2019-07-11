@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-<xsd:schema xmlns="http://www.foo.com/schema/component"
+<xsd:schema xmlns="http://www.foo.example/schema/component"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-         targetNamespace="http://www.foo.com/schema/component"
+         targetNamespace="http://www.foo.example/schema/component"
          elementFormDefault="qualified"
          attributeFormDefault="unqualified">
 

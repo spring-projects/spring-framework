@@ -109,10 +109,10 @@ public class AppCacheManifestTransformerTests {
 
 		assertThat(content).as("not rewrite external resources")
 				.contains("//example.org/style.css")
-				.contains("http://example.org/image.png");
+				.contains("https://example.org/image.png");
 
 		assertThat(content).as("generate fingerprint")
-				.contains("# Hash: 4bf0338bcbeb0a5b3a4ec9ed8864107d");
+				.contains("# Hash: 65ebc023e50b2b731fcace2871f0dae3");
 	}
 
 	private Resource getResource(String filePath) {

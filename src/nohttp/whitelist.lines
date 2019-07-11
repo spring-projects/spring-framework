@@ -1,0 +1,17 @@
+^http://[^/]*caucho.com.*
+^http://[^/]*gebish.org.*
+^http://[^/]*groovy-lang.org.*
+^http://[^/]*hsqldb.org.*
+^http://[^/]*sourceforge.net.*
+^http://easymock.org.*
+^http://forum.thymeleaf.org.*
+^http://jotm.objectweb.org.*
+^http://json-b.net/.*
+^http://objenesis.org.*
+^http://reactivex.io.*
+^http://www.beanshell.org.*
+^http://www.doclet.com.*
+^http://www.jensgulden.de.*
+^http://www.mockobjects.com.*
+^http://www.w3.org/2000/xmlns/
+^http://xunitpatterns.com.*

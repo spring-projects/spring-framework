@@ -108,13 +108,13 @@ public class MockMvcConnectionBuilderSupportTests {
 
 		assertMockMvcUsed(conn, "http://localhost/");
 		assertMockMvcUsed(conn, "https://example.com/");
-		assertMockMvcNotUsed(conn, "http://other.com/");
+		assertMockMvcNotUsed(conn, "http://other.example/");
 	}
 
 	@Test
 	public void mockMvcAlwaysUseMockMvc() throws Exception {
 		WebConnection conn = this.builder.alwaysUseMockMvc().createConnection(this.client);
-		assertMockMvcUsed(conn, "http://other.com/");
+		assertMockMvcUsed(conn, "http://other.example/");
 	}
 
 	@Test

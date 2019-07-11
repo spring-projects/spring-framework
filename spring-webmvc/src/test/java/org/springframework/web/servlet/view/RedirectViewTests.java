@@ -208,13 +208,13 @@ public class RedirectViewTests {
 
 		assertThat(rv.isRemoteHost("https://url.somewhere.com")).isFalse();
 		assertThat(rv.isRemoteHost("/path")).isFalse();
-		assertThat(rv.isRemoteHost("http://url.somewhereelse.com")).isFalse();
+		assertThat(rv.isRemoteHost("http://somewhereelse.example")).isFalse();
 
 		rv.setHosts(new String[] {"url.somewhere.com"});
 
 		assertThat(rv.isRemoteHost("https://url.somewhere.com")).isFalse();
 		assertThat(rv.isRemoteHost("/path")).isFalse();
-		assertThat(rv.isRemoteHost("http://url.somewhereelse.com")).isTrue();
+		assertThat(rv.isRemoteHost("http://somewhereelse.example")).isTrue();
 
 	}
 

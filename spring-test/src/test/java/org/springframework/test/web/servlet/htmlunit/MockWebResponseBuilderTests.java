@@ -50,7 +50,7 @@ public class MockWebResponseBuilderTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.webRequest = new WebRequest(new URL("http://example.com:80/test/this/here"));
+		this.webRequest = new WebRequest(new URL("http://company.example:80/test/this/here"));
 		this.responseBuilder = new MockWebResponseBuilder(System.currentTimeMillis(), this.webRequest, this.response);
 	}
 
@@ -66,7 +66,7 @@ public class MockWebResponseBuilderTests {
 	@Test
 	public void constructorWithNullResponse() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				new MockWebResponseBuilder(0L, new WebRequest(new URL("http://example.com:80/test/this/here")), null));
+				new MockWebResponseBuilder(0L, new WebRequest(new URL("http://company.example:80/test/this/here")), null));
 	}
 
 
