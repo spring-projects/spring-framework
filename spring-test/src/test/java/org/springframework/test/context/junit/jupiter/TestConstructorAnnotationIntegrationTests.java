@@ -28,6 +28,7 @@ import org.springframework.test.context.junit.jupiter.comics.Dog;
 import org.springframework.test.context.junit.jupiter.comics.Person;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.TestConstructor.AutowireMode.ALL;
 
 /**
  * Integration tests which demonstrate support for automatically
@@ -45,13 +46,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringJUnitConfig(TestConfig.class)
 @TestPropertySource(properties = "enigma = 42")
-@TestConstructor(autowire = true)
+@TestConstructor(autowireMode = ALL)
 class TestConstructorAnnotationIntegrationTests {
 
 	final ApplicationContext applicationContext;
 	final Person dilbert;
 	final Dog dog;
 	final Integer enigma;
+
 
 	TestConstructorAnnotationIntegrationTests(ApplicationContext applicationContext, Person dilbert, Dog dog,
 			@Value("${enigma}") Integer enigma) {

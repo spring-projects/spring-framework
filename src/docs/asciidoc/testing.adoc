@@ -1287,24 +1287,24 @@ for further details.
 [[integration-testing-annotations-testconstructor]]
 ===== `@TestConstructor`
 
-`@TestConstructor` is a type-level annotation that is used to configure whether a test
-class constructor should be automatically autowired from components in the test's
+`@TestConstructor` is a type-level annotation that is used to configure how the parameters
+of a test class constructor are autowired from components in the test's
 `ApplicationContext`.
 
 If `@TestConstructor` is not present or meta-present on a test class, the default _test
-constructor autowire_ mode will be used. See the tip below for details on how to change
+constructor autowire mode_ will be used. See the tip below for details on how to change
 the default mode. Note, however, that a local declaration of `@Autowired` on a
 constructor takes precedence over both `@TestConstructor` and the default mode.
 
-.Configuring the default test constructor autowire mode
+.Changing the default test constructor autowire mode
 [TIP]
 =====
-The default _test constructor autowire_ mode can be configured by setting the
-`spring.test.constructor.autowire` JVM system property to `true`. Alternatively, the
-default mode may be configured via the `SpringProperties` mechanism.
+The default _test constructor autowire mode_ can be changed by setting the
+`spring.test.constructor.autowire.mode` JVM system property to `all`. Alternatively, the
+default mode may be changed via the `SpringProperties` mechanism.
 
-If the `spring.test.constructor.autowire` property is not set, test class constructors
-will not be automatically autowired.
+If the `spring.test.constructor.autowire.mode` property is not set, test class
+constructors will not be automatically autowired.
 =====
 
 NOTE: As of Spring Framework 5.2, `@TestConstructor` is only supported in conjunction
@@ -4486,12 +4486,12 @@ the constructor is considered to be _autowirable_. A constructor is considered t
 autowirable if one of the following conditions is met (in order of precedence).
 
 * The constructor is annotated with `@Autowired`.
-* `@TestConstructor` is present or meta-present on the test class with the `autowire`
-  attribute set to `true`.
-* The default _test constructor autowire_ mode is set to `true`.
+* `@TestConstructor` is present or meta-present on the test class with the `autowireMode`
+  attribute set to `ALL`.
+* The default _test constructor autowire mode_ has been changed to `ALL`.
 
 See <<integration-testing-annotations-testconstructor>> for details on the use of
-`@TestConstructor` and how to set the global _test constructor autowire_ mode.
+`@TestConstructor` and how to change the global _test constructor autowire mode_.
 
 WARNING: If the constructor for a test class is considered to be _autowirable_, Spring
 assumes the responsibility for resolving arguments for all parameters in the constructor.
@@ -4540,9 +4540,9 @@ In the following example, Spring injects the `OrderService` bean from the
 
 Note that this feature lets test dependencies be `final` and therefore immutable.
 
-If the `spring.test.constructor.autowire` property is to `true` (see
+If the `spring.test.constructor.autowire.mode` property is to `all` (see
 <<integration-testing-annotations-testconstructor>>), we can omit the declaration of
-`@Autowired` on the constructor in the previous example resulting in the following.
+`@Autowired` on the constructor in the previous example, resulting in the following.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
