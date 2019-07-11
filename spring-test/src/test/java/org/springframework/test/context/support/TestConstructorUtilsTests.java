@@ -26,7 +26,6 @@ import org.springframework.core.SpringProperties;
 import org.springframework.test.context.TestConstructor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.context.TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME;
 import static org.springframework.test.context.TestConstructor.AutowireMode.ALL;
 import static org.springframework.test.context.TestConstructor.AutowireMode.ANNOTATED;
 
@@ -105,7 +104,7 @@ public class TestConstructorUtilsTests {
 	}
 
 	private void setGlobalFlag(String flag) {
-		SpringProperties.setProperty(TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME, flag);
+		SpringProperties.setProperty(TestConstructor.TEST_CONSTRUCTOR_AUTOWIRE_MODE_PROPERTY_NAME, flag);
 	}
 
 
