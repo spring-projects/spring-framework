@@ -16,18 +16,23 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Supplier;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.Hints;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -35,6 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
@@ -58,15 +64,18 @@ class DefaultClientResponse implements ClientResponse {
 
 	private final String requestDescription;
 
+	private final Supplier<HttpRequest> requestSupplier;
+
 
 	public DefaultClientResponse(ClientHttpResponse response, ExchangeStrategies strategies,
-			String logPrefix, String requestDescription) {
+			String logPrefix, String requestDescription, Supplier<HttpRequest> requestSupplier) {
 
 		this.response = response;
 		this.strategies = strategies;
 		this.headers = new DefaultHeaders();
 		this.logPrefix = logPrefix;
 		this.requestDescription = requestDescription;
+		this.requestSupplier = requestSupplier;
 	}
 
 
@@ -173,6 +182,46 @@ class DefaultClientResponse implements ClientResponse {
 	@Override
 	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
 		return toEntityListInternal(bodyToFlux(elementTypeRef));
+	}
+
+	@Override
+	public Mono<WebClientResponseException> createException() {
+		return DataBufferUtils.join(body(BodyExtractors.toDataBuffers()))
+				.map(dataBuffer -> {
+					byte[] bytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(bytes);
+					DataBufferUtils.release(dataBuffer);
+					return bytes;
+				})
+				.defaultIfEmpty(new byte[0])
+				.map(bodyBytes -> {
+					HttpRequest request = this.requestSupplier.get();
+					Charset charset = headers().contentType()
+							.map(MimeType::getCharset)
+							.orElse(StandardCharsets.ISO_8859_1);
+					if (HttpStatus.resolve(rawStatusCode()) != null) {
+						return WebClientResponseException.create(
+								statusCode().value(),
+								statusCode().getReasonPhrase(),
+								headers().asHttpHeaders(),
+								bodyBytes,
+								charset,
+								request);
+					}
+					else {
+						return new UnknownHttpStatusCodeException(
+								rawStatusCode(),
+								headers().asHttpHeaders(),
+								bodyBytes,
+								charset,
+								request);
+					}
+				});
+	}
+
+	// Used by DefaultClientResponseBuilder
+	HttpRequest request() {
+		return this.requestSupplier.get();
 	}
 
 	private <T> Mono<ResponseEntity<List<T>>> toEntityListInternal(Flux<T> bodyFlux) {

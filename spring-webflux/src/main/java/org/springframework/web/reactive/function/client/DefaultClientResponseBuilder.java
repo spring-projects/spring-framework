@@ -26,9 +26,11 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -52,6 +54,9 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	private Flux<DataBuffer> body = Flux.empty();
 
+	@Nullable
+	private HttpRequest request;
+
 
 	public DefaultClientResponseBuilder(ExchangeStrategies strategies) {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
@@ -64,6 +69,9 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		statusCode(other.statusCode());
 		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
 		cookies(cookies -> cookies.addAll(other.cookies()));
+		if (other instanceof DefaultClientResponse) {
+			this.request = ((DefaultClientResponse) other).request();
+		}
 	}
 
 
@@ -128,6 +136,13 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	}
 
 	@Override
+	public ClientResponse.Builder request(HttpRequest request) {
+		Assert.notNull(request, "Request must not be null");
+		this.request = request;
+		return this;
+	}
+
+	@Override
 	public ClientResponse build() {
 
 		ClientHttpResponse httpResponse =
@@ -136,7 +151,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		// When building ClientResponse manually, the ClientRequest.logPrefix() has to be passed,
 		// e.g. via ClientResponse.Builder, but this (builder) is not used currently.
 
-		return new DefaultClientResponse(httpResponse, this.strategies, "", "");
+		return new DefaultClientResponse(httpResponse, this.strategies, "", "", () -> this.request);
 	}
 
 

@@ -18,14 +18,12 @@ package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -36,7 +34,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -47,9 +44,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -421,7 +416,7 @@ class DefaultWebClient implements WebClient {
 	private static class DefaultResponseSpec implements ResponseSpec {
 
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
-				new StatusHandler(HttpStatus::isError, DefaultResponseSpec::createResponseException);
+				new StatusHandler(HttpStatus::isError, ClientResponse::createException);
 
 		private final Mono<ClientResponse> responseMono;
 
@@ -442,8 +437,7 @@ class DefaultWebClient implements WebClient {
 			if (this.statusHandlers.size() == 1 && this.statusHandlers.get(0) == DEFAULT_STATUS_HANDLER) {
 				this.statusHandlers.clear();
 			}
-			this.statusHandlers.add(new StatusHandler(statusPredicate,
-					(clientResponse, request) -> exceptionFunction.apply(clientResponse)));
+			this.statusHandlers.add(new StatusHandler(statusPredicate, exceptionFunction));
 
 			return this;
 		}
@@ -478,10 +472,9 @@ class DefaultWebClient implements WebClient {
 			if (HttpStatus.resolve(response.rawStatusCode()) != null) {
 				for (StatusHandler handler : this.statusHandlers) {
 					if (handler.test(response.statusCode())) {
-						HttpRequest request = this.requestSupplier.get();
 						Mono<? extends Throwable> exMono;
 						try {
-							exMono = handler.apply(response, request);
+							exMono = handler.apply(response);
 							exMono = exMono.flatMap(ex -> drainBody(response, ex));
 							exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
 						}
@@ -489,13 +482,14 @@ class DefaultWebClient implements WebClient {
 							exMono = drainBody(response, ex2);
 						}
 						T result = errorFunction.apply(exMono);
+						HttpRequest request = this.requestSupplier.get();
 						return insertCheckpoint(result, response.statusCode(), request);
 					}
 				}
 				return bodyPublisher;
 			}
 			else {
-				return errorFunction.apply(createResponseException(response, this.requestSupplier.get()));
+				return errorFunction.apply(response.createException());
 			}
 		}
 
@@ -523,50 +517,15 @@ class DefaultWebClient implements WebClient {
 			}
 		}
 
-		private static Mono<WebClientResponseException> createResponseException(
-				ClientResponse response, HttpRequest request) {
-
-			return DataBufferUtils.join(response.body(BodyExtractors.toDataBuffers()))
-					.map(dataBuffer -> {
-						byte[] bytes = new byte[dataBuffer.readableByteCount()];
-						dataBuffer.read(bytes);
-						DataBufferUtils.release(dataBuffer);
-						return bytes;
-					})
-					.defaultIfEmpty(new byte[0])
-					.map(bodyBytes -> {
-						Charset charset = response.headers().contentType()
-								.map(MimeType::getCharset)
-								.orElse(StandardCharsets.ISO_8859_1);
-						if (HttpStatus.resolve(response.rawStatusCode()) != null) {
-							return WebClientResponseException.create(
-									response.statusCode().value(),
-									response.statusCode().getReasonPhrase(),
-									response.headers().asHttpHeaders(),
-									bodyBytes,
-									charset,
-									request);
-						}
-						else {
-							return new UnknownHttpStatusCodeException(
-									response.rawStatusCode(),
-									response.headers().asHttpHeaders(),
-									bodyBytes,
-									charset,
-									request);
-						}
-					});
-		}
-
 
 		private static class StatusHandler {
 
 			private final Predicate<HttpStatus> predicate;
 
-			private final BiFunction<ClientResponse, HttpRequest, Mono<? extends Throwable>> exceptionFunction;
+			private final Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction;
 
 			public StatusHandler(Predicate<HttpStatus> predicate,
-					BiFunction<ClientResponse, HttpRequest, Mono<? extends Throwable>> exceptionFunction) {
+					Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
 				Assert.notNull(predicate, "Predicate must not be null");
 				Assert.notNull(exceptionFunction, "Function must not be null");
@@ -578,8 +537,8 @@ class DefaultWebClient implements WebClient {
 				return this.predicate.test(status);
 			}
 
-			public Mono<? extends Throwable> apply(ClientResponse response, HttpRequest request) {
-				return this.exceptionFunction.apply(response, request);
+			public Mono<? extends Throwable> apply(ClientResponse response) {
+				return this.exceptionFunction.apply(response);
 			}
 		}
 	}

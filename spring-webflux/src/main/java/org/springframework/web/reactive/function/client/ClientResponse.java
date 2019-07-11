@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -161,6 +162,14 @@ public interface ClientResponse {
 	 * @return {@code Mono} with the list of {@code ResponseEntity}s
 	 */
 	<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
+
+	/**
+	 * Creates a {@link WebClientResponseException} based on the status code,
+	 * headers, and body of this response as well as the corresponding request.
+	 *
+	 * @return a {@code Mono} with a {@code WebClientResponseException} based on this response
+	 */
+	Mono<WebClientResponseException> createException();
 
 
 	// Static builder methods
@@ -316,6 +325,13 @@ public interface ClientResponse {
 		 * @return this builder
 		 */
 		Builder body(String body);
+
+		/**
+		 * Set the request associated with the response.
+		 * @param request the request
+		 * @return this builder
+		 */
+		Builder request(HttpRequest request);
 
 		/**
 		 * Build the response.
