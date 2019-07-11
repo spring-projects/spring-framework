@@ -276,7 +276,7 @@ public class UrlPathHelper {
 	 * Match the given "mapping" to the start of the "requestUri" and if there
 	 * is a match return the extra part. This method is needed because the
 	 * context path and the servlet path returned by the HttpServletRequest are
-	 * stripped of semicolon content unlike the requesUri.
+	 * stripped of semicolon content unlike the requestUri.
 	 */
 	@Nullable
 	private String getRemainingPath(String requestUri, String mapping, boolean ignoreCase) {
