@@ -3,6 +3,7 @@
 -->
 **Affects:** \<Spring Framework version>
 
+
 ---
 <!--
 Thanks for taking the time to create an issue. Please read the following:
