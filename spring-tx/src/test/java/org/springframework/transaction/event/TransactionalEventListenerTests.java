@@ -48,8 +48,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.transaction.event.TransactionPhase.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMPLETION;
+import static org.springframework.transaction.event.TransactionPhase.AFTER_ROLLBACK;
+import static org.springframework.transaction.event.TransactionPhase.BEFORE_COMMIT;
 
 /**
  * Integration tests for {@link TransactionalEventListener} support
