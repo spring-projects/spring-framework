@@ -627,6 +627,50 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
+	public void emptyStatusHandlerShouldReturnBody() {
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.onStatus(HttpStatus::is5xxServerError, response -> Mono.empty())
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Internal Server error")
+				.verifyComplete();
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("*/*");
+			assertThat(request.getPath()).isEqualTo("/greeting?name=Spring");
+		});
+	}
+
+	@Test
+	public void emptyStatusHandlerShouldReturnBodyFlux() {
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Flux<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.onStatus(HttpStatus::is5xxServerError, response -> Mono.empty())
+				.bodyToFlux(String.class);
+
+		StepVerifier.create(result)
+				.expectNext("Internal Server error")
+				.verifyComplete();
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("*/*");
+			assertThat(request.getPath()).isEqualTo("/greeting?name=Spring");
+		});
+	}
+
+	@Test
 	public void shouldReceiveNotFoundEntity() {
 		prepareResponse(response -> response.setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));

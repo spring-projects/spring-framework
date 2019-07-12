@@ -671,17 +671,21 @@ public interface WebClient {
 
 		/**
 		 * Register a custom error function that gets invoked when the given {@link HttpStatus}
-		 * predicate applies. The exception returned from the function will be returned from
-		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
-		 * <p>By default, an error handler is register that throws a
+		 * predicate applies. Whatever exception is returned from the function (possibly using
+		 * {@link ClientResponse#createException()}) will also be returned as error signal
+		 * from {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
+		 * <p>By default, an error handler is registered that returns a
 		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
-		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
-		 * applies
+		 * To override this default (and return a non-error response from {@code bodyOn*}), register
+		 * an exception function that returns an {@linkplain Mono#empty() empty} mono.
 		 * <p><strong>NOTE:</strong> if the response is expected to have content,
 		 * the exceptionFunction should consume it. If not, the content will be
 		 * automatically drained to ensure resources are released.
+		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
+		 * applies
 		 * @param exceptionFunction the function that returns the exception
 		 * @return this builder
+		 * @see ClientResponse#createException()
 		 */
 		ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
