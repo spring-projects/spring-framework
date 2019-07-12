@@ -69,11 +69,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	public String[] getParameterNames(Method method) {
 		Method originalMethod = BridgeMethodResolver.findBridgedMethod(method);
 		Class<?> declaringClass = originalMethod.getDeclaringClass();
-		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
-		if (map == null) {
-			map = inspectClass(declaringClass);
-			this.parameterNamesCache.put(declaringClass, map);
-		}
+		Map<Member, String[]> map = this.parameterNamesCache.computeIfAbsent(declaringClass, this::inspectClass);
 		if (map != NO_DEBUG_INFO_MAP) {
 			return map.get(originalMethod);
 		}
@@ -84,11 +80,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
 		Class<?> declaringClass = ctor.getDeclaringClass();
-		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
-		if (map == null) {
-			map = inspectClass(declaringClass);
-			this.parameterNamesCache.put(declaringClass, map);
-		}
+		Map<Member, String[]> map = this.parameterNamesCache.computeIfAbsent(declaringClass, this::inspectClass);
 		if (map != NO_DEBUG_INFO_MAP) {
 			return map.get(ctor);
 		}
