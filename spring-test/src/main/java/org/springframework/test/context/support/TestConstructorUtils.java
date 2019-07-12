@@ -91,8 +91,7 @@ public abstract class TestConstructorUtils {
 			return true;
 		}
 
-		// Default to Autowire.ANNOTATED semantics.
-		AutowireMode autowireMode = AutowireMode.ANNOTATED;
+		AutowireMode autowireMode = null;
 
 		// Is the test class annotated with @TestConstructor?
 		TestConstructor testConstructor = AnnotatedElementUtils.findMergedAnnotation(testClass, TestConstructor.class);
