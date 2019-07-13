@@ -202,7 +202,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 			server = RSocketFactory.receive()
 					.addResponderPlugin(interceptor)
 					.frameDecoder(PayloadDecoder.ZERO_COPY)
-					.acceptor(context.getBean(RSocketMessageHandler::class.java).serverAcceptor())
+					.acceptor(context.getBean(RSocketMessageHandler::class.java).serverResponder())
 					.transport(TcpServerTransport.create("localhost", 7000))
 					.start()
 					.block()!!

@@ -65,7 +65,7 @@ public class RSocketServerToClientIntegrationTests {
 
 		server = RSocketFactory.receive()
 				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.acceptor(context.getBean(RSocketMessageHandler.class).serverAcceptor())
+				.acceptor(context.getBean(RSocketMessageHandler.class).serverResponder())
 				.transport(TcpServerTransport.create("localhost", 0))
 				.start()
 				.block();

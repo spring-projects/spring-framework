@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
  * Extension of {@link MessageMappingMessageHandler} to use as an RSocket
  * responder by handling incoming streams via {@code @MessageMapping} annotated
  * methods.
- * <p>Use {@link #clientAcceptor()} and {@link #serverAcceptor()} to obtain
+ * <p>Use {@link #clientResponder()} and {@link #serverResponder()} to obtain
  * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#acceptor(Function) client} or
  * {@link io.rsocket.RSocketFactory.ServerRSocketFactory#acceptor(SocketAcceptor) server}
  * side adapters.
@@ -270,7 +270,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * <p>Subsequent stream requests can be handled with
 	 * {@link MessageMapping MessageMapping} methods.
 	 */
-	public SocketAcceptor serverAcceptor() {
+	public SocketAcceptor serverResponder() {
 		return (setupPayload, sendingRSocket) -> {
 			MessagingRSocket responder = createResponder(setupPayload, sendingRSocket);
 			return responder.handleConnectionSetupPayload(setupPayload).then(Mono.just(responder));
@@ -291,7 +291,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * <p>Subsequent stream requests can be handled with
 	 * {@link MessageMapping MessageMapping} methods.
 	 */
-	public BiFunction<ConnectionSetupPayload, RSocket, RSocket> clientAcceptor() {
+	public BiFunction<ConnectionSetupPayload, RSocket, RSocket> clientResponder() {
 		return (setupPayload, sendingRSocket) -> {
 			MessagingRSocket responder = createResponder(setupPayload, sendingRSocket);
 			responder.handleConnectionSetupPayload(setupPayload).subscribe();

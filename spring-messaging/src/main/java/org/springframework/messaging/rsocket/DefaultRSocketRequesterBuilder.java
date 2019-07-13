@@ -125,7 +125,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 			messageHandler.setHandlers(this.handlers);
 			messageHandler.setRSocketStrategies(rsocketStrategies);
 			messageHandler.afterPropertiesSet();
-			rsocketFactory.acceptor(messageHandler.clientAcceptor());
+			rsocketFactory.acceptor(messageHandler.clientResponder());
 		}
 		rsocketFactory.frameDecoder(PayloadDecoder.ZERO_COPY);
 		this.factoryConfigurers.forEach(consumer -> consumer.accept(rsocketFactory));
