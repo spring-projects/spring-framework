@@ -91,6 +91,10 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
 
+	public Jaxb2XmlDecoder(MimeType... supportedMimeTypes) {
+		super(supportedMimeTypes);
+	}
+
 
 	/**
 	 * Configure a processor function to customize Unmarshaller instances.
