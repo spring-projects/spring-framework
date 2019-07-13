@@ -51,6 +51,7 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.HandlerResult;
@@ -365,7 +366,7 @@ public class ResponseEntityResultHandlerTests {
 
 		StepVerifier.create(resultHandler.handleResult(exchange, result))
 				.consumeErrorWith(ex -> assertThat(ex)
-						.isInstanceOf(IllegalStateException.class)
+						.isInstanceOf(HttpMessageNotWritableException.class)
 						.hasMessageContaining("with preset Content-Type"))
 				.verify();
 	}

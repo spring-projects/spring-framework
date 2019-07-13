@@ -33,6 +33,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -163,7 +164,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 		if (contentType != null && contentType.equals(bestMediaType)) {
-			return Mono.error(new IllegalStateException(
+			return Mono.error(new HttpMessageNotWritableException(
 					"No Encoder for [" + elementType + "] with preset Content-Type '" + contentType + "'"));
 		}
 
