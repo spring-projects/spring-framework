@@ -80,7 +80,7 @@ dependencies {
 	testCompile("io.projectreactor.netty:reactor-netty")
 	testCompile("de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1")
 	// Pull in the latest JUnit 5 Launcher API and the Vintage engine as well
-	// so that we can run JUnit 4 tests in IntelliJ IDEA.
+	// so that we can run JUnit 4 tests in IDEs.
 	testRuntime("org.junit.jupiter:junit-jupiter-engine")
 	testRuntime("org.junit.platform:junit-platform-launcher")
 	testRuntime("org.junit.vintage:junit-vintage-engine")
@@ -99,32 +99,22 @@ task testNG(type: Test) {
 	// forkEvery 1
 }
 
-task testJUnitJupiter(type: Test) {
-	description = "Runs JUnit Jupiter tests."
+test {
+	description = "Runs JUnit 4 and JUnit Jupiter tests."
+	dependsOn testNG
 	useJUnitPlatform {
-		includeEngines "junit-jupiter"
 		excludeTags "failing-test-case"
 	}
-	filter {
-		includeTestsMatching "org.springframework.test.context.junit.jupiter.*"
-	}
+	include(["**/*Tests.class", "**/*Test.class"])
+	exclude(["**/testng/**/*.*"])
 	// Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
-}
-
-test {
-	description = "Runs JUnit 4 tests."
-	dependsOn testJUnitJupiter, testNG
-	useJUnit()
-	scanForTestClasses = false
-	include(["**/*Tests.class", "**/*Test.class"])
-	exclude(["**/testng/**/*.*", "**/jupiter/**/*.*"])
 }
 
 task aggregateTestReports(type: TestReport) {
 	description = "Aggregates JUnit and TestNG test reports."
 	destinationDir = test.reports.html.destination
-	reportOn test, testJUnitJupiter, testNG
+	reportOn test, testNG
 }
 
 check.dependsOn aggregateTestReports
