@@ -60,7 +60,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private String separator = ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 
-	private String commentPrefix = ScriptUtils.DEFAULT_COMMENT_PREFIX;
+	private String[] commentPrefixes = ScriptUtils.DEFAULT_COMMENT_PREFIXES;
 
 	private String blockCommentStartDelimiter = ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
 
@@ -171,9 +171,22 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * Set the prefix that identifies single-line comments within the SQL scripts.
 	 * <p>Defaults to {@code "--"}.
 	 * @param commentPrefix the prefix for single-line comments
+	 * @see #setCommentPrefixes(String...)
 	 */
 	public void setCommentPrefix(String commentPrefix) {
-		this.commentPrefix = commentPrefix;
+		Assert.hasText(commentPrefix, "CommentPrefix must not be null or empty");
+		this.commentPrefixes = new String[] { commentPrefix };
+	}
+
+	/**
+	 * Set the prefixes that identify single-line comments within the SQL scripts.
+	 * <p>Defaults to {@code "--"}.
+	 * @param commentPrefixes the prefixes for single-line comments
+	 * @since 5.2
+	 */
+	public void setCommentPrefixes(String... commentPrefixes) {
+		Assert.notNull(commentPrefixes, "CommentPrefixes must not be null");
+		this.commentPrefixes = commentPrefixes;
 	}
 
 	/**
@@ -236,7 +249,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		for (Resource script : this.scripts) {
 			EncodedResource encodedScript = new EncodedResource(script, this.sqlScriptEncoding);
 			ScriptUtils.executeSqlScript(connection, encodedScript, this.continueOnError, this.ignoreFailedDrops,
-					this.commentPrefix, this.separator, this.blockCommentStartDelimiter, this.blockCommentEndDelimiter);
+					this.commentPrefixes, this.separator, this.blockCommentStartDelimiter, this.blockCommentEndDelimiter);
 		}
 	}
 
