@@ -25,6 +25,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.EncodedResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_COMMENT_PREFIXES;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.containsSqlScriptDelimiters;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.splitSqlScript;
@@ -117,18 +120,25 @@ public class ScriptUtilsUnitTests {
 	@Test
 	public void readAndSplitScriptContainingComments() throws Exception {
 		String script = readScript("test-data-with-comments.sql");
-		splitScriptContainingComments(script);
+		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
 	@Test
 	public void readAndSplitScriptContainingCommentsWithWindowsLineEnding() throws Exception {
 		String script = readScript("test-data-with-comments.sql").replaceAll("\n", "\r\n");
-		splitScriptContainingComments(script);
+		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
-	private void splitScriptContainingComments(String script) throws Exception {
+	@Test
+	public void readAndSplitScriptContainingCommentsWithMultiplePrefixes() throws Exception {
+		String script = readScript("test-data-with-multi-prefix-comments.sql");
+		splitScriptContainingComments(script, "--", "#", "^");
+	}
+
+	private void splitScriptContainingComments(String script, String... commentPrefixes) throws Exception {
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, ';', statements);
+		splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+				DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
