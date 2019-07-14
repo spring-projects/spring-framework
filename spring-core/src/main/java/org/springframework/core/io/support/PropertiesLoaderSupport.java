@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.CollectionFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
@@ -144,7 +145,7 @@ public abstract class PropertiesLoaderSupport {
 	 * loaded properties and properties set on this FactoryBean.
 	 */
 	protected Properties mergeProperties() throws IOException {
-		Properties result = new Properties();
+		Properties result = CollectionFactory.createStringAdaptingProperties();
 
 		if (this.localOverride) {
 			// Load properties from file upfront, to let local properties override.
