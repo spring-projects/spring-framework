@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.client;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
@@ -30,7 +31,6 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -44,6 +44,26 @@ import org.springframework.util.MultiValueMap;
  */
 final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
+	private static final HttpRequest EMPTY_REQUEST = new HttpRequest() {
+
+		private final URI empty = URI.create("");
+
+		@Override
+		public String getMethodValue() {
+			return "UNKNOWN";
+		}
+
+		@Override
+		public URI getURI() {
+			return this.empty;
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			return HttpHeaders.EMPTY;
+		}
+	};
+
 	private ExchangeStrategies strategies;
 
 	private HttpStatus statusCode = HttpStatus.OK;
@@ -54,13 +74,13 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	private Flux<DataBuffer> body = Flux.empty();
 
-	@Nullable
 	private HttpRequest request;
 
 
 	public DefaultClientResponseBuilder(ExchangeStrategies strategies) {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.strategies = strategies;
+		this.request = EMPTY_REQUEST;
 	}
 
 	public DefaultClientResponseBuilder(ClientResponse other) {
@@ -71,6 +91,9 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		cookies(cookies -> cookies.addAll(other.cookies()));
 		if (other instanceof DefaultClientResponse) {
 			this.request = ((DefaultClientResponse) other).request();
+		}
+		else {
+			this.request = EMPTY_REQUEST;
 		}
 	}
 
