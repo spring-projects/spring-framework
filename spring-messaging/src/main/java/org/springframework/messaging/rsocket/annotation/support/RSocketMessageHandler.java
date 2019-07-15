@@ -306,7 +306,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 		s = setupPayload.metadataMimeType();
 		MimeType metaMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
-		Assert.notNull(dataMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
+		Assert.notNull(metadataMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
 
 		RSocketStrategies strategies = this.rsocketStrategies;
 		Assert.notNull(strategies, "No RSocketStrategies. Was afterPropertiesSet not called?");
