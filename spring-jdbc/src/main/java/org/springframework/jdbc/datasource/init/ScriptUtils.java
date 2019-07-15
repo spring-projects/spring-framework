@@ -48,6 +48,7 @@ import org.springframework.util.StringUtils;
  * @author Oliver Gierke
  * @author Chris Baldwin
  * @author Nicolas Debeissat
+ * @author Phillip Webb
  * @since 4.0.3
  */
 public abstract class ScriptUtils {
@@ -185,9 +186,9 @@ public abstract class ScriptUtils {
 	 * Split an SQL script into separate statements delimited by the provided
 	 * separator string. Each individual statement will be added to the provided
 	 * {@code List}.
-	 * <p>Within the script, the provided {@code commentPrefix} will be honored:
-	 * any text beginning with the comment prefix and extending to the end of the
-	 * line will be omitted from the output. Similarly, the provided
+	 * <p>Within the script, the provided {@code commentPrefixes} will be honored:
+	 * any text beginning with one of the comment prefixes and extending to the
+	 * end of the line will be omitted from the output. Similarly, the provided
 	 * {@code blockCommentStartDelimiter} and {@code blockCommentEndDelimiter}
 	 * delimiters will be honored: any text enclosed in a block comment will be
 	 * omitted from the output. In addition, multiple adjacent whitespace characters
@@ -212,7 +213,7 @@ public abstract class ScriptUtils {
 
 		Assert.hasText(script, "'script' must not be null or empty");
 		Assert.notNull(separator, "'separator' must not be null");
-		Assert.notNull(commentPrefixes, "'commentPrefixes' must not be null");
+		Assert.notEmpty(commentPrefixes, "'commentPrefixes' must not be null or empty");
 		for (int i = 0; i < commentPrefixes.length; i++) {
 			Assert.hasText(commentPrefixes[i], "'commentPrefixes' must not contain null or empty elements");
 		}
@@ -307,14 +308,14 @@ public abstract class ScriptUtils {
 	}
 
 	/**
-	 * Read a script from the provided resource, using the supplied comment prefix
+	 * Read a script from the provided resource, using the supplied comment prefixes
 	 * and statement separator, and build a {@code String} containing the lines.
-	 * <p>Lines <em>beginning</em> with the comment prefix are excluded from the
-	 * results; however, line comments anywhere else &mdash; for example, within
-	 * a statement &mdash; will be included in the results.
+	 * <p>Lines <em>beginning</em> with one of the comment prefixes are excluded
+	 * from the results; however, line comments anywhere else &mdash; for example,
+	 * within a statement &mdash; will be included in the results.
 	 * @param resource the {@code EncodedResource} containing the script
 	 * to be processed
-	 * @param commentPrefixes the prefix that identifies comments in the SQL script
+	 * @param commentPrefixes the prefixes that identify comments in the SQL script
 	 * (typically "--")
 	 * @param separator the statement separator in the SQL script (typically ";")
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
@@ -358,11 +359,11 @@ public abstract class ScriptUtils {
 
 	/**
 	 * Read a script from the provided {@code LineNumberReader}, using the supplied
-	 * comment prefix and statement separator, and build a {@code String} containing
+	 * comment prefixes and statement separator, and build a {@code String} containing
 	 * the lines.
-	 * <p>Lines <em>beginning</em> with the comment prefix are excluded from the
-	 * results; however, line comments anywhere else &mdash; for example, within
-	 * a statement &mdash; will be included in the results.
+	 * <p>Lines <em>beginning</em> with one of the comment prefixes are excluded
+	 * from the results; however, line comments anywhere else &mdash; for example,
+	 * within a statement &mdash; will be included in the results.
 	 * @param lineNumberReader the {@code LineNumberReader} containing the script
 	 * to be processed
 	 * @param lineCommentPrefixes the prefixes that identify comments in the SQL script
@@ -407,9 +408,9 @@ public abstract class ScriptUtils {
 		}
 	}
 
-	private static boolean startsWithAny(String script, String[] prefixes, int toffset) {
+	private static boolean startsWithAny(String script, String[] prefixes, int offset) {
 		for (String prefix : prefixes) {
-			if (script.startsWith(prefix, toffset)) {
+			if (script.startsWith(prefix, offset)) {
 				return true;
 			}
 		}
