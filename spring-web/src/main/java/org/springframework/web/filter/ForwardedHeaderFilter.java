@@ -158,6 +158,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 	}
 
+	@Override
+	protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain) throws ServletException, IOException {
+
+		doFilterInternal(request, response, filterChain);
+	}
 
 	/**
 	 * Hide "Forwarded" or "X-Forwarded-*" headers.
