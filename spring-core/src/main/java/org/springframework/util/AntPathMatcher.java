@@ -169,6 +169,9 @@ public class AntPathMatcher implements PathMatcher {
 
 	@Override
 	public boolean isPattern(String path) {
+		if(path == null) {
+			return false;
+		}
 		boolean uriVar = false;
 		for (int i = 0; i < path.length(); i++) {
 			char c = path.charAt(i);
@@ -207,7 +210,7 @@ public class AntPathMatcher implements PathMatcher {
 	protected boolean doMatch(String pattern, String path, boolean fullMatch,
 			@Nullable Map<String, String> uriTemplateVariables) {
 
-		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
+		if (path == null || path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
 

@@ -43,6 +43,18 @@ public class MockMvcResultMatchersTests {
 	}
 
 	@Test
+	public void redirectNonMatching() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				redirectedUrl("/resource/2").match(getRedirectedUrlStubMvcResult("/resource/1")));
+	}
+
+	@Test
+	public void redirectNonMatchingBecauseNotRedirect() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				redirectedUrl("/resource/1").match(getForwardedUrlStubMvcResult("/resource/1")));
+	}
+
+	@Test
 	public void redirectWithUrlTemplate() throws Exception {
 		redirectedUrlTemplate("/orders/{orderId}/items/{itemId}", 1, 2).match(getRedirectedUrlStubMvcResult("/orders/1/items/2"));
 	}
@@ -59,8 +71,26 @@ public class MockMvcResultMatchersTests {
 	}
 
 	@Test
+	public void redirectWithNonMatchingPatternBecauseNotRedirect() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				redirectedUrlPattern("/resource/*").match(getForwardedUrlStubMvcResult("/resource/1")));
+	}
+
+	@Test
 	public void forward() throws Exception {
 		forwardedUrl("/api/resource/1").match(getForwardedUrlStubMvcResult("/api/resource/1"));
+	}
+
+	@Test
+	public void forwardNonMatching() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				forwardedUrlPattern("api/resource/2").match(getForwardedUrlStubMvcResult("api/resource/1")));
+	}
+
+	@Test
+	public void forwardNonMatchingBecauseNotForward() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				forwardedUrlPattern("api/resource/1").match(getRedirectedUrlStubMvcResult("api/resource/1")));
 	}
 
 	@Test
@@ -82,6 +112,12 @@ public class MockMvcResultMatchersTests {
 	public void forwardWithNonMatchingPattern() throws Exception {
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				forwardedUrlPattern("/resource/").match(getForwardedUrlStubMvcResult("/resource/1")));
+	}
+
+	@Test
+	public void forwardWithNonMatchingPatternBecauseNotForward() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				forwardedUrlPattern("/resource/*").match(getRedirectedUrlStubMvcResult("/resource/1")));
 	}
 
 	private StubMvcResult getRedirectedUrlStubMvcResult(String redirectUrl) throws Exception {
