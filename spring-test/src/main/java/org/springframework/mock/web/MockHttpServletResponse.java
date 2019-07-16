@@ -56,6 +56,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rod Johnson
  * @author Brian Clozel
  * @author Vedran Pavic
+ * @author Sebastien Deleuze
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
@@ -219,10 +220,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Get the content of the response body as a {@code String}, using the provided
-	 * {@code fallbackCharset} if no charset has been explicitly defined, else using
+	 * {@code fallbackCharset} if no charset has been explicitly defined and otherwise
 	 * using the configured {@linkplain #getCharacterEncoding character encoding}.
 	 * @return the content as a {@code String}
 	 * @throws UnsupportedEncodingException if the character encoding is not supported
+	 * @since 5.2
 	 * @see #getContentAsString()
 	 */
 	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {

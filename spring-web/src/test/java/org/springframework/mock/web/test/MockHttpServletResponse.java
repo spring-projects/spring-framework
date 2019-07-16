@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,6 +56,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rod Johnson
  * @author Brian Clozel
  * @author Vedran Pavic
+ * @author Sebastien Deleuze
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
@@ -204,9 +206,31 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.content.toByteArray();
 	}
 
+	/**
+	 * Get the content of the response body as a {@code String}, using the configured
+	 * {@linkplain #getCharacterEncoding character encoding}.
+	 * @return the content as a {@code String}
+	 * @throws UnsupportedEncodingException if the character encoding is not supported
+	 * @see #getContentAsString(Charset)
+	 */
 	public String getContentAsString() throws UnsupportedEncodingException {
 		return (this.characterEncoding != null ?
 				this.content.toString(this.characterEncoding) : this.content.toString());
+	}
+
+	/**
+	 * Get the content of the response body as a {@code String}, using the provided
+	 * {@code fallbackCharset} if no charset has been explicitly defined and otherwise
+	 * using the configured {@linkplain #getCharacterEncoding character encoding}.
+	 * @return the content as a {@code String}
+	 * @throws UnsupportedEncodingException if the character encoding is not supported
+	 * @since 5.2
+	 * @see #getContentAsString()
+	 */
+	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
+		return isCharset() ?
+				this.content.toString(this.characterEncoding) :
+				this.content.toString(fallbackCharset.name());
 	}
 
 	@Override
