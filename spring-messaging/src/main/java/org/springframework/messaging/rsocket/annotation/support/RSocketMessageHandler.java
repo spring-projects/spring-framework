@@ -223,6 +223,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 
+	@Override
 	@Nullable
 	protected CompositeMessageCondition getCondition(AnnotatedElement element) {
 		MessageMapping annot1 = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
@@ -305,16 +306,16 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		Assert.notNull(dataMimeType, "No `dataMimeType` in ConnectionSetupPayload and no default value");
 
 		s = setupPayload.metadataMimeType();
-		MimeType metaMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
-		Assert.notNull(dataMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
+		MimeType metadataMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
+		Assert.notNull(metadataMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
 
 		RSocketStrategies strategies = this.rsocketStrategies;
 		Assert.notNull(strategies, "No RSocketStrategies. Was afterPropertiesSet not called?");
-		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metaMimeType, strategies);
+		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metadataMimeType, strategies);
 
 		Assert.notNull(this.metadataExtractor, () -> "No MetadataExtractor. Was afterPropertiesSet not called?");
 
-		return new MessagingRSocket(dataMimeType, metaMimeType, this.metadataExtractor, requester,
+		return new MessagingRSocket(dataMimeType, metadataMimeType, this.metadataExtractor, requester,
 				this, getRouteMatcher(), strategies.dataBufferFactory());
 	}
 
