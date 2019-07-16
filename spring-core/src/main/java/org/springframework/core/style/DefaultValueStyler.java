@@ -18,10 +18,10 @@ package org.springframework.core.style;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -82,20 +82,15 @@ public class DefaultValueStyler implements ValueStyler {
 	}
 
 	private <K, V> String style(Map<K, V> value) {
-		StringBuilder result = new StringBuilder(value.size() * 8 + 16);
-		result.append(MAP + "[");
-		for (Iterator<Map.Entry<K, V>> it = value.entrySet().iterator(); it.hasNext();) {
-			Map.Entry<K, V> entry = it.next();
-			result.append(style(entry));
-			if (it.hasNext()) {
-				result.append(',').append(' ');
-			}
-		}
 		if (value.isEmpty()) {
-			result.append(EMPTY);
+			return MAP + '[' + EMPTY + ']';
 		}
-		result.append("]");
-		return result.toString();
+
+		StringJoiner result = new StringJoiner(", ", "[", "]");
+		for (Map.Entry<K, V> entry : value.entrySet()) {
+			result.add(style(entry));
+		}
+		return MAP + result;
 	}
 
 	private String style(Map.Entry<?, ?> value) {
@@ -103,19 +98,17 @@ public class DefaultValueStyler implements ValueStyler {
 	}
 
 	private String style(Collection<?> value) {
-		StringBuilder result = new StringBuilder(value.size() * 8 + 16);
-		result.append(getCollectionTypeString(value)).append('[');
-		for (Iterator<?> i = value.iterator(); i.hasNext();) {
-			result.append(style(i.next()));
-			if (i.hasNext()) {
-				result.append(',').append(' ');
-			}
-		}
+		String collectionType = getCollectionTypeString(value);
+
 		if (value.isEmpty()) {
-			result.append(EMPTY);
+			return collectionType + '[' + EMPTY + ']';
 		}
-		result.append("]");
-		return result.toString();
+
+		StringJoiner result = new StringJoiner(", ", "[", "]");
+		for (Object o : value) {
+			result.add(style(o));
+		}
+		return collectionType + result;
 	}
 
 	private String getCollectionTypeString(Collection<?> value) {
@@ -131,20 +124,15 @@ public class DefaultValueStyler implements ValueStyler {
 	}
 
 	private String styleArray(Object[] array) {
-		StringBuilder result = new StringBuilder(array.length * 8 + 16);
-		result.append(ARRAY + "<").append(ClassUtils.getShortName(array.getClass().getComponentType())).append(">[");
-		for (int i = 0; i < array.length - 1; i++) {
-			result.append(style(array[i]));
-			result.append(',').append(' ');
+		if (array.length == 0) {
+			return ARRAY + '<' + ClassUtils.getShortName(array.getClass().getComponentType()) + '>' + '[' + EMPTY + ']';
 		}
-		if (array.length > 0) {
-			result.append(style(array[array.length - 1]));
+
+		StringJoiner result = new StringJoiner(", ", "[", "]");
+		for (Object o : array) {
+			result.add(style(o));
 		}
-		else {
-			result.append(EMPTY);
-		}
-		result.append("]");
-		return result.toString();
+		return ARRAY + '<' + ClassUtils.getShortName(array.getClass().getComponentType()) + '>' + result;
 	}
 
 }
