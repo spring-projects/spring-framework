@@ -130,6 +130,11 @@ public class AntPathMatcherTests {
 		assertThat(pathMatcher.match("", "")).isTrue();
 
 		assertThat(pathMatcher.match("/{bla}.*", "/testing.html")).isTrue();
+
+		assertThat(pathMatcher.match("/test", null)).isFalse();
+		assertThat(pathMatcher.match("/", null)).isFalse();
+		assertThat(pathMatcher.match("/", null)).isFalse();
+		assertThat(pathMatcher.match(null, null)).isFalse();
 	}
 
 	// SPR-14247
@@ -688,6 +693,7 @@ public class AntPathMatcherTests {
 		assertThat(pathMatcher.isPattern("/test/{name}")).isTrue();
 		assertThat(pathMatcher.isPattern("/test/name")).isFalse();
 		assertThat(pathMatcher.isPattern("/test/foo{bar")).isFalse();
+		assertThat(pathMatcher.isPattern(null)).isFalse();
 	}
 
 }
