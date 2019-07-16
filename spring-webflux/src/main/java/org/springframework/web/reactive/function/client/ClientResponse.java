@@ -168,6 +168,7 @@ public interface ClientResponse {
 	 * headers, and body of this response as well as the corresponding request.
 	 *
 	 * @return a {@code Mono} with a {@code WebClientResponseException} based on this response
+	 * @since 5.2
 	 */
 	Mono<WebClientResponseException> createException();
 
