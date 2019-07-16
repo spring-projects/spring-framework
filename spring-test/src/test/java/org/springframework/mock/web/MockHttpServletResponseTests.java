@@ -17,6 +17,7 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.servlet.http.Cookie;
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rob Winch
  * @author Sam Brannen
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 19.02.2006
  */
 public class MockHttpServletResponseTests {
@@ -238,10 +240,11 @@ public class MockHttpServletResponseTests {
 		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
 	}
 
-	@Test
-	public void servletWriterAutoFlushedForString() throws IOException {
-		response.getWriter().write("X");
-		assertThat(response.getContentAsString()).isEqualTo("X");
+	@Test  // gh-23219
+	public void contentAsUtf8() throws IOException {
+		String content = "Příliš žluťoučký kůň úpěl ďábelské ódy";
+		response.getOutputStream().write(content.getBytes(StandardCharsets.UTF_8));
+		assertThat(response.getContentAsString(StandardCharsets.UTF_8)).isEqualTo(content);
 	}
 
 	@Test
@@ -254,6 +257,12 @@ public class MockHttpServletResponseTests {
 	public void servletWriterAutoFlushedForCharArray() throws IOException {
 		response.getWriter().write("XY".toCharArray());
 		assertThat(response.getContentAsString()).isEqualTo("XY");
+	}
+
+	@Test
+	public void servletWriterAutoFlushedForString() throws IOException {
+		response.getWriter().write("X");
+		assertThat(response.getContentAsString()).isEqualTo("X");
 	}
 
 	@Test

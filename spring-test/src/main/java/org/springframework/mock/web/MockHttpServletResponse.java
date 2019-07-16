@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -204,9 +205,30 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.content.toByteArray();
 	}
 
+	/**
+	 * Get the content of the response body as a {@code String}, using the configured
+	 * {@linkplain #getCharacterEncoding character encoding}.
+	 * @return the content as a {@code String}
+	 * @throws UnsupportedEncodingException if the character encoding is not supported
+	 * @see #getContentAsString(Charset)
+	 */
 	public String getContentAsString() throws UnsupportedEncodingException {
 		return (this.characterEncoding != null ?
 				this.content.toString(this.characterEncoding) : this.content.toString());
+	}
+
+	/**
+	 * Get the content of the response body as a {@code String}, using the provided
+	 * {@code fallbackCharset} if no charset has been explicitly defined, else using
+	 * using the configured {@linkplain #getCharacterEncoding character encoding}.
+	 * @return the content as a {@code String}
+	 * @throws UnsupportedEncodingException if the character encoding is not supported
+	 * @see #getContentAsString()
+	 */
+	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
+		return isCharset() ?
+				this.content.toString(this.characterEncoding) :
+				this.content.toString(fallbackCharset.name());
 	}
 
 	@Override
