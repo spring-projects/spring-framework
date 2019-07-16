@@ -207,8 +207,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	/**
-	 * Get the content of the response body as a {@code String}, using the configured
-	 * {@linkplain #getCharacterEncoding character encoding}.
+	 * Get the content of the response body as a {@code String}, using the charset
+	 * specified for the response by the application, either through
+	 * {@link HttpServletResponse} methods or through a charset parameter on the
+	 * {@code Content-Type}.
 	 * @return the content as a {@code String}
 	 * @throws UnsupportedEncodingException if the character encoding is not supported
 	 * @see #getContentAsString(Charset)
@@ -221,12 +223,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	/**
 	 * Get the content of the response body as a {@code String}, using the provided
 	 * {@code fallbackCharset} if no charset has been explicitly defined and otherwise
-	 * using the configured {@linkplain #getCharacterEncoding character encoding}.
+	 * using the charset specified for the response by the application, either
+	 * through {@link HttpServletResponse} methods or through a charset parameter on the
+	 * {@code Content-Type}.
 	 * @return the content as a {@code String}
 	 * @throws UnsupportedEncodingException if the character encoding is not supported
 	 * @since 5.2
 	 * @see #getContentAsString()
 	 */
+
 	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
 		return isCharset() ?
 				this.content.toString(this.characterEncoding) :
