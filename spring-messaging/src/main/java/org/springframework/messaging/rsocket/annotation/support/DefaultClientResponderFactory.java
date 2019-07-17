@@ -24,6 +24,7 @@ import io.rsocket.RSocketFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.invocation.reactive.ArgumentResolverConfigurer;
 import org.springframework.messaging.handler.invocation.reactive.ReturnValueHandlerConfigurer;
+import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.util.Assert;
 import org.springframework.util.RouteMatcher;

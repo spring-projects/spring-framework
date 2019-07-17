@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.rsocket.annotation.support;
+package org.springframework.messaging.rsocket;
 
 import java.util.Map;
 
@@ -37,6 +37,16 @@ public interface MetadataExtractor {
 	 * The key to assign to the extracted "route" of the payload.
 	 */
 	String ROUTE_KEY = "route";
+
+	/**
+	 * Constant for mime type {@code message/x.rsocket.composite-metadata.v0}.
+	 */
+	MimeType COMPOSITE_METADATA = new MimeType("message", "x.rsocket.composite-metadata.v0");
+
+	/**
+	 * Constant for mime type {@code message/x.rsocket.routing.v0}.
+	 */
+	MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
 
 
 	/**

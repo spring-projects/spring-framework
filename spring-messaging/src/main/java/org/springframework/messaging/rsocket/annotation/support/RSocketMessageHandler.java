@@ -40,6 +40,8 @@ import org.springframework.messaging.handler.DestinationPatternsMessageCondition
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.DefaultMetadataExtractor;
+import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
@@ -74,7 +76,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	@Nullable
 	private MimeType defaultDataMimeType;
 
-	private MimeType defaultMetadataMimeType = MessagingRSocket.COMPOSITE_METADATA;
+	private MimeType defaultMetadataMimeType = MetadataExtractor.COMPOSITE_METADATA;
 
 
 	/**

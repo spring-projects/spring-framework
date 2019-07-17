@@ -40,6 +40,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.ReactiveMessageHandler;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.PayloadUtils;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.support.MessageBuilder;
@@ -59,11 +60,6 @@ import org.springframework.util.RouteMatcher;
  * @since 5.2
  */
 class MessagingRSocket extends AbstractRSocket {
-
-	static final MimeType COMPOSITE_METADATA = new MimeType("message", "x.rsocket.composite-metadata.v0");
-
-	static final MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
-
 
 	private final MimeType dataMimeType;
 

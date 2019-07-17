@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.rsocket.annotation.support;
+package org.springframework.messaging.rsocket;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +31,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
-import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -61,7 +60,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
 		Assert.notNull(strategies, "RSocketStrategies is required");
 		this.rsocketStrategies = strategies;
 		// TODO: remove when rsocket-core API available
-		metadataToExtract(MessagingRSocket.ROUTING, String.class, ROUTE_KEY);
+		metadataToExtract(MetadataExtractor.ROUTING, String.class, ROUTE_KEY);
 	}
 
 
@@ -131,7 +130,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
 	@Override
 	public Map<String, Object> extract(Payload payload, MimeType metadataMimeType) {
 		Map<String, Object> result = new HashMap<>();
-		if (metadataMimeType.equals(MessagingRSocket.COMPOSITE_METADATA)) {
+		if (metadataMimeType.equals(COMPOSITE_METADATA)) {
 			for (CompositeMetadata.Entry entry : new CompositeMetadata(payload.metadata(), false)) {
 				processEntry(entry.getContent(), entry.getMimeType(), result);
 			}
@@ -149,7 +148,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
 			entryProcessor.process(content, result);
 			return;
 		}
-		if (MessagingRSocket.ROUTING.toString().equals(mimeType)) {
+		if (MetadataExtractor.ROUTING.toString().equals(mimeType)) {
 			// TODO: use rsocket-core API when available
 		}
 	}
