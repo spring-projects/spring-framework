@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public interface Cache {
 	 * a cached {@code null} value. A straight {@code null} being
 	 * returned means that the cache contains no mapping for this key.
 	 * @see #get(Object, Class)
+	 * @see #get(Object, Callable)
 	 */
 	@Nullable
 	ValueWrapper get(Object key);
@@ -94,6 +95,7 @@ public interface Cache {
 	 * @return the value to which this cache maps the specified key
 	 * @throws ValueRetrievalException if the {@code valueLoader} throws an exception
 	 * @since 4.3
+	 * @see #get(Object)
 	 */
 	@Nullable
 	<T> T get(Object key, Callable<T> valueLoader);
@@ -112,13 +114,11 @@ public interface Cache {
 	 * if it is not set already.
 	 * <p>This is equivalent to:
 	 * <pre><code>
-	 * Object existingValue = cache.get(key);
+	 * ValueWrapper existingValue = cache.get(key);
 	 * if (existingValue == null) {
 	 *     cache.put(key, value);
-	 *     return null;
-	 * } else {
-	 *     return existingValue;
 	 * }
+	 * return existingValue;
 	 * </code></pre>
 	 * except that the action is performed atomically. While all out-of-the-box
 	 * {@link CacheManager} implementations are able to perform the put atomically,
@@ -132,6 +132,7 @@ public interface Cache {
 	 * mapping for that key prior to this call. Returning {@code null} is therefore
 	 * an indicator that the given {@code value} has been associated with the key.
 	 * @since 4.1
+	 * @see #put(Object, Object)
 	 */
 	@Nullable
 	ValueWrapper putIfAbsent(Object key, @Nullable Object value);
@@ -143,7 +144,7 @@ public interface Cache {
 	void evict(Object key);
 
 	/**
-	 * Remove all mappings from the cache.
+	 * Clear the cache through removing all mappings.
 	 */
 	void clear();
 
