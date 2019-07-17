@@ -794,6 +794,9 @@ This section addresses testing with the combination of Kotlin and Spring Framewo
 The recommended testing framework is https://junit.org/junit5/[JUnit 5], as well as
 https://mockk.io/[Mockk] for mocking.
 
+NOTE: If you are using Spring Boot, see
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-kotlin-testing[this related documentation].
+
 ==== Constructor injection
 
 As described in the <<testing#testcontext-junit-jupiter-di#spring-web-reactive, dedicated section>>,

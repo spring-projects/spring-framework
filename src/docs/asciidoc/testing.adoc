@@ -6101,3 +6101,5 @@ See the following resources for more information about testing:
   Maven) that is targeted at database-driven projects and, among other things, puts your
   database into a known state between test runs.
 * https://sourceforge.net/projects/grinder/[The Grinder]: Java load testing framework.
+* https://github.com/Ninja-Squad/springmockk[SpringMockK]: Support for Spring Boot
+  integration tests written in Kotlin using https://mockk.io/[MockK] instead of Mockito.
