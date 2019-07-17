@@ -208,7 +208,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 					.build();
 		}
 		if (this.metadataExtractor == null) {
-			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(this.rsocketStrategies);
+			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
 			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
 			this.metadataExtractor = extractor;
 		}
@@ -318,7 +318,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		Assert.notNull(this.metadataExtractor, () -> "No MetadataExtractor. Was afterPropertiesSet not called?");
 
 		return new MessagingRSocket(dataMimeType, metadataMimeType, this.metadataExtractor, requester,
-				this, getRouteMatcher(), strategies.dataBufferFactory());
+				this, getRouteMatcher(), strategies);
 	}
 
 }

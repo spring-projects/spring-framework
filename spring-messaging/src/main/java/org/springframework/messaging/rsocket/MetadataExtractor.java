@@ -58,8 +58,9 @@ public interface MetadataExtractor {
 	 * @param payload the payload whose metadata should be read
 	 * @param metadataMimeType the mime type of the metadata; this is what was
 	 * specified by the client at the start of the RSocket connection.
+	 * @param strategies for access to codecs and a DataBufferFactory
 	 * @return a map of 0 or more decoded metadata values with assigned names
 	 */
-	Map<String, Object> extract(Payload payload, MimeType metadataMimeType);
+	Map<String, Object> extract(Payload payload, MimeType metadataMimeType, RSocketStrategies strategies);
 
 }

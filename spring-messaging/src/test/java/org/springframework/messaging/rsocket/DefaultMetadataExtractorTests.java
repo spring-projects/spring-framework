@@ -70,7 +70,7 @@ public class DefaultMetadataExtractorTests {
 		this.captor = ArgumentCaptor.forClass(Payload.class);
 		BDDMockito.when(this.rsocket.fireAndForget(captor.capture())).thenReturn(Mono.empty());
 
-		this.extractor = new DefaultMetadataExtractor(this.strategies);
+		this.extractor = new DefaultMetadataExtractor();
 	}
 
 	@After
@@ -91,7 +91,7 @@ public class DefaultMetadataExtractorTests {
 				.send().block();
 
 		Payload payload = this.captor.getValue();
-		Map<String, Object> result = this.extractor.extract(payload, COMPOSITE_METADATA);
+		Map<String, Object> result = this.extractor.extract(payload, COMPOSITE_METADATA, this.strategies);
 		payload.release();
 
 		assertThat(result).hasSize(1).containsEntry(ROUTE_KEY, "toA");
@@ -113,7 +113,7 @@ public class DefaultMetadataExtractorTests {
 				.block();
 
 		Payload payload = this.captor.getValue();
-		Map<String, Object> result = this.extractor.extract(payload, COMPOSITE_METADATA);
+		Map<String, Object> result = this.extractor.extract(payload, COMPOSITE_METADATA, this.strategies);
 		payload.release();
 
 		assertThat(result).hasSize(4)
@@ -128,7 +128,7 @@ public class DefaultMetadataExtractorTests {
 
 		requester(ROUTING).route("toA").data("data").send().block();
 		Payload payload = this.captor.getValue();
-		Map<String, Object> result = this.extractor.extract(payload, ROUTING);
+		Map<String, Object> result = this.extractor.extract(payload, ROUTING, this.strategies);
 		payload.release();
 
 		assertThat(result).hasSize(1).containsEntry(ROUTE_KEY, "toA");
@@ -141,7 +141,7 @@ public class DefaultMetadataExtractorTests {
 
 		requester(TEXT_PLAIN).route("toA").data("data").send().block();
 		Payload payload = this.captor.getValue();
-		Map<String, Object> result = this.extractor.extract(payload, TEXT_PLAIN);
+		Map<String, Object> result = this.extractor.extract(payload, TEXT_PLAIN, this.strategies);
 		payload.release();
 
 		assertThat(result).hasSize(1).containsEntry(ROUTE_KEY, "toA");
@@ -159,7 +159,7 @@ public class DefaultMetadataExtractorTests {
 
 		requester(TEXT_PLAIN).metadata("toA:text data", null).data("data").send().block();
 		Payload payload = this.captor.getValue();
-		Map<String, Object> result = this.extractor.extract(payload, TEXT_PLAIN);
+		Map<String, Object> result = this.extractor.extract(payload, TEXT_PLAIN, this.strategies);
 		payload.release();
 
 		assertThat(result).hasSize(2)
