@@ -169,7 +169,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	@Override
 	public boolean isPattern(String path) {
-		if(path == null) {
+		if (path == null) {
 			return false;
 		}
 		boolean uriVar = false;
@@ -202,7 +202,7 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * Actually match the given {@code path} against the given {@code pattern}.
 	 * @param pattern the pattern to match against
-	 * @param path the path String to test
+	 * @param path the path to test
 	 * @param fullMatch whether a full pattern match is required (else a pattern match
 	 * as far as the given base path goes is sufficient)
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
@@ -210,7 +210,7 @@ public class AntPathMatcher implements PathMatcher {
 	protected boolean doMatch(String pattern, String path, boolean fullMatch,
 			@Nullable Map<String, String> uriTemplateVariables) {
 
-		if (path == null || path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
+		if ((path == null) || (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator))) {
 			return false;
 		}
 
@@ -418,7 +418,7 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Tokenize the given path String into parts, based on this matcher's settings.
+	 * Tokenize the given path into parts, based on this matcher's settings.
 	 * @param path the path to tokenize
 	 * @return the tokenized path parts
 	 */
