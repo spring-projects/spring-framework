@@ -131,8 +131,8 @@ since the later requires a reference to the outer class.
 
 The Spring Framework also takes advantage of https://kotlinlang.org/docs/reference/null-safety.html[Kotlin null-safety]
 to determine if a HTTP parameter is required without having to explicitly
-define the `required` attribute.  That means `@RequestParam name: String?` is treated
-as not required and, conversely,  `@RequestParam name: String` is treated as being required.
+define the `required` attribute. That means `@RequestParam name: String?` is treated
+as not required and, conversely, `@RequestParam name: String` is treated as being required.
 This feature is also supported on the Spring Messaging `@Header` annotation.
 
 In a similar fashion, Spring bean injection with `@Autowired`, `@Bean`, or `@Inject` uses
@@ -417,6 +417,8 @@ dependencies {
 }
 ----
 
+Version `1.3.0` and above are supported.
+
 === How Reactive translates to Coroutines?
 
 For return values, the translation from Reactive to Coroutines APIs is the following:
@@ -541,7 +543,7 @@ class CoroutinesViewController(banner: Banner) {
 
 === WebFlux.fn
 
-Here is an example of Coroutines router definined via the {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
+Here is an example of Coroutines router defined via the {doc-root}/spring-framework/docs/{spring-version}/kdoc-api/spring-framework/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
 
 [source,kotlin,indent=0]
 ----
