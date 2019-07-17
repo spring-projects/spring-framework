@@ -31,13 +31,20 @@ final class WithoutTransactionOperations implements TransactionOperations {
 
 	static final WithoutTransactionOperations INSTANCE = new WithoutTransactionOperations();
 
+
 	private WithoutTransactionOperations() {
 	}
+
 
 	@Override
 	@Nullable
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		return action.doInTransaction(new SimpleTransactionStatus(false));
+	}
+
+	@Override
+	public void execute(Runnable action) throws TransactionException {
+		action.run();
 	}
 
 }

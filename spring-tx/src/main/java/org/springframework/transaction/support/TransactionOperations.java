@@ -44,6 +44,28 @@ public interface TransactionOperations {
 	@Nullable
 	<T> T execute(TransactionCallback<T> action) throws TransactionException;
 
+	/**
+	 * Execute the action specified by the given {@link Runnable} within a transaction.
+	 * <p>If you need to return an object from the callback or access the
+	 * {@link org.springframework.transaction.TransactionStatus} from within the callback,
+	 * use {@link #execute(TransactionCallback)} instead.
+	 * <p>This variant is analogous to using a {@link TransactionCallbackWithoutResult}
+	 * but with a simplified signature for common cases - and conveniently usable with
+	 * Java 8 lambda expressions.
+	 * @param action the Runnable that specifies the transactional action
+	 * @throws TransactionException in case of initialization, rollback, or system errors
+	 * @throws RuntimeException if thrown by the Runnable
+	 * @since 5.2
+	 * @see #execute(TransactionCallback)
+	 * @see TransactionCallbackWithoutResult
+	 */
+	default void execute(Runnable action) throws TransactionException {
+		execute(status -> {
+			action.run();
+			return null;
+		});
+	}
+
 
 	/**
 	 * Return an implementation of the {@code TransactionOperations} interface which
