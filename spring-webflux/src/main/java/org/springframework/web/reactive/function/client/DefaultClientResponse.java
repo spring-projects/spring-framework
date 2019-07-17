@@ -157,31 +157,22 @@ class DefaultClientResponse implements ClientResponse {
 
 	@Override
 	public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyType) {
-		return toEntityInternal(bodyToMono(bodyType));
+		return WebClientUtils.toEntity(this, bodyToMono(bodyType));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
-		return toEntityInternal(bodyToMono(bodyTypeReference));
-	}
-
-	private <T> Mono<ResponseEntity<T>> toEntityInternal(Mono<T> bodyMono) {
-		HttpHeaders headers = headers().asHttpHeaders();
-		int status = rawStatusCode();
-		return bodyMono
-				.map(body -> createEntity(body, headers, status))
-				.switchIfEmpty(Mono.defer(
-						() -> Mono.just(createEntity(headers, status))));
+		return WebClientUtils.toEntity(this, bodyToMono(bodyTypeReference));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass) {
-		return toEntityListInternal(bodyToFlux(elementClass));
+		return WebClientUtils.toEntityList(this, bodyToFlux(elementClass));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
-		return toEntityListInternal(bodyToFlux(elementTypeRef));
+		return WebClientUtils.toEntityList(this, bodyToFlux(elementTypeRef));
 	}
 
 	@Override
@@ -223,29 +214,6 @@ class DefaultClientResponse implements ClientResponse {
 	HttpRequest request() {
 		return this.requestSupplier.get();
 	}
-
-	private <T> Mono<ResponseEntity<List<T>>> toEntityListInternal(Flux<T> bodyFlux) {
-		HttpHeaders headers = headers().asHttpHeaders();
-		int status = rawStatusCode();
-		return bodyFlux
-				.collectList()
-				.map(body -> createEntity(body, headers, status));
-	}
-
-	private <T> ResponseEntity<T> createEntity(HttpHeaders headers, int status) {
-		HttpStatus resolvedStatus = HttpStatus.resolve(status);
-		return resolvedStatus != null
-				? new ResponseEntity<>(headers, resolvedStatus)
-				: ResponseEntity.status(status).headers(headers).build();
-	}
-
-	private <T> ResponseEntity<T> createEntity(T body, HttpHeaders headers, int status) {
-		HttpStatus resolvedStatus = HttpStatus.resolve(status);
-		return resolvedStatus != null
-				? new ResponseEntity<>(body, headers, resolvedStatus)
-				: ResponseEntity.status(status).headers(headers).body(body);
-	}
-
 
 	private class DefaultHeaders implements Headers {
 

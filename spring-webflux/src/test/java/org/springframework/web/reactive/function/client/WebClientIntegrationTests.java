@@ -219,7 +219,7 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveJsonAsResponseEntityString() {
+	public void exchangeShouldReceiveJsonAsResponseEntityString() {
 		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json").setBody(content));
@@ -246,7 +246,82 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
-	public void shouldReceiveJsonAsResponseEntityList() {
+	public void retrieveShouldReceiveJsonAsResponseEntityString() {
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody(content));
+
+		Mono<ResponseEntity<String>> result = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntity(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(entity -> {
+					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+					assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+					assertThat(entity.getHeaders().getContentLength()).isEqualTo(31);
+					assertThat(entity.getBody()).isEqualTo(content);
+				})
+				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/json");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@Test
+	public void retrieveEntityWithServerError() {
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<ResponseEntity<String>> result = this.webClient.get()
+				.uri("/").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntity(String.class);
+
+		StepVerifier.create(result)
+				.expectError(WebClientResponseException.class)
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@Test
+	public void retrieveEntityWithServerErrorStatusHandler() {
+		String content = "Internal Server error";
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody(content));
+
+		Mono<ResponseEntity<String>> result = this.webClient.get()
+				.uri("/").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.onStatus(HttpStatus::is5xxServerError, response -> Mono.empty())// use normal response
+				.toEntity(String.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(entity -> {
+					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+					assertThat(entity.getBody()).isEqualTo(content);
+				})
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@Test
+	public void exchangeShouldReceiveJsonAsResponseEntityList() {
 		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "application/json").setBody(content));
@@ -273,6 +348,57 @@ public class WebClientIntegrationTests {
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 		});
 	}
+
+	@Test
+	public void retrieveShouldReceiveJsonAsResponseEntityList() {
+		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody(content));
+
+		Mono<ResponseEntity<List<Pojo>>> result = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntityList(Pojo.class);
+
+		StepVerifier.create(result)
+				.consumeNextWith(entity -> {
+					assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+					assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+					assertThat(entity.getHeaders().getContentLength()).isEqualTo(58);
+					Pojo pojo1 = new Pojo("foo1", "bar1");
+					Pojo pojo2 = new Pojo("foo2", "bar2");
+					assertThat(entity.getBody()).isEqualTo(Arrays.asList(pojo1, pojo2));
+				})
+				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/json");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@Test
+	public void retrieveEntityListWithServerError() {
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<ResponseEntity<List<String>>> result = this.webClient.get()
+				.uri("/").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntityList(String.class);
+
+		StepVerifier.create(result)
+				.expectError(WebClientResponseException.class)
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
 
 	@Test
 	public void shouldReceiveJsonAsFluxString() {

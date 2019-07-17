@@ -35,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.MultiValueMap;
@@ -733,6 +734,48 @@ public interface WebClient {
 		 * status code is 4xx or 5xx
 		 */
 		<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef);
+
+		/**
+		 * Return the response as a delayed {@code ResponseEntity}. By default, if the response has
+		 * status code 4xx or 5xx, the {@code Mono} will contain a {@link WebClientException}. This
+		 * can be overridden with {@link #onStatus(Predicate, Function)}.
+		 * @param bodyClass the expected response body type
+		 * @param <T> response body type
+		 * @return {@code Mono} with the {@code ResponseEntity}
+		 */
+		<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass);
+
+		/**
+		 * Return the response as a delayed {@code ResponseEntity}. By default, if the response has
+		 * status code 4xx or 5xx, the {@code Mono} will contain a {@link WebClientException}. This
+		 * can be overridden with {@link #onStatus(Predicate, Function)}.
+		 * @param bodyTypeReference a type reference describing the expected response body type
+		 * @param <T> response body type
+		 * @return {@code Mono} with the {@code ResponseEntity}
+		 */
+		<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference);
+
+		/**
+		 * Return the response as a delayed list of {@code ResponseEntity}s. By default, if the
+		 * response has status code 4xx or 5xx, the {@code Mono} will contain a
+		 * {@link WebClientException}. This can be overridden with
+		 * {@link #onStatus(Predicate, Function)}.
+		 * @param elementClass the expected response body list element class
+		 * @param <T> the type of elements in the list
+		 * @return {@code Mono} with the list of {@code ResponseEntity}s
+		 */
+		<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass);
+
+		/**
+		 * Return the response as a delayed list of {@code ResponseEntity}s. By default, if the
+		 * response has status code 4xx or 5xx, the {@code Mono} will contain a
+		 * {@link WebClientException}. This can be overridden with
+		 * {@link #onStatus(Predicate, Function)}.
+		 * @param elementTypeRef the expected response body list element reference type
+		 * @param <T> the type of elements in the list
+		 * @return {@code Mono} with the list of {@code ResponseEntity}s
+		 */
+		<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
 
 	}
 

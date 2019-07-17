@@ -39,6 +39,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -528,6 +529,32 @@ class DefaultWebClient implements WebClient {
 			return result.checkpoint(description);
 		}
 
+		@Override
+		public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass) {
+			return this.responseMono.flatMap(response ->
+					WebClientUtils.toEntity(response, handleBodyMono(response, response.bodyToMono(bodyClass))));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
+			return this.responseMono.flatMap(response ->
+					WebClientUtils.toEntity(response,
+							handleBodyMono(response, response.bodyToMono(bodyTypeReference))));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass) {
+			return this.responseMono.flatMap(response ->
+					WebClientUtils.toEntityList(response,
+							handleBodyFlux(response, response.bodyToFlux(elementClass))));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
+			return this.responseMono.flatMap(response ->
+					WebClientUtils.toEntityList(response,
+							handleBodyFlux(response, response.bodyToFlux(elementTypeRef))));
+		}
 
 		private static class StatusHandler {
 
