@@ -44,7 +44,7 @@ ext {
 	rxjava2Version       = "2.2.10"
 	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
-	tomcatVersion        = "9.0.21"
+	tomcatVersion        = "9.0.22"
 	undertowVersion      = "2.0.22.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -143,7 +143,7 @@ configure(allprojects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.21"
+		toolVersion = "8.22"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
@@ -156,7 +156,7 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:4.12") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		testCompile("org.mockito:mockito-core:2.27.0") {
+		testCompile("org.mockito:mockito-core:2.28.2") {
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 		testCompile("com.nhaarman:mockito-kotlin:1.6.0") {
