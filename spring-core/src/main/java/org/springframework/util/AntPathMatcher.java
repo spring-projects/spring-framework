@@ -168,7 +168,7 @@ public class AntPathMatcher implements PathMatcher {
 
 
 	@Override
-	public boolean isPattern(String path) {
+	public boolean isPattern(@Nullable String path) {
 		if (path == null) {
 			return false;
 		}
@@ -207,10 +207,10 @@ public class AntPathMatcher implements PathMatcher {
 	 * as far as the given base path goes is sufficient)
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch,
+	protected boolean doMatch(String pattern, @Nullable String path, boolean fullMatch,
 			@Nullable Map<String, String> uriTemplateVariables) {
 
-		if ((path == null) || (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator))) {
+		if (path == null || path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
 
@@ -220,7 +220,6 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		String[] pathDirs = tokenizePath(path);
-
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
 		int pathIdxStart = 0;

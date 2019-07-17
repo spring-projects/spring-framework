@@ -438,7 +438,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return builder.toString();
 	}
 
-	private void writeMultipart(MultiValueMap<String, Object> parts, MediaType contentType, HttpOutputMessage outputMessage)
+	private void writeMultipart(
+			MultiValueMap<String, Object> parts, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException {
 
 		// If the supplied content type is null, fall back to multipart/form-data.

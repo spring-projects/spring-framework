@@ -35,6 +35,7 @@ import org.springframework.util.RouteMatcher;
  */
 class DefaultClientResponderFactory implements ClientResponderFactory, ClientResponderFactory.Config {
 
+	@Nullable
 	private List<Object> handlers;
 
 	@Nullable
@@ -52,9 +53,10 @@ class DefaultClientResponderFactory implements ClientResponderFactory, ClientRes
 	@Nullable
 	private ArgumentResolverConfigurer argumentResolverConfigurer;
 
+
 	@Override
 	public ClientResponderFactory handlers(Object... handlers) {
-		Assert.notEmpty(handlers, "handlers should not be empty");
+		Assert.notEmpty(handlers, "Handlers array must not be empty");
 		this.handlers = Arrays.asList(handlers);
 		return this;
 	}
@@ -89,9 +91,10 @@ class DefaultClientResponderFactory implements ClientResponderFactory, ClientRes
 		return this;
 	}
 
+
 	@Override
 	public void accept(RSocketFactory.ClientRSocketFactory clientRSocketFactory) {
-		Assert.notEmpty(this.handlers, "handlers should not be empty");
+		Assert.state(this.handlers != null, "No handlers set");
 		RSocketMessageHandler messageHandler = new RSocketMessageHandler();
 		messageHandler.setHandlers(this.handlers);
 		if (this.strategies != null) {

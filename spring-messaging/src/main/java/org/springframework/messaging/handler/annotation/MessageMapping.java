@@ -23,7 +23,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.messaging.Message;
-import org.springframework.messaging.simp.annotation.SendToUser;
 
 /**
  * Annotation for mapping a {@link Message} onto a message-handling method by
@@ -65,11 +64,11 @@ import org.springframework.messaging.simp.annotation.SendToUser;
  * authenticated user.</li>
  * </ul>
  *
- * <p>How the return value is handled depends on the processing scenario.
- * For STOMP over WebSocket, it is turned into a message and sent to a default
- * response destination or to a custom destination specified with an
- * {@link SendTo @SendTo} or {@link SendToUser @SendToUser} annotation.
- * For RSocket, the response is used to reply to the stream request.
+ * <p>How the return value is handled depends on the processing scenario. For
+ * STOMP over WebSocket, it is turned into a message and sent to a default response
+ * destination or to a custom destination specified with an {@link SendTo @SendTo}
+ * or {@link org.springframework.messaging.simp.annotation.SendToUser @SendToUser}
+ * annotation. For RSocket, the response is used to reply to the stream request.
  *
  * <p>Specializations of this annotation including
  * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping} or

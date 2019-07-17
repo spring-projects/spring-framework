@@ -144,6 +144,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * See {@link ScriptTemplateConfigurer#setEngineSupplier(Supplier)} documentation.
+	 * @since 5.2
 	 */
 	public void setEngineSupplier(Supplier<ScriptEngine> engineSupplier) {
 		this.engineSupplier = engineSupplier;
@@ -286,9 +287,8 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				engines = new HashMap<>(4);
 				enginesHolder.set(engines);
 			}
-			String name = (this.engineName != null ? this.engineName : this.engineSupplier.getClass().getSimpleName());
-			Object engineKey = (!ObjectUtils.isEmpty(this.scripts) ?
-					new EngineKey(name, this.scripts) : name);
+			String name = (this.engineName != null ? this.engineName : "");
+			Object engineKey = (!ObjectUtils.isEmpty(this.scripts) ? new EngineKey(name, this.scripts) : name);
 			ScriptEngine engine = engines.get(engineKey);
 			if (engine == null) {
 				if (this.engineName != null) {
@@ -308,18 +308,22 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
-	protected ScriptEngine createEngineFromName(@Nullable String engineName) {
-		if (this.scriptEngineManager == null) {
-			this.scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
+	protected ScriptEngine createEngineFromName(String engineName) {
+		ScriptEngineManager scriptEngineManager = this.scriptEngineManager;
+		if (scriptEngineManager == null) {
+			scriptEngineManager = new ScriptEngineManager(obtainApplicationContext().getClassLoader());
+			this.scriptEngineManager = scriptEngineManager;
 		}
-		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(this.scriptEngineManager, engineName);
+
+		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(scriptEngineManager, engineName);
 		loadScripts(engine);
 		return engine;
 	}
 
 	private ScriptEngine createEngineFromSupplier() {
+		Assert.state(this.engineSupplier != null, "No engine supplier available");
 		ScriptEngine engine = this.engineSupplier.get();
-		if (this.renderFunction != null && engine != null) {
+		if (this.renderFunction != null) {
 			Assert.isInstanceOf(Invocable.class, engine,
 					"ScriptEngine must implement Invocable when 'renderFunction' is specified");
 		}

@@ -110,13 +110,13 @@ public class ControllerAdviceBean implements Ordered {
 	public ControllerAdviceBean(String beanName, BeanFactory beanFactory, @Nullable ControllerAdvice controllerAdvice) {
 		Assert.hasText(beanName, "Bean name must contain text");
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
-		Assert.isTrue(beanFactory.containsBean(beanName), () -> "BeanFactory [" + beanFactory
-				+ "] does not contain specified controller advice bean '" + beanName + "'");
+		Assert.isTrue(beanFactory.containsBean(beanName), () -> "BeanFactory [" + beanFactory +
+				"] does not contain specified controller advice bean '" + beanName + "'");
 
 		this.beanOrName = beanName;
 		this.beanType = getBeanType(beanName, beanFactory);
-		this.beanTypePredicate = (controllerAdvice != null ? createBeanTypePredicate(controllerAdvice)
-				: createBeanTypePredicate(this.beanType));
+		this.beanTypePredicate = (controllerAdvice != null ? createBeanTypePredicate(controllerAdvice) :
+				createBeanTypePredicate(this.beanType));
 		this.beanFactory = beanFactory;
 	}
 
@@ -140,8 +140,11 @@ public class ControllerAdviceBean implements Ordered {
 			if (resolvedBean instanceof Ordered) {
 				this.order = ((Ordered) resolvedBean).getOrder();
 			}
+			else if (this.beanType != null) {
+				this.order = OrderUtils.getOrder(this.beanType, Ordered.LOWEST_PRECEDENCE);
+			}
 			else {
-				this.order = OrderUtils.getOrder(getBeanType(), Ordered.LOWEST_PRECEDENCE);
+				this.order = Ordered.LOWEST_PRECEDENCE;
 			}
 		}
 		return this.order;
@@ -236,18 +239,19 @@ public class ControllerAdviceBean implements Ordered {
 		return adviceBeans;
 	}
 
+	@Nullable
 	private static Class<?> getBeanType(String beanName, BeanFactory beanFactory) {
 		Class<?> beanType = beanFactory.getType(beanName);
 		return (beanType != null ? ClassUtils.getUserClass(beanType) : null);
 	}
 
-	private static HandlerTypePredicate createBeanTypePredicate(Class<?> beanType) {
+	private static HandlerTypePredicate createBeanTypePredicate(@Nullable Class<?> beanType) {
 		ControllerAdvice controllerAdvice = (beanType != null ?
 				AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class) : null);
 		return createBeanTypePredicate(controllerAdvice);
 	}
 
-	private static HandlerTypePredicate createBeanTypePredicate(ControllerAdvice controllerAdvice) {
+	private static HandlerTypePredicate createBeanTypePredicate(@Nullable ControllerAdvice controllerAdvice) {
 		if (controllerAdvice != null) {
 			return HandlerTypePredicate.builder()
 					.basePackage(controllerAdvice.basePackages())

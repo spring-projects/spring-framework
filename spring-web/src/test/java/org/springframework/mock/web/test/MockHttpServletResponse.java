@@ -231,11 +231,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @since 5.2
 	 * @see #getContentAsString()
 	 */
-
 	public String getContentAsString(Charset fallbackCharset) throws UnsupportedEncodingException {
-		return isCharset() ?
+		return (isCharset() && this.characterEncoding != null ?
 				this.content.toString(this.characterEncoding) :
-				this.content.toString(fallbackCharset.name());
+				this.content.toString(fallbackCharset.name()));
 	}
 
 	@Override
