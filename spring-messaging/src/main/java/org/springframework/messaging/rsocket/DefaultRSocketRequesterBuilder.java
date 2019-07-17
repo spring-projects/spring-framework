@@ -18,7 +18,6 @@ package org.springframework.messaging.rsocket;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -31,7 +30,6 @@ import io.rsocket.transport.netty.client.WebsocketClientTransport;
 import reactor.core.publisher.Mono;
 
 import org.springframework.lang.Nullable;
-import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -56,7 +54,6 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	private List<Consumer<RSocketStrategies.Builder>> strategiesConfigurers = new ArrayList<>();
 
-	private List<Object> handlers = new ArrayList<>();
 
 	@Override
 	public RSocketRequester.Builder dataMimeType(@Nullable MimeType mimeType) {
@@ -80,12 +77,6 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	@Override
 	public RSocketRequester.Builder rsocketStrategies(@Nullable RSocketStrategies strategies) {
 		this.strategies = strategies;
-		return this;
-	}
-
-	@Override
-	public RSocketRequester.Builder annotatedHandlers(Object... handlers) {
-		this.handlers.addAll(Arrays.asList(handlers));
 		return this;
 	}
 
@@ -120,13 +111,6 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		rsocketFactory.dataMimeType(dataMimeType.toString());
 		rsocketFactory.metadataMimeType(this.metadataMimeType.toString());
 
-		if (!this.handlers.isEmpty()) {
-			RSocketMessageHandler messageHandler = new RSocketMessageHandler();
-			messageHandler.setHandlers(this.handlers);
-			messageHandler.setRSocketStrategies(rsocketStrategies);
-			messageHandler.afterPropertiesSet();
-			rsocketFactory.acceptor(messageHandler.clientResponder());
-		}
 		rsocketFactory.frameDecoder(PayloadDecoder.ZERO_COPY);
 		this.factoryConfigurers.forEach(consumer -> consumer.accept(rsocketFactory));
 
