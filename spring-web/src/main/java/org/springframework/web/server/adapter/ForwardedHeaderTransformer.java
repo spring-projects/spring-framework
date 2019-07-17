@@ -96,7 +96,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 				builder.uri(uri);
 				String prefix = getForwardedPrefix(request);
 				if (prefix != null) {
-					builder.path(prefix + uri.getPath());
+					builder.path(prefix + uri.getRawPath());
 					builder.contextPath(prefix);
 				}
 			}
