@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ public final class MockMvc {
 			request = ((SmartRequestBuilder) requestBuilder).postProcessRequest(request);
 		}
 
-		final MvcResult mvcResult = new DefaultMvcResult(request, mockResponse);
+		MvcResult mvcResult = new DefaultMvcResult(request, mockResponse);
 		request.setAttribute(MVC_RESULT_ATTRIBUTE, mvcResult);
 
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();

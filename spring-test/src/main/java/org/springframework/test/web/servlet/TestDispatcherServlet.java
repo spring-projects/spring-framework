@@ -91,7 +91,7 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		}
 	}
 
-	private void registerAsyncResultInterceptors(final HttpServletRequest request) {
+	private void registerAsyncResultInterceptors(HttpServletRequest request) {
 
 		WebAsyncUtils.getAsyncManager(request).registerCallableInterceptor(KEY,
 				new CallableProcessingInterceptor() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -546,7 +546,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		private final PlaceholderResolver resolver;
 
-		public StaticStringValueResolver(final Map<String, String> values) {
+		public StaticStringValueResolver(Map<String, String> values) {
 			this.helper = new PropertyPlaceholderHelper("${", "}", ":", false);
 			this.resolver = values::get;
 		}
