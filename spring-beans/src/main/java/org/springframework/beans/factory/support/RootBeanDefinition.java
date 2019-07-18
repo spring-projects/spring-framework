@@ -74,6 +74,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	volatile Class<?> resolvedTargetType;
 
+	/** Package-visible field for caching if the bean is a factory bean. */
+	@Nullable
+	volatile Boolean isFactoryBean;
+
 	/** Package-visible field for caching the return type of a generically typed factory method. */
 	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
