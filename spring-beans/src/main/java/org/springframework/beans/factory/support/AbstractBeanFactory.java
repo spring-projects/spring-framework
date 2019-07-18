@@ -1333,6 +1333,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				ObjectUtils.nullSafeEquals(mbd.getFactoryMethodName(), previous.getFactoryMethodName()) &&
 				(mbd.targetType == null || mbd.targetType.equals(previous.targetType))) {
 			mbd.targetType = previous.targetType;
+			mbd.isFactoryBean = previous.isFactoryBean;
 			mbd.resolvedTargetType = previous.resolvedTargetType;
 			mbd.factoryMethodReturnType = previous.factoryMethodReturnType;
 			mbd.factoryMethodToIntrospect = previous.factoryMethodToIntrospect;
@@ -1541,8 +1542,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the corresponding bean definition
 	 */
 	protected boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
-		Class<?> beanType = predictBeanType(beanName, mbd, FactoryBean.class);
-		return (beanType != null && FactoryBean.class.isAssignableFrom(beanType));
+		Boolean result = mbd.isFactoryBean;
+		if (result == null) {
+			Class<?> beanType = predictBeanType(beanName, mbd, FactoryBean.class);
+			result = beanType != null && FactoryBean.class.isAssignableFrom(beanType);
+			mbd.isFactoryBean = result;
+		}
+		return result;
 	}
 
 	/**
