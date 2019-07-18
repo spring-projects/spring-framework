@@ -742,6 +742,7 @@ public interface WebClient {
 		 * @param bodyClass the expected response body type
 		 * @param <T> response body type
 		 * @return {@code Mono} with the {@code ResponseEntity}
+		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass);
 
@@ -752,6 +753,7 @@ public interface WebClient {
 		 * @param bodyTypeReference a type reference describing the expected response body type
 		 * @param <T> response body type
 		 * @return {@code Mono} with the {@code ResponseEntity}
+		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference);
 
@@ -763,6 +765,7 @@ public interface WebClient {
 		 * @param elementClass the expected response body list element class
 		 * @param <T> the type of elements in the list
 		 * @return {@code Mono} with the list of {@code ResponseEntity}s
+		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass);
 
@@ -774,6 +777,7 @@ public interface WebClient {
 		 * @param elementTypeRef the expected response body list element reference type
 		 * @param <T> the type of elements in the list
 		 * @return {@code Mono} with the list of {@code ResponseEntity}s
+		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
 
