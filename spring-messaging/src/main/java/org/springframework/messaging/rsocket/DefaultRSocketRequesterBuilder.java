@@ -47,12 +47,12 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	private MimeType metadataMimeType = DefaultRSocketRequester.COMPOSITE_METADATA;
 
-	private List<Consumer<RSocketFactory.ClientRSocketFactory>> factoryConfigurers = new ArrayList<>();
-
 	@Nullable
 	private RSocketStrategies strategies;
 
 	private List<Consumer<RSocketStrategies.Builder>> strategiesConfigurers = new ArrayList<>();
+
+	private List<ClientRSocketFactoryConfigurer> rsocketFactoryConfigurers = new ArrayList<>();
 
 
 	@Override
@@ -69,12 +69,6 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	}
 
 	@Override
-	public RSocketRequester.Builder rsocketFactory(Consumer<RSocketFactory.ClientRSocketFactory> configurer) {
-		this.factoryConfigurers.add(configurer);
-		return this;
-	}
-
-	@Override
 	public RSocketRequester.Builder rsocketStrategies(@Nullable RSocketStrategies strategies) {
 		this.strategies = strategies;
 		return this;
@@ -83,6 +77,12 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	@Override
 	public RSocketRequester.Builder rsocketStrategies(Consumer<RSocketStrategies.Builder> configurer) {
 		this.strategiesConfigurers.add(configurer);
+		return this;
+	}
+
+	@Override
+	public RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer) {
+		this.rsocketFactoryConfigurers.add(configurer);
 		return this;
 	}
 
@@ -110,9 +110,12 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		MimeType dataMimeType = getDataMimeType(rsocketStrategies);
 		rsocketFactory.dataMimeType(dataMimeType.toString());
 		rsocketFactory.metadataMimeType(this.metadataMimeType.toString());
-
 		rsocketFactory.frameDecoder(PayloadDecoder.ZERO_COPY);
-		this.factoryConfigurers.forEach(consumer -> consumer.accept(rsocketFactory));
+
+		this.rsocketFactoryConfigurers.forEach(configurer -> {
+			configurer.configureWithStrategies(rsocketStrategies);
+			configurer.configure(rsocketFactory);
+		});
 
 		return rsocketFactory.transport(transport)
 				.start()

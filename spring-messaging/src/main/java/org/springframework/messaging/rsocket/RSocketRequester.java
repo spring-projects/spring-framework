@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
-import io.rsocket.RSocketFactory;
 import io.rsocket.transport.ClientTransport;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -30,6 +29,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
+import org.springframework.messaging.rsocket.annotation.support.AnnotationClientResponderConfigurer;
 import org.springframework.util.MimeType;
 
 /**
@@ -142,18 +142,6 @@ public interface RSocketRequester {
 		RSocketRequester.Builder metadataMimeType(MimeType mimeType);
 
 		/**
-		 * Configure the {@code ClientRSocketFactory}.
-		 * <p><strong>Note:</strong> This builder provides shortcuts for certain
-		 * {@code ClientRSocketFactory} options it needs to know about such as
-		 * {@link #dataMimeType(MimeType)} and {@link #metadataMimeType(MimeType)}.
-		 * Please, use these shortcuts vs configuring them directly on the
-		 * {@code ClientRSocketFactory} so that the resulting
-		 * {@code RSocketRequester} is aware of those changes.
-		 * @param configurer consumer to customize the factory
-		 */
-		RSocketRequester.Builder rsocketFactory(Consumer<RSocketFactory.ClientRSocketFactory> configurer);
-
-		/**
 		 * Set the {@link RSocketStrategies} to use for access to encoders,
 		 * decoders, and a factory for {@code DataBuffer's}.
 		 * @param strategies the codecs strategies to use
@@ -168,6 +156,20 @@ public interface RSocketRequester {
 		 * @param configurer the configurer to apply
 		 */
 		RSocketRequester.Builder rsocketStrategies(Consumer<RSocketStrategies.Builder> configurer);
+
+		/**
+		 * Callback to configure the {@code ClientRSocketFactory} directly.
+		 * <p>See {@link AnnotationClientResponderConfigurer} for configuring a
+		 * client side responder.
+		 * <p><strong>Note:</strong> Do not set {@link #dataMimeType(MimeType)}
+		 * and {@link #metadataMimeType(MimeType)} directly on the
+		 * {@code ClientRSocketFactory}. Use the shortcuts on this builder
+		 * instead since the created {@code RSocketRequester} needs to be aware
+		 * of those settings.
+		 * @param configurer consumer to customize the factory
+		 * @see AnnotationClientResponderConfigurer
+		 */
+		RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer);
 
 		/**
 		 * Connect to the RSocket server over TCP.

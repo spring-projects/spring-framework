@@ -63,7 +63,7 @@ public class DefaultRSocketRequesterBuilderTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void shouldApplyCustomizationsAtSubscription() {
-		Consumer<RSocketFactory.ClientRSocketFactory> factoryConfigurer = mock(Consumer.class);
+		ClientRSocketFactoryConfigurer factoryConfigurer = mock(ClientRSocketFactoryConfigurer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
 				.rsocketFactory(factoryConfigurer)
@@ -79,7 +79,7 @@ public class DefaultRSocketRequesterBuilderTests {
 				.encoder(CharSequenceEncoder.allMimeTypes())
 				.decoder(StringDecoder.allMimeTypes())
 				.build();
-		Consumer<RSocketFactory.ClientRSocketFactory> factoryConfigurer = mock(Consumer.class);
+		ClientRSocketFactoryConfigurer factoryConfigurer = mock(ClientRSocketFactoryConfigurer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
 				.rsocketStrategies(strategies)
@@ -88,7 +88,8 @@ public class DefaultRSocketRequesterBuilderTests {
 				.connect(this.transport)
 				.block();
 		verify(this.transport).connect(anyInt());
-		verify(factoryConfigurer).accept(any(RSocketFactory.ClientRSocketFactory.class));
+		verify(factoryConfigurer).configureWithStrategies(any(RSocketStrategies.class));
+		verify(factoryConfigurer).configure(any(RSocketFactory.ClientRSocketFactory.class));
 		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
 	}
 

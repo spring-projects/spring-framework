@@ -42,7 +42,7 @@ import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
-import org.springframework.messaging.rsocket.annotation.support.ClientResponderFactory;
+import org.springframework.messaging.rsocket.annotation.support.AnnotationClientResponderConfigurer;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.stereotype.Controller;
 
@@ -103,22 +103,21 @@ public class RSocketServerToClientIntegrationTests {
 
 		ServerController serverController = context.getBean(ServerController.class);
 		serverController.reset();
-		RSocketStrategies rSocketStrategies = context.getBean(RSocketStrategies.class);
-
-		ClientResponderFactory clientResponder = ClientResponderFactory.create()
-				.strategies(rSocketStrategies)
-				.handlers(new ClientHandler());
+		RSocketStrategies strategies = context.getBean(RSocketStrategies.class);
 
 		RSocketRequester requester = null;
 		try {
+			ClientRSocketFactoryConfigurer responderConfigurer =
+					AnnotationClientResponderConfigurer.withHandlers(new ClientHandler());
+
 			requester = RSocketRequester.builder()
 					.rsocketFactory(factory -> {
 						factory.metadataMimeType("text/plain");
 						factory.setupPayload(ByteBufPayload.create("", connectionRoute));
 						factory.frameDecoder(PayloadDecoder.ZERO_COPY);
 					})
-					.rsocketFactory(clientResponder)
-					.rsocketStrategies(rSocketStrategies)
+					.rsocketFactory(responderConfigurer)
+					.rsocketStrategies(strategies)
 					.connectTcp("localhost", server.address().getPort())
 					.block();
 
