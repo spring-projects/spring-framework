@@ -185,9 +185,6 @@ class ConfigurationClassBeanDefinitionReader {
 			configClass.skippedBeanMethods.add(methodName);
 			return;
 		}
-		if (configClass.skippedBeanMethods.contains(methodName)) {
-			return;
-		}
 
 		AnnotationAttributes bean = AnnotationConfigUtils.attributesFor(metadata, Bean.class);
 		Assert.state(bean != null, "No @Bean annotation attributes");
