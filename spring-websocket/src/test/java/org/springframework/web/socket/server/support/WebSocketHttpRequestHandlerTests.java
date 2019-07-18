@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
@@ -20,7 +21,6 @@ import java.util.Collections;
 import java.util.Map;
 import javax.servlet.ServletException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.server.ServerHttpRequest;
@@ -42,24 +42,17 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link WebSocketHttpRequestHandler}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.1.9
  */
 public class WebSocketHttpRequestHandlerTests {
 
-	private HandshakeHandler handshakeHandler;
+	private final HandshakeHandler handshakeHandler = mock(HandshakeHandler.class);
 
-	private WebSocketHttpRequestHandler requestHandler;
+	private final WebSocketHttpRequestHandler requestHandler = new WebSocketHttpRequestHandler(mock(WebSocketHandler.class), this.handshakeHandler);
 
-	private MockHttpServletResponse response;
-
-
-	@Before
-	public void setUp() {
-		this.handshakeHandler = mock(HandshakeHandler.class);
-		this.requestHandler = new WebSocketHttpRequestHandler(mock(WebSocketHandler.class), this.handshakeHandler);
-		this.response = new MockHttpServletResponse();
-	}
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 
 	@Test
@@ -105,16 +98,8 @@ public class WebSocketHttpRequestHandlerTests {
 
 		private final boolean allowHandshake;
 
-		private Exception exception;
-
-
 		private TestInterceptor(boolean allowHandshake) {
 			this.allowHandshake = allowHandshake;
-		}
-
-
-		public Exception getException() {
-			return this.exception;
 		}
 
 
@@ -131,7 +116,6 @@ public class WebSocketHttpRequestHandlerTests {
 				WebSocketHandler wsHandler, Exception exception) {
 
 			response.getHeaders().add("exceptionHeaderName", "exceptionHeaderValue");
-			this.exception = exception;
 		}
 	}
 

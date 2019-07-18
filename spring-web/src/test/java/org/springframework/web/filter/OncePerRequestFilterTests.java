@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.filter;
 
 import java.io.IOException;
@@ -33,9 +34,9 @@ import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * Unit tests for {@link OncePerRequestFilter}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.1.9
  */
@@ -132,25 +133,8 @@ public class OncePerRequestFilterTests {
 		private boolean didFilterNestedErrorDispatch;
 
 
-		public void setShouldNotFilter(boolean shouldNotFilter) {
-			this.shouldNotFilter = shouldNotFilter;
-		}
-
-		public void setShouldNotFilterAsyncDispatch(boolean shouldNotFilterAsyncDispatch) {
-			this.shouldNotFilterAsyncDispatch = shouldNotFilterAsyncDispatch;
-		}
-
 		public void setShouldNotFilterErrorDispatch(boolean shouldNotFilterErrorDispatch) {
 			this.shouldNotFilterErrorDispatch = shouldNotFilterErrorDispatch;
-		}
-
-
-		public boolean didFilter() {
-			return this.didFilter;
-		}
-
-		public boolean didFilterNestedErrorDispatch() {
-			return this.didFilterNestedErrorDispatch;
 		}
 
 		public void reset() {
