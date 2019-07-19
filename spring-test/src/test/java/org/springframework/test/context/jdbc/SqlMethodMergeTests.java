@@ -16,50 +16,36 @@
 
 package org.springframework.test.context.jdbc;
 
-import java.lang.annotation.Repeatable;
-
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.context.jdbc.Sql.MergeMode.MERGE;
 
 /**
- * This is a copy of {@link TransactionalSqlScriptsTests} that verifies proper
- * handling of {@link Sql @Sql} as a {@link Repeatable} annotation.
+ * Transactional integration tests for {@link Sql @Sql} that verify proper
+ * merging support for class-level and method-level declarations.
  *
+ * @author Dmitry Semukhin
  * @author Sam Brannen
- * @since 4.1
+ * @since 5.2
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@Sql("schema.sql")
-@Sql("data.sql")
+@Sql({ "schema.sql", "data-add-catbert.sql" })
 @DirtiesContext
-public class RepeatableSqlAnnotationSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class SqlMethodMergeTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Test
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test01_classLevelScripts() {
-		assertNumUsers(1);
-	}
-
-	@Test
-	@Sql("drop-schema.sql")
-	@Sql("schema.sql")
-	@Sql("data.sql")
-	@Sql("data-add-dogbert.sql")
-	// test##_ prefix is required for @FixMethodOrder.
-	public void test02_methodLevelScripts() {
+	@Sql(scripts = "data-add-dogbert.sql", mergeMode = MERGE)
+	public void testMerge() {
 		assertNumUsers(2);
 	}
 
 	protected void assertNumUsers(int expected) {
-		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
+		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
 	}
 
 }

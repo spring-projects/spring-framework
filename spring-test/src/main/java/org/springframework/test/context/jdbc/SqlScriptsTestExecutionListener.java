@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -84,6 +84,7 @@ import org.springframework.util.StringUtils;
  * locate these beans.
  *
  * @author Sam Brannen
+ * @author Dmitry Semukhin
  * @since 4.1
  * @see Sql
  * @see SqlConfig
@@ -111,7 +112,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * {@link TestContext} <em>before</em> the current test method.
 	 */
 	@Override
-	public void beforeTestMethod(TestContext testContext) throws Exception {
+	public void beforeTestMethod(TestContext testContext) {
 		executeSqlScripts(testContext, ExecutionPhase.BEFORE_TEST_METHOD);
 	}
 
@@ -120,7 +121,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * {@link TestContext} <em>after</em> the current test method.
 	 */
 	@Override
-	public void afterTestMethod(TestContext testContext) throws Exception {
+	public void afterTestMethod(TestContext testContext) {
 		executeSqlScripts(testContext, ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
@@ -128,14 +129,14 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * Execute SQL scripts configured via {@link Sql @Sql} for the supplied
 	 * {@link TestContext} and {@link ExecutionPhase}.
 	 */
-	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
-		Set<Sql> methodLevelSqls = getScriptsFromElement(testContext.getTestMethod());
+	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) {
+		Set<Sql> methodLevelSqls = getSqlAnnotationsFor(testContext.getTestMethod());
 		List<Sql> methodLevelOverrides = methodLevelSqls.stream()
-							.filter(s -> s.executionPhase() == executionPhase)
-							.filter(s -> s.mergeMode() == Sql.MergeMode.OVERRIDE)
-							.collect(Collectors.toList());
+				.filter(s -> s.executionPhase() == executionPhase)
+				.filter(s -> s.mergeMode() == Sql.MergeMode.OVERRIDE)
+				.collect(Collectors.toList());
 		if (methodLevelOverrides.isEmpty()) {
-			executeScripts(getScriptsFromElement(testContext.getTestClass()), testContext, executionPhase, true);
+			executeScripts(getSqlAnnotationsFor(testContext.getTestClass()), testContext, executionPhase, true);
 			executeScripts(methodLevelSqls, testContext, executionPhase, false);
 		} else {
 			executeScripts(methodLevelOverrides, testContext, executionPhase, false);
@@ -143,20 +144,19 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	}
 
 	/**
-	 * Get SQL scripts configured via {@link Sql @Sql} for the supplied
+	 * Get the {@link Sql @Sql} annotations declared on the supplied
 	 * {@link AnnotatedElement}.
 	 */
-	private Set<Sql> getScriptsFromElement(AnnotatedElement annotatedElement) throws Exception {
+	private Set<Sql> getSqlAnnotationsFor(AnnotatedElement annotatedElement) {
 		return AnnotatedElementUtils.getMergedRepeatableAnnotations(annotatedElement, Sql.class, SqlGroup.class);
 	}
 
 	/**
-	 * Execute given {@link Sql @Sql} scripts.
-	 * {@link AnnotatedElement}.
+	 * Execute SQL scripts for the supplied {@link Sql @Sql} annotations.
 	 */
-	private void executeScripts(Iterable<Sql> scripts, TestContext testContext, ExecutionPhase executionPhase,
-								boolean classLevel)
-			throws Exception {
+	private void executeScripts(
+			Iterable<Sql> scripts, TestContext testContext, ExecutionPhase executionPhase, boolean classLevel) {
+
 		for (Sql sql : scripts) {
 			executeSqlScripts(sql, executionPhase, testContext, classLevel);
 		}
@@ -172,8 +172,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * @param testContext the current {@code TestContext}
 	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the class level
 	 */
-	private void executeSqlScripts(Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel)
-			throws Exception {
+	private void executeSqlScripts(
+			Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel) {
 
 		if (executionPhase != sql.executionPhase()) {
 			return;
@@ -185,8 +185,6 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					mergedSqlConfig, executionPhase, testContext));
 		}
 
-		final ResourceDatabasePopulator populator = configurePopulator(mergedSqlConfig);
-
 		String[] scripts = getScripts(sql, testContext, classLevel);
 		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(), scripts);
 		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
@@ -197,6 +195,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 				scriptResources.add(new ByteArrayResource(stmt.getBytes(), "from inlined SQL statement: " + stmt));
 			}
 		}
+
+		ResourceDatabasePopulator populator = configurePopulator(mergedSqlConfig);
 		populator.setScripts(scriptResources.toArray(new Resource[0]));
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scriptResources));
@@ -237,16 +237,13 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					TransactionDefinition.PROPAGATION_REQUIRED);
 			TransactionAttribute txAttr = TestContextTransactionUtils.createDelegatingTransactionAttribute(
 					testContext, new DefaultTransactionAttribute(propagation));
-			new TransactionTemplate(txMgr, txAttr).execute(status -> {
-				populator.execute(finalDataSource);
-				return null;
-			});
+			new TransactionTemplate(txMgr, txAttr).execute(() -> populator.execute(finalDataSource));
 		}
 	}
 
-	@NotNull
+	@NonNull
 	private ResourceDatabasePopulator configurePopulator(MergedSqlConfig mergedSqlConfig) {
-		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
 		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());
 		populator.setSeparator(mergedSqlConfig.getSeparator());
 		populator.setCommentPrefix(mergedSqlConfig.getCommentPrefix());

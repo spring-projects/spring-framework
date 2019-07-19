@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.core.annotation.AliasFor;
  * database during integration tests.
  *
  * <p>Method-level declarations override class-level declarations by default.
- * This behaviour can be adjusted via {@link MergeMode}
+ * This behavior can be adjusted by setting the {@link #mergeMode}.
  *
  * <p>Script execution is performed by the {@link SqlScriptsTestExecutionListener},
  * which is enabled by default.
@@ -54,6 +54,7 @@ import org.springframework.core.annotation.AliasFor;
  * <em>composed annotations</em> with attribute overrides.
  *
  * @author Sam Brannen
+ * @author Dmitry Semukhin
  * @since 4.1
  * @see SqlConfig
  * @see SqlGroup
@@ -139,6 +140,16 @@ public @interface Sql {
 	ExecutionPhase executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
 	/**
+	 * Indicates whether this {@code @Sql} annotation should be merged with
+	 * class-level {@code @Sql} annotations or override them.
+	 * <p>The merge mode is ignored if declared in a class-level {@code @Sql}
+	 * annotation.
+	 * <p>Defaults to {@link MergeMode#OVERRIDE OVERRIDE} for backwards compatibility.
+	 * @since 5.2
+	 */
+	MergeMode mergeMode() default MergeMode.OVERRIDE;
+
+	/**
 	 * Local configuration for the SQL scripts and statements declared within
 	 * this {@code @Sql} annotation.
 	 * <p>See the class-level javadocs for {@link SqlConfig} for explanations of
@@ -146,13 +157,6 @@ public @interface Sql {
 	 * <p>Defaults to an empty {@link SqlConfig @SqlConfig} instance.
 	 */
 	SqlConfig config() default @SqlConfig;
-
-	/**
-	 * Indicates whether this annotation should be merged with upper-level annotations
-	 * or override them.
-	 * <p>Defaults to {@link MergeMode#OVERRIDE}.
-	 */
-	MergeMode mergeMode() default MergeMode.OVERRIDE;
 
 
 	/**
@@ -174,22 +178,23 @@ public @interface Sql {
 	}
 
 	/**
-	 * Enumeration of <em>modes</em> that dictate whether or not
-	 * declared SQL {@link #scripts} and {@link #statements} are merged
-	 * with the upper-level annotations.
+	 * Enumeration of <em>modes</em> that dictate whether method-level {@code @Sql}
+	 * declarations are merged with class-level {@code @Sql} declarations.
+	 * @since 5.2
 	 */
 	enum MergeMode {
 
 		/**
-		 * Indicates that locally declared SQL {@link #scripts} and {@link #statements}
-		 * should override the upper-level (e.g. Class-level) annotations.
+		 * Indicates that method-level {@code @Sql} declarations should override
+		 * class-level {@code @Sql} declarations.
 		 */
 		OVERRIDE,
 
 		/**
-		 * Indicates that locally declared SQL {@link #scripts} and {@link #statements}
-		 * should be merged the upper-level (e.g. Class-level) annotations.
+		 * Indicates that method-level {@code @Sql} declarations should be merged
+		 * with class-level {@code @Sql} declarations.
 		 */
 		MERGE
 	}
+
 }
