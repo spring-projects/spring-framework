@@ -78,6 +78,7 @@ configure(allprojects) { project ->
 		}
 		imports {
 			mavenBom "org.junit:junit-bom:${junit5Version}"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:${kotlinVersion}"
 		}
 	}
 

@@ -7,8 +7,8 @@ dependencies {
 	optional("javax.inject:javax.inject:1")
 	optional("org.yaml:snakeyaml:1.24")
 	optional("org.codehaus.groovy:groovy-xml:${groovyVersion}")
-	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 }
 

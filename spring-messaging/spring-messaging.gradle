@@ -31,8 +31,8 @@ dependencies {
 	testCompile("org.apache.activemq:activemq-stomp:5.8.0")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
-	testCompile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	testCompile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	testCompile("org.jetbrains.kotlin:kotlin-reflect")
+	testCompile("org.jetbrains.kotlin:kotlin-stdlib")
 	testCompile("org.xmlunit:xmlunit-assertj:2.6.2")
 	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
 	testCompile(project(":spring-core-coroutines"))

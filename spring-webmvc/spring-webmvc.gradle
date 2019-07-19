@@ -40,8 +40,8 @@ dependencies {
 		exclude group: "org.slf4j", module: "jcl-over-slf4j"
 	}
 	optional("org.codehaus.groovy:groovy-templates:${groovyVersion}")
-	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")
 	testCompile("javax.servlet:javax.servlet-api:4.0.1")
 	testCompile("org.eclipse.jetty:jetty-servlet") {
@@ -72,8 +72,8 @@ dependencies {
 	testCompile("io.reactivex:rxjava:${rxjavaVersion}")
 	testCompile("io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}")
 	testCompile("io.reactivex.rxjava2:rxjava:${rxjava2Version}")
-	testCompile("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
-	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable:${kotlinVersion}")
+	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
+	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
 	testRuntime("org.jruby:jruby:9.2.7.0")
 	testRuntime("org.python:jython-standalone:2.7.1")
 	testRuntime("org.webjars:underscorejs:1.8.3")
