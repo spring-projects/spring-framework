@@ -90,6 +90,22 @@ public class ForwardedHeaderTransformerTests {
 		assertForwardedHeadersRemoved(request);
 	}
 
+	@Test // gh-23305
+	public void xForwardedPrefixShouldNotLeadToDecodedPath() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-Prefix", "/prefix");
+		ServerHttpRequest request = MockServerHttpRequest
+				.method(HttpMethod.GET, new URI("https://example.com/a%20b?q=a%2Bb"))
+				.headers(headers)
+				.build();
+
+		request = this.requestMutator.apply(request);
+
+		assertThat(request.getURI()).isEqualTo(new URI("https://example.com/prefix/a%20b?q=a%2Bb"));
+		assertThat(request.getPath().value()).isEqualTo("/prefix/a%20b");
+		assertForwardedHeadersRemoved(request);
+	}
+
 	@Test
 	public void xForwardedPrefixTrailingSlash() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
