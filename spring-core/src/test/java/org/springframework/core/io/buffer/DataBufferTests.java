@@ -236,6 +236,44 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
+	public void toStringNullCharset() {
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					buffer.toString(null));
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@Test
+	public void toStringUtf8() {
+		String spring = "Spring";
+		byte[] bytes = spring.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = createDataBuffer(bytes.length);
+		buffer.write(bytes);
+
+		String result = buffer.toString(StandardCharsets.UTF_8);
+
+		assertThat(result).isEqualTo(spring);
+		release(buffer);
+	}
+
+	@Test
+	public void toStringSection() {
+		String spring = "Spring";
+		byte[] bytes = spring.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = createDataBuffer(bytes.length);
+		buffer.write(bytes);
+
+		String result = buffer.toString(1, 3, StandardCharsets.UTF_8);
+
+		assertThat(result).isEqualTo("pri");
+		release(buffer);
+	}
+
+	@Test
 	public void inputStream() throws IOException {
 		DataBuffer buffer = createDataBuffer(4);
 		buffer.write(new byte[]{'a', 'b', 'c', 'd', 'e'});
