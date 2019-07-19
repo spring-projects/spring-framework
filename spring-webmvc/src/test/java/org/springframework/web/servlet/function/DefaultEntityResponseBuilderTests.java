@@ -81,6 +81,7 @@ public class DefaultEntityResponseBuilderTests {
 				EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 
 		assertThat(result.statusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(result.rawStatusCode()).isEqualTo(201);
 	}
 
 	@Test

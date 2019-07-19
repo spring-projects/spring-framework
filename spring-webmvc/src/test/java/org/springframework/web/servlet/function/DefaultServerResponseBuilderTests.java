@@ -67,6 +67,7 @@ public class DefaultServerResponseBuilderTests {
 	public void status() {
 		ServerResponse response = ServerResponse.status(HttpStatus.CREATED).build();
 		assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(response.rawStatusCode()).isEqualTo(201);
 	}
 
 	@Test

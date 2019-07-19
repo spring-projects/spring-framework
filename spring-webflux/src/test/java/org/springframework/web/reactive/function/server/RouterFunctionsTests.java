@@ -195,6 +195,10 @@ public class RouterFunctionsTests {
 						return HttpStatus.OK;
 					}
 					@Override
+					public int rawStatusCode() {
+						return 200;
+					}
+					@Override
 					public HttpHeaders headers() {
 						return new HttpHeaders();
 					}
@@ -227,6 +231,10 @@ public class RouterFunctionsTests {
 					@Override
 					public HttpStatus statusCode() {
 						return HttpStatus.OK;
+					}
+					@Override
+					public int rawStatusCode() {
+						return 200;
 					}
 					@Override
 					public HttpHeaders headers() {

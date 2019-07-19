@@ -350,6 +350,11 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
+		public int rawStatusCode() {
+			return this.statusCode;
+		}
+
+		@Override
 		public final HttpHeaders headers() {
 			return this.headers;
 		}

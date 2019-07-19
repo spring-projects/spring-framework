@@ -90,7 +90,8 @@ public class DefaultEntityResponseBuilderTests {
 		String body = "foo";
 		Mono<EntityResponse<String>> result = EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 		StepVerifier.create(result)
-				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()))
+				.expectNextMatches(response -> HttpStatus.CREATED.equals(response.statusCode()) &&
+						response.rawStatusCode() == 201)
 				.expectComplete()
 				.verify();
 	}
