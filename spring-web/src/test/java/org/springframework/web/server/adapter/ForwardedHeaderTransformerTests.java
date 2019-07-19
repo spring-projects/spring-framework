@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,10 +90,10 @@ public class ForwardedHeaderTransformerTests {
 		assertForwardedHeadersRemoved(request);
 	}
 
-	@Test
-	public void emptyXForwardedPrefixShouldNotLeadToDecodedPath() throws Exception {
+	@Test // gh-23305
+	public void xForwardedPrefixShouldNotLeadToDecodedPath() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("X-Forwarded-Prefix", "");
+		headers.add("X-Forwarded-Prefix", "/prefix");
 		ServerHttpRequest request = MockServerHttpRequest
 				.method(HttpMethod.GET, new URI("https://example.com/a%20b?q=a%2Bb"))
 				.headers(headers)
@@ -101,8 +101,8 @@ public class ForwardedHeaderTransformerTests {
 
 		request = this.requestMutator.apply(request);
 
-		assertThat(request.getURI()).isEqualTo(new URI("https://example.com/a%20b?q=a%2Bb"));
-		assertThat(request.getPath().value()).isEqualTo("/a%20b");
+		assertEquals(new URI("https://example.com/prefix/a%20b?q=a%2Bb"), request.getURI());
+		assertEquals("/prefix/a%20b", request.getPath().value());
 		assertForwardedHeadersRemoved(request);
 	}
 
