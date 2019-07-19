@@ -1277,45 +1277,46 @@ to serialize only a subset of the object properties, as the following example sh
 [[rest-template-multipart]]
 ===== Multipart
 
-To send multipart data, you need to provide a `MultiValueMap<String, ?>` whose values are
-either `Object` instances that represent part content or `HttpEntity` instances that represent the content and
-headers for a part. `MultipartBodyBuilder` provides a convenient API to prepare a
-multipart request, as the following example shows:
+To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values
+may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for
+part content with headers. For example:
 
 ====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-	MultipartBodyBuilder builder = new MultipartBodyBuilder();
-	builder.part("fieldPart", "fieldValue");
-	builder.part("filePart", new FileSystemResource("...logo.png"));
-	builder.part("jsonPart", new Person("Jason"));
+	MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 
-	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
+	parts.add("fieldPart", "fieldValue");
+	parts.add("filePart", new FileSystemResource("...logo.png"));
+	parts.add("jsonPart", new Person("Jason"));
+
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_XML);
+	parts.add("xmlPart", new HttpEntity<>(myBean, headers));
 ----
 ====
 
 In most cases, you do not have to specify the `Content-Type` for each part. The content
-type is determined automatically based on the `HttpMessageConverter` chosen to serialize it
-or, in the case of a `Resource`, based on the file extension. If necessary, you can
-explicitly provide the `MediaType` to use for each part through one of the overloaded
-builder `part` methods.
+type is determined automatically based on the `HttpMessageConverter` chosen to serialize
+it or, in the case of a `Resource` based on the file extension. If necessary, you can
+explicitly provide the `MediaType` with an `HttpEntity` wrapper.
 
-Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`, as the following example shows:
+Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`, as show below:
 
 ====
 [source,java,intent=0]
 [subs="verbatim,quotes"]
 ----
-	MultipartBodyBuilder builder = ...;
-	template.postForObject("https://example.com/upload", builder.build(), Void.class);
+	MultiValueMap<String, Object> parts = ...;
+	template.postForObject("https://example.com/upload", parts, Void.class);
 ----
 ====
 
-If the `MultiValueMap` contains at least one non-`String` value, which could also be
-represent regular form data (that is, `application/x-www-form-urlencoded`), you need not
-set the `Content-Type` to `multipart/form-data`. This is always the case when you use
-`MultipartBodyBuilder` which ensures an `HttpEntity` wrapper.
+If the `MultiValueMap` contains at least one non-`String` value, the `Content-Type` is set
+to `multipart/form-data` by the `FormHttpMessageConverter`. If the `MultiValueMap` has
+`String` values the `Content-Type` is defaulted to `application/x-www-form-urlencoded`.
+If necessary the `Content-Type` may also be set explicitly.
 
 
 [[rest-async-resttemplate]]
