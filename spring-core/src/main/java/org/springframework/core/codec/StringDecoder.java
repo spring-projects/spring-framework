@@ -16,9 +16,6 @@
 
 package org.springframework.core.codec;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -28,15 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.IntPredicate;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferWrapper;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.core.log.LogFormatUtils;
@@ -264,7 +260,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	}
 
 
-	private static class EndFrameBuffer implements DataBuffer {
+	private static class EndFrameBuffer extends DataBufferWrapper {
 
 		private static final DataBuffer BUFFER = new DefaultDataBufferFactory().wrap(new byte[0]);
 
@@ -272,6 +268,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 
 		public EndFrameBuffer(byte[] delimiter) {
+			super(BUFFER);
 			this.delimiter = delimiter;
 		}
 
@@ -279,150 +276,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 			return this.delimiter;
 		}
 
-		@Override
-		public DataBufferFactory factory() {
-			return BUFFER.factory();
-		}
-
-		@Override
-		public int indexOf(IntPredicate predicate, int fromIndex) {
-			return BUFFER.indexOf(predicate, fromIndex);
-		}
-
-		@Override
-		public int lastIndexOf(IntPredicate predicate, int fromIndex) {
-			return BUFFER.lastIndexOf(predicate, fromIndex);
-		}
-
-		@Override
-		public int readableByteCount() {
-			return BUFFER.readableByteCount();
-		}
-
-		@Override
-		public int writableByteCount() {
-			return BUFFER.writableByteCount();
-		}
-
-		@Override
-		public int capacity() {
-			return BUFFER.capacity();
-		}
-
-		@Override
-		public DataBuffer capacity(int capacity) {
-			return BUFFER.capacity(capacity);
-		}
-
-		@Override
-		public DataBuffer ensureCapacity(int capacity) {
-			return BUFFER.ensureCapacity(capacity);
-		}
-
-		@Override
-		public int readPosition() {
-			return BUFFER.readPosition();
-		}
-
-		@Override
-		public DataBuffer readPosition(int readPosition) {
-			return BUFFER.readPosition(readPosition);
-		}
-
-		@Override
-		public int writePosition() {
-			return BUFFER.writePosition();
-		}
-
-		@Override
-		public DataBuffer writePosition(int writePosition) {
-			return BUFFER.writePosition(writePosition);
-		}
-
-		@Override
-		public byte getByte(int index) {
-			return BUFFER.getByte(index);
-		}
-
-		@Override
-		public byte read() {
-			return BUFFER.read();
-		}
-
-		@Override
-		public DataBuffer read(byte[] destination) {
-			return BUFFER.read(destination);
-		}
-
-		@Override
-		public DataBuffer read(byte[] destination, int offset, int length) {
-			return BUFFER.read(destination, offset, length);
-		}
-
-		@Override
-		public DataBuffer write(byte b) {
-			return BUFFER.write(b);
-		}
-
-		@Override
-		public DataBuffer write(byte[] source) {
-			return BUFFER.write(source);
-		}
-
-		@Override
-		public DataBuffer write(byte[] source, int offset, int length) {
-			return BUFFER.write(source, offset, length);
-		}
-
-		@Override
-		public DataBuffer write(DataBuffer... buffers) {
-			return BUFFER.write(buffers);
-		}
-
-		@Override
-		public DataBuffer write(ByteBuffer... buffers) {
-			return BUFFER.write(buffers);
-		}
-
-		@Override
-		public DataBuffer write(CharSequence charSequence, Charset charset) {
-			return BUFFER.write(charSequence, charset);
-		}
-
-		@Override
-		public DataBuffer slice(int index, int length) {
-			return BUFFER.slice(index, length);
-		}
-
-		@Override
-		public DataBuffer retainedSlice(int index, int length) {
-			return BUFFER.retainedSlice(index, length);
-		}
-
-		@Override
-		public ByteBuffer asByteBuffer() {
-			return BUFFER.asByteBuffer();
-		}
-
-		@Override
-		public ByteBuffer asByteBuffer(int index, int length) {
-			return BUFFER.asByteBuffer(index, length);
-		}
-
-		@Override
-		public InputStream asInputStream() {
-			return BUFFER.asInputStream();
-		}
-
-		@Override
-		public InputStream asInputStream(boolean releaseOnClose) {
-			return BUFFER.asInputStream(releaseOnClose);
-		}
-
-		@Override
-		public OutputStream asOutputStream() {
-			return BUFFER.asOutputStream();
-		}
 	}
 
 
