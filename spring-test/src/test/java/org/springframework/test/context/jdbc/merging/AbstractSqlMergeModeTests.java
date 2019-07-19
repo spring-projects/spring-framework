@@ -14,38 +14,32 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.jdbc;
+package org.springframework.test.context.jdbc.merging;
 
-import org.junit.Test;
+import java.util.List;
 
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.EmptyDatabaseConfig;
+import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.context.jdbc.Sql.MergeMode.MERGE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 /**
- * Transactional integration tests for {@link Sql @Sql} that verify proper
- * merging support for class-level and method-level declarations.
+ * Abstract base class for tests involving {@link SqlMergeMode @SqlMergeMode}.
  *
- * @author Dmitry Semukhin
  * @author Sam Brannen
  * @since 5.2
  */
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@Sql({ "schema.sql", "data-add-catbert.sql" })
-@DirtiesContext
-public class SqlMethodMergeTests extends AbstractTransactionalJUnit4SpringContextTests {
+@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+abstract class AbstractSqlMergeModeTests extends AbstractTransactionalJUnit4SpringContextTests {
 
-	@Test
-	@Sql(scripts = "data-add-dogbert.sql", mergeMode = MERGE)
-	public void testMerge() {
-		assertNumUsers(2);
-	}
-
-	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+	protected void assertUsers(String... expectedUsers) {
+		List<String> actualUsers = super.jdbcTemplate.queryForList("select name from user", String.class);
+		assertThat(actualUsers).containsExactlyInAnyOrder(expectedUsers);
 	}
 
 }

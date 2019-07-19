@@ -31,8 +31,8 @@ import org.springframework.core.annotation.AliasFor;
  * SQL {@link #scripts} and {@link #statements} to be executed against a given
  * database during integration tests.
  *
- * <p>Method-level declarations override class-level declarations by default.
- * This behavior can be adjusted by setting the {@link #mergeMode}.
+ * <p>Method-level declarations override class-level declarations by default,
+ * but this behavior can be configured via {@link SqlMergeMode @SqlMergeMode}.
  *
  * <p>Script execution is performed by the {@link SqlScriptsTestExecutionListener},
  * which is enabled by default.
@@ -54,9 +54,9 @@ import org.springframework.core.annotation.AliasFor;
  * <em>composed annotations</em> with attribute overrides.
  *
  * @author Sam Brannen
- * @author Dmitry Semukhin
  * @since 4.1
  * @see SqlConfig
+ * @see SqlMergeMode
  * @see SqlGroup
  * @see SqlScriptsTestExecutionListener
  * @see org.springframework.transaction.annotation.Transactional
@@ -140,16 +140,6 @@ public @interface Sql {
 	ExecutionPhase executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
 	/**
-	 * Indicates whether this {@code @Sql} annotation should be merged with
-	 * class-level {@code @Sql} annotations or override them.
-	 * <p>The merge mode is ignored if declared in a class-level {@code @Sql}
-	 * annotation.
-	 * <p>Defaults to {@link MergeMode#OVERRIDE OVERRIDE} for backwards compatibility.
-	 * @since 5.2
-	 */
-	MergeMode mergeMode() default MergeMode.OVERRIDE;
-
-	/**
 	 * Local configuration for the SQL scripts and statements declared within
 	 * this {@code @Sql} annotation.
 	 * <p>See the class-level javadocs for {@link SqlConfig} for explanations of
@@ -175,26 +165,6 @@ public @interface Sql {
 		 * <em>after</em> the corresponding test method.
 		 */
 		AFTER_TEST_METHOD
-	}
-
-	/**
-	 * Enumeration of <em>modes</em> that dictate whether method-level {@code @Sql}
-	 * declarations are merged with class-level {@code @Sql} declarations.
-	 * @since 5.2
-	 */
-	enum MergeMode {
-
-		/**
-		 * Indicates that method-level {@code @Sql} declarations should override
-		 * class-level {@code @Sql} declarations.
-		 */
-		OVERRIDE,
-
-		/**
-		 * Indicates that method-level {@code @Sql} declarations should be merged
-		 * with class-level {@code @Sql} declarations.
-		 */
-		MERGE
 	}
 
 }
