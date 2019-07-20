@@ -463,12 +463,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public String[] getBeanNamesForType(ResolvableType type) {
+		return getBeanNamesForType(type, true, true);
+	}
+
+	@Override
+	public String[] getBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
 		Class<?> resolved = type.resolve();
 		if (resolved != null && !type.hasGenerics()) {
-			return getBeanNamesForType(resolved, true, true);
+			return getBeanNamesForType(resolved, includeNonSingletons, includeNonSingletons);
 		}
 		else {
-			return doGetBeanNamesForType(type, true, true);
+			return doGetBeanNamesForType(type, includeNonSingletons, includeNonSingletons);
 		}
 	}
 
