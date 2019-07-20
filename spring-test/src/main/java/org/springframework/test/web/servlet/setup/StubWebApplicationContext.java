@@ -252,6 +252,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
+	public String[] getBeanNamesForType(@Nullable ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
+		return this.beanFactory.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+	}
+
+	@Override
 	public String[] getBeanNamesForType(@Nullable Class<?> type) {
 		return this.beanFactory.getBeanNamesForType(type);
 	}

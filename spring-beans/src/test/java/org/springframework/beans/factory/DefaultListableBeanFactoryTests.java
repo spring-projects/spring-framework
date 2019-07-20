@@ -1751,6 +1751,8 @@ public class DefaultListableBeanFactoryTests {
 		assertThat(lbf.getBeanNamesForType(ConstructorDependencyFactoryBean.class).length).isEqualTo(1);
 		assertThat(lbf.getBeanNamesForType(ResolvableType.forClassWithGenerics(FactoryBean.class, Object.class)).length).isEqualTo(1);
 		assertThat(lbf.getBeanNamesForType(ResolvableType.forClassWithGenerics(FactoryBean.class, String.class)).length).isEqualTo(0);
+		assertThat(lbf.getBeanNamesForType(ResolvableType.forClassWithGenerics(FactoryBean.class, Object.class), true, true).length).isEqualTo(1);
+		assertThat(lbf.getBeanNamesForType(ResolvableType.forClassWithGenerics(FactoryBean.class, String.class), true, true).length).isEqualTo(0);
 	}
 
 	private RootBeanDefinition createConstructorDependencyBeanDefinition(int age) {
