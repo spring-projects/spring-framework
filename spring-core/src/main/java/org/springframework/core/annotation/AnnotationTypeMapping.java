@@ -48,6 +48,10 @@ import org.springframework.util.StringUtils;
  */
 final class AnnotationTypeMapping {
 
+
+	private static final MirrorSet[] EMPTY_MIRROR_SETS = new MirrorSet[0];
+
+
 	@Nullable
 	private final AnnotationTypeMapping source;
 
@@ -550,7 +554,7 @@ final class AnnotationTypeMapping {
 
 		MirrorSets() {
 			this.assigned = new MirrorSet[attributes.size()];
-			this.mirrorSets = new MirrorSet[0];
+			this.mirrorSets = EMPTY_MIRROR_SETS;
 		}
 
 		void updateFrom(Collection<Method> aliases) {
@@ -575,7 +579,7 @@ final class AnnotationTypeMapping {
 				mirrorSet.update();
 				Set<MirrorSet> unique = new LinkedHashSet<>(Arrays.asList(this.assigned));
 				unique.remove(null);
-				this.mirrorSets = unique.toArray(new MirrorSet[0]);
+				this.mirrorSets = unique.toArray(EMPTY_MIRROR_SETS);
 			}
 		}
 
