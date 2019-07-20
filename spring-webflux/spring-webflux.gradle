@@ -40,7 +40,7 @@ dependencies {
 	}
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
-	optional("com.google.protobuf:protobuf-java-util:3.7.1")
+	optional("com.google.protobuf:protobuf-java-util:3.9.0")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${coroutinesVersion}")
 	testCompile("javax.xml.bind:jaxb-api:2.3.1")
