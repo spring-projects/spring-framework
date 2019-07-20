@@ -29,6 +29,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
@@ -456,6 +457,16 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		Class<?> resolvedClass = ClassUtils.forName(className, classLoader);
 		this.beanClass = resolvedClass;
 		return resolvedClass;
+	}
+
+	/**
+	 * Return a resolvable type for this bean definition.
+	 * <p>This implementation delegates to {@link #getBeanClass()}.
+	 * @since 5.2
+	 */
+	@Override
+	public ResolvableType getResolvableType() {
+		return (hasBeanClass() ? ResolvableType.forClass(getBeanClass()) : ResolvableType.NONE);
 	}
 
 	/**

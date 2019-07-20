@@ -52,6 +52,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -272,6 +273,18 @@ public class ConfigurationClassProcessingTests {
 		assertThat(ctx.getBean(TestBean.class).getSpouse()).isSameAs(ctx.getBean("spouse"));
 		assertThat(ctx.getBean(NestedTestBean.class).getCompany()).isEqualTo("functional");
 	}
+
+	@Test
+	public void configurationWithApplicationListener() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithApplicationListener.class);
+		ctx.refresh();
+		ConfigWithApplicationListener config = ctx.getBean(ConfigWithApplicationListener.class);
+		assertThat(config.closed).isFalse();
+		ctx.close();
+		assertThat(config.closed).isTrue();
+	}
+
 
 
 	/**
@@ -564,6 +577,18 @@ public class ConfigurationClassProcessingTests {
 		@Bean
 		public NestedTestBean nestedTestBean(TestBean testBean) {
 			return new NestedTestBean(testBean.getSpouse().getName());
+		}
+	}
+
+
+	@Configuration
+	static class ConfigWithApplicationListener {
+
+		boolean closed = false;
+
+		@Bean
+		public ApplicationListener<ContextClosedEvent> listener() {
+			return (event -> this.closed = true);
 		}
 	}
 
