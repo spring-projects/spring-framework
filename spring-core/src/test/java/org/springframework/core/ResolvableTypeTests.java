@@ -147,28 +147,28 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
-	public void forInstanceMustNotBeNull() {
+	public void forInstanceMustNotBeNull() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ResolvableType.forInstance(null))
 			.withMessageContaining("Instance must not be null");
 	}
 
 	@Test
-	public void forInstanceNoProvider() {
+	public void forInstanceNoProvider() throws Exception {
 		ResolvableType type = ResolvableType.forInstance(new Object());
 		assertThat(type.getType()).isEqualTo(Object.class);
 		assertThat(type.resolve()).isEqualTo(Object.class);
 	}
 
 	@Test
-	public void forInstanceProvider() {
+	public void forInstanceProvider() throws Exception {
 		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<>(String.class));
 		assertThat(type.getRawClass()).isEqualTo(MyGenericInterfaceType.class);
 		assertThat(type.getGeneric().resolve()).isEqualTo(String.class);
 	}
 
 	@Test
-	public void forInstanceProviderNull() {
+	public void forInstanceProviderNull() throws Exception {
 		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(null));
 		assertThat(type.getType()).isEqualTo(MyGenericInterfaceType.class);
 		assertThat(type.resolve()).isEqualTo(MyGenericInterfaceType.class);
@@ -1348,6 +1348,7 @@ public class ResolvableTypeTests {
 		return new ResolvableTypeAssert(type);
 	}
 
+
 	@SuppressWarnings("unused")
 	private HashMap<Integer, List<String>> myMap;
 
@@ -1355,7 +1356,6 @@ public class ResolvableTypeTests {
 	@SuppressWarnings("serial")
 	static class ExtendsList extends ArrayList<CharSequence> {
 	}
-
 
 	@SuppressWarnings("serial")
 	static class ExtendsMap extends HashMap<String, Integer> {
@@ -1615,6 +1615,7 @@ public class ResolvableTypeTests {
 		Set<Integer> set;
 	}
 
+
 	private static class ResolvableTypeAssert extends AbstractAssert<ResolvableTypeAssert, ResolvableType>{
 
 		public ResolvableTypeAssert(ResolvableType actual) {
@@ -1648,7 +1649,6 @@ public class ResolvableTypeTests {
 			}
 			return type.getType() + ":" + type;
 		}
-
 	}
 
 }
