@@ -135,6 +135,18 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
+	public void forRawClassAssignableFromTypeVariable() { // gh-23321
+		ResolvableType typeVariable = ResolvableType.forClass(ExtendsList.class).as(List.class).getGeneric();
+		ResolvableType raw = ResolvableType.forRawClass(CharSequence.class);
+		assertThat(raw.resolve()).isEqualTo(CharSequence.class);
+		assertThat(typeVariable.resolve()).isEqualTo(CharSequence.class);
+		assertThat(raw.resolve().isAssignableFrom(typeVariable.resolve())).isTrue();
+		assertThat(typeVariable.resolve().isAssignableFrom(raw.resolve())).isTrue();
+		assertThat(raw.isAssignableFrom(typeVariable)).isTrue();
+		assertThat(typeVariable.isAssignableFrom(raw)).isTrue();
+	}
+
+	@Test
 	public void forInstanceMustNotBeNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ResolvableType.forInstance(null))

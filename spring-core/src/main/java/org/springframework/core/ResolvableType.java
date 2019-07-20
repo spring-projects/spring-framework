@@ -1013,7 +1013,7 @@ public class ResolvableType implements Serializable {
 			}
 			@Override
 			public boolean isAssignableFrom(ResolvableType other) {
-				Class<?> otherClass = other.getRawClass();
+				Class<?> otherClass = other.resolve();
 				return (otherClass != null && (clazz == null || ClassUtils.isAssignable(clazz, otherClass)));
 			}
 		};
