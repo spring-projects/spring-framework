@@ -38,7 +38,7 @@ public class AspectJCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	}
 
 	@Test
-	public void testKeyStrategy() throws Exception {
+	public void testKeyStrategy() {
 		AnnotationCacheAspect aspect = ctx.getBean(
 				"org.springframework.cache.config.internalCacheAspect", AnnotationCacheAspect.class);
 		assertThat(aspect.getKeyGenerator()).isSameAs(ctx.getBean("keyGenerator"));
