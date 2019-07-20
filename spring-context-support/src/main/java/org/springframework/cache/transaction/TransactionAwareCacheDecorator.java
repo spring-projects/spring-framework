@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Cache decorator which synchronizes its {@link #put}, {@link #evict} and {@link #clear}
- * operations with Spring-managed transactions (through Spring's {@link TransactionSynchronizationManager},
- * performing the actual cache put/evict/clear operation only in the after-commit phase of a
- * successful transaction. If no transaction is active, {@link #put}, {@link #evict} and
+ * Cache decorator which synchronizes its {@link #put}, {@link #evict} and
+ * {@link #clear} operations with Spring-managed transactions (through Spring's
+ * {@link TransactionSynchronizationManager}, performing the actual cache
+ * put/evict/clear operation only in the after-commit phase of a successful
+ * transaction. If no transaction is active, {@link #put}, {@link #evict} and
  * {@link #clear} operations will be performed immediately, as usual.
  *
- * <p>Use of more aggressive operations such as {@link #putIfAbsent} cannot be deferred
- * to the after-commit phase of a running transaction. Use these with care.
+ * <p><b>Note:</b> Use of immediate operations such as {@link #putIfAbsent}
+ * cannot be deferred to the after-commit phase of a running transaction.
+ * Use these with care in a transactional environment.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
@@ -52,6 +54,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 		Assert.notNull(targetCache, "Target Cache must not be null");
 		this.targetCache = targetCache;
 	}
+
 
 	/**
 	 * Return the target Cache that this Cache should delegate to.
@@ -101,7 +104,7 @@ public class TransactionAwareCacheDecorator implements Cache {
 	}
 
 	@Override
-	public ValueWrapper putIfAbsent(final Object key, final Object value) {
+	public ValueWrapper putIfAbsent(Object key, Object value) {
 		return this.targetCache.putIfAbsent(key, value);
 	}
 

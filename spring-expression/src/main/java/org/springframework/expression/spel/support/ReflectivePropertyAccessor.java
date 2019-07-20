@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,6 +330,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
+	 * Get the last read invoker pair.
 	 * @deprecated as of 4.3.15 since it is not used within the framework anymore
 	 */
 	@Deprecated
@@ -385,10 +386,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-				 "get", clazz, mustBeStatic, 0, ANY_TYPES);
+				"get", clazz, mustBeStatic, 0, ANY_TYPES);
 		if (method == null) {
 			method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
-					 "is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
+					"is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
 		}
 		return method;
 	}
@@ -419,19 +420,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Determine whether the given {@code Method} is a candidate for property access
-	 * on an instance of the given target class.
-	 * <p>The default implementation considers any method as a candidate, even for
-	 * non-user-declared properties on the {@link Object} base class.
-	 * @param method the Method to evaluate
-	 * @param targetClass the concrete target class that is being introspected
-	 * @since 4.3.15
-	 */
-	protected boolean isCandidateForProperty(Method method, Class<?> targetClass) {
-		return true;
-	}
-
-	/**
 	 * Return class methods ordered with non-bridge methods appearing higher.
 	 */
 	private Method[] getSortedMethods(Class<?> clazz) {
@@ -447,6 +435,19 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			this.sortedMethodsCache.put(clazz, methods);
 		}
 		return methods;
+	}
+
+	/**
+	 * Determine whether the given {@code Method} is a candidate for property access
+	 * on an instance of the given target class.
+	 * <p>The default implementation considers any method as a candidate, even for
+	 * non-user-declared properties on the {@link Object} base class.
+	 * @param method the Method to evaluate
+	 * @param targetClass the concrete target class that is being introspected
+	 * @since 4.3.15
+	 */
+	protected boolean isCandidateForProperty(Method method, Class<?> targetClass) {
+		return true;
 	}
 
 	/**
