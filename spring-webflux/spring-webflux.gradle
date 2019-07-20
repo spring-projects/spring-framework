@@ -40,7 +40,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 	testCompile("javax.xml.bind:jaxb-api:2.3.0")
 	testCompile("com.fasterxml:aalto-xml:1.0.0")
-	testCompile("org.hibernate:hibernate-validator:6.0.16.Final")
+	testCompile("org.hibernate:hibernate-validator:6.0.17.Final")
 	testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("io.undertow:undertow-core:${undertowVersion}")
