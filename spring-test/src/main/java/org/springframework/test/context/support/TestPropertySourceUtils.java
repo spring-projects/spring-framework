@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -99,9 +100,27 @@ public abstract class TestPropertySourceUtils {
 		return MergedAnnotations
 				.from(testClass, MergedAnnotations.SearchStrategy.EXHAUSTIVE)
 				.stream(TestPropertySource.class)
-				.map(a -> new TestPropertySourceAttributes((Class<?>) a.getSource(),
-						a.synthesize()))
+				.map(TestPropertySourceUtils::makeTestPropertySourceAttribute)
 				.collect(Collectors.toList());
+	}
+
+	private static TestPropertySourceAttributes makeTestPropertySourceAttribute(
+			MergedAnnotation<TestPropertySource> annotation) {
+
+		TestPropertySource testPropertySource = annotation.synthesize();
+		Class<?> rootDeclaringClass = (Class<?>) annotation.getSource();
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format(
+					"Retrieved @TestPropertySource [%s] for declaring class [%s].",
+					testPropertySource, rootDeclaringClass.getName()));
+		}
+
+		TestPropertySourceAttributes attributes = new TestPropertySourceAttributes(
+				rootDeclaringClass, testPropertySource);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved TestPropertySource attributes: " + attributes);
+		}
+		return attributes;
 	}
 
 	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {

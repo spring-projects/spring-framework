@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
  * repeatable} annotation.
  *
  * @author Anatoliy Korovin
+ * @since 5.2
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
