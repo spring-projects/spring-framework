@@ -16,22 +16,15 @@
 
 package org.springframework.test.context.env.repeatable;
 
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * A custom annotation with properties defined by the {@link TestPropertySource}.
+ * Abstract parent class with multiple properties definition for tests.
  *
  * @author Anatoliy Korovin
  * @since 5.2
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@TestPropertySource(properties = "meta = value from meta-annotation")
-public @interface AnnotationWithTestProperty {
+@TestPropertySource(properties = "first = value from parent class")
+@TestPropertySource(properties = "second = value from parent class")
+public abstract class ParentClassWithMultipleTestProperties {
 }

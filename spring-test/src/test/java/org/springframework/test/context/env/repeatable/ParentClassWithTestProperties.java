@@ -18,6 +18,13 @@ package org.springframework.test.context.env.repeatable;
 
 import org.springframework.test.context.TestPropertySource;
 
+
+/**
+ * Base class which declare a property by the {@link TestPropertySource} annotation.
+ *
+ * @author Anatoliy Korovin
+ * @since 5.2
+ */
 @TestPropertySource(properties = "inherited = 12345")
-public class ParentClassWithTestProperties {
+public abstract class ParentClassWithTestProperties {
 }

@@ -25,13 +25,13 @@ import java.lang.annotation.Target;
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * A custom annotation with properties defined by the {@link TestPropertySource}.
+ * A custom annotation which defined properties file in the {@link TestPropertySource}.
  *
  * @author Anatoliy Korovin
  * @since 5.2
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@TestPropertySource(properties = "meta = value from meta-annotation")
-public @interface AnnotationWithTestProperty {
+@TestPropertySource("meta.properties")
+public @interface AnnotationWithTestPropertyInPropertiesFile {
 }
