@@ -26,7 +26,14 @@ import java.lang.annotation.Target;
 
 
 /**
- * Container for repeatable annotation {@link TestPropertySource}
+ * {@code @TestPropertySources} is a container for one or more {@link TestPropertySource}
+ * declarations.
+ *
+ * <p>Note, however, that use of the {@code @TestPropertySources} container is completely
+ * optional since {@code @TestPropertySource} is a {@linkplain java.lang.annotation.Repeatable
+ * repeatable} annotation.
+ *
+ * @author Anatoliy Korovin
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -35,8 +42,9 @@ import java.lang.annotation.Target;
 public @interface TestPropertySources {
 
 	/**
-	 * array of annotation values
-	 * @return value
+	 * An array of one or more {@link TestPropertySource} declarations.
+	 *
+	 * @return array of {@link TestPropertySource} values.
 	 */
 	TestPropertySource[] value();
 }
