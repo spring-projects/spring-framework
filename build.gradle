@@ -17,7 +17,7 @@ plugins {
 }
 
 ext {
-	linkHomepage = "https://projects.spring.io/spring-framework"
+	linkHomepage = "https://spring.io/projects/spring-framework"
 	linkCi = "https://build.spring.io/browse/SPR"
 	linkIssue = "https://github.com/spring-projects/spring-framework/issues"
 	linkScmUrl = "https://github.com/spring-projects/spring-framework"
@@ -178,7 +178,7 @@ configure(allprojects) { project ->
 		"https://docs.oracle.com/javase/8/docs/api/",
 		"https://docs.oracle.com/javaee/7/api/",
 		"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
-		"https://pic.dhe.ibm.com/infocenter/wasinfo/v7r0/topic/com.ibm.websphere.javadoc.doc/web/apidocs/",
+		"https://www.ibm.com/support/knowledgecenter/SS7JFU_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
 		"https://glassfish.java.net/nonav/docs/v3/api/",
 		"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
 		"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",

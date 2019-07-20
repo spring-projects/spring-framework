@@ -105,7 +105,7 @@ dependencies {
 		exclude group: "org.springframework", module: "spring-context"
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-	optional("com.thoughtworks.xstream:xstream:1.4.10") {
+	optional("com.thoughtworks.xstream:xstream:1.4.11.1") {
 		exclude group: "xpp3", module: "xpp3_min"
 		exclude group: "xmlpull", module: "xmlpull"
 	}

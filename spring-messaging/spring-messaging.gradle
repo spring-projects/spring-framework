@@ -18,7 +18,7 @@ dependencies {
 	testCompile("javax.inject:javax.inject-tck:1")
 	testCompile("javax.servlet:javax.servlet-api:4.0.1")
 	testCompile("javax.validation:validation-api:1.1.0.Final")
-	testCompile("com.thoughtworks.xstream:xstream:1.4.10")
+	testCompile("com.thoughtworks.xstream:xstream:1.4.11.1")
 	testCompile("org.apache.activemq:activemq-broker:5.8.0")
 	testCompile("org.apache.activemq:activemq-kahadb-store:5.8.0") {
 		exclude group: "org.springframework", module: "spring-context"
