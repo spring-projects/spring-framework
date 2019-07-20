@@ -59,7 +59,7 @@ dependencies {
 	compile(project(":spring-core"))
 	optional("javax.xml.bind:jaxb-api:2.3.1")
 	optional("javax.activation:javax.activation-api:1.2.0")
-	optional("com.thoughtworks.xstream:xstream:1.4.10") {
+	optional("com.thoughtworks.xstream:xstream:1.4.11.1") {
 		exclude group: "xpp3", module: "xpp3_min"
 		exclude group: "xmlpull", module: "xmlpull"
 	}
