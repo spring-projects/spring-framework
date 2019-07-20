@@ -134,8 +134,8 @@ public class ResolvableTypeTests {
 		assertThat(type.isAssignableFrom(String.class)).isTrue();
 	}
 
-	@Test
-	public void forRawClassAssignableFromTypeVariable() { // gh-23321
+	@Test  // gh-23321
+	public void forRawClassAssignableFromTypeVariable() throws Exception {
 		ResolvableType typeVariable = ResolvableType.forClass(ExtendsList.class).as(List.class).getGeneric();
 		ResolvableType raw = ResolvableType.forRawClass(CharSequence.class);
 		assertThat(raw.resolve()).isEqualTo(CharSequence.class);
@@ -442,12 +442,8 @@ public class ResolvableTypeTests {
 			interfaces.add(interfaceType.toString());
 		}
 		assertThat(interfaces.toString()).isEqualTo(
-				"["
-				+ "java.io.Serializable, "
-				+ "java.lang.Cloneable, "
-				+ "java.util.List<java.lang.CharSequence>, "
-				+ "java.util.RandomAccess"
-				+ "]");
+				"[java.io.Serializable, java.lang.Cloneable, " +
+				"java.util.List<java.lang.CharSequence>, java.util.RandomAccess]");
 	}
 
 	@Test
