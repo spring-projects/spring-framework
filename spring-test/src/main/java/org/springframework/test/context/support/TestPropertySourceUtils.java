@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
@@ -39,12 +42,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptor;
 
 /**
  * Utility methods for working with {@link TestPropertySource @TestPropertySource}
@@ -53,6 +53,7 @@ import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDe
  * <p>Primarily intended for use within the framework.
  *
  * @author Sam Brannen
+ * @author Anatoliy Korovin
  * @since 4.1
  * @see TestPropertySource
  */
@@ -67,47 +68,59 @@ public abstract class TestPropertySourceUtils {
 
 	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
 
-
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
-		Class<TestPropertySource> annotationType = TestPropertySource.class;
-		AnnotationDescriptor<TestPropertySource> descriptor = findAnnotationDescriptor(testClass, annotationType);
-		if (descriptor == null) {
+
+		if (!isPresentTestPropertySourceAnnotation(testClass)) {
 			return new MergedTestPropertySources();
 		}
+		else {
+			return mergeTestPropertySources(testClass);
+		}
+	}
 
-		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(testClass);
+	private static boolean isPresentTestPropertySourceAnnotation(Class<?> testClass) {
+		return MergedAnnotations
+				.from(testClass, MergedAnnotations.SearchStrategy.EXHAUSTIVE)
+				.get(TestPropertySource.class).isPresent();
+	}
+
+	private static MergedTestPropertySources mergeTestPropertySources(Class<?> testClass) {
+
+		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(
+				testClass);
+
 		String[] locations = mergeLocations(attributesList);
 		String[] properties = mergeProperties(attributesList);
+
 		return new MergedTestPropertySources(locations, properties);
 	}
 
 	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
-		List<TestPropertySourceAttributes> attributesList = new ArrayList<>();
-		Class<TestPropertySource> annotationType = TestPropertySource.class;
+		return MergedAnnotations
+				.from(testClass, MergedAnnotations.SearchStrategy.EXHAUSTIVE)
+				.stream(TestPropertySource.class)
+				.map(TestPropertySourceUtils::makeTestPropertySourceAttribute)
+				.collect(Collectors.toList());
+	}
 
-		AnnotationDescriptor<TestPropertySource> descriptor = findAnnotationDescriptor(testClass, annotationType);
-		Assert.notNull(descriptor, String.format(
-				"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-				annotationType.getName(), testClass.getName()));
+	private static TestPropertySourceAttributes makeTestPropertySourceAttribute(
+			MergedAnnotation<TestPropertySource> annotation) {
 
-		while (descriptor != null) {
-			TestPropertySource testPropertySource = descriptor.synthesizeAnnotation();
-			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @TestPropertySource [%s] for declaring class [%s].",
+		TestPropertySource testPropertySource = annotation.synthesize();
+		Class<?> rootDeclaringClass = (Class<?>) annotation.getSource();
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format(
+					"Retrieved @TestPropertySource [%s] for declaring class [%s].",
 					testPropertySource, rootDeclaringClass.getName()));
-			}
-			TestPropertySourceAttributes attributes =
-					new TestPropertySourceAttributes(rootDeclaringClass, testPropertySource);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved TestPropertySource attributes: " + attributes);
-			}
-			attributesList.add(attributes);
-			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
 		}
 
-		return attributesList;
+		TestPropertySourceAttributes attributes = new TestPropertySourceAttributes(
+				rootDeclaringClass, testPropertySource);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved TestPropertySource attributes: " + attributes);
+		}
+		return attributes;
 	}
 
 	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {
