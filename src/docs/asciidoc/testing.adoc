@@ -419,6 +419,7 @@ Spring's testing annotations include the following:
 * <<spring-testing-annotation-aftertransaction>>
 * <<spring-testing-annotation-sql>>
 * <<spring-testing-annotation-sqlconfig>>
+* <<spring-testing-annotation-sqlmergemode>>
 * <<spring-testing-annotation-sqlgroup>>
 
 [[spring-testing-annotation-bootstrapwith]]
@@ -968,8 +969,8 @@ it:
 ----
 <1> Run two scripts for this test.
 
-
 See <<testcontext-executing-sql-declaratively>> for further details.
+
 
 [[spring-testing-annotation-sqlconfig]]
 ===== `@SqlConfig`
@@ -990,6 +991,56 @@ configured with the `@Sql` annotation. The following example shows how to use it
 	}
 ----
 <1> Set the comment prefix and the separator in SQL scripts.
+
+
+[[spring-testing-annotation-sqlmergemode]]
+===== `@SqlMergeMode`
+
+`@SqlMergeMode` is used to annotate a test class or test method to configure whether
+method-level `@Sql` declarations are merged with class-level `@Sql` declarations. If
+`@SqlMergeMode` is not declared on a test class or test method, the `OVERRIDE` merge mode
+will be used by default. With the `OVERRIDE` mode, method-level `@Sql` declarations will
+effectively override class-level `@Sql` declarations.
+
+Note that a method-level `@SqlMergeMode` declaration overrides a class-level declaration.
+
+The following example shows how to use `@SqlMergeMode` at the class level.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	@Sql("/test-schema.sql")
+	@SqlMergeMode(MERGE) <1>
+	class UserTests {
+
+		@Test
+		@Sql("/user-test-data-001.sql")
+		void standardUserProfile {
+			// execute code that relies on test data set 001
+		}
+	}
+----
+<1> Set the `@Sql` merge mode to `MERGE` for all test methods in the class.
+
+The following example shows how to use `@SqlMergeMode` at the method level.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@SpringJUnitConfig(TestConfig.class)
+	@Sql("/test-schema.sql")
+	class UserTests {
+
+		@Test
+		@Sql("/user-test-data-001.sql")
+		@SqlMergeMode(MERGE) <1>
+		void standardUserProfile {
+			// execute code that relies on test data set 001
+		}
+	}
+----
+<1> Set the `@Sql` merge mode to `MERGE` for a specific test method.
 
 
 [[spring-testing-annotation-sqlgroup]]
@@ -1411,6 +1462,7 @@ You can use each of the following as a meta-annotation in conjunction with the
 * `@Rollback`
 * `@Sql`
 * `@SqlConfig`
+* `@SqlMergeMode`
 * `@SqlGroup`
 * `@Repeat` _(only supported on JUnit 4)_
 * `@Timed` _(only supported on JUnit 4)_
@@ -3997,11 +4049,16 @@ various `executeSqlScript(..)` methods for further details.
 In addition to the aforementioned mechanisms for running SQL scripts programmatically,
 you can declaratively configure SQL scripts in the Spring TestContext Framework.
 Specifically, you can declare the `@Sql` annotation on a test class or test method to
-configure the resource paths to SQL scripts that should be run against a given database
-before or after an integration test method. Note that method-level declarations override
-class-level declarations and that support for `@Sql` is provided by the
-`SqlScriptsTestExecutionListener`, which is enabled by default.
+configure individual SQL statements or the resource paths to SQL scripts that should be
+run against a given database before or after an integration test method. Support for
+`@Sql` is provided by the `SqlScriptsTestExecutionListener`, which is enabled by default.
 
+NOTE: Method-level `@Sql` declarations override class-level declarations by default. As
+of Spring Framework 5.2, however, this behavior may be configured per test class or per
+test method via `@SqlMergeMode`. See
+<<testcontext-executing-sql-declaratively-script-merging>> for further details.
+
+[[testcontext-executing-sql-declaratively-script-resources]]
 ====== Path Resource Semantics
 
 Each path is interpreted as a Spring `Resource`. A plain path (for example,
@@ -4034,10 +4091,11 @@ within a JUnit Jupiter based integration test class:
 	}
 ----
 
+[[testcontext-executing-sql-declaratively-script-detection]]
 ====== Default Script Detection
 
-If no SQL scripts are specified, an attempt is made to detect a `default` script,
-depending on where `@Sql` is declared. If a default cannot be detected, an
+If no SQL scripts or statements are specified, an attempt is made to detect a `default`
+script, depending on where `@Sql` is declared. If a default cannot be detected, an
 `IllegalStateException` is thrown.
 
 * Class-level declaration: If the annotated test class is `com.example.MyTest`, the
@@ -4046,6 +4104,7 @@ depending on where `@Sql` is declared. If a default cannot be detected, an
   defined in the class `com.example.MyTest`, the corresponding default script is
   `classpath:com/example/MyTest.testMethod.sql`.
 
+[[testcontext-executing-sql-declaratively-multiple-annotations]]
 ====== Declaring Multiple `@Sql` Sets
 
 If you need to configure multiple sets of SQL scripts for a given test class or test
@@ -4088,6 +4147,7 @@ Java 7.
 	}
 ----
 
+[[testcontext-executing-sql-declaratively-script-execution-phases]]
 ====== Script Execution Phases
 
 By default, SQL scripts are executed before the corresponding test method. However, if
@@ -4117,6 +4177,7 @@ following example shows:
 Note that `ISOLATED` and `AFTER_TEST_METHOD` are statically imported from
 `Sql.TransactionMode` and `Sql.ExecutionPhase`, respectively.
 
+[[testcontext-executing-sql-declaratively-script-configuration]]
 ====== Script Configuration with `@SqlConfig`
 
 You can configure script parsing and error handling by using the `@SqlConfig` annotation.
@@ -4141,8 +4202,6 @@ supported by `ScriptUtils` and `ResourceDatabasePopulator` but are a superset of
 provided by the `<jdbc:initialize-database/>` XML namespace element. See the javadoc of
 individual attributes in {api-spring-framework}/test/context/jdbc/Sql.html[`@Sql`] and
 {api-spring-framework}/test/context/jdbc/SqlConfig.html[`@SqlConfig`] for details.
-
-
 
 [[testcontext-executing-sql-declaratively-tx]]
 *Transaction management for `@Sql`*
@@ -4207,6 +4266,18 @@ run, since any changes made to the database (either within the test method or wi
 `/test-data.sql` script) are automatically rolled back by the
 `TransactionalTestExecutionListener` (see <<testcontext-tx,transaction management>> for
 details).
+
+[[testcontext-executing-sql-declaratively-script-merging]]
+====== Merging and Overriding Configuration with `@SqlMergeMode`
+
+As of Spring Framework 5.2, it is possible to merge method-level `@Sql` declarations with
+class-level declarations. For example, this allows you to provide the configuration for a
+database schema or some common test data once per test class and then provide additional,
+use case specific test data per test method. To enable `@Sql` merging, annotate either
+your test class or test method with `@SqlMergeMode(MERGE)`. To disable merging for a
+specific test method (or specific test subclass), you can switch back to the default mode
+via `@SqlMergeMode(OVERRIDE)`. Consult the <<spring-testing-annotation-sqlmergemode,
+`@SqlMergeMode` annotation documentation section>> for examples and further details.
 
 
 [[testcontext-parallel-test-execution]]
