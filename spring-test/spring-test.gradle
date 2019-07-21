@@ -2,7 +2,6 @@ description = "Spring TestContext Framework"
 
 dependencyManagement {
 	imports {
-		mavenBom "org.junit:junit-bom:${junit5Version}"
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
