@@ -29,7 +29,17 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+/**
+ * Integration tests for support {@link TestPropertySource @TestPropertySource} as a
+ * repeatable annotation.
+ *
+ * Verify a repeatable usage of {@link TestPropertySource} both with a default value of
+ * properties file and with a specified properties file name in the
+ * {@link TestPropertySource} annotation.
+ *
+ * @author Anatoliy Korovin
+ * @since 5.2
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TestPropertySource

@@ -30,7 +30,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-
+/**
+ * Integration tests for support {@link TestPropertySource @TestPropertySource} as a
+ * repeatable annotation.
+ *
+ * Test a property definition by the using of {@link TestPropertySource} both in the
+ * parent class and locally.
+ *
+ * @author Anatoliy Korovin
+ * @since 5.2
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TestPropertySource(properties = "key = 051187")

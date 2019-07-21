@@ -30,6 +30,17 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Integration tests for support {@link TestPropertySource @TestPropertySource} as a
+ * repeatable annotation.
+ *
+ * This test verifies an overriding of the property value which declared in the
+ * meta-annotation by the {@link TestPropertySource} when this property is also defined
+ * locally in {@link TestPropertySource}.
+ *
+ * @author Anatoliy Korovin
+ * @since 5.2
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TestPropertySource(properties = "meta = local value")
