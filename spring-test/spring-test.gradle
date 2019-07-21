@@ -85,6 +85,17 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
 }
 
+task junit(type: Test) {
+	description = "Runs JUnit 4 and JUnit Jupiter tests."
+	useJUnitPlatform {
+		excludeTags "failing-test-case"
+	}
+	include(["**/*Tests.class", "**/*Test.class"])
+	exclude(["**/testng/**/*.*"])
+	// Java Util Logging for the JUnit Platform.
+	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+}
+
 task testNG(type: Test) {
 	description = "Runs TestNG tests."
 	useTestNG()
@@ -96,21 +107,15 @@ task testNG(type: Test) {
 }
 
 test {
-	description = "Runs JUnit 4 and JUnit Jupiter tests."
-	dependsOn testNG
-	useJUnitPlatform {
-		excludeTags "failing-test-case"
-	}
-	include(["**/*Tests.class", "**/*Test.class"])
-	exclude(["**/testng/**/*.*"])
-	// Java Util Logging for the JUnit Platform.
-	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+	description = "Runs all tests."
+	dependsOn junit, testNG
+	exclude(["**/*.*"])
 }
 
 task aggregateTestReports(type: TestReport) {
 	description = "Aggregates JUnit and TestNG test reports."
 	destinationDir = test.reports.html.destination
-	reportOn test, testNG
+	reportOn junit, testNG
 }
 
 check.dependsOn aggregateTestReports
