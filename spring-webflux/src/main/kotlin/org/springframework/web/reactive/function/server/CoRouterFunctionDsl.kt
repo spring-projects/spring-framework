@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function.server
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.reactor.mono
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpMethod
@@ -421,7 +420,7 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	 */
 	fun resources(lookupFunction: suspend (ServerRequest) -> Resource?) {
 		builder.resources {
-			GlobalScope.mono(Dispatchers.Unconfined) {
+			mono(Dispatchers.Unconfined) {
 				lookupFunction.invoke(it)
 			}
 		}
@@ -436,7 +435,7 @@ class CoRouterFunctionDsl(private val init: (CoRouterFunctionDsl.() -> Unit)) {
 	}
 
 	private fun asHandlerFunction(init: suspend (ServerRequest) -> ServerResponse) = HandlerFunction {
-		GlobalScope.mono(Dispatchers.Unconfined) {
+		mono(Dispatchers.Unconfined) {
 			init(it)
 		}
 	}

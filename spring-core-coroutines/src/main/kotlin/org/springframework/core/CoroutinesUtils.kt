@@ -40,7 +40,7 @@ import kotlin.reflect.jvm.kotlinFunction
  * @since 5.2
  */
 internal fun <T: Any> deferredToMono(source: Deferred<T>) =
-		GlobalScope.mono(Dispatchers.Unconfined) { source.await() }
+		mono(Dispatchers.Unconfined) { source.await() }
 
 /**
  * Convert a [Mono] instance to a [Deferred] one.
@@ -63,7 +63,7 @@ internal fun <T: Any> monoToDeferred(source: Mono<T>) =
 internal fun invokeHandlerMethod(method: Method, bean: Any, vararg args: Any?): Any? {
 	val function = method.kotlinFunction!!
 	return if (function.isSuspend) {
-		val mono = GlobalScope.mono(Dispatchers.Unconfined) {
+		val mono = mono(Dispatchers.Unconfined) {
 			function.callSuspend(bean, *args.sliceArray(0..(args.size-2)))
 					.let { if (it == Unit) null else it }
 		}.onErrorMap(InvocationTargetException::class.java) { it.targetException }
