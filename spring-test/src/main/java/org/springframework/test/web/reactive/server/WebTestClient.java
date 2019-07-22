@@ -833,7 +833,7 @@ public interface WebTestClient {
 		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher);
 
 		/**
-		 * Assert the extracted body with a {@link Matcher}.
+		 * Assert the extracted body with a {@link Consumer}.
 		 * @since 5.1
 		 */
 		<T extends S> T value(Consumer<B> consumer);
