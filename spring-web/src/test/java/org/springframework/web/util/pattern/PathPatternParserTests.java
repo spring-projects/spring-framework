@@ -411,7 +411,7 @@ public class PathPatternParserTests {
 	@Test
 	public void separatorTests() {
 		PathPatternParser parser = new PathPatternParser();
-		parser.setPathOptions(PathContainer.Options.HTTP_PATH);
+		parser.setPathOptions(PathContainer.Options.create('.', false));
 		String rawPattern = "first.second.{last}";
 		PathPattern pattern = parser.parse(rawPattern);
 		assertThat(pattern.computePatternString()).isEqualTo(rawPattern);
