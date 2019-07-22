@@ -824,7 +824,7 @@ while a fully formatted prefix based on that ID is available from
 `DEBUG` and `TRACE` logging can log sensitive information. This is why form parameters and
 headers are masked by default and you must explicitly enable their logging in full.
 
-The followig example shows how to do so for server-side requests:
+The following example shows how to do so for server-side requests:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
