@@ -19,6 +19,8 @@ package org.springframework.messaging.rsocket;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -44,6 +46,7 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Default, package-private {@link RSocketRequester} implementation.
@@ -57,6 +60,9 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 	static final MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
 
+
+	/** For route variable replacement. */
+	private static final Pattern VARS_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 	private static final Map<String, Object> EMPTY_HINTS = Collections.emptyMap();
 
@@ -105,9 +111,27 @@ final class DefaultRSocketRequester implements RSocketRequester {
 	}
 
 	@Override
-	public RequestSpec route(String route) {
+	public RequestSpec route(String route, Object... vars) {
 		Assert.notNull(route, "'route' is required");
+		route = expand(route, vars);
 		return new DefaultRequestSpec(route, metadataMimeType().equals(COMPOSITE_METADATA) ? ROUTING : null);
+	}
+
+	private static String expand(String route, Object... vars) {
+		if (ObjectUtils.isEmpty(vars)) {
+			return route;
+		}
+		StringBuffer sb = new StringBuffer();
+		int index = 0;
+		Matcher matcher = VARS_PATTERN.matcher(route);
+		while (matcher.find()) {
+			Assert.isTrue(index < vars.length, () -> "No value for variable '" + matcher.group(1) + "'");
+			String value = vars[index].toString();
+			value = value.contains(".") ? value.replaceAll("\\.", "%2E") : value;
+			matcher.appendReplacement(sb, value);
+			index++;
+		}
+		return sb.toString();
 	}
 
 	@Override

@@ -211,13 +211,16 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	@Test
+	public void routeWithVars() {
+		RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
+		requester.route("a.{b}.{c}", "BBB", "C.C.C").data("body").send().block();
+		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("a.BBB.C%2EC%2EC");
+	}
+
+	@Test
 	public void supportedMetadataMimeTypes() {
-
-		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN,
-				COMPOSITE_METADATA, this.strategies);
-
-		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN,
-				ROUTING, this.strategies);
+		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, COMPOSITE_METADATA, this.strategies);
+		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, ROUTING, this.strategies);
 	}
 
 	@Test

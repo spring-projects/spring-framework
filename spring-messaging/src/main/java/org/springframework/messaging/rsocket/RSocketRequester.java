@@ -66,13 +66,19 @@ public interface RSocketRequester {
 
 	/**
 	 * Begin to specify a new request with the given route to a remote handler.
+	 * <p>The route can be a template with placeholders, e.g.
+	 * {@code "flight.{code}"} in which case the supplied route variables are
+	 * expanded into the template after being formatted via {@code toString()}.
+	 * If a formatted variable contains a "." it is replaced with the escape
+	 * sequence "%2E" to avoid treating it as separator by the responder .
 	 * <p>If the connection is set to use composite metadata, the route is
 	 * encoded as {@code "message/x.rsocket.routing.v0"}. Otherwise the route
 	 * is encoded according to the mime type for the connection.
 	 * @param route the route to a handler
+	 * @param routeVars variables to be expanded into the route template
 	 * @return a spec for further defining and executing the request
 	 */
-	RequestSpec route(String route);
+	RequestSpec route(String route, Object... routeVars);
 
 	/**
 	 * Begin to specify a new request with the given metadata.
