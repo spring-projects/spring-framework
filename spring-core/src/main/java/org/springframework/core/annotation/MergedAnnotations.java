@@ -288,8 +288,21 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the element's
 	 * annotations
 	 */
-	static MergedAnnotations from(AnnotatedElement element) {
+	static MergedAnnotations from(@Nullable AnnotatedElement element) {
 		return from(element, SearchStrategy.DIRECT);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotations} instance containing all
+	 * annotations and meta-annotations from the specified elements using
+	 * {@link SearchStrategy#DIRECT}.
+	 * @param elements the source elements (elements of the array can be
+	 * {@code null})
+	 * @return a {@link MergedAnnotations} instance containing the element's
+	 * annotations
+	 */
+	static MergedAnnotations from(AnnotatedElement... elements) {
+		return TypeMappedAnnotations.from(elements);
 	}
 
 	/**
@@ -301,7 +314,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the merged
 	 * element annotations
 	 */
-	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
+	static MergedAnnotations from(@Nullable AnnotatedElement element, SearchStrategy searchStrategy) {
 		return from(element, searchStrategy, RepeatableContainers.standardRepeatables(), AnnotationFilter.PLAIN);
 	}
 
@@ -318,7 +331,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the merged
 	 * element annotations
 	 */
-	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
+	static MergedAnnotations from(@Nullable AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
 		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, annotationFilter);

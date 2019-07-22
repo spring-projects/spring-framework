@@ -78,6 +78,30 @@ abstract class AnnotationsScanner {
 	}
 
 	/**
+	 * Scan the the specified elements using {@link SearchStrategy#DIRECT} for
+	 * relevant annotations and call the processor as required.
+	 * @param context an optional context object that will be passed back to the
+	 * processor
+	 * @param sources the element sources to scan
+	 * @param processor the processor that receives the annotations
+	 * @return the result of {@link AnnotationsProcessor#finish(Object)}
+	 */
+	@Nullable
+	static <C, R> R scan(C context, AnnotatedElement[] sources,
+			AnnotationsProcessor<C, R> processor) {
+
+		for (AnnotatedElement source : sources) {
+			if (source != null) {
+				R result = process(context, source, SearchStrategy.DIRECT, processor, null);
+				if (result != null) {
+					return processor.finish(result);
+				}
+			}
+		}
+		return processor.finish(null);
+	}
+
+	/**
 	 * Scan the hierarchy of the specified element for relevant annotations and
 	 * call the processor as required.
 	 * @param context an optional context object that will be passed back to the
