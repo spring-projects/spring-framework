@@ -25,7 +25,6 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 /**
  * Abstract base class for tests involving {@link SqlMergeMode @SqlMergeMode}.
@@ -34,7 +33,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
  * @since 5.2
  */
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
+@DirtiesContext
 abstract class AbstractSqlMergeModeTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	protected void assertUsers(String... expectedUsers) {

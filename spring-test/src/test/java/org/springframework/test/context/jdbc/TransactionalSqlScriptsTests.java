@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.jdbc;
 
-import javax.sql.DataSource;
-
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,13 +45,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext
 public class TransactionalSqlScriptsTests {
 
-	protected JdbcTemplate jdbcTemplate;
-
-
 	@Autowired
-	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+	JdbcTemplate jdbcTemplate;
 
 	@Test
 	// test##_ prefix is required for @FixMethodOrder.
@@ -62,7 +55,7 @@ public class TransactionalSqlScriptsTests {
 	}
 
 	@Test
-	@Sql({ "drop-schema.sql", "schema.sql", "data.sql", "data-add-dogbert.sql" })
+	@Sql({ "recreate-schema.sql", "data.sql", "data-add-dogbert.sql" })
 	// test##_ prefix is required for @FixMethodOrder.
 	public void test02_methodLevelScripts() {
 		assertNumUsers(2);

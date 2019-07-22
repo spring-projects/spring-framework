@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.jdbc;
 
-import javax.sql.DataSource;
-
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,13 +44,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext
 public class NonTransactionalSqlScriptsTests {
 
-	protected JdbcTemplate jdbcTemplate;
-
-
 	@Autowired
-	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
+	JdbcTemplate jdbcTemplate;
 
 	@Test
 	// test##_ prefix is required for @FixMethodOrder.
