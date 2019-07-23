@@ -267,7 +267,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
 		populator.setSqlScriptEncoding(mergedSqlConfig.getEncoding());
 		populator.setSeparator(mergedSqlConfig.getSeparator());
-		populator.setCommentPrefix(mergedSqlConfig.getCommentPrefix());
+		populator.setCommentPrefixes(mergedSqlConfig.getCommentPrefixes());
 		populator.setBlockCommentStartDelimiter(mergedSqlConfig.getBlockCommentStartDelimiter());
 		populator.setBlockCommentEndDelimiter(mergedSqlConfig.getBlockCommentEndDelimiter());
 		populator.setContinueOnError(mergedSqlConfig.getErrorMode() == ErrorMode.CONTINUE_ON_ERROR);

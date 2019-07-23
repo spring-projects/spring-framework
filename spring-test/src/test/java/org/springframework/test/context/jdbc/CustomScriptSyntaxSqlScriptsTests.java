@@ -38,7 +38,7 @@ public class CustomScriptSyntaxSqlScriptsTests extends AbstractTransactionalJUni
 	@Test
 	@Sql("schema.sql")
 	@Sql(scripts = "data-add-users-with-custom-script-syntax.sql",//
-	config = @SqlConfig(commentPrefix = "`", blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@"))
+	config = @SqlConfig(commentPrefixes = { "`", "%%" }, blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@"))
 	public void methodLevelScripts() {
 		assertNumUsers(3);
 	}

@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @DirtiesContext
-@SqlConfig(commentPrefix = "`", blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@")
+@SqlConfig(commentPrefixes = { "`", "%%" }, blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@")
 public class GlobalCustomScriptSyntaxSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Test

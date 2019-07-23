@@ -21,9 +21,11 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
-import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_COMMENT_PREFIX;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_COMMENT_PREFIXES;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 import static org.springframework.test.context.jdbc.SqlConfig.ErrorMode.CONTINUE_ON_ERROR;
 import static org.springframework.test.context.jdbc.SqlConfig.ErrorMode.FAIL_ON_ERROR;
@@ -39,17 +41,50 @@ import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.IS
  */
 public class MergedSqlConfigTests {
 
-	private void assertDefaults(MergedSqlConfig cfg) {
-		assertThat(cfg).isNotNull();
-		assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
-		assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
-		assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
-		assertThat(cfg.getEncoding()).as("encoding").isEqualTo("");
-		assertThat(cfg.getSeparator()).as("separator").isEqualTo(DEFAULT_STATEMENT_SEPARATOR);
-		assertThat(cfg.getCommentPrefix()).as("commentPrefix").isEqualTo(DEFAULT_COMMENT_PREFIX);
-		assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
-		assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
-		assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(FAIL_ON_ERROR);
+	@Test
+	public void nullLocalSqlConfig() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new MergedSqlConfig(null, getClass()))
+			.withMessage("Local @SqlConfig must not be null");
+	}
+
+	@Test
+	public void nullTestClass() {
+		SqlConfig sqlConfig = GlobalConfigClass.class.getAnnotation(SqlConfig.class);
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new MergedSqlConfig(sqlConfig, null))
+			.withMessage("testClass must not be null");
+	}
+
+	@Test
+	public void localConfigWithEmptyCommentPrefix() throws Exception {
+		Method method = getClass().getMethod("localConfigMethodWithEmptyCommentPrefix");
+		SqlConfig sqlConfig = method.getAnnotation(Sql.class).config();
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new MergedSqlConfig(sqlConfig, getClass()))
+			.withMessage("@SqlConfig(commentPrefix) must contain text");
+	}
+
+	@Test
+	public void localConfigWithEmptyCommentPrefixes() throws Exception {
+		Method method = getClass().getMethod("localConfigMethodWithEmptyCommentPrefixes");
+		SqlConfig sqlConfig = method.getAnnotation(Sql.class).config();
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new MergedSqlConfig(sqlConfig, getClass()))
+			.withMessage("@SqlConfig(commentPrefixes) must not contain empty prefixes");
+	}
+
+	@Test
+	public void localConfigWithDuplicatedCommentPrefixes() throws Exception {
+		Method method = getClass().getMethod("localConfigMethodWithDuplicatedCommentPrefixes");
+		SqlConfig sqlConfig = method.getAnnotation(Sql.class).config();
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new MergedSqlConfig(sqlConfig, getClass()))
+			.withMessage("You may declare the 'commentPrefix' or 'commentPrefixes' attribute in @SqlConfig but not both");
 	}
 
 	@Test
@@ -61,28 +96,43 @@ public class MergedSqlConfigTests {
 	}
 
 	@Test
-	public void globalConfigWithDefaults() throws Exception {
-		Method method = GlobalConfigWithDefaultsClass.class.getMethod("globalConfigMethod");
-		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
-		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigWithDefaultsClass.class);
-		assertDefaults(cfg);
-	}
-
-	@Test
 	public void localConfigWithCustomValues() throws Exception {
 		Method method = getClass().getMethod("localConfigMethodWithCustomValues");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
+
+		assertSoftly(softly -> {
+			softly.assertThat(cfg).isNotNull();
+			softly.assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("ds");
+			softly.assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("txMgr");
+			softly.assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(ISOLATED);
+			softly.assertThat(cfg.getEncoding()).as("encoding").isEqualTo("enigma");
+			softly.assertThat(cfg.getSeparator()).as("separator").isEqualTo("\n");
+			softly.assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("`"));
+			softly.assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo("<<");
+			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(">>");
+			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(IGNORE_FAILED_DROPS);
+		});
+	}
+
+	@Test
+	public void localConfigWithCustomCommentPrefixes() throws Exception {
+		Method method = getClass().getMethod("localConfigMethodWithCustomCommentPrefixes");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
+
 		assertThat(cfg).isNotNull();
-		assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("ds");
-		assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("txMgr");
-		assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(ISOLATED);
-		assertThat(cfg.getEncoding()).as("encoding").isEqualTo("enigma");
-		assertThat(cfg.getSeparator()).as("separator").isEqualTo("\n");
-		assertThat(cfg.getCommentPrefix()).as("commentPrefix").isEqualTo("`");
-		assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo("<<");
-		assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(">>");
-		assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(IGNORE_FAILED_DROPS);
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("`"));
+	}
+
+	@Test
+	public void localConfigWithMultipleCommentPrefixes() throws Exception {
+		Method method = getClass().getMethod("localConfigMethodWithMultipleCommentPrefixes");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
+
+		assertThat(cfg).isNotNull();
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("`", "--"));
 	}
 
 	@Test
@@ -90,6 +140,7 @@ public class MergedSqlConfigTests {
 		Method method = getClass().getMethod("localConfigMethodWithContinueOnError");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
+
 		assertThat(cfg).isNotNull();
 		assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(CONTINUE_ON_ERROR);
 	}
@@ -99,8 +150,44 @@ public class MergedSqlConfigTests {
 		Method method = getClass().getMethod("localConfigMethodWithIgnoreFailedDrops");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, getClass());
+
 		assertThat(cfg).isNotNull();
 		assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(IGNORE_FAILED_DROPS);
+	}
+
+	@Test
+	public void globalConfigWithEmptyCommentPrefix() throws Exception {
+		SqlConfig sqlConfig = GlobalConfigWithWithEmptyCommentPrefixClass.class.getAnnotation(SqlConfig.class);
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new MergedSqlConfig(sqlConfig, getClass()))
+			.withMessage("@SqlConfig(commentPrefix) must contain text");
+	}
+
+	@Test
+	public void globalConfigWithEmptyCommentPrefixes() throws Exception {
+		SqlConfig sqlConfig = GlobalConfigWithWithEmptyCommentPrefixesClass.class.getAnnotation(SqlConfig.class);
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new MergedSqlConfig(sqlConfig, getClass()))
+			.withMessage("@SqlConfig(commentPrefixes) must not contain empty prefixes");
+	}
+
+	@Test
+	public void globalConfigWithDuplicatedCommentPrefixes() throws Exception {
+		SqlConfig sqlConfig = GlobalConfigWithWithDuplicatedCommentPrefixesClass.class.getAnnotation(SqlConfig.class);
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new MergedSqlConfig(sqlConfig, getClass()))
+			.withMessage("You may declare the 'commentPrefix' or 'commentPrefixes' attribute in @SqlConfig but not both");
+	}
+
+	@Test
+	public void globalConfigWithDefaults() throws Exception {
+		Method method = GlobalConfigWithDefaultsClass.class.getMethod("globalConfigMethod");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigWithDefaultsClass.class);
+		assertDefaults(cfg);
 	}
 
 	@Test
@@ -108,16 +195,19 @@ public class MergedSqlConfigTests {
 		Method method = GlobalConfigClass.class.getMethod("globalConfigMethod");
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigClass.class);
-		assertThat(cfg).isNotNull();
-		assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
-		assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
-		assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
-		assertThat(cfg.getEncoding()).as("encoding").isEqualTo("global");
-		assertThat(cfg.getSeparator()).as("separator").isEqualTo("\n");
-		assertThat(cfg.getCommentPrefix()).as("commentPrefix").isEqualTo(DEFAULT_COMMENT_PREFIX);
-		assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
-		assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
-		assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(IGNORE_FAILED_DROPS);
+
+		assertSoftly(softly -> {
+			softly.assertThat(cfg).isNotNull();
+			softly.assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
+			softly.assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
+			softly.assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
+			softly.assertThat(cfg.getEncoding()).as("encoding").isEqualTo("global");
+			softly.assertThat(cfg.getSeparator()).as("separator").isEqualTo("\n");
+			softly.assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("`", "--"));
+			softly.assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
+			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(IGNORE_FAILED_DROPS);
+		});
 	}
 
 	@Test
@@ -126,19 +216,78 @@ public class MergedSqlConfigTests {
 		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
 		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, GlobalConfigClass.class);
 
-		assertThat(cfg).isNotNull();
-		assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
-		assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
-		assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
-		assertThat(cfg.getEncoding()).as("encoding").isEqualTo("local");
-		assertThat(cfg.getSeparator()).as("separator").isEqualTo("@@");
-		assertThat(cfg.getCommentPrefix()).as("commentPrefix").isEqualTo(DEFAULT_COMMENT_PREFIX);
-		assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
-		assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
-		assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(CONTINUE_ON_ERROR);
+		assertSoftly(softly -> {
+			softly.assertThat(cfg).isNotNull();
+			softly.assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
+			softly.assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
+			softly.assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
+			softly.assertThat(cfg.getEncoding()).as("encoding").isEqualTo("local");
+			softly.assertThat(cfg.getSeparator()).as("separator").isEqualTo("@@");
+			softly.assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
+			softly.assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
+			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(CONTINUE_ON_ERROR);
+		});
+	}
+
+	@Test
+	public void globalConfigWithCommentPrefixAndLocalOverrides() throws Exception {
+		Class<?> testClass = GlobalConfigWithPrefixClass.class;
+
+		Method method = testClass.getMethod("commentPrefixesOverrideCommentPrefix");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#", "@"));
+
+		method = testClass.getMethod("commentPrefixOverridesCommentPrefix");
+		localSqlConfig = method.getAnnotation(Sql.class).config();
+		cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
+	}
+
+	@Test
+	public void globalConfigWithCommentPrefixesAndLocalOverrides() throws Exception {
+		Class<?> testClass = GlobalConfigWithPrefixesClass.class;
+
+		Method method = testClass.getMethod("commentPrefixesOverrideCommentPrefixes");
+		SqlConfig localSqlConfig = method.getAnnotation(Sql.class).config();
+		MergedSqlConfig cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#", "@"));
+
+		method = testClass.getMethod("commentPrefixOverridesCommentPrefixes");
+		localSqlConfig = method.getAnnotation(Sql.class).config();
+		cfg = new MergedSqlConfig(localSqlConfig, testClass);
+
+		assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(array("#"));
+	}
+
+	private void assertDefaults(MergedSqlConfig cfg) {
+		assertSoftly(softly -> {
+			softly.assertThat(cfg).isNotNull();
+			softly.assertThat(cfg.getDataSource()).as("dataSource").isEqualTo("");
+			softly.assertThat(cfg.getTransactionManager()).as("transactionManager").isEqualTo("");
+			softly.assertThat(cfg.getTransactionMode()).as("transactionMode").isEqualTo(INFERRED);
+			softly.assertThat(cfg.getEncoding()).as("encoding").isEqualTo("");
+			softly.assertThat(cfg.getSeparator()).as("separator").isEqualTo(DEFAULT_STATEMENT_SEPARATOR);
+			softly.assertThat(cfg.getCommentPrefixes()).as("commentPrefixes").isEqualTo(DEFAULT_COMMENT_PREFIXES);
+			softly.assertThat(cfg.getBlockCommentStartDelimiter()).as("blockCommentStartDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_START_DELIMITER);
+			softly.assertThat(cfg.getBlockCommentEndDelimiter()).as("blockCommentEndDelimiter").isEqualTo(DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+			softly.assertThat(cfg.getErrorMode()).as("errorMode").isEqualTo(FAIL_ON_ERROR);
+		});
+	}
+
+	private static String[] array(String... elements) {
+		return elements;
 	}
 
 	// -------------------------------------------------------------------------
+
+	@Sql(config = @SqlConfig(commentPrefix = "#", commentPrefixes = "#" ))
+	public static void localConfigMethodWithDuplicatedCommentPrefixes() {
+	}
 
 	@Sql
 	public static void localConfigMethodWithDefaults() {
@@ -146,6 +295,22 @@ public class MergedSqlConfigTests {
 
 	@Sql(config = @SqlConfig(dataSource = "ds", transactionManager = "txMgr", transactionMode = ISOLATED, encoding = "enigma", separator = "\n", commentPrefix = "`", blockCommentStartDelimiter = "<<", blockCommentEndDelimiter = ">>", errorMode = IGNORE_FAILED_DROPS))
 	public static void localConfigMethodWithCustomValues() {
+	}
+
+	@Sql(config = @SqlConfig(commentPrefix = "   " ))
+	public static void localConfigMethodWithEmptyCommentPrefix() {
+	}
+
+	@Sql(config = @SqlConfig(commentPrefixes = { "--", "   " }))
+	public static void localConfigMethodWithEmptyCommentPrefixes() {
+	}
+
+	@Sql(config = @SqlConfig(commentPrefixes = "`"))
+	public static void localConfigMethodWithCustomCommentPrefixes() {
+	}
+
+	@Sql(config = @SqlConfig(commentPrefixes = { "`", "--" }))
+	public static void localConfigMethodWithMultipleCommentPrefixes() {
 	}
 
 	@Sql(config = @SqlConfig(errorMode = CONTINUE_ON_ERROR))
@@ -156,24 +321,59 @@ public class MergedSqlConfigTests {
 	public static void localConfigMethodWithIgnoreFailedDrops() {
 	}
 
+	@SqlConfig(commentPrefix = "   ")
+	public static class GlobalConfigWithWithEmptyCommentPrefixClass {
+	}
+
+	@SqlConfig(commentPrefixes = { "--", "   " })
+	public static class GlobalConfigWithWithEmptyCommentPrefixesClass {
+	}
+
+	@SqlConfig(commentPrefix = "#", commentPrefixes = "#")
+	public static class GlobalConfigWithWithDuplicatedCommentPrefixesClass {
+	}
 
 	@SqlConfig
 	public static class GlobalConfigWithDefaultsClass {
 
-		@Sql("foo.sql")
+		@Sql
 		public void globalConfigMethod() {
 		}
 	}
 
-	@SqlConfig(encoding = "global", separator = "\n", errorMode = IGNORE_FAILED_DROPS)
+	@SqlConfig(encoding = "global", separator = "\n", commentPrefixes = { "`", "--" }, errorMode = IGNORE_FAILED_DROPS)
 	public static class GlobalConfigClass {
 
-		@Sql("foo.sql")
+		@Sql
 		public void globalConfigMethod() {
 		}
 
-		@Sql(scripts = "foo.sql", config = @SqlConfig(encoding = "local", separator = "@@", errorMode = CONTINUE_ON_ERROR))
+		@Sql(config = @SqlConfig(encoding = "local", separator = "@@", commentPrefix = "#", errorMode = CONTINUE_ON_ERROR))
 		public void globalConfigWithLocalOverridesMethod() {
+		}
+	}
+
+	@SqlConfig(commentPrefix = "`")
+	public static class GlobalConfigWithPrefixClass {
+
+		@Sql(config = @SqlConfig(commentPrefixes = { "#", "@" }))
+		public void commentPrefixesOverrideCommentPrefix() {
+		}
+
+		@Sql(config = @SqlConfig(commentPrefix = "#"))
+		public void commentPrefixOverridesCommentPrefix() {
+		}
+	}
+
+	@SqlConfig(commentPrefixes = { "`", "--" })
+	public static class GlobalConfigWithPrefixesClass {
+
+		@Sql(config = @SqlConfig(commentPrefixes = { "#", "@" }))
+		public void commentPrefixesOverrideCommentPrefixes() {
+		}
+
+		@Sql(config = @SqlConfig(commentPrefix = "#"))
+		public void commentPrefixOverridesCommentPrefixes() {
 		}
 	}
 

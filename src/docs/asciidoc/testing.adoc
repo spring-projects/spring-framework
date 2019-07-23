@@ -4190,12 +4190,12 @@ documented in the javadoc of the corresponding attribute. Due to the rules defin
 annotation attributes in the Java Language Specification, it is, unfortunately, not
 possible to assign a value of `null` to an annotation attribute. Thus, in order to
 support overrides of inherited global configuration, `@SqlConfig` attributes have an
-explicit default value of either `""` (for Strings) or `DEFAULT` (for enumerations). This
-approach lets local declarations of `@SqlConfig` selectively override individual
-attributes from global declarations of `@SqlConfig` by providing a value other than `""`
-or `DEFAULT`. Global `@SqlConfig` attributes are inherited whenever local `@SqlConfig`
-attributes do not supply an explicit value other than `""` or `DEFAULT`. Explicit local
-configuration, therefore, overrides global configuration.
+explicit default value of either `""` (for Strings), `{}` (for arrays), or `DEFAULT` (for
+enumerations). This approach lets local declarations of `@SqlConfig` selectively override
+individual attributes from global declarations of `@SqlConfig` by providing a value other
+than `""`, `{}`, or `DEFAULT`. Global `@SqlConfig` attributes are inherited whenever
+local `@SqlConfig` attributes do not supply an explicit value other than `""`, `{}`, or
+`DEFAULT`. Explicit local configuration, therefore, overrides global configuration.
 
 The configuration options provided by `@Sql` and `@SqlConfig` are equivalent to those
 supported by `ScriptUtils` and `ResourceDatabasePopulator` but are a superset of those
