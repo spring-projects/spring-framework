@@ -41,6 +41,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Delegate for creating a shareable JPA {@link javax.persistence.EntityManager}
@@ -59,6 +60,7 @@ import org.springframework.util.CollectionUtils;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Oliver Gierke
+ * @author Mark Paluch
  * @since 2.0
  * @see javax.persistence.PersistenceContext
  * @see javax.persistence.PersistenceContextType#TRANSACTION
@@ -72,6 +74,8 @@ public abstract class SharedEntityManagerCreator {
 	private static final Set<String> transactionRequiringMethods = new HashSet<>(8);
 
 	private static final Set<String> queryTerminatingMethods = new HashSet<>(8);
+
+	private static final Map<Class<?>, Class[]> CACHED_QUERY_INTERFACES = new ConcurrentReferenceHashMap<>();
 
 	static {
 		transactionRequiringMethods.add("joinTransaction");
@@ -310,7 +314,8 @@ public abstract class SharedEntityManagerCreator {
 				if (result instanceof Query) {
 					Query query = (Query) result;
 					if (isNewEm) {
-						Class<?>[] ifcs = ClassUtils.getAllInterfacesForClass(query.getClass(), this.proxyClassLoader);
+						Class<?>[] ifcs = CACHED_QUERY_INTERFACES.computeIfAbsent(query.getClass(), key ->
+								ClassUtils.getAllInterfacesForClass(key, this.proxyClassLoader));
 						result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs,
 								new DeferredQueryInvocationHandler(query, target));
 						isNewEm = false;
