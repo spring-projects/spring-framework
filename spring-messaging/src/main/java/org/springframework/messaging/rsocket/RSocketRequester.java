@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.codec.Decoder;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.rsocket.annotation.support.AnnotationClientResponderConfigurer;
 import org.springframework.util.MimeType;
@@ -125,32 +126,32 @@ public interface RSocketRequester {
 	interface Builder {
 
 		/**
-		 * Configure the MimeType for payload data which is then specified
-		 * on the {@code SETUP} frame and applies to the whole connection.
-		 * <p>By default this is set to the first concrete mime type supported
-		 * by the configured encoders and decoders.
-		 * @param mimeType the data MimeType to use
+		 * Configure the payload data MimeType to specify on the {@code SETUP}
+		 * frame that applies to the whole connection.
+		 * <p>If this is not set, the builder will try to select the mime type
+		 * based on the presence of a single
+		 * {@link RSocketStrategies.Builder#decoder(Decoder[])  non-default}
+		 * {@code Decoder}, or the first default decoder otherwise
+		 * (i.e. {@code String}) if no others are configured.
 		 */
 		RSocketRequester.Builder dataMimeType(@Nullable MimeType mimeType);
 
 		/**
-		 * Configure the MimeType for payload metadata which is then specified
-		 * on the {@code SETUP} frame and applies to the whole connection.
+		 * Configure the payload metadata MimeType to specify on the {@code SETUP}
+		 * frame and applies to the whole connection.
 		 * <p>By default this is set to
 		 * {@code "message/x.rsocket.composite-metadata.v0"} in which case the
 		 * route, if provided, is encoded as a
-		 * {@code "message/x.rsocket.routing.v0"} metadata entry, potentially
-		 * with other metadata entries added too. If this is set to any other
-		 * mime type, and a route is provided, it is assumed the mime type is
-		 * for the route.
-		 * @param mimeType the data MimeType to use
+		 * {@code "message/x.rsocket.routing.v0"} composite metadata entry.
+		 * For any other MimeType, it is assumed to be the MimeType for the
+		 * route, if provided.
 		 */
 		RSocketRequester.Builder metadataMimeType(MimeType mimeType);
 
 		/**
-		 * Set the {@link RSocketStrategies} to use for access to encoders,
-		 * decoders, and a factory for {@code DataBuffer's}.
-		 * @param strategies the codecs strategies to use
+		 * Set the {@link RSocketStrategies} to use.
+		 * <p>By default this is set to {@code RSocketStrategies.builder().build()}
+		 * but may be further customized via {@link #rsocketStrategies(Consumer)}.
 		 */
 		RSocketRequester.Builder rsocketStrategies(@Nullable RSocketStrategies strategies);
 
@@ -159,7 +160,6 @@ public interface RSocketRequester {
 		 * <p>By default this starts out with an empty builder, i.e.
 		 * {@link RSocketStrategies#builder()}, but the strategies can also be
 		 * set via {@link #rsocketStrategies(RSocketStrategies)}.
-		 * @param configurer the configurer to apply
 		 */
 		RSocketRequester.Builder rsocketStrategies(Consumer<RSocketStrategies.Builder> configurer);
 
@@ -172,7 +172,6 @@ public interface RSocketRequester {
 		 * {@code ClientRSocketFactory}. Use the shortcuts on this builder
 		 * instead since the created {@code RSocketRequester} needs to be aware
 		 * of those settings.
-		 * @param configurer consumer to customize the factory
 		 * @see AnnotationClientResponderConfigurer
 		 */
 		RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer);
