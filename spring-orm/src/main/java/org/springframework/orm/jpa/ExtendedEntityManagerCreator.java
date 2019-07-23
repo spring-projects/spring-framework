@@ -43,6 +43,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Delegate for creating a variety of {@link javax.persistence.EntityManager}
@@ -65,6 +66,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Mark Paluch
  * @since 2.0
  * @see javax.persistence.EntityManagerFactory#createEntityManager()
  * @see javax.persistence.PersistenceContextType#EXTENDED
@@ -72,6 +74,8 @@ import org.springframework.util.CollectionUtils;
  * @see SharedEntityManagerCreator
  */
 public abstract class ExtendedEntityManagerCreator {
+
+	private static final Map<Class<?>, Class[]> CACHED_ENTITY_MANAGER_INTERFACES = new ConcurrentReferenceHashMap<>();
 
 	/**
 	 * Create an application-managed extended EntityManager proxy.
@@ -222,17 +226,29 @@ public abstract class ExtendedEntityManagerCreator {
 			boolean containerManaged, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(rawEm, "EntityManager must not be null");
-		Set<Class<?>> ifcs = new LinkedHashSet<>();
+		Class[] interfaces;
+
 		if (emIfc != null) {
-			ifcs.add(emIfc);
+			interfaces = CACHED_ENTITY_MANAGER_INTERFACES.computeIfAbsent(emIfc, key -> {
+				Set<Class<?>> ifcs = new LinkedHashSet<>();
+				ifcs.add(key);
+				ifcs.add(EntityManagerProxy.class);
+				return ClassUtils.toClassArray(ifcs);
+			});
 		}
 		else {
-			ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(rawEm.getClass(), cl));
+			interfaces = CACHED_ENTITY_MANAGER_INTERFACES.computeIfAbsent(rawEm.getClass(), key -> {
+				Set<Class<?>> ifcs = new LinkedHashSet<>();
+				ifcs.addAll(ClassUtils
+						.getAllInterfacesForClassAsSet(key, cl));
+				ifcs.add(EntityManagerProxy.class);
+				return ClassUtils.toClassArray(ifcs);
+			});
 		}
-		ifcs.add(EntityManagerProxy.class);
+
 		return (EntityManager) Proxy.newProxyInstance(
 				(cl != null ? cl : ExtendedEntityManagerCreator.class.getClassLoader()),
-				ClassUtils.toClassArray(ifcs),
+				interfaces,
 				new ExtendedEntityManagerInvocationHandler(
 						rawEm, exceptionTranslator, jta, containerManaged, synchronizedWithTransaction));
 	}
