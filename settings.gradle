@@ -21,6 +21,7 @@ include "spring-webmvc"
 include "spring-webflux"
 include "spring-websocket"
 include "spring-framework-bom"
+include "integration-tests"
 
 rootProject.name = "spring"
 rootProject.children.each {project ->
