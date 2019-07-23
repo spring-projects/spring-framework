@@ -22,9 +22,13 @@ import org.junit.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.type.AnnotationMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,6 +68,16 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 	@Test
 	public void postFreezeGenericClass() {
 		assertPostFreeze(GenericClassConfiguration.class);
+	}
+
+	@Test
+	public void preFreezeAttribute() {
+		assertPreFreeze(AttributeClassConfiguration.class);
+	}
+
+	@Test
+	public void postFreezeAttribute() {
+		assertPostFreeze(AttributeClassConfiguration.class);
 	}
 
 	private void assertPostFreeze(Class<?> configurationClass) {
@@ -138,7 +152,29 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 
 	}
 
-	static class MyBean {
+	@Configuration
+	@Import(AttributeClassRegistrar.class)
+	static class AttributeClassConfiguration {
+
+	}
+
+	static class AttributeClassRegistrar implements ImportBeanDefinitionRegistrar {
+
+		@Override
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+				BeanDefinitionRegistry registry) {
+			BeanDefinition definition = BeanDefinitionBuilder.genericBeanDefinition(
+					RawWithAbstractObjectTypeFactoryBean.class).getBeanDefinition();
+			definition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, MyBean.class);
+			registry.registerBeanDefinition("myBean", definition);
+		}
+
+	}
+
+	abstract static class AbstractMyBean {
+	}
+
+	static class MyBean extends AbstractMyBean {
 	}
 
 	static class TestFactoryBean<T> implements FactoryBean<T> {
@@ -165,6 +201,22 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 
 		public MyFactoryBean() {
 			super(new MyBean());
+		}
+
+	}
+
+	static class RawWithAbstractObjectTypeFactoryBean implements FactoryBean<Object> {
+
+		private final Object object = new MyBean();
+
+		@Override
+		public Object getObject() throws Exception {
+			return object;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return MyBean.class;
 		}
 
 	}
