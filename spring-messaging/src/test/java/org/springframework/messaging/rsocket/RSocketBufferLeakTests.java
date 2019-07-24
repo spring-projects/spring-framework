@@ -26,6 +26,7 @@ import io.netty.util.ReferenceCounted;
 import io.rsocket.AbstractRSocket;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketFactory;
+import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.plugins.RSocketInterceptor;
 import io.rsocket.transport.netty.server.CloseableChannel;
@@ -44,8 +45,6 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.Resource;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -74,21 +73,21 @@ public class RSocketBufferLeakTests {
 	@BeforeClass
 	@SuppressWarnings("ConstantConditions")
 	public static void setupOnce() {
+
 		context = new AnnotationConfigApplicationContext(ServerConfig.class);
+		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
+		SocketAcceptor responder = messageHandler.serverResponder();
 
 		server = RSocketFactory.receive()
 				.frameDecoder(PayloadDecoder.ZERO_COPY)
 				.addResponderPlugin(payloadInterceptor) // intercept responding
-				.acceptor(context.getBean(RSocketMessageHandler.class).serverResponder())
+				.acceptor(responder)
 				.transport(TcpServerTransport.create("localhost", 7000))
 				.start()
 				.block();
 
 		requester = RSocketRequester.builder()
-				.rsocketFactory(factory -> {
-					factory.frameDecoder(PayloadDecoder.ZERO_COPY);
-					factory.addRequesterPlugin(payloadInterceptor); // intercept outgoing requests
-				})
+				.rsocketFactory(factory -> factory.addRequesterPlugin(payloadInterceptor))
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
 				.connectTcp("localhost", 7000)
 				.block();
@@ -215,8 +214,6 @@ public class RSocketBufferLeakTests {
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
 			return RSocketStrategies.builder()
-					.decoder(StringDecoder.allMimeTypes())
-					.encoder(CharSequenceEncoder.allMimeTypes())
 					.dataBufferFactory(new LeakAwareNettyDataBufferFactory(PooledByteBufAllocator.DEFAULT))
 					.build();
 		}

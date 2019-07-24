@@ -18,9 +18,9 @@ package org.springframework.messaging.rsocket;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import io.rsocket.RSocketFactory;
 import io.rsocket.frame.decoder.PayloadDecoder;
@@ -29,6 +29,9 @@ import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -110,7 +113,10 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		MimeType dataMimeType = getDataMimeType(rsocketStrategies);
 		rsocketFactory.dataMimeType(dataMimeType.toString());
 		rsocketFactory.metadataMimeType(this.metadataMimeType.toString());
-		rsocketFactory.frameDecoder(PayloadDecoder.ZERO_COPY);
+
+		if (rsocketStrategies.dataBufferFactory() instanceof NettyDataBufferFactory) {
+			rsocketFactory.frameDecoder(PayloadDecoder.ZERO_COPY);
+		}
 
 		this.rsocketFactoryConfigurers.forEach(configurer -> {
 			configurer.configureWithStrategies(rsocketStrategies);
@@ -139,16 +145,35 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		if (this.dataMimeType != null) {
 			return this.dataMimeType;
 		}
-		return Stream
-				.concat(
-						strategies.encoders().stream()
-								.flatMap(encoder -> encoder.getEncodableMimeTypes().stream()),
-						strategies.decoders().stream()
-								.flatMap(encoder -> encoder.getDecodableMimeTypes().stream())
-				)
-				.filter(MimeType::isConcrete)
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Failed to select data MimeType to use."));
+		// Look for non-basic Decoder (e.g. CBOR, Protobuf)
+		MimeType selected = null;
+		List<Decoder<?>> decoders = strategies.decoders();
+		for (Decoder<?> candidate : decoders) {
+			if (!isCoreCodec(candidate) && !candidate.getDecodableMimeTypes().isEmpty()) {
+				Assert.state(selected == null,
+						() -> "Cannot select default data MimeType based on configured decoders: " + decoders);
+				selected = getMimeType(candidate);
+			}
+		}
+		if (selected != null) {
+			return selected;
+		}
+		// Fall back on 1st decoder (e.g. String)
+		for (Decoder<?> decoder : decoders) {
+			if (!decoder.getDecodableMimeTypes().isEmpty()) {
+				return getMimeType(decoder);
+			}
+		}
+		throw new IllegalArgumentException("Failed to select data MimeType to use.");
+	}
+
+	private static boolean isCoreCodec(Object codec) {
+		return codec.getClass().getPackage().equals(StringDecoder.class.getPackage());
+	}
+
+	private static MimeType getMimeType(Decoder<?> decoder) {
+		MimeType mimeType = decoder.getDecodableMimeTypes().get(0);
+		return new MimeType(mimeType, Collections.emptyMap());
 	}
 
 }

@@ -24,10 +24,12 @@ import java.util.function.Function;
 
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
+import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.FrameType;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
@@ -40,6 +42,7 @@ import org.springframework.messaging.handler.DestinationPatternsMessageCondition
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.ClientRSocketFactoryConfigurer;
 import org.springframework.messaging.rsocket.DefaultMetadataExtractor;
 import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.RSocketRequester;
@@ -114,10 +117,16 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	/**
 	 * Provide configuration in the form of {@link RSocketStrategies} instance
 	 * which can also be re-used to initialize a client-side
-	 * {@link RSocketRequester}. When this property is set, it also sets
-	 * {@link #setDecoders(List) decoders}, {@link #setEncoders(List) encoders},
-	 * and {@link #setReactiveAdapterRegistry(ReactiveAdapterRegistry)
-	 * reactiveAdapterRegistry}.
+	 * {@link RSocketRequester}.
+	 * <p>When this is set, in turn it sets the following:
+	 * <ul>
+	 * <li>{@link #setDecoders(List)}
+	 * <li>{@link #setEncoders(List)}
+	 * <li>{@link #setRouteMatcher(RouteMatcher)}
+	 * <li>{@link #setMetadataExtractor(MetadataExtractor)}
+	 * <li>{@link #setReactiveAdapterRegistry(ReactiveAdapterRegistry)}
+	 * </ul>
+	 * <p>By default if this is not set, it is initialized from the above.
 	 */
 	public void setRSocketStrategies(@Nullable RSocketStrategies rsocketStrategies) {
 		this.rsocketStrategies = rsocketStrategies;
@@ -138,12 +147,10 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	/**
-	 * Configure a {@link MetadataExtractor} to extract the route and possibly
-	 * other metadata from the first payload of incoming requests.
-	 * <p>By default this is a {@link DefaultMetadataExtractor} with the
-	 * configured {@link RSocketStrategies} (and decoders), extracting a route
-	 * from {@code "message/x.rsocket.routing.v0"} or {@code "text/plain"}
-	 * metadata entries.
+	 * Configure a {@link MetadataExtractor} to extract the route along with
+	 * other metadata.
+	 * <p>By default this is {@link DefaultMetadataExtractor} extracting a
+	 * route from {@code "message/x.rsocket.routing.v0"} or {@code "text/plain"}.
 	 * @param extractor the extractor to use
 	 */
 	public void setMetadataExtractor(MetadataExtractor extractor) {
@@ -200,20 +207,25 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 	@Override
 	public void afterPropertiesSet() {
+
+		getArgumentResolverConfigurer().addCustomResolver(new RSocketRequesterMethodArgumentResolver());
+		super.afterPropertiesSet();
+
+		if (getMetadataExtractor() == null) {
+			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
+			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
+			setMetadataExtractor(extractor);
+		}
+
 		if (this.rsocketStrategies == null) {
 			this.rsocketStrategies = RSocketStrategies.builder()
 					.decoder(getDecoders().toArray(new Decoder<?>[0]))
 					.encoder(getEncoders().toArray(new Encoder<?>[0]))
+					.routeMatcher(getRouteMatcher())
+					.metadataExtractor(getMetadataExtractor())
 					.reactiveAdapterStrategy(getReactiveAdapterRegistry())
 					.build();
 		}
-		if (this.metadataExtractor == null) {
-			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
-			this.metadataExtractor = extractor;
-		}
-		getArgumentResolverConfigurer().addCustomResolver(new RSocketRequesterMethodArgumentResolver());
-		super.afterPropertiesSet();
 	}
 
 	@Override
@@ -315,10 +327,50 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		Assert.notNull(strategies, "No RSocketStrategies. Was afterPropertiesSet not called?");
 		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metadataMimeType, strategies);
 
-		Assert.notNull(this.metadataExtractor, () -> "No MetadataExtractor. Was afterPropertiesSet not called?");
+		Assert.state(this.metadataExtractor != null,
+				() -> "No MetadataExtractor. Was afterPropertiesSet not called?");
+
+		Assert.state(getRouteMatcher() != null,
+				() -> "No RouteMatcher. Was afterPropertiesSet not called?");
 
 		return new MessagingRSocket(dataMimeType, metadataMimeType, this.metadataExtractor, requester,
 				this, getRouteMatcher(), strategies);
+	}
+
+
+	public static ClientRSocketFactoryConfigurer clientResponder(Object... handlers) {
+		return new ResponderConfigurer(handlers);
+	}
+
+
+	private static final class ResponderConfigurer implements ClientRSocketFactoryConfigurer {
+
+		private final List<Object> handlers = new ArrayList<>();
+
+		@Nullable
+		private RSocketStrategies strategies;
+
+
+		private ResponderConfigurer(Object... handlers) {
+			Assert.notEmpty(handlers, "No handlers");
+			for (Object obj : handlers) {
+				this.handlers.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+			}
+		}
+
+		@Override
+		public void configureWithStrategies(RSocketStrategies strategies) {
+			this.strategies = strategies;
+		}
+
+		@Override
+		public void configure(RSocketFactory.ClientRSocketFactory factory) {
+			RSocketMessageHandler handler = new RSocketMessageHandler();
+			handler.setHandlers(this.handlers);
+			handler.setRSocketStrategies(this.strategies);
+			handler.afterPropertiesSet();
+			factory.acceptor(handler.clientResponder());
+		}
 	}
 
 }

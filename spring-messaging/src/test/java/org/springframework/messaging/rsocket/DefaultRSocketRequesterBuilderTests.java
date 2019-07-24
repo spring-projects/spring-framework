@@ -17,11 +17,16 @@
 package org.springframework.messaging.rsocket;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.DuplexConnection;
 import io.rsocket.RSocketFactory;
+import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.ClientTransport;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,13 +34,19 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.DecodingException;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
@@ -52,6 +63,8 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	private ClientTransport transport;
 
+	private final TestRSocketFactoryConfigurer rsocketFactoryConfigurer = new TestRSocketFactoryConfigurer();
+
 
 	@Before
 	public void setup() {
@@ -63,53 +76,113 @@ public class DefaultRSocketRequesterBuilderTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void shouldApplyCustomizationsAtSubscription() {
-		ClientRSocketFactoryConfigurer factoryConfigurer = mock(ClientRSocketFactoryConfigurer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
-				.rsocketFactory(factoryConfigurer)
+				.rsocketFactory(this.rsocketFactoryConfigurer)
 				.rsocketStrategies(strategiesConfigurer)
 				.connect(this.transport);
-		verifyZeroInteractions(this.transport, factoryConfigurer, strategiesConfigurer);
+
+		verifyZeroInteractions(this.transport);
+		assertThat(this.rsocketFactoryConfigurer.rsocketFactory()).isNull();
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void shouldApplyCustomizations() {
-		RSocketStrategies strategies = RSocketStrategies.builder()
-				.encoder(CharSequenceEncoder.allMimeTypes())
-				.decoder(StringDecoder.allMimeTypes())
-				.build();
-		ClientRSocketFactoryConfigurer factoryConfigurer = mock(ClientRSocketFactoryConfigurer.class);
-		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
+		Consumer<RSocketStrategies.Builder> rsocketStrategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
-				.rsocketStrategies(strategies)
-				.rsocketFactory(factoryConfigurer)
-				.rsocketStrategies(strategiesConfigurer)
+				.rsocketFactory(this.rsocketFactoryConfigurer)
+				.rsocketStrategies(rsocketStrategiesConfigurer)
 				.connect(this.transport)
 				.block();
+
+		// RSocketStrategies and RSocketFactory configurers should have been called
+
 		verify(this.transport).connect(anyInt());
-		verify(factoryConfigurer).configureWithStrategies(any(RSocketStrategies.class));
-		verify(factoryConfigurer).configure(any(RSocketFactory.ClientRSocketFactory.class));
-		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
+		verify(rsocketStrategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
+		assertThat(this.rsocketFactoryConfigurer.rsocketStrategies()).isNotNull();
+		assertThat(this.rsocketFactoryConfigurer.rsocketFactory()).isNotNull();
 	}
 
 	@Test
-	public void dataMimeType() throws NoSuchFieldException {
+	public void defaultDataMimeType() {
+		RSocketRequester requester = RSocketRequester.builder()
+				.connect(this.transport)
+				.block();
+
+		assertThat(requester.dataMimeType())
+				.as("Default data MimeType, based on the first configured Decoder")
+				.isEqualTo(MimeTypeUtils.TEXT_PLAIN);
+	}
+
+	@Test
+	public void defaultDataMimeTypeWithCustomDecoderRegitered() {
 		RSocketStrategies strategies = RSocketStrategies.builder()
-				.encoder(CharSequenceEncoder.allMimeTypes())
-				.decoder(StringDecoder.allMimeTypes())
+				.decoder(new TestJsonDecoder(MimeTypeUtils.APPLICATION_JSON))
 				.build();
 
 		RSocketRequester requester = RSocketRequester.builder()
 				.rsocketStrategies(strategies)
+				.connect(this.transport)
+				.block();
+
+		assertThat(requester.dataMimeType())
+				.as("Default data MimeType, based on the first configured, non-default Decoder")
+				.isEqualTo(MimeTypeUtils.APPLICATION_JSON);
+	}
+
+	@Test
+	public void defaultDataMimeTypeWithMultipleCustomDecoderRegitered() {
+		RSocketStrategies strategies = RSocketStrategies.builder()
+				.decoder(new TestJsonDecoder(MimeTypeUtils.APPLICATION_JSON))
+				.decoder(new TestJsonDecoder(MimeTypeUtils.APPLICATION_XML))
+				.build();
+
+		assertThatThrownBy(() ->
+				RSocketRequester
+						.builder()
+						.rsocketStrategies(strategies)
+						.connect(this.transport)
+						.block())
+				.hasMessageContaining("Cannot select default data MimeType");
+	}
+
+	@Test
+	public void dataMimeTypeSet() {
+		RSocketRequester requester = RSocketRequester.builder()
 				.dataMimeType(MimeTypeUtils.APPLICATION_JSON)
 				.connect(this.transport)
 				.block();
 
-		Field field = DefaultRSocketRequester.class.getDeclaredField("dataMimeType");
+		assertThat(requester.dataMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
+	}
+
+	@Test
+	public void frameDecoderMatchesDataBufferFactory() throws Exception {
+		testFrameDecoder(new NettyDataBufferFactory(ByteBufAllocator.DEFAULT), PayloadDecoder.ZERO_COPY);
+		testFrameDecoder(new DefaultDataBufferFactory(), PayloadDecoder.DEFAULT);
+	}
+
+	private void testFrameDecoder(DataBufferFactory bufferFactory, PayloadDecoder frameDecoder)
+			throws NoSuchFieldException {
+
+		RSocketStrategies strategies = RSocketStrategies.builder()
+				.dataBufferFactory(bufferFactory)
+				.build();
+
+		RSocketRequester.builder()
+				.rsocketStrategies(strategies)
+				.rsocketFactory(this.rsocketFactoryConfigurer)
+				.connect(this.transport)
+				.block();
+
+		RSocketFactory.ClientRSocketFactory factory = this.rsocketFactoryConfigurer.rsocketFactory();
+		assertThat(factory).isNotNull();
+
+		Field field = RSocketFactory.ClientRSocketFactory.class.getDeclaredField("payloadDecoder");
 		ReflectionUtils.makeAccessible(field);
-		MimeType dataMimeType = (MimeType) ReflectionUtils.getField(field, requester);
-		assertThat(dataMimeType).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
+		PayloadDecoder decoder = (PayloadDecoder) ReflectionUtils.getField(field, factory);
+		assertThat(decoder).isSameAs(frameDecoder);
 	}
 
 
@@ -132,6 +205,77 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		@Override
 		public void dispose() {
+		}
+	}
+
+
+	static class TestRSocketFactoryConfigurer implements ClientRSocketFactoryConfigurer {
+
+		private RSocketStrategies strategies;
+
+		private RSocketFactory.ClientRSocketFactory rsocketFactory;
+
+
+		public RSocketStrategies rsocketStrategies() {
+			return this.strategies;
+		}
+
+		public RSocketFactory.ClientRSocketFactory rsocketFactory() {
+			return this.rsocketFactory;
+		}
+
+
+		@Override
+		public void configureWithStrategies(RSocketStrategies strategies) {
+			this.strategies = strategies;
+		}
+
+		@Override
+		public void configure(RSocketFactory.ClientRSocketFactory rsocketFactory) {
+			this.rsocketFactory = rsocketFactory;
+		}
+	}
+
+
+	static class TestJsonDecoder implements Decoder<Object> {
+
+		private final MimeType mimeType;
+
+
+		TestJsonDecoder(MimeType mimeType) {
+			this.mimeType = mimeType;
+		}
+
+		@Override
+		public List<MimeType> getDecodableMimeTypes() {
+			return Collections.singletonList(this.mimeType);
+		}
+
+		@Override
+		public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+			return false;
+		}
+
+		@Override
+		public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+				MimeType mimeType, Map<String, Object> hints) {
+
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+				MimeType mimeType, Map<String, Object> hints) {
+
+			throw new UnsupportedOperationException();
+		}
+
+
+		@Override
+		public Object decode(DataBuffer buffer, ResolvableType targetType, MimeType mimeType,
+				Map<String, Object> hints) throws DecodingException {
+
+			throw new UnsupportedOperationException();
 		}
 	}
 

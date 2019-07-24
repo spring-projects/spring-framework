@@ -18,8 +18,8 @@ package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import io.rsocket.RSocketFactory;
+import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
@@ -37,12 +37,8 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
-import org.springframework.messaging.rsocket.annotation.support.AnnotationClientResponderConfigurer;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.stereotype.Controller;
 
@@ -62,11 +58,14 @@ public class RSocketServerToClientIntegrationTests {
 	@BeforeClass
 	@SuppressWarnings("ConstantConditions")
 	public static void setupOnce() {
+
 		context = new AnnotationConfigApplicationContext(RSocketConfig.class);
+		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
+		SocketAcceptor responder = messageHandler.serverResponder();
 
 		server = RSocketFactory.receive()
 				.frameDecoder(PayloadDecoder.ZERO_COPY)
-				.acceptor(context.getBean(RSocketMessageHandler.class).serverResponder())
+				.acceptor(responder)
 				.transport(TcpServerTransport.create("localhost", 0))
 				.start()
 				.block();
@@ -103,21 +102,16 @@ public class RSocketServerToClientIntegrationTests {
 
 		ServerController serverController = context.getBean(ServerController.class);
 		serverController.reset();
-		RSocketStrategies strategies = context.getBean(RSocketStrategies.class);
 
 		RSocketRequester requester = null;
 		try {
-			ClientRSocketFactoryConfigurer responderConfigurer =
-					AnnotationClientResponderConfigurer.withHandlers(new ClientHandler());
-
 			requester = RSocketRequester.builder()
 					.rsocketFactory(factory -> {
 						factory.metadataMimeType("text/plain");
 						factory.setupPayload(ByteBufPayload.create("", connectionRoute));
-						factory.frameDecoder(PayloadDecoder.ZERO_COPY);
 					})
-					.rsocketFactory(responderConfigurer)
-					.rsocketStrategies(strategies)
+					.rsocketFactory(RSocketMessageHandler.clientResponder(new ClientHandler()))
+					.rsocketStrategies(context.getBean(RSocketStrategies.class))
 					.connectTcp("localhost", server.address().getPort())
 					.block();
 
@@ -268,11 +262,7 @@ public class RSocketServerToClientIntegrationTests {
 
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
-			return RSocketStrategies.builder()
-					.decoder(StringDecoder.allMimeTypes())
-					.encoder(CharSequenceEncoder.allMimeTypes())
-					.dataBufferFactory(new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT))
-					.build();
+			return RSocketStrategies.create();
 		}
 	}
 

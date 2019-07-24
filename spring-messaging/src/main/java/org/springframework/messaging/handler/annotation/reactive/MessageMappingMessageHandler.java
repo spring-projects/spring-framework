@@ -88,6 +88,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	@Nullable
 	private Validator validator;
 
+	@Nullable
 	private RouteMatcher routeMatcher;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
@@ -97,9 +98,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 
 	public MessageMappingMessageHandler() {
-		AntPathMatcher pathMatcher = new AntPathMatcher();
-		pathMatcher.setPathSeparator(".");
-		this.routeMatcher = new SimpleRouteMatcher(pathMatcher);
 		setHandlerPredicate(type -> AnnotatedElementUtils.hasAnnotation(type, Controller.class));
 	}
 
@@ -150,7 +148,9 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	/**
 	 * Return the {@code RouteMatcher} used to map messages to handlers.
+	 * May be {@code null} before component is initialized.
 	 */
+	@Nullable
 	public RouteMatcher getRouteMatcher() {
 		return this.routeMatcher;
 	}
@@ -202,6 +202,12 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		// Catch-all
 		resolvers.add(new PayloadMethodArgumentResolver(
 				getDecoders(), this.validator, getReactiveAdapterRegistry(), true));
+
+		if (this.routeMatcher == null) {
+			AntPathMatcher pathMatcher = new AntPathMatcher();
+			pathMatcher.setPathSeparator(".");
+			this.routeMatcher = new SimpleRouteMatcher(pathMatcher);
+		}
 
 		return resolvers;
 	}
