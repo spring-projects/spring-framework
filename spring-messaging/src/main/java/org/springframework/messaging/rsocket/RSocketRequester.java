@@ -30,7 +30,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.Decoder;
 import org.springframework.lang.Nullable;
-import org.springframework.messaging.rsocket.annotation.support.AnnotationClientResponderConfigurer;
+import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.util.MimeType;
 
 /**
@@ -165,14 +165,15 @@ public interface RSocketRequester {
 
 		/**
 		 * Callback to configure the {@code ClientRSocketFactory} directly.
-		 * <p>See {@link AnnotationClientResponderConfigurer} for configuring a
-		 * client side responder.
+		 * <p>See static factory method
+		 * {@link RSocketMessageHandler#clientResponder(Object...)} for
+		 * configuring a client side responder with annotated methods.
 		 * <p><strong>Note:</strong> Do not set {@link #dataMimeType(MimeType)}
 		 * and {@link #metadataMimeType(MimeType)} directly on the
 		 * {@code ClientRSocketFactory}. Use the shortcuts on this builder
 		 * instead since the created {@code RSocketRequester} needs to be aware
 		 * of those settings.
-		 * @see AnnotationClientResponderConfigurer
+		 * @see RSocketMessageHandler#clientResponder(Object...)
 		 */
 		RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer);
 

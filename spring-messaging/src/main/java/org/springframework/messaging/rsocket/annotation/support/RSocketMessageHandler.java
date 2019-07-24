@@ -24,10 +24,12 @@ import java.util.function.Function;
 
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
+import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.FrameType;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
@@ -40,6 +42,7 @@ import org.springframework.messaging.handler.DestinationPatternsMessageCondition
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.rsocket.ClientRSocketFactoryConfigurer;
 import org.springframework.messaging.rsocket.DefaultMetadataExtractor;
 import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.RSocketRequester;
@@ -324,10 +327,50 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		Assert.notNull(strategies, "No RSocketStrategies. Was afterPropertiesSet not called?");
 		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metadataMimeType, strategies);
 
-		Assert.notNull(this.metadataExtractor, () -> "No MetadataExtractor. Was afterPropertiesSet not called?");
+		Assert.state(this.metadataExtractor != null,
+				() -> "No MetadataExtractor. Was afterPropertiesSet not called?");
+
+		Assert.state(getRouteMatcher() != null,
+				() -> "No RouteMatcher. Was afterPropertiesSet not called?");
 
 		return new MessagingRSocket(dataMimeType, metadataMimeType, this.metadataExtractor, requester,
 				this, getRouteMatcher(), strategies);
+	}
+
+
+	public static ClientRSocketFactoryConfigurer clientResponder(Object... handlers) {
+		return new ResponderConfigurer(handlers);
+	}
+
+
+	private static final class ResponderConfigurer implements ClientRSocketFactoryConfigurer {
+
+		private final List<Object> handlers = new ArrayList<>();
+
+		@Nullable
+		private RSocketStrategies strategies;
+
+
+		private ResponderConfigurer(Object... handlers) {
+			Assert.notEmpty(handlers, "No handlers");
+			for (Object obj : handlers) {
+				this.handlers.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+			}
+		}
+
+		@Override
+		public void configureWithStrategies(RSocketStrategies strategies) {
+			this.strategies = strategies;
+		}
+
+		@Override
+		public void configure(RSocketFactory.ClientRSocketFactory factory) {
+			RSocketMessageHandler handler = new RSocketMessageHandler();
+			handler.setHandlers(this.handlers);
+			handler.setRSocketStrategies(this.strategies);
+			handler.afterPropertiesSet();
+			factory.acceptor(handler.clientResponder());
+		}
 	}
 
 }
