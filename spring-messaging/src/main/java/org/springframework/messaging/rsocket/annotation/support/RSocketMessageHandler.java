@@ -114,10 +114,16 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	/**
 	 * Provide configuration in the form of {@link RSocketStrategies} instance
 	 * which can also be re-used to initialize a client-side
-	 * {@link RSocketRequester}. When this property is set, it also sets
-	 * {@link #setDecoders(List) decoders}, {@link #setEncoders(List) encoders},
-	 * and {@link #setReactiveAdapterRegistry(ReactiveAdapterRegistry)
-	 * reactiveAdapterRegistry}.
+	 * {@link RSocketRequester}.
+	 * <p>When this is set, in turn it sets the following:
+	 * <ul>
+	 * <li>{@link #setDecoders(List)}
+	 * <li>{@link #setEncoders(List)}
+	 * <li>{@link #setRouteMatcher(RouteMatcher)}
+	 * <li>{@link #setMetadataExtractor(MetadataExtractor)}
+	 * <li>{@link #setReactiveAdapterRegistry(ReactiveAdapterRegistry)}
+	 * </ul>
+	 * <p>By default if this is not set, it is initialized from the above.
 	 */
 	public void setRSocketStrategies(@Nullable RSocketStrategies rsocketStrategies) {
 		this.rsocketStrategies = rsocketStrategies;
@@ -138,12 +144,10 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	/**
-	 * Configure a {@link MetadataExtractor} to extract the route and possibly
-	 * other metadata from the first payload of incoming requests.
-	 * <p>By default this is a {@link DefaultMetadataExtractor} with the
-	 * configured {@link RSocketStrategies} (and decoders), extracting a route
-	 * from {@code "message/x.rsocket.routing.v0"} or {@code "text/plain"}
-	 * metadata entries.
+	 * Configure a {@link MetadataExtractor} to extract the route along with
+	 * other metadata.
+	 * <p>By default this is {@link DefaultMetadataExtractor} extracting a
+	 * route from {@code "message/x.rsocket.routing.v0"} or {@code "text/plain"}.
 	 * @param extractor the extractor to use
 	 */
 	public void setMetadataExtractor(MetadataExtractor extractor) {
@@ -200,20 +204,25 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 	@Override
 	public void afterPropertiesSet() {
+
+		getArgumentResolverConfigurer().addCustomResolver(new RSocketRequesterMethodArgumentResolver());
+		super.afterPropertiesSet();
+
+		if (getMetadataExtractor() == null) {
+			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
+			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
+			setMetadataExtractor(extractor);
+		}
+
 		if (this.rsocketStrategies == null) {
 			this.rsocketStrategies = RSocketStrategies.builder()
 					.decoder(getDecoders().toArray(new Decoder<?>[0]))
 					.encoder(getEncoders().toArray(new Encoder<?>[0]))
+					.routeMatcher(getRouteMatcher())
+					.metadataExtractor(getMetadataExtractor())
 					.reactiveAdapterStrategy(getReactiveAdapterRegistry())
 					.build();
 		}
-		if (this.metadataExtractor == null) {
-			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
-			this.metadataExtractor = extractor;
-		}
-		getArgumentResolverConfigurer().addCustomResolver(new RSocketRequesterMethodArgumentResolver());
-		super.afterPropertiesSet();
 	}
 
 	@Override

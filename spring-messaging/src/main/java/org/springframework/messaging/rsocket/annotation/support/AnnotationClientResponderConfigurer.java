@@ -25,10 +25,8 @@ import io.rsocket.RSocketFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.rsocket.ClientRSocketFactoryConfigurer;
-import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.util.Assert;
-import org.springframework.util.RouteMatcher;
 
 /**
  * {@link ClientRSocketFactoryConfigurer} to configure and plug in a responder
@@ -45,12 +43,6 @@ public final class AnnotationClientResponderConfigurer implements ClientRSocketF
 	private final List<Object> handlers = new ArrayList<>();
 
 	@Nullable
-	private RouteMatcher routeMatcher;
-
-	@Nullable
-	private MetadataExtractor extractor;
-
-	@Nullable
 	private RSocketStrategies strategies;
 
 
@@ -60,24 +52,6 @@ public final class AnnotationClientResponderConfigurer implements ClientRSocketF
 		}
 	}
 
-
-	/**
-	 * Configure the {@link RouteMatcher} to use. This is used to set
-	 * {@link RSocketMessageHandler#setRouteMatcher(RouteMatcher)}.
-	 */
-	public AnnotationClientResponderConfigurer routeMatcher(RouteMatcher routeMatcher) {
-		this.routeMatcher = routeMatcher;
-		return this;
-	}
-
-	/**
-	 * Configure the {@link MetadataExtractor} to use. This is used to set
-	 * {@link RSocketMessageHandler#setMetadataExtractor(MetadataExtractor)}.
-	 */
-	public AnnotationClientResponderConfigurer metadataExtractor(MetadataExtractor extractor) {
-		this.extractor = extractor;
-		return this;
-	}
 
 	/**
 	 * Configure handlers to detect {@code @MessasgeMapping} handler methods on.
@@ -101,12 +75,6 @@ public final class AnnotationClientResponderConfigurer implements ClientRSocketF
 		Assert.notEmpty(this.handlers, "No handlers");
 		RSocketMessageHandler messageHandler = new RSocketMessageHandler();
 		messageHandler.setHandlers(this.handlers);
-		if (this.routeMatcher != null) {
-			messageHandler.setRouteMatcher(this.routeMatcher);
-		}
-		if (this.extractor != null) {
-			messageHandler.setMetadataExtractor(this.extractor);
-		}
 		messageHandler.setRSocketStrategies(this.strategies);
 		messageHandler.afterPropertiesSet();
 		factory.acceptor(messageHandler.clientResponder());

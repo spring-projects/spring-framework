@@ -31,7 +31,10 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MimeType;
+import org.springframework.util.RouteMatcher;
+import org.springframework.util.SimpleRouteMatcher;
 
 /**
  * Access to strategies for use by RSocket requester and responder components.
@@ -90,16 +93,26 @@ public interface RSocketStrategies {
 	}
 
 	/**
-	 * Return the configured
-	 * {@link Builder#reactiveAdapterStrategy(ReactiveAdapterRegistry) reactiveAdapterRegistry}.
+	 * Return the configured {@link Builder#routeMatcher(RouteMatcher)}.
 	 */
-	ReactiveAdapterRegistry reactiveAdapterRegistry();
+	RouteMatcher routeMatcher();
+
+	/**
+	 * Return the configured {@link Builder#metadataExtractor(MetadataExtractor)}.
+	 */
+	MetadataExtractor metadataExtractor();
 
 	/**
 	 * Return the configured
 	 * {@link Builder#dataBufferFactory(DataBufferFactory) dataBufferFactory}.
 	 */
 	DataBufferFactory dataBufferFactory();
+
+	/**
+	 * Return the configured
+	 * {@link Builder#reactiveAdapterStrategy(ReactiveAdapterRegistry) reactiveAdapterRegistry}.
+	 */
+	ReactiveAdapterRegistry reactiveAdapterRegistry();
 
 
 	/**
@@ -148,6 +161,27 @@ public interface RSocketStrategies {
 		 * Apply the consumer to the list of configured decoders, immediately.
 		 */
 		Builder decoders(Consumer<List<Decoder<?>>> consumer);
+
+		/**
+		 * Configure a {@code RouteMatcher} for matching routes to message
+		 * handlers based on route patterns. This option is applicable to
+		 * client or server responders.
+		 * <p>By default, {@link SimpleRouteMatcher} is used, backed by
+		 * {@link AntPathMatcher} with "." as separator. For better
+		 * efficiency consider using the {@code PathPatternRouteMatcher} from
+		 * {@code spring-web} instead.
+		 */
+		Builder routeMatcher(RouteMatcher routeMatcher);
+
+		/**
+		 * Configure a {@link MetadataExtractor} to extract the route along with
+		 * other metadata. This option is applicable to client or server
+		 * responders.
+		 * <p>By default this is {@link DefaultMetadataExtractor} extracting a
+		 * route from {@code "message/x.rsocket.routing.v0"} or
+		 * {@code "text/plain"} metadata entries.
+		 */
+		Builder metadataExtractor(MetadataExtractor metadataExtractor);
 
 		/**
 		 * Configure the registry for reactive type support. This can be used to
