@@ -304,7 +304,13 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 */
 	public SocketAcceptor serverResponder() {
 		return (setupPayload, sendingRSocket) -> {
-			MessagingRSocket responder = createResponder(setupPayload, sendingRSocket);
+			MessagingRSocket responder;
+			try {
+				responder = createResponder(setupPayload, sendingRSocket);
+			}
+			catch (Throwable ex) {
+				return Mono.error(ex);
+			}
 			return responder.handleConnectionSetupPayload(setupPayload).then(Mono.just(responder));
 		};
 	}
@@ -335,14 +341,15 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		String s = setupPayload.dataMimeType();
 		MimeType dataMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultDataMimeType;
 		Assert.notNull(dataMimeType, "No `dataMimeType` in ConnectionSetupPayload and no default value");
+		Assert.isTrue(isDataMimeTypeSupported(dataMimeType), "Data MimeType '" + dataMimeType + "' not supported");
 
 		s = setupPayload.metadataMimeType();
-		MimeType metadataMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
-		Assert.notNull(metadataMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
+		MimeType metaMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
+		Assert.notNull(metaMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
 
 		RSocketStrategies strategies = this.rsocketStrategies;
 		Assert.notNull(strategies, "No RSocketStrategies. Was afterPropertiesSet not called?");
-		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metadataMimeType, strategies);
+		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metaMimeType, strategies);
 
 		Assert.state(this.metadataExtractor != null,
 				() -> "No MetadataExtractor. Was afterPropertiesSet not called?");
@@ -350,10 +357,20 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		Assert.state(getRouteMatcher() != null,
 				() -> "No RouteMatcher. Was afterPropertiesSet not called?");
 
-		return new MessagingRSocket(dataMimeType, metadataMimeType, this.metadataExtractor, requester,
+		return new MessagingRSocket(dataMimeType, metaMimeType, this.metadataExtractor, requester,
 				this, getRouteMatcher(), strategies);
 	}
 
+	private boolean isDataMimeTypeSupported(MimeType dataMimeType) {
+		for (Encoder<?> encoder : getEncoders()) {
+			for (MimeType encodable : encoder.getEncodableMimeTypes()) {
+				if (encodable.isCompatibleWith(dataMimeType)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	public static ClientRSocketFactoryConfigurer clientResponder(Object... handlers) {
 		return new ResponderConfigurer(handlers);

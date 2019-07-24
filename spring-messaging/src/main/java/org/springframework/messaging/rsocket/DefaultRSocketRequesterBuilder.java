@@ -145,21 +145,14 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		if (this.dataMimeType != null) {
 			return this.dataMimeType;
 		}
-		// Look for non-basic Decoder (e.g. CBOR, Protobuf)
-		MimeType selected = null;
-		List<Decoder<?>> decoders = strategies.decoders();
-		for (Decoder<?> candidate : decoders) {
+		// First non-basic Decoder (e.g. CBOR, Protobuf)
+		for (Decoder<?> candidate : strategies.decoders()) {
 			if (!isCoreCodec(candidate) && !candidate.getDecodableMimeTypes().isEmpty()) {
-				Assert.state(selected == null,
-						() -> "Cannot select default data MimeType based on configured decoders: " + decoders);
-				selected = getMimeType(candidate);
+				return getMimeType(candidate);
 			}
 		}
-		if (selected != null) {
-			return selected;
-		}
-		// Fall back on 1st decoder (e.g. String)
-		for (Decoder<?> decoder : decoders) {
+		// First core decoder (e.g. String)
+		for (Decoder<?> decoder : strategies.decoders()) {
 			if (!decoder.getDecodableMimeTypes().isEmpty()) {
 				return getMimeType(decoder);
 			}

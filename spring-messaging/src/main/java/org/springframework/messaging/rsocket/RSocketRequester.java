@@ -128,11 +128,10 @@ public interface RSocketRequester {
 		/**
 		 * Configure the payload data MimeType to specify on the {@code SETUP}
 		 * frame that applies to the whole connection.
-		 * <p>If this is not set, the builder will try to select the mime type
-		 * based on the presence of a single
+		 * <p>If this is not set, it will be set to the MimeType of the first
 		 * {@link RSocketStrategies.Builder#decoder(Decoder[])  non-default}
-		 * {@code Decoder}, or the first default decoder otherwise
-		 * (i.e. {@code String}) if no others are configured.
+		 * {@code Decoder}, or otherwise fall back on the MimeType of the first
+		 * (default) decoder.
 		 */
 		RSocketRequester.Builder dataMimeType(@Nullable MimeType mimeType);
 

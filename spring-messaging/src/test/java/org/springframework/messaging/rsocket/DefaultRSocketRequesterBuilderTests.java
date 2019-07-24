@@ -46,7 +46,6 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
@@ -129,22 +128,6 @@ public class DefaultRSocketRequesterBuilderTests {
 		assertThat(requester.dataMimeType())
 				.as("Default data MimeType, based on the first configured, non-default Decoder")
 				.isEqualTo(MimeTypeUtils.APPLICATION_JSON);
-	}
-
-	@Test
-	public void defaultDataMimeTypeWithMultipleCustomDecoderRegitered() {
-		RSocketStrategies strategies = RSocketStrategies.builder()
-				.decoder(new TestJsonDecoder(MimeTypeUtils.APPLICATION_JSON))
-				.decoder(new TestJsonDecoder(MimeTypeUtils.APPLICATION_XML))
-				.build();
-
-		assertThatThrownBy(() ->
-				RSocketRequester
-						.builder()
-						.rsocketStrategies(strategies)
-						.connect(this.transport)
-						.block())
-				.hasMessageContaining("Cannot select default data MimeType");
 	}
 
 	@Test
