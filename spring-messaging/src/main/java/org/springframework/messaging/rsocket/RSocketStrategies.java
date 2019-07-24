@@ -114,20 +114,30 @@ public interface RSocketStrategies {
 	 */
 	ReactiveAdapterRegistry reactiveAdapterRegistry();
 
-
-	/**
-	 * Return a builder to build a new {@code RSocketStrategies} instance.
-	 */
-	static Builder builder() {
-		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder();
-	}
-
 	/**
 	 * Return a builder to create a new {@link RSocketStrategies} instance
 	 * replicated from the current instance.
 	 */
 	default Builder mutate() {
 		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder(this);
+	}
+
+
+	/**
+	 * Create an {@code RSocketStrategies} instance with default settings.
+	 * Equivalent to {@code RSocketStrategies.builder().build()}.
+	 */
+	static RSocketStrategies create() {
+		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder().build();
+	}
+
+	/**
+	 * Return a builder to build a new {@code RSocketStrategies} instance.
+	 * The builder applies default settings, see individual builder methods for
+	 * details.
+	 */
+	static Builder builder() {
+		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder();
 	}
 
 
