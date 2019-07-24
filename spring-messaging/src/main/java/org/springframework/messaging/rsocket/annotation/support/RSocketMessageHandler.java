@@ -32,6 +32,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.codec.ByteArrayEncoder;
+import org.springframework.core.codec.ByteBufferEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.lang.Nullable;
@@ -82,6 +86,14 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	private MimeType defaultMetadataMimeType = MetadataExtractor.COMPOSITE_METADATA;
 
 
+	public RSocketMessageHandler() {
+		this.encoders.add(CharSequenceEncoder.allMimeTypes());
+		this.encoders.add(new ByteBufferEncoder());
+		this.encoders.add(new ByteArrayEncoder());
+		this.encoders.add(new DataBufferEncoder());
+	}
+
+
 	/**
 	 * {@inheritDoc}
 	 * <p>If {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
@@ -104,6 +116,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * other properties.
 	 */
 	public void setEncoders(List<? extends Encoder<?>> encoders) {
+		this.encoders.clear();
 		this.encoders.addAll(encoders);
 	}
 
@@ -128,22 +141,32 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * </ul>
 	 * <p>By default if this is not set, it is initialized from the above.
 	 */
-	public void setRSocketStrategies(@Nullable RSocketStrategies rsocketStrategies) {
-		this.rsocketStrategies = rsocketStrategies;
-		if (rsocketStrategies != null) {
-			setDecoders(rsocketStrategies.decoders());
-			setEncoders(rsocketStrategies.encoders());
-			setReactiveAdapterRegistry(rsocketStrategies.reactiveAdapterRegistry());
-		}
+	public void setRSocketStrategies(RSocketStrategies rsocketStrategies) {
+		setDecoders(rsocketStrategies.decoders());
+		setEncoders(rsocketStrategies.encoders());
+		setRouteMatcher(rsocketStrategies.routeMatcher());
+		setMetadataExtractor(rsocketStrategies.metadataExtractor());
+		setReactiveAdapterRegistry(rsocketStrategies.reactiveAdapterRegistry());
 	}
 
 	/**
-	 * Return the configured {@link RSocketStrategies}. This may be {@code null}
-	 * before {@link #afterPropertiesSet()} is called.
+	 * Return an {@link RSocketStrategies} instance initialized from the
+	 * corresponding properties listed under {@link #setRSocketStrategies}.
 	 */
-	@Nullable
 	public RSocketStrategies getRSocketStrategies() {
-		return this.rsocketStrategies;
+		return this.rsocketStrategies != null ? this.rsocketStrategies : initRSocketStrategies();
+	}
+
+	private RSocketStrategies initRSocketStrategies() {
+		return RSocketStrategies.builder()
+				.decoders(List::clear)
+				.encoders(List::clear)
+				.decoders(decoders -> decoders.addAll(getDecoders()))
+				.encoders(encoders -> encoders.addAll(getEncoders()))
+				.routeMatcher(getRouteMatcher())
+				.metadataExtractor(getMetadataExtractor())
+				.reactiveAdapterStrategy(getReactiveAdapterRegistry())
+				.build();
 	}
 
 	/**
@@ -208,7 +231,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	@Override
 	public void afterPropertiesSet() {
 
+		// Add argument resolver before parent initializes argument resolution
 		getArgumentResolverConfigurer().addCustomResolver(new RSocketRequesterMethodArgumentResolver());
+
 		super.afterPropertiesSet();
 
 		if (getMetadataExtractor() == null) {
@@ -217,15 +242,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 			setMetadataExtractor(extractor);
 		}
 
-		if (this.rsocketStrategies == null) {
-			this.rsocketStrategies = RSocketStrategies.builder()
-					.decoder(getDecoders().toArray(new Decoder<?>[0]))
-					.encoder(getEncoders().toArray(new Encoder<?>[0]))
-					.routeMatcher(getRouteMatcher())
-					.metadataExtractor(getMetadataExtractor())
-					.reactiveAdapterStrategy(getReactiveAdapterRegistry())
-					.build();
-		}
+		this.rsocketStrategies = initRSocketStrategies();
 	}
 
 	@Override

@@ -181,7 +181,7 @@ public interface RSocketStrategies {
 		 * efficiency consider using the {@code PathPatternRouteMatcher} from
 		 * {@code spring-web} instead.
 		 */
-		Builder routeMatcher(RouteMatcher routeMatcher);
+		Builder routeMatcher(@Nullable RouteMatcher routeMatcher);
 
 		/**
 		 * Configure a {@link MetadataExtractor} to extract the route along with
@@ -191,7 +191,7 @@ public interface RSocketStrategies {
 		 * route from {@code "message/x.rsocket.routing.v0"} or
 		 * {@code "text/plain"} metadata entries.
 		 */
-		Builder metadataExtractor(MetadataExtractor metadataExtractor);
+		Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor);
 
 		/**
 		 * Configure the registry for reactive type support. This can be used to
@@ -199,7 +199,7 @@ public interface RSocketStrategies {
 		 * {@link org.reactivestreams.Publisher Publisher}.
 		 * <p>By default this {@link ReactiveAdapterRegistry#getSharedInstance()}.
 		 */
-		Builder reactiveAdapterStrategy(ReactiveAdapterRegistry registry);
+		Builder reactiveAdapterStrategy(@Nullable ReactiveAdapterRegistry registry);
 
 		/**
 		 * Configure the DataBufferFactory to use for allocating buffers when
@@ -216,7 +216,7 @@ public interface RSocketStrategies {
 		 * <p>If using {@link DefaultDataBufferFactory} instead, there is no
 		 * need for related config changes in RSocket.
 		 */
-		Builder dataBufferFactory(DataBufferFactory bufferFactory);
+		Builder dataBufferFactory(@Nullable DataBufferFactory bufferFactory);
 
 		/**
 		 * Build the {@code RSocketStrategies} instance.

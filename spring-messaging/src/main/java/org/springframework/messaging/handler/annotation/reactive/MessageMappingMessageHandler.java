@@ -36,7 +36,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.codec.ByteArrayDecoder;
+import org.springframework.core.codec.ByteBufferDecoder;
+import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
@@ -99,6 +103,10 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	public MessageMappingMessageHandler() {
 		setHandlerPredicate(type -> AnnotatedElementUtils.hasAnnotation(type, Controller.class));
+		this.decoders.add(StringDecoder.allMimeTypes());
+		this.decoders.add(new ByteBufferDecoder());
+		this.decoders.add(new ByteArrayDecoder());
+		this.decoders.add(new DataBufferDecoder());
 	}
 
 
@@ -106,6 +114,7 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 	 * Configure the decoders to use for incoming payloads.
 	 */
 	public void setDecoders(List<? extends Decoder<?>> decoders) {
+		this.decoders.clear();
 		this.decoders.addAll(decoders);
 	}
 
@@ -179,6 +188,19 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 
 	@Override
+	public void afterPropertiesSet() {
+
+		// Initialize RouteMatcher before parent initializes handler mappings
+		if (this.routeMatcher == null) {
+			AntPathMatcher pathMatcher = new AntPathMatcher();
+			pathMatcher.setPathSeparator(".");
+			this.routeMatcher = new SimpleRouteMatcher(pathMatcher);
+		}
+
+		super.afterPropertiesSet();
+	}
+
+	@Override
 	protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
@@ -202,12 +224,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 		// Catch-all
 		resolvers.add(new PayloadMethodArgumentResolver(
 				getDecoders(), this.validator, getReactiveAdapterRegistry(), true));
-
-		if (this.routeMatcher == null) {
-			AntPathMatcher pathMatcher = new AntPathMatcher();
-			pathMatcher.setPathSeparator(".");
-			this.routeMatcher = new SimpleRouteMatcher(pathMatcher);
-		}
 
 		return resolvers;
 	}

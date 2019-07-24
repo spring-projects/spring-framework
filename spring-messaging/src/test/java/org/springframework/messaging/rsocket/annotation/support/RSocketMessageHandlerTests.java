@@ -16,18 +16,28 @@
 package org.springframework.messaging.rsocket.annotation.support;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import io.rsocket.frame.FrameType;
 import org.junit.Test;
 
+import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.codec.ByteArrayDecoder;
+import org.springframework.core.codec.ByteArrayEncoder;
+import org.springframework.core.codec.ByteBufferDecoder;
+import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.codec.DataBufferDecoder;
+import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.rsocket.DefaultMetadataExtractor;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
@@ -45,6 +55,108 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @since 5.2
  */
 public class RSocketMessageHandlerTests {
+
+	@Test
+	public void rsocketStrategiesInitializedFromOtherProperties() {
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.setDecoders(Collections.singletonList(new ByteArrayDecoder()));
+		handler.setEncoders(Collections.singletonList(new ByteArrayEncoder()));
+		handler.setRouteMatcher(new SimpleRouteMatcher(new AntPathMatcher()));
+		handler.setMetadataExtractor(new DefaultMetadataExtractor());
+		handler.setReactiveAdapterRegistry(new ReactiveAdapterRegistry());
+		handler.afterPropertiesSet();
+
+		RSocketStrategies strategies = handler.getRSocketStrategies();
+		assertThat(strategies).isNotNull();
+		assertThat(strategies.encoders()).isEqualTo(handler.getEncoders());
+		assertThat(strategies.decoders()).isEqualTo(handler.getDecoders());
+		assertThat(strategies.routeMatcher()).isSameAs(handler.getRouteMatcher());
+		assertThat(strategies.metadataExtractor()).isSameAs(handler.getMetadataExtractor());
+		assertThat(strategies.reactiveAdapterRegistry()).isSameAs(handler.getReactiveAdapterRegistry());
+	}
+
+	@Test
+	public void rsocketStrategiesInitializedFromDefaults() {
+
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.afterPropertiesSet();
+
+		RSocketStrategies strategies = handler.getRSocketStrategies();
+		assertThat(strategies).isNotNull();
+
+		assertThat(strategies.encoders()).hasSize(4).hasOnlyElementsOfTypes(
+				CharSequenceEncoder.class,
+				ByteArrayEncoder.class,
+				ByteBufferEncoder.class,
+				DataBufferEncoder.class);
+
+		assertThat(strategies.decoders()).hasSize(4).hasOnlyElementsOfTypes(
+				StringDecoder.class,
+				ByteArrayDecoder.class,
+				ByteBufferDecoder.class,
+				DataBufferDecoder.class);
+
+		assertThat(strategies.routeMatcher()).isSameAs(handler.getRouteMatcher()).isNotNull();
+		assertThat(strategies.metadataExtractor()).isSameAs(handler.getMetadataExtractor()).isNotNull();
+		assertThat(strategies.reactiveAdapterRegistry()).isSameAs(handler.getReactiveAdapterRegistry()).isNotNull();
+	}
+
+	@Test
+	public void rsocketStrategiesSetsOtherProperties() {
+
+		RSocketStrategies strategies = RSocketStrategies.builder()
+				.encoders(List::clear)
+				.decoders(List::clear)
+				.encoders(encoders -> encoders.add(new ByteArrayEncoder()))
+				.decoders(decoders -> decoders.add(new ByteArrayDecoder()))
+				.routeMatcher(new SimpleRouteMatcher(new AntPathMatcher()))
+				.metadataExtractor(new DefaultMetadataExtractor())
+				.reactiveAdapterStrategy(new ReactiveAdapterRegistry())
+				.build();
+
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.setRSocketStrategies(strategies);
+		handler.afterPropertiesSet();
+
+		assertThat(handler.getEncoders()).isEqualTo(strategies.encoders());
+		assertThat(handler.getDecoders()).isEqualTo(strategies.decoders());
+		assertThat(handler.getRouteMatcher()).isSameAs(strategies.routeMatcher());
+		assertThat(handler.getMetadataExtractor()).isSameAs(strategies.metadataExtractor());
+		assertThat(handler.getReactiveAdapterRegistry()).isSameAs(strategies.reactiveAdapterRegistry());
+	}
+
+	@Test
+	public void rsocketStrategiesReflectsFurtherChangesToOtherProperties() {
+
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+
+		// RSocketStrategies sets other properties first
+		handler.setRSocketStrategies(RSocketStrategies.builder()
+				.encoders(List::clear)
+				.decoders(List::clear)
+				.encoders(encoders -> encoders.add(new ByteArrayEncoder()))
+				.decoders(decoders -> decoders.add(new ByteArrayDecoder()))
+				.routeMatcher(new SimpleRouteMatcher(new AntPathMatcher()))
+				.metadataExtractor(new DefaultMetadataExtractor())
+				.reactiveAdapterStrategy(new ReactiveAdapterRegistry())
+				.build());
+
+		// Followed by further changes to other properties
+		handler.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
+		handler.setEncoders(Collections.singletonList(CharSequenceEncoder.allMimeTypes()));
+		handler.setRouteMatcher(new SimpleRouteMatcher(new AntPathMatcher()));
+		handler.setMetadataExtractor(new DefaultMetadataExtractor());
+		handler.setReactiveAdapterRegistry(new ReactiveAdapterRegistry());
+		handler.afterPropertiesSet();
+
+		// RSocketStrategies should reflect current state
+		RSocketStrategies strategies = handler.getRSocketStrategies();
+		assertThat(strategies.encoders()).isEqualTo(handler.getEncoders());
+		assertThat(strategies.decoders()).isEqualTo(handler.getDecoders());
+		assertThat(strategies.routeMatcher()).isSameAs(handler.getRouteMatcher());
+		assertThat(strategies.metadataExtractor()).isSameAs(handler.getMetadataExtractor());
+		assertThat(strategies.reactiveAdapterRegistry()).isSameAs(handler.getReactiveAdapterRegistry());
+	}
 
 	@Test
 	public void mappings() {

@@ -39,7 +39,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.RouteMatcher;
 import org.springframework.util.SimpleRouteMatcher;
@@ -124,6 +123,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		@Nullable
 		private MetadataExtractor metadataExtractor;
 
+		@Nullable
 		private ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 		@Nullable
@@ -149,6 +149,8 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		DefaultRSocketStrategiesBuilder(RSocketStrategies other) {
 			this.encoders.addAll(other.encoders());
 			this.decoders.addAll(other.decoders());
+			this.routeMatcher = other.routeMatcher();
+			this.metadataExtractor = other.metadataExtractor();
 			this.adapterRegistry = other.reactiveAdapterRegistry();
 			this.bufferFactory = other.dataBufferFactory();
 		}
@@ -179,26 +181,25 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		}
 
 		@Override
-		public Builder routeMatcher(RouteMatcher routeMatcher) {
+		public Builder routeMatcher(@Nullable RouteMatcher routeMatcher) {
 			this.routeMatcher = routeMatcher;
 			return this;
 		}
 
 		@Override
-		public Builder metadataExtractor(MetadataExtractor metadataExtractor) {
+		public Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor) {
 			this.metadataExtractor = metadataExtractor;
 			return this;
 		}
 
 		@Override
-		public Builder reactiveAdapterStrategy(ReactiveAdapterRegistry registry) {
-			Assert.notNull(registry, "ReactiveAdapterRegistry is required");
+		public Builder reactiveAdapterStrategy(@Nullable ReactiveAdapterRegistry registry) {
 			this.adapterRegistry = registry;
 			return this;
 		}
 
 		@Override
-		public Builder dataBufferFactory(DataBufferFactory bufferFactory) {
+		public Builder dataBufferFactory(@Nullable DataBufferFactory bufferFactory) {
 			this.bufferFactory = bufferFactory;
 			return this;
 		}
@@ -210,7 +211,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 					this.routeMatcher != null ? this.routeMatcher : initRouteMatcher(),
 					this.metadataExtractor != null ? this.metadataExtractor : initMetadataExtractor(),
 					this.bufferFactory != null ? this.bufferFactory : initBufferFactory(),
-					this.adapterRegistry);
+					this.adapterRegistry != null ? this.adapterRegistry : initReactiveAdapterRegistry());
 		}
 
 		private RouteMatcher initRouteMatcher() {
@@ -227,6 +228,10 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 		private DataBufferFactory initBufferFactory() {
 			return new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
+		}
+
+		private ReactiveAdapterRegistry initReactiveAdapterRegistry() {
+			return ReactiveAdapterRegistry.getSharedInstance();
 		}
 	}
 
