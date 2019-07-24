@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,13 @@ import org.springframework.util.ObjectUtils;
  */
 public class DefaultValueStyler implements ValueStyler {
 
-	private static final String EMPTY = "[empty]";
+	private static final String EMPTY = "[[empty]]";
 	private static final String NULL = "[null]";
 	private static final String COLLECTION = "collection";
 	private static final String SET = "set";
 	private static final String LIST = "list";
 	private static final String MAP = "map";
+	private static final String EMPTY_MAP = MAP + EMPTY;
 	private static final String ARRAY = "array";
 
 
@@ -83,7 +84,7 @@ public class DefaultValueStyler implements ValueStyler {
 
 	private <K, V> String style(Map<K, V> value) {
 		if (value.isEmpty()) {
-			return MAP + '[' + EMPTY + ']';
+			return EMPTY_MAP;
 		}
 
 		StringJoiner result = new StringJoiner(", ", "[", "]");
@@ -101,7 +102,7 @@ public class DefaultValueStyler implements ValueStyler {
 		String collectionType = getCollectionTypeString(value);
 
 		if (value.isEmpty()) {
-			return collectionType + '[' + EMPTY + ']';
+			return collectionType + EMPTY;
 		}
 
 		StringJoiner result = new StringJoiner(", ", "[", "]");
@@ -125,7 +126,7 @@ public class DefaultValueStyler implements ValueStyler {
 
 	private String styleArray(Object[] array) {
 		if (array.length == 0) {
-			return ARRAY + '<' + ClassUtils.getShortName(array.getClass().getComponentType()) + '>' + '[' + EMPTY + ']';
+			return ARRAY + '<' + ClassUtils.getShortName(array.getClass().getComponentType()) + '>' + EMPTY;
 		}
 
 		StringJoiner result = new StringJoiner(", ", "[", "]");

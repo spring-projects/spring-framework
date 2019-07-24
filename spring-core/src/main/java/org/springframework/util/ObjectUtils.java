@@ -710,11 +710,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (Object o : array) {
-			sj.add(String.valueOf(o));
+			stringJoiner.add(String.valueOf(o));
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -734,11 +734,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (boolean b : array) {
-			sj.add(String.valueOf(b));
+			stringJoiner.add(String.valueOf(b));
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -758,11 +758,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (byte b : array) {
-			sj.add(String.valueOf(b));
+			stringJoiner.add(String.valueOf(b));
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -782,11 +782,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (char c : array) {
-			sj.add('\'' + String.valueOf(c) + '\'');
+			stringJoiner.add('\'' + String.valueOf(c) + '\'');
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -806,11 +806,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (double d : array) {
-			sj.add(String.valueOf(d));
+			stringJoiner.add(String.valueOf(d));
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -830,11 +830,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (float f : array) {
-			sj.add(String.valueOf(f));
+			stringJoiner.add(String.valueOf(f));
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -854,11 +854,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (int i : array) {
-			sj.add(String.valueOf(i));
+			stringJoiner.add(String.valueOf(i));
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -878,11 +878,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (long l : array) {
-			sj.add(String.valueOf(l));
+			stringJoiner.add(String.valueOf(l));
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
@@ -902,11 +902,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringJoiner sj = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
 		for (short s : array) {
-			sj.add(String.valueOf(s));
+			stringJoiner.add(String.valueOf(s));
 		}
-		return sj.toString();
+		return stringJoiner.toString();
 	}
 
 }

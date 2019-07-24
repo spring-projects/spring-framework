@@ -1,6 +1,20 @@
-package org.springframework.core.style;
+/*
+ * Copyright 2002-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import org.junit.Test;
+package org.springframework.core.style;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,32 +24,37 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DefaultValueStylerTest {
+/**
+ * Unit tests for {@link DefaultValueStyler}.
+ *
+ * @since 5.2
+ */
+public class DefaultValueStylerTests {
 
-	private DefaultValueStyler styler = new DefaultValueStyler();
+	private final DefaultValueStyler styler = new DefaultValueStyler();
+
 
 	@Test
-	public void style() throws NoSuchMethodException {
+	public void styleBasics() throws NoSuchMethodException {
 		assertThat(styler.style(null)).isEqualTo("[null]");
-
 		assertThat(styler.style("str")).isEqualTo("'str'");
-
 		assertThat(styler.style(String.class)).isEqualTo("String");
-
 		assertThat(styler.style(String.class.getMethod("toString"))).isEqualTo("toString@String");
 	}
 
 	@Test
-	public void style_plainObject() {
-		final Object obj = new Object();
+	public void stylePlainObject() {
+		Object obj = new Object();
 
 		assertThat(styler.style(obj)).isEqualTo(String.valueOf(obj));
 	}
 
 	@Test
-	public void style_map() {
+	public void styleMaps() {
 		Map<String, Integer> map = Collections.emptyMap();
 		assertThat(styler.style(map)).isEqualTo("map[[empty]]");
 
@@ -49,19 +68,19 @@ public class DefaultValueStylerTest {
 	}
 
 	@Test
-	public void style_entry() {
-		final Map<String, Integer> map = new LinkedHashMap<>();
+	public void styleMapEntries() {
+		Map<String, Integer> map = new LinkedHashMap<>();
 		map.put("key1", 1);
 		map.put("key2", 2);
 
-		final Iterator<Map.Entry<String, Integer>> entries = map.entrySet().iterator();
+		Iterator<Map.Entry<String, Integer>> entries = map.entrySet().iterator();
 
 		assertThat(styler.style(entries.next())).isEqualTo("'key1' -> 1");
 		assertThat(styler.style(entries.next())).isEqualTo("'key2' -> 2");
 	}
 
 	@Test
-	public void style_collection() {
+	public void styleCollections() {
 		List<Integer> list = Collections.emptyList();
 		assertThat(styler.style(list)).isEqualTo("list[[empty]]");
 
@@ -73,26 +92,26 @@ public class DefaultValueStylerTest {
 	}
 
 	@Test
-	public void style_primitiveArray() {
+	public void stylePrimitiveArrays() {
 		int[] array = new int[0];
 		assertThat(styler.style(array)).isEqualTo("array<Object>[[empty]]");
 
-		array = new int[]{1};
+		array = new int[] { 1 };
 		assertThat(styler.style(array)).isEqualTo("array<Integer>[1]");
 
-		array = new int[]{1, 2};
+		array = new int[] { 1, 2 };
 		assertThat(styler.style(array)).isEqualTo("array<Integer>[1, 2]");
 	}
 
 	@Test
-	public void style_objectArray() {
+	public void styleObjectArrays() {
 		String[] array = new String[0];
 		assertThat(styler.style(array)).isEqualTo("array<String>[[empty]]");
 
-		array = new String[]{"str1"};
+		array = new String[] { "str1" };
 		assertThat(styler.style(array)).isEqualTo("array<String>['str1']");
 
-		array = new String[]{"str1", "str2"};
+		array = new String[] { "str1", "str2" };
 		assertThat(styler.style(array)).isEqualTo("array<String>['str1', 'str2']");
 	}
 
