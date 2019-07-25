@@ -42,6 +42,7 @@ import static org.mockito.Mockito.mock;
  * Unit tests for {@link AbstractServerHttpRequest}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class ServerHttpRequestTests {
 
@@ -89,7 +90,6 @@ public class ServerHttpRequestTests {
 
 	@Test
 	public void mutateRequest() throws Exception {
-
 		SslInfo sslInfo = mock(SslInfo.class);
 		ServerHttpRequest request = createHttpRequest("/").mutate().sslInfo(sslInfo).build();
 		assertThat(request.getSslInfo()).isSameAs(sslInfo);
@@ -123,6 +123,54 @@ public class ServerHttpRequestTests {
 
 		assertThat(request.getURI().getRawPath()).isEqualTo("/mutatedPath");
 		assertThat(request.getURI().getRawQuery()).isEqualTo("name=%E6%89%8E%E6%A0%B9");
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void mutateHeaderByAddingHeaderValues() throws Exception {
+		String headerName = "key";
+		String headerValue1 = "value1";
+		String headerValue2 = "value2";
+
+		ServerHttpRequest request = createHttpRequest("/path");
+		assertNull(request.getHeaders().get(headerName));
+
+		request = request.mutate().header(headerName, headerValue1).build();
+
+		assertNotNull(request.getHeaders().get(headerName));
+		assertEquals(1, request.getHeaders().get(headerName).size());
+		assertEquals(headerValue1, request.getHeaders().get(headerName).get(0));
+
+		request = request.mutate().header(headerName, headerValue2).build();
+
+		assertNotNull(request.getHeaders().get(headerName));
+		assertEquals(2, request.getHeaders().get(headerName).size());
+		assertEquals(headerValue1, request.getHeaders().get(headerName).get(0));
+		assertEquals(headerValue2, request.getHeaders().get(headerName).get(1));
+	}
+
+	@Test
+	public void mutateHeaderBySettingHeaderValues() throws Exception {
+		String headerName = "key";
+		String headerValue1 = "value1";
+		String headerValue2 = "value2";
+		String headerValue3 = "value3";
+
+		ServerHttpRequest request = createHttpRequest("/path");
+		assertNull(request.getHeaders().get(headerName));
+
+		request = request.mutate().header(headerName, headerValue1, headerValue2).build();
+
+		assertNotNull(request.getHeaders().get(headerName));
+		assertEquals(2, request.getHeaders().get(headerName).size());
+		assertEquals(headerValue1, request.getHeaders().get(headerName).get(0));
+		assertEquals(headerValue2, request.getHeaders().get(headerName).get(1));
+
+		request = request.mutate().header(headerName, new String[] { headerValue3 }).build();
+
+		assertNotNull(request.getHeaders().get(headerName));
+		assertEquals(1, request.getHeaders().get(headerName).size());
+		assertEquals(headerValue3, request.getHeaders().get(headerName).get(0));
 	}
 
 	private ServerHttpRequest createHttpRequest(String uriString) throws Exception {
