@@ -40,7 +40,7 @@ ext {
 	kotlinVersion        = "1.3.41"
 	log4jVersion         = "2.12.0"
 	nettyVersion         = "4.1.37.Final"
-	reactorVersion       = "Dysprosium-M2"
+	reactorVersion       = "Dysprosium-BUILD-SNAPSHOT"
 	rsocketVersion       = "0.12.2-RC4"
 	rxjavaVersion        = "1.3.8"
 	rxjavaAdapterVersion = "1.2.1"
@@ -156,7 +156,7 @@ configure(allprojects) { project ->
 	repositories {
 		mavenCentral()
 		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://repo.spring.io/milestone" } // Reactor
+		maven { url "https://repo.spring.io/snapshot" } // Reactor
 		mavenLocal()
 	}
 
