@@ -126,27 +126,21 @@ public class ServerHttpRequestTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	public void mutateHeaderByAddingHeaderValues() throws Exception {
+	public void mutateHeadersViaConsumer() throws Exception {
 		String headerName = "key";
 		String headerValue1 = "value1";
 		String headerValue2 = "value2";
 
 		ServerHttpRequest request = createHttpRequest("/path");
-		assertNull(request.getHeaders().get(headerName));
+		assertThat(request.getHeaders().get(headerName)).isNull();
 
-		request = request.mutate().header(headerName, headerValue1).build();
+		request = request.mutate().headers(headers -> headers.add(headerName, headerValue1)).build();
 
-		assertNotNull(request.getHeaders().get(headerName));
-		assertEquals(1, request.getHeaders().get(headerName).size());
-		assertEquals(headerValue1, request.getHeaders().get(headerName).get(0));
+		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue1);
 
-		request = request.mutate().header(headerName, headerValue2).build();
+		request = request.mutate().headers(headers -> headers.add(headerName, headerValue2)).build();
 
-		assertNotNull(request.getHeaders().get(headerName));
-		assertEquals(2, request.getHeaders().get(headerName).size());
-		assertEquals(headerValue1, request.getHeaders().get(headerName).get(0));
-		assertEquals(headerValue2, request.getHeaders().get(headerName).get(1));
+		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue1, headerValue2);
 	}
 
 	@Test
@@ -157,20 +151,15 @@ public class ServerHttpRequestTests {
 		String headerValue3 = "value3";
 
 		ServerHttpRequest request = createHttpRequest("/path");
-		assertNull(request.getHeaders().get(headerName));
+		assertThat(request.getHeaders().get(headerName)).isNull();
 
 		request = request.mutate().header(headerName, headerValue1, headerValue2).build();
 
-		assertNotNull(request.getHeaders().get(headerName));
-		assertEquals(2, request.getHeaders().get(headerName).size());
-		assertEquals(headerValue1, request.getHeaders().get(headerName).get(0));
-		assertEquals(headerValue2, request.getHeaders().get(headerName).get(1));
+		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue1, headerValue2);
 
-		request = request.mutate().header(headerName, new String[] { headerValue3 }).build();
+		request = request.mutate().header(headerName, headerValue3).build();
 
-		assertNotNull(request.getHeaders().get(headerName));
-		assertEquals(1, request.getHeaders().get(headerName).size());
-		assertEquals(headerValue3, request.getHeaders().get(headerName).get(0));
+		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue3);
 	}
 
 	private ServerHttpRequest createHttpRequest(String uriString) throws Exception {
