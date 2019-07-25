@@ -16,14 +16,26 @@
 
 package org.springframework.test.context.env.repeatable;
 
+import org.junit.Test;
+
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * Abstract parent class with foo property definition for tests.
+ * Same as {@link ExplicitPropertiesFilesRepeatedTestPropertySourceTests}, but
+ * with the order of the properties files reversed.
  *
- * @author Anatoliy Korovin
+ * @author Sam Brannen
  * @since 5.2
  */
-@TestPropertySource(properties = "foo = value from parent class")
-public abstract class FooTestPropertyDeclaration {
+@TestPropertySource("second.properties")
+@TestPropertySource("first.properties")
+public class ReversedExplicitPropertiesFilesRepeatedTestPropertySourceTests extends AbstractRepeatableTestPropertySourceTests {
+
+	@Test
+	public void test() {
+		assertEnvironmentValue("alpha", "beta");
+		assertEnvironmentValue("first", "1111");
+		assertEnvironmentValue("second", "1111");
+	}
+
 }

@@ -57,21 +57,38 @@ public class TestPropertySourceUtilsTests {
 	private static final String[] FOO_LOCATIONS = new String[] {"classpath:/foo.properties"};
 
 
-
 	@Test
 	public void emptyAnnotation() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				buildMergedTestPropertySources(EmptyPropertySources.class))
-			.withMessageStartingWith("Could not detect default properties file for test")
+		assertThatIllegalStateException()
+			.isThrownBy(() -> buildMergedTestPropertySources(EmptyPropertySources.class))
+			.withMessageStartingWith("Could not detect default properties file for test class")
+			.withMessageContaining("class path resource")
+			.withMessageContaining("does not exist")
 			.withMessageContaining("EmptyPropertySources.properties");
 	}
 
 	@Test
 	public void extendedEmptyAnnotation() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				buildMergedTestPropertySources(ExtendedEmptyPropertySources.class))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> buildMergedTestPropertySources(ExtendedEmptyPropertySources.class))
 			.withMessageStartingWith("Could not detect default properties file for test")
+			.withMessageContaining("class path resource")
+			.withMessageContaining("does not exist")
 			.withMessageContaining("ExtendedEmptyPropertySources.properties");
+	}
+
+	@Test
+	public void repeatedTestPropertySourcesWithConflictingInheritLocationsFlags() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> buildMergedTestPropertySources(RepeatedPropertySourcesWithConflictingInheritLocationsFlags.class))
+			.withMessageContaining("must declare the same value for 'inheritLocations' as other directly present or meta-present @TestPropertySource annotations");
+	}
+
+	@Test
+	public void repeatedTestPropertySourcesWithConflictingInheritPropertiesFlags() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> buildMergedTestPropertySources(RepeatedPropertySourcesWithConflictingInheritPropertiesFlags.class))
+			.withMessageContaining("must declare the same value for 'inheritProperties' as other directly present or meta-present @TestPropertySource annotations");
 	}
 
 	@Test
@@ -82,8 +99,8 @@ public class TestPropertySourceUtilsTests {
 
 	@Test
 	public void locationsAndValueAttributes() {
-		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
-				buildMergedTestPropertySources(LocationsAndValuePropertySources.class));
+		assertThatExceptionOfType(AnnotationConfigurationException.class)
+			.isThrownBy(() -> buildMergedTestPropertySources(LocationsAndValuePropertySources.class));
 	}
 
 	@Test
@@ -126,30 +143,37 @@ public class TestPropertySourceUtilsTests {
 
 	@Test
 	public void addPropertiesFilesToEnvironmentWithNullContext() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				addPropertiesFilesToEnvironment((ConfigurableApplicationContext) null, FOO_LOCATIONS))
-			.withMessageContaining("must not be null");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableApplicationContext) null, FOO_LOCATIONS))
+			.withMessageContaining("'context' must not be null");
 	}
 
 	@Test
 	public void addPropertiesFilesToEnvironmentWithContextAndNullLocations() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				addPropertiesFilesToEnvironment(mock(ConfigurableApplicationContext.class), (String[]) null))
-			.withMessageContaining("must not be null");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addPropertiesFilesToEnvironment(mock(ConfigurableApplicationContext.class), (String[]) null))
+			.withMessageContaining("'locations' must not be null");
 	}
 
 	@Test
 	public void addPropertiesFilesToEnvironmentWithNullEnvironment() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(ResourceLoader.class), FOO_LOCATIONS))
-			.withMessageContaining("must not be null");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(ResourceLoader.class), FOO_LOCATIONS))
+			.withMessageContaining("'environment' must not be null");
+	}
+
+	@Test
+	public void addPropertiesFilesToEnvironmentWithEnvironmentLocationsAndNullResourceLoader() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addPropertiesFilesToEnvironment(new MockEnvironment(), null, FOO_LOCATIONS))
+			.withMessageContaining("'resourceLoader' must not be null");
 	}
 
 	@Test
 	public void addPropertiesFilesToEnvironmentWithEnvironmentAndNullLocations() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				addPropertiesFilesToEnvironment(new MockEnvironment(), mock(ResourceLoader.class), (String[]) null))
-			.withMessageContaining("must not be null");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addPropertiesFilesToEnvironment(new MockEnvironment(), mock(ResourceLoader.class), (String[]) null))
+			.withMessageContaining("'locations' must not be null");
 	}
 
 	@Test
@@ -172,43 +196,43 @@ public class TestPropertySourceUtilsTests {
 
 	@Test
 	public void addInlinedPropertiesToEnvironmentWithNullContext() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				addInlinedPropertiesToEnvironment((ConfigurableApplicationContext) null, KEY_VALUE_PAIR))
-			.withMessageContaining("context");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addInlinedPropertiesToEnvironment((ConfigurableApplicationContext) null, KEY_VALUE_PAIR))
+			.withMessageContaining("'context' must not be null");
 	}
 
 	@Test
 	public void addInlinedPropertiesToEnvironmentWithContextAndNullInlinedProperties() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				addInlinedPropertiesToEnvironment(mock(ConfigurableApplicationContext.class), (String[]) null))
-			.withMessageContaining("inlined");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addInlinedPropertiesToEnvironment(mock(ConfigurableApplicationContext.class), (String[]) null))
+			.withMessageContaining("'inlinedProperties' must not be null");
 	}
 
 	@Test
 	public void addInlinedPropertiesToEnvironmentWithNullEnvironment() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				addInlinedPropertiesToEnvironment((ConfigurableEnvironment) null, KEY_VALUE_PAIR))
-			.withMessageContaining("environment");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addInlinedPropertiesToEnvironment((ConfigurableEnvironment) null, KEY_VALUE_PAIR))
+			.withMessageContaining("'environment' must not be null");
 	}
 
 	@Test
 	public void addInlinedPropertiesToEnvironmentWithEnvironmentAndNullInlinedProperties() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				addInlinedPropertiesToEnvironment(new MockEnvironment(), (String[]) null))
-			.withMessageContaining("inlined");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> addInlinedPropertiesToEnvironment(new MockEnvironment(), (String[]) null))
+			.withMessageContaining("'inlinedProperties' must not be null");
 	}
 
 	@Test
 	public void addInlinedPropertiesToEnvironmentWithMalformedUnicodeInValue() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				addInlinedPropertiesToEnvironment(new MockEnvironment(), asArray("key = \\uZZZZ")))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> addInlinedPropertiesToEnvironment(new MockEnvironment(), asArray("key = \\uZZZZ")))
 			.withMessageContaining("Failed to load test environment property");
 	}
 
 	@Test
 	public void addInlinedPropertiesToEnvironmentWithMultipleKeyValuePairsInSingleInlinedProperty() {
-		assertThatIllegalStateException().isThrownBy(() ->
-				addInlinedPropertiesToEnvironment(new MockEnvironment(), asArray("a=b\nx=y")))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> addInlinedPropertiesToEnvironment(new MockEnvironment(), asArray("a=b\nx=y")))
 			.withMessageContaining("Failed to load exactly one test environment property");
 	}
 
@@ -226,9 +250,9 @@ public class TestPropertySourceUtilsTests {
 
 	@Test
 	public void convertInlinedPropertiesToMapWithNullInlinedProperties() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				convertInlinedPropertiesToMap((String[]) null))
-			.withMessageContaining("inlined");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> convertInlinedPropertiesToMap((String[]) null))
+			.withMessageContaining("'inlinedProperties' must not be null");
 	}
 
 
@@ -254,6 +278,16 @@ public class TestPropertySourceUtilsTests {
 
 	@TestPropertySource
 	static class ExtendedEmptyPropertySources extends EmptyPropertySources {
+	}
+
+	@TestPropertySource(locations = "foo.properties", inheritLocations = false)
+	@TestPropertySource(locations = "bar.properties", inheritLocations = true)
+	static class RepeatedPropertySourcesWithConflictingInheritLocationsFlags {
+	}
+
+	@TestPropertySource(properties = "a = b", inheritProperties = false)
+	@TestPropertySource(properties = "x = y", inheritProperties = true)
+	static class RepeatedPropertySourcesWithConflictingInheritPropertiesFlags {
 	}
 
 	@TestPropertySource(locations = "/foo", value = "/bar")

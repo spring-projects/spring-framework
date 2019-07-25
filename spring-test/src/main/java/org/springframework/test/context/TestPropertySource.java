@@ -68,6 +68,8 @@ import org.springframework.core.annotation.AliasFor;
  * <ul>
  * <li>Typically, {@code @TestPropertySource} will be used in conjunction with
  * {@link ContextConfiguration @ContextConfiguration}.</li>
+ * <li>As of Spring Framework 5.2, {@code @TestPropertySource} can be used as a
+ * <em>{@linkplain Repeatable repeatable}</em> annotation.</li>
  * <li>This annotation may be used as a <em>meta-annotation</em> to create
  * custom <em>composed annotations</em>; however, caution should be taken if
  * this annotation and {@code @ContextConfiguration} are combined on a composed

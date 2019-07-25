@@ -16,15 +16,25 @@
 
 package org.springframework.test.context.env.repeatable;
 
+import org.junit.Test;
+
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * Abstract parent class with multiple properties definition for tests.
+ * Integration tests for {@link TestPropertySource @TestPropertySource} as a
+ * repeatable annotation.
  *
  * @author Anatoliy Korovin
+ * @author Sam Brannen
  * @since 5.2
  */
-@TestPropertySource(properties = "first = value from parent class")
-@TestPropertySource(properties = "second = value from parent class")
-public abstract class ParentClassWithMultipleTestProperties {
+@TestPropertySource(properties = "meta = local override")
+@MetaInlinedTestProperty
+public class LocalInlinedPropertyOverridesMetaInlinedPropertyTests extends AbstractRepeatableTestPropertySourceTests {
+
+	@Test
+	public void test() {
+		assertEnvironmentValue("meta", "local override");
+	}
+
 }

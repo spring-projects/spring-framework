@@ -16,58 +16,39 @@
 
 package org.springframework.test.context.env.repeatable;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for support {@link TestPropertySource @TestPropertySource} as a
- * repeatable annotation.
+ * Abstract base class for integration tests involving
+ * {@link TestPropertySource @TestPropertySource} as a repeatable annotation.
  *
- * Test multiple test property declarations by the using of {@link TestPropertySource} as
- * a repeatable annotation.
- *
- * @author Anatoliy Korovin
+ * @author Sam Brannen
  * @since 5.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration
-@TestPropertySource(properties = "first = 1111")
-@TestPropertySource(properties = "second = 2222")
-public class TestPropertySourceRepeatableTests {
+abstract class AbstractRepeatableTestPropertySourceTests {
 
 	@Autowired
 	Environment env;
 
-	@Value("${first}")
-	String first;
 
-	@Value("${second}")
-	String second;
-
-
-	@Test
-	public void inlinePropertyFromParentClassAndFromLocalTestPropertySourceAnnotation() {
-		assertPropertyValue("first", first, "1111");
-		assertPropertyValue("second", second, "2222");
-	}
-
-	private void assertPropertyValue(String name, String value, String expectedValue) {
-		assertThat(env.getProperty(name)).isEqualTo(expectedValue);
-		assertThat(value).isEqualTo(expectedValue);
+	protected void assertEnvironmentValue(String key, String expected) {
+		assertThat(env.getProperty(key)).as("Value of key [" + key + "].").isEqualTo(expected);
 	}
 
 
 	@Configuration
 	static class Config {
 	}
+
 }

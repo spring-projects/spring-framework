@@ -16,22 +16,30 @@
 
 package org.springframework.test.context.env.repeatable;
 
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.junit.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * A custom annotation which defined properties file in the {@link TestPropertySource}.
+ * Integration tests for {@link TestPropertySource @TestPropertySource} as a
+ * repeatable annotation.
+ *
+ * <p>Same as {@link ReversedExplicitPropertiesFilesRepeatedTestPropertySourceTests},
+ * but with the order of the properties files reversed.
  *
  * @author Anatoliy Korovin
+ * @author Sam Brannen
  * @since 5.2
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@TestPropertySource("meta.properties")
-public @interface AnnotationWithTestPropertyInPropertiesFile {
+@TestPropertySource("first.properties")
+@TestPropertySource("second.properties")
+public class ExplicitPropertiesFilesRepeatedTestPropertySourceTests extends AbstractRepeatableTestPropertySourceTests {
+
+	@Test
+	public void test() {
+		assertEnvironmentValue("alpha", "omega");
+		assertEnvironmentValue("first", "1111");
+		assertEnvironmentValue("second", "2222");
+	}
+
 }

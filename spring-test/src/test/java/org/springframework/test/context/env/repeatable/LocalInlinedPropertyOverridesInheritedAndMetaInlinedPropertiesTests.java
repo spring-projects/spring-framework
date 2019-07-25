@@ -16,22 +16,37 @@
 
 package org.springframework.test.context.env.repeatable;
 
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.Test;
+
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.env.repeatable.LocalInlinedPropertyOverridesInheritedAndMetaInlinedPropertiesTests.Key1InlinedTestProperty;
 
 /**
- * A custom annotation with foo property defined by the {@link TestPropertySource}.
+ * Integration tests for {@link TestPropertySource @TestPropertySource} as a
+ * repeatable annotation.
  *
  * @author Anatoliy Korovin
+ * @author Sam Brannen
  * @since 5.2
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@TestPropertySource(properties = "foo = value from meta-annotation")
-public @interface FooTestProperty {
+@TestPropertySource(properties = "key1 = local")
+@Key1InlinedTestProperty
+public class LocalInlinedPropertyOverridesInheritedAndMetaInlinedPropertiesTests extends AbstractClassWithTestProperty {
+
+	@Test
+	public void test() {
+		assertEnvironmentValue("key1", "local");
+	}
+
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@TestPropertySource(properties = "key1 = meta")
+	@interface Key1InlinedTestProperty {
+	}
+
 }
