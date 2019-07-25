@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import org.springframework.http.HttpCookie;
@@ -34,6 +35,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
@@ -137,9 +139,29 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		Builder contextPath(String contextPath);
 
 		/**
-		 * Set or override the specified header.
+		 * Add the given, single header value under the given name.
+		 * @param headerName the header name
+		 * @param headerValue the header value
+		 * @deprecated This method will be removed in Spring Framework 5.2 in
+		 * favor of {@link #header(String, String...)}.
 		 */
-		Builder header(String key, String value);
+		@Deprecated
+		Builder header(String headerName, String headerValue);
+
+		/**
+		 * Set or override the specified header values under the given name.
+		 * <p>If you need to set a single header value, you may invoke this
+		 * method with an explicit one-element array &mdash; for example,
+		 * <code>header("key", new String[] { "value" })</code> &mdash; or you
+		 * may choose to use {@link #headers(Consumer)} for greater control.
+		 * @param headerName the header name
+		 * @param headerValues the header values
+		 * @since 5.1.9
+		 * @see #headers(Consumer)
+		 */
+		default Builder header(String headerName, String... headerValues) {
+			return headers(httpHeaders -> httpHeaders.put(headerName, Arrays.asList(headerValues)));
+		}
 
 		/**
 		 * Manipulate request headers. The provided {@code HttpHeaders} contains
@@ -147,6 +169,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} or
 		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
 		 * use any other {@link HttpHeaders} methods.
+		 * @see #header(String, String...)
 		 */
 		Builder headers(Consumer<HttpHeaders> headersConsumer);
 

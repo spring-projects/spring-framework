@@ -111,6 +111,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ServerHttpRequest.Builder header(String key, String value) {
 		this.httpHeaders.add(key, value);
 		return this;
