@@ -209,7 +209,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			return new DefaultRSocketStrategies(
 					this.encoders, this.decoders,
 					this.routeMatcher != null ? this.routeMatcher : initRouteMatcher(),
-					this.metadataExtractor != null ? this.metadataExtractor : initMetadataExtractor(),
+					getOrInitMetadataExtractor(),
 					this.bufferFactory != null ? this.bufferFactory : initBufferFactory(),
 					this.adapterRegistry != null ? this.adapterRegistry : initReactiveAdapterRegistry());
 		}
@@ -220,10 +220,22 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			return new SimpleRouteMatcher(pathMatcher);
 		}
 
-		private MetadataExtractor initMetadataExtractor() {
-			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
-			return extractor;
+		private MetadataExtractor getOrInitMetadataExtractor() {
+			if (this.metadataExtractor != null) {
+				if (this.metadataExtractor instanceof DefaultMetadataExtractor) {
+					DefaultMetadataExtractor extractor = (DefaultMetadataExtractor) this.metadataExtractor;
+					if (extractor.getDecoders().isEmpty()) {
+						extractor.setDecoders(this.decoders);
+					}
+				}
+				return this.metadataExtractor;
+			}
+			else {
+				DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
+				extractor.setDecoders(this.decoders);
+				extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
+				return extractor;
+			}
 		}
 
 		private DataBufferFactory initBufferFactory() {

@@ -174,6 +174,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * other metadata.
 	 * <p>By default this is {@link DefaultMetadataExtractor} extracting a
 	 * route from {@code "message/x.rsocket.routing.v0"} or {@code "text/plain"}.
+	 * <p>If the extractor is a {@code DefaultMetadataExtractor}, its
+	 * {@code decoders} property will be set, if not already set, to the
+	 * {@link #setDecoders(List)} configured here.
 	 * @param extractor the extractor to use
 	 */
 	public void setMetadataExtractor(MetadataExtractor extractor) {
@@ -238,6 +241,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 		if (getMetadataExtractor() == null) {
 			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
+			extractor.setDecoders(getDecoders());
 			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
 			setMetadataExtractor(extractor);
 		}

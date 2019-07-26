@@ -190,6 +190,9 @@ public interface RSocketStrategies {
 		 * <p>By default this is {@link DefaultMetadataExtractor} extracting a
 		 * route from {@code "message/x.rsocket.routing.v0"} or
 		 * {@code "text/plain"} metadata entries.
+		 * <p>If the extractor is a {@code DefaultMetadataExtractor}, its
+		 * {@code decoders} property will be set, if not already set, to the
+		 * {@link #decoder(Decoder[]) decoders} configured here.
 		 */
 		Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor);
 

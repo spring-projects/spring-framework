@@ -15,6 +15,7 @@
  */
 package org.springframework.messaging.rsocket.annotation.support;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -156,6 +157,31 @@ public class RSocketMessageHandlerTests {
 		assertThat(strategies.routeMatcher()).isSameAs(handler.getRouteMatcher());
 		assertThat(strategies.metadataExtractor()).isSameAs(handler.getMetadataExtractor());
 		assertThat(strategies.reactiveAdapterRegistry()).isSameAs(handler.getReactiveAdapterRegistry());
+	}
+
+	@Test
+	public void metadataExtractorInitializedWithDecoders() {
+		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
+
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.setDecoders(Arrays.asList(new ByteArrayDecoder(), new ByteBufferDecoder()));
+		handler.setMetadataExtractor(extractor);
+		handler.afterPropertiesSet();
+
+		assertThat(((DefaultMetadataExtractor) handler.getMetadataExtractor()).getDecoders()).hasSize(2);
+	}
+
+	@Test
+	public void metadataExtractorWithExplicitlySetDecoders() {
+		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
+		extractor.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
+
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.setDecoders(Arrays.asList(new ByteArrayDecoder(), new ByteBufferDecoder()));
+		handler.setMetadataExtractor(extractor);
+		handler.afterPropertiesSet();
+
+		assertThat(((DefaultMetadataExtractor) handler.getMetadataExtractor()).getDecoders()).hasSize(1);
 	}
 
 	@Test

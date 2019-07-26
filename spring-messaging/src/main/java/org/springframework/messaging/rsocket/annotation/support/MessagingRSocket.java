@@ -192,8 +192,7 @@ class MessagingRSocket extends AbstractRSocket {
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setLeaveMutable(true);
 
-		Map<String, Object> metadataValues =
-				this.metadataExtractor.extract(payload, this.metadataMimeType, this.strategies);
+		Map<String, Object> metadataValues = this.metadataExtractor.extract(payload, this.metadataMimeType);
 
 		metadataValues.putIfAbsent(MetadataExtractor.ROUTE_KEY, "");
 		for (Map.Entry<String, Object> entry : metadataValues.entrySet()) {
