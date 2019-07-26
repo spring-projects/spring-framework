@@ -17,6 +17,7 @@
 package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
+import java.util.Collections;
 
 import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
@@ -37,10 +38,12 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * Client-side handling of requests initiated from the server side.
@@ -262,7 +265,10 @@ public class RSocketServerToClientIntegrationTests {
 
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
-			return RSocketStrategies.create();
+			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
+			extractor.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
+			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
+			return RSocketStrategies.builder().metadataExtractor(extractor).build();
 		}
 	}
 

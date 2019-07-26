@@ -39,7 +39,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.RouteMatcher;
 import org.springframework.util.SimpleRouteMatcher;
 
@@ -209,9 +208,9 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			return new DefaultRSocketStrategies(
 					this.encoders, this.decoders,
 					this.routeMatcher != null ? this.routeMatcher : initRouteMatcher(),
-					getOrInitMetadataExtractor(),
+					this.metadataExtractor != null ? this.metadataExtractor : initMetadataExtractor(),
 					this.bufferFactory != null ? this.bufferFactory : initBufferFactory(),
-					this.adapterRegistry != null ? this.adapterRegistry : initReactiveAdapterRegistry());
+					this.adapterRegistry != null ? this.adapterRegistry : ReactiveAdapterRegistry.getSharedInstance());
 		}
 
 		private RouteMatcher initRouteMatcher() {
@@ -220,30 +219,14 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			return new SimpleRouteMatcher(pathMatcher);
 		}
 
-		private MetadataExtractor getOrInitMetadataExtractor() {
-			if (this.metadataExtractor != null) {
-				if (this.metadataExtractor instanceof DefaultMetadataExtractor) {
-					DefaultMetadataExtractor extractor = (DefaultMetadataExtractor) this.metadataExtractor;
-					if (extractor.getDecoders().isEmpty()) {
-						extractor.setDecoders(this.decoders);
-					}
-				}
-				return this.metadataExtractor;
-			}
-			else {
-				DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-				extractor.setDecoders(this.decoders);
-				extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
-				return extractor;
-			}
+		private MetadataExtractor initMetadataExtractor() {
+			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
+			extractor.setDecoders(this.decoders);
+			return extractor;
 		}
 
 		private DataBufferFactory initBufferFactory() {
 			return new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
-		}
-
-		private ReactiveAdapterRegistry initReactiveAdapterRegistry() {
-			return ReactiveAdapterRegistry.getSharedInstance();
 		}
 	}
 

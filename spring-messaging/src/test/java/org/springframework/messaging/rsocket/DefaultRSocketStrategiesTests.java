@@ -15,8 +15,6 @@
  */
 package org.springframework.messaging.rsocket;
 
-import java.util.Collections;
-
 import org.junit.Test;
 
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -59,6 +57,8 @@ public class DefaultRSocketStrategiesTests {
 		assertThat(strategies.routeMatcher()).isNotNull();
 		assertThat(strategies.metadataExtractor()).isNotNull();
 		assertThat(strategies.reactiveAdapterRegistry()).isNotNull();
+
+		assertThat(((DefaultMetadataExtractor) strategies.metadataExtractor()).getDecoders()).hasSize(4);
 	}
 
 	@Test
@@ -87,39 +87,6 @@ public class DefaultRSocketStrategiesTests {
 		assertThat(strategies.routeMatcher()).isSameAs(matcher);
 		assertThat(strategies.metadataExtractor()).isSameAs(extractor);
 		assertThat(strategies.reactiveAdapterRegistry()).isSameAs(registry);
-	}
-
-	@Test
-	public void metadataExtractorInitializedWithDecoders() {
-		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-
-		RSocketStrategies strategies = RSocketStrategies.builder()
-				.decoders(decoders -> {
-					decoders.clear();
-					decoders.add(new ByteArrayDecoder());
-					decoders.add(new ByteBufferDecoder());
-				})
-				.metadataExtractor(extractor)
-				.build();
-
-		assertThat(((DefaultMetadataExtractor) strategies.metadataExtractor()).getDecoders()).hasSize(2);
-	}
-
-	@Test
-	public void metadataExtractorWithExplicitlySetDecoders() {
-		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-		extractor.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
-
-		RSocketStrategies strategies = RSocketStrategies.builder()
-				.decoders(decoders -> {
-					decoders.clear();
-					decoders.add(new ByteArrayDecoder());
-					decoders.add(new ByteBufferDecoder());
-				})
-				.metadataExtractor(extractor)
-				.build();
-
-		assertThat(((DefaultMetadataExtractor) strategies.metadataExtractor()).getDecoders()).hasSize(1);
 	}
 
 	@Test

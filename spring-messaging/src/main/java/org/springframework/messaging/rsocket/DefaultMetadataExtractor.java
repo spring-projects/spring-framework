@@ -59,10 +59,6 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
 	/**
 	 * Configure the decoders to use for de-serializing metadata entries.
 	 * <p>By default this is not set.
-	 * <p>When this extractor is passed into {@link RSocketStrategies.Builder} or
-	 * {@link org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler
-	 * RSocketMessageHandler}, the decoders may be left not set, and they will
-	 * be initialized from the decoders already configured there.
 	 */
 	public void setDecoders(List<? extends Decoder<?>> decoders) {
 		this.decoders.clear();

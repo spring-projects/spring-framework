@@ -36,11 +36,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.lang.Nullable;
@@ -103,10 +99,6 @@ public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<C
 
 	public MessageMappingMessageHandler() {
 		setHandlerPredicate(type -> AnnotatedElementUtils.hasAnnotation(type, Controller.class));
-		this.decoders.add(StringDecoder.allMimeTypes());
-		this.decoders.add(new ByteBufferDecoder());
-		this.decoders.add(new ByteArrayDecoder());
-		this.decoders.add(new DataBufferDecoder());
 	}
 
 

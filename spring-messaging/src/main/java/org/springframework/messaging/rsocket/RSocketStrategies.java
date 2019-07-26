@@ -125,7 +125,8 @@ public interface RSocketStrategies {
 
 	/**
 	 * Create an {@code RSocketStrategies} instance with default settings.
-	 * Equivalent to {@code RSocketStrategies.builder().build()}.
+	 * Equivalent to {@code RSocketStrategies.builder().build()}. See individual
+	 * builder methods for details on default settings.
 	 */
 	static RSocketStrategies create() {
 		return new DefaultRSocketStrategies.DefaultRSocketStrategiesBuilder().build();
@@ -190,9 +191,6 @@ public interface RSocketStrategies {
 		 * <p>By default this is {@link DefaultMetadataExtractor} extracting a
 		 * route from {@code "message/x.rsocket.routing.v0"} or
 		 * {@code "text/plain"} metadata entries.
-		 * <p>If the extractor is a {@code DefaultMetadataExtractor}, its
-		 * {@code decoders} property will be set, if not already set, to the
-		 * {@link #decoder(Decoder[]) decoders} configured here.
 		 */
 		Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor);
 
