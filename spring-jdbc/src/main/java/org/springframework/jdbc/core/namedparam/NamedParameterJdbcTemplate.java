@@ -424,7 +424,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 * @param sql the original SQL statement
 	 * @return a representation of the parsed SQL statement
 	 */
-	protected ParsedSql getParsedSql(String sql) {
+	public ParsedSql getParsedSql(String sql) {
 		if (getCacheLimit() <= 0) {
 			return NamedParameterUtils.parseSqlStatement(sql);
 		}
