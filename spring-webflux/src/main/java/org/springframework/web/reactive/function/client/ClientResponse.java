@@ -331,6 +331,7 @@ public interface ClientResponse {
 		 * Set the request associated with the response.
 		 * @param request the request
 		 * @return this builder
+		 * @since 5.2
 		 */
 		Builder request(HttpRequest request);
 
