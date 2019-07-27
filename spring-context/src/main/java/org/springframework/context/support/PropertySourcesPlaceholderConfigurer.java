@@ -17,7 +17,9 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -154,6 +156,12 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			}
 		}
 
+		List<String> sourceNames = this.propertySources.stream()
+				.map(source -> source.getName())
+				.collect(Collectors.toList());
+		for (String sourceName : sourceNames) {
+			this.propertySources.replace(sourceName, new ConvertingPropertySourceDecorator<>(this.propertySources.get(sourceName)));
+		}
 		processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
 		this.appliedPropertySources = this.propertySources;
 	}
@@ -197,6 +205,51 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	}
 
 	/**
+	 * Implemented for compatibility with {@link org.springframework.beans.factory.config.PropertyResourceConfigurer}.
+	 * @deprecated in favor of {@link #convertProperty(java.lang.String, java.lang.Object)}
+	 */
+	@Override
+	@Deprecated
+	protected void convertProperties(Properties props) {
+		throw new UnsupportedOperationException(
+				"Call convertProperty(String, Object) instead");
+	}
+
+	/**
+	 * Implemented for compatibility with {@link org.springframework.beans.factory.config.PropertyResourceConfigurer}.
+	 * @deprecated in favor of {@link #convertProperty(java.lang.String, java.lang.Object)}
+	 */
+	@Override
+	@Deprecated
+	protected String convertProperty(String propertyName, String propertyValue) {
+		throw new UnsupportedOperationException(
+				"Call convertProperty(String, Object) instead");
+	}
+
+	/**
+	 * Implemented for compatibility with {@link org.springframework.beans.factory.config.PropertyResourceConfigurer}.
+	 * @deprecated in favor of {@link #convertProperty(java.lang.String, java.lang.Object)}
+	 */
+	@Override
+	@Deprecated
+	protected String convertPropertyValue(String originalValue) {
+		throw new UnsupportedOperationException(
+				"Call convertProperty(String, Object) instead");
+	}
+
+	/**
+	 * Convert the given property from the properties source to the value
+	 * which should be applied.
+	 * <p>The default implementation returns the input property value.
+	 * @param propertyName the name of the property that the value is defined for
+	 * @param propertyValue the original value from the properties source
+	 * @return the converted value, to be used for processing
+	 */
+	protected Object convertProperty(String propertyName, Object propertyValue) {
+		return propertyValue;
+	}
+
+	/**
 	 * Return the property sources that were actually applied during
 	 * {@link #postProcessBeanFactory(ConfigurableListableBeanFactory) post-processing}.
 	 * @return the property sources that were applied
@@ -208,4 +261,21 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		return this.appliedPropertySources;
 	}
 
+	private class ConvertingPropertySourceDecorator<T> extends PropertySource<T> {
+		private final PropertySource<T> delegate;
+
+		public ConvertingPropertySourceDecorator(PropertySource<T> delegate) {
+			super(delegate.getName(), delegate.getSource());
+			this.delegate = delegate;
+		}
+
+		@Override
+		public Object getProperty(String name) {
+			Object value = this.delegate.getProperty(name);
+			if (value != null) {
+				return convertProperty(name, value);
+			}
+			return value;
+		}
+	}
 }

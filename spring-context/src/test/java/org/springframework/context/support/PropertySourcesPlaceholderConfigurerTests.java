@@ -388,6 +388,30 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		assertThat(bf.getBean(OptionalTestBean.class).getName()).isEqualTo(Optional.empty());
 	}
 
+	@Test
+	public void convertPropertyImplemented() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+					.addPropertyValue("name", "Hello ${my.name}")
+					.getBeanDefinition());
+
+		MockEnvironment env = new MockEnvironment();
+		env.setProperty("my.name", "encoded-val");
+
+		PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer() {
+			@Override
+			protected Object convertProperty(String propertyName, Object propertyValue) {
+				if ("encoded-val".equals(propertyValue)) {
+					return "decoded-val";
+				}
+				return propertyValue;
+			}
+		};
+		ppc.setEnvironment(env);
+		ppc.postProcessBeanFactory(bf);
+		assertThat(bf.getBean(TestBean.class).getName()).isEqualTo("Hello decoded-val");
+	}
 
 	private static class OptionalTestBean {
 
