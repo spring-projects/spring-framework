@@ -16,25 +16,19 @@
 
 package org.springframework.test.context.support;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.List;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ResourceUtils;
 
 /**
- * {@code TestPropertySourceAttributes} encapsulates the attributes declared
- * via {@link TestPropertySource @TestPropertySource}.
+ * {@code TestPropertySourceAttributes} encapsulates attributes declared
+ * via {@link TestPropertySource @TestPropertySource} annotations.
  *
  * <p>In addition to encapsulating declared attributes,
- * {@code TestPropertySourceAttributes} also enforces configuration rules
- * and detects default properties files.
+ * {@code TestPropertySourceAttributes} also enforces configuration rules.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -42,8 +36,6 @@ import org.springframework.util.ResourceUtils;
  * @see MergedTestPropertySources
  */
 class TestPropertySourceAttributes {
-
-	private static final Log logger = LogFactory.getLog(TestPropertySourceAttributes.class);
 
 	private final Class<?> declaringClass;
 
@@ -57,27 +49,29 @@ class TestPropertySourceAttributes {
 
 
 	/**
-	 * Create a new {@code TestPropertySourceAttributes} instance for the
-	 * supplied {@link TestPropertySource @TestPropertySource} annotation and
-	 * the {@linkplain Class test class} that declared it, enforcing
-	 * configuration rules and detecting a default properties file if
-	 * necessary.
+	 * Create a new {@code TestPropertySourceAttributes} instance for the supplied
+	 * values and enforce configuration rules.
 	 * @param declaringClass the class that declared {@code @TestPropertySource}
-	 * @param testPropertySource the annotation from which to retrieve the attributes
-	 * @since 4.2
+	 * @param locations the merged {@link TestPropertySource#locations()}
+	 * @param inheritLocations the {@link TestPropertySource#inheritLocations()} flag
+	 * @param properties the merged {@link TestPropertySource#properties()}
+	 * @param inheritProperties the {@link TestPropertySource#inheritProperties()} flag
+	 * @since 5.2
 	 */
-	TestPropertySourceAttributes(Class<?> declaringClass, TestPropertySource testPropertySource) {
-		this(declaringClass, testPropertySource.locations(), testPropertySource.inheritLocations(),
-			testPropertySource.properties(), testPropertySource.inheritProperties());
+	TestPropertySourceAttributes(Class<?> declaringClass, List<String> locations, boolean inheritLocations,
+			List<String> properties, boolean inheritProperties) {
+
+		this(declaringClass, locations.toArray(new String[0]), inheritLocations, properties.toArray(new String[0]),
+			inheritProperties);
 	}
 
 	private TestPropertySourceAttributes(Class<?> declaringClass, String[] locations, boolean inheritLocations,
 			String[] properties, boolean inheritProperties) {
 
-		Assert.notNull(declaringClass, "declaringClass must not be null");
-		if (ObjectUtils.isEmpty(locations) && ObjectUtils.isEmpty(properties)) {
-			locations = new String[] { detectDefaultPropertiesFile(declaringClass) };
-		}
+		Assert.notNull(declaringClass, "'declaringClass' must not be null");
+		Assert.isTrue(!ObjectUtils.isEmpty(locations) || !ObjectUtils.isEmpty(properties),
+			"Either 'locations' or 'properties' are required");
+
 		this.declaringClass = declaringClass;
 		this.locations = locations;
 		this.inheritLocations = inheritLocations;
@@ -97,7 +91,8 @@ class TestPropertySourceAttributes {
 	/**
 	 * Get the resource locations that were declared via {@code @TestPropertySource}.
 	 * <p>Note: The returned value may represent a <em>detected default</em>
-	 * that does not match the original value declared via {@code @TestPropertySource}.
+	 * or merged locations that do not match the original value declared via a
+	 * single {@code @TestPropertySource} annotation.
 	 * @return the resource locations; potentially <em>empty</em>
 	 * @see TestPropertySource#value
 	 * @see TestPropertySource#locations
@@ -117,10 +112,12 @@ class TestPropertySourceAttributes {
 
 	/**
 	 * Get the inlined properties that were declared via {@code @TestPropertySource}.
-	 * @return the inlined properties; potentially {@code null} or <em>empty</em>
+	 * <p>Note: The returned value may represent merged properties that do not
+	 * match the original value declared via a single {@code @TestPropertySource}
+	 * annotation.
+	 * @return the inlined properties; potentially <em>empty</em>
 	 * @see TestPropertySource#properties
 	 */
-	@Nullable
 	String[] getProperties() {
 		return this.properties;
 	}
@@ -147,33 +144,6 @@ class TestPropertySourceAttributes {
 		.append("properties", ObjectUtils.nullSafeToString(this.properties))//
 		.append("inheritProperties", this.inheritProperties)//
 		.toString();
-	}
-
-
-	/**
-	 * Detect a default properties file for the supplied class, as specified
-	 * in the class-level Javadoc for {@link TestPropertySource}.
-	 */
-	private static String detectDefaultPropertiesFile(Class<?> testClass) {
-		String resourcePath = ClassUtils.convertClassNameToResourcePath(testClass.getName()) + ".properties";
-		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
-
-		if (classPathResource.exists()) {
-			String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Detected default properties file \"%s\" for test class [%s]",
-					prefixedResourcePath, testClass.getName()));
-			}
-			return prefixedResourcePath;
-		}
-		else {
-			String msg = String.format("Could not detect default properties file for test [%s]: " +
-					"%s does not exist. Either declare the 'locations' or 'properties' attributes " +
-					"of @TestPropertySource or make the default properties file available.", testClass.getName(),
-					classPathResource);
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
 	}
 
 }

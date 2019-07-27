@@ -688,6 +688,7 @@ The following example demonstrates how to declare inlined properties:
 ----
 <1> Declare `timezone` and `port` properties.
 
+See <<testcontext-ctx-management-property-sources>> for examples and further details.
 
 [[spring-testing-annotation-dirtiescontext]]
 ===== `@DirtiesContext`
@@ -2840,6 +2841,24 @@ The following example sets two inlined properties:
 	}
 ----
 <1> Setting two properties by using two variations of the key-value syntax.
+
+[NOTE]
+====
+As of Spring Framework 5.2, `@TestPropertySource` can be used as _repeatable annotation_.
+That means that you can have multiple declarations of `@TestPropertySource` on a single
+test class, with the `locations` and `properties` from later `@TestPropertySource`
+annotations overriding those from previous `@TestPropertySource` annotations.
+
+In addition, you may declare multiple composed annotations on a test class that are each
+meta-annotated with `@TestPropertySource`, and all of those `@TestPropertySource`
+declarations will contribute to your test property sources.
+
+Directly present `@TestPropertySource` annotations always take precedence over
+meta-present `@TestPropertySource` annotations. In other words, `locations` and
+`properties` from a directly present `@TestPropertySource` annotation will override the
+`locations` and `properties` from a `@TestPropertySource` annotation used as a
+meta-annotation.
+====
 
 
 ====== Default Properties File Detection
