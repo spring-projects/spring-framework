@@ -16,12 +16,22 @@
 
 package org.springframework.test.context.support;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.log.LogMessage;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ResourceUtils;
 
 /**
  * {@code TestPropertySourceAttributes} encapsulates attributes declared
@@ -37,48 +47,96 @@ import org.springframework.util.ObjectUtils;
  */
 class TestPropertySourceAttributes {
 
+	private static final Log logger = LogFactory.getLog(TestPropertySourceAttributes.class);
+
+
+	private final int aggregateIndex;
+
 	private final Class<?> declaringClass;
 
-	private final String[] locations;
+	private final List<String> locations;
 
 	private final boolean inheritLocations;
 
-	private final String[] properties;
+	private final List<String> properties;
 
 	private final boolean inheritProperties;
 
 
-	/**
-	 * Create a new {@code TestPropertySourceAttributes} instance for the supplied
-	 * values and enforce configuration rules.
-	 * @param declaringClass the class that declared {@code @TestPropertySource}
-	 * @param locations the merged {@link TestPropertySource#locations()}
-	 * @param inheritLocations the {@link TestPropertySource#inheritLocations()} flag
-	 * @param properties the merged {@link TestPropertySource#properties()}
-	 * @param inheritProperties the {@link TestPropertySource#inheritProperties()} flag
-	 * @since 5.2
-	 */
-	TestPropertySourceAttributes(Class<?> declaringClass, List<String> locations, boolean inheritLocations,
-			List<String> properties, boolean inheritProperties) {
-
-		this(declaringClass, locations.toArray(new String[0]), inheritLocations, properties.toArray(new String[0]),
-			inheritProperties);
+	TestPropertySourceAttributes(MergedAnnotation<TestPropertySource> annotation) {
+		this.aggregateIndex = annotation.getAggregateIndex();
+		this.declaringClass = (Class<?>) annotation.getSource();
+		this.inheritLocations = annotation.getBoolean("inheritLocations");
+		this.inheritProperties = annotation.getBoolean("inheritProperties");
+		this.properties = new ArrayList<>();
+		this.locations = new ArrayList<>();
+		mergePropertiesAndLocations(annotation);
 	}
 
-	private TestPropertySourceAttributes(Class<?> declaringClass, String[] locations, boolean inheritLocations,
-			String[] properties, boolean inheritProperties) {
 
-		Assert.notNull(declaringClass, "'declaringClass' must not be null");
-		Assert.isTrue(!ObjectUtils.isEmpty(locations) || !ObjectUtils.isEmpty(properties),
-			"Either 'locations' or 'properties' are required");
-
-		this.declaringClass = declaringClass;
-		this.locations = locations;
-		this.inheritLocations = inheritLocations;
-		this.properties = properties;
-		this.inheritProperties = inheritProperties;
+	boolean canMerge(MergedAnnotation<TestPropertySource> annotation) {
+		return annotation.getAggregateIndex() == this.aggregateIndex;
 	}
 
+	void merge(MergedAnnotation<TestPropertySource> annotation) {
+		Assert.state((Class<?>) annotation.getSource() == this.declaringClass,
+				() -> "Detected @TestPropertySource declarations within an aggregate index "
+						+ "with different source: " + this.declaringClass + " and "
+						+ annotation.getSource());
+		logger.trace(LogMessage.format("Retrieved %s for declaring class [%s].",
+				annotation, this.declaringClass.getName()));
+		assertSameBooleanAttribute(this.inheritLocations, annotation, "inheritLocations");
+		assertSameBooleanAttribute(this.inheritProperties, annotation, "inheritProperties");
+		mergePropertiesAndLocations(annotation);
+	}
+
+	private void assertSameBooleanAttribute(boolean expected,
+			MergedAnnotation<TestPropertySource> annotation, String attribute) {
+		Assert.isTrue(expected == annotation.getBoolean(attribute), () -> String.format(
+				"Classes %s and %s must declare the same value for '%s' as other directly " +
+				"present or meta-present @TestPropertySource annotations", this.declaringClass.getName(),
+				((Class<?>) annotation.getSource()).getName(), attribute));
+	}
+
+	private void mergePropertiesAndLocations(
+			MergedAnnotation<TestPropertySource> annotation) {
+		String[] locations = annotation.getStringArray("locations");
+		String[] properties = annotation.getStringArray("properties");
+		boolean prepend = annotation.getDistance() > 0;
+		if (ObjectUtils.isEmpty(locations) && ObjectUtils.isEmpty(properties)) {
+			addAll(prepend, this.locations, detectDefaultPropertiesFile(annotation));
+		}
+		else {
+			addAll(prepend, this.locations, locations);
+			addAll(prepend, this.properties, properties);
+		}
+	}
+
+	private void addAll(boolean prepend, List<String> list, String... additions) {
+		list.addAll(prepend ? 0 : list.size(), Arrays.asList(additions));
+	}
+
+	private String detectDefaultPropertiesFile(
+			MergedAnnotation<TestPropertySource> annotation) {
+		Class<?> testClass = (Class<?>) annotation.getSource();
+		String resourcePath = ClassUtils.convertClassNameToResourcePath(testClass.getName()) + ".properties";
+		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
+		if (!classPathResource.exists()) {
+			String msg = String.format(
+					"Could not detect default properties file for test class [%s]: "
+							+ "%s does not exist. Either declare the 'locations' or 'properties' attributes "
+							+ "of @TestPropertySource or make the default properties file available.",
+					testClass.getName(), classPathResource);
+			logger.error(msg);
+			throw new IllegalStateException(msg);
+		}
+		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Detected default properties file \"%s\" for test class [%s]",
+					prefixedResourcePath, testClass.getName()));
+		}
+		return prefixedResourcePath;
+	}
 
 	/**
 	 * Get the {@linkplain Class class} that declared {@code @TestPropertySource}.
@@ -98,7 +156,7 @@ class TestPropertySourceAttributes {
 	 * @see TestPropertySource#locations
 	 */
 	String[] getLocations() {
-		return this.locations;
+		return this.locations.toArray(new String[0]);
 	}
 
 	/**
@@ -119,7 +177,7 @@ class TestPropertySourceAttributes {
 	 * @see TestPropertySource#properties
 	 */
 	String[] getProperties() {
-		return this.properties;
+		return this.properties.toArray(new String[0]);
 	}
 
 	/**
@@ -138,12 +196,12 @@ class TestPropertySourceAttributes {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)//
-		.append("declaringClass", this.declaringClass.getName())//
-		.append("locations", ObjectUtils.nullSafeToString(this.locations))//
-		.append("inheritLocations", this.inheritLocations)//
-		.append("properties", ObjectUtils.nullSafeToString(this.properties))//
-		.append("inheritProperties", this.inheritProperties)//
-		.toString();
+				.append("declaringClass", this.declaringClass.getName())
+				.append("locations", this.locations)
+				.append("inheritLocations", this.inheritLocations)
+				.append("properties", this.properties)
+				.append("inheritProperties", this.inheritProperties)
+				.toString();
 	}
 
 }
