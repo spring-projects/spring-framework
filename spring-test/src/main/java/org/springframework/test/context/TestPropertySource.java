@@ -172,9 +172,24 @@ public @interface TestPropertySource {
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
 	 *   // ...
-	 * }
-	 * </pre>
-	 *
+	 * }</pre>
+	 * <p>If {@code @TestPropertySource} is used as a <em>{@linkplain Repeatable
+	 * repeatable}</em> annotation, the following special rules apply.
+	 * <ol>
+	 * <li>All {@code @TestPropertySource} annotations at a given level in the
+	 * test class hierarchy (i.e., directly present or meta-present on a test
+	 * class) are considered to be <em>local</em> annotations, in contrast to
+	 * {@code @TestPropertySource} annotations that are inherited from a
+	 * superclass.</li>
+	 * <li>All local {@code @TestPropertySource} annotations must declare the
+	 * same value for the {@code inheritLocations} flag.</li>
+	 * <li>The {@code inheritLocations} flag is not taken into account between
+	 * local {@code @TestPropertySource} annotations. Specifically, the property
+	 * source locations for one local annotation will be appended to the list of
+	 * property source locations defined by previous local annotations. This
+	 * allows a local annotation to extend the list of test property source
+	 * locations, potentially overriding individual properties.</li>
+	 * </ol>
 	 * @see #locations
 	 */
 	boolean inheritLocations() default true;
@@ -232,8 +247,24 @@ public @interface TestPropertySource {
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
 	 *   // ...
-	 * }
-	 * </pre>
+	 * }</pre>
+	 * <p>If {@code @TestPropertySource} is used as a <em>{@linkplain Repeatable
+	 * repeatable}</em> annotation, the following special rules apply.
+	 * <ol>
+	 * <li>All {@code @TestPropertySource} annotations at a given level in the
+	 * test class hierarchy (i.e., directly present or meta-present on a test
+	 * class) are considered to be <em>local</em> annotations, in contrast to
+	 * {@code @TestPropertySource} annotations that are inherited from a
+	 * superclass.</li>
+	 * <li>All local {@code @TestPropertySource} annotations must declare the
+	 * same value for the {@code inheritProperties} flag.</li>
+	 * <li>The {@code inheritProperties} flag is not taken into account between
+	 * local {@code @TestPropertySource} annotations. Specifically, inlined
+	 * properties for one local annotation will be appended to the list of
+	 * inlined properties defined by previous local annotations. This allows a
+	 * local annotation to extend the list of inlined properties, potentially
+	 * overriding individual properties.</li>
+	 * </ol>
 	 * @see #properties
 	 */
 	boolean inheritProperties() default true;
