@@ -35,7 +35,7 @@ public class LocalInlinedPropertyAndMetaInlinedPropertyTests extends AbstractRep
 	@Test
 	public void test() {
 		assertEnvironmentValue("key1", "local");
-		assertEnvironmentValue("meta", "inlined");
+		assertEnvironmentValue("enigma", "meta");
 	}
 
 }

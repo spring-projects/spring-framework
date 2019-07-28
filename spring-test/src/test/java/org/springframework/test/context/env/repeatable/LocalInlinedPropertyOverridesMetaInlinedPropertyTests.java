@@ -28,13 +28,13 @@ import org.springframework.test.context.TestPropertySource;
  * @author Sam Brannen
  * @since 5.2
  */
-@TestPropertySource(properties = "meta = local override")
+@TestPropertySource(properties = "enigma = local override")
 @MetaInlinedTestProperty
 public class LocalInlinedPropertyOverridesMetaInlinedPropertyTests extends AbstractRepeatableTestPropertySourceTests {
 
 	@Test
 	public void test() {
-		assertEnvironmentValue("meta", "local override");
+		assertEnvironmentValue("enigma", "local override");
 	}
 
 }

@@ -22,16 +22,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.env.repeatable.MetaComposedTestProperty.MetaMetaInlinedTestProperty;
 
 /**
- * Composed annotation that declares a {@code meta} inlined property via
- * {@link TestPropertySource @TestPropertySource}.
+ * Composed annotation that declares a property via
+ * {@link TestPropertySource @TestPropertySource} used as a meta-meta-annotation.
  *
- * @author Anatoliy Korovin
+ * @author Sam Brannen
  * @since 5.2
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@TestPropertySource(properties = "enigma = meta")
-@interface MetaInlinedTestProperty {
+@MetaMetaInlinedTestProperty
+@interface MetaComposedTestProperty {
+
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@TestPropertySource(properties = "enigma = meta meta")
+	@interface MetaMetaInlinedTestProperty {
+	}
+
 }

@@ -16,22 +16,24 @@
 
 package org.springframework.test.context.env.repeatable;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.junit.Test;
 
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * Composed annotation that declares a {@code meta} inlined property via
- * {@link TestPropertySource @TestPropertySource}.
+ * Integration tests for {@link TestPropertySource @TestPropertySource} as a
+ * repeatable annotation.
  *
- * @author Anatoliy Korovin
+ * @author Sam Brannen
  * @since 5.2
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@TestPropertySource(properties = "enigma = meta")
-@interface MetaInlinedTestProperty {
+@MetaInlinedTestProperty
+@MetaComposedTestProperty
+public class MetaInlinedPropertyOverridesMetaMetaInlinedPropertyTests extends AbstractRepeatableTestPropertySourceTests {
+
+	@Test
+	public void test() {
+		assertEnvironmentValue("enigma", "meta");
+	}
+
 }
