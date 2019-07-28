@@ -172,7 +172,7 @@ public class AccountController {
 In addition to fine-grained, controller method level configuration, you probably want to
 define some global CORS configuration, too. You can set URL-based `CorsConfiguration`
 mappings individually on any `HandlerMapping`. Most applications, however, use the
-MVC Java configuration or the MVC XNM namespace to do that.
+MVC Java configuration or the MVC XML namespace to do that.
 
 By default, global configuration enables the following:
 
