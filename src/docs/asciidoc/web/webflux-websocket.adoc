@@ -53,11 +53,9 @@ Then you can map it to a URL and add a `WebSocketHandlerAdapter`, as the followi
 		public HandlerMapping handlerMapping() {
 			Map<String, WebSocketHandler> map = new HashMap<>();
 			map.put("/path", new MyWebSocketHandler());
+			int order = -1; // before annotated controllers
 
-			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
-			mapping.setUrlMap(map);
-			mapping.setOrder(-1); // before annotated controllers
-			return mapping;
+			return new SimpleUrlHandlerMapping(map, order);
 		}
 
 		@Bean

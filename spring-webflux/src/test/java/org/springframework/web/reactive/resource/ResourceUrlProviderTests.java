@@ -152,12 +152,7 @@ public class ResourceUrlProviderTests {
 
 		@Bean
 		public SimpleUrlHandlerMapping simpleUrlHandlerMapping() {
-			ResourceWebHandler handler = new ResourceWebHandler();
-			HashMap<String, ResourceWebHandler> handlerMap = new HashMap<>();
-			handlerMap.put("/resources/**", handler);
-			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
-			hm.setUrlMap(handlerMap);
-			return hm;
+			return new SimpleUrlHandlerMapping(Collections.singletonMap("/resources/**", new ResourceWebHandler()));
 		}
 
 		@Bean

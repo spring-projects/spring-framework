@@ -145,12 +145,8 @@ public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests
 			map.put("/sub-protocol", new SubProtocolWebSocketHandler());
 			map.put("/custom-header", new CustomHeaderHandler());
 			map.put("/close", new SessionClosingHandler());
-
-			SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
-			mapping.setUrlMap(map);
-			return mapping;
+			return new SimpleUrlHandlerMapping(map);
 		}
-
 	}
 
 

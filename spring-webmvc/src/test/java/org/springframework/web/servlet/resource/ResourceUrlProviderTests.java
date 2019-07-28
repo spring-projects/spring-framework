@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,12 +175,8 @@ public class ResourceUrlProviderTests {
 
 		@Bean
 		public SimpleUrlHandlerMapping simpleUrlHandlerMapping() {
-			ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-			HashMap<String, ResourceHttpRequestHandler> handlerMap = new HashMap<>();
-			handlerMap.put("/resources/**", handler);
-			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
-			hm.setUrlMap(handlerMap);
-			return hm;
+			return new SimpleUrlHandlerMapping(
+				Collections.singletonMap("/resources/**", new ResourceHttpRequestHandler()));
 		}
 
 		@Bean
