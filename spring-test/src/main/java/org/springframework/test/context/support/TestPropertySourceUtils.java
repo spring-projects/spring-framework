@@ -92,7 +92,7 @@ public abstract class TestPropertySourceUtils {
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
 		MergedAnnotations mergedAnnotations = MergedAnnotations.from(testClass, SearchStrategy.EXHAUSTIVE);
 		return (mergedAnnotations.isPresent(TestPropertySource.class) ? mergeTestPropertySources(mergedAnnotations) :
-				new MergedTestPropertySources());
+				MergedTestPropertySources.empty());
 	}
 
 	private static MergedTestPropertySources mergeTestPropertySources(MergedAnnotations mergedAnnotations) {
