@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.Payload;
 import io.rsocket.metadata.CompositeMetadata;
 
@@ -179,8 +179,9 @@ public class DefaultMetadataExtractor implements MetadataExtractor {
 
 	private static class EntryExtractor<T> {
 
+		// We only need this to wrap ByteBufs
 		private final static NettyDataBufferFactory bufferFactory =
-				new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
+				new NettyDataBufferFactory(ByteBufAllocator.DEFAULT);
 
 
 		private final Decoder<T> decoder;

@@ -17,18 +17,10 @@
 package org.springframework.messaging.rsocket;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.CompositeByteBuf;
-import io.netty.buffer.Unpooled;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
-import io.rsocket.metadata.CompositeMetadataFlyweight;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,12 +33,9 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.NettyDataBuffer;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of {@link RSocketRequester}.
@@ -55,9 +44,6 @@ import org.springframework.util.ObjectUtils;
  * @since 5.2
  */
 final class DefaultRSocketRequester implements RSocketRequester {
-
-	/** For route variable replacement. */
-	private static final Pattern VARS_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 	private static final Map<String, Object> EMPTY_HINTS = Collections.emptyMap();
 
@@ -107,30 +93,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 	@Override
 	public RequestSpec route(String route, Object... vars) {
-		Assert.notNull(route, "'route' is required");
-		route = expand(route, vars);
-		return new DefaultRequestSpec(route, isCompositeMetadata() ? MetadataExtractor.ROUTING : null);
-	}
-
-	private static String expand(String route, Object... vars) {
-		if (ObjectUtils.isEmpty(vars)) {
-			return route;
-		}
-		StringBuffer sb = new StringBuffer();
-		int index = 0;
-		Matcher matcher = VARS_PATTERN.matcher(route);
-		while (matcher.find()) {
-			Assert.isTrue(index < vars.length, () -> "No value for variable '" + matcher.group(1) + "'");
-			String value = vars[index].toString();
-			value = value.contains(".") ? value.replaceAll("\\.", "%2E") : value;
-			matcher.appendReplacement(sb, value);
-			index++;
-		}
-		return sb.toString();
-	}
-
-	private boolean isCompositeMetadata() {
-		return metadataMimeType().equals(MetadataExtractor.COMPOSITE_METADATA);
+		return new DefaultRequestSpec(route, vars);
 	}
 
 	@Override
@@ -150,22 +113,23 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 	private class DefaultRequestSpec implements RequestSpec {
 
-		private final Map<Object, MimeType> metadata = new LinkedHashMap<>(4);
+		private final MetadataEncoder metadataEncoder;
 
 
-		DefaultRequestSpec(Object metadata, @Nullable MimeType mimeType) {
-			mimeType = (mimeType == null && !isCompositeMetadata() ? metadataMimeType() : mimeType);
-			Assert.notNull(mimeType, "MimeType is required for composite metadata");
-			metadata(metadata, mimeType);
+		public DefaultRequestSpec(String route, Object... vars) {
+			this.metadataEncoder = new MetadataEncoder(metadataMimeType(), strategies);
+			this.metadataEncoder.route(route, vars);
 		}
+
+		public DefaultRequestSpec(Object metadata, @Nullable MimeType mimeType) {
+			this.metadataEncoder = new MetadataEncoder(metadataMimeType(), strategies);
+			this.metadataEncoder.metadata(metadata, mimeType);
+		}
+
 
 		@Override
 		public RequestSpec metadata(Object metadata, MimeType mimeType) {
-			Assert.notNull(metadata, "Metadata content is required");
-			Assert.notNull(mimeType, "MimeType is required");
-			Assert.isTrue(this.metadata.isEmpty() || isCompositeMetadata(),
-					"Composite metadata required for multiple metadata entries.");
-			this.metadata.put(metadata, mimeType);
+			this.metadataEncoder.metadata(metadata, mimeType);
 			return this;
 		}
 
@@ -265,69 +229,17 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		private Payload firstPayload(DataBuffer data) {
 			DataBuffer metadata;
 			try {
-				metadata = getMetadata();
-				return PayloadUtils.createPayload(metadata, data);
+				metadata = this.metadataEncoder.encode();
 			}
 			catch (Throwable ex) {
 				DataBufferUtils.release(data);
 				throw ex;
 			}
+			return PayloadUtils.createPayload(metadata, data);
 		}
 
 		private Mono<Payload> emptyPayload() {
 			return Mono.fromCallable(() -> firstPayload(emptyDataBuffer));
-		}
-
-		private DataBuffer getMetadata() {
-			if (isCompositeMetadata()) {
-				CompositeByteBuf metadata = getAllocator().compositeBuffer();
-				this.metadata.forEach((value, mimeType) -> {
-					DataBuffer dataBuffer = encodeMetadata(value, mimeType);
-					CompositeMetadataFlyweight.encodeAndAddMetadata(metadata, getAllocator(), mimeType.toString(),
-							dataBuffer instanceof NettyDataBuffer ?
-									((NettyDataBuffer) dataBuffer).getNativeBuffer() :
-									Unpooled.wrappedBuffer(dataBuffer.asByteBuffer()));
-				});
-				return asDataBuffer(metadata);
-			}
-			else {
-				Assert.isTrue(this.metadata.size() == 1, "Composite metadata required for multiple entries");
-				Map.Entry<Object, MimeType> entry = this.metadata.entrySet().iterator().next();
-				if (!metadataMimeType().equals(entry.getValue())) {
-					throw new IllegalArgumentException(
-							"Connection configured for metadata mime type " +
-									"'" + metadataMimeType() + "', but actual is `" + this.metadata + "`");
-				}
-				return encodeMetadata(entry.getKey(), entry.getValue());
-			}
-		}
-
-		@SuppressWarnings("unchecked")
-		private <T> DataBuffer encodeMetadata(Object metadata, MimeType mimeType) {
-			if (metadata instanceof DataBuffer) {
-				return (DataBuffer) metadata;
-			}
-			ResolvableType type = ResolvableType.forInstance(metadata);
-			Encoder<T> encoder = strategies.encoder(type, mimeType);
-			Assert.notNull(encoder, () -> "No encoder for metadata " + metadata + ", mimeType '" + mimeType + "'");
-			return encoder.encodeValue((T) metadata, bufferFactory(), type, mimeType, EMPTY_HINTS);
-		}
-
-		private ByteBufAllocator getAllocator() {
-			return bufferFactory() instanceof NettyDataBufferFactory ?
-					((NettyDataBufferFactory) bufferFactory()).getByteBufAllocator() :
-					ByteBufAllocator.DEFAULT;
-		}
-
-		private DataBuffer asDataBuffer(ByteBuf byteBuf) {
-			if (bufferFactory() instanceof NettyDataBufferFactory) {
-				return ((NettyDataBufferFactory) bufferFactory()).wrap(byteBuf);
-			}
-			else {
-				DataBuffer dataBuffer = bufferFactory().wrap(byteBuf.nioBuffer());
-				byteBuf.release();
-				return dataBuffer;
-			}
 		}
 	}
 
