@@ -134,7 +134,7 @@ public class ExceptionHandlerMethodResolver {
 		if (method == null) {
 			Throwable cause = exception.getCause();
 			if (cause != null) {
-				method = resolveMethodByExceptionType(cause.getClass());
+				method = resolveMethodByThrowable(cause);
 			}
 		}
 		return method;
