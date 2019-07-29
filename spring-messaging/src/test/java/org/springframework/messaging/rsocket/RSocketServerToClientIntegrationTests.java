@@ -17,7 +17,6 @@
 package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
-import java.util.Collections;
 
 import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
@@ -267,8 +266,7 @@ public class RSocketServerToClientIntegrationTests {
 
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
-			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-			extractor.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
+			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(StringDecoder.allMimeTypes());
 			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
 			return RSocketStrategies.builder().metadataExtractor(extractor).build();
 		}

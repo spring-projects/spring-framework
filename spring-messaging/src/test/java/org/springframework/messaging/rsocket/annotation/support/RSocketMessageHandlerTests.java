@@ -129,8 +129,7 @@ public class RSocketMessageHandlerTests {
 
 	@Test
 	public void metadataExtractorWithExplicitlySetDecoders() {
-		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-		extractor.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
+		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(StringDecoder.allMimeTypes());
 
 		RSocketMessageHandler handler = new RSocketMessageHandler();
 		handler.setDecoders(Arrays.asList(new ByteArrayDecoder(), new ByteBufferDecoder()));

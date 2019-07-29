@@ -37,7 +37,6 @@ import org.springframework.util.MimeType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.messaging.rsocket.MetadataExtractor.COMPOSITE_METADATA;
 import static org.springframework.messaging.rsocket.MetadataExtractor.ROUTE_KEY;
 import static org.springframework.messaging.rsocket.MetadataExtractor.ROUTING;
@@ -71,8 +70,7 @@ public class DefaultMetadataExtractorTests {
 		this.captor = ArgumentCaptor.forClass(Payload.class);
 		BDDMockito.when(this.rsocket.fireAndForget(captor.capture())).thenReturn(Mono.empty());
 
-		this.extractor = new DefaultMetadataExtractor();
-		this.extractor.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
+		this.extractor = new DefaultMetadataExtractor(StringDecoder.allMimeTypes());
 	}
 
 	@After
@@ -165,56 +163,14 @@ public class DefaultMetadataExtractorTests {
 	}
 
 	@Test
-	public void addMetadataToExtractBeforeDecoders() {
-		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-		extractor.metadataToExtract(TEXT_PLAIN, String.class, "key");
-		extractor.setDecoders(Collections.singletonList(StringDecoder.allMimeTypes()));
-
-		requester(TEXT_PLAIN).metadata("meta entry", null).data("data").send().block();
-		Payload payload = this.captor.getValue();
-		Map<String, Object> result = extractor.extract(payload, TEXT_PLAIN);
-		payload.release();
-
-		assertThat(result).hasSize(1).containsEntry("key", "meta entry");
-	}
-
-	@Test
-	public void noDecoderExceptionWhenSettingDecoders() {
-		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-		extractor.metadataToExtract(TEXT_PLAIN, String.class, "key");
-
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> extractor.setDecoders(Collections.singletonList(new ByteArrayDecoder())))
-				.withMessage("No decoder for MetadataProcessor mimeType=text/plain, targetType=java.lang.String");
-	}
-
-	@Test
-	public void noDecoderExceptionWhenRegisteringMetadataToExtract() {
-		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-		extractor.setDecoders(Collections.singletonList(new ByteArrayDecoder()));
+	public void noDecoder() {
+		DefaultMetadataExtractor extractor =
+				new DefaultMetadataExtractor(Collections.singletonList(new ByteArrayDecoder())
+		);
 
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> extractor.metadataToExtract(TEXT_PLAIN, String.class, "key"))
-				.withMessage("No decoder for text/plain");
-	}
-
-	@Test
-	public void decodersNotSet() {
-		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor();
-		extractor.metadataToExtract(TEXT_PLAIN, String.class, "key");
-
-		assertThatIllegalStateException()
-				.isThrownBy(() -> {
-					requester(TEXT_PLAIN).metadata("meta entry", null).data("data").send().block();
-					Payload payload = this.captor.getValue();
-					try {
-						extractor.extract(payload, TEXT_PLAIN);
-					}
-					finally {
-						payload.release();
-					}
-				})
-				.withMessage("No decoder for MetadataProcessor mimeType=text/plain, targetType=java.lang.String");
+				.withMessage("No decoder for text/plain and java.lang.String");
 	}
 
 
