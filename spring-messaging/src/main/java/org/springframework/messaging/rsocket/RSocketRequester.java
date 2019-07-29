@@ -164,15 +164,12 @@ public interface RSocketRequester {
 
 		/**
 		 * Callback to configure the {@code ClientRSocketFactory} directly.
-		 * <p>See static factory method
-		 * {@link RSocketMessageHandler#clientResponder(Object...)} for
-		 * configuring a client side responder with annotated methods.
-		 * <p><strong>Note:</strong> Do not set {@link #dataMimeType(MimeType)}
-		 * and {@link #metadataMimeType(MimeType)} directly on the
-		 * {@code ClientRSocketFactory}. Use the shortcuts on this builder
-		 * instead since the created {@code RSocketRequester} needs to be aware
-		 * of those settings.
-		 * @see RSocketMessageHandler#clientResponder(Object...)
+		 * <p>Do not set {@link #dataMimeType(MimeType)} and
+		 * {@link #metadataMimeType(MimeType)} directly on the
+		 * {@code ClientRSocketFactory}. Use methods on this builder instead
+		 * so the {@code RSocketRequester} will have access to them.
+		 * <p>For configuring client side responding, see
+		 * {@link RSocketMessageHandler#clientResponder(RSocketStrategies, Object...)}.
 		 */
 		RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer);
 

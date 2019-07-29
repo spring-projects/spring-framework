@@ -18,10 +18,9 @@ package org.springframework.messaging.rsocket;
 import io.rsocket.RSocketFactory;
 
 /**
- * Strategy to apply some configuration to a
- * {@link io.rsocket.RSocketFactory.ClientRSocketFactory ClientRSocketFactory}.
- * It is given to {@link RSocketRequester.Builder} to initialize the
- * {@code RSocketFactory} that's used to connect.
+ * Strategy to apply configuration to a client side {@code RSocketFactory}.
+ * that's being prepared by {@link RSocketRequester.Builder} to connect
+ * to a server.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
@@ -30,17 +29,7 @@ import io.rsocket.RSocketFactory;
 public interface ClientRSocketFactoryConfigurer {
 
 	/**
-	 * This method is invoked by {@link RSocketRequester.Builder} immediately
-	 * before the call to {@link #configure}, and can be used by implementations
-	 * of this interface that need access to the configured
-	 * {@code RSocketStrategies}.
-	 */
-	default void configureWithStrategies(RSocketStrategies strategies) {
-	}
-
-	/**
-	 * Configure the given {@code ClientRSocketFactory}.
-	 * @param rsocketFactory the factory to configure
+	 * Apply configuration to the given {@code ClientRSocketFactory}.
 	 */
 	void configure(RSocketFactory.ClientRSocketFactory rsocketFactory);
 

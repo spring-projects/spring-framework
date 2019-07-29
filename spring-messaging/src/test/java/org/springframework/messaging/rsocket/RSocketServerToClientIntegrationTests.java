@@ -106,15 +106,17 @@ public class RSocketServerToClientIntegrationTests {
 		ServerController serverController = context.getBean(ServerController.class);
 		serverController.reset();
 
+		RSocketStrategies strategies = context.getBean(RSocketStrategies.class);
+		ClientRSocketFactoryConfigurer clientResponderConfigurer =
+				RSocketMessageHandler.clientResponder(strategies, new ClientHandler());
+
 		RSocketRequester requester = null;
 		try {
 			requester = RSocketRequester.builder()
-					.rsocketFactory(factory -> {
-						factory.metadataMimeType("text/plain");
-						factory.setupPayload(ByteBufPayload.create("", connectionRoute));
-					})
-					.rsocketFactory(RSocketMessageHandler.clientResponder(new ClientHandler()))
-					.rsocketStrategies(context.getBean(RSocketStrategies.class))
+					.metadataMimeType(MimeTypeUtils.TEXT_PLAIN)
+					.rsocketStrategies(strategies)
+					.rsocketFactory(clientResponderConfigurer)
+					.rsocketFactory(factory -> factory.setupPayload(ByteBufPayload.create("", connectionRoute)))
 					.connectTcp("localhost", server.address().getPort())
 					.block();
 

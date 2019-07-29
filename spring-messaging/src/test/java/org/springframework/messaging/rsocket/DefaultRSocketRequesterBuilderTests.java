@@ -99,7 +99,6 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		verify(this.transport).connect(anyInt());
 		verify(rsocketStrategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
-		assertThat(this.rsocketFactoryConfigurer.rsocketStrategies()).isNotNull();
 		assertThat(this.rsocketFactoryConfigurer.rsocketFactory()).isNotNull();
 	}
 
@@ -194,24 +193,13 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	static class TestRSocketFactoryConfigurer implements ClientRSocketFactoryConfigurer {
 
-		private RSocketStrategies strategies;
-
 		private RSocketFactory.ClientRSocketFactory rsocketFactory;
 
 
-		public RSocketStrategies rsocketStrategies() {
-			return this.strategies;
-		}
-
-		public RSocketFactory.ClientRSocketFactory rsocketFactory() {
+		RSocketFactory.ClientRSocketFactory rsocketFactory() {
 			return this.rsocketFactory;
 		}
 
-
-		@Override
-		public void configureWithStrategies(RSocketStrategies strategies) {
-			this.strategies = strategies;
-		}
 
 		@Override
 		public void configure(RSocketFactory.ClientRSocketFactory rsocketFactory) {

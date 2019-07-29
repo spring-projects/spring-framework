@@ -24,7 +24,6 @@ import java.util.function.Function;
 
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
-import io.rsocket.RSocketFactory;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.FrameType;
 import reactor.core.publisher.Mono;
@@ -344,18 +343,15 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	/**
-	 * Return an adapter for a client side
-	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#acceptor(BiFunction)
-	 * acceptor} that delegate to this {@link RSocketMessageHandler} for
-	 * handling.
-	 * <p>The initial {@link ConnectionSetupPayload} can be processed with a
-	 * {@link ConnectMapping @ConnectionMapping} method but, unlike the
-	 * server side, such a method is merely a callback and cannot prevent the
-	 * connection unless the method throws an error immediately. Such a method
-	 * can also start requests to the server but must do so decoupled from
-	 * handling and from the current thread.
-	 * <p>Subsequent stream requests can be handled with
-	 * {@link MessageMapping MessageMapping} methods.
+	 * Return an adapter for a client side responder that can be used to set
+	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#acceptor(Function)}.
+	 * The responder delegates requests to this {@code RSocketMessageHandler}
+	 * for handling via {@code @MessageMapping} methods.
+	 * <p>The initial {@link ConnectionSetupPayload} can be accessed through a
+	 * {@link ConnectMapping @ConnectionMapping} method, but such a method is
+	 * only a callback just before the connection is made and cannot "accept"
+	 * or prevent the connection. Such a method can also start requests to the
+	 * server but must do so decoupled from handling and the current thread.
 	 */
 	public BiFunction<ConnectionSetupPayload, RSocket, RSocket> clientResponder() {
 		return (setupPayload, sendingRSocket) -> {
@@ -375,17 +371,13 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		MimeType metaMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
 		Assert.notNull(metaMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
 
-		RSocketStrategies strategies = getRSocketStrategies();
-		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metaMimeType, strategies);
+		RSocketRequester requester = RSocketRequester.wrap(
+				rsocket, dataMimeType, metaMimeType, this.strategies);
 
-		Assert.state(this.metadataExtractor != null,
-				() -> "No MetadataExtractor. Was afterPropertiesSet not called?");
+		Assert.state(getRouteMatcher() != null, () -> "No RouteMatcher. Was afterPropertiesSet not called?");
 
-		Assert.state(getRouteMatcher() != null,
-				() -> "No RouteMatcher. Was afterPropertiesSet not called?");
-
-		return new MessagingRSocket(dataMimeType, metaMimeType, this.metadataExtractor, requester,
-				this, getRouteMatcher(), strategies);
+		return new MessagingRSocket(dataMimeType, metaMimeType, this.metadataExtractor,
+				requester, this, getRouteMatcher(), this.strategies);
 	}
 
 	private boolean isDataMimeTypeSupported(MimeType dataMimeType) {
@@ -399,39 +391,39 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		return false;
 	}
 
-	public static ClientRSocketFactoryConfigurer clientResponder(Object... handlers) {
-		return new ResponderConfigurer(handlers);
-	}
+	/**
+	 * Static factory method for a configurer of a client side responder with
+	 * annotated handler methods. This is intended to be passed into
+	 * {@link RSocketRequester.Builder#rsocketFactory(ClientRSocketFactoryConfigurer)}.
+	 * <p>In effect a shortcut to create and initialize
+	 * {@code RSocketMessageHandler} with the given strategies and handlers,
+	 * and use {@link #clientResponder()} to obtain the responder.
+	 * For more advanced scenarios, e.g. discovering handlers through a custom
+	 * stereotype annotation, consider declaring {@code RSocketMessageHandler}
+	 * as a bean, and then obtain the responder from it.
+	 * @param strategies the strategies to set on the created
+	 * {@code RSocketMessageHandler}
+	 * @param candidateHandlers a list of Objects and/or Classes with annotated
+	 * handler methods; used to call {@link #setHandlers(List)} with
+	 * on the created {@code RSocketMessageHandler}
+	 * @return a configurer that may be passed into
+	 * {@link RSocketRequester.Builder#rsocketFactory(ClientRSocketFactoryConfigurer)}
+	 */
+	public static ClientRSocketFactoryConfigurer clientResponder(
+			RSocketStrategies strategies, Object... candidateHandlers) {
 
-
-	private static final class ResponderConfigurer implements ClientRSocketFactoryConfigurer {
-
-		private final List<Object> handlers = new ArrayList<>();
-
-		@Nullable
-		private RSocketStrategies strategies;
-
-
-		private ResponderConfigurer(Object... handlers) {
-			Assert.notEmpty(handlers, "No handlers");
-			for (Object obj : handlers) {
-				this.handlers.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
-			}
+		Assert.notEmpty(candidateHandlers, "No handlers");
+		List<Object> handlers = new ArrayList<>(candidateHandlers.length);
+		for (Object obj : candidateHandlers) {
+			handlers.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
 		}
 
-		@Override
-		public void configureWithStrategies(RSocketStrategies strategies) {
-			this.strategies = strategies;
-		}
-
-		@Override
-		public void configure(RSocketFactory.ClientRSocketFactory factory) {
+		return rsocketFactory -> {
 			RSocketMessageHandler handler = new RSocketMessageHandler();
-			handler.setHandlers(this.handlers);
-			handler.setRSocketStrategies(this.strategies);
+			handler.setHandlers(handlers);
+			handler.setRSocketStrategies(strategies);
 			handler.afterPropertiesSet();
-			factory.acceptor(handler.clientResponder());
-		}
+			rsocketFactory.acceptor(handler.clientResponder());
+		};
 	}
-
 }

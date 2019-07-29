@@ -55,7 +55,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	private List<Consumer<RSocketStrategies.Builder>> strategiesConfigurers = new ArrayList<>();
 
-	private List<ClientRSocketFactoryConfigurer> rsocketFactoryConfigurers = new ArrayList<>();
+	private List<ClientRSocketFactoryConfigurer> rsocketConfigurers = new ArrayList<>();
 
 
 	@Override
@@ -85,7 +85,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	@Override
 	public RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer) {
-		this.rsocketFactoryConfigurers.add(configurer);
+		this.rsocketConfigurers.add(configurer);
 		return this;
 	}
 
@@ -118,10 +118,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 			rsocketFactory.frameDecoder(PayloadDecoder.ZERO_COPY);
 		}
 
-		this.rsocketFactoryConfigurers.forEach(configurer -> {
-			configurer.configureWithStrategies(rsocketStrategies);
-			configurer.configure(rsocketFactory);
-		});
+		this.rsocketConfigurers.forEach(configurer -> configurer.configure(rsocketFactory));
 
 		return rsocketFactory.transport(transport)
 				.start()
