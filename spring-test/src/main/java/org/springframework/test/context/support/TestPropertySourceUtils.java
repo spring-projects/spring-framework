@@ -54,6 +54,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @author Anatoliy Korovin
+ * @author Phillip Webb
  * @since 4.1
  * @see TestPropertySource
  */
@@ -83,21 +84,26 @@ public abstract class TestPropertySourceUtils {
 	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(
 			MergedAnnotations mergedAnnotations) {
 
-		List<TestPropertySourceAttributes> result = new ArrayList<>();
+		List<TestPropertySourceAttributes> attributesList = new ArrayList<>();
 		mergedAnnotations.stream(TestPropertySource.class)
-				.forEach(annotation -> addOrMergeTestPropertySourceAttributes(result, annotation));
-		return result;
+				.forEach(annotation -> addOrMergeTestPropertySourceAttributes(attributesList, annotation));
+		return attributesList;
 	}
 
-	private static void addOrMergeTestPropertySourceAttributes(
-			List<TestPropertySourceAttributes> result,
-			MergedAnnotation<TestPropertySource> annotation) {
+	private static void addOrMergeTestPropertySourceAttributes(List<TestPropertySourceAttributes> attributesList,
+			MergedAnnotation<TestPropertySource> current) {
 
-		if (result.isEmpty() || !result.get(result.size()-1).canMerge(annotation)) {
-			result.add(new TestPropertySourceAttributes(annotation));
+		if (attributesList.isEmpty()) {
+			attributesList.add(new TestPropertySourceAttributes(current));
 		}
 		else {
-			result.get(result.size() - 1).merge(annotation);
+			TestPropertySourceAttributes previous = attributesList.get(attributesList.size() - 1);
+			if (previous.canMergeWith(current)) {
+				previous.mergeWith(current);
+			}
+			else {
+				attributesList.add(new TestPropertySourceAttributes(current));
+			}
 		}
 	}
 

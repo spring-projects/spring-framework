@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.support;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 
 import org.junit.Test;
@@ -81,14 +83,18 @@ public class TestPropertySourceUtilsTests {
 	public void repeatedTestPropertySourcesWithConflictingInheritLocationsFlags() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> buildMergedTestPropertySources(RepeatedPropertySourcesWithConflictingInheritLocationsFlags.class))
-			.withMessageContaining("must declare the same value for 'inheritLocations' as other directly present or meta-present @TestPropertySource annotations");
+			.withMessage("@TestPropertySource on RepeatedPropertySourcesWithConflictingInheritLocationsFlags and " +
+				"@InheritLocationsFalseTestProperty on RepeatedPropertySourcesWithConflictingInheritLocationsFlags " +
+				"must declare the same value for 'inheritLocations' as other directly present or meta-present @TestPropertySource annotations");
 	}
 
 	@Test
 	public void repeatedTestPropertySourcesWithConflictingInheritPropertiesFlags() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> buildMergedTestPropertySources(RepeatedPropertySourcesWithConflictingInheritPropertiesFlags.class))
-			.withMessageContaining("must declare the same value for 'inheritProperties' as other directly present or meta-present @TestPropertySource annotations");
+			.withMessage("@TestPropertySource on RepeatedPropertySourcesWithConflictingInheritPropertiesFlags and " +
+				"@InheritPropertiesFalseTestProperty on RepeatedPropertySourcesWithConflictingInheritPropertiesFlags " +
+				"must declare the same value for 'inheritProperties' as other directly present or meta-present @TestPropertySource annotations");
 	}
 
 	@Test
@@ -271,6 +277,15 @@ public class TestPropertySourceUtilsTests {
 		return arr;
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@TestPropertySource(locations = "foo.properties", inheritLocations = false)
+	@interface InheritLocationsFalseTestProperty {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@TestPropertySource(properties = "a = b", inheritProperties = false)
+	@interface InheritPropertiesFalseTestProperty {
+	}
 
 	@TestPropertySource
 	static class EmptyPropertySources {
@@ -280,13 +295,13 @@ public class TestPropertySourceUtilsTests {
 	static class ExtendedEmptyPropertySources extends EmptyPropertySources {
 	}
 
-	@TestPropertySource(locations = "foo.properties", inheritLocations = false)
+	@InheritLocationsFalseTestProperty
 	@TestPropertySource(locations = "bar.properties", inheritLocations = true)
 	static class RepeatedPropertySourcesWithConflictingInheritLocationsFlags {
 	}
 
-	@TestPropertySource(properties = "a = b", inheritProperties = false)
 	@TestPropertySource(properties = "x = y", inheritProperties = true)
+	@InheritPropertiesFalseTestProperty
 	static class RepeatedPropertySourcesWithConflictingInheritPropertiesFlags {
 	}
 
