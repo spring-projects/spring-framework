@@ -19,9 +19,12 @@ package org.springframework.messaging.rsocket;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
+import io.rsocket.Payload;
 import io.rsocket.RSocketFactory;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.ClientTransport;
@@ -29,11 +32,16 @@ import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 
 /**
@@ -45,10 +53,25 @@ import org.springframework.util.MimeType;
  */
 final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
+	private static final Map<String, Object> HINTS = Collections.emptyMap();
+
+
 	@Nullable
 	private MimeType dataMimeType;
 
 	private MimeType metadataMimeType = MetadataExtractor.COMPOSITE_METADATA;
+
+	@Nullable
+	private Object setupData;
+
+	@Nullable
+	private String setupRoute;
+
+	@Nullable
+	private Object[] setupRouteVars;
+
+	@Nullable
+	private Map<Object, MimeType> setupMetadata;
 
 	@Nullable
 	private RSocketStrategies strategies;
@@ -68,6 +91,26 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	public RSocketRequester.Builder metadataMimeType(MimeType mimeType) {
 		Assert.notNull(mimeType, "`metadataMimeType` is required");
 		this.metadataMimeType = mimeType;
+		return this;
+	}
+
+	@Override
+	public RSocketRequester.Builder setupData(Object data) {
+		this.setupData = data;
+		return this;
+	}
+
+	@Override
+	public RSocketRequester.Builder setupRoute(String route, Object... routeVars) {
+		this.setupRoute = route;
+		this.setupRouteVars = routeVars;
+		return this;
+	}
+
+	@Override
+	public RSocketRequester.Builder setupMetadata(Object metadata, @Nullable MimeType mimeType) {
+		this.setupMetadata = (this.setupMetadata == null ? new LinkedHashMap<>(4) : this.setupMetadata);
+		this.setupMetadata.put(metadata, mimeType);
 		return this;
 	}
 
@@ -120,10 +163,50 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		factory.dataMimeType(dataMimeType.toString());
 		factory.metadataMimeType(this.metadataMimeType.toString());
 
+		Payload setupPayload = getSetupPayload(dataMimeType, rsocketStrategies);
+		if (setupPayload != null) {
+			factory.setupPayload(setupPayload);
+		}
+
 		return factory.transport(transport)
 				.start()
 				.map(rsocket -> new DefaultRSocketRequester(
 						rsocket, dataMimeType, this.metadataMimeType, rsocketStrategies));
+	}
+
+	@Nullable
+	private Payload getSetupPayload(MimeType dataMimeType, RSocketStrategies strategies) {
+		DataBuffer metadata = null;
+		if (this.setupRoute != null || !CollectionUtils.isEmpty(this.setupMetadata)) {
+			metadata = new MetadataEncoder(this.metadataMimeType, strategies)
+					.metadataAndOrRoute(this.setupMetadata, this.setupRoute, this.setupRouteVars)
+					.encode();
+		}
+		DataBuffer data = null;
+		if (this.setupData != null) {
+			try {
+				ResolvableType type = ResolvableType.forClass(this.setupData.getClass());
+				Encoder<Object> encoder = strategies.encoder(type, dataMimeType);
+				Assert.notNull(encoder, () -> "No encoder for " + dataMimeType + ", " + type);
+				data = encoder.encodeValue(this.setupData, strategies.dataBufferFactory(), type, dataMimeType, HINTS);
+			}
+			catch (Throwable ex) {
+				if (metadata != null) {
+					DataBufferUtils.release(metadata);
+				}
+				throw ex;
+			}
+		}
+		if (metadata == null && data == null) {
+			return null;
+		}
+		metadata = metadata != null ? metadata : emptyBuffer(strategies);
+		data = data != null ? data : emptyBuffer(strategies);
+		return PayloadUtils.createPayload(metadata, data);
+	}
+
+	private DataBuffer emptyBuffer(RSocketStrategies strategies) {
+		return strategies.dataBufferFactory().wrap(new byte[0]);
 	}
 
 	private RSocketStrategies getRSocketStrategies() {

@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.function.Consumer;
 
 import io.rsocket.ConnectionSetupPayload;
+import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
@@ -140,6 +141,28 @@ public interface RSocketRequester {
 		RSocketRequester.Builder metadataMimeType(MimeType mimeType);
 
 		/**
+		 * Set the data for the setup payload. The data will be encoded
+		 * according to the configured {@link #dataMimeType(MimeType)}.
+		 * <p>By default this is not set.
+		 */
+		RSocketRequester.Builder setupData(Object data);
+
+		/**
+		 * Set the route for the setup payload. The rules for formatting and
+		 * encoding the route are the same as those for a request route as
+		 * described in {@link #route(String, Object...)}.
+		 * <p>By default this is not set.
+		 */
+		RSocketRequester.Builder setupRoute(String route, Object... routeVars);
+
+		/**
+		 * Add metadata entry to the setup payload. Composite metadata must be
+		 * in use if this is called more than once or in addition to
+		 * {@link #setupRoute(String, Object...)}.
+		 */
+		RSocketRequester.Builder setupMetadata(Object value, @Nullable MimeType mimeType);
+
+		/**
 		 * Provide {@link RSocketStrategies} to use.
 		 * <p>By default this is based on default settings of
 		 * {@link RSocketStrategies.Builder} but may be further customized via
@@ -157,12 +180,20 @@ public interface RSocketRequester {
 
 		/**
 		 * Callback to configure the {@code ClientRSocketFactory} directly.
-		 * <p>Note that the data and metadata mime types cannot be set directly
-		 * on the {@code ClientRSocketFactory}. Use shortcuts on this builder
-		 * {@link #dataMimeType(MimeType)} and {@link #metadataMimeType(MimeType)}
-		 * instead.
-		 * <p>To configure client side responding, see
+		 * <ul>
+		 * <li>The data and metadata mime types cannot be set directly
+		 * on the {@code ClientRSocketFactory} and will be overridden. Use the
+		 * shortcuts {@link #dataMimeType(MimeType)} and
+		 * {@link #metadataMimeType(MimeType)} on this builder instead.
+		 * <li>The frame decoder also cannot be set directly and instead is set
+		 * to match the configured {@code DataBufferFactory}.
+		 * <li>For the
+		 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#setupPayload(Payload)
+		 * setupPayload}, consider using methods on this builder to specify the
+		 * route, other metadata, and data as Object values to be encoded.
+		 * <li>To configure client side responding, see
 		 * {@link RSocketMessageHandler#clientResponder(RSocketStrategies, Object...)}.
+		 * </ul>
 		 */
 		RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer);
 

@@ -188,7 +188,8 @@ public interface RSocketStrategies {
 		 * Configure a {@link MetadataExtractor} to extract the route along with
 		 * other metadata. This option is applicable to client or server
 		 * responders.
-		 * <p>By default this is {@link DefaultMetadataExtractor} extracting a
+		 * <p>By default this is {@link DefaultMetadataExtractor} created with
+		 * the {@link #decoder(Decoder[]) configured} decoders and extracting a
 		 * route from {@code "message/x.rsocket.routing.v0"} metadata.
 		 */
 		Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor);

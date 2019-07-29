@@ -23,7 +23,6 @@ import io.rsocket.SocketAcceptor;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
-import io.rsocket.util.ByteBufPayload;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,12 +36,10 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.StringDecoder;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.MimeTypeUtils;
 
 /**
  * Client-side handling of requests initiated from the server side.
@@ -112,10 +109,9 @@ public class RSocketServerToClientIntegrationTests {
 		RSocketRequester requester = null;
 		try {
 			requester = RSocketRequester.builder()
-					.metadataMimeType(MimeTypeUtils.TEXT_PLAIN)
+					.setupRoute(connectionRoute)
 					.rsocketStrategies(strategies)
 					.rsocketFactory(clientResponderConfigurer)
-					.rsocketFactory(factory -> factory.setupPayload(ByteBufPayload.create("", connectionRoute)))
 					.connectTcp("localhost", server.address().getPort())
 					.block();
 
@@ -266,9 +262,7 @@ public class RSocketServerToClientIntegrationTests {
 
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
-			DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(StringDecoder.allMimeTypes());
-			extractor.metadataToExtract(MimeTypeUtils.TEXT_PLAIN, String.class, MetadataExtractor.ROUTE_KEY);
-			return RSocketStrategies.builder().metadataExtractor(extractor).build();
+			return RSocketStrategies.create();
 		}
 	}
 

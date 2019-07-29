@@ -173,6 +173,24 @@ public class DefaultRSocketRequesterBuilderTests {
 	}
 
 	@Test
+	public void setupRoute() {
+		RSocketRequester.builder()
+				.dataMimeType(MimeTypeUtils.TEXT_PLAIN)
+				.metadataMimeType(MimeTypeUtils.TEXT_PLAIN)
+				.setupRoute("toA")
+				.setupData("My data")
+				.connect(this.transport)
+				.block();
+
+		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
+				.map(ConnectionSetupPayload::create)
+				.block();
+
+		assertThat(setupPayload.getMetadataUtf8()).isEqualTo("toA");
+		assertThat(setupPayload.getDataUtf8()).isEqualTo("My data");
+	}
+
+	@Test
 	public void frameDecoderMatchesDataBufferFactory() throws Exception {
 		testFrameDecoder(new NettyDataBufferFactory(ByteBufAllocator.DEFAULT), PayloadDecoder.ZERO_COPY);
 		testFrameDecoder(new DefaultDataBufferFactory(), PayloadDecoder.DEFAULT);
