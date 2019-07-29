@@ -49,17 +49,12 @@ import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Default, package-private {@link RSocketRequester} implementation.
+ * Default implementation of {@link RSocketRequester}.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
  */
 final class DefaultRSocketRequester implements RSocketRequester {
-
-	static final MimeType COMPOSITE_METADATA = new MimeType("message", "x.rsocket.composite-metadata.v0");
-
-	static final MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
-
 
 	/** For route variable replacement. */
 	private static final Pattern VARS_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
@@ -114,7 +109,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 	public RequestSpec route(String route, Object... vars) {
 		Assert.notNull(route, "'route' is required");
 		route = expand(route, vars);
-		return new DefaultRequestSpec(route, metadataMimeType().equals(COMPOSITE_METADATA) ? ROUTING : null);
+		return new DefaultRequestSpec(route, isCompositeMetadata() ? MetadataExtractor.ROUTING : null);
 	}
 
 	private static String expand(String route, Object... vars) {
@@ -132,6 +127,10 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			index++;
 		}
 		return sb.toString();
+	}
+
+	private boolean isCompositeMetadata() {
+		return metadataMimeType().equals(MetadataExtractor.COMPOSITE_METADATA);
 	}
 
 	@Override
@@ -154,14 +153,10 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		private final Map<Object, MimeType> metadata = new LinkedHashMap<>(4);
 
 
-		public DefaultRequestSpec(Object metadata, @Nullable MimeType mimeType) {
+		DefaultRequestSpec(Object metadata, @Nullable MimeType mimeType) {
 			mimeType = (mimeType == null && !isCompositeMetadata() ? metadataMimeType() : mimeType);
 			Assert.notNull(mimeType, "MimeType is required for composite metadata");
 			metadata(metadata, mimeType);
-		}
-
-		private boolean isCompositeMetadata() {
-			return metadataMimeType().equals(COMPOSITE_METADATA);
 		}
 
 		@Override
@@ -184,22 +179,27 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		public ResponseSpec data(Object producer, Class<?> elementClass) {
 			Assert.notNull(producer, "'producer' must not be null");
 			Assert.notNull(elementClass, "'elementClass' must not be null");
-			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(producer.getClass());
+			ReactiveAdapter adapter = getAdapter(producer.getClass());
 			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
 			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forClass(elementClass));
+		}
+
+		@Nullable
+		private ReactiveAdapter getAdapter(Class<?> aClass) {
+			return strategies.reactiveAdapterRegistry().getAdapter(aClass);
 		}
 
 		@Override
 		public ResponseSpec data(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
 			Assert.notNull(producer, "'producer' must not be null");
 			Assert.notNull(elementTypeRef, "'elementTypeRef' must not be null");
-			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(producer.getClass());
+			ReactiveAdapter adapter = getAdapter(producer.getClass());
 			Assert.notNull(adapter, "'producer' type is unknown to ReactiveAdapterRegistry");
 			return toResponseSpec(adapter.toPublisher(producer), ResolvableType.forType(elementTypeRef));
 		}
 
 		private ResponseSpec toResponseSpec(Object input, ResolvableType elementType) {
-			ReactiveAdapter adapter = strategies.reactiveAdapterRegistry().getAdapter(input.getClass());
+			ReactiveAdapter adapter = getAdapter(input.getClass());
 			Publisher<?> publisher;
 			if (input instanceof Publisher) {
 				publisher = (Publisher<?>) input;

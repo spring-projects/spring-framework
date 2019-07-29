@@ -43,7 +43,7 @@ import org.springframework.util.RouteMatcher;
 import org.springframework.util.SimpleRouteMatcher;
 
 /**
- * Default, package-private {@link RSocketStrategies} implementation.
+ * Default implementation of {@link RSocketStrategies}.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
@@ -108,7 +108,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 
 	/**
-	 * Default RSocketStrategies.Builder implementation.
+	 * Default implementation of {@link RSocketStrategies.Builder}.
 	 */
 	static class DefaultRSocketStrategiesBuilder implements RSocketStrategies.Builder {
 

@@ -38,13 +38,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
- * Default {@link MetadataExtractor} implementation that relies on {@link Decoder}s
- * to deserialize the content of metadata entries.
- *
+ * Default {@link MetadataExtractor} implementation that relies on
+ * {@link Decoder}s to deserialize the content of metadata entries.
  * <p>By default only {@code "message/x.rsocket.routing.v0""} is extracted and
- * saved under {@link MetadataExtractor#ROUTE_KEY}. Use the
- * {@code metadataToExtract} methods to specify other metadata mime types of
- * interest to extract.
+ * saved under {@link MetadataExtractor#ROUTE_KEY}. Use {@code metadataToExtract}
+ * methods to specify other metadata mime types of interest to extract.
  *
  * @author Rossen Stoyanchev
  * @since 5.2

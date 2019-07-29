@@ -133,7 +133,7 @@ public interface RSocketStrategies {
 	}
 
 	/**
-	 * Return a builder to build a new {@code RSocketStrategies} instance.
+	 * Return a builder to prepare a new {@code RSocketStrategies} instance.
 	 * The builder applies default settings, see individual builder methods for
 	 * details.
 	 */
@@ -179,7 +179,7 @@ public interface RSocketStrategies {
 		 * client or server responders.
 		 * <p>By default, {@link SimpleRouteMatcher} is used, backed by
 		 * {@link AntPathMatcher} with "." as separator. For better
-		 * efficiency consider using the {@code PathPatternRouteMatcher} from
+		 * efficiency consider switching to {@code PathPatternRouteMatcher} from
 		 * {@code spring-web} instead.
 		 */
 		Builder routeMatcher(@Nullable RouteMatcher routeMatcher);
@@ -189,8 +189,7 @@ public interface RSocketStrategies {
 		 * other metadata. This option is applicable to client or server
 		 * responders.
 		 * <p>By default this is {@link DefaultMetadataExtractor} extracting a
-		 * route from {@code "message/x.rsocket.routing.v0"} or
-		 * {@code "text/plain"} metadata entries.
+		 * route from {@code "message/x.rsocket.routing.v0"} metadata.
 		 */
 		Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor);
 
@@ -213,7 +212,7 @@ public interface RSocketStrategies {
 		 * here, and sets the frame decoder in {@link ClientRSocketFactory
 		 * ClientRSocketFactory} accordingly. For server setup, the
 		 * {@link ServerRSocketFactory ServerRSocketFactory} must be configured
-		 * accordingly too for zero copy.
+		 * accordingly for zero copy too.
 		 * <p>If using {@link DefaultDataBufferFactory} instead, there is no
 		 * need for related config changes in RSocket.
 		 */

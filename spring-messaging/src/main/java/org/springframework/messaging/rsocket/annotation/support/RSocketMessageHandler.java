@@ -53,13 +53,18 @@ import org.springframework.util.RouteMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * Extension of {@link MessageMappingMessageHandler} to use as an RSocket
- * responder by handling incoming streams via {@code @MessageMapping} annotated
- * methods.
- * <p>Use {@link #clientResponder()} and {@link #serverResponder()} to obtain
- * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#acceptor(Function) client} or
- * {@link io.rsocket.RSocketFactory.ServerRSocketFactory#acceptor(SocketAcceptor) server}
- * side adapters.
+ * Extension of {@link MessageMappingMessageHandler} for use in RSocket as a
+ * responder that handles requests with {@link ConnectMapping @ConnectMapping}
+ * and {@link MessageMapping @MessageMapping} methods.
+ * <p>For RSocket servers use {@link #serverResponder()} to obtain a
+ * {@link SocketAcceptor} to register with
+ * {@link io.rsocket.RSocketFactory.ServerRSocketFactory ServerRSocketFactory}.
+ * <p>For RSocket clients use {@link #clientResponder()} to obtain an adapter
+ * to register with
+ * {@link io.rsocket.RSocketFactory.ClientRSocketFactory ClientRSocketFactory},
+ * or use the static shortcut
+ * {@link #clientResponder(RSocketStrategies, Object...)} to obtain a configurer
+ * for {@link RSocketRequester.Builder#rsocketFactory}.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
@@ -86,8 +91,8 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * {@inheritDoc}
 	 * <p>When {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
 	 * is set, this property is re-initialized with the decoders in it, and
-	 * vice versa, setting this property mutates the {@code RSocketStrategies}
-	 * to change its decoders.
+	 * likewise when this property is set the {@code RSocketStrategies} are
+	 * mutated to change the decoders in them.
 	 * <p>By default this is set to the
 	 * {@link RSocketStrategies.Builder#decoder(Decoder[]) defaults} from
 	 * {@code RSocketStrategies}.
@@ -107,8 +112,8 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * Configure the encoders to use for encoding handler method return values.
 	 * <p>When {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
 	 * is set, this property is re-initialized with the encoders in it, and
-	 * vice versa, setting this property mutates the {@code RSocketStrategies}
-	 * to change its encoders.
+	 * likewise when this property is set the {@code RSocketStrategies} are
+	 * mutated to change the encoders in it.
 	 * <p>By default this is set to the
 	 * {@link RSocketStrategies.Builder#encoder(Encoder[]) defaults} from
 	 * {@code RSocketStrategies}.
@@ -134,9 +139,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	/**
 	 * {@inheritDoc}
 	 * <p>When {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
-	 * is set, this property is re-initialized with the RouteMatcher in it, and
-	 * vice versa, setting this property mutates the {@code RSocketStrategies}
-	 * to change its route matcher.
+	 * is set, this property is re-initialized with the route matcher in it, and
+	 * likewise when this property is set the {@code RSocketStrategies} are
+	 * mutated to change the matcher in it.
 	 * <p>By default this is set to the
 	 * {@link RSocketStrategies.Builder#routeMatcher(RouteMatcher) defaults}
 	 * from {@code RSocketStrategies}.
@@ -150,10 +155,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	/**
 	 * Configure the registry for adapting various reactive types.
 	 * <p>When {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
-	 * is set, this property is re-initialized with the
-	 * {@code ReactiveAdapterRegistry} in it, and vice versa, setting this
-	 * property mutates the {@code RSocketStrategies} to change its adapter
-	 * registry.
+	 * is set, this property is re-initialized with the registry in it, and
+	 * likewise when this property is set the {@code RSocketStrategies} are
+	 * mutated to change the registry in it.
 	 * <p>By default this is set to the
 	 * {@link RSocketStrategies.Builder#reactiveAdapterStrategy(ReactiveAdapterRegistry) defaults}
 	 * from {@code RSocketStrategies}.
@@ -168,9 +172,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * Configure a {@link MetadataExtractor} to extract the route along with
 	 * other metadata.
 	 * <p>When {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
-	 * is set, this property is re-initialized with the {@code MetadataExtractor}
-	 * in it, and vice versa, setting this property mutates the
-	 * {@code RSocketStrategies} to change its {@code MetadataExtractor}.
+	 * is set, this property is re-initialized with the extractor in it, and
+	 * likewise when this property is set the {@code RSocketStrategies} are
+	 * mutated to change the extractor in it.
 	 * <p>By default this is set to the
 	 * {@link RSocketStrategies.Builder#metadataExtractor(MetadataExtractor)} defaults}
 	 * from {@code RSocketStrategies}.
@@ -206,10 +210,6 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 */
 	public void setRSocketStrategies(RSocketStrategies rsocketStrategies) {
 		this.strategies = rsocketStrategies;
-		updateStateFromRSocketStrategies();
-	}
-
-	private void updateStateFromRSocketStrategies() {
 		setDecoders(this.strategies.decoders());
 		setEncoders(this.strategies.encoders());
 		setRouteMatcher(this.strategies.routeMatcher());
@@ -326,7 +326,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * and return {@code Mono<Void>} with an error signal preventing the
 	 * connection. Such a method can also start requests to the client but that
 	 * must be done decoupled from handling and from the current thread.
-	 * <p>Subsequent stream requests can be handled with
+	 * <p>Subsequent requests on the connection can be handled with
 	 * {@link MessageMapping MessageMapping} methods.
 	 */
 	public SocketAcceptor serverResponder() {

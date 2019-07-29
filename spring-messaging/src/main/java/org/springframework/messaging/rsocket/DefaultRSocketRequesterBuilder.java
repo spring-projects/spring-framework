@@ -48,7 +48,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	@Nullable
 	private MimeType dataMimeType;
 
-	private MimeType metadataMimeType = DefaultRSocketRequester.COMPOSITE_METADATA;
+	private MimeType metadataMimeType = MetadataExtractor.COMPOSITE_METADATA;
 
 	@Nullable
 	private RSocketStrategies strategies;
@@ -109,18 +109,18 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		Assert.isTrue(!rsocketStrategies.encoders().isEmpty(), "No encoders");
 		Assert.isTrue(!rsocketStrategies.decoders().isEmpty(), "No decoders");
 
-		RSocketFactory.ClientRSocketFactory rsocketFactory = RSocketFactory.connect();
-		MimeType dataMimeType = getDataMimeType(rsocketStrategies);
-		rsocketFactory.dataMimeType(dataMimeType.toString());
-		rsocketFactory.metadataMimeType(this.metadataMimeType.toString());
+		RSocketFactory.ClientRSocketFactory factory = RSocketFactory.connect();
+		this.rsocketConfigurers.forEach(configurer -> configurer.configure(factory));
 
 		if (rsocketStrategies.dataBufferFactory() instanceof NettyDataBufferFactory) {
-			rsocketFactory.frameDecoder(PayloadDecoder.ZERO_COPY);
+			factory.frameDecoder(PayloadDecoder.ZERO_COPY);
 		}
 
-		this.rsocketConfigurers.forEach(configurer -> configurer.configure(rsocketFactory));
+		MimeType dataMimeType = getDataMimeType(rsocketStrategies);
+		factory.dataMimeType(dataMimeType.toString());
+		factory.metadataMimeType(this.metadataMimeType.toString());
 
-		return rsocketFactory.transport(transport)
+		return factory.transport(transport)
 				.start()
 				.map(rsocket -> new DefaultRSocketRequester(
 						rsocket, dataMimeType, this.metadataMimeType, rsocketStrategies));

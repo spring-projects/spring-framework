@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.DuplexConnection;
 import io.rsocket.RSocketFactory;
 import io.rsocket.frame.decoder.PayloadDecoder;
@@ -62,19 +63,21 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	private ClientTransport transport;
 
+	private final MockConnection connection = new MockConnection();
+
 	private final TestRSocketFactoryConfigurer rsocketFactoryConfigurer = new TestRSocketFactoryConfigurer();
 
 
 	@Before
 	public void setup() {
 		this.transport = mock(ClientTransport.class);
-		given(this.transport.connect(anyInt())).willReturn(Mono.just(new MockConnection()));
+		given(this.transport.connect(anyInt())).willReturn(Mono.just(this.connection));
 	}
 
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void shouldApplyCustomizationsAtSubscription() {
+	public void rsocketFactoryConfigurerAppliesAtSubscription() {
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
 				.rsocketFactory(this.rsocketFactoryConfigurer)
@@ -87,7 +90,7 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void shouldApplyCustomizations() {
+	public void rsocketFactoryConfigurer() {
 		Consumer<RSocketStrategies.Builder> rsocketStrategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
 				.rsocketFactory(this.rsocketFactoryConfigurer)
@@ -109,12 +112,12 @@ public class DefaultRSocketRequesterBuilderTests {
 				.block();
 
 		assertThat(requester.dataMimeType())
-				.as("Default data MimeType, based on the first configured Decoder")
+				.as("Default data MimeType, based on the first Decoder")
 				.isEqualTo(MimeTypeUtils.TEXT_PLAIN);
 	}
 
 	@Test
-	public void defaultDataMimeTypeWithCustomDecoderRegitered() {
+	public void defaultDataMimeTypeWithCustomDecoderRegistered() {
 		RSocketStrategies strategies = RSocketStrategies.builder()
 				.decoder(new TestJsonDecoder(MimeTypeUtils.APPLICATION_JSON))
 				.build();
@@ -130,13 +133,43 @@ public class DefaultRSocketRequesterBuilderTests {
 	}
 
 	@Test
-	public void dataMimeTypeSet() {
+	public void dataMimeTypeExplicitlySet() {
 		RSocketRequester requester = RSocketRequester.builder()
 				.dataMimeType(MimeTypeUtils.APPLICATION_JSON)
 				.connect(this.transport)
 				.block();
 
+		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
+				.map(ConnectionSetupPayload::create)
+				.block();
+
+		assertThat(setupPayload.dataMimeType()).isEqualTo("application/json");
 		assertThat(requester.dataMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
+	}
+
+	@Test
+	public void mimeTypesCannotBeChangedAtRSocketFactoryLevel() {
+		MimeType dataMimeType = MimeTypeUtils.APPLICATION_JSON;
+		MimeType metaMimeType = MetadataExtractor.ROUTING;
+
+		RSocketRequester requester = RSocketRequester.builder()
+				.metadataMimeType(metaMimeType)
+				.dataMimeType(dataMimeType)
+				.rsocketFactory(factory -> {
+					factory.metadataMimeType("text/plain");
+					factory.dataMimeType("application/xml");
+				})
+				.connect(this.transport)
+				.block();
+
+		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
+				.map(ConnectionSetupPayload::create)
+				.block();
+
+		assertThat(setupPayload.dataMimeType()).isEqualTo(dataMimeType.toString());
+		assertThat(setupPayload.metadataMimeType()).isEqualTo(metaMimeType.toString());
+		assertThat(requester.dataMimeType()).isEqualTo(dataMimeType);
+		assertThat(requester.metadataMimeType()).isEqualTo(metaMimeType);
 	}
 
 	@Test
@@ -170,8 +203,16 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	static class MockConnection implements DuplexConnection {
 
+		private Publisher<ByteBuf> sentFrames;
+
+
+		public Publisher<ByteBuf> sentFrames() {
+			return this.sentFrames;
+		}
+
 		@Override
 		public Mono<Void> send(Publisher<ByteBuf> frames) {
+			this.sentFrames = frames;
 			return Mono.empty();
 		}
 
@@ -224,7 +265,7 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		@Override
 		public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
-			return false;
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

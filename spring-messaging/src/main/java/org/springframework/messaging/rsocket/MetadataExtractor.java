@@ -22,10 +22,10 @@ import io.rsocket.Payload;
 import org.springframework.util.MimeType;
 
 /**
- * Strategy to extract a map of values from the metadata of a {@link Payload}.
- * This includes decoding metadata entries based on their mime type and
- * assigning a name to the decoded value. The resulting name-value pairs can
- * be added to the headers of a
+ * Strategy to extract a map of value(s) from {@link Payload} metadata, which
+ * could be composite metadata with multiple entries. Each metadata entry
+ * is decoded based on its {@code MimeType} and a name is assigned to the decoded
+ * value. The resulting name-value pairs can be added to the headers of a
  * {@link org.springframework.messaging.Message Message}.
  *
  * @author Rossen Stoyanchev
@@ -39,26 +39,22 @@ public interface MetadataExtractor {
 	String ROUTE_KEY = "route";
 
 	/**
-	 * Constant for mime type {@code message/x.rsocket.composite-metadata.v0}.
+	 * Constant MimeType {@code "message/x.rsocket.composite-metadata.v0"}.
 	 */
 	MimeType COMPOSITE_METADATA = new MimeType("message", "x.rsocket.composite-metadata.v0");
 
 	/**
-	 * Constant for mime type {@code message/x.rsocket.routing.v0}.
+	 * Constant for MimeType {@code "message/x.rsocket.routing.v0"}.
 	 */
 	MimeType ROUTING = new MimeType("message", "x.rsocket.routing.v0");
 
 
 	/**
 	 * Extract a map of values from the given {@link Payload} metadata.
-	 * <p>Metadata may be composite and consist of multiple entries
-	 * Implementations are free to extract any number of name-value pairs per
-	 * metadata entry. The Payload "route" should be saved under the
-	 * {@link #ROUTE_KEY}.
+	 * The Payload "route", if present, should be saved under {@link #ROUTE_KEY}.
 	 * @param payload the payload whose metadata should be read
-	 * @param metadataMimeType the mime type of the metadata; this is what was
-	 * specified by the client at the start of the RSocket connection.
-	 * @return a map of 0 or more decoded metadata values with assigned names
+	 * @param metadataMimeType the metadata MimeType for the connection.
+	 * @return name values pairs extracted from the metadata
 	 */
 	Map<String, Object> extract(Payload payload, MimeType metadataMimeType);
 

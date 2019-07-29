@@ -48,8 +48,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.messaging.rsocket.DefaultRSocketRequester.COMPOSITE_METADATA;
-import static org.springframework.messaging.rsocket.DefaultRSocketRequester.ROUTING;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 
 /**
@@ -147,7 +145,7 @@ public class DefaultRSocketRequesterTests {
 	public void metadataCompositeWithRoute() {
 
 		RSocketRequester requester = RSocketRequester.wrap(
-				this.rsocket, TEXT_PLAIN, COMPOSITE_METADATA, this.strategies);
+				this.rsocket, TEXT_PLAIN, MetadataExtractor.COMPOSITE_METADATA, this.strategies);
 
 		requester.route("toA").data("bodyA").send().block(Duration.ofSeconds(5));
 
@@ -156,7 +154,7 @@ public class DefaultRSocketRequesterTests {
 
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
-		assertThat(entry.getMimeType()).isEqualTo(ROUTING.toString());
+		assertThat(entry.getMimeType()).isEqualTo(MetadataExtractor.ROUTING.toString());
 		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
 
 		assertThat(iterator.hasNext()).isFalse();
@@ -166,7 +164,7 @@ public class DefaultRSocketRequesterTests {
 	public void metadataCompositeWithRouteAndTextEntry() {
 
 		RSocketRequester requester = RSocketRequester.wrap(
-				this.rsocket, TEXT_PLAIN, COMPOSITE_METADATA, this.strategies);
+				this.rsocket, TEXT_PLAIN, MetadataExtractor.COMPOSITE_METADATA, this.strategies);
 
 		requester.route("toA")
 				.metadata("My metadata", TEXT_PLAIN).data("bodyA")
@@ -178,7 +176,7 @@ public class DefaultRSocketRequesterTests {
 
 		assertThat(iterator.hasNext()).isTrue();
 		CompositeMetadata.Entry entry = iterator.next();
-		assertThat(entry.getMimeType()).isEqualTo(ROUTING.toString());
+		assertThat(entry.getMimeType()).isEqualTo(MetadataExtractor.ROUTING.toString());
 		assertThat(entry.getContent().toString(StandardCharsets.UTF_8)).isEqualTo("toA");
 
 		assertThat(iterator.hasNext()).isTrue();
@@ -206,7 +204,7 @@ public class DefaultRSocketRequesterTests {
 	@Test
 	public void metadataMimeTypeMismatch() {
 		RSocketRequester requester = RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, TEXT_PLAIN, this.strategies);
-		assertThatThrownBy(() -> requester.metadata("toA", ROUTING).data("bodyA").send().block())
+		assertThatThrownBy(() -> requester.metadata("toA", MetadataExtractor.ROUTING).data("bodyA").send().block())
 				.hasMessageStartingWith("Connection configured for metadata mime type");
 	}
 
@@ -219,8 +217,8 @@ public class DefaultRSocketRequesterTests {
 
 	@Test
 	public void supportedMetadataMimeTypes() {
-		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, COMPOSITE_METADATA, this.strategies);
-		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, ROUTING, this.strategies);
+		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, MetadataExtractor.COMPOSITE_METADATA, this.strategies);
+		RSocketRequester.wrap(this.rsocket, TEXT_PLAIN, MetadataExtractor.ROUTING, this.strategies);
 	}
 
 	@Test
