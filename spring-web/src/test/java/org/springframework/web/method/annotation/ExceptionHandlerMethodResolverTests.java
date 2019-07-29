@@ -78,6 +78,20 @@ public class ExceptionHandlerMethodResolverTests {
 	}
 
 	@Test
+	public void resolveMethodExceptionCause() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+		IOException ioException = new FileNotFoundException();
+
+		SocketException bindException = new BindException();
+		bindException.initCause(ioException);
+
+		Exception nestedException = new Exception(bindException);
+		Exception exception = new Exception(nestedException);
+
+		assertThat(resolver.resolveMethod(exception).getName()).isEqualTo("handleSocketException");
+	}
+
+	@Test
 	public void resolveMethodInherited() {
 		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(InheritedController.class);
 		IOException exception = new IOException();
