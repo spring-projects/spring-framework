@@ -154,11 +154,11 @@ public class MethodParameterTests {
 	public void multipleResolveParameterTypeCalls() throws Exception {
 		Method method = ArrayList.class.getMethod("get", int.class);
 		MethodParameter methodParameter = MethodParameter.forExecutable(method, -1);
-		assertEquals(Object.class, methodParameter.getParameterType());
+		assertThat(methodParameter.getParameterType()).isEqualTo(Object.class);
 		GenericTypeResolver.resolveParameterType(methodParameter, StringList.class);
-		assertEquals(String.class, methodParameter.getParameterType());
+		assertThat(methodParameter.getParameterType()).isEqualTo(String.class);
 		GenericTypeResolver.resolveParameterType(methodParameter, IntegerList.class);
-		assertEquals(Integer.class, methodParameter.getParameterType());
+		assertThat(methodParameter.getParameterType()).isEqualTo(Integer.class);
 	}
 
 	@Test
@@ -167,9 +167,8 @@ public class MethodParameterTests {
 		MethodParameter m1 = MethodParameter.forExecutable(method, -1);
 		MethodParameter m2 = MethodParameter.forExecutable(method, -1);
 		MethodParameter m3 = MethodParameter.forExecutable(method, -1).nested();
-		assertEquals(m1, m2);
-		assertNotEquals(m1, m3);
-		assertEquals(m1.hashCode(), m2.hashCode());
+		assertThat(m1).isEqualTo(m2).isNotEqualTo(m3);
+		assertThat(m1.hashCode()).isEqualTo(m2.hashCode());
 	}
 
 	@Test
@@ -182,10 +181,8 @@ public class MethodParameterTests {
 		MethodParameter m3 = MethodParameter.forExecutable(method, -1);
 		GenericTypeResolver.resolveParameterType(m3, IntegerList.class);
 		MethodParameter m4 = MethodParameter.forExecutable(method, -1);
-		assertEquals(m1, m2);
-		assertNotEquals(m1, m3);
-		assertNotEquals(m1, m4);
-		assertEquals(m1.hashCode(), m2.hashCode());
+		assertThat(m1).isEqualTo(m2).isNotEqualTo(m3).isNotEqualTo(m4);
+		assertThat(m1.hashCode()).isEqualTo(m2.hashCode());
 	}
 
 
