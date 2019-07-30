@@ -456,13 +456,13 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public <T> Mono<T> bodyToMono(Class<T> elementClass) {
-			Assert.notNull(elementClass, "ElementClass must not be null");
+			Assert.notNull(elementClass, "Class must not be null");
 			return this.responseMono.flatMap(response -> handleBodyMono(response, response.bodyToMono(elementClass)));
 		}
 
 		@Override
 		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef) {
-			Assert.notNull(elementTypeRef, "ElementTypeRef must not be null");
+			Assert.notNull(elementTypeRef, "ParameterizedTypeReference must not be null");
 			return this.responseMono.flatMap(response -> handleBodyMono(response, response.bodyToMono(elementTypeRef)));
 		}
 
@@ -478,13 +478,13 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public <T> Flux<T> bodyToFlux(Class<T> elementClass) {
-			Assert.notNull(elementClass, "ElementClass must not be null");
+			Assert.notNull(elementClass, "Class must not be null");
 			return this.responseMono.flatMapMany(response -> handleBodyFlux(response, response.bodyToFlux(elementClass)));
 		}
 
 		@Override
 		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef) {
-			Assert.notNull(elementTypeRef, "ElementTypeRef must not be null");
+			Assert.notNull(elementTypeRef, "ParameterizedTypeReference must not be null");
 			return this.responseMono.flatMapMany(response -> handleBodyFlux(response, response.bodyToFlux(elementTypeRef)));
 		}
 
