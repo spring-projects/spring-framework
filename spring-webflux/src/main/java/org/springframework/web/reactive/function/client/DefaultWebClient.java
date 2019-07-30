@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -396,8 +397,10 @@ class DefaultWebClient implements WebClient {
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
+		private static final IntPredicate STATUS_CODE_ERROR = value -> value >= 400;
+
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
-				new StatusHandler(HttpStatus::isError, DefaultResponseSpec::createResponseException);
+				new StatusHandler(STATUS_CODE_ERROR, DefaultResponseSpec::createResponseException);
 
 		private final Mono<ClientResponse> responseMono;
 
@@ -414,11 +417,24 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+			return onRawStatus(toIntPredicate(statusPredicate), exceptionFunction);
+		}
+
+		private static IntPredicate toIntPredicate(Predicate<HttpStatus> predicate) {
+			return value -> {
+				HttpStatus status = HttpStatus.resolve(value);
+				return (status != null) && predicate.test(status);
+			};
+		}
+
+		@Override
+		public ResponseSpec onRawStatus(IntPredicate statusCodePredicate,
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
 			if (this.statusHandlers.size() == 1 && this.statusHandlers.get(0) == DEFAULT_STATUS_HANDLER) {
 				this.statusHandlers.clear();
 			}
-			this.statusHandlers.add(new StatusHandler(statusPredicate,
+			this.statusHandlers.add(new StatusHandler(statusCodePredicate,
 					(clientResponse, request) -> exceptionFunction.apply(clientResponse)));
 
 			return this;
@@ -451,27 +467,23 @@ class DefaultWebClient implements WebClient {
 		private <T extends Publisher<?>> T handleBody(ClientResponse response,
 				T bodyPublisher, Function<Mono<? extends Throwable>, T> errorFunction) {
 
-			if (HttpStatus.resolve(response.rawStatusCode()) != null) {
-				for (StatusHandler handler : this.statusHandlers) {
-					if (handler.test(response.statusCode())) {
-						HttpRequest request = this.requestSupplier.get();
-						Mono<? extends Throwable> exMono;
-						try {
-							exMono = handler.apply(response, request);
-							exMono = exMono.flatMap(ex -> drainBody(response, ex));
-							exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
-						}
-						catch (Throwable ex2) {
-							exMono = drainBody(response, ex2);
-						}
-						return errorFunction.apply(exMono);
+			int statusCode = response.rawStatusCode();
+			for (StatusHandler handler : this.statusHandlers) {
+				if (handler.test(statusCode)) {
+					HttpRequest request = this.requestSupplier.get();
+					Mono<? extends Throwable> exMono;
+					try {
+						exMono = handler.apply(response, request);
+						exMono = exMono.flatMap(ex -> drainBody(response, ex));
+						exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
 					}
+					catch (Throwable ex2) {
+						exMono = drainBody(response, ex2);
+					}
+					return errorFunction.apply(exMono);
 				}
-				return bodyPublisher;
 			}
-			else {
-				return errorFunction.apply(createResponseException(response, this.requestSupplier.get()));
-			}
+			return bodyPublisher;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -520,11 +532,11 @@ class DefaultWebClient implements WebClient {
 
 		private static class StatusHandler {
 
-			private final Predicate<HttpStatus> predicate;
+			private final IntPredicate predicate;
 
 			private final BiFunction<ClientResponse, HttpRequest, Mono<? extends Throwable>> exceptionFunction;
 
-			public StatusHandler(Predicate<HttpStatus> predicate,
+			public StatusHandler(IntPredicate predicate,
 					BiFunction<ClientResponse, HttpRequest, Mono<? extends Throwable>> exceptionFunction) {
 
 				Assert.notNull(predicate, "Predicate must not be null");
@@ -533,13 +545,15 @@ class DefaultWebClient implements WebClient {
 				this.exceptionFunction = exceptionFunction;
 			}
 
-			public boolean test(HttpStatus status) {
+			public boolean test(int status) {
 				return this.predicate.test(status);
 			}
 
 			public Mono<? extends Throwable> apply(ClientResponse response, HttpRequest request) {
 				return this.exceptionFunction.apply(response, request);
 			}
+
+
 		}
 	}
 
