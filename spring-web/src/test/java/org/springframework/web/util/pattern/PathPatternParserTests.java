@@ -184,6 +184,7 @@ public class PathPatternParserTests {
 		checkStructure("/{foo}");
 		checkStructure("/{f}/");
 		checkStructure("/{foo}/{bar}/{wibble}");
+		checkStructure("/{mobile-number}"); // gh-23101
 	}
 
 	@Test
