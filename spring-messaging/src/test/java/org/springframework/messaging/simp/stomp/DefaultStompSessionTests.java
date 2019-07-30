@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -32,6 +33,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Receiptable;
@@ -83,7 +86,9 @@ public class DefaultStompSessionTests {
 	public void setUp() {
 		this.connectHeaders = new StompHeaders();
 		this.session = new DefaultStompSession(this.sessionHandler, this.connectHeaders);
-		this.session.setMessageConverter(new StringMessageConverter());
+		this.session.setMessageConverter(
+				new CompositeMessageConverter(
+						Arrays.asList(new StringMessageConverter(), new ByteArrayMessageConverter())));
 
 		SettableListenableFuture<Void> future = new SettableListenableFuture<>();
 		future.set(null);
@@ -111,7 +116,7 @@ public class DefaultStompSessionTests {
 	@Test // SPR-16844
 	public void afterConnectedWithSpecificVersion() {
 		assertThat(this.session.isConnected()).isFalse();
-		this.connectHeaders.setAcceptVersion(new String[] {"1.1"});
+		this.connectHeaders.setAcceptVersion("1.1");
 
 		this.session.afterConnected(this.connection);
 
@@ -388,6 +393,26 @@ public class DefaultStompSessionTests {
 		message = this.messageCaptor.getValue();
 		accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		assertThat(accessor.getReceipt()).isEqualTo("my-receipt");
+	}
+
+	@Test // gh-23358
+	public void sendByteArray() {
+		this.session.afterConnected(this.connection);
+		assertThat(this.session.isConnected());
+
+		String destination = "/topic/foo";
+		String payload = "sample payload";
+		this.session.send(destination, payload.getBytes(StandardCharsets.UTF_8));
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertThat(stompHeaders.size()).as(stompHeaders.toString()).isEqualTo(2);
+
+		assertThat(stompHeaders.getDestination()).isEqualTo(destination);
+		assertThat(stompHeaders.getContentType()).isEqualTo(MimeTypeUtils.APPLICATION_OCTET_STREAM);
+		assertThat(new String(message.getPayload(), StandardCharsets.UTF_8)).isEqualTo(payload);
 	}
 
 	@Test
