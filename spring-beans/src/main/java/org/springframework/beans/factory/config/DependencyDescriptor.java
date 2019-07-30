@@ -430,7 +430,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Override
 	public int hashCode() {
-		return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass);
+		return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass));
 	}
 
 

@@ -41,7 +41,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resolverComposite = new HandlerMethodArgumentResolverComposite();
 
 		Method method = getClass().getDeclaredMethod("handle", Integer.class, String.class);
@@ -51,7 +51,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 
 
 	@Test
-	public void supportsParameter() {
+	public void supportsParameter() throws Exception {
 		this.resolverComposite.addResolver(new StubArgumentResolver(Integer.class));
 
 		assertThat(this.resolverComposite.supportsParameter(paramInt)).isTrue();

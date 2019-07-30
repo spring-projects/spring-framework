@@ -591,7 +591,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		@Override
 		public int hashCode() {
-			return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector);
+			return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector));
 		}
 
 		@Override
