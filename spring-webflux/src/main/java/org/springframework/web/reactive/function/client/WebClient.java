@@ -666,6 +666,7 @@ public interface WebClient {
 		RequestHeadersSpec<?> syncBody(Object body);
 	}
 
+
 	/**
 	 * Contract for specifying response operations following the exchange.
 	 */
@@ -799,18 +800,17 @@ public interface WebClient {
 		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
-
 	}
 
 
 	/**
 	 * Contract for specifying request headers and URI for a request.
-	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>>
 			extends UriSpec<S>, RequestHeadersSpec<S> {
 	}
+
 
 	/**
 	 * Contract for specifying request headers, body and URI for a request.

@@ -190,10 +190,12 @@ class DefaultClientResponse implements ClientResponse {
 					Charset charset = headers().contentType()
 							.map(MimeType::getCharset)
 							.orElse(StandardCharsets.ISO_8859_1);
-					if (HttpStatus.resolve(rawStatusCode()) != null) {
+					int statusCode = rawStatusCode();
+					HttpStatus httpStatus = HttpStatus.resolve(statusCode);
+					if (httpStatus != null) {
 						return WebClientResponseException.create(
-								statusCode().value(),
-								statusCode().getReasonPhrase(),
+								statusCode,
+								httpStatus.getReasonPhrase(),
 								headers().asHttpHeaders(),
 								bodyBytes,
 								charset,
@@ -201,7 +203,7 @@ class DefaultClientResponse implements ClientResponse {
 					}
 					else {
 						return new UnknownHttpStatusCodeException(
-								rawStatusCode(),
+								statusCode,
 								headers().asHttpHeaders(),
 								bodyBytes,
 								charset,

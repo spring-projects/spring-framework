@@ -166,7 +166,6 @@ public interface ClientResponse {
 	/**
 	 * Creates a {@link WebClientResponseException} based on the status code,
 	 * headers, and body of this response as well as the corresponding request.
-	 *
 	 * @return a {@code Mono} with a {@code WebClientResponseException} based on this response
 	 * @since 5.2
 	 */

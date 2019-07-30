@@ -440,7 +440,7 @@ class DefaultWebClient implements WebClient {
 		private static IntPredicate toIntPredicate(Predicate<HttpStatus> predicate) {
 			return value -> {
 				HttpStatus status = HttpStatus.resolve(value);
-				return (status != null) && predicate.test(status);
+				return (status != null && predicate.test(status));
 			};
 		}
 
@@ -448,9 +448,8 @@ class DefaultWebClient implements WebClient {
 		public ResponseSpec onRawStatus(IntPredicate statusCodePredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
-			Assert.notNull(statusCodePredicate, "StatusCodePredicate must not be null");
+			Assert.notNull(statusCodePredicate, "IntPredicate must not be null");
 			Assert.notNull(exceptionFunction, "Function must not be null");
-
 			this.statusHandlers.add(0, new StatusHandler(statusCodePredicate, exceptionFunction));
 			return this;
 		}
@@ -563,6 +562,7 @@ class DefaultWebClient implements WebClient {
 							handleBodyFlux(response, response.bodyToFlux(elementTypeRef))));
 		}
 
+
 		private static class StatusHandler {
 
 			private final IntPredicate predicate;
@@ -583,7 +583,6 @@ class DefaultWebClient implements WebClient {
 			public Mono<? extends Throwable> apply(ClientResponse response) {
 				return this.exceptionFunction.apply(response);
 			}
-
 		}
 	}
 
