@@ -136,7 +136,6 @@ public class AntPathMatcherTests {
 	public void matchWithNullPath() {
 		assertThat(pathMatcher.match("/test", null)).isFalse();
 		assertThat(pathMatcher.match("/", null)).isFalse();
-		assertThat(pathMatcher.match("/", null)).isFalse();
 		assertThat(pathMatcher.match(null, null)).isFalse();
 	}
 
