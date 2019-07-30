@@ -48,7 +48,7 @@ ext {
 	slf4jVersion         = "1.7.26"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
 	tomcatVersion        = "9.0.22"
-	undertowVersion      = "2.0.22.Final"
+	undertowVersion      = "2.0.23.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4j = {

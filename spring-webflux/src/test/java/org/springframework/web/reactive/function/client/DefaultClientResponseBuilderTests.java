@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -31,18 +30,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Arjen Poutsma
  */
 public class DefaultClientResponseBuilderTests {
 
-	private DataBufferFactory dataBufferFactory;
+	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
-	@Before
-	public void createBufferFactory() {
-		this.dataBufferFactory = new DefaultDataBufferFactory();
-	}
 
 	@Test
 	public void normal() {
@@ -102,16 +98,11 @@ public class DefaultClientResponseBuilderTests {
 
 	@Test
 	public void fromCustomStatus() {
-
-		ClientResponse other = ClientResponse.create(499, ExchangeStrategies.withDefaults())
-				.build();
-
-		ClientResponse result = ClientResponse.from(other)
-				.build();
+		ClientResponse other = ClientResponse.create(499, ExchangeStrategies.withDefaults()).build();
+		ClientResponse result = ClientResponse.from(other).build();
 
 		assertThat(result.rawStatusCode()).isEqualTo(499);
-		assertThat(result.statusCode()).isNull();
+		assertThatIllegalArgumentException().isThrownBy(result::statusCode);
 	}
-
 
 }

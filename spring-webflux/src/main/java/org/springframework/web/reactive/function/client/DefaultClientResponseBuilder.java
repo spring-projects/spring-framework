@@ -203,7 +203,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 		@Override
 		public HttpStatus getStatusCode() {
-			return HttpStatus.resolve(this.statusCode);
+			return HttpStatus.valueOf(this.statusCode);
 		}
 
 		@Override
