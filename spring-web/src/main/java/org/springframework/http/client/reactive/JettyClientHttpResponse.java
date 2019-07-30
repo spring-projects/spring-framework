@@ -53,7 +53,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(getRawStatusCode());
+		return HttpStatus.resolve(getRawStatusCode());
 	}
 
 	@Override

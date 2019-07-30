@@ -100,5 +100,18 @@ public class DefaultClientResponseBuilderTests {
 				.verifyComplete();
 	}
 
+	@Test
+	public void fromCustomStatus() {
+
+		ClientResponse other = ClientResponse.create(499, ExchangeStrategies.withDefaults())
+				.build();
+
+		ClientResponse result = ClientResponse.from(other)
+				.build();
+
+		assertThat(result.rawStatusCode()).isEqualTo(499);
+		assertThat(result.statusCode()).isNull();
+	}
+
 
 }

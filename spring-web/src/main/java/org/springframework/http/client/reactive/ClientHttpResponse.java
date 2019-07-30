@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.http.client.reactive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -34,8 +35,9 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an HttpStatus enum value
 	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @see HttpStatus#valueOf(int)
+	 * @see HttpStatus#resolve(int)
 	 */
+	@Nullable
 	HttpStatus getStatusCode();
 
 	/**

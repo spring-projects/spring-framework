@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class MockClientHttpResponse implements ClientHttpResponse {
 
-	private final HttpStatus status;
+	private final int status;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -60,18 +60,23 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	public MockClientHttpResponse(HttpStatus status) {
 		Assert.notNull(status, "HttpStatus is required");
+		this.status = status.value();
+	}
+
+	public MockClientHttpResponse(int status) {
+		Assert.isTrue(status >= 100 && status < 600, "Status must be between 1xx and 5xx");
 		this.status = status;
 	}
 
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return this.status;
+		return HttpStatus.resolve(this.status);
 	}
 
 	@Override
 	public int getRawStatusCode() {
-		return this.status.value();
+		return this.status;
 	}
 
 	@Override
@@ -120,7 +125,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	public Mono<String> getBodyAsString() {
 		Charset charset = getCharset();
 		return Flux.from(getBody())
-				.reduce(bufferFactory.allocateBuffer(), (previous, current) -> {
+				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
 					previous.write(current);
 					DataBufferUtils.release(current);
 					return previous;
