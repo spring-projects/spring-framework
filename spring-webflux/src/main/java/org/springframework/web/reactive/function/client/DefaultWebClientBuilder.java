@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,10 +63,10 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ClientHttpConnector connector;
 
+	private ExchangeStrategies exchangeStrategies;
+
 	@Nullable
 	private ExchangeFunction exchangeFunction;
-
-	private ExchangeStrategies exchangeStrategies;
 
 
 	public DefaultWebClientBuilder() {
@@ -91,8 +91,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
 		this.connector = other.connector;
-		this.exchangeFunction = other.exchangeFunction;
 		this.exchangeStrategies = other.exchangeStrategies;
+		this.exchangeFunction = other.exchangeFunction;
 	}
 
 
@@ -156,12 +156,6 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	public WebClient.Builder clientConnector(ClientHttpConnector connector) {
-		this.connector = connector;
-		return this;
-	}
-
-	@Override
 	public WebClient.Builder filter(ExchangeFilterFunction filter) {
 		Assert.notNull(filter, "ExchangeFilterFunction must not be null");
 		initFilters().add(filter);
@@ -182,8 +176,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
-		this.exchangeFunction = exchangeFunction;
+	public WebClient.Builder clientConnector(ClientHttpConnector connector) {
+		this.connector = connector;
 		return this;
 	}
 
@@ -191,6 +185,12 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	public WebClient.Builder exchangeStrategies(ExchangeStrategies strategies) {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.exchangeStrategies = strategies;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
+		this.exchangeFunction = exchangeFunction;
 		return this;
 	}
 

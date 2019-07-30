@@ -33,7 +33,7 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  */
 public class ClientHttpResponseDecorator implements ClientHttpResponse {
-	
+
 	private final ClientHttpResponse delegate;
 
 
@@ -48,7 +48,7 @@ public class ClientHttpResponseDecorator implements ClientHttpResponse {
 	}
 
 
-	// ServerHttpResponse delegation methods...
+	// ClientHttpResponse delegation methods...
 
 	@Override
 	public HttpStatus getStatusCode() {
