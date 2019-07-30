@@ -493,6 +493,14 @@ public class StatusResultMatchers {
 	}
 
 	/**
+	 * Assert the response status code is {@code HttpStatus.TOO_EARLY} (425).
+	 * @since 5.2
+	 */
+	public ResultMatcher isTooEarly() {
+		return matcher(HttpStatus.valueOf(425));
+	}
+
+	/**
 	 * Assert the response status code is {@code HttpStatus.UPGRADE_REQUIRED} (426).
 	 */
 	public ResultMatcher isUpgradeRequired() {
