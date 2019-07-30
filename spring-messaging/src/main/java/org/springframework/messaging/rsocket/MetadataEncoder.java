@@ -24,14 +24,12 @@ import java.util.regex.Pattern;
 
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.CompositeByteBuf;
-import io.netty.buffer.Unpooled;
 import io.rsocket.metadata.CompositeMetadataFlyweight;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -165,18 +163,14 @@ final class MetadataEncoder {
 			try {
 				mergedMetadata.forEach((value, mimeType) -> {
 					DataBuffer buffer = encodeEntry(value, mimeType);
-					CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
-							mimeType.toString(),
-							buffer instanceof NettyDataBuffer ?
-									((NettyDataBuffer) buffer).getNativeBuffer() :
-									Unpooled.wrappedBuffer(buffer.asByteBuffer()));
+					CompositeMetadataFlyweight.encodeAndAddMetadata(
+							composite, this.allocator, mimeType.toString(), PayloadUtils.asByteBuf(buffer));
 				});
 				if (bufferFactory() instanceof NettyDataBufferFactory) {
 					return ((NettyDataBufferFactory) bufferFactory()).wrap(composite);
 				}
 				else {
-					DataBuffer buffer = bufferFactory().allocateBuffer();
-					buffer.write(composite.nioBuffer());
+					DataBuffer buffer = bufferFactory().wrap(composite.nioBuffer());
 					composite.release();
 					return buffer;
 				}
