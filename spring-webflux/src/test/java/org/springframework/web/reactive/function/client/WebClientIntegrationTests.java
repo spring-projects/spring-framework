@@ -731,6 +731,28 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
+	public void shouldApplyCustomRawStatusHandler() {
+		prepareResponse(response -> response.setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));
+
+		Mono<String> result = this.webClient.get()
+				.uri("/greeting?name=Spring")
+				.retrieve()
+				.onRawStatus(value -> value >= 500 && value < 600, response -> Mono.just(new MyException("500 error!")))
+				.bodyToMono(String.class);
+
+		StepVerifier.create(result)
+				.expectError(MyException.class)
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("*/*");
+			assertThat(request.getPath()).isEqualTo("/greeting?name=Spring");
+		});
+	}
+
+	@Test
 	public void shouldApplyCustomStatusHandlerParameterizedTypeReference() {
 		prepareResponse(response -> response.setResponseCode(500)
 				.setHeader("Content-Type", "text/plain").setBody("Internal Server error"));

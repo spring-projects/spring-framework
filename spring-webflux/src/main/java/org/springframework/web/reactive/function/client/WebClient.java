@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 import org.reactivestreams.Publisher;
@@ -689,6 +690,24 @@ public interface WebClient {
 		 * @see ClientResponse#createException()
 		 */
 		ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
+
+		/**
+		 * Register a custom error function that gets invoked when the given raw status code
+		 * predicate applies. The exception returned from the function will be returned from
+		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
+		 * <p>By default, an error handler is registered that throws a
+		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
+		 * @param statusCodePredicate a predicate of the raw status code that indicates
+		 * whether {@code exceptionFunction} applies.
+		 * <p><strong>NOTE:</strong> if the response is expected to have content,
+		 * the exceptionFunction should consume it. If not, the content will be
+		 * automatically drained to ensure resources are released.
+		 * @param exceptionFunction the function that returns the exception
+		 * @return this builder
+		 * @since 5.1.9
+		 */
+		ResponseSpec onRawStatus(IntPredicate statusCodePredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**
