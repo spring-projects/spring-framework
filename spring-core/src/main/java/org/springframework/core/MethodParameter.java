@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -71,7 +72,7 @@ public class MethodParameter {
 
 	private final int parameterIndex;
 
-	private int nestingLevel = 1;
+	private int nestingLevel;
 
 	/** Map from Integer level to Integer type index */
 	Map<Integer, Integer> typeIndexesPerLevel;
@@ -612,7 +613,11 @@ public class MethodParameter {
 			return false;
 		}
 		MethodParameter otherParam = (MethodParameter) other;
-		return (this.parameterIndex == otherParam.parameterIndex && getMember().equals(otherParam.getMember()));
+		return (this.containingClass == otherParam.containingClass &&
+				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, otherParam.typeIndexesPerLevel) &&
+				this.nestingLevel == otherParam.nestingLevel &&
+				this.parameterIndex == otherParam.parameterIndex &&
+				getMember().equals(otherParam.getMember()));
 	}
 
 	@Override
