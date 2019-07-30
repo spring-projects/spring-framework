@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Test fixture with {@link HandlerMethodReturnValueHandlerComposite}.
+ *
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unused")
@@ -47,8 +48,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 
 
 	@Before
-	public void setUp() throws Exception {
-
+	public void setup() throws Exception {
 		this.integerType = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
 		this.stringType = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 
@@ -60,6 +60,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 
 		mavContainer = new ModelAndViewContainer();
 	}
+
 
 	@Test
 	public void supportsReturnType() throws Exception {
@@ -84,9 +85,8 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		verifyNoMoreInteractions(anotherIntegerHandler);
 	}
 
-	@Test // SPR-13083
+	@Test  // SPR-13083
 	public void handleReturnValueWithAsyncHandler() throws Exception {
-
 		Promise<Integer> promise = new Promise<>();
 		MethodParameter promiseType = new MethodParameter(getClass().getDeclaredMethod("handlePromise"), -1);
 

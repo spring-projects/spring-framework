@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resolverComposite = new HandlerMethodArgumentResolverComposite();
 
 		Method method = getClass().getDeclaredMethod("handle", Integer.class, String.class);
@@ -50,7 +50,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 
 
 	@Test
-	public void supportsParameter() {
+	public void supportsParameter() throws Exception {
 		this.resolverComposite.addResolver(new StubArgumentResolver(Integer.class));
 
 		assertTrue(this.resolverComposite.supportsParameter(paramInt));
