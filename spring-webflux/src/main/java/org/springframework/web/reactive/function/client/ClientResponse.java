@@ -35,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 
@@ -60,17 +59,17 @@ import org.springframework.web.reactive.function.BodyExtractor;
 public interface ClientResponse {
 
 	/**
-	 * Return the status code of this response.
-	 * @return the status as an HttpStatus enum value
+	 * Return the HTTP status code as an {@link HttpStatus} enum value.
+	 * @return the HTTP status as an HttpStatus enum value (never {@code null})
 	 * @throws IllegalArgumentException in case of an unknown HTTP status code
-	 * @see HttpStatus#resolve(int)
+	 * @since #getRawStatusCode()
+	 * @see HttpStatus#valueOf(int)
 	 */
-	@Nullable
 	HttpStatus statusCode();
 
 	/**
 	 * Return the (potentially non-standard) status code of this response.
-	 * @return the status as an integer
+	 * @return the HTTP status as an integer value
 	 * @since 5.1
 	 * @see #statusCode()
 	 * @see HttpStatus#resolve(int)

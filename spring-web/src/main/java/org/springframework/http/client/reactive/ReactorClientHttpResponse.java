@@ -87,7 +87,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return HttpStatus.resolve(getRawStatusCode());
+		return HttpStatus.valueOf(getRawStatusCode());
 	}
 
 	@Override

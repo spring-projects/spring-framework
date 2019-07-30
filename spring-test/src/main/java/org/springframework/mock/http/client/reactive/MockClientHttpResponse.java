@@ -71,7 +71,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return HttpStatus.resolve(this.status);
+		return HttpStatus.valueOf(this.status);
 	}
 
 	@Override
@@ -81,10 +81,9 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		String headerName = HttpHeaders.SET_COOKIE;
-		if (!getCookies().isEmpty() && this.headers.get(headerName) == null) {
+		if (!getCookies().isEmpty() && this.headers.get(HttpHeaders.SET_COOKIE) == null) {
 			getCookies().values().stream().flatMap(Collection::stream)
-					.forEach(cookie -> getHeaders().add(headerName, cookie.toString()));
+					.forEach(cookie -> getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString()));
 		}
 		return this.headers;
 	}
