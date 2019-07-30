@@ -202,7 +202,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		}
 		metadata = metadata != null ? metadata : emptyBuffer(strategies);
 		data = data != null ? data : emptyBuffer(strategies);
-		return PayloadUtils.createPayload(metadata, data);
+		return PayloadUtils.createPayload(data, metadata);
 	}
 
 	private DataBuffer emptyBuffer(RSocketStrategies strategies) {

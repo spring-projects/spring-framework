@@ -235,7 +235,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 				DataBufferUtils.release(data);
 				throw ex;
 			}
-			return PayloadUtils.createPayload(metadata, data);
+			return PayloadUtils.createPayload(data, metadata);
 		}
 
 		private Mono<Payload> emptyPayload() {

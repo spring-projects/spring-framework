@@ -72,11 +72,11 @@ public abstract class PayloadUtils {
 	 * or using {@link Unpooled#wrappedBuffer(ByteBuffer...)} if necessary.
 	 * Otherwise, if both are {@link DefaultDataBuffer}, then
 	 * {@link DefaultPayload} is created.
-	 * @param metadata the metadata part for the payload
 	 * @param data the data part for the payload
+	 * @param metadata the metadata part for the payload
 	 * @return the created payload
 	 */
-	public static Payload createPayload(DataBuffer metadata, DataBuffer data) {
+	public static Payload createPayload(DataBuffer data, DataBuffer metadata) {
 		return data instanceof NettyDataBuffer || metadata instanceof NettyDataBuffer ?
 				ByteBufPayload.create(asByteBuf(data), asByteBuf(metadata)) :
 				DefaultPayload.create(asByteBuffer(data), asByteBuffer(metadata));

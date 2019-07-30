@@ -81,7 +81,7 @@ public class PayloadUtilsTests {
 		NettyDataBuffer data = createNettyDataBuffer("sample data");
 		NettyDataBuffer metadata = createNettyDataBuffer("sample metadata");
 
-		Payload payload = PayloadUtils.createPayload(metadata, data);
+		Payload payload = PayloadUtils.createPayload(data, metadata);
 		try {
 			assertThat(payload).isInstanceOf(ByteBufPayload.class);
 			assertThat(payload.data()).isSameAs(data.getNativeBuffer());
@@ -96,7 +96,7 @@ public class PayloadUtilsTests {
 	public void createWithDefaultBuffers() {
 		DataBuffer data = createDefaultDataBuffer("sample data");
 		DataBuffer metadata = createDefaultDataBuffer("sample metadata");
-		Payload payload = PayloadUtils.createPayload(metadata, data);
+		Payload payload = PayloadUtils.createPayload(data, metadata);
 
 		assertThat(payload).isInstanceOf(DefaultPayload.class);
 		assertThat(payload.getDataUtf8()).isEqualTo(dataBufferToString(data));
@@ -107,7 +107,7 @@ public class PayloadUtilsTests {
 	public void createWithNettyAndDefaultBuffers() {
 		NettyDataBuffer data = createNettyDataBuffer("sample data");
 		DefaultDataBuffer metadata = createDefaultDataBuffer("sample metadata");
-		Payload payload = PayloadUtils.createPayload(metadata, data);
+		Payload payload = PayloadUtils.createPayload(data, metadata);
 		try {
 			assertThat(payload).isInstanceOf(ByteBufPayload.class);
 			assertThat(payload.data()).isSameAs(data.getNativeBuffer());
@@ -122,7 +122,7 @@ public class PayloadUtilsTests {
 	public void createWithDefaultAndNettyBuffers() {
 		DefaultDataBuffer data = createDefaultDataBuffer("sample data");
 		NettyDataBuffer metadata = createNettyDataBuffer("sample metadata");
-		Payload payload = PayloadUtils.createPayload(metadata, data);
+		Payload payload = PayloadUtils.createPayload(data, metadata);
 		try {
 			assertThat(payload).isInstanceOf(ByteBufPayload.class);
 			assertThat(payload.getDataUtf8()).isEqualTo(dataBufferToString(data));

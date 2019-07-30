@@ -163,7 +163,7 @@ public class DefaultMetadataExtractorTests {
 
 
 	private Payload createPayload(DataBuffer metadata) {
-		return PayloadUtils.createPayload(metadata, this.strategies.dataBufferFactory().allocateBuffer());
+		return PayloadUtils.createPayload(this.strategies.dataBufferFactory().allocateBuffer(), metadata);
 	}
 
 }
