@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,10 +66,10 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ClientHttpConnector connector;
 
+	private ExchangeStrategies exchangeStrategies;
+
 	@Nullable
 	private ExchangeFunction exchangeFunction;
-
-	private ExchangeStrategies exchangeStrategies;
 
 
 	public DefaultWebClientBuilder() {
@@ -80,8 +80,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		Assert.notNull(other, "DefaultWebClientBuilder must not be null");
 
 		this.baseUrl = other.baseUrl;
-		this.defaultUriVariables =
-				other.defaultUriVariables != null ? new LinkedHashMap<>(other.defaultUriVariables) : null;
+		this.defaultUriVariables = (other.defaultUriVariables != null ?
+				new LinkedHashMap<>(other.defaultUriVariables) : null);
 		this.uriBuilderFactory = other.uriBuilderFactory;
 		if (other.defaultHeaders != null) {
 			this.defaultHeaders = new HttpHeaders();
@@ -90,13 +90,13 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		else {
 			this.defaultHeaders = null;
 		}
-		this.defaultCookies =
-				other.defaultCookies != null ? new LinkedMultiValueMap<>(other.defaultCookies) : null;
+		this.defaultCookies = (other.defaultCookies != null ?
+				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.defaultRequest = other.defaultRequest;
 		this.filters = other.filters != null ? new ArrayList<>(other.filters) : null;
 		this.connector = other.connector;
-		this.exchangeFunction = other.exchangeFunction;
 		this.exchangeStrategies = other.exchangeStrategies;
+		this.exchangeFunction = other.exchangeFunction;
 	}
 
 
@@ -164,12 +164,6 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	public WebClient.Builder clientConnector(ClientHttpConnector connector) {
-		this.connector = connector;
-		return this;
-	}
-
-	@Override
 	public WebClient.Builder filter(ExchangeFilterFunction filter) {
 		Assert.notNull(filter, "ExchangeFilterFunction must not be null");
 		initFilters().add(filter);
@@ -190,8 +184,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
-		this.exchangeFunction = exchangeFunction;
+	public WebClient.Builder clientConnector(ClientHttpConnector connector) {
+		this.connector = connector;
 		return this;
 	}
 
@@ -200,6 +194,23 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.exchangeStrategies = strategies;
 		return this;
+	}
+
+	@Override
+	public WebClient.Builder exchangeFunction(ExchangeFunction exchangeFunction) {
+		this.exchangeFunction = exchangeFunction;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
+		builderConsumer.accept(this);
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder clone() {
+		return new DefaultWebClientBuilder(this);
 	}
 
 	@Override
@@ -243,17 +254,6 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private static <K, V> MultiValueMap<K, V> unmodifiableCopy(MultiValueMap<K, V> map) {
 		return CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(map));
-	}
-
-	@Override
-	public WebClient.Builder clone() {
-		return new DefaultWebClientBuilder(this);
-	}
-
-	@Override
-	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
-		builderConsumer.accept(this);
-		return this;
 	}
 
 }

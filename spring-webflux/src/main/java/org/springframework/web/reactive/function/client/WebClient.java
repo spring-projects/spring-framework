@@ -304,11 +304,6 @@ public interface WebClient {
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
 
 		/**
-		 * Clone this {@code WebClient.Builder}.
-		 */
-		Builder clone();
-
-		/**
 		 * Apply the given {@code Consumer} to this builder instance.
 		 * <p>This can be useful for applying pre-packaged customizations.
 		 * @param builderConsumer the consumer to apply
@@ -316,16 +311,19 @@ public interface WebClient {
 		Builder apply(Consumer<Builder> builderConsumer);
 
 		/**
+		 * Clone this {@code WebClient.Builder}.
+		 */
+		Builder clone();
+
+		/**
 		 * Builder the {@link WebClient} instance.
 		 */
 		WebClient build();
-
 	}
 
 
 	/**
 	 * Contract for specifying the URI for a request.
-	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface UriSpec<S extends RequestHeadersSpec<?>> {
@@ -359,7 +357,6 @@ public interface WebClient {
 
 	/**
 	 * Contract for specifying request headers leading up to the exchange.
-	 *
 	 * @param <S> a self reference to the spec type
 	 */
 	interface RequestHeadersSpec<S extends RequestHeadersSpec<S>> {
@@ -525,9 +522,9 @@ public interface WebClient {
 		 * {@linkplain BodyInserters#fromPublisher Publisher inserter}.
 		 * For example:
 		 * <p><pre>
-		 * Mono<Person> personMono = ... ;
+		 * Mono&lt;Person&gt; personMono = ... ;
 		 *
-		 * Mono<Void> result = client.post()
+		 * Mono&lt;Void&gt; result = client.post()
 		 *     .uri("/persons/{id}", id)
 		 *     .contentType(MediaType.APPLICATION_JSON)
 		 *     .body(personMono, Person.class)
