@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,9 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 */
 	public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager) {
 		super(methodParameter);
+
 		this.declaringClass = methodParameter.getDeclaringClass();
-		if (this.methodParameter.getMethod() != null) {
+		if (methodParameter.getMethod() != null) {
 			this.methodName = methodParameter.getMethod().getName();
 			this.parameterTypes = methodParameter.getMethod().getParameterTypes();
 		}
@@ -117,6 +118,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 */
 	public DependencyDescriptor(Field field, boolean required, boolean eager) {
 		super(field);
+
 		this.declaringClass = field.getDeclaringClass();
 		this.fieldName = field.getName();
 		this.required = required;
@@ -129,6 +131,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 */
 	public DependencyDescriptor(DependencyDescriptor original) {
 		super(original);
+
 		this.declaringClass = original.declaringClass;
 		this.methodName = original.methodName;
 		this.parameterTypes = original.parameterTypes;
@@ -236,7 +239,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	}
 
 	/**
-	 * Build a ResolvableType object for the wrapped parameter/field.
+	 * Build a {@link ResolvableType} object for the wrapped parameter/field.
 	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {

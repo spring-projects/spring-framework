@@ -106,10 +106,9 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 	/**
 	 * Iterate over registered
-	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} and
-	 * invoke the one that supports it.
-	 * @throws IllegalStateException if no suitable
-	 * {@link HandlerMethodArgumentResolver} is found.
+	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}
+	 * and invoke the one that supports it.
+	 * @throws IllegalArgumentException if no suitable argument resolver is found
 	 */
 	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
@@ -130,9 +129,9 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
-			for (HandlerMethodArgumentResolver methodArgumentResolver : this.argumentResolvers) {
-				if (methodArgumentResolver.supportsParameter(parameter)) {
-					result = methodArgumentResolver;
+			for (HandlerMethodArgumentResolver resolver : this.argumentResolvers) {
+				if (resolver.supportsParameter(parameter)) {
+					result = resolver;
 					this.argumentResolverCache.put(parameter, result);
 					break;
 				}
