@@ -434,12 +434,22 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		EXHAUSTIVE,
 
 		/**
-		 * Perform a full search of the entire type hierarchy , including
+		 * Perform a full search of the entire type hierarchy, including
 		 * superclasses and implemented interfaces. Superclass annotations do
 		 * not need to be meta-annotated with {@link Inherited @Inherited}.
 		 */
-		TYPE_HIERARCHY
+		TYPE_HIERARCHY,
 
+		/**
+		 * Perform a full search of the entire type hierarchy on the source
+		 * <em>and</em> any enclosing classes. This strategy is similar to
+		 * {@link #TYPE_HIERARCHY} except that {@link Class#getEnclosingClass()
+		 * enclosing classes} are also searched. Superclass annotations do not
+		 * need to be meta-annotated with {@link Inherited @Inherited}. When
+		 * searching a {@link Method} source, this strategy is identical to
+		 * {@link #TYPE_HIERARCHY}.
+		 */
+		TYPE_HIERARCHY_AND_ENCLOSING_CLASSES
 	}
 
 }

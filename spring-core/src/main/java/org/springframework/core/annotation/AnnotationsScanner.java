@@ -123,10 +123,12 @@ abstract class AnnotationsScanner {
 			case INHERITED_ANNOTATIONS:
 				return processClassInheritedAnnotations(context, source, processor, classFilter);
 			case SUPERCLASS:
-				return processClassHierarchy(context, new int[] {0}, source, processor, classFilter, false);
+				return processClassHierarchy(context, source, processor, classFilter, false, false);
 			case EXHAUSTIVE:
 			case TYPE_HIERARCHY:
-				return processClassHierarchy(context, new int[] {0}, source, processor, classFilter, true);
+				return processClassHierarchy(context, source, processor, classFilter, true, false);
+			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES:
+				return processClassHierarchy(context, source, processor, classFilter, true, true);
 		}
 		throw new IllegalStateException("Unsupported search strategy " + searchStrategy);
 	}
@@ -185,9 +187,21 @@ abstract class AnnotationsScanner {
 	}
 
 	@Nullable
+	private static <C, R> R processClassHierarchy(C context, Class<?> source,
+			AnnotationsProcessor<C, R> processor,
+			@Nullable BiPredicate<C, Class<?>> classFilter, boolean includeInterfaces,
+			boolean includeEnclosing) {
+
+		int[] aggregateIndex = new int[] { 0 };
+		return processClassHierarchy(context, aggregateIndex, source, processor,
+				classFilter, includeInterfaces, includeEnclosing);
+	}
+
+	@Nullable
 	private static <C, R> R processClassHierarchy(C context, int[] aggregateIndex,
 			Class<?> source, AnnotationsProcessor<C, R> processor,
-			@Nullable BiPredicate<C, Class<?>> classFilter, boolean includeInterfaces) {
+			@Nullable BiPredicate<C, Class<?>> classFilter, boolean includeInterfaces,
+			boolean includeEnclosing) {
 
 		R result = processor.doWithAggregate(context, aggregateIndex[0]);
 		if (result != null) {
@@ -205,7 +219,7 @@ abstract class AnnotationsScanner {
 		if (includeInterfaces) {
 			for (Class<?> interfaceType : source.getInterfaces()) {
 				R interfacesResult = processClassHierarchy(context, aggregateIndex,
-						interfaceType, processor, classFilter, true);
+						interfaceType, processor, classFilter, true, includeEnclosing);
 				if (interfacesResult != null) {
 					return interfacesResult;
 				}
@@ -214,9 +228,19 @@ abstract class AnnotationsScanner {
 		Class<?> superclass = source.getSuperclass();
 		if (superclass != Object.class && superclass != null) {
 			R superclassResult = processClassHierarchy(context, aggregateIndex,
-					superclass, processor, classFilter, includeInterfaces);
+					superclass, processor, classFilter, includeInterfaces,
+					includeEnclosing);
 			if (superclassResult != null) {
 				return superclassResult;
+			}
+		}
+		Class<?> enclosingClass = source.getEnclosingClass();
+		if (includeEnclosing && enclosingClass != null) {
+			R enclosingResult = processClassHierarchy(context, aggregateIndex,
+					enclosingClass, processor, classFilter, includeInterfaces,
+					includeEnclosing);
+			if (enclosingResult != null) {
+				return enclosingResult;
 			}
 		}
 		return null;
@@ -237,6 +261,7 @@ abstract class AnnotationsScanner {
 						processor, classFilter, source, false);
 			case EXHAUSTIVE:
 			case TYPE_HIERARCHY:
+			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES:
 				return processMethodHierarchy(context, new int[] {0}, source.getDeclaringClass(),
 						processor, classFilter, source, true);
 		}

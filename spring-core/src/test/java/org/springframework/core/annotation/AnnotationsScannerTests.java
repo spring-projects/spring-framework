@@ -455,6 +455,29 @@ public class AnnotationsScannerTests {
 	}
 
 	@Test
+	public void typeHierarchyWithEnclosedStrategyOnEnclosedStaticClassScansAnnotations() {
+		Class<?> source = AnnotationEnclosingClassSample.EnclosedStatic.EnclosedStaticStatic.class;
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES))
+				.containsExactly("0:EnclosedThree", "1:EnclosedTwo", "2:EnclosedOne");
+	}
+
+	@Test
+	public void typeHierarchyWithEnclosedStrategyOnEnclosedInnerClassScansAnnotations() {
+		Class<?> source = AnnotationEnclosingClassSample.EnclosedInner.EnclosedInnerInner.class;
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES))
+				.containsExactly("0:EnclosedThree", "1:EnclosedTwo", "2:EnclosedOne");
+	}
+
+	@Test
+	public void typeHierarchyWithEnclosedStrategyOnMethodHierarchyUsesTypeHierarchyScan() {
+		Method source = methodFrom(WithHierarchy.class);
+		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES)).containsExactly(
+				"0:TestAnnotation1", "1:TestAnnotation5", "1:TestInheritedAnnotation5",
+				"2:TestAnnotation6", "3:TestAnnotation2", "3:TestInheritedAnnotation2",
+				"4:TestAnnotation3", "5:TestAnnotation4");
+	}
+
+	@Test
 	public void scanWhenProcessorReturnsFromDoWithAggregateExitsEarly() {
 		String result = AnnotationsScanner.scan(this, WithSingleSuperclass.class,
 				SearchStrategy.TYPE_HIERARCHY, new AnnotationsProcessor<Object, String>() {
