@@ -39,6 +39,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link AnnotatedElement}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2
  * @see AnnotationsProcessor
  */
@@ -121,7 +122,7 @@ abstract class AnnotationsScanner {
 			case DIRECT:
 				return processElement(context, source, processor, classFilter);
 			case INHERITED_ANNOTATIONS:
-				return processClassInheritedAnnotations(context, source, processor, classFilter);
+				return processClassInheritedAnnotations(context, source, searchStrategy, processor, classFilter);
 			case SUPERCLASS:
 				return processClassHierarchy(context, source, processor, classFilter, false, false);
 			case EXHAUSTIVE:
@@ -135,9 +136,9 @@ abstract class AnnotationsScanner {
 
 	@Nullable
 	private static <C, R> R processClassInheritedAnnotations(C context, Class<?> source,
-			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
+			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
 
-		if (isWithoutHierarchy(source)) {
+		if (isWithoutHierarchy(source, searchStrategy)) {
 			return processElement(context, source, processor, classFilter);
 		}
 		Annotation[] relevant = null;
@@ -505,7 +506,7 @@ abstract class AnnotationsScanner {
 		if (hasPlainJavaAnnotationsOnly(source)) {
 			return true;
 		}
-		if (searchStrategy == SearchStrategy.DIRECT || isWithoutHierarchy(source)) {
+		if (searchStrategy == SearchStrategy.DIRECT || isWithoutHierarchy(source, searchStrategy)) {
 			if (source instanceof Method && ((Method) source).isBridge()) {
 				return false;
 			}
@@ -530,19 +531,21 @@ abstract class AnnotationsScanner {
 		return (type.getName().startsWith("java.") || type == Ordered.class);
 	}
 
-	private static boolean isWithoutHierarchy(AnnotatedElement source) {
+	private static boolean isWithoutHierarchy(AnnotatedElement source, SearchStrategy searchStrategy) {
 		if (source == Object.class) {
 			return true;
 		}
 		if (source instanceof Class) {
 			Class<?> sourceClass = (Class<?>) source;
-			return (sourceClass.getSuperclass() == Object.class &&
+			boolean noSuperTypes = (sourceClass.getSuperclass() == Object.class &&
 					sourceClass.getInterfaces().length == 0);
+			return (searchStrategy == SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES ? noSuperTypes &&
+					sourceClass.getEnclosingClass() == null : noSuperTypes);
 		}
 		if (source instanceof Method) {
 			Method sourceMethod = (Method) source;
 			return (Modifier.isPrivate(sourceMethod.getModifiers()) ||
-					isWithoutHierarchy(sourceMethod.getDeclaringClass()));
+					isWithoutHierarchy(sourceMethod.getDeclaringClass(), searchStrategy));
 		}
 		return true;
 	}

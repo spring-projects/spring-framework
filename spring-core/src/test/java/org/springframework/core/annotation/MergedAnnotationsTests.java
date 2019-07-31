@@ -693,6 +693,19 @@ public class MergedAnnotationsTests {
 	}
 
 	@Test
+	public void streamTypeHierarchyAndEnclosingClassesFromNonAnnotatedInnerClassWithAnnotatedEnclosingClass() {
+		Stream<Class<?>> classes = MergedAnnotations.from(AnnotatedClass.NonAnnotatedInnerClass.class,
+			SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES).stream().map(MergedAnnotation::getType);
+		assertThat(classes).containsExactly(Component.class, Indexed.class);
+	}
+
+	@Test
+	public void streamTypeHierarchyAndEnclosingClassesFromNonAnnotatedStaticNestedClassWithAnnotatedEnclosingClass() {
+		Stream<Class<?>> classes = MergedAnnotations.from(AnnotatedClass.NonAnnotatedStaticNestedClass.class,
+			SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES).stream().map(MergedAnnotation::getType);
+		assertThat(classes).containsExactly(Component.class, Indexed.class);
+	}
+	@Test
 	public void getFromMethodWithMethodAnnotationOnLeaf() throws Exception {
 		Method method = Leaf.class.getMethod("annotatedOnLeaf");
 		assertThat(method.getAnnotation(Order.class)).isNotNull();
@@ -2112,6 +2125,16 @@ public class MergedAnnotationsTests {
 	static class NonAnnotatedClass {
 	}
 
+	@Component
+	static class AnnotatedClass {
+
+		class NonAnnotatedInnerClass {
+		}
+
+		static class NonAnnotatedStaticNestedClass {
+		}
+	}
+
 	static interface NonAnnotatedInterface {
 	}
 
@@ -2839,6 +2862,7 @@ public class MergedAnnotationsTests {
 	public static class ImplementsInterfaceWithGenericAnnotatedMethod
 			implements InterfaceWithGenericAnnotatedMethod<String> {
 
+		@Override
 		public void foo(String t) {
 		}
 	}
@@ -2852,6 +2876,7 @@ public class MergedAnnotationsTests {
 	public static class ExtendsBaseClassWithGenericAnnotatedMethod
 			extends BaseClassWithGenericAnnotatedMethod<String> {
 
+		@Override
 		public void foo(String t) {
 		}
 	}
