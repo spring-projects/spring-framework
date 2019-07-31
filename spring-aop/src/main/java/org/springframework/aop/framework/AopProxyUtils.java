@@ -180,8 +180,7 @@ public abstract class AopProxyUtils {
 		if (proxy instanceof DecoratingProxy) {
 			nonUserIfcCount++;
 		}
-		Class<?>[] userInterfaces = new Class<?>[proxyInterfaces.length - nonUserIfcCount];
-		System.arraycopy(proxyInterfaces, 0, userInterfaces, 0, userInterfaces.length);
+		Class<?>[] userInterfaces = Arrays.copyOf(proxyInterfaces, proxyInterfaces.length - nonUserIfcCount);
 		Assert.notEmpty(userInterfaces, "JDK proxy must implement one or more interfaces");
 		return userInterfaces;
 	}

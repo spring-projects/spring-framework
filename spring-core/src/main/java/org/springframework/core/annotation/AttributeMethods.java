@@ -268,8 +268,7 @@ final class AttributeMethods {
 			return NONE;
 		}
 		Arrays.sort(methods, methodComparator);
-		Method[] attributeMethods = new Method[size];
-		System.arraycopy(methods, 0, attributeMethods, 0, size);
+		Method[] attributeMethods = Arrays.copyOf(methods, size);
 		return new AttributeMethods(annotationType, attributeMethods);
 	}
 

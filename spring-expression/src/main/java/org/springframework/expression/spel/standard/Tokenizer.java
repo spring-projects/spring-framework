@@ -501,9 +501,7 @@ class Tokenizer {
 	}
 
 	private char[] subarray(int start, int end) {
-		char[] result = new char[end - start];
-		System.arraycopy(this.charsToProcess, start, result, 0, end - start);
-		return result;
+		return Arrays.copyOfRange(this.charsToProcess, start, end);
 	}
 
 	/**

@@ -395,9 +395,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 						logger.debug("Bean with name '" + finalName + "' concluding interceptor chain " +
 								"is not an advisor class: treating it as a target or TargetSource");
 					}
-					String[] newNames = new String[this.interceptorNames.length - 1];
-					System.arraycopy(this.interceptorNames, 0, newNames, 0, newNames.length);
-					this.interceptorNames = newNames;
+					this.interceptorNames = Arrays.copyOf(this.interceptorNames, this.interceptorNames.length - 1);
 				}
 			}
 		}
