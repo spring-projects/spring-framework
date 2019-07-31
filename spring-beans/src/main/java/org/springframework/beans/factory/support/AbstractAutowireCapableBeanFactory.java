@@ -858,9 +858,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Try to obtain the FactoryBean's object type from its factory method
 				// declaration without instantiating the containing bean at all.
 				BeanDefinition factoryBeanDefinition = getBeanDefinition(factoryBeanName);
-				if (factoryBeanDefinition instanceof AbstractBeanDefinition &&
-						((AbstractBeanDefinition) factoryBeanDefinition).hasBeanClass()) {
-					Class<?> factoryBeanClass = ((AbstractBeanDefinition) factoryBeanDefinition).getBeanClass();
+				Class<?> factoryBeanClass = null;
+				if (factoryBeanDefinition instanceof AbstractBeanDefinition
+						&& ((AbstractBeanDefinition) factoryBeanDefinition).hasBeanClass()) {
+					factoryBeanClass = ((AbstractBeanDefinition) factoryBeanDefinition).getBeanClass();
+				}
+				else {
+					RootBeanDefinition fbmbd = getMergedBeanDefinition(factoryBeanName, factoryBeanDefinition);
+					factoryBeanClass = determineTargetType(factoryBeanName, fbmbd, new Class<?>[] { Object.class });
+				}
+				if (factoryBeanClass != null) {
 					result = getTypeForFactoryBeanFromMethod(factoryBeanClass, factoryMethodName);
 					if (result.resolve() != null) {
 						return result;

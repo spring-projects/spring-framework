@@ -28,6 +28,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.type.AnnotationMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,6 +82,32 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 		assertPostFreeze(AttributeClassConfiguration.class);
 	}
 
+	@Test
+	public void preFreezeUnresolvedGenericFactoryBean() {
+		// Covers the case where a @Configuration is picked up via component scanning
+		// and its bean definition only has a String bean class. In such cases
+		// beanDefinition.hasBeanClass() returns false so we need to actually
+		// call determineTargetType ourselves
+		GenericBeanDefinition factoryBeanDefinition = new GenericBeanDefinition();
+		factoryBeanDefinition.setBeanClassName(GenericClassConfiguration.class.getName());
+		GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+		beanDefinition.setBeanClass(FactoryBean.class);
+		beanDefinition.setFactoryBeanName("factoryBean");
+		beanDefinition.setFactoryMethodName("myBean");
+		GenericApplicationContext context = new GenericApplicationContext();
+		try {
+			context.registerBeanDefinition("factoryBean", factoryBeanDefinition);
+			context.registerBeanDefinition("myBean", beanDefinition);
+			NameCollectingBeanFactoryPostProcessor postProcessor = new NameCollectingBeanFactoryPostProcessor();
+			context.addBeanFactoryPostProcessor(postProcessor);
+			context.refresh();
+			assertContainsMyBeanName(postProcessor.getNames());
+		}
+		finally {
+			context.close();
+		}
+	}
+
 	private void assertPostFreeze(Class<?> configurationClass) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				configurationClass);
@@ -90,11 +118,16 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 			BeanFactoryPostProcessor... postProcessors) {
 		NameCollectingBeanFactoryPostProcessor postProcessor = new NameCollectingBeanFactoryPostProcessor();
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		Arrays.stream(postProcessors).forEach(context::addBeanFactoryPostProcessor);
-		context.addBeanFactoryPostProcessor(postProcessor);
-		context.register(configurationClass);
-		context.refresh();
-		assertContainsMyBeanName(postProcessor.getNames());
+		try {
+			Arrays.stream(postProcessors).forEach(context::addBeanFactoryPostProcessor);
+			context.addBeanFactoryPostProcessor(postProcessor);
+			context.register(configurationClass);
+			context.refresh();
+			assertContainsMyBeanName(postProcessor.getNames());
+		}
+		finally {
+			context.close();
+		}
 	}
 
 	private void assertContainsMyBeanName(AnnotationConfigApplicationContext context) {
