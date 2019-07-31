@@ -524,7 +524,7 @@ public abstract class AnnotationUtils {
 			return method.getDeclaredAnnotation(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(method, SearchStrategy.EXHAUSTIVE,
+		return MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY,
 					RepeatableContainers.none(), AnnotationFilter.PLAIN)
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);
@@ -563,7 +563,7 @@ public abstract class AnnotationUtils {
 			return clazz.getDeclaredAnnotation(annotationType);
 		}
 		// Exhaustive retrieval of merged annotations...
-		return MergedAnnotations.from(clazz, SearchStrategy.EXHAUSTIVE,
+		return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY,
 					RepeatableContainers.none(), AnnotationFilter.PLAIN)
 				.get(annotationType).withNonMergedAttributes()
 				.synthesize(MergedAnnotation::isPresent).orElse(null);

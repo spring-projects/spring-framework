@@ -763,7 +763,7 @@ public abstract class AnnotatedElementUtils {
 	}
 
 	private static MergedAnnotations findAnnotations(AnnotatedElement element) {
-		return MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE,
+		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY,
 				RepeatableContainers.none(), AnnotationFilter.PLAIN);
 	}
 
@@ -771,7 +771,7 @@ public abstract class AnnotatedElementUtils {
 			@Nullable Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
 		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
-		return MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE,
+		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY,
 				repeatableContainers, AnnotationFilter.PLAIN);
 	}
 

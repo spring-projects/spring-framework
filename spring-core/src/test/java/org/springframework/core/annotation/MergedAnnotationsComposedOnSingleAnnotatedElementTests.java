@@ -105,70 +105,70 @@ public class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	public void exhaustiveStrategyMultipleComposedAnnotationsOnClass() {
-		assertExhaustiveStrategyBehavior(MultipleComposedCachesClass.class);
+	public void typeHierarchyStrategyMultipleComposedAnnotationsOnClass() {
+		assertTypeHierarchyStrategyBehavior(MultipleComposedCachesClass.class);
 	}
 
 	@Test
-	public void exhaustiveStrategyMultipleInheritedComposedAnnotationsOnSuperclass() {
-		assertExhaustiveStrategyBehavior(SubMultipleComposedCachesClass.class);
+	public void typeHierarchyStrategyMultipleInheritedComposedAnnotationsOnSuperclass() {
+		assertTypeHierarchyStrategyBehavior(SubMultipleComposedCachesClass.class);
 	}
 
 	@Test
-	public void exhaustiveStrategyMultipleNoninheritedComposedAnnotationsOnClass() {
+	public void typeHierarchyStrategyMultipleNoninheritedComposedAnnotationsOnClass() {
 		MergedAnnotations annotations = MergedAnnotations.from(
-				MultipleNoninheritedComposedCachesClass.class, SearchStrategy.EXHAUSTIVE);
+				MultipleNoninheritedComposedCachesClass.class, SearchStrategy.TYPE_HIERARCHY);
 		assertThat(stream(annotations, "value")).containsExactly("noninheritedCache1",
 				"noninheritedCache2");
 	}
 
 	@Test
-	public void exhaustiveStrategyMultipleNoninheritedComposedAnnotationsOnSuperclass() {
+	public void typeHierarchyStrategyMultipleNoninheritedComposedAnnotationsOnSuperclass() {
 		MergedAnnotations annotations = MergedAnnotations.from(
 				SubMultipleNoninheritedComposedCachesClass.class,
-				SearchStrategy.EXHAUSTIVE);
+				SearchStrategy.TYPE_HIERARCHY);
 		assertThat(stream(annotations, "value")).containsExactly("noninheritedCache1",
 				"noninheritedCache2");
 	}
 
 	@Test
-	public void exhaustiveStrategyComposedPlusLocalAnnotationsOnClass() {
-		assertExhaustiveStrategyBehavior(ComposedPlusLocalCachesClass.class);
+	public void typeHierarchyStrategyComposedPlusLocalAnnotationsOnClass() {
+		assertTypeHierarchyStrategyBehavior(ComposedPlusLocalCachesClass.class);
 	}
 
 	@Test
-	public void exhaustiveStrategyMultipleComposedAnnotationsOnInterface() {
-		assertExhaustiveStrategyBehavior(MultipleComposedCachesOnInterfaceClass.class);
+	public void typeHierarchyStrategyMultipleComposedAnnotationsOnInterface() {
+		assertTypeHierarchyStrategyBehavior(MultipleComposedCachesOnInterfaceClass.class);
 	}
 
 	@Test
-	public void exhaustiveStrategyComposedCacheOnInterfaceAndLocalCacheOnClass() {
-		assertExhaustiveStrategyBehavior(
+	public void typeHierarchyStrategyComposedCacheOnInterfaceAndLocalCacheOnClass() {
+		assertTypeHierarchyStrategyBehavior(
 				ComposedCacheOnInterfaceAndLocalCacheClass.class);
 	}
 
 	@Test
-	public void exhaustiveStrategyMultipleComposedAnnotationsOnMethod() throws Exception {
-		assertExhaustiveStrategyBehavior(
+	public void typeHierarchyStrategyMultipleComposedAnnotationsOnMethod() throws Exception {
+		assertTypeHierarchyStrategyBehavior(
 				getClass().getDeclaredMethod("multipleComposedCachesMethod"));
 	}
 
 	@Test
-	public void exhaustiveStrategyComposedPlusLocalAnnotationsOnMethod()
+	public void typeHierarchyStrategyComposedPlusLocalAnnotationsOnMethod()
 			throws Exception {
-		assertExhaustiveStrategyBehavior(
+		assertTypeHierarchyStrategyBehavior(
 				getClass().getDeclaredMethod("composedPlusLocalCachesMethod"));
 	}
 
 	@Test
-	public void exhaustiveStrategyMultipleComposedAnnotationsOnBridgeMethod()
+	public void typeHierarchyStrategyMultipleComposedAnnotationsOnBridgeMethod()
 			throws Exception {
-		assertExhaustiveStrategyBehavior(getBridgeMethod());
+		assertTypeHierarchyStrategyBehavior(getBridgeMethod());
 	}
 
-	private void assertExhaustiveStrategyBehavior(AnnotatedElement element) {
+	private void assertTypeHierarchyStrategyBehavior(AnnotatedElement element) {
 		MergedAnnotations annotations = MergedAnnotations.from(element,
-				SearchStrategy.EXHAUSTIVE);
+				SearchStrategy.TYPE_HIERARCHY);
 		assertThat(stream(annotations, "key")).containsExactly("fooKey", "barKey");
 		assertThat(stream(annotations, "value")).containsExactly("fooCache", "barCache");
 	}

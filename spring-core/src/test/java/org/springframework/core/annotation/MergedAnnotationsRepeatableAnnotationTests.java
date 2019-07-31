@@ -135,89 +135,89 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void exhaustiveWhenNonRepeatableThrowsException() {
+	public void typeHierarchyWhenNonRepeatableThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				getAnnotations(null, NonRepeatable.class, SearchStrategy.EXHAUSTIVE, getClass()))
+				getAnnotations(null, NonRepeatable.class, SearchStrategy.TYPE_HIERARCHY, getClass()))
 			.satisfies(this::nonRepeatableRequirements);
 	}
 
 	@Test
-	public void exhaustiveWhenContainerMissingValueAttributeThrowsException() {
+	public void typeHierarchyWhenContainerMissingValueAttributeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerMissingValueAttribute.class, InvalidRepeatable.class,
-						SearchStrategy.EXHAUSTIVE, getClass()))
+						SearchStrategy.TYPE_HIERARCHY, getClass()))
 			.satisfies(this::missingValueAttributeRequirements);
 	}
 
 	@Test
-	public void exhaustiveWhenWhenNonArrayValueAttributeThrowsException() {
+	public void typeHierarchyWhenWhenNonArrayValueAttributeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerWithNonArrayValueAttribute.class, InvalidRepeatable.class,
-						SearchStrategy.EXHAUSTIVE, getClass()))
+						SearchStrategy.TYPE_HIERARCHY, getClass()))
 			.satisfies(this::nonArrayValueAttributeRequirements);
 	}
 
 	@Test
-	public void exhaustiveWhenWrongComponentTypeThrowsException() {
+	public void typeHierarchyWhenWrongComponentTypeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerWithArrayValueAttributeButWrongComponentType.class,
-						InvalidRepeatable.class, SearchStrategy.EXHAUSTIVE, getClass()))
+						InvalidRepeatable.class, SearchStrategy.TYPE_HIERARCHY, getClass()))
 			.satisfies(this::wrongComponentTypeRequirements);
 	}
 
 	@Test
-	public void exhaustiveWhenOnClassReturnsAnnotations() {
+	public void typeHierarchyWhenOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE, RepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, RepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveWhenWhenOnSuperclassReturnsAnnotations() {
+	public void typeHierarchyWhenWhenOnSuperclassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE, SubRepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, SubRepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveWhenComposedOnClassReturnsAnnotations() {
+	public void typeHierarchyWhenComposedOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE, ComposedRepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, ComposedRepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveWhenComposedMixedWithContainerOnClassReturnsAnnotations() {
+	public void typeHierarchyWhenComposedMixedWithContainerOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE,
+				SearchStrategy.TYPE_HIERARCHY,
 				ComposedRepeatableMixedWithContainerClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveWhenComposedContainerForRepeatableOnClassReturnsAnnotations() {
+	public void typeHierarchyWhenComposedContainerForRepeatableOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE, ComposedContainerClass.class);
+				SearchStrategy.TYPE_HIERARCHY, ComposedContainerClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveAnnotationsWhenNoninheritedComposedRepeatableOnClassReturnsAnnotations() {
+	public void typeHierarchyAnnotationsWhenNoninheritedComposedRepeatableOnClassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
-				SearchStrategy.EXHAUSTIVE, NoninheritedRepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, NoninheritedRepeatableClass.class);
 		assertThat(annotations.stream().map(Noninherited::value)).containsExactly("A",
 				"B", "C");
 	}
 
 	@Test
-	public void exhaustiveAnnotationsWhenNoninheritedComposedRepeatableOnSuperclassReturnsAnnotations() {
+	public void typeHierarchyAnnotationsWhenNoninheritedComposedRepeatableOnSuperclassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
-				SearchStrategy.EXHAUSTIVE, SubNoninheritedRepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, SubNoninheritedRepeatableClass.class);
 		assertThat(annotations.stream().map(Noninherited::value)).containsExactly("A",
 				"B", "C");
 	}

@@ -81,7 +81,7 @@ public abstract class OrderUtils {
 	 */
 	@Nullable
 	public static Integer getOrder(Class<?> type) {
-		return getOrderFromAnnotations(type, MergedAnnotations.from(type, SearchStrategy.EXHAUSTIVE));
+		return getOrderFromAnnotations(type, MergedAnnotations.from(type, SearchStrategy.TYPE_HIERARCHY));
 	}
 
 	/**
@@ -127,7 +127,7 @@ public abstract class OrderUtils {
 	 */
 	@Nullable
 	public static Integer getPriority(Class<?> type) {
-		return MergedAnnotations.from(type, SearchStrategy.EXHAUSTIVE).get(JAVAX_PRIORITY_ANNOTATION)
+		return MergedAnnotations.from(type, SearchStrategy.TYPE_HIERARCHY).get(JAVAX_PRIORITY_ANNOTATION)
 				.getValue(MergedAnnotation.VALUE, Integer.class).orElse(null);
 	}
 

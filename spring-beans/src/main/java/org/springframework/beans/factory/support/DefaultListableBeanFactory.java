@@ -684,7 +684,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Class<?> beanType = getType(beanName);
 		if (beanType != null) {
 			MergedAnnotation<A> annotation =
-					MergedAnnotations.from(beanType, SearchStrategy.EXHAUSTIVE).get(annotationType);
+					MergedAnnotations.from(beanType, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
 			if (annotation.isPresent()) {
 				return annotation;
 			}
@@ -696,7 +696,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				Class<?> beanClass = bd.getBeanClass();
 				if (beanClass != beanType) {
 					MergedAnnotation<A> annotation =
-							MergedAnnotations.from(beanClass, SearchStrategy.EXHAUSTIVE).get(annotationType);
+							MergedAnnotations.from(beanClass, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
 					if (annotation.isPresent()) {
 						return annotation;
 					}
@@ -706,7 +706,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Method factoryMethod = bd.getResolvedFactoryMethod();
 			if (factoryMethod != null) {
 				MergedAnnotation<A> annotation =
-						MergedAnnotations.from(factoryMethod, SearchStrategy.EXHAUSTIVE).get(annotationType);
+						MergedAnnotations.from(factoryMethod, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
 				if (annotation.isPresent()) {
 					return annotation;
 				}
