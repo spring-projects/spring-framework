@@ -195,6 +195,17 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
+		builderConsumer.accept(this);
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder clone() {
+		return new DefaultWebClientBuilder(this);
+	}
+
+	@Override
 	public WebClient build() {
 		ExchangeFunction exchange = initExchangeFunction();
 		ExchangeFunction filteredExchange = (this.filters != null ? this.filters.stream()
@@ -244,17 +255,6 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		else {
 			return ExchangeFunctions.create(new ReactorClientHttpConnector(), this.exchangeStrategies);
 		}
-	}
-
-	@Override
-	public WebClient.Builder clone() {
-		return new DefaultWebClientBuilder(this);
-	}
-
-	@Override
-	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
-		builderConsumer.accept(this);
-		return this;
 	}
 
 }

@@ -303,11 +303,6 @@ public interface WebClient {
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
 
 		/**
-		 * Clone this {@code WebClient.Builder}.
-		 */
-		Builder clone();
-
-		/**
 		 * Apply the given {@code Consumer} to this builder instance.
 		 * <p>This can be useful for applying pre-packaged customizations.
 		 * @param builderConsumer the consumer to apply
@@ -315,10 +310,14 @@ public interface WebClient {
 		Builder apply(Consumer<Builder> builderConsumer);
 
 		/**
+		 * Clone this {@code WebClient.Builder}.
+		 */
+		Builder clone();
+
+		/**
 		 * Builder the {@link WebClient} instance.
 		 */
 		WebClient build();
-
 	}
 
 
