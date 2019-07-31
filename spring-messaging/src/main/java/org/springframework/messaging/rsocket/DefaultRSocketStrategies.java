@@ -56,23 +56,23 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 	private final RouteMatcher routeMatcher;
 
-	private final MetadataExtractor metadataExtractor;
+	private final ReactiveAdapterRegistry adapterRegistry;
 
 	private final DataBufferFactory bufferFactory;
 
-	private final ReactiveAdapterRegistry adapterRegistry;
+	private final MetadataExtractor metadataExtractor;
 
 
 	private DefaultRSocketStrategies(List<Encoder<?>> encoders, List<Decoder<?>> decoders,
-			RouteMatcher routeMatcher, MetadataExtractor metadataExtractor,
-			DataBufferFactory bufferFactory, ReactiveAdapterRegistry adapterRegistry) {
+			RouteMatcher routeMatcher, ReactiveAdapterRegistry adapterRegistry,
+			DataBufferFactory bufferFactory, MetadataExtractor metadataExtractor) {
 
 		this.encoders = Collections.unmodifiableList(encoders);
 		this.decoders = Collections.unmodifiableList(decoders);
 		this.routeMatcher = routeMatcher;
-		this.metadataExtractor = metadataExtractor;
-		this.bufferFactory = bufferFactory;
 		this.adapterRegistry = adapterRegistry;
+		this.bufferFactory = bufferFactory;
+		this.metadataExtractor = metadataExtractor;
 	}
 
 
@@ -92,8 +92,8 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 	}
 
 	@Override
-	public MetadataExtractor metadataExtractor() {
-		return this.metadataExtractor;
+	public ReactiveAdapterRegistry reactiveAdapterRegistry() {
+		return this.adapterRegistry;
 	}
 
 	@Override
@@ -102,8 +102,8 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 	}
 
 	@Override
-	public ReactiveAdapterRegistry reactiveAdapterRegistry() {
-		return this.adapterRegistry;
+	public MetadataExtractor metadataExtractor() {
+		return this.metadataExtractor;
 	}
 
 
@@ -120,38 +120,35 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		private RouteMatcher routeMatcher;
 
 		@Nullable
-		private MetadataExtractor metadataExtractor;
-
-		@Nullable
 		private ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 		@Nullable
 		private DataBufferFactory bufferFactory;
 
+		@Nullable
+		private MetadataExtractor metadataExtractor;
 
 		DefaultRSocketStrategiesBuilder() {
-
-			// Order of decoders may be significant for default data MimeType
-			// selection in RSocketRequester.Builder
-
-			this.decoders.add(StringDecoder.allMimeTypes());
-			this.decoders.add(new ByteBufferDecoder());
-			this.decoders.add(new ByteArrayDecoder());
-			this.decoders.add(new DataBufferDecoder());
-
 			this.encoders.add(CharSequenceEncoder.allMimeTypes());
 			this.encoders.add(new ByteBufferEncoder());
 			this.encoders.add(new ByteArrayEncoder());
 			this.encoders.add(new DataBufferEncoder());
+
+			// Order of decoders may be significant for default data MimeType
+			// selection in RSocketRequester.Builder
+			this.decoders.add(StringDecoder.allMimeTypes());
+			this.decoders.add(new ByteBufferDecoder());
+			this.decoders.add(new ByteArrayDecoder());
+			this.decoders.add(new DataBufferDecoder());
 		}
 
 		DefaultRSocketStrategiesBuilder(RSocketStrategies other) {
 			this.encoders.addAll(other.encoders());
 			this.decoders.addAll(other.decoders());
 			this.routeMatcher = other.routeMatcher();
-			this.metadataExtractor = other.metadataExtractor();
 			this.adapterRegistry = other.reactiveAdapterRegistry();
 			this.bufferFactory = other.dataBufferFactory();
+			this.metadataExtractor = other.metadataExtractor();
 		}
 
 
@@ -186,12 +183,6 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		}
 
 		@Override
-		public Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor) {
-			this.metadataExtractor = metadataExtractor;
-			return this;
-		}
-
-		@Override
 		public Builder reactiveAdapterStrategy(@Nullable ReactiveAdapterRegistry registry) {
 			this.adapterRegistry = registry;
 			return this;
@@ -204,21 +195,26 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		}
 
 		@Override
+		public Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor) {
+			this.metadataExtractor = metadataExtractor;
+			return this;
+		}
+
+		@Override
 		public RSocketStrategies build() {
+			RouteMatcher matcher = (this.routeMatcher != null ? this.routeMatcher : initRouteMatcher());
 
-			RouteMatcher matcher = this.routeMatcher != null ? this.routeMatcher : initRouteMatcher();
+			ReactiveAdapterRegistry registry = (this.adapterRegistry != null ?
+					this.adapterRegistry : ReactiveAdapterRegistry.getSharedInstance());
 
-			MetadataExtractor extractor = this.metadataExtractor != null ?
-					this.metadataExtractor : new DefaultMetadataExtractor(this.decoders);
+			DataBufferFactory factory = (this.bufferFactory != null ?
+					this.bufferFactory : new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT));
 
-			DataBufferFactory factory = this.bufferFactory != null ?
-					this.bufferFactory : new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
-
-			ReactiveAdapterRegistry registry = this.adapterRegistry != null ?
-					this.adapterRegistry : ReactiveAdapterRegistry.getSharedInstance();
+			MetadataExtractor extractor = (this.metadataExtractor != null ?
+					this.metadataExtractor : new DefaultMetadataExtractor(this.decoders));
 
 			return new DefaultRSocketStrategies(
-					this.encoders, this.decoders, matcher, extractor, factory, registry);
+					this.encoders, this.decoders, matcher, registry, factory, extractor);
 		}
 
 		private RouteMatcher initRouteMatcher() {

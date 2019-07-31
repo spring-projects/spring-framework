@@ -612,7 +612,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		if (FactoryBean.class.isAssignableFrom(predictedType)) {
 			if (beanInstance == null && !isFactoryDereference) {
 				beanType = getTypeForFactoryBean(beanName, mbd, allowFactoryBeanInit);
-				predictedType = (beanType != null) ? beanType.resolve() : null;
+				predictedType = beanType.resolve();
 				if (predictedType == null) {
 					return false;
 				}
@@ -1377,17 +1377,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
-	private void copyRelevantMergedBeanDefinitionCaches(RootBeanDefinition previous,
-			RootBeanDefinition mbd) {
+	private void copyRelevantMergedBeanDefinitionCaches(RootBeanDefinition previous, RootBeanDefinition mbd) {
 		if (ObjectUtils.nullSafeEquals(mbd.getBeanClassName(), previous.getBeanClassName()) &&
 				ObjectUtils.nullSafeEquals(mbd.getFactoryBeanName(), previous.getFactoryBeanName()) &&
-				ObjectUtils.nullSafeEquals(mbd.getFactoryMethodName(), previous.getFactoryMethodName()) &&
-				(mbd.targetType == null || mbd.targetType.equals(previous.targetType))) {
-			mbd.targetType = previous.targetType;
-			mbd.isFactoryBean = previous.isFactoryBean;
-			mbd.resolvedTargetType = previous.resolvedTargetType;
-			mbd.factoryMethodReturnType = previous.factoryMethodReturnType;
-			mbd.factoryMethodToIntrospect = previous.factoryMethodToIntrospect;
+				ObjectUtils.nullSafeEquals(mbd.getFactoryMethodName(), previous.getFactoryMethodName())) {
+			ResolvableType targetType = mbd.targetType;
+			ResolvableType previousTargetType = previous.targetType;
+			if (targetType == null || targetType.equals(previousTargetType)) {
+				mbd.targetType = previousTargetType;
+				mbd.isFactoryBean = previous.isFactoryBean;
+				mbd.resolvedTargetType = previous.resolvedTargetType;
+				mbd.factoryMethodReturnType = previous.factoryMethodReturnType;
+				mbd.factoryMethodToIntrospect = previous.factoryMethodToIntrospect;
+			}
 		}
 	}
 
@@ -1625,9 +1627,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 * @see #getBean(String)
 	 */
-	protected ResolvableType getTypeForFactoryBean(String beanName,
-			RootBeanDefinition mbd, boolean allowInit) {
-
+	protected ResolvableType getTypeForFactoryBean(String beanName, RootBeanDefinition mbd, boolean allowInit) {
 		ResolvableType result = getTypeForFactoryBeanFromAttributes(mbd);
 		if (result != ResolvableType.NONE) {
 			return result;

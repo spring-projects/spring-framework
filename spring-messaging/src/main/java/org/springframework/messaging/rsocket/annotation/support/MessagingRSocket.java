@@ -77,15 +77,15 @@ class MessagingRSocket extends AbstractRSocket {
 
 
 	MessagingRSocket(MimeType dataMimeType, MimeType metadataMimeType, MetadataExtractor metadataExtractor,
-			RSocketRequester requester, ReactiveMessageHandler messageHandler,
-			RouteMatcher routeMatcher, RSocketStrategies strategies) {
+			RSocketRequester requester, ReactiveMessageHandler messageHandler, RouteMatcher routeMatcher,
+			RSocketStrategies strategies) {
 
 		Assert.notNull(dataMimeType, "'dataMimeType' is required");
 		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
-		Assert.notNull(metadataExtractor, "'metadataExtractor' is required");
-		Assert.notNull(requester, "'requester' is required");
-		Assert.notNull(messageHandler, "'messageHandler' is required");
-		Assert.notNull(routeMatcher, "'routeMatcher' is required");
+		Assert.notNull(metadataExtractor, "MetadataExtractor is required");
+		Assert.notNull(requester, "RSocketRequester is required");
+		Assert.notNull(messageHandler, "ReactiveMessageHandler is required");
+		Assert.notNull(routeMatcher, "RouteMatcher is required");
 		Assert.notNull(strategies, "RSocketStrategies is required");
 
 		this.dataMimeType = dataMimeType;

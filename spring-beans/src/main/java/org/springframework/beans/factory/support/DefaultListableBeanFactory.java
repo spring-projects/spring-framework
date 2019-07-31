@@ -583,8 +583,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return StringUtils.toStringArray(result);
 	}
 
-	private boolean isSingleton(String beanName, RootBeanDefinition mbd, BeanDefinitionHolder dbd) {
-		return (dbd != null) ? mbd.isSingleton() : isSingleton(beanName);
+	private boolean isSingleton(String beanName, RootBeanDefinition mbd, @Nullable BeanDefinitionHolder dbd) {
+		return (dbd != null ? mbd.isSingleton() : isSingleton(beanName));
 	}
 
 	/**

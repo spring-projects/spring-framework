@@ -900,7 +900,7 @@ public abstract class StringUtils {
 	 * @return the resulting {@code String} array
 	 */
 	public static String[] toStringArray(@Nullable Collection<String> collection) {
-		return (collection != null || collection.isEmpty() ? collection.toArray(EMPTY_STRING_ARRAY) : EMPTY_STRING_ARRAY);
+		return (!CollectionUtils.isEmpty(collection) ? collection.toArray(EMPTY_STRING_ARRAY) : EMPTY_STRING_ARRAY);
 	}
 
 	/**

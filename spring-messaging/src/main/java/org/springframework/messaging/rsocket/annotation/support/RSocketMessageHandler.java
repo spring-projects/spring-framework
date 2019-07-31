@@ -73,9 +73,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 	private final List<Encoder<?>> encoders = new ArrayList<>();
 
-	private MetadataExtractor metadataExtractor;
-
-	private RSocketStrategies strategies;
+	private RSocketStrategies strategies = RSocketStrategies.create();
 
 	@Nullable
 	private MimeType defaultDataMimeType;
@@ -84,29 +82,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 
 
 	public RSocketMessageHandler() {
-		setRSocketStrategies(RSocketStrategies.create());
+		setRSocketStrategies(this.strategies);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>When {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
-	 * is set, this property is re-initialized with the decoders in it, and
-	 * likewise when this property is set the {@code RSocketStrategies} are
-	 * mutated to change the decoders in them.
-	 * <p>By default this is set to the
-	 * {@link RSocketStrategies.Builder#decoder(Decoder[]) defaults} from
-	 * {@code RSocketStrategies}.
-	 */
-	@Override
-	public void setDecoders(List<? extends Decoder<?>> decoders) {
-		super.setDecoders(decoders);
-		this.strategies = this.strategies.mutate()
-				.decoders(list -> {
-					list.clear();
-					list.addAll(decoders);
-				})
-				.build();
-	}
 
 	/**
 	 * Configure the encoders to use for encoding handler method return values.
@@ -139,6 +117,27 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	/**
 	 * {@inheritDoc}
 	 * <p>When {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
+	 * is set, this property is re-initialized with the decoders in it, and
+	 * likewise when this property is set the {@code RSocketStrategies} are
+	 * mutated to change the decoders in them.
+	 * <p>By default this is set to the
+	 * {@link RSocketStrategies.Builder#decoder(Decoder[]) defaults} from
+	 * {@code RSocketStrategies}.
+	 */
+	@Override
+	public void setDecoders(List<? extends Decoder<?>> decoders) {
+		super.setDecoders(decoders);
+		this.strategies = this.strategies.mutate()
+				.decoders(list -> {
+					list.clear();
+					list.addAll(decoders);
+				})
+				.build();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>When {@link #setRSocketStrategies(RSocketStrategies) rsocketStrategies}
 	 * is set, this property is re-initialized with the route matcher in it, and
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the matcher in it.
@@ -147,7 +146,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * from {@code RSocketStrategies}.
 	 */
 	@Override
-	public void setRouteMatcher(RouteMatcher routeMatcher) {
+	public void setRouteMatcher(@Nullable RouteMatcher routeMatcher) {
 		super.setRouteMatcher(routeMatcher);
 		this.strategies = this.strategies.mutate().routeMatcher(routeMatcher).build();
 	}
@@ -181,17 +180,14 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * @param extractor the extractor to use
 	 */
 	public void setMetadataExtractor(MetadataExtractor extractor) {
-		this.metadataExtractor = extractor;
-		this.strategies = this.strategies.mutate().metadataExtractor(this.metadataExtractor).build();
+		this.strategies = this.strategies.mutate().metadataExtractor(extractor).build();
 	}
 
 	/**
 	 * Return the configured {@link #setMetadataExtractor MetadataExtractor}.
-	 * This may be {@code null} before {@link #afterPropertiesSet()}.
 	 */
-	@Nullable
 	public MetadataExtractor getMetadataExtractor() {
-		return this.metadataExtractor;
+		return this.strategies.metadataExtractor();
 	}
 
 	/**
@@ -210,11 +206,11 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 */
 	public void setRSocketStrategies(RSocketStrategies rsocketStrategies) {
 		this.strategies = rsocketStrategies;
-		setDecoders(this.strategies.decoders());
-		setEncoders(this.strategies.encoders());
-		setRouteMatcher(this.strategies.routeMatcher());
-		setMetadataExtractor(this.strategies.metadataExtractor());
-		setReactiveAdapterRegistry(this.strategies.reactiveAdapterRegistry());
+		this.encoders.clear();
+		this.encoders.addAll(this.strategies.encoders());
+		super.setDecoders(this.strategies.decoders());
+		super.setRouteMatcher(this.strategies.routeMatcher());
+		super.setReactiveAdapterRegistry(this.strategies.reactiveAdapterRegistry());
 	}
 
 	/**
@@ -284,19 +280,19 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	@Override
 	@Nullable
 	protected CompositeMessageCondition getCondition(AnnotatedElement element) {
-		MessageMapping annot1 = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
-		if (annot1 != null && annot1.value().length > 0) {
-			String[] patterns = processDestinations(annot1.value());
+		MessageMapping ann1 = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
+		if (ann1 != null && ann1.value().length > 0) {
+			String[] patterns = processDestinations(ann1.value());
 			return new CompositeMessageCondition(
 					RSocketFrameTypeMessageCondition.REQUEST_CONDITION,
-					new DestinationPatternsMessageCondition(patterns, getRouteMatcher()));
+					new DestinationPatternsMessageCondition(patterns, obtainRouteMatcher()));
 		}
-		ConnectMapping annot2 = AnnotatedElementUtils.findMergedAnnotation(element, ConnectMapping.class);
-		if (annot2 != null) {
-			String[] patterns = processDestinations(annot2.value());
+		ConnectMapping ann2 = AnnotatedElementUtils.findMergedAnnotation(element, ConnectMapping.class);
+		if (ann2 != null) {
+			String[] patterns = processDestinations(ann2.value());
 			return new CompositeMessageCondition(
 					RSocketFrameTypeMessageCondition.CONNECT_CONDITION,
-					new DestinationPatternsMessageCondition(patterns, getRouteMatcher()));
+					new DestinationPatternsMessageCondition(patterns, obtainRouteMatcher()));
 		}
 		return null;
 	}
@@ -362,22 +358,18 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	private MessagingRSocket createResponder(ConnectionSetupPayload setupPayload, RSocket rsocket) {
-		String s = setupPayload.dataMimeType();
-		MimeType dataMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultDataMimeType;
+		String str = setupPayload.dataMimeType();
+		MimeType dataMimeType = StringUtils.hasText(str) ? MimeTypeUtils.parseMimeType(str) : this.defaultDataMimeType;
 		Assert.notNull(dataMimeType, "No `dataMimeType` in ConnectionSetupPayload and no default value");
 		Assert.isTrue(isDataMimeTypeSupported(dataMimeType), "Data MimeType '" + dataMimeType + "' not supported");
 
-		s = setupPayload.metadataMimeType();
-		MimeType metaMimeType = StringUtils.hasText(s) ? MimeTypeUtils.parseMimeType(s) : this.defaultMetadataMimeType;
+		str = setupPayload.metadataMimeType();
+		MimeType metaMimeType = StringUtils.hasText(str) ? MimeTypeUtils.parseMimeType(str) : this.defaultMetadataMimeType;
 		Assert.notNull(metaMimeType, "No `metadataMimeType` in ConnectionSetupPayload and no default value");
 
-		RSocketRequester requester = RSocketRequester.wrap(
-				rsocket, dataMimeType, metaMimeType, this.strategies);
-
-		Assert.state(getRouteMatcher() != null, () -> "No RouteMatcher. Was afterPropertiesSet not called?");
-
-		return new MessagingRSocket(dataMimeType, metaMimeType, this.metadataExtractor,
-				requester, this, getRouteMatcher(), this.strategies);
+		RSocketRequester requester = RSocketRequester.wrap(rsocket, dataMimeType, metaMimeType, this.strategies);
+		return new MessagingRSocket(dataMimeType, metaMimeType, getMetadataExtractor(),
+				requester, this, obtainRouteMatcher(), this.strategies);
 	}
 
 	private boolean isDataMimeTypeSupported(MimeType dataMimeType) {

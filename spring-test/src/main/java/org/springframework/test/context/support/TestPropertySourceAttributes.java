@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code TestPropertySourceAttributes} encapsulates attributes declared
@@ -196,7 +197,7 @@ class TestPropertySourceAttributes {
 	 * @see TestPropertySource#locations
 	 */
 	String[] getLocations() {
-		return this.locations.toArray(new String[0]);
+		return StringUtils.toStringArray(this.locations);
 	}
 
 	/**
@@ -217,7 +218,7 @@ class TestPropertySourceAttributes {
 	 * @see TestPropertySource#properties
 	 */
 	String[] getProperties() {
-		return this.properties.toArray(new String[0]);
+		return StringUtils.toStringArray(this.properties);
 	}
 
 	/**
@@ -245,7 +246,9 @@ class TestPropertySourceAttributes {
 	}
 
 	private static Class<?> declaringClass(MergedAnnotation<?> mergedAnnotation) {
-		return (Class<?>) mergedAnnotation.getSource();
+		Object source = mergedAnnotation.getSource();
+		Assert.state(source instanceof Class, "No source class available");
+		return (Class<?>) source;
 	}
 
 }

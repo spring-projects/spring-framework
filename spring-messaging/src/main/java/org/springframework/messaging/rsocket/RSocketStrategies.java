@@ -98,9 +98,10 @@ public interface RSocketStrategies {
 	RouteMatcher routeMatcher();
 
 	/**
-	 * Return the configured {@link Builder#metadataExtractor(MetadataExtractor)}.
+	 * Return the configured
+	 * {@link Builder#reactiveAdapterStrategy(ReactiveAdapterRegistry) reactiveAdapterRegistry}.
 	 */
-	MetadataExtractor metadataExtractor();
+	ReactiveAdapterRegistry reactiveAdapterRegistry();
 
 	/**
 	 * Return the configured
@@ -109,10 +110,9 @@ public interface RSocketStrategies {
 	DataBufferFactory dataBufferFactory();
 
 	/**
-	 * Return the configured
-	 * {@link Builder#reactiveAdapterStrategy(ReactiveAdapterRegistry) reactiveAdapterRegistry}.
+	 * Return the configured {@link Builder#metadataExtractor(MetadataExtractor)}.
 	 */
-	ReactiveAdapterRegistry reactiveAdapterRegistry();
+	MetadataExtractor metadataExtractor();
 
 	/**
 	 * Return a builder to create a new {@link RSocketStrategies} instance
@@ -185,16 +185,6 @@ public interface RSocketStrategies {
 		Builder routeMatcher(@Nullable RouteMatcher routeMatcher);
 
 		/**
-		 * Configure a {@link MetadataExtractor} to extract the route along with
-		 * other metadata. This option is applicable to client or server
-		 * responders.
-		 * <p>By default this is {@link DefaultMetadataExtractor} created with
-		 * the {@link #decoder(Decoder[]) configured} decoders and extracting a
-		 * route from {@code "message/x.rsocket.routing.v0"} metadata.
-		 */
-		Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor);
-
-		/**
 		 * Configure the registry for reactive type support. This can be used to
 		 * to adapt to, and/or determine the semantics of a given
 		 * {@link org.reactivestreams.Publisher Publisher}.
@@ -218,6 +208,16 @@ public interface RSocketStrategies {
 		 * need for related config changes in RSocket.
 		 */
 		Builder dataBufferFactory(@Nullable DataBufferFactory bufferFactory);
+
+		/**
+		 * Configure a {@link MetadataExtractor} to extract the route along with
+		 * other metadata. This option is applicable to client or server
+		 * responders.
+		 * <p>By default this is {@link DefaultMetadataExtractor} created with
+		 * the {@link #decoder(Decoder[]) configured} decoders and extracting a
+		 * route from {@code "message/x.rsocket.routing.v0"} metadata.
+		 */
+		Builder metadataExtractor(@Nullable MetadataExtractor metadataExtractor);
 
 		/**
 		 * Build the {@code RSocketStrategies} instance.

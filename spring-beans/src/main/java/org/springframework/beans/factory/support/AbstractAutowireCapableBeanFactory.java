@@ -888,7 +888,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				// No type found for shortcut FactoryBean instance:
 				// fall back to full creation of the FactoryBean instance.
-				return super.getTypeForFactoryBean(beanName, mbd, allowInit);
+				return super.getTypeForFactoryBean(beanName, mbd, true);
 			}
 		}
 
@@ -1990,6 +1990,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
+
 	/**
 	 * {@link MethodCallback} used to find {@link FactoryBean} type information.
 	 */
@@ -1999,11 +2000,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		private ResolvableType result = ResolvableType.NONE;
 
-
 		FactoryBeanMethodTypeFinder(String factoryMethodName) {
 			this.factoryMethodName = factoryMethodName;
 		}
-
 
 		@Override
 		public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
@@ -2028,13 +2027,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					FactoryBean.class.isAssignableFrom(method.getReturnType());
 		}
 
-
 		ResolvableType getResult() {
 			Class<?> resolved = this.result.resolve();
 			boolean foundResult = resolved != null && resolved != Object.class;
 			return (foundResult ? this.result : ResolvableType.NONE);
 		}
-
 	}
 
 }

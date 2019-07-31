@@ -163,6 +163,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	/**
 	 * Get the {@code @SqlMergeMode} annotation declared on the supplied {@code element}.
 	 */
+	@Nullable
 	private SqlMergeMode getSqlMergeModeFor(AnnotatedElement element) {
 		return AnnotatedElementUtils.findMergedAnnotation(element, SqlMergeMode.class);
 	}
