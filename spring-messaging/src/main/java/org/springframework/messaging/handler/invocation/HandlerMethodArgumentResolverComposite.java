@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.messaging.Message;
 
 /**
  * Resolves method parameters by delegating to a list of registered
- * {@link HandlerMethodArgumentResolver}. Previously resolved method parameters are cached
- * for faster lookups.
+ * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
+ * Previously resolved method parameters are cached for faster lookups.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -51,26 +51,22 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	}
 
 	/**
-	 * Add the given {@link HandlerMethodArgumentResolver}s.
+	 * Add the given {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 * @since 4.3
 	 */
 	public HandlerMethodArgumentResolverComposite addResolvers(HandlerMethodArgumentResolver... resolvers) {
 		if (resolvers != null) {
-			for (HandlerMethodArgumentResolver resolver : resolvers) {
-				this.argumentResolvers.add(resolver);
-			}
+			Collections.addAll(this.argumentResolvers, resolvers);
 		}
 		return this;
 	}
 
 	/**
-	 * Add the given {@link HandlerMethodArgumentResolver}s.
+	 * Add the given {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 */
-	public HandlerMethodArgumentResolverComposite addResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
-		if (argumentResolvers != null) {
-			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
-				this.argumentResolvers.add(resolver);
-			}
+	public HandlerMethodArgumentResolverComposite addResolvers(List<? extends HandlerMethodArgumentResolver> resolvers) {
+		if (resolvers != null) {
+			this.argumentResolvers.addAll(resolvers);
 		}
 		return this;
 	}
@@ -91,8 +87,8 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 
 	/**
-	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered
-	 * {@link HandlerMethodArgumentResolver}.
+	 * Whether the given {@linkplain MethodParameter method parameter} is
+	 * supported by any registered {@link HandlerMethodArgumentResolver}.
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -100,20 +96,25 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	}
 
 	/**
-	 * Iterate over registered {@link HandlerMethodArgumentResolver}s and invoke the one that supports it.
-	 * @throws IllegalStateException if no suitable {@link HandlerMethodArgumentResolver} is found.
+	 * Iterate over registered
+	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}
+	 * and invoke the one that supports it.
+	 * @throws IllegalStateException if no suitable
+	 * {@link HandlerMethodArgumentResolver} is found.
 	 */
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
 		if (resolver == null) {
-			throw new IllegalStateException("Unknown parameter type [" + parameter.getParameterType().getName() + "]");
+			throw new IllegalArgumentException("Unsupported parameter type [" +
+					parameter.getParameterType().getName() + "]. supportsParameter should be called first.");
 		}
 		return resolver.resolveArgument(parameter, message);
 	}
 
 	/**
-	 * Find a registered {@link HandlerMethodArgumentResolver} that supports the given method parameter.
+	 * Find a registered {@link HandlerMethodArgumentResolver} that supports
+	 * the given method parameter.
 	 */
 	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
