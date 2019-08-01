@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,6 +202,10 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return true;
 				}
+			}
+			else if (method.getName().equals("getWarnings") || method.getName().equals("clearWarnings")) {
+				// Avoid creation of target Connection on pre-close cleanup (e.g. in Hibernate Session)
+				return null;
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.
