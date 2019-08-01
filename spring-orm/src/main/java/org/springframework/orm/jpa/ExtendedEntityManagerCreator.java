@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,8 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public abstract class ExtendedEntityManagerCreator {
 
-	private static final Map<Class<?>, Class[]> CACHED_ENTITY_MANAGER_INTERFACES = new ConcurrentReferenceHashMap<>();
+	private static final Map<Class<?>, Class<?>[]> cachedEntityManagerInterfaces = new ConcurrentReferenceHashMap<>(4);
+
 
 	/**
 	 * Create an application-managed extended EntityManager proxy.
@@ -226,10 +227,10 @@ public abstract class ExtendedEntityManagerCreator {
 			boolean containerManaged, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(rawEm, "EntityManager must not be null");
-		Class[] interfaces;
+		Class<?>[] interfaces;
 
 		if (emIfc != null) {
-			interfaces = CACHED_ENTITY_MANAGER_INTERFACES.computeIfAbsent(emIfc, key -> {
+			interfaces = cachedEntityManagerInterfaces.computeIfAbsent(emIfc, key -> {
 				Set<Class<?>> ifcs = new LinkedHashSet<>();
 				ifcs.add(key);
 				ifcs.add(EntityManagerProxy.class);
@@ -237,7 +238,7 @@ public abstract class ExtendedEntityManagerCreator {
 			});
 		}
 		else {
-			interfaces = CACHED_ENTITY_MANAGER_INTERFACES.computeIfAbsent(rawEm.getClass(), key -> {
+			interfaces = cachedEntityManagerInterfaces.computeIfAbsent(rawEm.getClass(), key -> {
 				Set<Class<?>> ifcs = new LinkedHashSet<>();
 				ifcs.addAll(ClassUtils
 						.getAllInterfacesForClassAsSet(key, cl));

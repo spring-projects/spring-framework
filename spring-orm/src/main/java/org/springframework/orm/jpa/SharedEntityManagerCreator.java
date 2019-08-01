@@ -71,11 +71,11 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Class<?>[] NO_ENTITY_MANAGER_INTERFACES = new Class<?>[0];
 
+	private static final Map<Class<?>, Class<?>[]> cachedQueryInterfaces = new ConcurrentReferenceHashMap<>(4);
+
 	private static final Set<String> transactionRequiringMethods = new HashSet<>(8);
 
 	private static final Set<String> queryTerminatingMethods = new HashSet<>(8);
-
-	private static final Map<Class<?>, Class[]> CACHED_QUERY_INTERFACES = new ConcurrentReferenceHashMap<>();
 
 	static {
 		transactionRequiringMethods.add("joinTransaction");
@@ -314,7 +314,7 @@ public abstract class SharedEntityManagerCreator {
 				if (result instanceof Query) {
 					Query query = (Query) result;
 					if (isNewEm) {
-						Class<?>[] ifcs = CACHED_QUERY_INTERFACES.computeIfAbsent(query.getClass(), key ->
+						Class<?>[] ifcs = cachedQueryInterfaces.computeIfAbsent(query.getClass(), key ->
 								ClassUtils.getAllInterfacesForClass(key, this.proxyClassLoader));
 						result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs,
 								new DeferredQueryInvocationHandler(query, target));
