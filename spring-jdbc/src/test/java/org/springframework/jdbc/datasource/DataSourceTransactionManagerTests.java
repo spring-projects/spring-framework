@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,18 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.inOrder;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.willThrow;
 
 /**
  * @author Juergen Hoeller
@@ -117,6 +127,7 @@ public class DataSourceTransactionManagerTests  {
 		if (lazyConnection) {
 			given(con.getAutoCommit()).willReturn(autoCommit);
 			given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
+			given(con.getWarnings()).willThrow(new SQLException());
 		}
 
 		if (!lazyConnection || createStatement) {
@@ -141,6 +152,10 @@ public class DataSourceTransactionManagerTests  {
 				try {
 					if (createStatement) {
 						tCon.createStatement();
+					}
+					else {
+						tCon.getWarnings();
+						tCon.clearWarnings();
 					}
 				}
 				catch (SQLException ex) {
@@ -669,7 +684,6 @@ public class DataSourceTransactionManagerTests  {
 		SQLException failure = new SQLException();
 		given(ds2.getConnection()).willThrow(failure);
 
-
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
@@ -974,12 +988,12 @@ public class DataSourceTransactionManagerTests  {
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).setAutoCommit(true);
 		verify(con).close();
-
 	}
 
 	@Test
 	public void testTransactionAwareDataSourceProxy() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
+		given(con.getWarnings()).willThrow(new SQLException());
 
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
@@ -990,6 +1004,9 @@ public class DataSourceTransactionManagerTests  {
 				assertEquals(con, DataSourceUtils.getConnection(ds));
 				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
 				try {
+					Connection tCon = dsProxy.getConnection();
+					tCon.getWarnings();
+					tCon.clearWarnings();
 					assertEquals(con, ((ConnectionProxy) dsProxy.getConnection()).getTargetConnection());
 					// should be ignored
 					dsProxy.getConnection().close();
