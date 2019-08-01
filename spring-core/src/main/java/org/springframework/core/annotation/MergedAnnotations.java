@@ -115,8 +115,9 @@ import org.springframework.lang.Nullable;
  *
  * // get all ExampleAnnotation declarations (including any meta-annotations) and
  * // print the merged "value" attributes
- * mergedAnnotations.stream(ExampleAnnotation.class).map(
- * 		a -&gt; a.getString("value")).forEach(System.out::println);
+ * mergedAnnotations.stream(ExampleAnnotation.class)
+ *     .map(mergedAnnotation -&gt; mergedAnnotation.getString("value"))
+ *     .forEach(System.out::println);
  * </pre>
  *
  * @author Phillip Webb
@@ -152,7 +153,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * Determine if the specified annotation is directly present.
 	 * <p>Equivalent to calling {@code get(annotationType).isDirectlyPresent()}.
 	 * @param annotationType the annotation type to check
-	 * @return {@code true} if the annotation is present
+	 * @return {@code true} if the annotation is directly present
 	 */
 	<A extends Annotation> boolean isDirectlyPresent(Class<A> annotationType);
 
@@ -161,12 +162,12 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * <p>Equivalent to calling {@code get(annotationType).isDirectlyPresent()}.
 	 * @param annotationType the fully qualified class name of the annotation type
 	 * to check
-	 * @return {@code true} if the annotation is present
+	 * @return {@code true} if the annotation is directly present
 	 */
 	boolean isDirectlyPresent(String annotationType);
 
 	/**
-	 * Return the {@linkplain MergedAnnotationSelectors#nearest() nearest} matching
+	 * Get the {@linkplain MergedAnnotationSelectors#nearest() nearest} matching
 	 * annotation or meta-annotation of the specified type, or
 	 * {@link MergedAnnotation#missing()} if none is present.
 	 * @param annotationType the annotation type to get
@@ -175,7 +176,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	<A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType);
 
 	/**
-	 * Return the {@linkplain MergedAnnotationSelectors#nearest() nearest} matching
+	 * Get the {@linkplain MergedAnnotationSelectors#nearest() nearest} matching
 	 * annotation or meta-annotation of the specified type, or
 	 * {@link MergedAnnotation#missing()} if none is present.
 	 * @param annotationType the annotation type to get
@@ -188,7 +189,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate);
 
 	/**
-	 * Return a matching annotation or meta-annotation of the specified type, or
+	 * Get a matching annotation or meta-annotation of the specified type, or
 	 * {@link MergedAnnotation#missing()} if none is present.
 	 * @param annotationType the annotation type to get
 	 * @param predicate a predicate that must match, or {@code null} if only
@@ -205,7 +206,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 			@Nullable MergedAnnotationSelector<A> selector);
 
 	/**
-	 * Return the {@linkplain MergedAnnotationSelectors#nearest() nearest} matching
+	 * Get the {@linkplain MergedAnnotationSelectors#nearest() nearest} matching
 	 * annotation or meta-annotation of the specified type, or
 	 * {@link MergedAnnotation#missing()} if none is present.
 	 * @param annotationType the fully qualified class name of the annotation type
@@ -215,7 +216,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	<A extends Annotation> MergedAnnotation<A> get(String annotationType);
 
 	/**
-	 * Return the {@linkplain MergedAnnotationSelectors#nearest() nearest} matching
+	 * Get the {@linkplain MergedAnnotationSelectors#nearest() nearest} matching
 	 * annotation or meta-annotation of the specified type, or
 	 * {@link MergedAnnotation#missing()} if none is present.
 	 * @param annotationType the fully qualified class name of the annotation type
@@ -229,7 +230,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 			@Nullable Predicate<? super MergedAnnotation<A>> predicate);
 
 	/**
-	 * Return a matching annotation or meta-annotation of the specified type, or
+	 * Get a matching annotation or meta-annotation of the specified type, or
 	 * {@link MergedAnnotation#missing()} if none is present.
 	 * @param annotationType the fully qualified class name of the annotation type
 	 * to get
@@ -443,7 +444,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		/**
 		 * Perform a full search of the entire type hierarchy on the source
 		 * <em>and</em> any enclosing classes. This strategy is similar to
-		 * {@link #TYPE_HIERARCHY} except that {@link Class#getEnclosingClass()
+		 * {@link #TYPE_HIERARCHY} except that {@linkplain Class#getEnclosingClass()
 		 * enclosing classes} are also searched. Superclass annotations do not
 		 * need to be meta-annotated with {@link Inherited @Inherited}. When
 		 * searching a {@link Method} source, this strategy is identical to
