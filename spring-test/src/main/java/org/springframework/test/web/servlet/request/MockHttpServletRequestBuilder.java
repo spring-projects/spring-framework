@@ -337,6 +337,12 @@ public class MockHttpServletRequestBuilder
 		return this;
 	}
 
+	public MockHttpServletRequestBuilder queryParam(String name, String... values) {
+		addToMultiValueMap(this.parameters, name, values);
+//		UriComponentsBuilder.fromUri(this.url).queryParam(name, values).build().toUri();
+		return this;
+	}
+
 	/**
 	 * Add a map of request parameters to the {@link MockHttpServletRequest},
 	 * for example when testing a form submission.
@@ -635,12 +641,13 @@ public class MockHttpServletRequestBuilder
 			request.setQueryString(this.url.getRawQuery());
 		}
 		addRequestParams(request, UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
+		addRequestParams(request, this.parameters);
 
-		this.parameters.forEach((name, values) -> {
+		/*this.parameters.forEach((name, values) -> {
 			for (String value : values) {
 				request.addParameter(name, value);
 			}
-		});
+		});*/
 
 		if (this.content != null && this.content.length > 0) {
 			String requestContentType = request.getContentType();
@@ -707,10 +714,23 @@ public class MockHttpServletRequestBuilder
 	}
 
 	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {
-		map.forEach((key, values) -> values.forEach(value -> {
-			value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
-			request.addParameter(UriUtils.decode(key, StandardCharsets.UTF_8), value);
-		}));
+		if (map.size() > 0) {
+			request.setQueryString(request.getQueryString() == null ? "" : request.getQueryString());
+		}
+		map.forEach((key, values) -> {
+			StringBuilder valueString = new StringBuilder();
+			for (String s : values) {
+				valueString.append(key).append((s != null ? "=" + s : "")).append("&");
+			}
+			valueString = new StringBuilder(valueString.substring(0, valueString.length() - 1));
+			values.forEach(value -> {
+				value = (value != null ? UriUtils.decode(value, StandardCharsets.UTF_8) : null);
+				request.addParameter(UriUtils.decode(key, StandardCharsets.UTF_8), value);
+			});
+			if (request.getQueryString() != null && !request.getQueryString().contains(valueString)) {
+				request.setQueryString(request.getQueryString() + valueString);
+			}
+		});
 	}
 
 	private MultiValueMap<String, String> parseFormData(MediaType mediaType) {

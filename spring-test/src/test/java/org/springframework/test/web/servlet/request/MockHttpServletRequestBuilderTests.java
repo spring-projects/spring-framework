@@ -234,6 +234,21 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
+	public void requestParameterToQueryList() {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
+		this.builder.param("foo", "bar");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		System.out.println(request.getParameterMap());
+		System.out.println(request.getRequestURI());
+		System.out.println(request.getQueryString());
+
+		assertThat(request.getQueryString()).isEqualTo("foo=bar");
+		assertThat(request.getParameter("foo")).isEqualTo("bar");
+	}
+
+	@Test
 	public void requestParameterFromQueryWithEncoding() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/?foo={value}", "bar=baz");
 
@@ -249,6 +264,8 @@ public class MockHttpServletRequestBuilderTests {
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		Map<String, String[]> parameterMap = request.getParameterMap();
+
+		System.out.println(parameterMap.get("foo"));
 
 		assertThat(parameterMap.get("foo")).isEqualTo(new String[] {null});
 		assertThat(request.getQueryString()).isEqualTo("foo");
