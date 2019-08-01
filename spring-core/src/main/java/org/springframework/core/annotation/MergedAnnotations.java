@@ -111,7 +111,7 @@ import org.springframework.lang.Nullable;
  * mergedAnnotations.get(ExampleAnnotation.class).getString("value");
  *
  * // get all meta-annotations but no directly present annotations
- * mergedAnnotations.stream().anyMatch(MergedAnnotation::isMetaPresent);
+ * mergedAnnotations.stream().filter(MergedAnnotation::isMetaPresent);
  *
  * // get all ExampleAnnotation declarations (including any meta-annotations) and
  * // print the merged "value" attributes
