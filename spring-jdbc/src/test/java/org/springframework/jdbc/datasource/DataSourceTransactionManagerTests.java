@@ -125,6 +125,7 @@ public class DataSourceTransactionManagerTests  {
 		if (lazyConnection) {
 			given(con.getAutoCommit()).willReturn(autoCommit);
 			given(con.getTransactionIsolation()).willReturn(Connection.TRANSACTION_READ_COMMITTED);
+			given(con.getWarnings()).willThrow(new SQLException());
 		}
 
 		if (!lazyConnection || createStatement) {
@@ -151,6 +152,10 @@ public class DataSourceTransactionManagerTests  {
 				try {
 					if (createStatement) {
 						tCon.createStatement();
+					}
+					else {
+						tCon.getWarnings();
+						tCon.clearWarnings();
 					}
 				}
 				catch (SQLException ex) {
@@ -703,7 +708,6 @@ public class DataSourceTransactionManagerTests  {
 		SQLException failure = new SQLException();
 		given(ds2.getConnection()).willThrow(failure);
 
-
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
@@ -1024,12 +1028,12 @@ public class DataSourceTransactionManagerTests  {
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).setAutoCommit(true);
 		verify(con).close();
-
 	}
 
 	@Test
 	public void testTransactionAwareDataSourceProxy() throws Exception {
 		given(con.getAutoCommit()).willReturn(true);
+		given(con.getWarnings()).willThrow(new SQLException());
 
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		boolean condition1 = !TransactionSynchronizationManager.hasResource(ds);
@@ -1041,6 +1045,9 @@ public class DataSourceTransactionManagerTests  {
 				assertThat(DataSourceUtils.getConnection(ds)).isEqualTo(con);
 				TransactionAwareDataSourceProxy dsProxy = new TransactionAwareDataSourceProxy(ds);
 				try {
+					Connection tCon = dsProxy.getConnection();
+					tCon.getWarnings();
+					tCon.clearWarnings();
 					assertThat(((ConnectionProxy) dsProxy.getConnection()).getTargetConnection()).isEqualTo(con);
 					// should be ignored
 					dsProxy.getConnection().close();
@@ -1286,7 +1293,8 @@ public class DataSourceTransactionManagerTests  {
 		assertThat(condition).as("Hasn't thread connection").isTrue();
 	}
 
-	@Test public void testTransactionWithPropagationNotSupported() throws Exception {
+	@Test
+	public void testTransactionWithPropagationNotSupported() throws Exception {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 		boolean condition1 = !TransactionSynchronizationManager.hasResource(ds);
