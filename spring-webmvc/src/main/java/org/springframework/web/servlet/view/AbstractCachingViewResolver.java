@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -58,6 +59,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		}
 	};
 
+	/** Default cache filter that always caches. */
+	private static final CacheFilter DEFAULT_CACHE_FILTER = (view, viewName, locale) -> true;
+
 
 	/** The maximum number of entries in the cache. */
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
@@ -65,11 +69,11 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Whether we should refrain from resolving views again if unresolved once. */
 	private boolean cacheUnresolved = true;
 
+	/** Filter function that determines if view should be cached. */
+	private CacheFilter cacheFilter = DEFAULT_CACHE_FILTER;
+
 	/** Fast access cache for Views, returning already cached instances without a global lock. */
 	private final Map<Object, View> viewAccessCache = new ConcurrentHashMap<>(DEFAULT_CACHE_LIMIT);
-
-	/** Filter function which determines if view should be cached. */
-	private ViewCacheFilter viewCacheFilter = (viewName, view, locale) -> true;
 
 	/** Map from view key to View instance, synchronized for View creation. */
 	@SuppressWarnings("serial")
@@ -138,27 +142,27 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	/**
-	 * Filter function which determines if view should be cached.
-	 * Default behaviour is to cache all views.
-	 */
-	public void setViewCacheFilter(ViewCacheFilter cacheFilter) {
-		this.viewCacheFilter = cacheFilter;
-	}
-
-	/**
-	 * Return filter function which determines if view should be cached.
-	 */
-	public ViewCacheFilter getViewCacheFilter() {
-		return this.viewCacheFilter;
-	}
-
-	/**
 	 * Return if caching of unresolved views is enabled.
 	 */
 	public boolean isCacheUnresolved() {
 		return this.cacheUnresolved;
 	}
 
+	/**
+	 * Sets the filter that determines if view should be cached.
+	 * Default behaviour is to cache all views.
+	 */
+	public void setCacheFilter(CacheFilter cacheFilter) {
+		Assert.notNull(cacheFilter, "CacheFilter must not be null");
+		this.cacheFilter = cacheFilter;
+	}
+
+	/**
+	 * Return filter function that determines if view should be cached.
+	 */
+	public CacheFilter getCacheFilter() {
+		return this.cacheFilter;
+	}
 
 	@Override
 	@Nullable
@@ -178,7 +182,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 						if (view == null && this.cacheUnresolved) {
 							view = UNRESOLVED_VIEW;
 						}
-						if (view != null && this.viewCacheFilter.filter(viewName, view, locale)) {
+						if (view != null && this.cacheFilter.filter(view, viewName, locale)) {
 							this.viewAccessCache.put(cacheKey, view);
 							this.viewCreationCache.put(cacheKey, view);
 						}
@@ -284,4 +288,26 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	@Nullable
 	protected abstract View loadView(String viewName, Locale locale) throws Exception;
 
+
+	/**
+	 * Filter that determines if view should be cached.
+	 *
+	 * @author Sergey Galkin
+	 * @author Arjen Poutsma
+	 * @since 5.2
+	 */
+	@FunctionalInterface
+	public interface CacheFilter {
+
+		/**
+		 * Indicates whether the given view should be cached. The name and
+		 * locale used to resolve the view are also provided.
+		 * @param view the view
+		 * @param viewName the name used to resolve {@code view}
+		 * @param locale the locale used to resolve {@code view}
+		 * @return {@code true} if the view should be cached; {@code false}
+		 * otherwise
+		 */
+		boolean filter(View view, String viewName, Locale locale);
+	}
 }

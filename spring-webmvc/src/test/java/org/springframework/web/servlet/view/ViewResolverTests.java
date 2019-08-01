@@ -516,6 +516,47 @@ public class ViewResolverTests {
 		assertThat(count.intValue()).isEqualTo(3);
 	}
 
+	@Test
+	public void cacheFilterEnabled() throws Exception {
+		AtomicInteger count = new AtomicInteger();
+
+		// filter is enabled by default
+		AbstractCachingViewResolver viewResolver = new AbstractCachingViewResolver() {
+			@Override
+			protected View loadView(String viewName, Locale locale) {
+				assertThat(viewName).isEqualTo("view");
+				assertThat(locale).isEqualTo(Locale.getDefault());
+				count.incrementAndGet();
+				return new TestView();
+			}
+		};
+
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+
+		assertThat(count.intValue()).isEqualTo(1);
+	}
+
+	@Test
+	public void cacheFilterDisabled() throws Exception {
+		AtomicInteger count = new AtomicInteger();
+
+		AbstractCachingViewResolver viewResolver = new AbstractCachingViewResolver() {
+			@Override
+			protected View loadView(String viewName, Locale locale) {
+				count.incrementAndGet();
+				return new TestView();
+			}
+		};
+
+		viewResolver.setCacheFilter((view, viewName, locale) -> false);
+
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+
+		assertThat(count.intValue()).isEqualTo(2);
+	}
+
 
 	public static class TestView extends InternalResourceView {
 
