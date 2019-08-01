@@ -76,6 +76,7 @@ public class MethodParameter {
 	@Nullable
 	Map<Integer, Integer> typeIndexesPerLevel;
 
+	/** The containing class. Could also be supplied by overriding {@link #getContainingClass()} */
 	@Nullable
 	private volatile Class<?> containingClass;
 
@@ -383,6 +384,12 @@ public class MethodParameter {
 		this.containingClass = containingClass;
 	}
 
+	/**
+	 * Return the containing class for this method parameter.
+	 * @return a specific containing class (potentially a subclass of the
+	 * declaring class), or otherwise simply the declaring class itself
+	 * @see #getDeclaringClass()
+	 */
 	public Class<?> getContainingClass() {
 		Class<?> containingClass = this.containingClass;
 		return (containingClass != null ? containingClass : getDeclaringClass());
@@ -660,7 +667,7 @@ public class MethodParameter {
 			return false;
 		}
 		MethodParameter otherParam = (MethodParameter) other;
-		return (this.containingClass == otherParam.containingClass &&
+		return (getContainingClass() == otherParam.getContainingClass() &&
 				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, otherParam.typeIndexesPerLevel) &&
 				this.nestingLevel == otherParam.nestingLevel &&
 				this.parameterIndex == otherParam.parameterIndex &&
