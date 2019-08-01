@@ -1300,10 +1300,7 @@ public class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forMethodParameter(MethodParameter methodParameter, @Nullable Type targetType) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
-		int nestingLevel = methodParameter.getNestingLevel();
-		Map<Integer, Integer> typeIndexesPerLevel = methodParameter.typeIndexesPerLevel;
-		return forMethodParameter(methodParameter, targetType, nestingLevel,
-				typeIndexesPerLevel);
+		return forMethodParameter(methodParameter, targetType, methodParameter.getNestingLevel());
 	}
 
 	/**
@@ -1313,16 +1310,16 @@ public class ResolvableType implements Serializable {
 	 * @param methodParameter the source method parameter (must not be {@code null})
 	 * @param targetType the type to resolve (a part of the method parameter's type)
 	 * @param nestingLevel the nesting level to use
-	 * @param typeIndexesPerLevel the type indexes per nesting level
 	 * @return a {@link ResolvableType} for the specified method parameter
 	 * @since 5.2
 	 * @see #forMethodParameter(Method, int)
 	 */
-	static ResolvableType forMethodParameter(MethodParameter methodParameter, @Nullable Type targetType,
-			int nestingLevel, @Nullable Map<Integer, Integer> typeIndexesPerLevel) {
+	static ResolvableType forMethodParameter(
+			MethodParameter methodParameter, @Nullable Type targetType, int nestingLevel) {
+
 		ResolvableType owner = forType(methodParameter.getContainingClass()).as(methodParameter.getDeclaringClass());
 		return forType(targetType, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).
-				getNested(nestingLevel, typeIndexesPerLevel);
+				getNested(nestingLevel, methodParameter.typeIndexesPerLevel);
 	}
 
 	/**

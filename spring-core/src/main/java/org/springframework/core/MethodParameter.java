@@ -160,9 +160,7 @@ public class MethodParameter {
 	 * @param containingClass the containing class
 	 * @since 5.2
 	 */
-	MethodParameter(Executable executable, int parameterIndex,
-			@Nullable Class<?> containingClass) {
-
+	MethodParameter(Executable executable, int parameterIndex, @Nullable Class<?> containingClass) {
 		Assert.notNull(executable, "Executable must not be null");
 		this.executable = executable;
 		this.parameterIndex = validateIndex(executable, parameterIndex);
@@ -488,9 +486,7 @@ public class MethodParameter {
 		if (paramType != null) {
 			return paramType;
 		}
-		if (this.containingClass != null) {
-			paramType = ResolvableType.forMethodParameter(this, null, 1, null).resolve();
-		}
+		paramType = ResolvableType.forMethodParameter(this, null, 1).resolve();
 		if (paramType == null) {
 			paramType = computeParameterType();
 		}
@@ -760,7 +756,7 @@ public class MethodParameter {
 			return false;
 		}
 		MethodParameter otherParam = (MethodParameter) other;
-		return (this.containingClass == otherParam.containingClass &&
+		return (getContainingClass() == otherParam.getContainingClass() &&
 				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, otherParam.typeIndexesPerLevel) &&
 				this.nestingLevel == otherParam.nestingLevel &&
 				this.parameterIndex == otherParam.parameterIndex &&
@@ -925,11 +921,10 @@ public class MethodParameter {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			if (function != null && function.isSuspend()) {
 				Type paramType = ReflectJvmMapping.getJavaType(function.getReturnType());
-				Class<?> paramClass = ResolvableType.forType(paramType).resolve();
-				Assert.notNull(paramClass, "Type " + paramType + "can't be resolved to a class");
-				return paramClass;
+				return ResolvableType.forType(paramType).resolve(method.getReturnType());
 			}
 			return method.getReturnType();
 		}
 	}
+
 }
