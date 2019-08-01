@@ -189,20 +189,18 @@ abstract class AnnotationsScanner {
 
 	@Nullable
 	private static <C, R> R processClassHierarchy(C context, Class<?> source,
-			AnnotationsProcessor<C, R> processor,
-			@Nullable BiPredicate<C, Class<?>> classFilter, boolean includeInterfaces,
-			boolean includeEnclosing) {
+			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter,
+			boolean includeInterfaces, boolean includeEnclosing) {
 
-		int[] aggregateIndex = new int[] { 0 };
+		int[] aggregateIndex = new int[] {0};
 		return processClassHierarchy(context, aggregateIndex, source, processor,
 				classFilter, includeInterfaces, includeEnclosing);
 	}
 
 	@Nullable
-	private static <C, R> R processClassHierarchy(C context, int[] aggregateIndex,
-			Class<?> source, AnnotationsProcessor<C, R> processor,
-			@Nullable BiPredicate<C, Class<?>> classFilter, boolean includeInterfaces,
-			boolean includeEnclosing) {
+	private static <C, R> R processClassHierarchy(C context, int[] aggregateIndex, Class<?> source,
+			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter,
+			boolean includeInterfaces, boolean includeEnclosing) {
 
 		R result = processor.doWithAggregate(context, aggregateIndex[0]);
 		if (result != null) {
@@ -229,8 +227,7 @@ abstract class AnnotationsScanner {
 		Class<?> superclass = source.getSuperclass();
 		if (superclass != Object.class && superclass != null) {
 			R superclassResult = processClassHierarchy(context, aggregateIndex,
-					superclass, processor, classFilter, includeInterfaces,
-					includeEnclosing);
+					superclass, processor, classFilter, includeInterfaces, includeEnclosing);
 			if (superclassResult != null) {
 				return superclassResult;
 			}
@@ -238,8 +235,7 @@ abstract class AnnotationsScanner {
 		Class<?> enclosingClass = source.getEnclosingClass();
 		if (includeEnclosing && enclosingClass != null) {
 			R enclosingResult = processClassHierarchy(context, aggregateIndex,
-					enclosingClass, processor, classFilter, includeInterfaces,
-					includeEnclosing);
+					enclosingClass, processor, classFilter, includeInterfaces, true);
 			if (enclosingResult != null) {
 				return enclosingResult;
 			}

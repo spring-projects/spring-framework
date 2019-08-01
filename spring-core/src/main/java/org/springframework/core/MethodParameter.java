@@ -301,6 +301,16 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Return a variant of this {@code MethodParameter} with the type
+	 * for the current level set to the specified value.
+	 * @param typeIndex the new type index
+	 * @since 5.2
+	 */
+	public MethodParameter withTypeIndex(int typeIndex) {
+		return nested(this.nestingLevel, typeIndex);
+	}
+
+	/**
 	 * Set the type index for the current nesting level.
 	 * @param typeIndex the corresponding type index
 	 * (or {@code null} for the default type index)
@@ -310,15 +320,6 @@ public class MethodParameter {
 	@Deprecated
 	public void setTypeIndexForCurrentLevel(int typeIndex) {
 		getTypeIndexesPerLevel().put(this.nestingLevel, typeIndex);
-	}
-
-	/**
-	 * Return a variant of this {@code MethodParameter} with the type for the current
-	 * level set to the specified value.
-	 * @param typeIndex the new type index
-	 */
-	public MethodParameter withTypeIndex(int typeIndex) {
-		return nested(this.nestingLevel, typeIndex);
 	}
 
 	/**
@@ -435,22 +436,39 @@ public class MethodParameter {
 		return (getParameterType() == Optional.class ? nested() : this);
 	}
 
-	public Class<?> getContainingClass() {
-		Class<?> containingClass = this.containingClass;
-		return (containingClass != null ? containingClass : getDeclaringClass());
+	/**
+	 * Return a variant of this {@code MethodParameter} which refers to the
+	 * given containing class.
+	 * @param containingClass a specific containing class (potentially a
+	 * subclass of the declaring class, e.g. substituting a type variable)
+	 * @since 5.2
+	 * @see #getParameterType()
+	 */
+	public MethodParameter withContainingClass(@Nullable Class<?> containingClass) {
+		MethodParameter result = clone();
+		result.containingClass = containingClass;
+		result.parameterType = null;
+		return result;
 	}
 
+	/**
+	 * Set a containing class to resolve the parameter type against.
+	 */
 	@Deprecated
 	void setContainingClass(Class<?> containingClass) {
 		this.containingClass = containingClass;
 		this.parameterType = null;
 	}
 
-	public MethodParameter withContainingClass(@Nullable Class<?> containingClass) {
-		MethodParameter result = clone();
-		result.containingClass = containingClass;
-		result.parameterType = null;
-		return result;
+	/**
+	 * Return the containing class for this method parameter.
+	 * @return a specific containing class (potentially a subclass of the
+	 * declaring class), or otherwise simply the declaring class itself
+	 * @see #getDeclaringClass()
+	 */
+	public Class<?> getContainingClass() {
+		Class<?> containingClass = this.containingClass;
+		return (containingClass != null ? containingClass : getDeclaringClass());
 	}
 
 	/**
@@ -470,7 +488,7 @@ public class MethodParameter {
 		if (paramType != null) {
 			return paramType;
 		}
-		if (getContainingClass() != null) {
+		if (this.containingClass != null) {
 			paramType = ResolvableType.forMethodParameter(this, null, 1, null).resolve();
 		}
 		if (paramType == null) {
