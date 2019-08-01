@@ -823,9 +823,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * it will be fully created to check the type of its exposed object.
 	 */
 	@Override
-	protected ResolvableType getTypeForFactoryBean(String beanName,
-			RootBeanDefinition mbd, boolean allowInit) {
-
+	protected ResolvableType getTypeForFactoryBean(String beanName, RootBeanDefinition mbd, boolean allowInit) {
 		// Check if the bean definition itself has defined the type with an attribute
 		ResolvableType result = getTypeForFactoryBeanFromAttributes(mbd);
 		if (result != ResolvableType.NONE) {
@@ -858,14 +856,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Try to obtain the FactoryBean's object type from its factory method
 				// declaration without instantiating the containing bean at all.
 				BeanDefinition factoryBeanDefinition = getBeanDefinition(factoryBeanName);
-				Class<?> factoryBeanClass = null;
-				if (factoryBeanDefinition instanceof AbstractBeanDefinition
-						&& ((AbstractBeanDefinition) factoryBeanDefinition).hasBeanClass()) {
+				Class<?> factoryBeanClass;
+				if (factoryBeanDefinition instanceof AbstractBeanDefinition &&
+						((AbstractBeanDefinition) factoryBeanDefinition).hasBeanClass()) {
 					factoryBeanClass = ((AbstractBeanDefinition) factoryBeanDefinition).getBeanClass();
 				}
 				else {
 					RootBeanDefinition fbmbd = getMergedBeanDefinition(factoryBeanName, factoryBeanDefinition);
-					factoryBeanClass = determineTargetType(factoryBeanName, fbmbd, new Class<?>[] { Object.class });
+					factoryBeanClass = determineTargetType(factoryBeanName, fbmbd);
 				}
 				if (factoryBeanClass != null) {
 					result = getTypeForFactoryBeanFromMethod(factoryBeanClass, factoryMethodName);
