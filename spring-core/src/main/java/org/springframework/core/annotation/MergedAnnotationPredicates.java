@@ -101,7 +101,7 @@ public abstract class MergedAnnotationPredicates {
 	/**
 	 * Create a new stateful, single use {@link Predicate} that matches
 	 * annotations that are unique based on the extracted key. For example
-	 * {@code MergedAnnotationPredicates.unique(MergedAnnotation::type)} will
+	 * {@code MergedAnnotationPredicates.unique(MergedAnnotation::getType)} will
 	 * match the first time a unique type is encountered.
 	 * @param keyExtractor function used to extract the key used to test for
 	 * uniqueness
