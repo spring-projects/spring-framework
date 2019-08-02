@@ -16,28 +16,29 @@ a number of Java EE (and related) technologies.
 
 
 [[remoting]]
-== Remoting and Web Services with Spring
+== Remoting and Web Services
 
-Spring features integration classes for remoting support with various technologies.
+Spring provides support for remoting with various technologies.
 The remoting support eases the development of remote-enabled services, implemented
-by your usual POJOs. Currently, Spring supports the following remoting technologies:
+via Java interfaces and objects as input and output. Currently, Spring supports the
+following remoting technologies:
 
-* *Remote Method Invocation (RMI)*: Through the use of  `RmiProxyFactoryBean` and
+* <<remoting-rmi,Remote Method Invocation (RMI)>>: Through the use of  `RmiProxyFactoryBean` and
   `RmiServiceExporter`, Spring supports both traditional RMI (with `java.rmi.Remote`
   interfaces and `java.rmi.RemoteException`) and transparent remoting through RMI
   invokers (with any Java interface).
-* *Spring's HTTP invoker*: Spring provides a special remoting strategy that allows
+* <<remoting-httpinvoker>>: Spring provides a special remoting strategy that allows
   for Java serialization though HTTP, supporting any Java interface (as the RMI
   invoker does). The corresponding support classes are `HttpInvokerProxyFactoryBean`
   and `HttpInvokerServiceExporter`.
-* *Hessian*: By using Spring's `HessianProxyFactoryBean` and the
+* <<remoting-caucho-protocols-hessian>>: By using Spring's `HessianProxyFactoryBean` and the
   `HessianServiceExporter`, you can transparently expose your services through the
   lightweight binary HTTP-based protocol provided by Caucho.
-* *JAX-WS*: Spring provides remoting support for web services through JAX-WS.
-* *JMS*: Remoting via JMS as the underlying protocol is supported through the
+* <<remoting-web-services>>: Spring provides remoting support for web services through JAX-WS.
+* <<remoting-jms>>: Remoting via JMS as the underlying protocol is supported through the
   `JmsInvokerServiceExporter` and `JmsInvokerProxyFactoryBean` classes in the
    `spring-jms` module.
-* *AMQP*: Remoting via AMQP as the underlying protocol is supported by the
+* <<remoting-amqp>>: Remoting via AMQP as the underlying protocol is supported by the
   separate Spring AMQP project.
 
 While discussing the remoting capabilities of Spring, we use the following domain
@@ -96,7 +97,7 @@ the protocol.
 
 
 [[remoting-rmi]]
-=== Exposing Services by Using RMI
+=== RMI
 
 By using Spring's support for RMI, you can transparently expose your services through the
 RMI infrastructure. After having this set up, you basically have a configuration similar
@@ -210,7 +211,7 @@ and you can find more information about Hessian itself at https://www.caucho.com
 
 
 [[remoting-caucho-protocols-hessian]]
-==== Wiring up `DispatcherServlet` for Hessian
+==== Hessian
 
 Hessian communicates through HTTP and does so by using a custom servlet. By using Spring's
 `DispatcherServlet` principles (see <<webmvc.adoc#mvc-servlet>>), we can wire up such a
@@ -368,7 +369,7 @@ at https://projects.spring.io/spring-security/.
 
 
 [[remoting-httpinvoker]]
-=== Exposing Services by Using HTTP Invokers
+=== Spring HTTP Invoker
 
 As opposed to Hessian, Spring HTTP invokers are both lightweight protocols that use their own slim
 serialization mechanisms and use the standard Java serialization
@@ -496,7 +497,7 @@ The following example shows how to do so:
 
 
 [[remoting-web-services]]
-=== Web Services
+=== Java Web Services
 
 Spring provides full support for the standard Java web services APIs:
 
@@ -725,7 +726,7 @@ accordingly first. Check the JAX-WS documentation for details on those requireme
 
 
 [[remoting-jms]]
-=== Exposing Services through JMS
+=== JMS
 
 You can also expose services transparently by using JMS as the underlying communication
 protocol. The JMS remoting support in the Spring Framework is pretty basic. It sends
@@ -895,8 +896,9 @@ The following example defines beans that you can inject into other client-side o
 
 [[remoting-amqp]]
 === AMQP
-See the {doc-spring-amqp}/html/_reference.html#remoting[Spring AMQP Reference Guide's
-'Spring Remoting with AMQP' section] for more information.
+Remoting via AMQP as the underlying protocol is supported in the Spring AMQP project.
+For further details please visit the {doc-spring-amqp}/html/#remoting[Spring Remoting]
+section of the Spring AMQP reference.
 
 [[remoting-autodection-remote-interfaces]]
 [NOTE]
@@ -978,7 +980,7 @@ major new features added going forward.
 
 
 [[rest-resttemplate]]
-==== Using `RestTemplate`
+==== `RestTemplate`
 
 The `RestTemplate` provides a higher level API over HTTP client libraries. It makes it
 easy to invoke REST endpoints in a single line. It exposes the following groups of
