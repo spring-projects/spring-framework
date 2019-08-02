@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -44,6 +47,8 @@ import org.springframework.util.ObjectUtils;
  */
 @Deprecated
 abstract class AnnotationReadingVisitorUtils {
+
+	private static final Log logger = LogFactory.getLog(AnnotationReadingVisitorUtils.class);
 
 	public static AnnotationAttributes convertClassValues(Object annotatedElement,
 			@Nullable ClassLoader classLoader, AnnotationAttributes original, boolean classValuesAsString) {
@@ -94,7 +99,8 @@ abstract class AnnotationReadingVisitorUtils {
 				}
 				entry.setValue(value);
 			}
-			catch (Throwable ex) {
+			catch (Exception ex) {
+				logger.warn("Cannot convert class values", ex);
 				// Class not found - can't resolve class reference in annotation attribute.
 				result.put(entry.getKey(), ex);
 			}
